@@ -4,22 +4,24 @@ project(glight)
 
 find_package(PkgConfig)
 pkg_check_modules(GTKMM gtkmm-3.0>=3.0.0 REQUIRED)
-pkg_check_modules(GLIBMM glibmm-2.4 REQUIRED)
 pkg_check_modules(FLACPP flac++ REQUIRED)
 pkg_check_modules(ALSA alsa REQUIRED)
 pkg_check_modules(LIBOLA libola REQUIRED)
 
 find_package(Boost COMPONENTS system REQUIRED)
 find_package(LibXml2 REQUIRED)
+find_package(Threads REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-O3 -Wall -DNDEBUG -march=native -std=c++11")
 set(CMAKE_C_FLAGS "-O3 -Wall -DNDEBUG -march=native")
 
+include_directories(${GTKMM_INCLUDE_DIRS})
+include_directories(${FLACPP_INCLUDE_DIRS})
+include_directories(${ALSA_INCLUDE_DIRS})
+include_directories(${LIBOLA_INCLUDE_DIRS})
+
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${LIBXML2_INCLUDE_DIR})
-include_directories(${GTKMM_INCLUDE_DIRS})
-include_directories(${GLIBMM_INCLUDE_DIRS})
-include_directories(${LIBOLA_INCLUDE_DIRS})
 
 set(MAINFILES
   audioplayer.cpp
@@ -27,8 +29,6 @@ set(MAINFILES
   flacdecoder.cpp
   glight.cpp
   reader.cpp
-#  serialconnection.cpp
-#  stopwatch.cpp
   writer.cpp)
 
 set(GUIFILES
@@ -59,6 +59,15 @@ add_executable(glight ${MAINFILES} ${GUIFILES} ${THEATREFILES})
 
 link_directories(${GTKMM_LIBDIR})
 
-target_link_libraries(glight ${Boost_SYSTEM_LIBRARY} FLAC++ asound aubio dl pthread usb ${GTKMM_LIBRARIES} ${LIBXML2_LIBRARIES} ${LIBOLA_LIBRARIES})
+target_link_libraries(glight 
+  ${Boost_SYSTEM_LIBRARY} 
+  ${FLACPP_LIBRARIES} 
+  ${ALSA_LIBRARIES} 
+  ${LIBOLA_LIBRARIES} 
+  aubio 
+  ${GTKMM_LIBRARIES} 
+  ${LIBXML2_LIBRARIES} 
+  ${LIBOLA_LIBRARIES}
+  ${CMAKE_THREAD_LIBS_INIT})
 
 install(TARGETS glight RUNTIME DESTINATION bin)

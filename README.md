@@ -15,8 +15,9 @@ The source of Glight can be downloaded from Github, currently from https://githu
 - [Boost](https://www.boost.org/). `libboost-system-dev` on Debian and Ubuntu.
 - [Aubio](https://aubio.org/). `libaubio-dev` on Debian and Ubuntu.
 - [Flac++](https://xiph.org/flac/). `libflac++-dev` on Debian and Ubuntu.
-- [libalsa](https://www.alsa-project.org/).
+- [alsa library](https://www.alsa-project.org/). `libasound2-dev` on Debian and Ubuntu.
 - [libola](https://www.openlighting.org/ola/). `libola-dev` on Debian and Ubuntu.
+- [libxml2](http://xmlsoft.org/). `libxml2-dev` on Debian and Ubuntu.
 
 Once these prerequisited are installed, glight can be compiled by running the following from the source directory:
 
