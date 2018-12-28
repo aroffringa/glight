@@ -12,6 +12,9 @@ find_package(Boost COMPONENTS system REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(Threads REQUIRED)
 
+find_library(AUBIO_LIBRARY NAMES aubio)
+find_path(AUBIO_INCLUDE_DIR NAMES aubio/aubio.h)
+
 set(CMAKE_CXX_FLAGS "-O3 -Wall -DNDEBUG -march=native -std=c++11")
 set(CMAKE_C_FLAGS "-O3 -Wall -DNDEBUG -march=native")
 
@@ -19,6 +22,7 @@ include_directories(${GTKMM_INCLUDE_DIRS})
 include_directories(${FLACPP_INCLUDE_DIRS})
 include_directories(${ALSA_INCLUDE_DIRS})
 include_directories(${LIBOLA_INCLUDE_DIRS})
+include_directories(${AUBIO_INCLUDE_DIR})
 
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${LIBXML2_INCLUDE_DIR})
@@ -64,7 +68,7 @@ target_link_libraries(glight
   ${FLACPP_LIBRARIES} 
   ${ALSA_LIBRARIES} 
   ${LIBOLA_LIBRARIES} 
-  aubio 
+  ${AUBIO_LIBRARY}
   ${GTKMM_LIBRARIES} 
   ${LIBXML2_LIBRARIES} 
   ${LIBOLA_LIBRARIES}
