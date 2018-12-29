@@ -55,21 +55,18 @@ ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &man
 	_buttonBox.pack_start(_removeButton, false, false, 0);
 
 	show_all_children();
-	set_default_size(0,300);
+	set_default_size(0, 300);
 }
 
 ControlWindow::~ControlWindow()
 {
-	for(std::vector<class ControlWidget *>::iterator i=_controls.begin();i!=_controls.end();++i)
-		delete *i;
 }
 
 void ControlWindow::UpdateAfterPresetRemoval()
 {
-	for(std::vector<ControlWidget*>::const_iterator i=_controls.begin();
-		i!=_controls.end(); ++i)
+	for(std::unique_ptr<ControlWidget>& cWidget : _controls)
 	{
-		(*i)->UpdateAfterPresetRemoval();
+		cWidget->UpdateAfterPresetRemoval();
 	}
 }
 
@@ -77,27 +74,25 @@ void ControlWindow::addControl()
 {
 	bool hasKey = _controls.size()<10 && _keyRowIndex<3;
 	char key = hasKey ? _keyRowsLower[_keyRowIndex][_controls.size()] : ' ';
-	ControlWidget *control = new ControlWidget(_management, key);
-	control->SignalChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlValueChanged),control));
+	std::unique_ptr<ControlWidget> control(new ControlWidget(_management, key));
+	control->SignalChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlValueChanged), control.get()));
 	_hBox.pack_start(*control, true, true, 3);
 	control->show();
-	_controls.push_back(control);
+	_controls.emplace_back(std::move(control));
 }
 
 void ControlWindow::onRemoveButtonClicked()
 {
 	if(_controls.size() > 1)
 	{
-		ControlWidget *control = _controls.back();
 		_controls.pop_back();
-		delete control;
 	}
 }
 
 void ControlWindow::onAssignButtonClicked()
 {
 	size_t controlIndex = 0;
-	for(ControlWidget* c : _controls)
+	for(std::unique_ptr<ControlWidget>& c : _controls)
 		c->Unassign();
 	size_t n = _management.PresetValues().size();
 	if(!_controls.empty())
@@ -144,7 +139,7 @@ void ControlWindow::onControlValueChanged(double newValue, ControlWidget* widget
 	if(_soloCheckButton.get_active())
 	{
 		// Limitting the controls might generate another control value change, but since
-		// it is a auto generated change we will not apply the limit of that change to
+		// it is an auto generated change we will not apply the limit of that change to
 		// other faders.
 		static bool inEvent = false;
 		if(!inEvent)
@@ -153,10 +148,10 @@ void ControlWindow::onControlValueChanged(double newValue, ControlWidget* widget
 			double limitValue = ControlWidget::MAX_SCALE_VALUE() - newValue - ControlWidget::MAX_SCALE_VALUE()*0.01;
 			if(limitValue < 0.0)
 				limitValue = 0.0;
-			for(std::vector<ControlWidget*>::iterator c=_controls.begin(); c!=_controls.end(); ++c)
+			for(std::unique_ptr<ControlWidget>& c : _controls)
 			{
-				if(*c != widget)
-					(*c)->Limit(limitValue);
+				if(c.get() != widget)
+					c->Limit(limitValue);
 			}
 			inEvent = false;
 		}
@@ -207,9 +202,9 @@ bool ControlWindow::HandleKeyUp(char key)
 
 bool ControlWindow::IsAssigned(PresetValue* presetValue)
 {
-	for(std::vector<ControlWidget*>::iterator c=_controls.begin(); c!=_controls.end(); ++c)
+	for(std::unique_ptr<ControlWidget>& c : _controls)
 	{
-		if((*c)->Preset() == presetValue)
+		if(c->Preset() == presetValue)
 			return true;
 	}
 	return false;

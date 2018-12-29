@@ -10,6 +10,14 @@
 OLADevice::OLADevice() :
 	_universe(1)
 {
+}
+
+void OLADevice::Abort()
+{
+}
+
+void OLADevice::Open()
+{
 	// turn on OLA logging
 	ola::InitLogging(ola::OLA_LOG_WARN, ola::OLA_LOG_STDERR);
 	_buffer.Blackout(); // Set all channels to 0
@@ -22,15 +30,7 @@ OLADevice::OLADevice() :
 	}
 }
 
-void OLADevice::Abort()
-{
-}
-
-void OLADevice::Open()
-{
-}
-
-void OLADevice::SetValues(unsigned char *newValues, size_t size)
+void OLADevice::SetValues(const unsigned char *newValues, size_t size)
 {
 	size_t n = std::min<size_t>(512, size);
 	for(size_t i=0; i!=n; ++i)

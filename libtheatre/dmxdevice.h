@@ -16,7 +16,7 @@ class DmxDevice {
 
 		virtual void Open() = 0;
 		
-		virtual void SetValues(unsigned char *newValues, size_t size) = 0;
+		virtual void SetValues(const unsigned char *newValues, size_t size) = 0;
 		
 		virtual void GetValues(unsigned char *destination, size_t size) = 0;
 

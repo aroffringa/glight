@@ -18,32 +18,32 @@ class DummyDevice : public DmxDevice {
 		{
 		}
 
-		virtual void Open()
+		virtual void Open() final override
 		{
 			_isOpen = true;
 		}
 		
-		virtual void SetValues(unsigned char *newValues, size_t size)
+		virtual void SetValues(const unsigned char *newValues, size_t size) final override
 		{
 		}
 		
-		virtual void GetValues(unsigned char *destination, size_t size)
+		virtual void GetValues(unsigned char *destination, size_t size) final override
 		{
 			for(size_t i=0;i<size;++i)
 				destination[i] = 0;
 		}
 
-		virtual void WaitForNextSync()
+		virtual void WaitForNextSync() final override
 		{
 			usleep(1000);
 		}
 
-		virtual void Abort()
+		virtual void Abort() final override
 		{
 			_isOpen = false;
 		}
 
-		virtual bool IsOpen()
+		virtual bool IsOpen() final override
 		{
 			return _isOpen;
 		}

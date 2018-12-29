@@ -16,11 +16,13 @@ class Management {
 	public:
 		Management(class Theatre &theatre);
 		~Management();
+		
 		void Clear();
 
-		// It is not allowed to call this function while running
 		void AddDevice(std::unique_ptr<class DmxDevice> device);
+		
 		void Run();
+		
 		class Theatre &Theatre() const { return *_theatre; }
 
 		const std::vector<std::unique_ptr<class Controllable>>& Controllables() const

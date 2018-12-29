@@ -14,7 +14,7 @@ public:
 	OLADevice();
 	
 	void Open() final override;
-	void SetValues(unsigned char *newValues, size_t size) final override;
+	void SetValues(const unsigned char *newValues, size_t size) final override;
 	void GetValues(unsigned char *destination, size_t size) final override;
 	void WaitForNextSync() final override;
 	void Abort() final override;

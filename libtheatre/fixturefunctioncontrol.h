@@ -5,7 +5,7 @@
 #include "fixturefunction.h"
 
 /**
-	@author Andre Offringa
+	@author André Offringa
 */
 class FixtureFunctionControl : public Controllable {
 	public:

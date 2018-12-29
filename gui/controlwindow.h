@@ -22,6 +22,7 @@ class ControlWindow  : public Gtk::Window {
 		bool HandleKeyUp(char key);
 		bool IsAssigned(class PresetValue* presetValue);
 		size_t KeyRowIndex() const { return _keyRowIndex; }
+		
 	private:
 		void onAddButtonClicked() { addControl(); }
 		void onRemoveButtonClicked();
@@ -40,7 +41,7 @@ class ControlWindow  : public Gtk::Window {
 		Gtk::Button _addButton, _assignButton, _assignChasesButton, _removeButton;
 		Gtk::VButtonBox _buttonBox;
 
-		std::vector<class ControlWidget *> _controls;
+		std::vector<std::unique_ptr<class ControlWidget>> _controls;
 		class ShowWindow* _showWindow;
 		static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
 };

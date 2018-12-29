@@ -8,6 +8,8 @@
 #include <gtkmm/eventbox.h>
 #include <gtkmm/menu.h>
 
+#include <memory>
+
 /**
 	@author Andre Offringa
 */
@@ -33,6 +35,7 @@ class ControlWidget : public Gtk::VBox {
 		}
 		
 		static double MAX_SCALE_VALUE();
+		
 	private:
 		void writeValue();
 		void onScaleChange();
@@ -49,15 +52,15 @@ class ControlWidget : public Gtk::VBox {
 		Gtk::CheckButton _onCheckButton;
 		Gtk::EventBox _eventBox;
 		Gtk::Label _nameLabel;
-		Gtk::Menu *_popupMenu, *_popupChaseMenu, *_popupPresetMenu, *_popupFunctionMenu;
-		std::vector<Gtk::MenuItem *> _popupMenuItems;
+		std::vector<std::unique_ptr<Gtk::MenuItem>> _popupMenuItems;
+		std::unique_ptr<Gtk::Menu> _popupMenu, _popupChaseMenu, _popupPresetMenu, _popupFunctionMenu;
 
 		class Management &_management;
 		class PresetValue *_preset;
 
 		bool _holdUpdates;
 		
-		sigc::signal<void,double> _signalChange;
+		sigc::signal<void, double> _signalChange;
 };
 
 #endif

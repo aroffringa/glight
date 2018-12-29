@@ -12,11 +12,7 @@ ControlWidget::ControlWidget(class Management &management, char key)
  :
   _scale(0, MAX_SCALE_VALUE_DEF, MAX_SCALE_VALUE_DEF/100),
 	_flashButton(std::string(1, key)), _nameLabel("<..>"),
-	_popupMenu(0),
-	_popupChaseMenu(0),
-	_popupPresetMenu(0),
-	_popupFunctionMenu(0),
-	_management(management), _preset(0),
+	_management(management), _preset(nullptr),
 	_holdUpdates(false)
 {
 	_scale.set_inverted(true);
@@ -49,25 +45,11 @@ ControlWidget::ControlWidget(class Management &management, char key)
 }
 
 ControlWidget::~ControlWidget()
-{
-	DestroyPopupMenu();
-}
+{ }
 
 double ControlWidget::MAX_SCALE_VALUE()
 {
 	return MAX_SCALE_VALUE_DEF;
-}
-
-void ControlWidget::DestroyPopupMenu()
-{
-	delete _popupMenu; _popupMenu = 0;
-	delete _popupChaseMenu; _popupChaseMenu = 0;
-	delete _popupFunctionMenu; _popupFunctionMenu = 0;
-	delete _popupPresetMenu; _popupPresetMenu = 0;
-	for(std::vector<Gtk::MenuItem*>::const_iterator i=_popupMenuItems.begin();
-		i != _popupMenuItems.end();++i)
-		delete *i;
-	_popupMenuItems.clear();
 }
 
 void ControlWidget::onOnButtonClicked()
@@ -113,29 +95,28 @@ void ControlWidget::onScaleChange()
 
 bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
 {
-	DestroyPopupMenu();
-
-	_popupMenu = new Gtk::Menu();
-	_popupChaseMenu = new Gtk::Menu();
-	_popupPresetMenu = new Gtk::Menu();
-	_popupFunctionMenu = new Gtk::Menu();
+	_popupMenu.reset(new Gtk::Menu());
+	_popupChaseMenu.reset(new Gtk::Menu());
+	_popupPresetMenu.reset(new Gtk::Menu());
+	_popupFunctionMenu.reset(new Gtk::Menu());
+	_popupMenuItems.clear();
 	
-	Gtk::MenuItem *submi;
+	std::unique_ptr<Gtk::MenuItem> submi;
 	
-	submi = new Gtk::MenuItem("Functions");
+	submi.reset(new Gtk::MenuItem("Functions"));
 	submi->set_submenu(*_popupFunctionMenu);
 	_popupMenu->append(*submi);
-	_popupMenuItems.push_back(submi);
+	_popupMenuItems.emplace_back(std::move(submi));
 
-	submi = new Gtk::MenuItem("Presets");
+	submi.reset(new Gtk::MenuItem("Presets"));
 	submi->set_submenu(*_popupPresetMenu);
 	_popupMenu->append(*submi);
-	_popupMenuItems.push_back(submi);
+	_popupMenuItems.emplace_back(std::move(submi));
 
-	submi = new Gtk::MenuItem("Chases");
+	submi.reset(new Gtk::MenuItem("Chases"));
 	submi->set_submenu(*_popupChaseMenu);
 	_popupMenu->append(*submi);
-	_popupMenuItems.push_back(submi);
+	_popupMenuItems.emplace_back(std::move(submi));
 
 	const std::vector<std::unique_ptr<PresetValue>>&
 		presets = _management.PresetValues();
@@ -143,19 +124,18 @@ bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
 	{
 		Gtk::Menu* subMenu;
 		Controllable& c = pv->Controllable();
-		if(dynamic_cast<Chase*>(&c) != 0)
-			subMenu = _popupChaseMenu;
+		if(dynamic_cast<Chase*>(&c) != nullptr)
+			subMenu = _popupChaseMenu.get();
 		else if(dynamic_cast<PresetCollection*>(&c))
-			subMenu = _popupPresetMenu;
+			subMenu = _popupPresetMenu.get();
 		else
-			subMenu = _popupFunctionMenu;
+			subMenu = _popupFunctionMenu.get();
 		
-		Gtk::MenuItem *mi = new Gtk::MenuItem(c.Name());
+		std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(c.Name()));
 		mi->signal_activate().connect(sigc::bind<PresetValue*>( 
     sigc::mem_fun(*this, &ControlWidget::onMenuItemClicked), pv.get()));
-		_popupMenuItems.push_back(mi);
-
 		subMenu->append(*mi);
+		_popupMenuItems.emplace_back(std::move(mi));
 	}
 	_popupMenu->show_all_children();
 	_popupMenu->popup(event->button, event->time);
@@ -165,7 +145,7 @@ bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
 
 void ControlWidget::writeValue()
 {
-	if(_preset != 0)
+	if(_preset != nullptr)
 	{
 		_preset->Value().Set((unsigned) _scale.get_value());
 	}
@@ -175,7 +155,7 @@ void ControlWidget::Assign(PresetValue* item)
 {
 	if(item != _preset)
 	{
-		if(item != 0)
+		if(item != nullptr)
 			_nameLabel.set_text(item->Controllable().Name());
 		else
 			_nameLabel.set_text("<..>");
@@ -193,12 +173,12 @@ void ControlWidget::onMenuItemClicked(PresetValue *item)
 
 void ControlWidget::UpdateAfterPresetRemoval()
 {
-	if(_preset != 0)
+	if(_preset != nullptr)
 	{
 		if(!_management.Contains(*_preset))
 		{
 			_nameLabel.set_text("<..>");
-			_preset = 0;
+			_preset = nullptr;
 			_scale.set_value(0.0);
 		}
 	}

@@ -89,17 +89,17 @@ void BeatFinder::open()
 		rc = snd_pcm_readi(_handle, alsaBuffer.data(), readAtATime);
 		if(rc == -EPIPE)
 		{
-			std::cout << "Buffer overrun!" << std::endl;
+			std::cout << "Buffer overrun!\n";
 			snd_pcm_prepare(_handle);
 		}
 		else if (rc < 0)
 		{
-			std::cout << "ERROR:" << snd_strerror(rc) << std::endl;
+			std::cout << "ERROR:" << snd_strerror(rc) << '\n';
 			break;
 		}
 		else {
 			if (rc != (int) readAtATime)
-				std::cout << "Only " << rc << " frames were read in snd_pcm_readi()." << std::endl;
+				std::cout << "Only " << rc << " frames were read in snd_pcm_readi().\n";
 		}
 		for(size_t i=0; i!=hop_size; ++i)
 		{
@@ -117,7 +117,6 @@ void BeatFinder::open()
 			smpl_t confidence = aubio_tempo_get_confidence(tempo);
 			if(confidence > _minimumConfidence)
 			{
-				//std::cout << "BEAT! (" << double(confidence) << ")\n";
 				std::unique_lock<std::mutex> lock(_mutex);
 				_confidence = confidence;
 				if(_beatValue < (60.0*60.0*24.0*365.0))
@@ -140,7 +139,7 @@ void BeatFinder::open()
 
 void BeatFinder::close()
 {
-	if(_alsaThread != 0)
+	if(_alsaThread != nullptr)
 	{
 		_alsaThread->join();
 		_alsaThread.reset();

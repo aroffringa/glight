@@ -13,11 +13,13 @@
 #include "theatre.h"
 #include "valuesnapshot.h"
 
-Management::Management(class Theatre &theatre)
- : _thread(), _isRunning(false), _isQuitting(false),
+Management::Management(class Theatre &theatre) : 
+	_thread(),
+	_isRunning(false), _isQuitting(false),
 	_createTime(boost::posix_time::microsec_clock::local_time()),
 	_nextPresetValueId(1),
-	_theatre(&theatre), _snapshot(new ValueSnapshot()),
+	_theatre(&theatre),
+	_snapshot(new ValueSnapshot()),
 	_beatFinder(new BeatFinder()),
 	_show(new class Show(*this))
 {
@@ -67,9 +69,9 @@ void Management::Run()
 
 void Management::ManagementThread::operator()()
 {
+	std::unique_ptr<ValueSnapshot> nextSnapshot(new ValueSnapshot());
 	while(!parent->IsQuitting())
 	{
-		std::unique_ptr<ValueSnapshot> nextSnapshot(new ValueSnapshot());
 		nextSnapshot->SetUniverseCount(parent->_devices.size());
 
 		for(unsigned universe=0; universe < parent->_devices.size(); ++universe)
@@ -89,7 +91,7 @@ void Management::ManagementThread::operator()()
 				valuesChar[i] = static_cast<unsigned char>(val);
 			}
 
-			ValueUniverseSnapshot &universeValues =
+			ValueUniverseSnapshot& universeValues =
 				nextSnapshot->GetUniverseSnapshot(universe);
 			universeValues.SetValues(valuesChar, parent->_theatre->HighestChannel()+1);
 
@@ -98,7 +100,7 @@ void Management::ManagementThread::operator()()
 		}
 
 		std::lock_guard<std::mutex> lock(parent->_mutex);
-		parent->_snapshot = std::move(nextSnapshot);
+		std::swap(parent->_snapshot, nextSnapshot);
 	}
 }
 
@@ -110,7 +112,7 @@ void Management::AbortAllDevices()
 	}
 }
 
-void Management::GetChannelValues(unsigned *values, unsigned universe)
+void Management::GetChannelValues(unsigned* values, unsigned universe)
 {
 	double relTimeInMs = GetOffsetTimeInMS();
 	double beatValue, beatConfidence;
