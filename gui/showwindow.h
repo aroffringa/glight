@@ -11,6 +11,8 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/window.h>
 
+#include "guistate.h"
+
 /**
 	@author Andre Offringa
 */
@@ -24,6 +26,9 @@ class ShowWindow : public Gtk::Window {
 		void EmitUpdate();
 		void EmitUpdateAfterPresetRemoval();
 		void EmitUpdateAfterAddPreset();
+		
+		GUIState& State() { return _state; }
+		
 	private:
 		void onProgramWindowButtonClicked();
 		void onControlWindowButtonClicked()
@@ -65,6 +70,8 @@ class ShowWindow : public Gtk::Window {
 
 		class SceneFrame *_sceneFrame;
 
+		GUIState _state;
+		
 		Gtk::Menu _menuFile;
 		
 		Gtk::MenuItem _miFile;
