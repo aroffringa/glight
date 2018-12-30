@@ -10,12 +10,9 @@
 #include "libtheatre/show.h"
 #include "libtheatre/theatre.h"
 
-Reader::Reader(Management &management) : _management(management), _theatre(management.Theatre())
-{
-}
+#include "gui/guistate.h"
 
-
-Reader::~Reader()
+Reader::Reader(Management &management) : _management(management), _theatre(management.Theatre()), _guiState(nullptr)
 {
 }
 
@@ -68,6 +65,16 @@ void Reader::parseGroup(xmlNode *node)
 		parseControl(node);
 	else if(name(node) == "show")
 		parseShow(node);
+	else if(name(node) == "gui")
+	{
+		if(_guiState == nullptr)
+		{
+			GUIState scratchState;
+			parseGUI(node, scratchState);
+		}
+		else
+			parseGUI(node, *_guiState);
+	}
 	else throw std::runtime_error(std::string("Invalid node: ") + name(node));
 }
 
@@ -325,4 +332,52 @@ ControlSceneItem &Reader::parseControlSceneItem(xmlNode *node, Scene &scene)
 	return *item;
 }
 
+void Reader::parseGUI(xmlNode* node, GUIState& guiState)
+{
+	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
+	{
+		if(curNode->type == XML_ELEMENT_NODE)
+			parseGUIItem(curNode, guiState);
+	}
+}
 
+void Reader::parseGUIItem(xmlNode* node, GUIState& guiState)
+{
+	const std::string n = name(node);
+	if(n == "faders")
+		parseGUIFaders(node, guiState);
+	else
+		throw std::runtime_error("Invalid GUI element: " + n);
+}
+
+void Reader::parseGUIFaders(xmlNode* node, GUIState& guiState)
+{
+	guiState.FaderSetups().emplace_back(new FaderSetupState());
+	FaderSetupState& fader = *guiState.FaderSetups().back().get();
+	fader.name = getStringAttribute(node, "name");
+	fader.isActive = getBoolAttribute(node, "active");
+	fader.isSolo = getBoolAttribute(node, "solo");
+	fader.width = getIntAttribute(node, "width");
+	fader.height = getIntAttribute(node, "height");
+	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
+	{
+		if(curNode->type == XML_ELEMENT_NODE)
+		{
+			const std::string n = name(curNode);
+			if(n == "fader")
+				parseGUIPresetRef(curNode, fader);
+			else
+				throw std::runtime_error("Invalid GUI fader element: " + n);
+		}
+	}
+}
+
+void Reader::parseGUIPresetRef(xmlNode* node, FaderSetupState& fader)
+{
+	if(hasAttribute(node, "preset-id"))
+	{
+		fader.presets.emplace_back(&_management.GetPresetValue(getIntAttribute(node, "preset-id")));
+	}
+	else
+		fader.presets.emplace_back(nullptr);
+}

@@ -26,7 +26,8 @@ class ControlWidget : public Gtk::VBox {
 		void Unassign() { Assign(0); }
 		PresetValue* Preset() const { return _preset; }
 		
-		sigc::signal<void,double>& SignalChange() { return _signalChange; }
+		sigc::signal<void, double>& SignalValueChange() { return _signalValueChange; }
+		sigc::signal<void>& Signal_signalAssigned() { return _signalAssigned; }
 		
 		void Limit(double value)
 		{
@@ -60,7 +61,8 @@ class ControlWidget : public Gtk::VBox {
 
 		bool _holdUpdates;
 		
-		sigc::signal<void, double> _signalChange;
+		sigc::signal<void, double> _signalValueChange;
+		sigc::signal<void> _signalAssigned;
 };
 
 #endif

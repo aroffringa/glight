@@ -11,6 +11,8 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/window.h>
 
+#include "guistate.h"
+
 /**
 	@author Andre Offringa
 */
@@ -19,11 +21,14 @@ class ShowWindow : public Gtk::Window {
 		ShowWindow(std::unique_ptr<class DmxDevice> dmxDevice);
 		~ShowWindow();
 		
-		bool IsAssignedToControl(class PresetValue* presetValue);
+		bool IsAssignedToControl(class PresetValue* presetValue) const;
 
 		void EmitUpdate();
 		void EmitUpdateAfterPresetRemoval();
 		void EmitUpdateAfterAddPreset();
+		
+		GUIState& State() { return _state; }
+		
 	private:
 		void onProgramWindowButtonClicked();
 		void onControlWindowButtonClicked()
@@ -32,7 +37,12 @@ class ShowWindow : public Gtk::Window {
 		}
 		void onConfigurationWindowButtonClicked();
 		void onVisualizationWindowButtonClicked();
-		void addControlWindow();
+		
+		/**
+		 * If stateOrNull is nullptr, the first inactive state is selected, or
+		 * if no states are inactive, a new state is created.
+		 */
+		void addControlWindow(FaderSetupState* stateOrNull = nullptr);
 
 		bool onKeyDown(GdkEventKey *event);
 		bool onKeyUp(GdkEventKey *event);
@@ -56,7 +66,7 @@ class ShowWindow : public Gtk::Window {
 		Gtk::HButtonBox _windowButtonsBox;
 
 		class ProgramWindow *_programWindow;
-		std::vector<class ControlWindow *> _controlWindows;
+		std::vector<std::unique_ptr<class ControlWindow>> _controlWindows;
 		class ConfigurationWindow *_configurationWindow;
 		class VisualizationWindow *_visualizationWindow;
 
@@ -65,6 +75,8 @@ class ShowWindow : public Gtk::Window {
 
 		class SceneFrame *_sceneFrame;
 
+		GUIState _state;
+		
 		Gtk::Menu _menuFile;
 		
 		Gtk::MenuItem _miFile;

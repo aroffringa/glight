@@ -306,6 +306,14 @@ Sequence& Management::GetSequence(const std::string &name) const
 	return NamedObject::FindNamedObject(_sequences, name);
 }
 
+PresetValue& Management::GetPresetValue(unsigned id) const
+{
+	for(const std::unique_ptr<PresetValue>& pv : _presetValues)
+		if(pv->Id() == id)
+			return *pv;
+	throw std::runtime_error("Could not find preset value with given ID");
+}
+
 ValueSnapshot Management::Snapshot()
 {
 	std::lock_guard<std::mutex> lock(_mutex);
