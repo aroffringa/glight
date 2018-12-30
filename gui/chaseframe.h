@@ -24,6 +24,7 @@ class ChaseFrame : public Gtk::VPaned {
 
 		void Update() { fillChaseList(); }
 		void UpdateAfterPresetRemoval() { fillChaseList(); }
+		
 	private:
 		void fillChaseList();
 		void initUpperPanel();
@@ -33,6 +34,7 @@ class ChaseFrame : public Gtk::VPaned {
 		void onTriggerSpeedChanged();
 		void onTransitionSpeedChanged();
 		void onBeatSpeedChanged();
+		void onDeleteChaseClicked();
 
 		struct ChaseListColumns : public Gtk::TreeModelColumnRecord
 		{
