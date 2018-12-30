@@ -135,21 +135,23 @@ void ShowWindow::onProgramWindowButtonClicked()
 		_programWindow->hide();
 }
 
-void ShowWindow::addControlWindow()
+void ShowWindow::addControlWindow(FaderSetupState* stateOrNull)
 {
-	FaderSetupState* inactiveState = nullptr;
-	for(std::unique_ptr<FaderSetupState>& setup : _state.FaderSetups())
+	if(stateOrNull == nullptr)
 	{
-		if(!setup->isActive)
+		for(std::unique_ptr<FaderSetupState>& setup : _state.FaderSetups())
 		{
-			inactiveState = setup.get();
-			break;
+			if(!setup->isActive)
+			{
+				stateOrNull = setup.get();
+				break;
+			}
 		}
 	}
-	if(inactiveState == nullptr)
+	if(stateOrNull == nullptr)
 		_controlWindows.emplace_back(new ControlWindow(this, *_management, nextControlKeyRow()));
 	else
-		_controlWindows.emplace_back(new ControlWindow(this, *_management, nextControlKeyRow(), inactiveState));
+		_controlWindows.emplace_back(new ControlWindow(this, *_management, nextControlKeyRow(), stateOrNull));
 	ControlWindow *newWindow = _controlWindows.back().get();
 	newWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	newWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
@@ -245,17 +247,38 @@ void ShowWindow::onMIOpenClicked()
 	{
 		std::unique_lock<std::mutex> lock(_management->Mutex());
 		_management->Clear();
+		_controlWindows.clear();
+		_state.Clear();
 		Reader reader(*_management);
+		reader.SetGUIState(_state);
 		reader.Read(dialog.get_filename());
 
 		if(_management->Show().Scenes().size() != 0)
 			_sceneFrame->SetSelectedScene(*_management->Show().Scenes()[0]);
 		else
 			_sceneFrame->SetNoSelectedScene();
-
+		
 		lock.unlock();
 	
 		EmitUpdate();
+		
+		if(_state.Empty())
+		{
+			std::cout << "File did not contain GUI state info: will start with default faders.\n";
+			addControlWindow();
+		}
+		else {
+			for(const std::unique_ptr<FaderSetupState>& state : _state.FaderSetups())
+			{
+				if(state->isActive)
+				{
+					// Currently it is not displayed, so to avoid the control window doing the
+					// wrong thing, isActive is set to false and will be set to true by the control window.
+					state->isActive = false;
+					addControlWindow(state.get());
+				}
+			}
+		}
 	}
 }
 

@@ -37,7 +37,12 @@ class ShowWindow : public Gtk::Window {
 		}
 		void onConfigurationWindowButtonClicked();
 		void onVisualizationWindowButtonClicked();
-		void addControlWindow();
+		
+		/**
+		 * If stateOrNull is nullptr, the first inactive state is selected, or
+		 * if no states are inactive, a new state is created.
+		 */
+		void addControlWindow(FaderSetupState* stateOrNull = nullptr);
 
 		bool onKeyDown(GdkEventKey *event);
 		bool onKeyUp(GdkEventKey *event);

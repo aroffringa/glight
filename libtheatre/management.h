@@ -63,6 +63,7 @@ class Management {
 
 		class Controllable& GetControllable(const std::string &name) const;
 		class Sequence& GetSequence(const std::string &name) const;
+		class PresetValue& GetPresetValue(unsigned id) const;
 		class ValueSnapshot Snapshot();
 
 		double GetOffsetTimeInMS() const

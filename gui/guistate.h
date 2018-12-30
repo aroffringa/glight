@@ -38,6 +38,13 @@ public:
 		_faderSetupSignalChange();
 	}
 	
+	void Clear()
+	{
+		_faderSetups.clear();
+	}
+	
+	bool Empty() const { return _faderSetups.empty(); }
+	
 private:
 	sigc::signal<void()> _faderSetupSignalChange;
 	std::vector<std::unique_ptr<FaderSetupState>> _faderSetups;
