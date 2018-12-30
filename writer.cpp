@@ -11,7 +11,9 @@
 #include "libtheatre/show.h"
 #include "libtheatre/theatre.h"
 
-Writer::Writer(Management &management) : _management(management), _encoding("UTF-8")
+#include "gui/guistate.h"
+
+Writer::Writer(Management &management) : _management(management), _guiState(nullptr), _encoding("UTF-8")
 {
 }
 
@@ -119,6 +121,13 @@ void Writer::writeGlightShow()
 		writeScene(*scene);
 
 	endElement(); // show
+	
+	startElement("gui");
+	
+	if(_guiState != nullptr)
+		writeGUIState(*_guiState);
+	
+	endElement(); // gui
 
 	endElement(); // glight-show
 }
@@ -317,4 +326,28 @@ void Writer::writeControlSceneItem(const ControlSceneItem &item)
 	writeAttribute("start-value", item.StartValue().UInt());
 	writeAttribute("end-value", item.EndValue().UInt());
 	writeAttribute("controllable-ref", item.Controllable().Name());
+}
+
+void Writer::writeGUIState(const GUIState& guiState)
+{
+	for(const std::unique_ptr<FaderSetupState>& fState : guiState.FaderSetups())
+		writeFaderState(*fState);
+}
+
+void Writer::writeFaderState(const FaderSetupState& guiState)
+{
+	startElement("faders");
+	writeAttribute("name", guiState.name);
+	writeAttribute("active", guiState.isActive);
+	writeAttribute("solo", guiState.isSolo);
+	writeAttribute("width", guiState.width);
+	writeAttribute("height", guiState.height);
+	for(const PresetValue* preset : guiState.presets)
+	{
+		startElement("fader");
+		if(preset != nullptr)
+			writeAttribute("preset-id", preset->Id());
+		endElement(); // preset
+	}
+	endElement(); // faders
 }

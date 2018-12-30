@@ -28,7 +28,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miFile("_File", true),
 	_miNew(Gtk::Stock::NEW),
 	_miOpen(Gtk::Stock::OPEN),
-	_miSave(Gtk::Stock::SAVE),
+	_miSave(Gtk::Stock::SAVE_AS),
 	_miQuit(Gtk::Stock::QUIT)
 {
 	set_title("Glight - show");
@@ -281,6 +281,7 @@ void ShowWindow::onMISaveClicked()
 
 		std::lock_guard<std::mutex> lock(_management->Mutex());
 		Writer writer(*_management);
+		writer.SetGUIState(_state);
 		writer.Write(filename);
 	}
 }

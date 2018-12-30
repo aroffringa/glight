@@ -23,6 +23,8 @@ class Writer {
 	public:
 		Writer(class Management &management);
 		~Writer() { }
+		
+		void SetGUIState(class GUIState& guiState) { _guiState = &guiState; }
 
 		void Write(const Glib::ustring &filename);
 		static void CheckXmlVersion();
@@ -46,6 +48,9 @@ class Writer {
 		void writeSceneItem(const class SceneItem &item);
 		void writeKeySceneItem(const class KeySceneItem &item);
 		void writeControlSceneItem(const class ControlSceneItem &item);
+		
+		void writeGUIState(const class GUIState& guiState);
+		void writeFaderState(const class FaderSetupState& guiState);
 
 		void startElement(const char *elementName);
 		void endElement();
@@ -57,7 +62,9 @@ class Writer {
 		{ writeAttribute(attributeName, attributeValue.c_str()); }
 		void writeAttribute(const char *attributeName, int attributeValue);
 
-		class Management &_management;
+		class Management& _management;
+		class GUIState* _guiState;
+		
 		xmlTextWriterPtr _writer;
 		const char *_encoding;
 

@@ -5,6 +5,8 @@
 #include <vector>
 #include <memory>
 
+#include <sigc++/signal.h>
+
 class FaderSetupState
 {
 public:
@@ -25,6 +27,8 @@ class GUIState
 {
 public:
 	std::vector<std::unique_ptr<FaderSetupState>>& FaderSetups()
+	{ return _faderSetups; }
+	const std::vector<std::unique_ptr<FaderSetupState>>& FaderSetups() const
 	{ return _faderSetups; }
 	
 	sigc::signal<void()>& FaderSetupSignalChange() { return _faderSetupSignalChange; }
