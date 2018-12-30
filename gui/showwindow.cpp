@@ -97,8 +97,7 @@ ShowWindow::~ShowWindow()
 	delete _visualizationWindow;
 	delete _configurationWindow;
 
-	for(std::vector<ControlWindow*>::iterator i=_controlWindows.begin();i!=_controlWindows.end();++i)
-		delete (*i);
+	_controlWindows.clear();
 
 	delete _programWindow;
 	Theatre *theatre = &_management->Theatre();
@@ -109,8 +108,8 @@ ShowWindow::~ShowWindow()
 void ShowWindow::EmitUpdate()
 {
 	_programWindow->Update();
-	for(std::vector<ControlWindow*>::iterator i=_controlWindows.begin();i!=_controlWindows.end();++i)
-		(*i)->Update();
+	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
+		cw->Update();
 	_configurationWindow->Update();
 	_sceneFrame->Update();
 }
@@ -118,8 +117,8 @@ void ShowWindow::EmitUpdate()
 void ShowWindow::EmitUpdateAfterPresetRemoval()
 {
 	_programWindow->UpdateAfterPresetRemoval();
-	for(std::vector<ControlWindow*>::iterator i=_controlWindows.begin();i!=_controlWindows.end();++i)
-		(*i)->UpdateAfterPresetRemoval();
+	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
+		cw->UpdateAfterPresetRemoval();
 }
 
 void ShowWindow::EmitUpdateAfterAddPreset()
@@ -138,8 +137,20 @@ void ShowWindow::onProgramWindowButtonClicked()
 
 void ShowWindow::addControlWindow()
 {
-	ControlWindow *newWindow = new ControlWindow(this, *_management, nextControlKeyRow());
-	_controlWindows.push_back(newWindow);
+	FaderSetupState* inactiveState = nullptr;
+	for(std::unique_ptr<FaderSetupState>& setup : _state.FaderSetups())
+	{
+		if(!setup->isActive)
+		{
+			inactiveState = setup.get();
+			break;
+		}
+	}
+	if(inactiveState == nullptr)
+		_controlWindows.emplace_back(new ControlWindow(this, *_management, nextControlKeyRow()));
+	else
+		_controlWindows.emplace_back(new ControlWindow(this, *_management, nextControlKeyRow(), inactiveState));
+	ControlWindow *newWindow = _controlWindows.back().get();
 	newWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	newWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 	newWindow->signal_hide().connect(sigc::bind(sigc::mem_fun(*this, &ShowWindow::onControlWindowHidden), newWindow));
@@ -170,18 +181,18 @@ bool ShowWindow::onKeyDown(GdkEventKey *event)
 	if(_sceneFrame->HandleKeyDown(event->keyval))
 		return true;
 	bool handled = false;
-	for(std::vector<ControlWindow*>::iterator i=_controlWindows.begin();i!=_controlWindows.end();++i)
+	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
 		if(!handled)
-			handled = (*i)->HandleKeyDown(event->keyval);
+			handled = cw->HandleKeyDown(event->keyval);
 	return handled;
 }
 
 bool ShowWindow::onKeyUp(GdkEventKey *event)
 {
 	bool handled = false;
-	for(std::vector<ControlWindow*>::iterator i=_controlWindows.begin();i!=_controlWindows.end();++i)
+	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
 		if(!handled)
-			handled = (*i)->HandleKeyUp(event->keyval);
+			handled = cw->HandleKeyUp(event->keyval);
 	return handled;
 }
 
@@ -279,11 +290,11 @@ void ShowWindow::onMIQuitClicked()
 	hide();
 }
 
-bool ShowWindow::IsAssignedToControl(PresetValue* presetValue)
+bool ShowWindow::IsAssignedToControl(PresetValue* presetValue) const
 {
-	for(std::vector<ControlWindow*>::const_iterator i=_controlWindows.begin(); i!=_controlWindows.end(); ++i)
+	for(const std::unique_ptr<ControlWindow>& cw : _controlWindows)
 	{
-		if((*i)->IsAssigned(presetValue))
+		if(cw->IsAssigned(presetValue))
 			return true;
 	}
 	return false;
@@ -291,15 +302,14 @@ bool ShowWindow::IsAssignedToControl(PresetValue* presetValue)
 
 void ShowWindow::onControlWindowHidden(ControlWindow* window)
 {
-	for(std::vector<ControlWindow*>::iterator i=_controlWindows.begin(); i!=_controlWindows.end(); ++i)
+	for(std::vector<std::unique_ptr<ControlWindow>>::iterator i=_controlWindows.begin(); i!=_controlWindows.end(); ++i)
 	{
-		if(*i == window)
+		if(i->get() == window)
 		{
 			_controlWindows.erase(i);
 			break;
 		}
 	}
-	delete window;
 }
 
 size_t ShowWindow::nextControlKeyRow() const
@@ -307,9 +317,9 @@ size_t ShowWindow::nextControlKeyRow() const
 	size_t index = 0;
 	while(index < std::numeric_limits<size_t>::max()) {
 		bool found = false;
-		for(std::vector<ControlWindow*>::const_iterator i=_controlWindows.begin(); i!=_controlWindows.end(); ++i)
+		for(const std::unique_ptr<ControlWindow>& cw : _controlWindows)
 		{
-			if(index == (*i)->KeyRowIndex())
+			if(index == cw->KeyRowIndex())
 			{
 				++index;
 				found = true;

@@ -21,7 +21,7 @@ class ShowWindow : public Gtk::Window {
 		ShowWindow(std::unique_ptr<class DmxDevice> dmxDevice);
 		~ShowWindow();
 		
-		bool IsAssignedToControl(class PresetValue* presetValue);
+		bool IsAssignedToControl(class PresetValue* presetValue) const;
 
 		void EmitUpdate();
 		void EmitUpdateAfterPresetRemoval();
@@ -61,7 +61,7 @@ class ShowWindow : public Gtk::Window {
 		Gtk::HButtonBox _windowButtonsBox;
 
 		class ProgramWindow *_programWindow;
-		std::vector<class ControlWindow *> _controlWindows;
+		std::vector<std::unique_ptr<class ControlWindow>> _controlWindows;
 		class ConfigurationWindow *_configurationWindow;
 		class VisualizationWindow *_visualizationWindow;
 
