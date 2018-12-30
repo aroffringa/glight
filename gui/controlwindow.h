@@ -10,12 +10,23 @@
 #include <gtkmm/scale.h>
 #include <gtkmm/window.h>
 
+#include "avoidrecursion.h"
+
 /**
 	@author Andre Offringa
 */
 class ControlWindow  : public Gtk::Window {
 	public:
+		/**
+		 * Construct a control window with a new, empty fader setup.
+		 */
 		ControlWindow(class ShowWindow* showWindow, class Management& management, size_t keyRowIndex);
+		
+		/**
+		 * Construct a control window and load an existing fader setup.
+		 */
+		ControlWindow(class ShowWindow* showWindow, class Management& management, size_t keyRowIndex, class FaderSetupState* state);
+		
 		~ControlWindow();
 
 		void Update() { UpdateAfterPresetRemoval(); }
@@ -26,17 +37,24 @@ class ControlWindow  : public Gtk::Window {
 		size_t KeyRowIndex() const { return _keyRowIndex; }
 		
 	private:
+		void initializeWidgets();
+		
 		void onAddButtonClicked() { addControl(); }
 		void onRemoveButtonClicked();
 		void onAssignButtonClicked();
 		void onAssignChasesButtonClicked();
 		void onSoloButtonToggled();
 		void onNameButtonClicked();
+		void onNewFaderSetupButtonClicked();
 		void onControlValueChanged(double newValue, class ControlWidget* widget);
+		void onControlAssigned(double newValue, size_t widgetIndex);
+		bool onResize(GdkEventConfigure *event);
 		
 		void addControl();
 		
+		void onFaderSetupChanged();
 		void updateFaderSetupList();
+		void loadState();
 
 		class Management &_management;
 		size_t _keyRowIndex;
@@ -46,7 +64,7 @@ class ControlWindow  : public Gtk::Window {
 		Gtk::ComboBox _faderSetup;
 		Glib::RefPtr<Gtk::ListStore> _faderSetupList;
 		Gtk::HBox _hBoxUpper, _hBox2;
-		Gtk::Button _nameButton;
+		Gtk::Button _nameButton, _newFaderSetupButton;
 		Gtk::CheckButton _soloCheckButton;
 		Gtk::Button _addButton, _assignButton, _assignChasesButton, _removeButton;
 		Gtk::VButtonBox _buttonBox;
@@ -54,6 +72,8 @@ class ControlWindow  : public Gtk::Window {
 		std::vector<std::unique_ptr<class ControlWidget>> _controls;
 		class ShowWindow* _showWindow;
 		class FaderSetupState* _state;
+		AvoidRecursion _delayUpdates;
+		sigc::connection _faderSetupChangeConnection;
 		static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
 		
 		class FaderSetupColumns : public Gtk::TreeModel::ColumnRecord

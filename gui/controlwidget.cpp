@@ -64,7 +64,7 @@ void ControlWidget::onOnButtonClicked()
 		_holdUpdates = false;
 
 		writeValue();
-		_signalChange.emit(_scale.get_value());
+		_signalValueChange.emit(_scale.get_value());
 	}
 }
 
@@ -89,7 +89,7 @@ void ControlWidget::onScaleChange()
 		_holdUpdates = false;
 
 		writeValue();
-		_signalChange.emit(_scale.get_value());
+		      _signalValueChange.emit(_scale.get_value());
 	}
 }
 
@@ -155,14 +155,18 @@ void ControlWidget::Assign(PresetValue* item)
 {
 	if(item != _preset)
 	{
-		if(item != nullptr)
-		{
-			_nameLabel.set_text(item->Controllable().Name());
-			_scale.set_value(item->Value().UInt());
-		}
-		else
-			_nameLabel.set_text("<..>");
 		_preset = item;
+		if(_preset != nullptr)
+		{
+			_nameLabel.set_text(_preset->Controllable().Name());
+			_scale.set_value(_preset->Value().UInt());
+		}
+		else {
+			_nameLabel.set_text("<..>");
+			_scale.set_value(0);
+		}
+		_signalAssigned();
+		_signalValueChange.emit(_scale.get_value());
 	}
 }
 
