@@ -156,13 +156,13 @@ void ControlWidget::Assign(PresetValue* item)
 	if(item != _preset)
 	{
 		if(item != nullptr)
+		{
 			_nameLabel.set_text(item->Controllable().Name());
+			_scale.set_value(item->Value().UInt());
+		}
 		else
 			_nameLabel.set_text("<..>");
-		if(_preset != 0)
-			_preset->Value().Set(0);
 		_preset = item;
-		_scale.set_value(0.0);
 	}
 }
 
