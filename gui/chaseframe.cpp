@@ -1,4 +1,5 @@
 #include "chaseframe.h"
+#include "programwindow.h"
 
 #include "../libtheatre/chase.h"
 #include "../libtheatre/management.h"
@@ -49,6 +50,7 @@ void ChaseFrame::fillChaseList()
 
 void ChaseFrame::initUpperPanel()
 {
+	_deleteChaseButton.signal_clicked().connect(sigc::mem_fun(*this, &ChaseFrame::onDeleteChaseClicked));
 	_upperButtonBox.pack_start(_deleteChaseButton);
 	
 	_upperBox.pack_start(_upperButtonBox, false, false, 5);
@@ -190,3 +192,15 @@ void ChaseFrame::onSelectedChaseChanged()
 	}
 }
 
+void ChaseFrame::onDeleteChaseClicked()
+{
+	Glib::RefPtr<Gtk::TreeSelection> selection =
+    _chaseListView.get_selection();
+	Gtk::TreeModel::iterator selected = selection->get_selected();
+	if(selected)
+	{
+		Chase *chase = (*selected)[_chaseListColumns._chase];
+		_management.RemoveControllable(*chase);
+		_parentWindow.ForwardUpdateAfterPresetRemoval();
+	}
+}
