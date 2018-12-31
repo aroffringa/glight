@@ -10,6 +10,8 @@
 #include <gtkmm/scale.h>
 #include <gtkmm/window.h>
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include "avoidrecursion.h"
 
 /**
@@ -49,12 +51,17 @@ class ControlWindow  : public Gtk::Window {
 		void onControlValueChanged(double newValue, class ControlWidget* widget);
 		void onControlAssigned(double newValue, size_t widgetIndex);
 		bool onResize(GdkEventConfigure *event);
+		double mapSliderToSpeed(int sliderVal);
+		void onChangeUpSpeed();
+		void onChangeDownSpeed();
+		bool onTimeout() { updateValues(); return true; }
 		
 		void addControl();
 		
 		void onFaderSetupChanged();
 		void updateFaderSetupList();
 		void loadState();
+		void updateValues();
 
 		class Management &_management;
 		size_t _keyRowIndex;
@@ -66,6 +73,7 @@ class ControlWindow  : public Gtk::Window {
 		Gtk::HBox _hBoxUpper, _hBox2;
 		Gtk::Button _nameButton, _newFaderSetupButton;
 		Gtk::CheckButton _soloCheckButton;
+		Gtk::HScale _fadeUpSpeed, _fadeDownSpeed;
 		Gtk::Button _addButton, _assignButton, _assignChasesButton, _removeButton;
 		Gtk::VButtonBox _buttonBox;
 
@@ -73,8 +81,10 @@ class ControlWindow  : public Gtk::Window {
 		class ShowWindow* _showWindow;
 		class FaderSetupState* _state;
 		AvoidRecursion _delayUpdates;
-		sigc::connection _faderSetupChangeConnection;
+		sigc::connection _faderSetupChangeConnection, _timeoutConnection;
 		static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
+		
+		boost::posix_time::ptime _lastUpdateTime;
 		
 		class FaderSetupColumns : public Gtk::TreeModel::ColumnRecord
 		{

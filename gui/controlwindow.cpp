@@ -9,6 +9,8 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
+#include <glibmm/main.h>
+
 const char ControlWindow::_keyRowsUpper[3][10] = {
 	{ 'Z','X','C','V','B','N','M','<','>','?' },
 	{ 'A','S','D','F','G','H','J','K','L',':' },
@@ -25,11 +27,14 @@ ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &man
 	_nameButton("Name"),
 	_newFaderSetupButton(Gtk::Stock::NEW),
 	_soloCheckButton("Solo"),
+	_fadeUpSpeed(0.0, 11.0, 1.0),
+	_fadeDownSpeed(0.0, 11.0, 1.0),
 	_addButton(Gtk::Stock::ADD),
 	_assignButton("Assign"),
 	_assignChasesButton("Chases"),
 	_removeButton(Gtk::Stock::REMOVE),
-	_showWindow(showWindow)
+	_showWindow(showWindow),
+	_lastUpdateTime(boost::posix_time::microsec_clock::local_time())
 {
 	_showWindow->State().FaderSetups().emplace_back(new FaderSetupState());
 	_state = _showWindow->State().FaderSetups().back().get();
@@ -52,12 +57,15 @@ ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &man
 	_nameButton("Name"),
 	_newFaderSetupButton(Gtk::Stock::NEW),
 	_soloCheckButton("Solo"),
+	_fadeUpSpeed(0.0, 11.0, 1.0),
+	_fadeDownSpeed(0.0, 11.0, 1.0),
 	_addButton(Gtk::Stock::ADD),
 	_assignButton("Assign"),
 	_assignChasesButton("Chases"),
 	_removeButton(Gtk::Stock::REMOVE),
 	_showWindow(showWindow),
-	_state(state)
+	_state(state),
+	_lastUpdateTime(boost::posix_time::microsec_clock::local_time())
 {
 	_state->isActive = true;
 	initializeWidgets();
@@ -79,6 +87,8 @@ void ControlWindow::initializeWidgets()
 	_faderSetupChangeConnection = _showWindow->State().FaderSetupSignalChange().connect(sigc::mem_fun(*this, &ControlWindow::updateFaderSetupList));
 	
 	signal_configure_event().connect(sigc::mem_fun(*this, &ControlWindow::onResize), false);
+	
+	_timeoutConnection = Glib::signal_timeout().connect( sigc::mem_fun(*this, &ControlWindow::onTimeout), 40);
 	
 	add(_vBox);
 	
@@ -106,6 +116,12 @@ void ControlWindow::initializeWidgets()
 	
 	_soloCheckButton.signal_toggled().connect(sigc::mem_fun(*this, &ControlWindow::onSoloButtonToggled));
 	_buttonBox.pack_start(_soloCheckButton, false, false);
+	
+	_buttonBox.pack_start(_fadeUpSpeed, false, false);
+	_fadeUpSpeed.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWindow::onChangeUpSpeed));
+	
+	_buttonBox.pack_start(_fadeDownSpeed, false, false);
+	_fadeDownSpeed.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWindow::onChangeDownSpeed));
 
 	_addButton.signal_clicked().connect(sigc::mem_fun(*this, &ControlWindow::onAddButtonClicked));
 	_buttonBox.pack_start(_addButton, false, false);
@@ -385,4 +401,50 @@ void ControlWindow::loadState()
 	
 	for(size_t i=0; i!=_state->presets.size(); ++i)
 		_controls[i]->Assign(_state->presets[i]);
+}
+
+void ControlWindow::updateValues()
+{
+	boost::posix_time::ptime currentTime(boost::posix_time::microsec_clock::local_time());
+	double timePassed = (double) (currentTime - _lastUpdateTime).total_microseconds() * 1e-6;
+	_lastUpdateTime = std::move(currentTime);
+	for(std::unique_ptr<ControlWidget>& cw : _controls)
+	{
+		cw->UpdateValue(timePassed);
+	}
+}
+
+double ControlWindow::mapSliderToSpeed(int sliderVal)
+{
+	switch(sliderVal)
+	{
+		default:
+		case 0: return 0.0;
+		case 1: return 0.01;
+		case 2: return 0.05;
+		case 3: return 0.1;
+		case 4: return 0.2;
+		case 5: return 0.5;
+		case 6: return 1.0;
+		case 7: return 2.0;
+		case 8: return 5.0;
+		case 9: return 10.0;
+		case 10: return 20.0;
+	}
+}
+
+void ControlWindow::onChangeDownSpeed()
+{
+	double speed = mapSliderToSpeed(int(_fadeDownSpeed.get_value()));
+
+	for(std::unique_ptr<ControlWidget>& cw : _controls)
+		cw->SetFadeDownSpeed(speed);
+}
+
+void ControlWindow::onChangeUpSpeed()
+{
+	double speed = mapSliderToSpeed(int(_fadeUpSpeed.get_value()));
+	
+	for(std::unique_ptr<ControlWidget>& cw : _controls)
+		cw->SetFadeUpSpeed(speed);
 }

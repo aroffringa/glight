@@ -25,12 +25,8 @@ VisualizationWindow::~VisualizationWindow()
 
 void VisualizationWindow::initialize()
 {
-	//Gdk::Pixmap::create(_drawingArea.get_window(), _drawingArea.get_width(), _drawingArea.get_height());
-	//_buffer = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, _drawingArea.get_width(), _drawingArea.get_height());
 	queue_draw();
 	_isInitialized = true;
-	//_bufferWidth = _drawingArea.get_width();
-	//_bufferHeight = _drawingArea.get_height();
 
 	if(!_isTimerRunning)
 	{

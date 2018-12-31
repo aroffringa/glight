@@ -27,7 +27,7 @@ class ControlWidget : public Gtk::VBox {
 		PresetValue* Preset() const { return _preset; }
 		
 		sigc::signal<void, double>& SignalValueChange() { return _signalValueChange; }
-		sigc::signal<void>& Signal_signalAssigned() { return _signalAssigned; }
+		sigc::signal<void>& SignalAssigned() { return _signalAssigned; }
 		
 		void Limit(double value)
 		{
@@ -36,6 +36,11 @@ class ControlWidget : public Gtk::VBox {
 		}
 		
 		static double MAX_SCALE_VALUE();
+		
+		void SetFadeUpSpeed(double fadePerSecond) { _fadeUpSpeed = fadePerSecond; }
+		void SetFadeDownSpeed(double fadePerSecond) { _fadeDownSpeed = fadePerSecond; }
+		
+		void UpdateValue(double timePassed);
 		
 	private:
 		void writeValue();
@@ -58,6 +63,8 @@ class ControlWidget : public Gtk::VBox {
 
 		class Management &_management;
 		class PresetValue *_preset;
+		double _fadeUpSpeed, _fadeDownSpeed;
+		unsigned _fadingValue, _targetValue;
 
 		bool _holdUpdates;
 		
