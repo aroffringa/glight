@@ -21,8 +21,6 @@ class ShowWindow : public Gtk::Window {
 		ShowWindow(std::unique_ptr<class DmxDevice> dmxDevice);
 		~ShowWindow();
 		
-		bool IsAssignedToControl(class PresetValue* presetValue) const;
-
 		void EmitUpdate();
 		void EmitUpdateAfterPresetRemoval();
 		void EmitUpdateAfterAddPreset();

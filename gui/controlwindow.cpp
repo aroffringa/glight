@@ -178,7 +178,7 @@ void ControlWindow::onAssignButtonClicked()
 		for(size_t i=0; i!=n; ++i)
 		{
 			PresetValue* p = _management.PresetValues()[i].get();
-			if(!_showWindow->IsAssignedToControl(p))
+			if(!_showWindow->State().IsAssigned(p))
 			{
 				_controls[controlIndex]->Assign(p);
 				++controlIndex;

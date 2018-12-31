@@ -314,16 +314,6 @@ void ShowWindow::onMIQuitClicked()
 	hide();
 }
 
-bool ShowWindow::IsAssignedToControl(PresetValue* presetValue) const
-{
-	for(const std::unique_ptr<ControlWindow>& cw : _controlWindows)
-	{
-		if(cw->IsAssigned(presetValue))
-			return true;
-	}
-	return false;
-}
-
 void ShowWindow::onControlWindowHidden(ControlWindow* window)
 {
 	for(std::vector<std::unique_ptr<ControlWindow>>::iterator i=_controlWindows.begin(); i!=_controlWindows.end(); ++i)

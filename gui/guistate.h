@@ -19,6 +19,14 @@ public:
 	bool isSolo;
 	size_t width, height;
 	
+	bool IsAssigned(const class PresetValue* p) const
+	{
+		for(const class PresetValue* preset : presets)
+			if(p == preset)
+				return true;
+		return false;
+	}
+	
 	// This list may contain nullptrs to indicate unset controls.
 	std::vector<class PresetValue *> presets;
 };
@@ -44,6 +52,16 @@ public:
 	}
 	
 	bool Empty() const { return _faderSetups.empty(); }
+	
+	bool IsAssigned(const class PresetValue* p) const
+	{
+		for(const std::unique_ptr<FaderSetupState>& fader : _faderSetups)
+		{
+			if(fader->IsAssigned(p))
+				return true;
+		}
+		return false;
+	}
 	
 private:
 	sigc::signal<void()> _faderSetupSignalChange;
