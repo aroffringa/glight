@@ -13,6 +13,8 @@ ControlWidget::ControlWidget(class Management &management, char key)
   _scale(0, MAX_SCALE_VALUE_DEF, MAX_SCALE_VALUE_DEF/100),
 	_flashButton(std::string(1, key)), _nameLabel("<..>"),
 	_management(management), _preset(nullptr),
+	_fadeUpSpeed(0.0), _fadeDownSpeed(0.0),
+	_fadingValue(0), _targetValue(0),
 	_holdUpdates(false)
 {
 	_scale.set_inverted(true);
@@ -89,7 +91,7 @@ void ControlWidget::onScaleChange()
 		_holdUpdates = false;
 
 		writeValue();
-		      _signalValueChange.emit(_scale.get_value());
+		_signalValueChange.emit(_scale.get_value());
 	}
 }
 
@@ -145,9 +147,16 @@ bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
 
 void ControlWidget::writeValue()
 {
-	if(_preset != nullptr)
+	_targetValue = _scale.get_value();
+	double fadeSpeed =
+		(_targetValue > _fadingValue) ? _fadeUpSpeed : _fadeDownSpeed;
+	if(fadeSpeed == 0.0)
 	{
-		_preset->Value().Set((unsigned) _scale.get_value());
+		_fadingValue = _targetValue;
+		if(_preset != nullptr)
+		{
+			_preset->Value().Set(_targetValue);
+		}
 	}
 }
 
@@ -201,4 +210,38 @@ void ControlWidget::FullOn()
 void ControlWidget::FullOff()
 {
 	_scale.set_value(0);
+}
+
+void ControlWidget::UpdateValue(double timePassed)
+{
+	if(_targetValue != _fadingValue)
+	{
+		_targetValue = _scale.get_value();
+		double fadeSpeed =
+			(_targetValue > _fadingValue) ? _fadeUpSpeed : _fadeDownSpeed;
+		if(fadeSpeed == 0.0)
+		{
+			_fadingValue = _targetValue;
+		}
+		else {
+			unsigned stepSize = unsigned(std::min<double>(timePassed * fadeSpeed * double(MAX_SCALE_VALUE_DEF), double(MAX_SCALE_VALUE_DEF)));
+			if(_targetValue > _fadingValue)
+			{
+				if(_fadingValue + stepSize > _targetValue)
+					_fadingValue = _targetValue;
+				else
+					_fadingValue += stepSize;
+			}
+			else {
+				if(_targetValue + stepSize > _fadingValue)
+					_fadingValue = _targetValue;
+				else
+					_fadingValue -= stepSize;
+			}
+		}
+		if(_preset != nullptr)
+		{
+			_preset->Value().Set(_fadingValue);
+		}
+	}
 }
