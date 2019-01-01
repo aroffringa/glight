@@ -53,6 +53,8 @@ class ShowWindow : public Gtk::Window {
 		void onMISaveClicked();
 		void onMIQuitClicked();
 		
+		void onMIDryModeClicked();
+		
 		void onControlWindowHidden(class ControlWindow* window);
 		
 		size_t nextControlKeyRow() const;
@@ -65,16 +67,23 @@ class ShowWindow : public Gtk::Window {
 		std::unique_ptr<class VisualizationWindow> _visualizationWindow;
 
 		std::unique_ptr<class Management> _management;
+		/**
+		 * When running in dry mode, the running management is moved here
+		 * and kept running, while all actions from then on affect the
+		 * dry mode management that is not connected to a device.
+		 */
+		std::unique_ptr<class Management> _backgroundManagement;
 		class PresetCollection *_preset;
 
 		std::unique_ptr<class SceneFrame> _sceneFrame;
 
 		GUIState _state;
 		
-		Gtk::Menu _menuFile, _menuWindow;
+		Gtk::Menu _menuFile, _menuOptions, _menuWindow;
 		
-		Gtk::MenuItem _miFile, _miWindow;
+		Gtk::MenuItem _miFile, _miOptions, _miWindow;
 		Gtk::ImageMenuItem _miNew, _miOpen, _miSave, _miQuit;
+		Gtk::CheckMenuItem _miDryMode;
 		Gtk::CheckMenuItem _miProgrammingWindow, _miConfigWindow;
 		Gtk::MenuItem _miNewControlWindow;
 		Gtk::CheckMenuItem _miVisualizationWindow;

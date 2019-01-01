@@ -19,7 +19,12 @@ class FixtureFunction : public NamedObject {
 		};
 
 		FixtureFunction(class Theatre &theatre, FunctionType type, const std::string &name);
+		
+		FixtureFunction(const FixtureFunction& source, class Theatre& theatre);
 
+		FixtureFunction(const FixtureFunction& source) = delete;
+		FixtureFunction& operator=(const FixtureFunction& source) = delete;
+		
 		void Mix(unsigned value, MixStyle mixStyle, unsigned *channels, unsigned universe)
 		{
 			if(IsSingleChannel() && _firstChannel.Universe() == universe)

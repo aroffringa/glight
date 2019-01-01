@@ -4,6 +4,17 @@
 
 #include <sstream>
 
+Theatre::Theatre(const Theatre& source)
+{
+	_fixtureTypes.reserve(source._fixtureTypes.size());
+	for(const std::unique_ptr<FixtureType>& fixtureType : source._fixtureTypes)
+		_fixtureTypes.emplace_back(new FixtureType(*fixtureType));
+	
+	_fixtures.reserve(source._fixtures.size());
+	for(const std::unique_ptr<Fixture>& fixture : source._fixtures)
+		_fixtures.emplace_back(new Fixture(*fixture, *this));
+}
+
 void Theatre::Clear()
 {
 	_fixtures.clear();

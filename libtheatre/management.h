@@ -75,11 +75,14 @@ class Management {
 		{
 			return *_show;
 		}
+		std::unique_ptr<Management> MakeDryMode();
 	private:
 		struct ManagementThread {
 			Management *parent;
 			void operator()();
 		};
+		
+		Management(const Management& forDryCopy, std::shared_ptr<class BeatFinder>& beatFinder);
 
 		void GetChannelValues(unsigned *values, unsigned universe);
 		void removeControllable(std::vector<std::unique_ptr<class Controllable>>::iterator controllablePtr);
@@ -110,7 +113,7 @@ class Management {
 
 		std::unique_ptr<class Theatre> _theatre;
 		std::unique_ptr<class ValueSnapshot> _snapshot;
-		std::unique_ptr<class BeatFinder> _beatFinder;
+		std::shared_ptr<class BeatFinder> _beatFinder;
 		std::unique_ptr<class Show> _show;
 
 		std::vector<std::unique_ptr<class Controllable>> _controllables;

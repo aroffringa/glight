@@ -8,7 +8,10 @@
 
 #include <glibmm/main.h>
 
-VisualizationWindow::VisualizationWindow(Management &management) : _management(management), _isInitialized(false), _isTimerRunning(false)
+VisualizationWindow::VisualizationWindow(Management* management) :
+	_management(management),
+	_dryManagement(nullptr),
+	_isInitialized(false), _isTimerRunning(false)
 {
 	set_title("Glight - visualization");
 
@@ -53,9 +56,11 @@ void VisualizationWindow::draw(const Cairo::RefPtr< Cairo::Context>& cairo)
 	cairo->set_source_rgba(0,0,0,1);
 	cairo->rectangle(0, 0, width, height);
 	cairo->fill();
+	
+	Management& mngt = _dryManagement==nullptr ? *_management : *_dryManagement;
 
-	Theatre &theatre = _management.Theatre();
-	ValueSnapshot snapshot = _management.Snapshot();
+	Theatre &theatre = mngt.Theatre();
+	ValueSnapshot snapshot = mngt.Snapshot();
 	const std::vector<std::unique_ptr<Fixture>>& fixtures = theatre.Fixtures();
 	int position = 0;
 	size_t fixtureCount = fixtures.size();

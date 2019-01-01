@@ -27,6 +27,11 @@ class FixtureType : public NamedObject {
 
 		FixtureType(FixtureClass fixtureClass) : NamedObject(ClassName(fixtureClass)), _class(fixtureClass)
 		{ }
+		
+		FixtureType(const FixtureType& fixtureType) :
+			NamedObject(fixtureType),
+			_class(fixtureType._class)
+			{ }
 
 		static const std::string ClassName(FixtureClass fixtureClass)
 		{

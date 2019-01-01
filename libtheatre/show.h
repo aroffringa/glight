@@ -37,6 +37,7 @@ class Show {
 		}
 		void Mix(unsigned *channelValues, unsigned universe, const class Timing& timing);
 		const std::vector<std::unique_ptr<class Scene>>& Scenes() const { return _scenes; }
+		
 	private:
 		bool isRunning(Scene* scene) const
 		{

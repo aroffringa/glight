@@ -22,11 +22,13 @@
 
 ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miFile("_File", true),
+	_miOptions("_Options", true),
 	_miWindow("_Window", true),
 	_miNew(Gtk::Stock::NEW),
 	_miOpen(Gtk::Stock::OPEN),
 	_miSave(Gtk::Stock::SAVE_AS),
 	_miQuit(Gtk::Stock::QUIT),
+	_miDryMode("Dry mode"),
 	_miProgrammingWindow("Programming"),
 	_miConfigWindow("Config"),
 	_miNewControlWindow("New faders window"),
@@ -51,7 +53,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_configurationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_configurationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 
-	_visualizationWindow.reset(new VisualizationWindow(*_management));
+	_visualizationWindow.reset(new VisualizationWindow(_management.get()));
 
 	createMenu();
 	
@@ -191,6 +193,14 @@ void ShowWindow::createMenu()
 	_miFile.set_submenu(_menuFile);
 	_menuBar.append(_miFile);
 	
+	_menuOptions.set_title("_Options");
+	
+	_miDryMode.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMIDryModeClicked));
+	_menuOptions.append(_miDryMode);
+		
+	_miOptions.set_submenu(_menuOptions);
+	_menuBar.append(_miOptions);
+	
 	_menuWindow.set_title("_Window");
 	
 	_miProgrammingWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onProgramWindowButtonClicked));
@@ -306,6 +316,22 @@ void ShowWindow::onMISaveClicked()
 void ShowWindow::onMIQuitClicked()
 {
 	hide();
+}
+
+void ShowWindow::onMIDryModeClicked()
+{
+	if(_miDryMode.get_active() && _backgroundManagement == nullptr)
+	{
+		// Switch from real mode to dry mode
+		_backgroundManagement = std::move(_management);
+		_management = _backgroundManagement->MakeDryMode();
+		_visualizationWindow->SetDryMode(_management.get());
+		EmitUpdate();
+	}
+	else {
+		// Switch from dry mode to real mode
+		_visualizationWindow->SetRealMode();
+	}
 }
 
 void ShowWindow::onControlWindowHidden(ControlWindow* window)

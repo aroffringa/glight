@@ -5,6 +5,7 @@
 #include "chase.h"
 #include "controllable.h"
 #include "dmxdevice.h"
+#include "dummydevice.h"
 #include "fixturefunctioncontrol.h"
 #include "presetcollection.h"
 #include "presetvalue.h"
@@ -318,4 +319,33 @@ ValueSnapshot Management::Snapshot()
 {
 	std::lock_guard<std::mutex> lock(_mutex);
 	return *_snapshot;
+}
+
+/**
+ * Copy constructor for making a dry mode copy.
+ */
+Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatFinder>& beatFinder) :
+	_createTime(forDryCopy._createTime),
+	_nextPresetValueId(forDryCopy._nextPresetValueId)
+{
+	for(size_t i=0; i!=forDryCopy._devices.size(); ++i)
+		_devices.emplace_back(new DummyDevice());
+
+	_theatre.reset(new class Theatre(*forDryCopy._theatre));
+	_snapshot.reset(new ValueSnapshot(*forDryCopy._snapshot));
+	_show.reset(new class Show(*this)); // For now we don't copy the show
+	
+	/** TODO to be copied:
+			std::vector<std::unique_ptr<class Controllable>> _controllables;
+		std::vector<std::unique_ptr<class PresetValue>> _presetValues;
+		std::vector<std::unique_ptr<class Sequence>> _sequences;
+		std::vector<std::unique_ptr<class DmxDevice>> _devices;
+	*/
+}
+
+std::unique_ptr<Management> Management::MakeDryMode()
+{
+	std::lock_guard<std::mutex> guard(_mutex);
+	std::unique_ptr<Management> dryMode(new Management(*this, _beatFinder));
+	return dryMode;
 }

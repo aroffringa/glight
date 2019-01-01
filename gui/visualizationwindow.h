@@ -11,17 +11,29 @@
 */
 class VisualizationWindow : public Gtk::Window {
 	public:
-		VisualizationWindow(class Management &management);
+		VisualizationWindow(class Management* management);
 		~VisualizationWindow();
 
 		void Update()
 		{
 			queue_draw();
 		}
+		
+		void SetDryMode(class Management* dryManagement)
+		{
+			_dryManagement = dryManagement;
+			Update();
+		}
+		void SetRealMode()
+		{
+			_dryManagement = nullptr;
+			Update();
+		}
 	private:
 		Gtk::DrawingArea _drawingArea;
 
-		Management &_management;
+		Management* _management;
+		Management* _dryManagement;
 		bool _isInitialized, _isTimerRunning;
 		sigc::connection _timeoutConnection;
 

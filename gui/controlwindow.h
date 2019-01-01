@@ -63,7 +63,7 @@ class ControlWindow  : public Gtk::Window {
 		void loadState();
 		void updateValues();
 
-		class Management &_management;
+		class Management& _management;
 		size_t _keyRowIndex;
 
 		Gtk::VBox _vBox;

@@ -16,6 +16,7 @@ class Theatre {
 		{
 			Clear();
 		}
+		Theatre(const Theatre& source);
 
 		void Clear();
 
