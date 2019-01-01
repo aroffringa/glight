@@ -21,25 +21,25 @@
 #include "../writer.h"
 
 ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
-	_programWindowButton("Programming"),
-	_controlWindowButton("Controls"),
-	_configurationWindowButton("Config"),
-	_visualizationWindowButton("Visualization"),
 	_miFile("_File", true),
+	_miWindow("_Window", true),
 	_miNew(Gtk::Stock::NEW),
 	_miOpen(Gtk::Stock::OPEN),
 	_miSave(Gtk::Stock::SAVE_AS),
-	_miQuit(Gtk::Stock::QUIT)
+	_miQuit(Gtk::Stock::QUIT),
+	_miProgrammingWindow("Programming"),
+	_miConfigWindow("Config"),
+	_miNewControlWindow("New faders window"),
+	_miVisualizationWindow("Visualization")
 {
 	set_title("Glight - show");
 
-	Theatre *theatre = new Theatre();
-	_management = new Management(*theatre);
+	_management.reset(new Management());
 	_management->AddDevice(std::move(device));
 
 	_management->Run();
 
-	_programWindow = new ProgramWindow(*_management, *this);
+	_programWindow.reset(new ProgramWindow(*_management, *this));
 
 	_programWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_programWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
@@ -47,39 +47,16 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	
 	addControlWindow();
 
-	_configurationWindow = new ConfigurationWindow(*_management);
+	_configurationWindow.reset(new ConfigurationWindow(*_management));
 	_configurationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_configurationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 
-	_visualizationWindow = new VisualizationWindow(*_management);
+	_visualizationWindow.reset(new VisualizationWindow(*_management));
 
 	createMenu();
 	
-	_programWindowButton.set_active(true);
-	_programWindowButton.signal_clicked().connect(sigc::mem_fun(*this, &ShowWindow::onProgramWindowButtonClicked));
-	_windowButtonsBox.pack_start(_programWindowButton);
-	_programWindowButton.show();
-
-	_controlWindowButton.signal_clicked().connect(sigc::mem_fun(*this, &ShowWindow::onControlWindowButtonClicked));
-	_windowButtonsBox.pack_start(_controlWindowButton);
-	_controlWindowButton.show();
-
-	_configurationWindowButton.set_active(false);
-	_configurationWindowButton.signal_clicked().connect(sigc::mem_fun(*this, &ShowWindow::onConfigurationWindowButtonClicked));
-	_windowButtonsBox.pack_start(_configurationWindowButton);
-	_configurationWindowButton.show();
-
-	_visualizationWindowButton.set_active(false);
-	_visualizationWindowButton.signal_clicked().connect(sigc::mem_fun(*this, &ShowWindow::onVisualizationWindowButtonClicked));
-	_windowButtonsBox.pack_start(_visualizationWindowButton);
-	_visualizationWindowButton.show();
-
-	_box.pack_start(_windowButtonsBox, false, false);
-	_windowButtonsBox.show();
-
-	_sceneFrame = new SceneFrame(*_management);
+	_sceneFrame.reset(new SceneFrame(*_management));
 	_box.pack_start(*_sceneFrame, true, true);
-	_sceneFrame->show();
 	
 	add(_box);
 	_box.show_all();
@@ -93,16 +70,14 @@ ShowWindow::~ShowWindow()
 {
 	_menuFile.detach();
 	
-	delete _sceneFrame;
-	delete _visualizationWindow;
-	delete _configurationWindow;
+	_sceneFrame.reset();
+	_visualizationWindow.reset();
+	_configurationWindow.reset();
 
 	_controlWindows.clear();
 
-	delete _programWindow;
-	Theatre *theatre = &_management->Theatre();
-	delete _management;
-	delete theatre;
+	_programWindow.reset();
+	_management.reset();
 }
 
 void ShowWindow::EmitUpdate()
@@ -128,7 +103,7 @@ void ShowWindow::EmitUpdateAfterAddPreset()
 
 void ShowWindow::onProgramWindowButtonClicked()
 {
-	bool show = _programWindowButton.get_active();
+	bool show = _miProgrammingWindow.get_active();
 	if(show)
 		_programWindow->show();
 	else
@@ -161,7 +136,7 @@ void ShowWindow::addControlWindow(FaderSetupState* stateOrNull)
 
 void ShowWindow::onConfigurationWindowButtonClicked()
 {
-	bool show = _configurationWindowButton.get_active();
+	bool show = _miConfigWindow.get_active();
 	if(show)
 		_configurationWindow->show();
 	else
@@ -170,13 +145,12 @@ void ShowWindow::onConfigurationWindowButtonClicked()
 
 void ShowWindow::onVisualizationWindowButtonClicked()
 {
-	bool show = _visualizationWindowButton.get_active();
+	bool show = _miVisualizationWindow.get_active();
 	if(show)
 		_visualizationWindow->show();
 	else
 		_visualizationWindow->hide();
 }
-
 
 bool ShowWindow::onKeyDown(GdkEventKey *event)
 {
@@ -216,6 +190,26 @@ void ShowWindow::createMenu()
 
 	_miFile.set_submenu(_menuFile);
 	_menuBar.append(_miFile);
+	
+	_menuWindow.set_title("_Window");
+	
+	_miProgrammingWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onProgramWindowButtonClicked));
+	_miProgrammingWindow.set_active(true);
+	_menuWindow.append(_miProgrammingWindow);
+	
+	_miNewControlWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onControlWindowButtonClicked));
+	_menuWindow.append(_miNewControlWindow);
+
+	_miConfigWindow.set_active(false);
+	_miConfigWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onConfigurationWindowButtonClicked));
+	_menuWindow.append(_miConfigWindow);
+
+	_miVisualizationWindow.set_active(false);
+	_miVisualizationWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onVisualizationWindowButtonClicked));
+	_menuWindow.append(_miVisualizationWindow);
+	
+	_miWindow.set_submenu(_menuWindow);
+	_menuBar.append(_miWindow);
 	
 	_box.pack_start(_menuBar, false, false);
 }

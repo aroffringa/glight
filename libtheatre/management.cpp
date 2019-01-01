@@ -13,12 +13,12 @@
 #include "theatre.h"
 #include "valuesnapshot.h"
 
-Management::Management(class Theatre &theatre) : 
+Management::Management() : 
 	_thread(),
 	_isRunning(false), _isQuitting(false),
 	_createTime(boost::posix_time::microsec_clock::local_time()),
 	_nextPresetValueId(1),
-	_theatre(&theatre),
+	_theatre(new class Theatre()),
 	_snapshot(new ValueSnapshot()),
 	_beatFinder(new BeatFinder()),
 	_show(new class Show(*this))

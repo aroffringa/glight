@@ -5,6 +5,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
+#include <gtkmm/checkmenuitem.h>
 #include <gtkmm/imagemenuitem.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menubar.h>
@@ -57,28 +58,26 @@ class ShowWindow : public Gtk::Window {
 		size_t nextControlKeyRow() const;
 
 		Gtk::VBox _box;
-		Gtk::ToggleButton _programWindowButton;
-		Gtk::Button _controlWindowButton;
-		Gtk::ToggleButton _configurationWindowButton;
-		Gtk::ToggleButton _visualizationWindowButton;
-		Gtk::HButtonBox _windowButtonsBox;
 
-		class ProgramWindow *_programWindow;
+		std::unique_ptr<class ProgramWindow> _programWindow;
 		std::vector<std::unique_ptr<class ControlWindow>> _controlWindows;
-		class ConfigurationWindow *_configurationWindow;
-		class VisualizationWindow *_visualizationWindow;
+		std::unique_ptr<class ConfigurationWindow> _configurationWindow;
+		std::unique_ptr<class VisualizationWindow> _visualizationWindow;
 
-		class Management *_management;
+		std::unique_ptr<class Management> _management;
 		class PresetCollection *_preset;
 
-		class SceneFrame *_sceneFrame;
+		std::unique_ptr<class SceneFrame> _sceneFrame;
 
 		GUIState _state;
 		
-		Gtk::Menu _menuFile;
+		Gtk::Menu _menuFile, _menuWindow;
 		
-		Gtk::MenuItem _miFile;
+		Gtk::MenuItem _miFile, _miWindow;
 		Gtk::ImageMenuItem _miNew, _miOpen, _miSave, _miQuit;
+		Gtk::CheckMenuItem _miProgrammingWindow, _miConfigWindow;
+		Gtk::MenuItem _miNewControlWindow;
+		Gtk::CheckMenuItem _miVisualizationWindow;
 		
 		Gtk::MenuBar _menuBar;
 };

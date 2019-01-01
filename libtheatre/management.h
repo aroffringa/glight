@@ -14,7 +14,7 @@
 */
 class Management {
 	public:
-		Management(class Theatre &theatre);
+		Management();
 		~Management();
 		
 		void Clear();
@@ -108,7 +108,7 @@ class Management {
 		boost::posix_time::ptime _createTime;
 		unsigned _nextPresetValueId;
 
-		class Theatre *_theatre;
+		std::unique_ptr<class Theatre> _theatre;
 		std::unique_ptr<class ValueSnapshot> _snapshot;
 		std::unique_ptr<class BeatFinder> _beatFinder;
 		std::unique_ptr<class Show> _show;
