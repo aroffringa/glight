@@ -19,11 +19,17 @@
 */
 class ChaseFrame : public Gtk::VPaned {
 	public:
-		ChaseFrame(class Management &management, class ProgramWindow &parentWindow);
+		ChaseFrame(class Management& management, class ProgramWindow& parentWindow);
 		~ChaseFrame();
 
 		void Update() { fillChaseList(); }
 		void UpdateAfterPresetRemoval() { fillChaseList(); }
+		
+		void ChangeManagement(class Management& management)
+		{
+			_management = &management;
+			fillChaseList();
+		}
 		
 	private:
 		void fillChaseList();
@@ -63,8 +69,8 @@ class ChaseFrame : public Gtk::VPaned {
 		Gtk::Label _beatSpeedLabel;
 		Gtk::HScale _beatSpeed;
 
-		Management &_management;
-		ProgramWindow &_parentWindow;
+		Management* _management;
+		ProgramWindow& _parentWindow;
 };
 
 #endif

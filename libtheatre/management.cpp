@@ -16,7 +16,7 @@
 
 Management::Management() : 
 	_thread(),
-	_isRunning(false), _isQuitting(false),
+	_isQuitting(false),
 	_createTime(boost::posix_time::microsec_clock::local_time()),
 	_nextPresetValueId(1),
 	_theatre(new class Theatre()),
@@ -302,18 +302,34 @@ Controllable& Management::GetControllable(const std::string &name) const
 	return NamedObject::FindNamedObject(_controllables, name);
 }
 
+size_t Management::ControllableIndex(const Controllable* controllable) const
+{
+	return NamedObject::FindIndex(_controllables, controllable);
+}
+
 Sequence& Management::GetSequence(const std::string &name) const
 {
 	return NamedObject::FindNamedObject(_sequences, name);
 }
 
-PresetValue& Management::GetPresetValue(unsigned id) const
+size_t Management::SequenceIndex(const Sequence* sequence) const
+{
+	return NamedObject::FindIndex(_sequences, sequence);
+}
+
+PresetValue* Management::GetPresetValue(unsigned id) const
 {
 	for(const std::unique_ptr<PresetValue>& pv : _presetValues)
 		if(pv->Id() == id)
-			return *pv;
-	throw std::runtime_error("Could not find preset value with given ID");
+			return pv.get();
+	return nullptr;
 }
+
+size_t Management::PresetValueIndex(const PresetValue* presetValue) const
+{
+	return NamedObject::FindIndex(_presetValues, presetValue);
+}
+
 
 ValueSnapshot Management::Snapshot()
 {
@@ -325,22 +341,90 @@ ValueSnapshot Management::Snapshot()
  * Copy constructor for making a dry mode copy.
  */
 Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatFinder>& beatFinder) :
+	_thread(),
+	_isQuitting(false),
 	_createTime(forDryCopy._createTime),
-	_nextPresetValueId(forDryCopy._nextPresetValueId)
+	_nextPresetValueId(forDryCopy._nextPresetValueId),
+	_theatre(new class Theatre(*forDryCopy._theatre)),
+	_beatFinder(beatFinder)
 {
 	for(size_t i=0; i!=forDryCopy._devices.size(); ++i)
 		_devices.emplace_back(new DummyDevice());
 
-	_theatre.reset(new class Theatre(*forDryCopy._theatre));
 	_snapshot.reset(new ValueSnapshot(*forDryCopy._snapshot));
-	_show.reset(new class Show(*this)); // For now we don't copy the show
+	_show.reset(new class Show(*this)); // TODO For now we don't copy the show
 	
-	/** TODO to be copied:
-			std::vector<std::unique_ptr<class Controllable>> _controllables;
-		std::vector<std::unique_ptr<class PresetValue>> _presetValues;
-		std::vector<std::unique_ptr<class Sequence>> _sequences;
-		std::vector<std::unique_ptr<class DmxDevice>> _devices;
-	*/
+	// The controllables can have dependencies to other controllables, hence dependences
+	// need to be resolved and copied first.
+	_controllables.resize(forDryCopy._controllables.size());
+	_presetValues.resize(forDryCopy._presetValues.size());
+	_sequences.resize(forDryCopy._sequences.size());
+	for(size_t i=0; i!=forDryCopy._controllables.size(); ++i)
+	{
+		if(_controllables[i] == nullptr) // not already resolved?
+			dryCopyControllerDependency(forDryCopy, i);
+	}
+	for(size_t i=0; i!=forDryCopy._presetValues.size(); ++i)
+	{
+		if(_presetValues[i] == nullptr)
+		{
+			size_t cIndex = forDryCopy.ControllableIndex(&forDryCopy._presetValues[i]->Controllable());
+			_presetValues[i].reset(new PresetValue(*forDryCopy._presetValues[i], *_controllables[cIndex]));
+		}
+	}
+	for(size_t i=0; i!=forDryCopy._sequences.size(); ++i)
+	{
+		if(_sequences[i] == nullptr)
+			dryCopySequenceDependency(forDryCopy, i);
+	}
+}
+
+void Management::dryCopyControllerDependency(const Management& forDryCopy, size_t index)
+{
+	Controllable* controllable = forDryCopy._controllables[index].get();
+	FixtureFunctionControl* ffc = dynamic_cast<FixtureFunctionControl*>(controllable);
+	const Chase* chase = dynamic_cast<const Chase *>(controllable);
+	const PresetCollection* presetCollection = dynamic_cast<const PresetCollection *>(controllable);
+	if(ffc != nullptr)
+	{
+		FixtureFunction& ff = _theatre->GetFixtureFunction(ffc->Function().Name());
+		_controllables[index].reset(new FixtureFunctionControl(ff));
+	}
+	else if(chase != nullptr)
+	{
+		size_t sIndex = forDryCopy.SequenceIndex(&chase->Sequence());
+		if(_sequences[sIndex] == nullptr)
+			dryCopySequenceDependency(forDryCopy, sIndex);
+		_controllables[index].reset(new Chase(*chase, *_sequences[sIndex]));
+	}
+	else if(presetCollection != nullptr)
+	{
+		_controllables[index].reset(new PresetCollection());
+		PresetCollection& pc = static_cast<PresetCollection&>(*_controllables[index]);
+		for(const std::unique_ptr<PresetValue>& value : presetCollection->PresetValues())
+		{
+			// This preset is owned by the preset collection, not by management.
+			size_t cIndex = forDryCopy.ControllableIndex(&value->Controllable());
+			if(_controllables[cIndex] == nullptr)
+				dryCopyControllerDependency(forDryCopy, cIndex);
+			pc.AddPresetValue(*value, *_controllables[cIndex]);
+		}
+	}
+	else throw std::runtime_error("Unknown controllable in manager");
+}
+
+void Management::dryCopySequenceDependency(const Management& forDryCopy, size_t index)
+{
+	Sequence* sourceSequence = forDryCopy.Sequences()[index].get();
+	_sequences[index] = sourceSequence->CopyWithoutPresets();
+	Sequence* destSequence = static_cast<Sequence*>(_sequences[index].get());
+	for(const PresetCollection* preset : sourceSequence->Presets())
+	{
+		size_t pIndex = forDryCopy.ControllableIndex(preset);
+		if(_controllables[pIndex] == nullptr)
+			dryCopyControllerDependency(forDryCopy, pIndex);
+		destSequence->AddPreset(static_cast<PresetCollection*>(_controllables[pIndex].get()));
+	}
 }
 
 std::unique_ptr<Management> Management::MakeDryMode()
@@ -348,4 +432,32 @@ std::unique_ptr<Management> Management::MakeDryMode()
 	std::lock_guard<std::mutex> guard(_mutex);
 	std::unique_ptr<Management> dryMode(new Management(*this, _beatFinder));
 	return dryMode;
+}
+
+void Management::SwapDevices(Management& source)
+{
+	bool
+		sourceRunning = source._thread != nullptr,
+		thisRunning = _thread != nullptr;
+	if(thisRunning)
+	{
+		Quit();
+		_thread->join();
+		_thread.reset();
+	}
+	if(sourceRunning)
+	{
+		source.Quit();
+		source._thread->join();
+		source._thread.reset();
+	}
+	
+	std::unique_lock<std::mutex> guard(_mutex);
+	std::swap(source._devices, _devices);
+	guard.unlock();
+	
+	if(sourceRunning)
+		source.Run();
+	if(thisRunning)
+		Run();
 }

@@ -15,15 +15,15 @@
 */
 class ControlWidget : public Gtk::VBox {
 	public:
-		ControlWidget(class Management &management, char key);
+		ControlWidget(class Management& management, char key);
 		~ControlWidget();
 
 		void UpdateAfterPresetRemoval();
 		void Toggle();
 		void FullOn();
 		void FullOff();
-		void Assign(class PresetValue* item);
-		void Unassign() { Assign(0); }
+		void Assign(class PresetValue* item, bool moveFader);
+		void Unassign() { Assign(nullptr, false); }
 		PresetValue* Preset() const { return _preset; }
 		
 		sigc::signal<void, double>& SignalValueChange() { return _signalValueChange; }
@@ -41,6 +41,7 @@ class ControlWidget : public Gtk::VBox {
 		void SetFadeDownSpeed(double fadePerSecond) { _fadeDownSpeed = fadePerSecond; }
 		
 		void UpdateValue(double timePassed);
+		void ChangeManagement(class Management& management);
 		
 	private:
 		void writeValue();
@@ -61,8 +62,8 @@ class ControlWidget : public Gtk::VBox {
 		std::vector<std::unique_ptr<Gtk::MenuItem>> _popupMenuItems;
 		std::unique_ptr<Gtk::Menu> _popupMenu, _popupChaseMenu, _popupPresetMenu, _popupFunctionMenu;
 
-		class Management &_management;
-		class PresetValue *_preset;
+		class Management* _management;
+		class PresetValue* _preset;
 		double _fadeUpSpeed, _fadeDownSpeed;
 		unsigned _fadingValue, _targetValue;
 

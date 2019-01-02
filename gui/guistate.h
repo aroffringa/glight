@@ -27,6 +27,8 @@ public:
 		return false;
 	}
 	
+	void ChangeManagement(class Management& management);
+	
 	// This list may contain nullptrs to indicate unset controls.
 	std::vector<class PresetValue *> presets;
 };
@@ -61,6 +63,12 @@ public:
 				return true;
 		}
 		return false;
+	}
+	
+	void ChangeManagement(class Management& management)
+	{
+		for(std::unique_ptr<FaderSetupState>& fader : _faderSetups)
+			fader->ChangeManagement(management);
 	}
 	
 private:

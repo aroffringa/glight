@@ -39,6 +39,11 @@ class PresetCollection : public Controllable {
 			_presetValues.emplace_back(new PresetValue(id, controllable));
 			return *_presetValues.back();
 		}
+		PresetValue& AddPresetValue(class PresetValue& source, class Controllable &controllable)
+		{
+			_presetValues.emplace_back(new PresetValue(source, controllable));
+			return *_presetValues.back();
+		}
 		bool IsUsing(const Controllable &controllable) const
 		{
 			for(const std::unique_ptr<PresetValue>& pv : _presetValues)

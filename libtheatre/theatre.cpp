@@ -4,7 +4,7 @@
 
 #include <sstream>
 
-Theatre::Theatre(const Theatre& source)
+Theatre::Theatre(const Theatre& source) : _highestChannel(source._highestChannel)
 {
 	_fixtureTypes.reserve(source._fixtureTypes.size());
 	for(const std::unique_ptr<FixtureType>& fixtureType : source._fixtureTypes)

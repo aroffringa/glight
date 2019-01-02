@@ -12,7 +12,7 @@ ControlWidget::ControlWidget(class Management &management, char key)
  :
   _scale(0, MAX_SCALE_VALUE_DEF, MAX_SCALE_VALUE_DEF/100),
 	_flashButton(std::string(1, key)), _nameLabel("<..>"),
-	_management(management), _preset(nullptr),
+	_management(&management), _preset(nullptr),
 	_fadeUpSpeed(0.0), _fadeDownSpeed(0.0),
 	_fadingValue(0), _targetValue(0),
 	_holdUpdates(false)
@@ -121,7 +121,7 @@ bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
 	_popupMenuItems.emplace_back(std::move(submi));
 
 	const std::vector<std::unique_ptr<PresetValue>>&
-		presets = _management.PresetValues();
+		presets = _management->PresetValues();
 	for(const std::unique_ptr<PresetValue>& pv : presets)
 	{
 		Gtk::Menu* subMenu;
@@ -160,7 +160,7 @@ void ControlWidget::writeValue()
 	}
 }
 
-void ControlWidget::Assign(PresetValue* item)
+void ControlWidget::Assign(PresetValue* item, bool moveFader)
 {
 	if(item != _preset)
 	{
@@ -168,27 +168,34 @@ void ControlWidget::Assign(PresetValue* item)
 		if(_preset != nullptr)
 		{
 			_nameLabel.set_text(_preset->Controllable().Name());
-			_scale.set_value(_preset->Value().UInt());
+			if(moveFader)
+				_scale.set_value(_preset->Value().UInt());
+			else
+				writeValue();
 		}
 		else {
 			_nameLabel.set_text("<..>");
-			_scale.set_value(0);
+			if(moveFader)
+				_scale.set_value(0);
+			else
+				writeValue();
 		}
 		_signalAssigned();
-		_signalValueChange.emit(_scale.get_value());
+		if(moveFader)
+			_signalValueChange.emit(_scale.get_value());
 	}
 }
 
 void ControlWidget::onMenuItemClicked(PresetValue *item)
 {
-	Assign(item);
+	Assign(item, true);
 }
 
 void ControlWidget::UpdateAfterPresetRemoval()
 {
 	if(_preset != nullptr)
 	{
-		if(!_management.Contains(*_preset))
+		if(!_management->Contains(*_preset))
 		{
 			_nameLabel.set_text("<..>");
 			_preset = nullptr;
@@ -244,4 +251,15 @@ void ControlWidget::UpdateValue(double timePassed)
 			_preset->Value().Set(_fadingValue);
 		}
 	}
+}
+
+void ControlWidget::ChangeManagement(class Management& management)
+{
+	size_t presetId = _preset->Id();
+	_management = &management;
+	PresetValue* pv = _management->GetPresetValue(presetId);
+	if(pv == nullptr)
+		Unassign();
+	else
+		Assign(pv, false);
 }

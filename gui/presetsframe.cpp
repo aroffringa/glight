@@ -17,7 +17,8 @@ PresetsFrame::PresetsFrame(Management &management, ProgramWindow &parentWindow) 
 	_addPresetToSequenceButton(Gtk::Stock::ADD),
 	_clearSequenceButton("Clear"),
 	_createSequenceButton("Create"),
-	_management(management), _parentWindow(parentWindow),
+	_management(&management),
+	_parentWindow(parentWindow),
 	_nameFrame(management)
 {
 	initPresetsPart();
@@ -115,9 +116,9 @@ void PresetsFrame::FillPresetsList()
 {
 	_presetListModel->clear();
 
-	std::lock_guard<std::mutex> lock(_management.Mutex());
+	std::lock_guard<std::mutex> lock(_management->Mutex());
 	const std::vector<std::unique_ptr<Controllable>>&
-		controllables = _management.Controllables();
+		controllables = _management->Controllables();
 	for(const std::unique_ptr<Controllable>& contr : controllables)
 	{
 		PresetCollection *presetCollection =
@@ -134,13 +135,13 @@ void PresetsFrame::FillPresetsList()
 
 void PresetsFrame::onNewPresetButtonClicked()
 {
-	std::unique_lock<std::mutex> lock(_management.Mutex());
-	PresetCollection &presetCollection = _management.AddPresetCollection();
-	presetCollection.SetFromCurrentSituation(_management);
+	std::unique_lock<std::mutex> lock(_management->Mutex());
+	PresetCollection &presetCollection = _management->AddPresetCollection();
+	presetCollection.SetFromCurrentSituation(*_management);
 	std::stringstream s;
 	s << "%" << _presetListModel->children().size();
 	presetCollection.SetName(s.str());
-	_management.AddPreset(presetCollection);
+	_management->AddPreset(presetCollection);
 	lock.unlock();
 
 	FillPresetsList();
@@ -156,8 +157,8 @@ void PresetsFrame::onDeletePresetButtonClicked()
 	{
 		PresetCollection *preset = (*selected)[_presetListColumns._preset];
 		_presetListModel->erase(selected);
-		std::unique_lock<std::mutex> lock(_management.Mutex());
-		_management.RemoveControllable(*preset);
+		std::unique_lock<std::mutex> lock(_management->Mutex());
+		_management->RemoveControllable(*preset);
 		lock.unlock();
 	
 		_parentWindow.ForwardUpdateAfterPresetRemoval();
@@ -173,7 +174,7 @@ void PresetsFrame::onAddPresetToSequenceButtonClicked()
 	{
 		PresetCollection *preset = (*selected)[_presetListColumns._preset];
 		Gtk::TreeModel::iterator newRow = _newSequenceListModel->append();
-		std::lock_guard<std::mutex> lock(_management.Mutex());
+		std::lock_guard<std::mutex> lock(_management->Mutex());
 		(*newRow)[_newSequenceListColumns._title] = preset->Name();
 		(*newRow)[_newSequenceListColumns._preset] = preset;
 	}
@@ -186,8 +187,8 @@ void PresetsFrame::onClearSequenceButtonClicked()
 
 void PresetsFrame::onCreateSequenceButtonClicked()
 {
-	std::unique_lock<std::mutex> lock(_management.Mutex());
-	Sequence &sequence = _management.AddSequence();
+	std::unique_lock<std::mutex> lock(_management->Mutex());
+	Sequence &sequence = _management->AddSequence();
 
 	Gtk::TreeModel::Children children = _newSequenceListModel->children();
 	for(Gtk::TreeModel::Children::const_iterator i=children.begin();
@@ -198,7 +199,7 @@ void PresetsFrame::onCreateSequenceButtonClicked()
 	}
 
 	std::stringstream s;
-	s << "#" << _management.Sequences().size();
+	s << "#" << _management->Sequences().size();
 	sequence.SetName(s.str());
 	lock.unlock();
 

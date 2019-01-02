@@ -26,12 +26,16 @@ class NameFrame : public Gtk::HBox {
 			update();
 		}
 		sigc::signal<void>& SignalNameChange() { return _signalNameChange; }
+		void ChangeManagement(class Management& management)
+		{
+			_management = &management;
+		}
 	private:
 		void onButtonClicked();
 		void update();
 
-		class Management &_management;
-		class NamedObject *_namedObject;
+		class Management* _management;
+		class NamedObject* _namedObject;
 
 		Gtk::Entry _entry;
 		Gtk::Label _label;

@@ -38,6 +38,16 @@ class ControlWindow  : public Gtk::Window {
 		bool IsAssigned(class PresetValue* presetValue);
 		size_t KeyRowIndex() const { return _keyRowIndex; }
 		
+		/**
+		 * Associates all faders to a different management instance.
+		 * 
+		 * Faders will be assigned to the presets of the new management instance, by looking
+		 * up the preset by Id. This method is e.g. used for switching between dry and real mode.
+		 * Faders that are assigned to a preset with an Id that does not correspond to a preset
+		 * in the new instance are unassigned.
+		 */
+		void ChangeManagement(class Management& management);
+		
 	private:
 		void initializeWidgets();
 		
@@ -63,7 +73,7 @@ class ControlWindow  : public Gtk::Window {
 		void loadState();
 		void updateValues();
 
-		class Management& _management;
+		class Management* _management;
 		size_t _keyRowIndex;
 
 		Gtk::VBox _vBox;

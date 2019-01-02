@@ -10,17 +10,18 @@ class PresetValue {
 	public:
 		PresetValue(unsigned id, class Controllable &controllable)
 			: _id(id), _value(0), _controllable(&controllable)
-		{
-		}
-		PresetValue(const PresetValue &source)
-			: _id(source._id), _value(source._value), _controllable(source._controllable)
-		{
-		}
-		virtual ~PresetValue()
-		{
-		}
+		{ }
+		
+		PresetValue(const PresetValue &source) = default;
+		
+		/**
+		 * Copy constructor that copies the source but associates it with the given controllable.
+		 */
+		PresetValue(const PresetValue &source, class Controllable &controllable) :
+			_id(source._id), _value(source._value), _controllable(&controllable)
+		{ }
 
-		virtual void SetValue(const ControlValue &value) { _value = value; }
+		void SetValue(const ControlValue &value) { _value = value; }
 		const ControlValue &Value() const { return _value; }
 		ControlValue &Value() { return _value; }
 
@@ -28,6 +29,7 @@ class PresetValue {
 
 		class Controllable &Controllable() const { return *_controllable; }
 		bool IsIgnorable() const { return _value.UInt() == 0; }
+		
 	private:
 		unsigned _id;
 		ControlValue _value;

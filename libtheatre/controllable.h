@@ -12,7 +12,9 @@
 class Controllable : public NamedObject {
 	public:
 		Controllable() { }
+		Controllable(const Controllable& source) : NamedObject(source) { }
 		Controllable(const std::string &name) : NamedObject(name) { }
+		
 		virtual ~Controllable() { }
 
 		virtual void Mix(const ControlValue &value, unsigned *channelValues, unsigned universe, const class Timing& timing) = 0;

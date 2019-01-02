@@ -17,7 +17,7 @@ ChaseFrame::ChaseFrame(Management &management, ProgramWindow &parentWindow)
 	_beatTriggerCheckButton("Trigger by beat"),
 	_beatSpeedLabel("Beats per trigger :"),
 	_beatSpeed(0.25, 4.0, 0.25),
-	_management(management), _parentWindow(parentWindow)
+	_management(&management), _parentWindow(parentWindow)
 {
 	initUpperPanel();
 
@@ -32,9 +32,9 @@ void ChaseFrame::fillChaseList()
 {
 	_chaseListModel->clear();
 
-	std::lock_guard<std::mutex> lock(_management.Mutex());
+	std::lock_guard<std::mutex> lock(_management->Mutex());
 	const std::vector<std::unique_ptr<Controllable>>&
-		controllables = _management.Controllables();
+		controllables = _management->Controllables();
 	for(const std::unique_ptr<Controllable>& c : controllables)
 	{
 		Chase* chase = dynamic_cast<Chase*>(c.get());
@@ -114,7 +114,7 @@ void ChaseFrame::onTriggerTypeChanged()
 	Gtk::TreeModel::iterator selected = selection->get_selected();
 	if(selected)
 	{
-		std::lock_guard<std::mutex> lock(_management.Mutex());
+		std::lock_guard<std::mutex> lock(_management->Mutex());
 		Chase *chase = (*selected)[_chaseListColumns._chase];
 		if(_delayTriggerCheckButton.get_active())
 			chase->Trigger().SetType(Trigger::DelayTriggered);
@@ -130,7 +130,7 @@ void ChaseFrame::onTriggerSpeedChanged()
 	Gtk::TreeModel::iterator selected = selection->get_selected();
 	if(selected)
 	{
-		std::lock_guard<std::mutex> lock(_management.Mutex());
+		std::lock_guard<std::mutex> lock(_management->Mutex());
 		Chase *chase = (*selected)[_chaseListColumns._chase];
 		chase->Trigger().SetDelayInMs(_triggerSpeed.get_value());
 	}
@@ -143,7 +143,7 @@ void ChaseFrame::onTransitionSpeedChanged()
 	Gtk::TreeModel::iterator selected = selection->get_selected();
 	if(selected)
 	{
-		std::lock_guard<std::mutex> lock(_management.Mutex());
+		std::lock_guard<std::mutex> lock(_management->Mutex());
 		Chase *chase = (*selected)[_chaseListColumns._chase];
 		chase->Transition().SetLengthInMs(_transitionSpeed.get_value());
 	}
@@ -156,7 +156,7 @@ void ChaseFrame::onBeatSpeedChanged()
 	Gtk::TreeModel::iterator selected = selection->get_selected();
 	if(selected)
 	{
-		std::lock_guard<std::mutex> lock(_management.Mutex());
+		std::lock_guard<std::mutex> lock(_management->Mutex());
 		Chase *chase = (*selected)[_chaseListColumns._chase];
 		chase->Trigger().SetDelayInBeats(_beatSpeed.get_value());
 	}
@@ -172,7 +172,7 @@ void ChaseFrame::onSelectedChaseChanged()
 		_bottomFrame.set_sensitive(true);
 
 		Chase *chase = (*selected)[_chaseListColumns._chase];
-		std::unique_lock<std::mutex> lock(_management.Mutex());
+		std::unique_lock<std::mutex> lock(_management->Mutex());
 		enum Trigger::Type triggerType = chase->Trigger().Type();
 		double triggerSpeed = chase->Trigger().DelayInMs();
 		double transitionSpeed = chase->Transition().LengthInMs();
@@ -200,7 +200,7 @@ void ChaseFrame::onDeleteChaseClicked()
 	if(selected)
 	{
 		Chase *chase = (*selected)[_chaseListColumns._chase];
-		_management.RemoveControllable(*chase);
+		_management->RemoveControllable(*chase);
 		_parentWindow.ForwardUpdateAfterPresetRemoval();
 	}
 }

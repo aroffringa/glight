@@ -7,22 +7,22 @@
 #include "sequenceframe.h"
 #include "chaseframe.h"
 
-ProgramWindow::ProgramWindow(Management &management, ShowWindow &showWindow)
-	: _showWindow(showWindow)
+ProgramWindow::ProgramWindow(Management& management, ShowWindow& showWindow) :
+	_presetsFrame(new PresetsFrame(management, *this)),
+	_sequenceFrame(new SequenceFrame(management, *this)),
+	_chaseFrame(new ChaseFrame(management, *this)),
+	_showWindow(showWindow)
 {
 	set_title("Glight - programming");
 
 	set_default_size(400,400);
 
-	_presetsFrame = new PresetsFrame(management, *this);
 	_notebook.append_page(*_presetsFrame, "Presets");
 	_presetsFrame->show();
 
-	_sequenceFrame = new SequenceFrame(management, *this);
 	_notebook.append_page(*_sequenceFrame, "Sequences");
 	_sequenceFrame->show();
 
-	_chaseFrame = new ChaseFrame(management, *this);
 	_notebook.append_page(*_chaseFrame, "Chases");
 	_chaseFrame->show();
 
@@ -31,11 +31,7 @@ ProgramWindow::ProgramWindow(Management &management, ShowWindow &showWindow)
 }
 
 ProgramWindow::~ProgramWindow()
-{
-	delete _chaseFrame;
-	delete _sequenceFrame;
-	delete _presetsFrame;
-}
+{ }
 
 void ProgramWindow::UpdateSequenceList()
 {
@@ -69,4 +65,11 @@ void ProgramWindow::UpdateAfterPresetRemoval()
 	_presetsFrame->UpdateAfterPresetRemoval();
 	_sequenceFrame->UpdateAfterPresetRemoval();
 	_chaseFrame->UpdateAfterPresetRemoval();
+}
+
+void ProgramWindow::ChangeManagement(class Management& management)
+{
+	_presetsFrame->ChangeManagement(management);
+	_sequenceFrame->ChangeManagement(management);
+	_chaseFrame->ChangeManagement(management);
 }

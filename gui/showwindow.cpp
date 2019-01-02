@@ -325,12 +325,24 @@ void ShowWindow::onMIDryModeClicked()
 		// Switch from real mode to dry mode
 		_backgroundManagement = std::move(_management);
 		_management = _backgroundManagement->MakeDryMode();
+		_management->Run();
+		_state.ChangeManagement(*_management);
+		_programWindow->ChangeManagement(*_management);
+		for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
+			cw->ChangeManagement(*_management);
 		_visualizationWindow->SetDryMode(_management.get());
 		EmitUpdate();
 	}
-	else {
+	else if(!_miDryMode.get_active() && _backgroundManagement != nullptr) {
 		// Switch from dry mode to real mode
+		_management->SwapDevices(*_backgroundManagement);
+		_state.ChangeManagement(*_management);
+		_programWindow->ChangeManagement(*_management);
+		for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
+			cw->ChangeManagement(*_management);
 		_visualizationWindow->SetRealMode();
+		EmitUpdate();
+		_backgroundManagement.reset();
 	}
 }
 

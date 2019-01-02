@@ -18,11 +18,18 @@
 */
 class SequenceFrame : public Gtk::VPaned {
 	public:
-		SequenceFrame(class Management &management, class ProgramWindow &parentWindow);
+		SequenceFrame(class Management& management, class ProgramWindow &parentWindow);
 		~SequenceFrame();
 
 		void Update() { fillSequenceList(); }
 		void UpdateAfterPresetRemoval() { fillSequenceList(); }
+		
+		void ChangeManagement(class Management& management)
+		{
+			_nameFrame.ChangeManagement(management);
+			_management = &management;
+			fillSequenceList();
+		}
 	private:
 		void fillSequenceList();
 		void onCreateChaseButtonClicked();
@@ -48,8 +55,8 @@ class SequenceFrame : public Gtk::VPaned {
 
 		NameFrame _nameFrame;
 
-		class Management &_management;
-		class ProgramWindow &_parentWindow;
+		class Management* _management;
+		class ProgramWindow& _parentWindow;
 };
 
 #endif
