@@ -41,7 +41,7 @@ class ControlWidget : public Gtk::VBox {
 		void SetFadeDownSpeed(double fadePerSecond) { _fadeDownSpeed = fadePerSecond; }
 		
 		void UpdateValue(double timePassed);
-		void ChangeManagement(class Management& management);
+		void ChangeManagement(class Management& management, bool moveSliders);
 		
 	private:
 		void writeValue();

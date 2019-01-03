@@ -54,8 +54,11 @@ class ShowWindow : public Gtk::Window {
 		void onMIQuitClicked();
 		
 		void onMIDryModeClicked();
+		void onMICancelDryModeClicked();
 		
 		void onControlWindowHidden(class ControlWindow* window);
+		
+		void changeManagement(class Management* newManagement, bool moveControlSliders);
 		
 		size_t nextControlKeyRow() const;
 
@@ -84,6 +87,7 @@ class ShowWindow : public Gtk::Window {
 		Gtk::MenuItem _miFile, _miOptions, _miWindow;
 		Gtk::ImageMenuItem _miNew, _miOpen, _miSave, _miQuit;
 		Gtk::CheckMenuItem _miDryMode;
+		Gtk::MenuItem _miCancelDryMode;
 		Gtk::CheckMenuItem _miProgrammingWindow, _miConfigWindow;
 		Gtk::MenuItem _miNewControlWindow;
 		Gtk::CheckMenuItem _miVisualizationWindow;

@@ -7,7 +7,10 @@ void FaderSetupState::ChangeManagement(Management& management)
 {
 	for(PresetValue*& preset : presets)
 	{
-		size_t presetId = preset->Id();
-		preset = management.GetPresetValue(presetId);
+		if(preset != nullptr)
+		{
+			size_t presetId = preset->Id();
+			preset = management.GetPresetValue(presetId);
+		}
 	}
 }

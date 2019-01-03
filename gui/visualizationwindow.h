@@ -29,6 +29,12 @@ class VisualizationWindow : public Gtk::Window {
 			_dryManagement = nullptr;
 			Update();
 		}
+		void MakeDryModeReal()
+		{
+			_management = _dryManagement;
+			_dryManagement = nullptr;
+			Update();
+		}
 	private:
 		Gtk::DrawingArea _drawingArea;
 
@@ -39,6 +45,7 @@ class VisualizationWindow : public Gtk::Window {
 
 		void initialize();
 		void draw(const Cairo::RefPtr< Cairo::Context>& cairo);
+		void draw(const Cairo::RefPtr< Cairo::Context>& cairo, class Management& management, size_t yOffset, size_t height);
 		bool onExpose(const Cairo::RefPtr<Cairo::Context>& context);
 		bool onTimeout()
 		{

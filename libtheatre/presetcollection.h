@@ -14,6 +14,7 @@
 class PresetCollection : public Controllable {
 	public:
 		PresetCollection() { }
+		PresetCollection(const std::string& name) : Controllable(name) { }
 		~PresetCollection() { Clear(); }
 
 		void Clear()

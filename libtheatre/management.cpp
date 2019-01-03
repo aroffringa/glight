@@ -63,18 +63,22 @@ void Management::AddDevice(std::unique_ptr<class DmxDevice> device)
 
 void Management::Run()
 {
-	ManagementThread threadFunc;
-	threadFunc.parent = this;
-	_thread.reset(new std::thread(threadFunc));
+	if(_thread == nullptr)
+	{
+		_isQuitting = false;
+		ManagementThread threadFunc;
+		threadFunc.parent = this;
+		_thread.reset(new std::thread(threadFunc));
+	}
+	else throw std::runtime_error("Invalid call to Run(): already running");
 }
 
 void Management::ManagementThread::operator()()
 {
 	std::unique_ptr<ValueSnapshot> nextSnapshot(new ValueSnapshot());
+	nextSnapshot->SetUniverseCount(parent->_devices.size());
 	while(!parent->IsQuitting())
 	{
-		nextSnapshot->SetUniverseCount(parent->_devices.size());
-
 		for(unsigned universe=0; universe < parent->_devices.size(); ++universe)
 		{
 			unsigned values[512];
@@ -107,9 +111,9 @@ void Management::ManagementThread::operator()()
 
 void Management::AbortAllDevices()
 {
-	for(unsigned universe=0; universe < _devices.size(); ++universe)
+	for(std::unique_ptr<DmxDevice>& device : _devices)
 	{
-		_devices[universe]->Abort();
+		device->Abort();
 	}
 }
 
@@ -399,7 +403,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 	}
 	else if(presetCollection != nullptr)
 	{
-		_controllables[index].reset(new PresetCollection());
+		_controllables[index].reset(new PresetCollection(presetCollection->Name()));
 		PresetCollection& pc = static_cast<PresetCollection&>(*_controllables[index]);
 		for(const std::unique_ptr<PresetValue>& value : presetCollection->PresetValues())
 		{
@@ -453,6 +457,10 @@ void Management::SwapDevices(Management& source)
 	}
 	
 	std::unique_lock<std::mutex> guard(_mutex);
+#ifndef NDEBUG
+	if(source._devices.size() != _devices.size())
+		throw std::runtime_error("Something went wrong: device lists were not of same size in call to SwapDevices()");
+#endif
 	std::swap(source._devices, _devices);
 	guard.unlock();
 	

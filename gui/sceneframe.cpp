@@ -16,8 +16,8 @@
 
 SceneFrame::SceneFrame(Management &management)
  : Gtk::Frame("Scene"),
-	_management(management),
-	_show(_management.Show()),
+	_management(&management),
+	_show(&_management->Show()),
 	_audioWidget(),
 	_clickIsLabel("Click is: "),
 	_clickIsSelectButton("select"),
@@ -165,19 +165,26 @@ SceneFrame::~SceneFrame()
 void SceneFrame::Update()
 {
 	// For testing
-	if(_show.Scenes().empty())
+	if(_show->Scenes().empty())
 	{
-		_selectedScene = _show.AddScene();
+		_selectedScene = _show->AddScene();
 		_audioWidget.SetScene(*_selectedScene);
 	}
 	else {
-		_selectedScene = _show.Scenes()[0].get();
+		_selectedScene = _show->Scenes()[0].get();
 	}
 
 	fillControllablesList();
 	fillSceneItemList();
 	updateAudio();
 	updateAudioWidgetKeys();
+}
+
+void SceneFrame::ChangeManagement(class Management& management)
+{
+	_management = &management;
+	_show = &_management->Show();
+	Update();
 }
 
 void SceneFrame::createSceneItemsList()
@@ -229,7 +236,7 @@ void SceneFrame::fillSceneItemList()
 
 	if(_selectedScene != 0)
 	{
-		std::unique_lock<std::mutex> lock(_management.Mutex());
+		std::unique_lock<std::mutex> lock(_management->Mutex());
 		const std::multimap<double, std::unique_ptr<SceneItem>>
 			&items = _selectedScene->SceneItems();
 		for(const std::pair<const double, std::unique_ptr<SceneItem>>& item : items)
@@ -277,7 +284,7 @@ void SceneFrame::updateSelectedSceneItems()
 	Glib::RefPtr<Gtk::TreeSelection> selection =
 		_sceneItemsListView.get_selection();
 	std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-	std::lock_guard<std::mutex> lock(_management.Mutex());
+	std::lock_guard<std::mutex> lock(_management->Mutex());
 	for(std::vector<Gtk::TreeModel::Path>::iterator pathPtr = pathHandle.begin();
 		pathPtr != pathHandle.end(); ++pathPtr)
 	{
@@ -292,9 +299,9 @@ void SceneFrame::fillControllablesList()
 {
 	_controllablesListModel->clear();
 
-	std::lock_guard<std::mutex> lock(_management.Mutex());
+	std::lock_guard<std::mutex> lock(_management->Mutex());
 	const std::vector<std::unique_ptr<Controllable>>&
-		controllable = _management.Controllables();
+		controllable = _management->Controllables();
 	for(const std::unique_ptr<Controllable>& contr : controllable)
 	{
 		Gtk::TreeModel::iterator iter = _controllablesListModel->append();
@@ -308,9 +315,9 @@ void SceneFrame::onStartButtonPressed()
 {
 	if(_selectedScene != nullptr)
 	{
-		std::lock_guard<std::mutex> lock(_management.Mutex());
+		std::lock_guard<std::mutex> lock(_management->Mutex());
 		_selectedScene->SetStartOffset(0.0);
-		_show.StartScene(_management.GetOffsetTimeInMS(), _selectedScene);
+		_show->StartScene(_management->GetOffsetTimeInMS(), _selectedScene);
 	}
 }
 
@@ -318,9 +325,9 @@ void SceneFrame::onStartSelectionButtonPressed()
 {
 	if(_selectedScene != nullptr)
 	{
-		std::lock_guard<std::mutex> lock(_management.Mutex());
+		std::lock_guard<std::mutex> lock(_management->Mutex());
 		_selectedScene->SetStartOffset(_audioWidget.Position());
-		_show.StartScene(_management.GetOffsetTimeInMS(), _selectedScene);
+		_show->StartScene(_management->GetOffsetTimeInMS(), _selectedScene);
 	}
 }
 
@@ -328,16 +335,16 @@ void SceneFrame::onStopButtonPressed()
 {
 	if(_selectedScene != nullptr)
 	{
-		std::lock_guard<std::mutex> lock(_management.Mutex());
-		_show.StopScene(_selectedScene);
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_show->StopScene(_selectedScene);
 	}
 }
 
 void SceneFrame::addKey(enum KeySceneItem::Level level)
 {
-	std::unique_lock<std::mutex> lock(_management.Mutex());
+	std::unique_lock<std::mutex> lock(_management->Mutex());
 	KeySceneItem *key =
-		_selectedScene->AddKeySceneItem(_management.GetOffsetTimeInMS() - _selectedScene->StartTimeInMS());
+		_selectedScene->AddKeySceneItem(_management->GetOffsetTimeInMS() - _selectedScene->StartTimeInMS());
 	key->SetLevel(level);
 	lock.unlock();
 
@@ -360,7 +367,7 @@ void SceneFrame::onCreateControlItemButtonPressed()
 		Glib::RefPtr<Gtk::TreeSelection> selection =
 			_sceneItemsListView.get_selection();
 		std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-		std::unique_lock<std::mutex> lock(_management.Mutex());
+		std::unique_lock<std::mutex> lock(_management->Mutex());
 		for(std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr = pathHandle.begin();
 			pathPtr != pathHandle.end(); ++pathPtr)
 		{
@@ -407,7 +414,7 @@ void SceneFrame::onSelectedSceneItemChanged()
 					_removeButton.set_sensitive(true);
 					_startScale.set_sensitive(true);
 					_endScale.set_sensitive(true);
-					std::unique_lock<std::mutex> lock(_management.Mutex());
+					std::unique_lock<std::mutex> lock(_management->Mutex());
 					SceneItem *item = selectedItem();
 					ControlSceneItem *csi = dynamic_cast<ControlSceneItem*>(item);
 					if(csi != 0)
@@ -436,7 +443,7 @@ void SceneFrame::onSetEndTimeButtonPressed()
 	Glib::RefPtr<Gtk::TreeSelection> selection =
 		_sceneItemsListView.get_selection();
 	std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-	std::unique_lock<std::mutex> lock(_management.Mutex());
+	std::unique_lock<std::mutex> lock(_management->Mutex());
 	for(std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr = pathHandle.begin();
 		pathPtr != pathHandle.end(); ++pathPtr)
 	{
@@ -463,7 +470,7 @@ void SceneFrame::onRemoveButtonPressed()
 	Glib::RefPtr<Gtk::TreeSelection> selection =
 		_sceneItemsListView.get_selection();
 	std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-	std::unique_lock<std::mutex> lock(_management.Mutex());
+	std::unique_lock<std::mutex> lock(_management->Mutex());
 	for(std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr = pathHandle.begin();
 		pathPtr != pathHandle.end(); ++pathPtr)
 	{
@@ -511,7 +518,7 @@ void SceneFrame::onScalesChanged()
 		Glib::RefPtr<Gtk::TreeSelection> selection =
 			_sceneItemsListView.get_selection();
 		std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-		std::unique_lock<std::mutex> lock(_management.Mutex());
+		std::unique_lock<std::mutex> lock(_management->Mutex());
 		for(std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr = pathHandle.begin();
 			pathPtr != pathHandle.end(); ++pathPtr)
 		{
@@ -552,10 +559,10 @@ void SceneFrame::onChangeAudioButtonPressed()
 
 bool SceneFrame::onTimeout()
 {
-	std::unique_lock<std::mutex> lock(_management.Mutex());
-	if(_selectedScene!=0 && _selectedScene->IsPlaying())
+	std::unique_lock<std::mutex> lock(_management->Mutex());
+	if(_selectedScene!=nullptr && _selectedScene->IsPlaying())
 	{
-		double pos = _management.GetOffsetTimeInMS() - _selectedScene->StartTimeInMS();
+		double pos = _management->GetOffsetTimeInMS() - _selectedScene->StartTimeInMS();
 		lock.unlock();
 		_audioWidget.SetPosition(pos);
 	}
@@ -570,7 +577,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS)
 		Glib::RefPtr<Gtk::TreeSelection> selection =
 			_sceneItemsListView.get_selection();
 		std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-		std::unique_lock<std::mutex> lock(_management.Mutex());
+		std::unique_lock<std::mutex> lock(_management->Mutex());
 		for(std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr = pathHandle.begin();
 			pathPtr != pathHandle.end(); ++pathPtr)
 		{
@@ -589,7 +596,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS)
 		Glib::RefPtr<Gtk::TreeSelection> selection =
 			_sceneItemsListView.get_selection();
 		std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-		std::unique_lock<std::mutex> lock(_management.Mutex());
+		std::unique_lock<std::mutex> lock(_management->Mutex());
 		for(std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr = pathHandle.begin();
 			pathPtr != pathHandle.end(); ++pathPtr)
 		{
@@ -606,7 +613,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS)
 	{
 		_isUpdating = true;
 
-		std::unique_lock<std::mutex> lock(_management.Mutex());
+		std::unique_lock<std::mutex> lock(_management->Mutex());
 		KeySceneItem *item = _selectedScene->AddKeySceneItem(timeInMS);
 		item->SetLevel(KeySceneItem::Key);
 		lock.unlock();
@@ -623,7 +630,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS)
 		{
 			_isUpdating = true;
 	
-			std::unique_lock<std::mutex> lock(_management.Mutex());
+			std::unique_lock<std::mutex> lock(_management->Mutex());
 			ControlSceneItem *item = _selectedScene->AddControlSceneItem(timeInMS, *(*activeControllable)[_controllablesListColumns._controllable]);
 			item->SetDurationInMS(1000);
 			lock.unlock();
@@ -640,8 +647,8 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS)
 
 void SceneFrame::updateAudio()
 {
-	std::unique_lock<std::mutex> lock(_management.Mutex());
-	if(_selectedScene!=0 && _selectedScene->AudioFile() != _audioFile)
+	std::unique_lock<std::mutex> lock(_management->Mutex());
+	if(_selectedScene!=nullptr && _selectedScene->AudioFile() != _audioFile)
 	{
 		_audioFile = _selectedScene->AudioFile();
 		lock.unlock();
@@ -660,6 +667,6 @@ void SceneFrame::updateAudio()
 
 void SceneFrame::updateAudioWidgetKeys()
 {
-	std::lock_guard<std::mutex> lock(_management.Mutex());
+	std::lock_guard<std::mutex> lock(_management->Mutex());
 	_audioWidget.UpdateKeys();
 }

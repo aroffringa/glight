@@ -29,6 +29,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miSave(Gtk::Stock::SAVE_AS),
 	_miQuit(Gtk::Stock::QUIT),
 	_miDryMode("Dry mode"),
+	_miCancelDryMode("Cancel dry mode"),
 	_miProgrammingWindow("Programming"),
 	_miConfigWindow("Config"),
 	_miNewControlWindow("New faders window"),
@@ -198,6 +199,10 @@ void ShowWindow::createMenu()
 	_miDryMode.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMIDryModeClicked));
 	_menuOptions.append(_miDryMode);
 		
+	_miCancelDryMode.set_sensitive(false);
+	_miCancelDryMode.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMICancelDryModeClicked));
+	_menuOptions.append(_miCancelDryMode);
+		
 	_miOptions.set_submenu(_menuOptions);
 	_menuBar.append(_miOptions);
 	
@@ -326,24 +331,42 @@ void ShowWindow::onMIDryModeClicked()
 		_backgroundManagement = std::move(_management);
 		_management = _backgroundManagement->MakeDryMode();
 		_management->Run();
-		_state.ChangeManagement(*_management);
-		_programWindow->ChangeManagement(*_management);
-		for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
-			cw->ChangeManagement(*_management);
 		_visualizationWindow->SetDryMode(_management.get());
-		EmitUpdate();
+		changeManagement(_management.get(), false);
+		_miCancelDryMode.set_sensitive(true);
 	}
-	else if(!_miDryMode.get_active() && _backgroundManagement != nullptr) {
+	else if(!_miDryMode.get_active() && _backgroundManagement != nullptr)
+	{
 		// Switch from dry mode to real mode
 		_management->SwapDevices(*_backgroundManagement);
-		_state.ChangeManagement(*_management);
-		_programWindow->ChangeManagement(*_management);
-		for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
-			cw->ChangeManagement(*_management);
-		_visualizationWindow->SetRealMode();
-		EmitUpdate();
+		_visualizationWindow->MakeDryModeReal();
 		_backgroundManagement.reset();
+		_miCancelDryMode.set_sensitive(false);
 	}
+}
+
+void ShowWindow::onMICancelDryModeClicked()
+{
+	if(_miDryMode.get_active() && _backgroundManagement != nullptr)
+	{
+		std::swap(_backgroundManagement, _management);
+		_visualizationWindow->SetRealMode();
+		changeManagement(_management.get(), true);
+		_backgroundManagement.reset();
+		_miCancelDryMode.set_sensitive(false);
+		_miDryMode.set_active(false);
+	}
+}
+
+void ShowWindow::changeManagement(Management* newManagement, bool moveControlSliders)
+{
+	_state.ChangeManagement(*newManagement);
+	_programWindow->ChangeManagement(*newManagement);
+	for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
+		cw->ChangeManagement(*newManagement, moveControlSliders);
+	_configurationWindow->ChangeManagement(*newManagement);
+	_sceneFrame->ChangeManagement(*newManagement);
+	EmitUpdate();
 }
 
 void ShowWindow::onControlWindowHidden(ControlWindow* window)

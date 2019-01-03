@@ -449,11 +449,11 @@ void ControlWindow::onChangeUpSpeed()
 		cw->SetFadeUpSpeed(speed);
 }
 
-void ControlWindow::ChangeManagement(class Management& management)
+void ControlWindow::ChangeManagement(class Management& management, bool moveSliders)
 {
 	_management = &management;
 	for(std::unique_ptr<ControlWidget>& cw : _controls)
 	{
-		cw->ChangeManagement(management);
+		cw->ChangeManagement(management, moveSliders);
 	}
 }

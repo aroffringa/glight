@@ -46,7 +46,7 @@ class ControlWindow  : public Gtk::Window {
 		 * Faders that are assigned to a preset with an Id that does not correspond to a preset
 		 * in the new instance are unassigned.
 		 */
-		void ChangeManagement(class Management& management);
+		void ChangeManagement(class Management& management, bool moveSliders);
 		
 	private:
 		void initializeWidgets();

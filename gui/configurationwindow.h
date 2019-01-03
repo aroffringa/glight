@@ -12,14 +12,21 @@
 
 #include "../libtheatre/fixturetype.h"
 
+#include <memory>
+
 /**
 	@author Andre Offringa
 */
 class ConfigurationWindow : public Gtk::Window {
 	public:
 		ConfigurationWindow(class Management &management);
-		~ConfigurationWindow() { destroyPopupMenu(); }
 		void Update() { fillFixturesList(); }
+		void ChangeManagement(Management& management)
+		{
+			_management = &management;
+			fillFixturesList();
+		}
+		
 	private:
 		void fillFixturesList();
 		bool onAddButtonClicked(GdkEventButton* event);
@@ -27,10 +34,9 @@ class ConfigurationWindow : public Gtk::Window {
 		void onDecChannelButtonClicked();
 		void onMenuItemClicked(enum FixtureType::FixtureClass cl);
 		void updateFixture(const class Fixture *fixture);
-		void destroyPopupMenu();
 		static std::string getChannelString(const class Fixture& fixture);
 
-		class Management &_management;
+		class Management* _management;
 
 		Gtk::TreeView _fixturesListView;
 		Glib::RefPtr<Gtk::ListStore> _fixturesListModel;
@@ -50,8 +56,8 @@ class ConfigurationWindow : public Gtk::Window {
 		Gtk::HButtonBox _buttonBox;
 
 		Gtk::Button _addButton, _incChannelButton, _decChannelButton;
-		Gtk::Menu *_popupMenu;
-		std::vector<Gtk::MenuItem *> _popupMenuItems;
+		std::unique_ptr<Gtk::Menu> _popupMenu;
+		std::vector<std::unique_ptr<Gtk::MenuItem>> _popupMenuItems;
 };
 
 #endif

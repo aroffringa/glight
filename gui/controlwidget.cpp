@@ -169,14 +169,20 @@ void ControlWidget::Assign(PresetValue* item, bool moveFader)
 		{
 			_nameLabel.set_text(_preset->Controllable().Name());
 			if(moveFader)
+			{
+				_fadingValue = _preset->Value().UInt();
 				_scale.set_value(_preset->Value().UInt());
+			}
 			else
 				writeValue();
 		}
 		else {
 			_nameLabel.set_text("<..>");
 			if(moveFader)
+			{
+				_fadingValue = 0;
 				_scale.set_value(0);
+			}
 			else
 				writeValue();
 		}
@@ -253,13 +259,20 @@ void ControlWidget::UpdateValue(double timePassed)
 	}
 }
 
-void ControlWidget::ChangeManagement(class Management& management)
+void ControlWidget::ChangeManagement(class Management& management, bool moveSliders)
 {
-	size_t presetId = _preset->Id();
-	_management = &management;
-	PresetValue* pv = _management->GetPresetValue(presetId);
-	if(pv == nullptr)
-		Unassign();
-	else
-		Assign(pv, false);
+	if(_preset == nullptr)
+	{
+		_management = &management;
+	}
+	else {
+		size_t presetId = _preset->Id();
+		_management = &management;
+		PresetValue* pv = _management->GetPresetValue(presetId);
+		if(pv == nullptr)
+			Unassign();
+		else {
+			Assign(pv, moveSliders);
+		}
+	}
 }
