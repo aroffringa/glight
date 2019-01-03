@@ -19,11 +19,18 @@
 class PresetsFrame : public Gtk::VPaned
 {
 	public:
-		PresetsFrame(class Management &management, class ProgramWindow &parentWindow);
+		PresetsFrame(class Management& management, class ProgramWindow& parentWindow);
 		~PresetsFrame();
 
 		void Update() { FillPresetsList(); }
-		void UpdateAfterPresetRemoval() { FillPresetsList(); }	
+		void UpdateAfterPresetRemoval() { FillPresetsList(); }
+		
+		void ChangeManagement(class Management &management)
+		{
+			_nameFrame.ChangeManagement(management);
+			_management = &management;
+			FillPresetsList();
+		}
 private:
 		void FillPresetsList();
 
@@ -72,7 +79,7 @@ private:
 		Gtk::Button _newPresetButton, _deletePresetButton;
 		Gtk::Button _addPresetToSequenceButton, _clearSequenceButton, _createSequenceButton;
 
-		Management &_management;
+		Management* _management;
 		class ProgramWindow &_parentWindow;
 		NameFrame _nameFrame;
 };

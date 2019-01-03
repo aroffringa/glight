@@ -5,6 +5,14 @@ FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type, const std:
 {
 }
 
+FixtureFunction::FixtureFunction(const FixtureFunction& source, class Theatre& theatre) :
+	NamedObject(source),
+	_theatre(theatre),
+	_type(source._type),
+	_firstChannel(source._firstChannel)
+{
+}
+
 void FixtureFunction::IncChannel()
 {
 	if(IsSingleChannel())

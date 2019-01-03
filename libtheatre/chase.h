@@ -15,6 +15,13 @@ class Chase : public Controllable {
 		Chase(class Sequence &sequence) : _sequence(sequence)
 		{
 		}
+		Chase(const Chase& chase, class Sequence &sequence) :
+			Controllable(chase),
+			_sequence(sequence),
+			_trigger(chase._trigger),
+			_transition(chase._transition)
+		{
+		}
 		~Chase()
 		{
 		}

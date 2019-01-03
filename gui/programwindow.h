@@ -4,12 +4,14 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm/window.h>
 
+#include <memory>
+
 /**
 	@author Andre Offringa
 */
 class ProgramWindow : public Gtk::Window {
 	public:
-		ProgramWindow(class Management &management, class ShowWindow &showWindow);
+		ProgramWindow(class Management& management, class ShowWindow& showWindow);
 		~ProgramWindow();
 
 		void MakeSequenceTabActive() { _notebook.set_current_page(1); }
@@ -20,14 +22,16 @@ class ProgramWindow : public Gtk::Window {
 		void ForwardUpdateAfterAddPreset();
 		void Update();
 		void UpdateAfterPresetRemoval();
+		
+		void ChangeManagement(class Management &management);
 	private:
 
 		Gtk::Notebook _notebook;
-		class PresetsFrame *_presetsFrame;
-		class SequenceFrame *_sequenceFrame;
-		class ChaseFrame *_chaseFrame;
+		std::unique_ptr<class PresetsFrame> _presetsFrame;
+		std::unique_ptr<class SequenceFrame> _sequenceFrame;
+		std::unique_ptr<class ChaseFrame> _chaseFrame;
 
-		class ShowWindow &_showWindow;
+		class ShowWindow& _showWindow;
 };
 
 #endif

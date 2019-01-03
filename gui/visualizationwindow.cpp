@@ -8,9 +8,13 @@
 
 #include <glibmm/main.h>
 
-VisualizationWindow::VisualizationWindow(Management &management) : _management(management), _isInitialized(false), _isTimerRunning(false)
+VisualizationWindow::VisualizationWindow(Management* management) :
+	_management(management),
+	_dryManagement(nullptr),
+	_isInitialized(false), _isTimerRunning(false)
 {
 	set_title("Glight - visualization");
+	set_default_size(600, 200);
 
 	_drawingArea.signal_draw().connect(sigc::mem_fun(*this, &VisualizationWindow::onExpose));
 
@@ -44,18 +48,12 @@ bool VisualizationWindow::onExpose(const Cairo::RefPtr<Cairo::Context>& context)
 	return true;
 }
 
-void VisualizationWindow::draw(const Cairo::RefPtr< Cairo::Context>& cairo)
+void VisualizationWindow::draw(const Cairo::RefPtr< Cairo::Context>& cairo, Management& management, size_t yOffset, size_t height)
 {
-	double
-		width = _drawingArea.get_width(),
-		height = _drawingArea.get_height();
+	double width = _drawingArea.get_width();
 
-	cairo->set_source_rgba(0,0,0,1);
-	cairo->rectangle(0, 0, width, height);
-	cairo->fill();
-
-	Theatre &theatre = _management.Theatre();
-	ValueSnapshot snapshot = _management.Snapshot();
+	Theatre &theatre = management.Theatre();
+	ValueSnapshot snapshot = management.Snapshot();
 	const std::vector<std::unique_ptr<Fixture>>& fixtures = theatre.Fixtures();
 	int position = 0;
 	size_t fixtureCount = fixtures.size();
@@ -67,9 +65,30 @@ void VisualizationWindow::draw(const Cairo::RefPtr< Cairo::Context>& cairo)
 		cairo->set_source_rgb((double) c.Red()/224.0+0.125, (double) c.Green()/224.0+0.125, (double) c.Blue()/224.0+0.125);
 
 		double x = ((double) position + 0.5) * (width / fixtureCount);
-		cairo->arc(x, height/2.0, minDistance*0.8, 0.0, 2.0 * M_PI);
+		cairo->arc(x, height/2.0 + yOffset, minDistance*0.8, 0.0, 2.0 * M_PI);
 		cairo->fill();
 
 		++position;
 	}
 }
+
+void VisualizationWindow::draw(const Cairo::RefPtr< Cairo::Context>& cairo)
+{
+	double
+		width = _drawingArea.get_width(),
+		height = _drawingArea.get_height();
+
+	cairo->set_source_rgba(0,0,0,1);
+	cairo->rectangle(0, 0, width, height);
+	cairo->fill();
+	
+	if(_dryManagement==nullptr)
+	{
+		draw(cairo, *_management, 0, height);
+	}
+	else {
+		draw(cairo, *_management, 0, height/2.0);
+		draw(cairo, *_dryManagement, height/2.0, height/2.0);
+	}
+}
+

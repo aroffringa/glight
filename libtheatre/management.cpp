@@ -5,6 +5,7 @@
 #include "chase.h"
 #include "controllable.h"
 #include "dmxdevice.h"
+#include "dummydevice.h"
 #include "fixturefunctioncontrol.h"
 #include "presetcollection.h"
 #include "presetvalue.h"
@@ -13,12 +14,12 @@
 #include "theatre.h"
 #include "valuesnapshot.h"
 
-Management::Management(class Theatre &theatre) : 
+Management::Management() : 
 	_thread(),
-	_isRunning(false), _isQuitting(false),
+	_isQuitting(false),
 	_createTime(boost::posix_time::microsec_clock::local_time()),
 	_nextPresetValueId(1),
-	_theatre(&theatre),
+	_theatre(new class Theatre()),
 	_snapshot(new ValueSnapshot()),
 	_beatFinder(new BeatFinder()),
 	_show(new class Show(*this))
@@ -62,18 +63,22 @@ void Management::AddDevice(std::unique_ptr<class DmxDevice> device)
 
 void Management::Run()
 {
-	ManagementThread threadFunc;
-	threadFunc.parent = this;
-	_thread.reset(new std::thread(threadFunc));
+	if(_thread == nullptr)
+	{
+		_isQuitting = false;
+		ManagementThread threadFunc;
+		threadFunc.parent = this;
+		_thread.reset(new std::thread(threadFunc));
+	}
+	else throw std::runtime_error("Invalid call to Run(): already running");
 }
 
 void Management::ManagementThread::operator()()
 {
 	std::unique_ptr<ValueSnapshot> nextSnapshot(new ValueSnapshot());
+	nextSnapshot->SetUniverseCount(parent->_devices.size());
 	while(!parent->IsQuitting())
 	{
-		nextSnapshot->SetUniverseCount(parent->_devices.size());
-
 		for(unsigned universe=0; universe < parent->_devices.size(); ++universe)
 		{
 			unsigned values[512];
@@ -106,9 +111,9 @@ void Management::ManagementThread::operator()()
 
 void Management::AbortAllDevices()
 {
-	for(unsigned universe=0; universe < _devices.size(); ++universe)
+	for(std::unique_ptr<DmxDevice>& device : _devices)
 	{
-		_devices[universe]->Abort();
+		device->Abort();
 	}
 }
 
@@ -301,21 +306,166 @@ Controllable& Management::GetControllable(const std::string &name) const
 	return NamedObject::FindNamedObject(_controllables, name);
 }
 
+size_t Management::ControllableIndex(const Controllable* controllable) const
+{
+	return NamedObject::FindIndex(_controllables, controllable);
+}
+
 Sequence& Management::GetSequence(const std::string &name) const
 {
 	return NamedObject::FindNamedObject(_sequences, name);
 }
 
-PresetValue& Management::GetPresetValue(unsigned id) const
+size_t Management::SequenceIndex(const Sequence* sequence) const
+{
+	return NamedObject::FindIndex(_sequences, sequence);
+}
+
+PresetValue* Management::GetPresetValue(unsigned id) const
 {
 	for(const std::unique_ptr<PresetValue>& pv : _presetValues)
 		if(pv->Id() == id)
-			return *pv;
-	throw std::runtime_error("Could not find preset value with given ID");
+			return pv.get();
+	return nullptr;
 }
+
+size_t Management::PresetValueIndex(const PresetValue* presetValue) const
+{
+	return NamedObject::FindIndex(_presetValues, presetValue);
+}
+
 
 ValueSnapshot Management::Snapshot()
 {
 	std::lock_guard<std::mutex> lock(_mutex);
 	return *_snapshot;
+}
+
+/**
+ * Copy constructor for making a dry mode copy.
+ */
+Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatFinder>& beatFinder) :
+	_thread(),
+	_isQuitting(false),
+	_createTime(forDryCopy._createTime),
+	_nextPresetValueId(forDryCopy._nextPresetValueId),
+	_theatre(new class Theatre(*forDryCopy._theatre)),
+	_beatFinder(beatFinder)
+{
+	for(size_t i=0; i!=forDryCopy._devices.size(); ++i)
+		_devices.emplace_back(new DummyDevice());
+
+	_snapshot.reset(new ValueSnapshot(*forDryCopy._snapshot));
+	_show.reset(new class Show(*this)); // TODO For now we don't copy the show
+	
+	// The controllables can have dependencies to other controllables, hence dependences
+	// need to be resolved and copied first.
+	_controllables.resize(forDryCopy._controllables.size());
+	_presetValues.resize(forDryCopy._presetValues.size());
+	_sequences.resize(forDryCopy._sequences.size());
+	for(size_t i=0; i!=forDryCopy._controllables.size(); ++i)
+	{
+		if(_controllables[i] == nullptr) // not already resolved?
+			dryCopyControllerDependency(forDryCopy, i);
+	}
+	for(size_t i=0; i!=forDryCopy._presetValues.size(); ++i)
+	{
+		if(_presetValues[i] == nullptr)
+		{
+			size_t cIndex = forDryCopy.ControllableIndex(&forDryCopy._presetValues[i]->Controllable());
+			_presetValues[i].reset(new PresetValue(*forDryCopy._presetValues[i], *_controllables[cIndex]));
+		}
+	}
+	for(size_t i=0; i!=forDryCopy._sequences.size(); ++i)
+	{
+		if(_sequences[i] == nullptr)
+			dryCopySequenceDependency(forDryCopy, i);
+	}
+}
+
+void Management::dryCopyControllerDependency(const Management& forDryCopy, size_t index)
+{
+	Controllable* controllable = forDryCopy._controllables[index].get();
+	FixtureFunctionControl* ffc = dynamic_cast<FixtureFunctionControl*>(controllable);
+	const Chase* chase = dynamic_cast<const Chase *>(controllable);
+	const PresetCollection* presetCollection = dynamic_cast<const PresetCollection *>(controllable);
+	if(ffc != nullptr)
+	{
+		FixtureFunction& ff = _theatre->GetFixtureFunction(ffc->Function().Name());
+		_controllables[index].reset(new FixtureFunctionControl(ff));
+	}
+	else if(chase != nullptr)
+	{
+		size_t sIndex = forDryCopy.SequenceIndex(&chase->Sequence());
+		if(_sequences[sIndex] == nullptr)
+			dryCopySequenceDependency(forDryCopy, sIndex);
+		_controllables[index].reset(new Chase(*chase, *_sequences[sIndex]));
+	}
+	else if(presetCollection != nullptr)
+	{
+		_controllables[index].reset(new PresetCollection(presetCollection->Name()));
+		PresetCollection& pc = static_cast<PresetCollection&>(*_controllables[index]);
+		for(const std::unique_ptr<PresetValue>& value : presetCollection->PresetValues())
+		{
+			// This preset is owned by the preset collection, not by management.
+			size_t cIndex = forDryCopy.ControllableIndex(&value->Controllable());
+			if(_controllables[cIndex] == nullptr)
+				dryCopyControllerDependency(forDryCopy, cIndex);
+			pc.AddPresetValue(*value, *_controllables[cIndex]);
+		}
+	}
+	else throw std::runtime_error("Unknown controllable in manager");
+}
+
+void Management::dryCopySequenceDependency(const Management& forDryCopy, size_t index)
+{
+	Sequence* sourceSequence = forDryCopy.Sequences()[index].get();
+	_sequences[index] = sourceSequence->CopyWithoutPresets();
+	Sequence* destSequence = static_cast<Sequence*>(_sequences[index].get());
+	for(const PresetCollection* preset : sourceSequence->Presets())
+	{
+		size_t pIndex = forDryCopy.ControllableIndex(preset);
+		if(_controllables[pIndex] == nullptr)
+			dryCopyControllerDependency(forDryCopy, pIndex);
+		destSequence->AddPreset(static_cast<PresetCollection*>(_controllables[pIndex].get()));
+	}
+}
+
+std::unique_ptr<Management> Management::MakeDryMode()
+{
+	std::lock_guard<std::mutex> guard(_mutex);
+	std::unique_ptr<Management> dryMode(new Management(*this, _beatFinder));
+	return dryMode;
+}
+
+void Management::SwapDevices(Management& source)
+{
+	bool
+		sourceRunning = source._thread != nullptr,
+		thisRunning = _thread != nullptr;
+	if(thisRunning)
+	{
+		Quit();
+		_thread->join();
+		_thread.reset();
+	}
+	if(sourceRunning)
+	{
+		source.Quit();
+		source._thread->join();
+		source._thread.reset();
+	}
+	
+	std::unique_lock<std::mutex> guard(_mutex);
+#ifndef NDEBUG
+	if(source._devices.size() != _devices.size())
+		throw std::runtime_error("Something went wrong: device lists were not of same size in call to SwapDevices()");
+#endif
+	std::swap(source._devices, _devices);
+	guard.unlock();
+	
+	if(sourceRunning)
+		source.Run();
+	if(thisRunning)
+		Run();
 }

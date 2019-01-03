@@ -5,12 +5,12 @@
 
 #include "programwindow.h"
 
-SequenceFrame::SequenceFrame(Management &management, ProgramWindow &parentWindow)
-	:
+SequenceFrame::SequenceFrame(Management &management, ProgramWindow &parentWindow) :
 	_sequenceFrame("All sequences"),
 	_createChaseButton("Create chase"),
 	_nameFrame(management),
-	_management(management), _parentWindow(parentWindow)
+	_management(&management),
+	_parentWindow(parentWindow)
 {
 	_createChaseButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &SequenceFrame::onCreateChaseButtonClicked));
@@ -50,16 +50,15 @@ SequenceFrame::SequenceFrame(Management &management, ProgramWindow &parentWindow
 
 
 SequenceFrame::~SequenceFrame()
-{
-}
+{ }
 
 void SequenceFrame::fillSequenceList()
 {
 	_sequenceListModel->clear();
 
-	std::lock_guard<std::mutex> lock(_management.Mutex());
+	std::lock_guard<std::mutex> lock(_management->Mutex());
 	const std::vector<std::unique_ptr<Sequence>>&
-		sequences = _management.Sequences();
+		sequences = _management->Sequences();
 	for(const std::unique_ptr<Sequence>& sequence : sequences)
 	{
 		Gtk::TreeModel::iterator iter = _sequenceListModel->append();
@@ -78,11 +77,11 @@ void SequenceFrame::onCreateChaseButtonClicked()
 	{
 		Sequence *sequence = (*selected)[_sequenceListColumns._sequence];
 
-		std::unique_lock<std::mutex> lock(_management.Mutex());
-		Chase &chase = _management.AddChase(*sequence);
+		std::unique_lock<std::mutex> lock(_management->Mutex());
+		Chase &chase = _management->AddChase(*sequence);
 		chase.SetName(sequence->Name());
 
-		_management.AddPreset(chase);
+		_management->AddPreset(chase);
 		lock.unlock();
 
 		_parentWindow.UpdateChaseList();

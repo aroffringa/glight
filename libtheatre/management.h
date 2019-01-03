@@ -14,7 +14,7 @@
 */
 class Management {
 	public:
-		Management(class Theatre &theatre);
+		Management();
 		~Management();
 		
 		void Clear();
@@ -62,8 +62,13 @@ class Management {
 		std::mutex& Mutex() { return _mutex; }
 
 		class Controllable& GetControllable(const std::string &name) const;
+		size_t ControllableIndex(const Controllable* controllable) const;
+		
 		class Sequence& GetSequence(const std::string &name) const;
-		class PresetValue& GetPresetValue(unsigned id) const;
+		size_t SequenceIndex(const Sequence* sequence) const;
+		
+		class PresetValue* GetPresetValue(unsigned id) const;
+		size_t PresetValueIndex(const class PresetValue* presetValue) const;
 		class ValueSnapshot Snapshot();
 
 		double GetOffsetTimeInMS() const
@@ -75,16 +80,30 @@ class Management {
 		{
 			return *_show;
 		}
+		
+		std::unique_ptr<Management> MakeDryMode();
+		
+		/**
+		 * Swap DMX devices of two managements.
+		 * 
+		 * This can be called while running, and is e.g. useful for switching from dry mode.
+		 */
+		void SwapDevices(Management& source);
 	private:
 		struct ManagementThread {
 			Management *parent;
 			void operator()();
 		};
+		
+		Management(const Management& forDryCopy, std::shared_ptr<class BeatFinder>& beatFinder);
 
 		void GetChannelValues(unsigned *values, unsigned universe);
 		void removeControllable(std::vector<std::unique_ptr<class Controllable>>::iterator controllablePtr);
 		void removePreset(std::vector<std::unique_ptr<class PresetValue>>::iterator presetValuePtr);
 		void removeSequence(std::vector<std::unique_ptr<class Sequence>>::iterator sequencePtr);
+		
+		void dryCopySequenceDependency(const Management& forDryCopy, size_t index);
+		void dryCopyControllerDependency(const Management& forDryCopy, size_t index);
 
 		bool IsQuitting()
 		{
@@ -103,14 +122,14 @@ class Management {
 		void AbortAllDevices();
 
 		std::unique_ptr<std::thread> _thread;
-		bool _isRunning, _isQuitting;
+		bool _isQuitting;
 		std::mutex _mutex;
 		boost::posix_time::ptime _createTime;
 		unsigned _nextPresetValueId;
 
-		class Theatre *_theatre;
+		std::unique_ptr<class Theatre> _theatre;
 		std::unique_ptr<class ValueSnapshot> _snapshot;
-		std::unique_ptr<class BeatFinder> _beatFinder;
+		std::shared_ptr<class BeatFinder> _beatFinder;
 		std::unique_ptr<class Show> _show;
 
 		std::vector<std::unique_ptr<class Controllable>> _controllables;

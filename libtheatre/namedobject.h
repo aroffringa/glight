@@ -27,6 +27,19 @@ class NamedObject {
 			}
 			throw std::runtime_error(std::string("Could not find named object ") + name + " in container.");
 		}
+		
+		template<typename ObjectType>
+		static size_t FindIndex(const std::vector<std::unique_ptr<ObjectType>>& container, const ObjectType* element)
+		{
+			for(size_t i=0; i!=container.size(); ++i)
+			{
+				if(container[i].get() == element)
+				{
+					return i;
+				}
+			}
+			throw std::runtime_error("Could not find object in container.");
+		}
 	private:
 		std::string _name;
 };

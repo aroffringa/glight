@@ -10,9 +10,8 @@
 #include "../libtheatre/theatre.h"
 
 ConfigurationWindow::ConfigurationWindow(Management &management)
-	: _management(management), _addButton(Gtk::Stock::ADD),
-	_incChannelButton("+channel"), _decChannelButton("-channel"),
-	_popupMenu(0)
+	: _management(&management), _addButton(Gtk::Stock::ADD),
+	_incChannelButton("+channel"), _decChannelButton("-channel")
 {
 	set_title("Glight - configuration");
 
@@ -55,9 +54,9 @@ void ConfigurationWindow::fillFixturesList()
 {
 	_fixturesListModel->clear();
 
-	std::lock_guard<std::mutex> lock(_management.Mutex());
+	std::lock_guard<std::mutex> lock(_management->Mutex());
 	const std::vector<std::unique_ptr<Fixture>>
-		&fixtures = _management.Theatre().Fixtures();
+		&fixtures = _management->Theatre().Fixtures();
 	for(const std::unique_ptr<Fixture>& fixture : fixtures)
 	{
 		Gtk::TreeModel::iterator iter = _fixturesListModel->append();
@@ -86,37 +85,23 @@ std::string ConfigurationWindow::getChannelString(const class Fixture& fixture)
 	return s.str();
 }
 
-void ConfigurationWindow::destroyPopupMenu()
-{
-	if(_popupMenu != 0 )
-	{
-		delete _popupMenu;
-		_popupMenu = 0;
-		for(std::vector<Gtk::MenuItem*>::const_iterator i=_popupMenuItems.begin();
-			i != _popupMenuItems.end();++i)
-			delete *i;
-		_popupMenuItems.clear();
-	}
-}
-
 bool ConfigurationWindow::onAddButtonClicked(GdkEventButton* event)
 {
 	if(event->button == 1)
 	{
-		destroyPopupMenu();
+		_popupMenuItems.clear();
 	
-		_popupMenu = new Gtk::Menu();
+		_popupMenu.reset(new Gtk::Menu());
 	
 		const std::vector<enum FixtureType::FixtureClass> &classes = FixtureType::GetClassList();
 		for(std::vector<enum FixtureType::FixtureClass>::const_iterator c=classes.begin();
 			c<classes.end();++c)
 		{
-			Gtk::MenuItem *mi = new Gtk::MenuItem(FixtureType::ClassName(*c));
+			std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(FixtureType::ClassName(*c)));
 			mi->signal_activate().connect(sigc::bind<enum FixtureType::FixtureClass>( 
 			sigc::mem_fun(*this, &ConfigurationWindow::onMenuItemClicked), (*c)));
-			_popupMenuItems.push_back(mi);
-	
 			_popupMenu->append(*mi);
+			_popupMenuItems.emplace_back(std::move(mi));
 		}
 		_popupMenu->show_all_children();
 		_popupMenu->popup(event->button, event->time);
@@ -127,8 +112,8 @@ bool ConfigurationWindow::onAddButtonClicked(GdkEventButton* event)
 
 void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 {
-	FixtureType &type = _management.Theatre().AddFixtureType(cl);
-	Fixture &fixture = _management.Theatre().AddFixture(type);
+	FixtureType &type = _management->Theatre().AddFixtureType(cl);
+	Fixture &fixture = _management->Theatre().AddFixture(type);
 	const std::vector<std::unique_ptr<FixtureFunction>> &functions = fixture.Functions();
 
 	int number = 1;
@@ -136,8 +121,8 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 	{
 		//std::stringstream funcName;
 		//funcName << fixture.Name() << number;
-		FixtureFunctionControl &control = _management.AddFixtureFunctionControl(*ff);
-		_management.AddPreset(control);
+		FixtureFunctionControl &control = _management->AddFixtureFunctionControl(*ff);
+		_management->AddPreset(control);
 		control.SetName(ff->Name());
 		++number;
 	}

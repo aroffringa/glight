@@ -17,6 +17,11 @@ class Sequence : public NamedObject {
 		~Sequence()
 		{
 		}
+		
+		std::unique_ptr<Sequence> CopyWithoutPresets()
+		{
+			return std::unique_ptr<Sequence>(new Sequence(static_cast<NamedObject&>(*this)));
+		}
 
 		size_t Size() const { return _presets.size(); }
 
@@ -38,6 +43,9 @@ class Sequence : public NamedObject {
 			return false;
 		}
 	private:
+		Sequence(const NamedObject& namedObj) : NamedObject(namedObj)
+		{ }
+		
 		std::vector<class PresetCollection *> _presets;
 };
 

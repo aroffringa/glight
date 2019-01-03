@@ -13,6 +13,7 @@
 class Fixture : public NamedObject {
 	public:
 		Fixture(class Theatre &theatre, class FixtureType &type, const std::string &name);
+		Fixture(const Fixture& source, class Theatre& theatre);
 		~Fixture();
 
 		const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const

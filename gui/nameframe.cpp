@@ -5,8 +5,8 @@
 
 #include <gtkmm/stock.h>
 
-NameFrame::NameFrame(Management &management) :
-	_management(management),
+NameFrame::NameFrame(Management& management) :
+	_management(&management),
 	_namedObject(0),
 	_label("Name:"),
 	_button(Gtk::Stock::APPLY)
@@ -47,7 +47,7 @@ void NameFrame::onButtonClicked()
 {
 	if(_namedObject != 0)
 	{
-		std::unique_lock<std::mutex> lock(_management.Mutex());
+		std::unique_lock<std::mutex> lock(_management->Mutex());
 		_namedObject->SetName(_entry.get_text());
 		lock.unlock();
 

@@ -16,6 +16,7 @@ class Theatre {
 		{
 			Clear();
 		}
+		Theatre(const Theatre& source);
 
 		void Clear();
 
@@ -32,6 +33,7 @@ class Theatre {
 		unsigned HighestChannel() const { return _highestChannel; }
 		unsigned FirstFreeChannel() const { return _fixtures.empty() ? 0 : _highestChannel+1; }
 		void NotifyDmxChange();
+		
 	private:
 		std::vector<std::unique_ptr<class Fixture>> _fixtures;
 		std::vector<std::unique_ptr<class FixtureType>> _fixtureTypes;

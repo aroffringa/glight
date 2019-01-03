@@ -14,6 +14,7 @@
 class PresetCollection : public Controllable {
 	public:
 		PresetCollection() { }
+		PresetCollection(const std::string& name) : Controllable(name) { }
 		~PresetCollection() { Clear(); }
 
 		void Clear()
@@ -37,6 +38,11 @@ class PresetCollection : public Controllable {
 		PresetValue& AddPresetValue(unsigned id, class Controllable &controllable)
 		{
 			_presetValues.emplace_back(new PresetValue(id, controllable));
+			return *_presetValues.back();
+		}
+		PresetValue& AddPresetValue(class PresetValue& source, class Controllable &controllable)
+		{
+			_presetValues.emplace_back(new PresetValue(source, controllable));
 			return *_presetValues.back();
 		}
 		bool IsUsing(const Controllable &controllable) const

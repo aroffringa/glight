@@ -132,6 +132,13 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 	}
 }
 
+Fixture::Fixture(const Fixture& source, class Theatre& theatre) :
+	NamedObject(source), _theatre(theatre), _type(theatre.GetFixtureType(source._type.Name()))
+{
+	for(const std::unique_ptr<FixtureFunction>& ff : source._functions)
+		_functions.emplace_back(new FixtureFunction(*ff, theatre));
+}
+
 Fixture::~Fixture()
 { }
 

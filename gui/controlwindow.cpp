@@ -21,7 +21,7 @@ const char ControlWindow::_keyRowsLower[3][10] = {
 	{ 'q','w','e','r','t','y','u','i','o','p' } };
 
 ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &management, size_t keyRowIndex)
-  : _management(management),
+  : _management(&management),
 	_keyRowIndex(keyRowIndex),
 	_faderSetupLabel("Fader setup: "),
 	_nameButton("Name"),
@@ -51,7 +51,7 @@ ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &man
 }
 
 ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &management, size_t keyRowIndex, FaderSetupState* state)
-  : _management(management),
+  : _management(&management),
 	_keyRowIndex(keyRowIndex),
 	_faderSetupLabel("Fader setup: "),
 	_nameButton("Name"),
@@ -165,7 +165,7 @@ void ControlWindow::addControl()
 	}
 	bool hasKey = _controls.size()<10 && _keyRowIndex<3;
 	char key = hasKey ? _keyRowsLower[_keyRowIndex][_controls.size()] : ' ';
-	std::unique_ptr<ControlWidget> control(new ControlWidget(_management, key));
+	std::unique_ptr<ControlWidget> control(new ControlWidget(*_management, key));
 	size_t controlIndex = _controls.size();
 	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlValueChanged), control.get()));
 	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlAssigned), controlIndex));
@@ -188,15 +188,15 @@ void ControlWindow::onAssignButtonClicked()
 	size_t controlIndex = 0;
 	for(std::unique_ptr<ControlWidget>& c : _controls)
 		c->Unassign();
-	size_t n = _management.PresetValues().size();
+	size_t n = _management->PresetValues().size();
 	if(!_controls.empty())
 	{
 		for(size_t i=0; i!=n; ++i)
 		{
-			PresetValue* p = _management.PresetValues()[i].get();
+			PresetValue* p = _management->PresetValues()[i].get();
 			if(!_showWindow->State().IsAssigned(p))
 			{
-				_controls[controlIndex]->Assign(p);
+				_controls[controlIndex]->Assign(p, true);
 				++controlIndex;
 				if(controlIndex == _controls.size())
 					break;
@@ -210,13 +210,13 @@ void ControlWindow::onAssignChasesButtonClicked()
 	size_t controlIndex = 0;
 	if(!_controls.empty())
 	{
-		for(size_t i=0; i!=_management.PresetValues().size(); ++i)
+		for(size_t i=0; i!=_management->PresetValues().size(); ++i)
 		{
-			PresetValue* p = _management.PresetValues()[i].get();
+			PresetValue* p = _management->PresetValues()[i].get();
 			Chase* c = dynamic_cast<Chase*>(&p->Controllable());
 			if(c != nullptr)
 			{
-				_controls[controlIndex]->Assign(p);
+				_controls[controlIndex]->Assign(p, true);
 				++controlIndex;
 				if(controlIndex == _controls.size())
 					break;
@@ -400,7 +400,7 @@ void ControlWindow::loadState()
 	resize(_state->width, _state->height);
 	
 	for(size_t i=0; i!=_state->presets.size(); ++i)
-		_controls[i]->Assign(_state->presets[i]);
+		_controls[i]->Assign(_state->presets[i], true);
 }
 
 void ControlWindow::updateValues()
@@ -447,4 +447,13 @@ void ControlWindow::onChangeUpSpeed()
 	
 	for(std::unique_ptr<ControlWidget>& cw : _controls)
 		cw->SetFadeUpSpeed(speed);
+}
+
+void ControlWindow::ChangeManagement(class Management& management, bool moveSliders)
+{
+	_management = &management;
+	for(std::unique_ptr<ControlWidget>& cw : _controls)
+	{
+		cw->ChangeManagement(management, moveSliders);
+	}
 }

@@ -42,9 +42,11 @@ class SceneFrame : public Gtk::Frame {
 			_audioWidget.SetNoScene();
 			_selectedScene = 0;
 		}
+		void ChangeManagement(class Management& management);
+		
 	private:
-		class Management &_management;
-		class Show &_show;
+		class Management* _management;
+		class Show* _show;
 
 		struct SceneItemsListColumns : public Gtk::TreeModelColumnRecord
 		{

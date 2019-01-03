@@ -177,11 +177,11 @@ void Writer::writeControllable(const Controllable &controllable)
 		const Chase *chase = dynamic_cast<const Chase *>(&controllable);
 		const PresetCollection *presetCollection = dynamic_cast<const PresetCollection *>(&controllable);
 	
-		if(fixtureFunctionControl != 0)
+		if(fixtureFunctionControl != nullptr)
 			writeFixtureFunctionControl(*fixtureFunctionControl);
-		else if(chase != 0)
+		else if(chase != nullptr)
 			writeChase(*chase);
-		else if(presetCollection != 0)
+		else if(presetCollection != nullptr)
 			writePresetCollection(*presetCollection);
 		else
 			throw std::runtime_error("Unknown controllable");
