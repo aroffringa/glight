@@ -12,6 +12,8 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/window.h>
 
+#include <sigc++/signal.h>
+
 #include "guistate.h"
 
 /**
@@ -27,6 +29,8 @@ class ShowWindow : public Gtk::Window {
 		void EmitUpdateAfterAddPreset();
 		
 		GUIState& State() { return _state; }
+		
+		sigc::signal<void(Management&)>& SignalChangeManagement() { return _signalChangeManagement; }
 		
 	private:
 		void onProgramWindowButtonClicked();
@@ -81,6 +85,8 @@ class ShowWindow : public Gtk::Window {
 		std::unique_ptr<class SceneFrame> _sceneFrame;
 
 		GUIState _state;
+		
+		sigc::signal<void(Management&)> _signalChangeManagement;
 		
 		Gtk::Menu _menuFile, _menuOptions, _menuWindow;
 		

@@ -23,8 +23,8 @@ class ProgramWindow : public Gtk::Window {
 		void Update();
 		void UpdateAfterPresetRemoval();
 		
-		void ChangeManagement(class Management &management);
 	private:
+		void onChangeManagement(class Management &management);
 
 		Gtk::Notebook _notebook;
 		std::unique_ptr<class PresetsFrame> _presetsFrame;

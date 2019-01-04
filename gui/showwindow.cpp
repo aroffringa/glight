@@ -370,7 +370,7 @@ void ShowWindow::onMICancelDryModeClicked()
 void ShowWindow::changeManagement(Management* newManagement, bool moveControlSliders)
 {
 	_state.ChangeManagement(*newManagement);
-	_programWindow->ChangeManagement(*newManagement);
+	_signalChangeManagement(*newManagement);
 	for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
 		cw->ChangeManagement(*newManagement, moveControlSliders);
 	_configurationWindow->ChangeManagement(*newManagement);
