@@ -376,8 +376,8 @@ void Reader::parseGUIPresetRef(xmlNode* node, FaderSetupState& fader)
 {
 	if(hasAttribute(node, "preset-id"))
 	{
-		fader.presets.emplace_back(_management.GetPresetValue(getIntAttribute(node, "preset-id")));
+		fader.faders.emplace_back(_management.GetPresetValue(getIntAttribute(node, "preset-id")));
 	}
 	else
-		fader.presets.emplace_back(nullptr);
+		fader.faders.emplace_back(nullptr);
 }

@@ -11,6 +11,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
+#include "avoidrecursion.h"
 #include "nameframe.h"
 
 /**
@@ -53,6 +54,7 @@ class SequenceFrame : public Gtk::VPaned {
 		Gtk::Frame _sequenceFrame;
 		Gtk::Button _createChaseButton;
 
+		AvoidRecursion _delayUpdates;
 		NameFrame _nameFrame;
 
 		class Management* _management;
