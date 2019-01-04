@@ -81,10 +81,9 @@ void BeatFinder::open()
  
 	std::vector<int16_t> alsaBuffer(hop_size*2);
 	
-	_confidence = 0.0;
-	_beatValue = 0.0;
+	_beat = Beat(0.0, 0.0);
 	
-	while(!isStopping())
+	while(!_isStopping)
 	{
 		rc = snd_pcm_readi(_handle, alsaBuffer.data(), readAtATime);
 		if(rc == -EPIPE)
@@ -117,28 +116,34 @@ void BeatFinder::open()
 			smpl_t confidence = aubio_tempo_get_confidence(tempo);
 			if(confidence > _minimumConfidence)
 			{
-				std::unique_lock<std::mutex> lock(_mutex);
-				_confidence = confidence;
-				if(_beatValue < (60.0*60.0*24.0*365.0))
-					++_beatValue;
+				Beat beat = _beat; // atomic load
+				beat.confidence = confidence;
+				// We do a simple reset on high numbers just to make sure that the 'float' precision does not run out.
+				// With 8 beats per second, this would still take 24h to run out.
+				if(beat.value < (60.0*60.0*24.0*8.0))
+					++beat.value;
 				else
-					_beatValue = 0.0;
+					beat.value = 0.0;
+				_beat = beat; // atomic store
 			}
 		}
 		else if(is_silence)
 		{
-			std::unique_lock<std::mutex> lock(_mutex);
-			_confidence = 0.0;
+			Beat beat = _beat; // atomic load
+			beat.confidence = 0.0;
+			_beat = beat; // atomic load
 		}
 	}
 	snd_pcm_drop(_handle);
 	
   del_aubio_tempo(tempo);
   del_fvec(tempo_out);
+	del_fvec(ibuf);
 }
 
 void BeatFinder::close()
 {
+	_isStopping = true;
 	if(_alsaThread != nullptr)
 	{
 		_alsaThread->join();

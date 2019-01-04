@@ -3,6 +3,7 @@
 
 #include <alsa/asoundlib.h>
 
+#include <atomic>
 #include <string>
 #include <stdexcept>
 #include <iostream>
@@ -21,13 +22,19 @@ public:
 			{ }
 	};
 
-	BeatFinder() : _alsaPeriodSize(256), _alsaBufferSize(2048), _alsaThread(), _isStopping(false), _isOpen(false), _minimumConfidence(0.05)
+	BeatFinder() : 
+		_alsaPeriodSize(256), 
+		_alsaBufferSize(2048),
+		_alsaThread(),
+		_isStopping(false),
+		_isOpen(false),
+		_beat(Beat()),
+		_minimumConfidence(0.05)
 	{
 	}
 
 	virtual ~BeatFinder()
 	{
-		setStopping();
 		close();
 	}
 
@@ -38,9 +45,9 @@ public:
 	
 	void GetBeatValue(double& beatValue, double& confidence)
 	{
-		std::unique_lock<std::mutex> lock(_mutex);
-		beatValue = _beatValue;
-		confidence = _confidence;
+		Beat beat = _beat;
+		beatValue = beat.value;
+		confidence = beat.confidence;
 	}
 private:
 	struct AlsaThread {
@@ -62,24 +69,20 @@ private:
 	snd_pcm_t *_handle;
 	unsigned _alsaPeriodSize, _alsaBufferSize;
 	std::unique_ptr<std::thread> _alsaThread;
-	bool _isStopping;
+	std::atomic<bool> _isStopping;
 	bool _isOpen;
 	std::mutex _mutex;
-	double _confidence, _minimumConfidence;
-	double _beatValue;
+	struct Beat {
+		Beat() : value(0.0), confidence(0.0) { }
+		Beat(float c, float v) : value(v), confidence(c) { }
+		float value;
+		float confidence;
+	} _beatValue;
+	std::atomic<Beat> _beat;
+	float _minimumConfidence;
 
 	void open();
 	void close();
-	bool isStopping()
-	{
-		std::unique_lock<std::mutex> lock(_mutex);
-		return _isStopping;
-	}
-	void setStopping()
-	{
-		std::unique_lock<std::mutex> lock(_mutex);
-		_isStopping = true;
-	}
 };
 
 #endif
