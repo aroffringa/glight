@@ -342,11 +342,11 @@ void Writer::writeFaderState(const FaderSetupState& guiState)
 	writeAttribute("solo", guiState.isSolo);
 	writeAttribute("width", guiState.width);
 	writeAttribute("height", guiState.height);
-	for(const PresetValue* preset : guiState.presets)
+	for(const FaderState& fader : guiState.faders)
 	{
 		startElement("fader");
-		if(preset != nullptr)
-			writeAttribute("preset-id", preset->Id());
+		if(fader.GetPresetValue() != nullptr)
+			writeAttribute("preset-id", fader.GetPresetValue()->Id());
 		endElement(); // preset
 	}
 	endElement(); // faders

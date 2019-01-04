@@ -11,6 +11,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
+#include "avoidrecursion.h"
 #include "nameframe.h"
 
 /**
@@ -82,6 +83,7 @@ private:
 		Management* _management;
 		class ProgramWindow &_parentWindow;
 		NameFrame _nameFrame;
+		AvoidRecursion _delayUpdates;
 };
 
 #endif

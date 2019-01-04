@@ -5,7 +5,30 @@
 #include <vector>
 #include <memory>
 
+#include <sigc++/connection.h>
 #include <sigc++/signal.h>
+
+class FaderState
+{
+public:
+	explicit FaderState(class PresetValue* pv);
+	FaderState() : _presetValue(nullptr) { }
+	FaderState(const FaderState& source);
+	
+	FaderState& operator=(const FaderState& rhs);
+	
+	~FaderState() { _presetValueDeletedConnection.disconnect(); }
+	void SetPresetValue(class PresetValue* presetValue);
+	void SetNoPresetValue() { SetPresetValue(nullptr); }
+	
+	// This might return a nullptr to indicate an unset controls.
+	class PresetValue* GetPresetValue() const { return _presetValue; }
+	
+private:
+	void onPresetValueDeleted();
+	class PresetValue* _presetValue;
+	sigc::connection _presetValueDeletedConnection;
+};
 
 class FaderSetupState
 {
@@ -21,16 +44,15 @@ public:
 	
 	bool IsAssigned(const class PresetValue* p) const
 	{
-		for(const class PresetValue* preset : presets)
-			if(p == preset)
+		for(const class FaderState& fader : faders)
+			if(p == fader.GetPresetValue())
 				return true;
 		return false;
 	}
 	
 	void ChangeManagement(class Management& management);
 	
-	// This list may contain nullptrs to indicate unset controls.
-	std::vector<class PresetValue *> presets;
+	std::vector<FaderState> faders;
 };
 
 class GUIState

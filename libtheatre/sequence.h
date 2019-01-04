@@ -10,13 +10,7 @@
 */
 class Sequence : public NamedObject {
 	public:
-		Sequence()
-		{
-		}
-
-		~Sequence()
-		{
-		}
+		Sequence() = default;
 		
 		std::unique_ptr<Sequence> CopyWithoutPresets()
 		{

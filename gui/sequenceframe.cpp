@@ -54,6 +54,7 @@ SequenceFrame::~SequenceFrame()
 
 void SequenceFrame::fillSequenceList()
 {
+	AvoidRecursion::Token token(_delayUpdates);
 	_sequenceListModel->clear();
 
 	std::lock_guard<std::mutex> lock(_management->Mutex());
@@ -91,21 +92,24 @@ void SequenceFrame::onCreateChaseButtonClicked()
 
 void SequenceFrame::onSelectedSequenceChanged()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _sequenceListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	if(_delayUpdates.IsFirst())
 	{
-		Sequence *sequence = (*selected)[_sequenceListColumns._sequence];
-		_nameFrame.SetNamedObject(*sequence);
+		Glib::RefPtr<Gtk::TreeSelection> selection =
+			_sequenceListView.get_selection();
+		Gtk::TreeModel::iterator selected = selection->get_selected();
+		if(selected)
+		{
+			Sequence *sequence = (*selected)[_sequenceListColumns._sequence];
+			_nameFrame.SetNamedObject(*sequence);
 
-		_createChaseButton.set_sensitive(true);
-	}
-	else
-	{
-		_nameFrame.SetNoNamedObject();
+			_createChaseButton.set_sensitive(true);
+		}
+		else
+		{
+			_nameFrame.SetNoNamedObject();
 
-		_createChaseButton.set_sensitive(false);
+			_createChaseButton.set_sensitive(false);
+		}
 	}
 }
 

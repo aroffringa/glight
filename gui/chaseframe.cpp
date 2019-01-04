@@ -30,6 +30,7 @@ ChaseFrame::~ChaseFrame()
 
 void ChaseFrame::fillChaseList()
 {
+	AvoidRecursion::Token token(_delayUpdates);
 	_chaseListModel->clear();
 
 	std::lock_guard<std::mutex> lock(_management->Mutex());
@@ -164,31 +165,34 @@ void ChaseFrame::onBeatSpeedChanged()
 
 void ChaseFrame::onSelectedChaseChanged()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _chaseListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	if(_delayUpdates.IsFirst())
 	{
-		_bottomFrame.set_sensitive(true);
+		Glib::RefPtr<Gtk::TreeSelection> selection =
+			_chaseListView.get_selection();
+		Gtk::TreeModel::iterator selected = selection->get_selected();
+		if(selected)
+		{
+			_bottomFrame.set_sensitive(true);
 
-		Chase *chase = (*selected)[_chaseListColumns._chase];
-		std::unique_lock<std::mutex> lock(_management->Mutex());
-		enum Trigger::Type triggerType = chase->Trigger().Type();
-		double triggerSpeed = chase->Trigger().DelayInMs();
-		double transitionSpeed = chase->Transition().LengthInMs();
-		double beatSpeed = chase->Trigger().DelayInBeats();
-		lock.unlock();
-		_triggerSpeed.set_value(triggerSpeed);
-		_transitionSpeed.set_value(transitionSpeed);
-		_beatSpeed.set_value(beatSpeed);
-		if(triggerType == Trigger::DelayTriggered)
-			_delayTriggerCheckButton.set_active(true);
+			Chase *chase = (*selected)[_chaseListColumns._chase];
+			std::unique_lock<std::mutex> lock(_management->Mutex());
+			enum Trigger::Type triggerType = chase->Trigger().Type();
+			double triggerSpeed = chase->Trigger().DelayInMs();
+			double transitionSpeed = chase->Transition().LengthInMs();
+			double beatSpeed = chase->Trigger().DelayInBeats();
+			lock.unlock();
+			_triggerSpeed.set_value(triggerSpeed);
+			_transitionSpeed.set_value(transitionSpeed);
+			_beatSpeed.set_value(beatSpeed);
+			if(triggerType == Trigger::DelayTriggered)
+				_delayTriggerCheckButton.set_active(true);
+			else
+				_beatTriggerCheckButton.set_active(true);
+		}
 		else
-			_beatTriggerCheckButton.set_active(true);
-	}
-	else
-	{
-		_bottomFrame.set_sensitive(false);
+		{
+			_bottomFrame.set_sensitive(false);
+		}
 	}
 }
 

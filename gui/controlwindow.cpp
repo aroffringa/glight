@@ -40,7 +40,8 @@ ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &man
 	_state = _showWindow->State().FaderSetups().back().get();
 	_state->name = "Unnamed fader setup";
 	_state->isActive = true;
-	_state->presets.assign(10, nullptr);
+	for(size_t i=0; i!=10; ++i)
+		_state->faders.emplace_back();
 	
 	initializeWidgets();
 	
@@ -161,7 +162,7 @@ void ControlWindow::addControl()
 {
 	if(_delayUpdates.IsFirst())
 	{
-		_state->presets.emplace_back(nullptr);
+		_state->faders.emplace_back();
 	}
 	bool hasKey = _controls.size()<10 && _keyRowIndex<3;
 	char key = hasKey ? _keyRowsLower[_keyRowIndex][_controls.size()] : ' ';
@@ -179,7 +180,7 @@ void ControlWindow::onRemoveButtonClicked()
 	if(_controls.size() > 1)
 	{
 		_controls.pop_back();
-		_state->presets.pop_back();
+		_state->faders.pop_back();
 	}
 }
 
@@ -258,7 +259,7 @@ void ControlWindow::onControlValueChanged(double newValue, ControlWidget* widget
 void ControlWindow::onControlAssigned(double newValue, size_t widgetIndex)
 {
 	if(_delayUpdates.IsFirst())
-		_state->presets[widgetIndex] = _controls[widgetIndex]->Preset();
+		_state->faders[widgetIndex].SetPresetValue(_controls[widgetIndex]->Preset());
 }
 
 bool ControlWindow::HandleKeyDown(char key)
@@ -339,7 +340,8 @@ void ControlWindow::onNewFaderSetupButtonClicked()
 	_state = _showWindow->State().FaderSetups().back().get();
 	_state->isActive = true;
 	_state->name = "Unnamed fader setup";
-	_state->presets.assign(10, nullptr);
+	for(size_t i=0; i!=10; ++i)
+		_state->faders.emplace_back();
 	_state->height = 300;
 	_state->width = 100;
 	loadState();
@@ -393,14 +395,14 @@ void ControlWindow::loadState()
 {
 	_soloCheckButton.set_active(_state->isSolo);
 	
-	while(_controls.size() < _state->presets.size())
+	while(_controls.size() < _state->faders.size())
 		addControl();
-	_controls.resize(_state->presets.size()); // remove controls if there were too many
+	_controls.resize(_state->faders.size()); // remove controls if there were too many
 	
 	resize(_state->width, _state->height);
 	
-	for(size_t i=0; i!=_state->presets.size(); ++i)
-		_controls[i]->Assign(_state->presets[i], true);
+	for(size_t i=0; i!=_state->faders.size(); ++i)
+		_controls[i]->Assign(_state->faders[i].GetPresetValue(), true);
 }
 
 void ControlWindow::updateValues()

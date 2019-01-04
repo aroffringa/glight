@@ -114,6 +114,7 @@ void PresetsFrame::initNewSequencePart()
 
 void PresetsFrame::FillPresetsList()
 {
+	AvoidRecursion::Token token(_delayUpdates);
 	_presetListModel->clear();
 
 	std::lock_guard<std::mutex> lock(_management->Mutex());
@@ -210,20 +211,23 @@ void PresetsFrame::onCreateSequenceButtonClicked()
 
 void PresetsFrame::onSelectedPresetChanged()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _presetListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	if(_delayUpdates.IsFirst())
 	{
-		PresetCollection *preset = (*selected)[_presetListColumns._preset];
-		_nameFrame.SetNamedObject(*preset);
+		Glib::RefPtr<Gtk::TreeSelection> selection =
+			_presetListView.get_selection();
+		Gtk::TreeModel::iterator selected = selection->get_selected();
+		if(selected)
+		{
+			PresetCollection *preset = (*selected)[_presetListColumns._preset];
+			_nameFrame.SetNamedObject(*preset);
 
-		_addPresetToSequenceButton.set_sensitive(true);
-	}
-	else
-	{
-		_nameFrame.SetNoNamedObject();
+			_addPresetToSequenceButton.set_sensitive(true);
+		}
+		else
+		{
+			_nameFrame.SetNoNamedObject();
 
-		_addPresetToSequenceButton.set_sensitive(false);
+			_addPresetToSequenceButton.set_sensitive(false);
+		}
 	}
 }
