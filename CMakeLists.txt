@@ -39,6 +39,7 @@ set(GUIFILES
   gui/application.cpp
   gui/audiowidget.cpp
   gui/chaseframe.cpp
+  gui/chasewizard.cpp
   gui/configurationwindow.cpp
   gui/controlwidget.cpp
   gui/controlwindow.cpp

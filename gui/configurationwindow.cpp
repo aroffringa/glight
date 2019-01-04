@@ -1,4 +1,5 @@
 #include "configurationwindow.h"
+#include "showwindow.h"
 
 #include <boost/thread/locks.hpp>
 
@@ -9,11 +10,17 @@
 #include "../libtheatre/management.h"
 #include "../libtheatre/theatre.h"
 
-ConfigurationWindow::ConfigurationWindow(Management &management)
-	: _management(&management), _addButton(Gtk::Stock::ADD),
-	_incChannelButton("+channel"), _decChannelButton("-channel")
+ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
+	_showWindow(showWindow),
+	_management(&showWindow->GetManagement()),
+	_addButton(Gtk::Stock::ADD),
+	_incChannelButton("+channel"),
+	_decChannelButton("-channel")
 {
 	set_title("Glight - configuration");
+	
+	showWindow->SignalChangeManagement().connect(sigc::mem_fun(*this, &ConfigurationWindow::onChangeManagement));
+	showWindow->SignalUpdateControllables().connect(sigc::mem_fun(*this, &ConfigurationWindow::update));
 
 	_fixturesListModel =
     Gtk::ListStore::create(_fixturesListColumns);
@@ -127,7 +134,7 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 		++number;
 	}
 
-	fillFixturesList();
+	_showWindow->EmitUpdate();
 }
 
 void ConfigurationWindow::onIncChannelButtonClicked()

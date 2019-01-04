@@ -4,6 +4,7 @@
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/messagedialog.h>
 
+#include "chasewizard.h"
 #include "configurationwindow.h"
 #include "controlwindow.h"
 #include "programwindow.h"
@@ -23,7 +24,7 @@
 
 ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miFile("_File", true),
-	_miOptions("_Options", true),
+	_miDesign("_Design", true),
 	_miWindow("_Window", true),
 	_miNew(Gtk::Stock::NEW),
 	_miOpen(Gtk::Stock::OPEN),
@@ -31,6 +32,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miQuit(Gtk::Stock::QUIT),
 	_miDryMode("Dry mode"),
 	_miCancelDryMode("Cancel dry mode"),
+	_miChaseWizard("Chase wizard"),
 	_miProgrammingWindow("Programming"),
 	_miConfigWindow("Config"),
 	_miNewControlWindow("New faders window"),
@@ -51,11 +53,13 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	
 	addControlWindow();
 
-	_configurationWindow.reset(new ConfigurationWindow(*_management));
+	_configurationWindow.reset(new ConfigurationWindow(this));
 	_configurationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_configurationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 
 	_visualizationWindow.reset(new VisualizationWindow(_management.get()));
+	
+	_chaseWizard.reset(new ChaseWizard(this));
 
 	createMenu();
 	
@@ -89,8 +93,8 @@ void ShowWindow::EmitUpdate()
 	_programWindow->Update();
 	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
 		cw->Update();
-	_configurationWindow->Update();
 	_sceneFrame->Update();
+	_signalUpdateControllables();
 }
 
 void ShowWindow::EmitUpdateAfterPresetRemoval()
@@ -98,11 +102,13 @@ void ShowWindow::EmitUpdateAfterPresetRemoval()
 	_programWindow->UpdateAfterPresetRemoval();
 	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
 		cw->UpdateAfterPresetRemoval();
+	_signalUpdateControllables();
 }
 
 void ShowWindow::EmitUpdateAfterAddPreset()
 {
 	_sceneFrame->Update();
+	_signalUpdateControllables();
 }
 
 void ShowWindow::onProgramWindowButtonClicked()
@@ -195,17 +201,22 @@ void ShowWindow::createMenu()
 	_miFile.set_submenu(_menuFile);
 	_menuBar.append(_miFile);
 	
-	_menuOptions.set_title("_Options");
+	_menuDesign.set_title("_Design");
 	
 	_miDryMode.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMIDryModeClicked));
-	_menuOptions.append(_miDryMode);
+	_menuDesign.append(_miDryMode);
 		
 	_miCancelDryMode.set_sensitive(false);
 	_miCancelDryMode.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMICancelDryModeClicked));
-	_menuOptions.append(_miCancelDryMode);
+	_menuDesign.append(_miCancelDryMode);
+	
+	_menuDesign.append(_miDesignSep1);
 		
-	_miOptions.set_submenu(_menuOptions);
-	_menuBar.append(_miOptions);
+	_miChaseWizard.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMIChaseWizardClicked));
+	_menuDesign.append(_miChaseWizard);
+	
+	_miDesign.set_submenu(_menuDesign);
+	_menuBar.append(_miDesign);
 	
 	_menuWindow.set_title("_Window");
 	
@@ -373,7 +384,6 @@ void ShowWindow::changeManagement(Management* newManagement, bool moveControlSli
 	_signalChangeManagement(*newManagement);
 	for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
 		cw->ChangeManagement(*newManagement, moveControlSliders);
-	_configurationWindow->ChangeManagement(*newManagement);
 	_sceneFrame->ChangeManagement(*newManagement);
 	EmitUpdate();
 }
@@ -408,4 +418,9 @@ size_t ShowWindow::nextControlKeyRow() const
 			return index;
 	}
 	throw std::runtime_error("Error in nextControlKeyRow()");
+}
+
+void ShowWindow::onMIChaseWizardClicked()
+{
+	_chaseWizard->show();
 }
