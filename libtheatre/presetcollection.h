@@ -35,6 +35,11 @@ class PresetCollection : public Controllable {
 			}
 		}
 		const std::vector<std::unique_ptr<PresetValue>> &PresetValues() const { return _presetValues; }
+		PresetValue& AddPresetValue(class PresetValue& source)
+		{
+			_presetValues.emplace_back(new PresetValue(source));
+			return *_presetValues.back();
+		}
 		PresetValue& AddPresetValue(unsigned id, class Controllable &controllable)
 		{
 			_presetValues.emplace_back(new PresetValue(id, controllable));

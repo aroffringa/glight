@@ -77,16 +77,18 @@ void SequenceFrame::onCreateChaseButtonClicked()
 	if(selected)
 	{
 		Sequence *sequence = (*selected)[_sequenceListColumns._sequence];
+		if(sequence->Size() != 0)
+		{
+			std::unique_lock<std::mutex> lock(_management->Mutex());
+			Chase &chase = _management->AddChase(*sequence);
+			chase.SetName(sequence->Name());
 
-		std::unique_lock<std::mutex> lock(_management->Mutex());
-		Chase &chase = _management->AddChase(*sequence);
-		chase.SetName(sequence->Name());
+			_management->AddPreset(chase);
+			lock.unlock();
 
-		_management->AddPreset(chase);
-		lock.unlock();
-
-		_parentWindow.UpdateChaseList();
-		_parentWindow.MakeChasesTabActive();
+			_parentWindow.UpdateChaseList();
+			_parentWindow.MakeChasesTabActive();
+		}
 	}
 }
 
