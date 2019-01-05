@@ -49,6 +49,13 @@ private:
 		_randomAroundSingleColourBtn;
 	
 	ColorSequenceWidget _colorsWidgetP3;
+	Gtk::RadioButton
+		_increasingRunRB,
+		_decreasingRunRB,
+		_backAndForthRunRB,
+		_inwardRunRB,
+		_outwardRunRB,
+		_randomRunRB;
 	
 	ColorSequenceWidget _colorsWidgetP4;
 	Gtk::Label _variationLabel;

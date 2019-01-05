@@ -8,30 +8,68 @@
 #include "presetcollection.h"
 #include "sequence.h"
 
+#include <algorithm>
 #include <random>
 
-Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors)
+Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
 {
 	Sequence& seq = management.AddSequence();
 	seq.SetName("Runchase");
-	for(size_t chaseIndex=0; chaseIndex!=colors.size(); ++chaseIndex)
+	size_t frames = colors.size();
+	if(runType == InwardRun || runType == OutwardRun)
+		frames = (frames+1)/2;
+	std::vector<size_t> pos;
+	if(runType == RandomRun)
+	{
+		pos.resize(frames);
+		for(size_t i=0; i!=frames; ++i)
+			pos[i] = i;
+		std::random_device rd;
+		std::mt19937 mt(rd());
+		std::shuffle(pos.begin(), pos.end(), mt);
+	}
+	for(size_t frameIndex=0; frameIndex!=frames; ++frameIndex)
 	{
 		PresetCollection& pc = management.AddPresetCollection();
-		pc.SetName("Runchase" + std::to_string(chaseIndex+1));
+		pc.SetName("Runchase" + std::to_string(frameIndex+1));
 		unsigned
-			red = colors[chaseIndex].Red()*((1<<24)-1)/255,
-			green = colors[chaseIndex].Green()*((1<<24)-1)/255,
-			blue = colors[chaseIndex].Blue()*((1<<24)-1)/255,
+			red = colors[frameIndex].Red()*((1<<24)-1)/255,
+			green = colors[frameIndex].Green()*((1<<24)-1)/255,
+			blue = colors[frameIndex].Blue()*((1<<24)-1)/255,
 			master = 0;
 		if(red != 0 || green != 0 || blue != 0)
 			master = (1<<24)-1;
-		for(size_t fixIndex = chaseIndex; fixIndex < fixtures.size(); fixIndex += colors.size())
+		for(size_t i = 0; i < (fixtures.size() + colors.size() - 1) / colors.size(); ++i)
 		{
-			Fixture* f = fixtures[fixIndex];
-			addColorPresets(management, *f, pc, red, green, blue, master);
+			size_t fixIndex = 0;
+			switch(runType)
+			{
+				case IncreasingRun:
+				case BackAndForthRun:
+				case InwardRun:
+					fixIndex = frameIndex + i * colors.size();
+					break;
+				case DecreasingRun:
+				case OutwardRun:
+					fixIndex = frames - frameIndex - 1 + i * colors.size();
+					break;
+				case RandomRun:
+					fixIndex = pos[frameIndex] + i * colors.size();
+					break;
+			}
+			if(fixIndex < fixtures.size())
+			{
+				Fixture* f = fixtures[fixIndex];
+				addColorPresets(management, *f, pc, red, green, blue, master);
+			}
 		}
 		seq.AddPreset(&pc);
 		management.AddPreset(pc);
+	}
+	if(runType == BackAndForthRun)
+	{
+		for(size_t i=2; i<colors.size(); ++i)
+			seq.AddPreset(seq.Presets()[colors.size()-i]);
 	}
 	return seq;
 }

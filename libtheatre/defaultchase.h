@@ -6,7 +6,8 @@
 class DefaultChase
 {
 public:
-	static class Sequence& MakeRunningLight(class Management& management, const std::vector<class Fixture*>& fixtures, const std::vector<class Color>& colors);
+	enum RunType { IncreasingRun, DecreasingRun, BackAndForthRun, InwardRun, OutwardRun, RandomRun };
+	static class Sequence& MakeRunningLight(class Management& management, const std::vector<class Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType);
 	
 	static class Sequence& MakeColorVariation(class Management& management, const std::vector<class Fixture*>& fixtures, const std::vector<class Color>& colors, double variation);
 	

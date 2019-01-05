@@ -17,6 +17,12 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow) :
 	_runningLightBtn("Running light"),
 	_randomAroundSingleColourBtn("Random around single colour"),
 	_colorsWidgetP3(this),
+	_increasingRunRB("Increasing order"),
+	_decreasingRunRB("Decreasing order"),
+	_backAndForthRunRB("Back and forth"),
+	_inwardRunRB("Inward"),
+	_outwardRunRB("Outward"),
+	_randomRunRB("Randomized"),
 	_colorsWidgetP4(this),
 	_variationLabel("Variation:"),
 	_nextButton("Next"),
@@ -73,6 +79,19 @@ void ChaseWizard::initPage2()
 void ChaseWizard::initPage3()
 {
 	_vBoxPage3.pack_start(_colorsWidgetP3, true, false);
+	Gtk::RadioButtonGroup group;
+	_increasingRunRB.set_group(group);
+	_vBoxPage3.pack_start(_increasingRunRB, true, false);
+	_decreasingRunRB.set_group(group);
+	_vBoxPage3.pack_start(_decreasingRunRB, true, false);
+	_backAndForthRunRB.set_group(group);
+	_vBoxPage3.pack_start(_backAndForthRunRB, true, false);
+	_inwardRunRB.set_group(group);
+	_vBoxPage3.pack_start(_inwardRunRB, true, false);
+	_outwardRunRB.set_group(group);
+	_vBoxPage3.pack_start(_outwardRunRB, true, false);
+	_randomRunRB.set_group(group);
+	_vBoxPage3.pack_start(_randomRunRB, true, false);
 }
 
 void ChaseWizard::initPage4()
@@ -133,15 +152,28 @@ void ChaseWizard::onNextClicked()
 			_currentPage = 4;
 		}
 		break;
-		case 3:
-		_mainBox.remove(_vBoxPage3);
-		_mainBox.pack_start(_vBoxPage1, true, true);
-		_vBoxPage1.show_all();
-		_currentPage = 1;
-		DefaultChase::MakeRunningLight(*_management, _selectedFixtures, _colorsWidgetP3.GetColors());
-		_showWindow->EmitUpdate();
-		hide();
-		break;
+		case 3: {
+			_mainBox.remove(_vBoxPage3);
+			_mainBox.pack_start(_vBoxPage1, true, true);
+			_vBoxPage1.show_all();
+			_currentPage = 1;
+			enum DefaultChase::RunType runType;
+			if(_increasingRunRB.get_active())
+				runType = DefaultChase::IncreasingRun;
+			else if(_decreasingRunRB.get_active())
+				runType = DefaultChase::DecreasingRun;
+			else if(_backAndForthRunRB.get_active())
+				runType = DefaultChase::BackAndForthRun;
+			else if(_inwardRunRB.get_active())
+				runType = DefaultChase::InwardRun;
+			else if(_outwardRunRB.get_active())
+				runType = DefaultChase::OutwardRun;
+			else //if(_randomRunRB.get_active())
+				runType = DefaultChase::RandomRun;
+			DefaultChase::MakeRunningLight(*_management, _selectedFixtures, _colorsWidgetP3.GetColors(), runType);
+			_showWindow->EmitUpdate();
+			hide();
+		} break;
 		case 4:
 		_mainBox.remove(_vBoxPage4);
 		_mainBox.pack_start(_vBoxPage1, true, true);
