@@ -50,9 +50,11 @@ set(GUIFILES
   gui/sceneframe.cpp
   gui/sequenceframe.cpp
   gui/showwindow.cpp
-  gui/visualizationwindow.cpp)
+  gui/visualizationwindow.cpp
+  gui/components/colorselectwidget.cpp)
 
 set(THEATREFILES
+  libtheatre/defaultchase.cpp
   libtheatre/fixture.cpp
   libtheatre/fixturefunction.cpp
   libtheatre/management.cpp

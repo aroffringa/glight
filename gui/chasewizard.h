@@ -1,46 +1,58 @@
 #ifndef CHASE_WIZARD_H
 #define CHASE_WIZARD_H
 
-#include <vector>
+#include "components/colorsequencewidget.h"
 
 #include <gtkmm/box.h>
+#include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>
-#include <gtkmm/drawingarea.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/radiobutton.h>
+#include <gtkmm/scale.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
-#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/window.h>
+
+#include <vector>
 
 class ChaseWizard : public Gtk::Window
 {
 public:
 	ChaseWizard(class ShowWindow*);
+	~ChaseWizard();
 	
 private:
 	void fillFixturesList();
-	void onManagementChange(class Management& newManagement) { _management = &newManagement; fillFixturesList(); }
+	void onManagementChange(class Management& newManagement)
+	{
+		_management = &newManagement;
+		fillFixturesList();
+	}
 	void onNextClicked();
-	void onColorClicked();
-	bool onColorAreaDraw(const Cairo::RefPtr<Cairo::Context>& cr);
+	void initPage1();
 	void initPage2();
 	void initPage3();
-	void makeChase();
+	void initPage4();
 	
 	class ShowWindow* _showWindow;
 	class Management* _management;
 	
 	Gtk::VBox _mainBox;
-	Gtk::VBox _vBoxPage2, _vBoxPage3;
+	Gtk::VBox _vBoxPage1, _vBoxPage2, _vBoxPage3, _vBoxPage4;
 	Gtk::Label _selectLabel;
 	Gtk::TreeView _fixturesListView;
 	std::vector<class Fixture*> _selectedFixtures;
 	
-	Gtk::HBox _colorHBox;
-	Gtk::Label _colorLabel;
-	Gtk::DrawingArea _colorArea;
-	Gtk::Button _colorButton;
-	double _colorR, _colorG, _colorB;
+	Gtk::RadioButton
+		_runningLightBtn,
+		_randomAroundSingleColourBtn;
+	
+	ColorSequenceWidget _colorsWidgetP3;
+	
+	ColorSequenceWidget _colorsWidgetP4;
+	Gtk::Label _variationLabel;
+	Gtk::Scale _variation;
 	
 	Gtk::ButtonBox _buttonBox;
 	Gtk::Button _nextButton;
