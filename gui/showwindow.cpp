@@ -2,6 +2,7 @@
 
 #include <gtkmm/stock.h>
 #include <gtkmm/filechooserdialog.h>
+#include <gtkmm/messagedialog.h>
 
 #include "configurationwindow.h"
 #include "controlwindow.h"
@@ -349,12 +350,20 @@ void ShowWindow::onMICancelDryModeClicked()
 {
 	if(_miDryMode.get_active() && _backgroundManagement != nullptr)
 	{
-		std::swap(_backgroundManagement, _management);
-		_visualizationWindow->SetRealMode();
-		changeManagement(_management.get(), true);
-		_backgroundManagement.reset();
-		_miCancelDryMode.set_sensitive(false);
-		_miDryMode.set_active(false);
+		Gtk::MessageDialog dialog(*this, "Are you sure you want to cancel dry mode?",
+			false, Gtk::MESSAGE_QUESTION,
+			Gtk::BUTTONS_OK_CANCEL);
+		dialog.set_secondary_text("All changes made after entering dry mode will be lost");
+		int result = dialog.run();
+		if(result == Gtk::RESPONSE_OK)
+		{
+			std::swap(_backgroundManagement, _management);
+			_visualizationWindow->SetRealMode();
+			changeManagement(_management.get(), true);
+			_backgroundManagement.reset();
+			_miCancelDryMode.set_sensitive(false);
+			_miDryMode.set_active(false);
+		}
 	}
 }
 
