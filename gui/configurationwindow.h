@@ -19,15 +19,15 @@
 */
 class ConfigurationWindow : public Gtk::Window {
 	public:
-		ConfigurationWindow(class Management &management);
-		void Update() { fillFixturesList(); }
-		void ChangeManagement(Management& management)
+		ConfigurationWindow(class ShowWindow* showWindow);
+		
+	private:
+		void onChangeManagement(class Management& management)
 		{
 			_management = &management;
 			fillFixturesList();
 		}
-		
-	private:
+		void update() { fillFixturesList(); }
 		void fillFixturesList();
 		bool onAddButtonClicked(GdkEventButton* event);
 		void onIncChannelButtonClicked();
@@ -36,6 +36,7 @@ class ConfigurationWindow : public Gtk::Window {
 		void updateFixture(const class Fixture *fixture);
 		static std::string getChannelString(const class Fixture& fixture);
 
+		class ShowWindow* _showWindow;
 		class Management* _management;
 
 		Gtk::TreeView _fixturesListView;

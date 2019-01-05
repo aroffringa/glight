@@ -68,6 +68,7 @@ class Management {
 		size_t SequenceIndex(const Sequence* sequence) const;
 		
 		class PresetValue* GetPresetValue(unsigned id) const;
+		class PresetValue* GetPresetValue(Controllable& controllable) const;
 		size_t PresetValueIndex(const class PresetValue* presetValue) const;
 		class ValueSnapshot Snapshot();
 

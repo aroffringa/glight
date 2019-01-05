@@ -67,7 +67,7 @@ void ProgramWindow::UpdateAfterPresetRemoval()
 	_chaseFrame->UpdateAfterPresetRemoval();
 }
 
-void ProgramWindow::ChangeManagement(class Management& management)
+void ProgramWindow::onChangeManagement(class Management& management)
 {
 	_presetsFrame->ChangeManagement(management);
 	_sequenceFrame->ChangeManagement(management);

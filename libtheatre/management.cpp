@@ -329,6 +329,14 @@ PresetValue* Management::GetPresetValue(unsigned id) const
 	return nullptr;
 }
 
+PresetValue* Management::GetPresetValue(Controllable& controllable) const
+{
+	for(const std::unique_ptr<PresetValue>& pv : _presetValues)
+		if(&pv->Controllable() == &controllable)
+			return pv.get();
+	return nullptr;
+}
+
 size_t Management::PresetValueIndex(const PresetValue* presetValue) const
 {
 	return NamedObject::FindIndex(_presetValues, presetValue);

@@ -39,6 +39,7 @@ set(GUIFILES
   gui/application.cpp
   gui/audiowidget.cpp
   gui/chaseframe.cpp
+  gui/chasewizard.cpp
   gui/configurationwindow.cpp
   gui/controlwidget.cpp
   gui/controlwindow.cpp
@@ -49,9 +50,11 @@ set(GUIFILES
   gui/sceneframe.cpp
   gui/sequenceframe.cpp
   gui/showwindow.cpp
-  gui/visualizationwindow.cpp)
+  gui/visualizationwindow.cpp
+  gui/components/colorselectwidget.cpp)
 
 set(THEATREFILES
+  libtheatre/defaultchase.cpp
   libtheatre/fixture.cpp
   libtheatre/fixturefunction.cpp
   libtheatre/management.cpp
