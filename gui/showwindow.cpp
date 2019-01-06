@@ -4,11 +4,13 @@
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/messagedialog.h>
 
+#include "chaseframe.h"
 #include "chasewizard.h"
 #include "configurationwindow.h"
 #include "controlwindow.h"
-#include "programwindow.h"
+#include "presetsframe.h"
 #include "sceneframe.h"
+#include "sequenceframe.h"
 #include "visualizationwindow.h"
 
 #include "../libtheatre/dmxdevice.h"
@@ -33,7 +35,6 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miDryMode("Dry mode"),
 	_miCancelDryMode("Cancel dry mode"),
 	_miChaseWizard("Chase wizard"),
-	_miProgrammingWindow("Programming"),
 	_miConfigWindow("Config"),
 	_miNewControlWindow("New faders window"),
 	_miVisualizationWindow("Visualization")
@@ -45,12 +46,6 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 
 	_management->Run();
 
-	_programWindow.reset(new ProgramWindow(*_management, *this));
-
-	_programWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
-	_programWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
-	_programWindow->show();
-	
 	addControlWindow();
 
 	_configurationWindow.reset(new ConfigurationWindow(this));
@@ -63,8 +58,17 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 
 	createMenu();
 	
+	_presetsFrame.reset(new PresetsFrame(*_management, *this));
+	_sequenceFrame.reset(new SequenceFrame(*_management, *this));
+	_chaseFrame.reset(new ChaseFrame(*_management, *this));
 	_sceneFrame.reset(new SceneFrame(*_management));
-	_box.pack_start(*_sceneFrame, true, true);
+
+	_notebook.append_page(*_presetsFrame, "Presets");
+	_notebook.append_page(*_sequenceFrame, "Sequences");
+	_notebook.append_page(*_chaseFrame, "Chases");
+	_notebook.append_page(*_sceneFrame, "Timeline");
+
+	_box.pack_start(_notebook);
 	
 	add(_box);
 	_box.show_all();
@@ -84,24 +88,27 @@ ShowWindow::~ShowWindow()
 
 	_controlWindows.clear();
 
-	_programWindow.reset();
 	_management.reset();
 }
 
 void ShowWindow::EmitUpdate()
 {
-	_programWindow->Update();
 	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
 		cw->Update();
+	_presetsFrame->Update();
+	_sequenceFrame->Update();
+	_chaseFrame->Update();
 	_sceneFrame->Update();
 	_signalUpdateControllables();
 }
 
 void ShowWindow::EmitUpdateAfterPresetRemoval()
 {
-	_programWindow->UpdateAfterPresetRemoval();
 	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
 		cw->UpdateAfterPresetRemoval();
+	_presetsFrame->UpdateAfterPresetRemoval();
+	_sequenceFrame->UpdateAfterPresetRemoval();
+	_chaseFrame->UpdateAfterPresetRemoval();
 	_signalUpdateControllables();
 }
 
@@ -111,13 +118,14 @@ void ShowWindow::EmitUpdateAfterAddPreset()
 	_signalUpdateControllables();
 }
 
-void ShowWindow::onProgramWindowButtonClicked()
+void ShowWindow::UpdateSequenceList()
 {
-	bool show = _miProgrammingWindow.get_active();
-	if(show)
-		_programWindow->show();
-	else
-		_programWindow->hide();
+	_sequenceFrame->Update();
+}
+
+void ShowWindow::UpdateChaseList()
+{
+	_chaseFrame->Update();
 }
 
 void ShowWindow::addControlWindow(FaderSetupState* stateOrNull)
@@ -219,10 +227,6 @@ void ShowWindow::createMenu()
 	_menuBar.append(_miDesign);
 	
 	_menuWindow.set_title("_Window");
-	
-	_miProgrammingWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onProgramWindowButtonClicked));
-	_miProgrammingWindow.set_active(true);
-	_menuWindow.append(_miProgrammingWindow);
 	
 	_miNewControlWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onControlWindowButtonClicked));
 	_menuWindow.append(_miNewControlWindow);
@@ -384,6 +388,9 @@ void ShowWindow::changeManagement(Management* newManagement, bool moveControlSli
 	_signalChangeManagement(*newManagement);
 	for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
 		cw->ChangeManagement(*newManagement, moveControlSliders);
+	_presetsFrame->ChangeManagement(*newManagement);
+	_sequenceFrame->ChangeManagement(*newManagement);
+	_chaseFrame->ChangeManagement(*newManagement);
 	_sceneFrame->ChangeManagement(*newManagement);
 	EmitUpdate();
 }
