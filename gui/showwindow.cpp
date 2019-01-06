@@ -8,6 +8,7 @@
 #include "chasewizard.h"
 #include "configurationwindow.h"
 #include "controlwindow.h"
+#include "effectsframe.h"
 #include "presetsframe.h"
 #include "sceneframe.h"
 #include "sequenceframe.h"
@@ -35,7 +36,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miDryMode("Dry mode"),
 	_miCancelDryMode("Cancel dry mode"),
 	_miChaseWizard("Chase wizard"),
-	_miConfigWindow("Config"),
+	_miConfigWindow("Fixtures config"),
 	_miNewControlWindow("New faders window"),
 	_miVisualizationWindow("Visualization")
 {
@@ -61,11 +62,13 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_presetsFrame.reset(new PresetsFrame(*_management, *this));
 	_sequenceFrame.reset(new SequenceFrame(*_management, *this));
 	_chaseFrame.reset(new ChaseFrame(*_management, *this));
+	_effectsFrame.reset(new EffectsFrame(*_management, *this));
 	_sceneFrame.reset(new SceneFrame(*_management));
 
 	_notebook.append_page(*_presetsFrame, "Presets");
 	_notebook.append_page(*_sequenceFrame, "Sequences");
 	_notebook.append_page(*_chaseFrame, "Chases");
+	_notebook.append_page(*_effectsFrame, "Effects");
 	_notebook.append_page(*_sceneFrame, "Timeline");
 
 	_box.pack_start(_notebook);
