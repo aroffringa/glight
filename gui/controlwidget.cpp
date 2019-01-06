@@ -1,7 +1,5 @@
 #include "controlwidget.h"
 
-#include "../libtheatre/chase.h"
-#include "../libtheatre/presetcollection.h"
 #include "../libtheatre/presetvalue.h"
 #include "../libtheatre/management.h"
 #include "../libtheatre/controllable.h"
@@ -44,6 +42,8 @@ ControlWidget::ControlWidget(class Management &management, char key)
 		connect(sigc::mem_fun(*this, &ControlWidget::onNameLabelClicked));
 	_eventBox.add(_nameLabel);
 	_nameLabel.show();
+	
+	_menu.SignalControllableSelected().connect(sigc::mem_fun(*this, &ControlWidget::onControllableSelected));
 }
 
 ControlWidget::~ControlWidget()
@@ -97,51 +97,7 @@ void ControlWidget::onScaleChange()
 
 bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
 {
-	_popupMenu.reset(new Gtk::Menu());
-	_popupChaseMenu.reset(new Gtk::Menu());
-	_popupPresetMenu.reset(new Gtk::Menu());
-	_popupFunctionMenu.reset(new Gtk::Menu());
-	_popupMenuItems.clear();
-	
-	std::unique_ptr<Gtk::MenuItem> submi;
-	
-	submi.reset(new Gtk::MenuItem("Functions"));
-	submi->set_submenu(*_popupFunctionMenu);
-	_popupMenu->append(*submi);
-	_popupMenuItems.emplace_back(std::move(submi));
-
-	submi.reset(new Gtk::MenuItem("Presets"));
-	submi->set_submenu(*_popupPresetMenu);
-	_popupMenu->append(*submi);
-	_popupMenuItems.emplace_back(std::move(submi));
-
-	submi.reset(new Gtk::MenuItem("Chases"));
-	submi->set_submenu(*_popupChaseMenu);
-	_popupMenu->append(*submi);
-	_popupMenuItems.emplace_back(std::move(submi));
-
-	const std::vector<std::unique_ptr<PresetValue>>&
-		presets = _management->PresetValues();
-	for(const std::unique_ptr<PresetValue>& pv : presets)
-	{
-		Gtk::Menu* subMenu;
-		Controllable& c = pv->Controllable();
-		if(dynamic_cast<Chase*>(&c) != nullptr)
-			subMenu = _popupChaseMenu.get();
-		else if(dynamic_cast<PresetCollection*>(&c))
-			subMenu = _popupPresetMenu.get();
-		else
-			subMenu = _popupFunctionMenu.get();
-		
-		std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(c.Name()));
-		mi->signal_activate().connect(sigc::bind<PresetValue*>( 
-    sigc::mem_fun(*this, &ControlWidget::onMenuItemClicked), pv.get()));
-		subMenu->append(*mi);
-		_popupMenuItems.emplace_back(std::move(mi));
-	}
-	_popupMenu->show_all_children();
-	_popupMenu->popup(event->button, event->time);
-
+	_menu.Popup(*_management, event);
 	return true;
 }
 
@@ -192,7 +148,7 @@ void ControlWidget::Assign(PresetValue* item, bool moveFader)
 	}
 }
 
-void ControlWidget::onMenuItemClicked(PresetValue *item)
+void ControlWidget::onControllableSelected(PresetValue *item)
 {
 	Assign(item, true);
 }

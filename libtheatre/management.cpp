@@ -303,11 +303,13 @@ Chase &Management::AddChase(Sequence &sequence)
 	return static_cast<Chase&>(*_controllables.back());
 }
 
-void Management::AddEffect(std::unique_ptr<Effect> effect)
+Effect& Management::AddEffect(std::unique_ptr<Effect> effect)
 {
 	std::vector<std::unique_ptr<EffectControl>> controls = effect->ConstructControls();
 	for(std::unique_ptr<EffectControl>& control : controls)
 		_controllables.emplace_back(std::move(control));
+	_effects.emplace_back(std::move(effect));
+	return *_effects.back();
 }
 
 Controllable& Management::GetControllable(const std::string &name) const

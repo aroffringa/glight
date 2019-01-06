@@ -13,11 +13,10 @@ public:
 	virtual void Mix(const ControlValue& value, unsigned* channelValues, unsigned universe, const class Timing& timing) final override;
 private:
 	friend class Effect;
-	void attach(class Effect* effect, size_t index, bool isLast)
+	void attach(class Effect* effect, size_t index)
 	{
 		_effect = effect;
 		_index = index;
-		_isLast = isLast;
 	}
 	class Effect* _effect;
 	size_t _index;
@@ -28,9 +27,8 @@ private:
 
 inline void EffectControl::Mix(const ControlValue& value, unsigned* channelValues, unsigned universe, const class Timing& timing)
 { 
-	_effect->setControlValue(_index, value);
-	if(_isLast)
-		_effect->collectAndMix(channelValues, universe, timing);
+	if(_effect->setControlValue(_index, value))
+		_effect->mix(channelValues, universe, timing);
 }
 
 #endif

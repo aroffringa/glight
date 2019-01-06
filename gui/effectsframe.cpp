@@ -2,6 +2,9 @@
 
 #include "showwindow.h"
 
+#include "../libtheatre/management.h"
+#include "../libtheatre/effects/thresholdeffect.h"
+
 #include <gtkmm/stock.h>
 
 EffectsFrame::EffectsFrame(Management &management, ShowWindow &parentWindow) :
@@ -15,6 +18,8 @@ EffectsFrame::EffectsFrame(Management &management, ShowWindow &parentWindow) :
 	_parentWindow(parentWindow),
 	_nameFrame(management)
 {
+	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &EffectsFrame::fillEffectsList));
+	
 	initEffectsPart();
 	initPropertiesPart();
 
@@ -57,7 +62,8 @@ void EffectsFrame::initEffectsPart()
 
 void EffectsFrame::initPropertiesPart()
 {
-	_addConnectionButton.signal_clicked().
+	_addConnectionButton.set_events(Gdk::BUTTON_PRESS_MASK);
+	_addConnectionButton.signal_button_press_event().
 		connect(sigc::mem_fun(*this, &EffectsFrame::onAddConnectionClicked));
 	_addConnectionButton.set_sensitive(false);
 	_connectionsButtonBox.pack_start(_addConnectionButton);
@@ -84,6 +90,19 @@ void EffectsFrame::initPropertiesPart()
 
 void EffectsFrame::fillEffectsList()
 {
+	AvoidRecursion::Token token(_delayUpdates);
+	_effectsListModel->clear();
+
+	std::lock_guard<std::mutex> lock(_management->Mutex());
+	const std::vector<std::unique_ptr<Effect>>&
+		effects = _management->Effects();
+	for(const std::unique_ptr<Effect>& effect : effects)
+	{
+		Gtk::TreeModel::iterator iter = _effectsListModel->append();
+		Gtk::TreeModel::Row row = *iter;
+		row[_effectsListColumns._title] = effect->Name();
+		row[_effectsListColumns._effect] = effect.get();
+	}
 }
 
 void EffectsFrame::onSelectedEffectChanged()
@@ -92,14 +111,22 @@ void EffectsFrame::onSelectedEffectChanged()
 
 void EffectsFrame::onNewEffectClicked()
 {
+	std::unique_ptr<Effect> effect(new ThresholdEffect());
+	effect->SetName("Threshold");
+	Effect* added = &_management->AddEffect(std::move(effect));
+	for(EffectControl* ec : added->Controls())
+		_management->AddPreset(*ec);
+	_parentWindow.EmitUpdate();
 }
 
 void EffectsFrame::onDeleteEffectClicked()
 {
 }
 
-void EffectsFrame::onAddConnectionClicked()
+bool EffectsFrame::onAddConnectionClicked(GdkEventButton* event)
 {
+	_controllablesMenu.Popup(*_management, event);
+	return true;
 }
 
 void EffectsFrame::onRemoveConnectionClicked()

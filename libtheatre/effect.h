@@ -53,21 +53,35 @@ public:
 	
 	const std::vector<Controllable*>& Connections() const { return _connections; }
 	
+	void StartIteration()
+	{
+		for(ControlValue& v : _values)
+			v.Set(0);
+		_nValuesSet = 0;
+	}
+	
 protected:
 	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const class Timing& timing) = 0;
+	
+	virtual std::string getControlName(size_t index) const = 0;
 	
 private:
 	friend class EffectControl;
 	
-	void setControlValue(size_t index, const ControlValue& value)
-	{ _values[index] = value; }
+	bool setControlValue(size_t index, const ControlValue& value)
+	{
+		_values[index] = value;
+		++_nValuesSet;
+		return _nValuesSet == _values.size();
+	}
 	
-	void collectAndMix(unsigned* channelValues, unsigned universe, const class Timing& timing)
+	void mix(unsigned* channelValues, unsigned universe, const class Timing& timing)
 	{
 		mix(_values.data(), channelValues, universe, timing);
 	}
 	
 	std::vector<ControlValue> _values;
+	size_t _nValuesSet;
 	std::vector<class EffectControl*> _controls;
 	std::vector<Controllable*> _connections;
 	std::vector<sigc::connection> _onDeleteConnections;
@@ -88,7 +102,9 @@ inline std::vector<std::unique_ptr<EffectControl>> Effect::ConstructControls()
 	{
 		controls.emplace_back(new EffectControl());
 		EffectControl& control = *controls[i];
-		control.attach(this, i, i == (_controls.size()-1));
+		_controls[i] = &control;
+		control.attach(this, i);
+		control.SetName(getControlName(i));
 	}
 	return controls;
 }

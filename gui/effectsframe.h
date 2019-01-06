@@ -14,6 +14,8 @@
 #include "avoidrecursion.h"
 #include "nameframe.h"
 
+#include "components/controllableselectmenu.h"
+
 /**
 	@author Andre Offringa
 */
@@ -40,7 +42,7 @@ private:
 		void onNewEffectClicked();
 		void onDeleteEffectClicked();
 		void onSelectedEffectChanged();
-		void onAddConnectionClicked();
+		bool onAddConnectionClicked(GdkEventButton* event);
 		void onRemoveConnectionClicked();
 		void onNameChange() { fillEffectsList(); }
 
@@ -80,6 +82,7 @@ private:
 		Management* _management;
 		class ShowWindow& _parentWindow;
 		NameFrame _nameFrame;
+		ControllableSelectMenu _controllablesMenu;
 		AvoidRecursion _delayUpdates;
 };
 

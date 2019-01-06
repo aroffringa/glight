@@ -51,7 +51,8 @@ set(GUIFILES
   gui/sequenceframe.cpp
   gui/showwindow.cpp
   gui/visualizationwindow.cpp
-  gui/components/colorselectwidget.cpp)
+  gui/components/colorselectwidget.cpp
+  gui/components/controllableselectmenu.cpp)
 
 set(THEATREFILES
   libtheatre/defaultchase.cpp

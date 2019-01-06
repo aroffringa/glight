@@ -8,9 +8,9 @@ class ControlValue {
 	public:
 		enum MixStyle { Default, HighestValue, Sum, LowestValue, Multiply, First, Second };
 
-		ControlValue(unsigned value) { _value = value; }
-		ControlValue(const ControlValue &source) { _value = source._value; }
-		~ControlValue() { }
+		ControlValue() { }
+		ControlValue(unsigned value) : _value(value) { }
+		ControlValue(const ControlValue &source) = default;
 
 		unsigned int UInt() const { return _value; }
 
