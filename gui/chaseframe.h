@@ -21,7 +21,7 @@
 */
 class ChaseFrame : public Gtk::VPaned {
 	public:
-		ChaseFrame(class Management& management, class ProgramWindow& parentWindow);
+		ChaseFrame(class Management& management, class ShowWindow& parentWindow);
 		~ChaseFrame();
 
 		void Update() { fillChaseList(); }
@@ -74,7 +74,7 @@ class ChaseFrame : public Gtk::VPaned {
 		AvoidRecursion _delayUpdates;
 		
 		Management* _management;
-		ProgramWindow& _parentWindow;
+		ShowWindow& _parentWindow;
 };
 
 #endif

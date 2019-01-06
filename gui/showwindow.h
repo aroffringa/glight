@@ -9,6 +9,7 @@
 #include <gtkmm/imagemenuitem.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menubar.h>
+#include <gtkmm/notebook.h>
 #include <gtkmm/separatormenuitem.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/window.h>
@@ -36,8 +37,12 @@ public:
 	
 	Management& GetManagement() const { return *_management; }
 	
+	void MakeSequenceTabActive() { _notebook.set_current_page(1); }
+	void MakeChasesTabActive() { _notebook.set_current_page(2); }
+	
+	void UpdateSequenceList();
+	void UpdateChaseList();
 private:
-	void onProgramWindowButtonClicked();
 	void onControlWindowButtonClicked()
 	{
 		addControlWindow();
@@ -73,7 +78,6 @@ private:
 
 	Gtk::VBox _box;
 
-	std::unique_ptr<class ProgramWindow> _programWindow;
 	std::vector<std::unique_ptr<class ControlWindow>> _controlWindows;
 	std::unique_ptr<class ConfigurationWindow> _configurationWindow;
 	std::unique_ptr<class VisualizationWindow> _visualizationWindow;
@@ -88,6 +92,9 @@ private:
 	std::unique_ptr<class Management> _backgroundManagement;
 	class PresetCollection *_preset;
 
+	std::unique_ptr<class PresetsFrame> _presetsFrame;
+	std::unique_ptr<class SequenceFrame> _sequenceFrame;
+	std::unique_ptr<class ChaseFrame> _chaseFrame;
 	std::unique_ptr<class SceneFrame> _sceneFrame;
 
 	GUIState _state;
@@ -103,11 +110,12 @@ private:
 	Gtk::MenuItem _miCancelDryMode;
 	Gtk::SeparatorMenuItem _miDesignSep1;
 	Gtk::MenuItem _miChaseWizard;
-	Gtk::CheckMenuItem _miProgrammingWindow, _miConfigWindow;
+	Gtk::CheckMenuItem _miConfigWindow;
 	Gtk::MenuItem _miNewControlWindow;
 	Gtk::CheckMenuItem _miVisualizationWindow;
 	
 	Gtk::MenuBar _menuBar;
+	Gtk::Notebook _notebook;
 };
 
 #endif

@@ -1,11 +1,10 @@
 #include "chaseframe.h"
-#include "programwindow.h"
+#include "showwindow.h"
 
 #include "../libtheatre/chase.h"
 #include "../libtheatre/management.h"
 
-ChaseFrame::ChaseFrame(Management &management, ProgramWindow &parentWindow)
-	:
+ChaseFrame::ChaseFrame(Management &management, ShowWindow &parentWindow) :
 	_upperFrame("All chases"),
 	_deleteChaseButton("Delete"),
 	_bottomFrame("Selected chase"),
@@ -205,6 +204,6 @@ void ChaseFrame::onDeleteChaseClicked()
 	{
 		Chase *chase = (*selected)[_chaseListColumns._chase];
 		_management->RemoveControllable(*chase);
-		_parentWindow.ForwardUpdateAfterPresetRemoval();
+		_parentWindow.EmitUpdateAfterPresetRemoval();
 	}
 }

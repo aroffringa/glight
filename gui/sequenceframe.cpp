@@ -3,9 +3,9 @@
 #include "../libtheatre/sequence.h"
 #include "../libtheatre/chase.h"
 
-#include "programwindow.h"
+#include "showwindow.h"
 
-SequenceFrame::SequenceFrame(Management &management, ProgramWindow &parentWindow) :
+SequenceFrame::SequenceFrame(Management &management, ShowWindow &parentWindow) :
 	_sequenceFrame("All sequences"),
 	_createChaseButton("Create chase"),
 	_nameFrame(management),
