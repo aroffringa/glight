@@ -2,14 +2,14 @@
 
 #include <gtkmm/stock.h>
 
-#include "programwindow.h"
+#include "showwindow.h"
 
 #include "../libtheatre/management.h"
 #include "../libtheatre/presetvalue.h"
 #include "../libtheatre/presetcollection.h"
 #include "../libtheatre/sequence.h"
 
-PresetsFrame::PresetsFrame(Management &management, ProgramWindow &parentWindow) :
+PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 	_presetsFrame("Preset programming"),
 	_newSequenceFrame("New sequence"),
 	_newPresetButton(Gtk::Stock::NEW), 
@@ -146,7 +146,7 @@ void PresetsFrame::onNewPresetButtonClicked()
 	lock.unlock();
 
 	FillPresetsList();
-	_parentWindow.ForwardUpdateAfterAddPreset();
+	_parentWindow.EmitUpdateAfterAddPreset();
 }
 
 void PresetsFrame::onDeletePresetButtonClicked()
@@ -162,7 +162,7 @@ void PresetsFrame::onDeletePresetButtonClicked()
 		_management->RemoveControllable(*preset);
 		lock.unlock();
 	
-		_parentWindow.ForwardUpdateAfterPresetRemoval();
+		_parentWindow.EmitUpdateAfterPresetRemoval();
 	}
 }
 

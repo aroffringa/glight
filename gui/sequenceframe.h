@@ -19,7 +19,7 @@
 */
 class SequenceFrame : public Gtk::VPaned {
 	public:
-		SequenceFrame(class Management& management, class ProgramWindow &parentWindow);
+		SequenceFrame(class Management& management, class ShowWindow& parentWindow);
 		~SequenceFrame();
 
 		void Update() { fillSequenceList(); }
@@ -58,7 +58,7 @@ class SequenceFrame : public Gtk::VPaned {
 		NameFrame _nameFrame;
 
 		class Management* _management;
-		class ProgramWindow& _parentWindow;
+		class ShowWindow& _parentWindow;
 };
 
 #endif

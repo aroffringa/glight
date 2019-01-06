@@ -46,7 +46,6 @@ set(GUIFILES
   gui/guistate.cpp
   gui/nameframe.cpp
   gui/presetsframe.cpp
-  gui/programwindow.cpp
   gui/sceneframe.cpp
   gui/sequenceframe.cpp
   gui/showwindow.cpp
