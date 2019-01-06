@@ -128,12 +128,13 @@ void Management::GetChannelValues(unsigned* values, unsigned universe)
 
 	std::lock_guard<std::mutex> lock(_mutex);
 
-	_show->Mix(values, universe, relTiming);
+	for(const std::unique_ptr<class Effect>& effect : _effects)
+		effect->StartIteration();
 
+	_show->Mix(values, universe, relTiming);
+	
 	for(const std::unique_ptr<class PresetValue>& pv : _presetValues)
-	{
 		pv->Controllable().Mix(pv->Value(), values, universe, relTiming);
-	}
 }
 
 PresetCollection& Management::AddPresetCollection()

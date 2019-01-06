@@ -45,6 +45,7 @@ private:
 		bool onAddConnectionClicked(GdkEventButton* event);
 		void onRemoveConnectionClicked();
 		void onNameChange() { fillEffectsList(); }
+		void onControllableSelected(class PresetValue* preset);
 
 		Gtk::TreeView _effectsListView;
 		Glib::RefPtr<Gtk::ListStore> _effectsListModel;

@@ -3,6 +3,8 @@
 #include "showwindow.h"
 
 #include "../libtheatre/management.h"
+#include "../libtheatre/presetvalue.h"
+
 #include "../libtheatre/effects/thresholdeffect.h"
 
 #include <gtkmm/stock.h>
@@ -62,9 +64,11 @@ void EffectsFrame::initEffectsPart()
 
 void EffectsFrame::initPropertiesPart()
 {
+	_controllablesMenu.SignalControllableSelected().connect(sigc::mem_fun(*this, &EffectsFrame::onControllableSelected));
+	
 	_addConnectionButton.set_events(Gdk::BUTTON_PRESS_MASK);
 	_addConnectionButton.signal_button_press_event().
-		connect(sigc::mem_fun(*this, &EffectsFrame::onAddConnectionClicked));
+		connect(sigc::mem_fun(*this, &EffectsFrame::onAddConnectionClicked), false);
 	_addConnectionButton.set_sensitive(false);
 	_connectionsButtonBox.pack_start(_addConnectionButton);
 
@@ -107,6 +111,25 @@ void EffectsFrame::fillEffectsList()
 
 void EffectsFrame::onSelectedEffectChanged()
 {
+	if(_delayUpdates.IsFirst())
+	{
+		Glib::RefPtr<Gtk::TreeSelection> selection =
+			_effectsListView.get_selection();
+		Gtk::TreeModel::iterator selected = selection->get_selected();
+		if(selected)
+		{
+			Effect* effect = (*selected)[_effectsListColumns._effect];
+			_nameFrame.SetNamedObject(*effect);
+
+			_addConnectionButton.set_sensitive(true);
+		}
+		else
+		{
+			_nameFrame.SetNoNamedObject();
+
+			_addConnectionButton.set_sensitive(false);
+		}
+	}
 }
 
 void EffectsFrame::onNewEffectClicked()
@@ -131,4 +154,16 @@ bool EffectsFrame::onAddConnectionClicked(GdkEventButton* event)
 
 void EffectsFrame::onRemoveConnectionClicked()
 {
+}
+
+void EffectsFrame::onControllableSelected(class PresetValue* preset)
+{
+	Glib::RefPtr<Gtk::TreeSelection> selection =
+		_effectsListView.get_selection();
+	Gtk::TreeModel::iterator selected = selection->get_selected();
+	if(selected)
+	{
+		Effect* effect = (*selected)[_effectsListColumns._effect];
+		effect->AddConnection(&preset->Controllable());
+	}
 }

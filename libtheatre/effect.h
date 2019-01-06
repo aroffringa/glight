@@ -16,6 +16,7 @@ class Effect : public NamedObject
 public:
 	Effect(size_t controlCount) :
 		_values(controlCount, 0),
+		_nValuesSet(0),
 		_controls(controlCount, nullptr)
 	{
 	}
@@ -72,7 +73,12 @@ private:
 	{
 		_values[index] = value;
 		++_nValuesSet;
-		return _nValuesSet == _values.size();
+		if(_nValuesSet == _values.size())
+		{
+			_nValuesSet = 0;
+			return true;
+		}
+		else return false;
 	}
 	
 	void mix(unsigned* channelValues, unsigned universe, const class Timing& timing)

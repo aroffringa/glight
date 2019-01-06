@@ -57,7 +57,7 @@ protected:
 		}
 	}
 	
-	virtual std::string getControlName(size_t index) const final override { return Name(); }
+	virtual std::string getControlName(size_t) const final override { return Name(); }
 	
 private:
 	unsigned
