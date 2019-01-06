@@ -6,6 +6,8 @@
 #include "controllable.h"
 #include "dmxdevice.h"
 #include "dummydevice.h"
+#include "effect.h"
+#include "effectcontrol.h"
 #include "fixturefunctioncontrol.h"
 #include "presetcollection.h"
 #include "presetvalue.h"
@@ -299,6 +301,13 @@ Chase &Management::AddChase(Sequence &sequence)
 {
 	_controllables.emplace_back(new Chase(sequence));
 	return static_cast<Chase&>(*_controllables.back());
+}
+
+void Management::AddEffect(std::unique_ptr<Effect> effect)
+{
+	std::vector<std::unique_ptr<EffectControl>> controls = effect->ConstructControls();
+	for(std::unique_ptr<EffectControl>& control : controls)
+		_controllables.emplace_back(std::move(control));
 }
 
 Controllable& Management::GetControllable(const std::string &name) const

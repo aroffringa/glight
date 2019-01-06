@@ -13,7 +13,7 @@ class FixtureFunctionControl : public Controllable {
 			: Controllable(function.Name()), _function(&function)
 		{ }
 		
-		virtual void Mix(const ControlValue &value, unsigned *channelValues, unsigned universe, const class Timing&)
+		virtual void Mix(const ControlValue &value, unsigned *channelValues, unsigned universe, const class Timing&) final override
 		{
 			_function->Mix(value.UInt(), ControlValue::Default, channelValues, universe);
 		}

@@ -37,6 +37,10 @@ class Management {
 		{
 			return _sequences;
 		}
+		const std::vector<std::unique_ptr<class Effect>>& Effects() const
+		{
+			return _effects;
+		}
 		const std::vector<std::unique_ptr<class DmxDevice>>& Devices() const
 		{
 			return _devices;
@@ -58,6 +62,8 @@ class Management {
 		void RemoveSequence(class Sequence &sequence);
 
 		class Chase& AddChase(class Sequence &sequence);
+		
+		void AddEffect(std::unique_ptr<class Effect> effect);
 
 		std::mutex& Mutex() { return _mutex; }
 
@@ -71,7 +77,7 @@ class Management {
 		class PresetValue* GetPresetValue(Controllable& controllable) const;
 		size_t PresetValueIndex(const class PresetValue* presetValue) const;
 		class ValueSnapshot Snapshot();
-
+		
 		double GetOffsetTimeInMS() const
 		{
 			boost::posix_time::ptime currentTime(boost::posix_time::microsec_clock::local_time());
@@ -136,6 +142,7 @@ class Management {
 		std::vector<std::unique_ptr<class Controllable>> _controllables;
 		std::vector<std::unique_ptr<class PresetValue>> _presetValues;
 		std::vector<std::unique_ptr<class Sequence>> _sequences;
+		std::vector<std::unique_ptr<class Effect>> _effects;
 		std::vector<std::unique_ptr<class DmxDevice>> _devices;
 };
 

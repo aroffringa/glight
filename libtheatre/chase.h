@@ -25,7 +25,7 @@ class Chase : public Controllable {
 		~Chase()
 		{
 		}
-		virtual void Mix(const ControlValue &value, unsigned *channelValues, unsigned universe, const Timing& timing)
+		virtual void Mix(const ControlValue &value, unsigned *channelValues, unsigned universe, const Timing& timing) final override
 		{
 			if(_trigger.Type() == Trigger::DelayTriggered)
 				mixDelayChase(value, channelValues, universe, timing);
