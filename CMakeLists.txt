@@ -52,7 +52,9 @@ set(GUIFILES
   gui/showwindow.cpp
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp
-  gui/components/controllableselectmenu.cpp)
+  gui/components/controllableselectmenu.cpp
+  gui/components/propertiesbox.cpp
+  gui/properties/propertyset.cpp)
 
 set(THEATREFILES
   libtheatre/defaultchase.cpp

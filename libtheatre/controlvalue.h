@@ -22,6 +22,10 @@ class ControlValue {
 		{
 			return ControlValue((1<<24)-1);
 		}
+		static unsigned MaxUInt()
+		{
+			return (1<<24)-1;
+		}
 
 		static unsigned Mix(unsigned firstValue, unsigned secondValue, MixStyle mixStyle)
 		{

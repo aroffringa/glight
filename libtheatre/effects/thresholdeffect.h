@@ -22,11 +22,20 @@ class ThresholdEffect : public Effect
 public:
 	ThresholdEffect() :
 		Effect(1),
-		_lowerStartLimit(ControlValue::Max().UInt()*1/3),
-		_lowerEndLimit(ControlValue::Max().UInt()*2/3),
-		_upperStartLimit(ControlValue::Max().UInt()+1),
-		_upperEndLimit(ControlValue::Max().UInt()+1)
+		_lowerStartLimit(ControlValue::MaxUInt()*1/3),
+		_lowerEndLimit(ControlValue::MaxUInt()*2/3),
+		_upperStartLimit(ControlValue::MaxUInt()),
+		_upperEndLimit(ControlValue::MaxUInt())
 	{ }
+	
+	unsigned LowerStartLimit() const { return _lowerStartLimit; }
+	unsigned LowerEndLimit() const { return _lowerEndLimit; }
+	unsigned UpperStartLimit() const { return _upperStartLimit; }
+	unsigned UpperEndLimit() const { return _upperEndLimit; }
+	void SetLowerStartLimit(unsigned lowerStartLimit) { _lowerStartLimit = lowerStartLimit; }
+	void SetLowerEndLimit(unsigned lowerEndLimit) { _lowerEndLimit = lowerEndLimit; }
+	void SetUpperStartLimit(unsigned upperStartLimit) { _upperStartLimit = upperStartLimit; }
+	void SetUpperEndLimit(unsigned upperEndLimit) { _upperEndLimit = upperEndLimit; }
 	
 protected:
 	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const class Timing& timing) final override

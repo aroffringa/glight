@@ -15,6 +15,7 @@
 #include "nameframe.h"
 
 #include "components/controllableselectmenu.h"
+#include "components/propertiesbox.h"
 
 /**
 	@author Andre Offringa
@@ -35,15 +36,20 @@ class EffectsFrame : public Gtk::VPaned
 		}
 private:
 		void fillEffectsList();
+		void fillProperties(class Effect& effect);
+		void fillConnectionsList(class Effect& effect);
 
 		void initEffectsPart();
 		void initPropertiesPart();
+		
+		Effect* getSelectedEffect();
 
 		void onNewEffectClicked();
 		void onDeleteEffectClicked();
 		void onSelectedEffectChanged();
 		bool onAddConnectionClicked(GdkEventButton* event);
 		void onRemoveConnectionClicked();
+		void onSelectedConnectionChanged();
 		void onNameChange() { fillEffectsList(); }
 		void onControllableSelected(class PresetValue* preset);
 
@@ -58,6 +64,14 @@ private:
 			Gtk::TreeModelColumn<class Effect *> _effect;
 		} _effectsListColumns;
 
+		Gtk::VBox _effectsVBox;
+		Gtk::HBox _effectsHBox;
+		Gtk::Frame _effectsFrame;
+		Gtk::ScrolledWindow _effectsScrolledWindow;
+		Gtk::VButtonBox _effectsButtonBox;
+		Gtk::Button _newEffectButton, _deleteEffectButton;
+		NameFrame _nameFrame;
+
 		Gtk::TreeView _connectionsListView;
 		Glib::RefPtr<Gtk::ListStore> _connectionsListModel;
 		struct ConnectionsListColumns : public Gtk::TreeModelColumnRecord
@@ -68,21 +82,17 @@ private:
 			Gtk::TreeModelColumn<Glib::ustring> _title;
 			Gtk::TreeModelColumn<size_t> _index;
 		} _connectionsListColumns;
-
-		Gtk::VBox _effectsVBox;
-		Gtk::HBox _effectsHBox, _connectionsBox;
-		Gtk::Frame _effectsFrame;
-		Gtk::Frame _connectionsFrame;
-
-		Gtk::ScrolledWindow _effectsScrolledWindow, _connectionsScrolledWindow;
-
-		Gtk::VButtonBox _effectsButtonBox, _connectionsButtonBox;
-		Gtk::Button _newEffectButton, _deleteEffectButton;
+		
+		Gtk::HBox _propertiesHBox, _connectionsBox;
+		Gtk::Frame _connectionsFrame, _propertiesFrame;
+		PropertiesBox _propertiesBox;
+		
+		Gtk::ScrolledWindow _connectionsScrolledWindow;
+		Gtk::VButtonBox _connectionsButtonBox;
 		Gtk::Button _addConnectionButton, _removeConnectionButton;
 
 		Management* _management;
 		class ShowWindow& _parentWindow;
-		NameFrame _nameFrame;
 		ControllableSelectMenu _controllablesMenu;
 		AvoidRecursion _delayUpdates;
 };

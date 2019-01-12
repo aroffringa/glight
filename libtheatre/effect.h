@@ -36,7 +36,7 @@ public:
 	{
 		_connections.emplace_back(controllable);
 		_onDeleteConnections.emplace_back(
-			controllable->SignalDelete().connect([&]() { RemoveConnection(controllable); })
+			controllable->SignalDelete().connect([controllable,this]() { RemoveConnection(controllable); })
 		);
 	}
 	
@@ -49,6 +49,12 @@ public:
 		// convert to index to also remove corresponding connection
 		size_t index = item - _connections.begin();
 		_connections.erase(item);
+		_onDeleteConnections.erase(_onDeleteConnections.begin() + index);
+	}
+	
+	void RemoveConnection(size_t index)
+	{
+		_connections.erase(_connections.begin() + index);
 		_onDeleteConnections.erase(_onDeleteConnections.begin() + index);
 	}
 	
