@@ -34,12 +34,12 @@ void PropertiesBox::fillProperties()
 					std::to_string(100.0*_propertySet->GetControlValue(property)/ControlValue::MaxUInt());
 					
 				row._widgets.emplace_back(new Gtk::Label(property.Title()));
-				_grid.attach(*row._widgets.back(), 0, rowIndex);
+				_grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
 				
 				Gtk::Entry* entry = new Gtk::Entry();
 				row._widgets.emplace_back(entry);
 				entry->set_text(entryText);
-				_grid.attach(*entry, 1, rowIndex);
+				_grid.attach(*entry, 1, rowIndex, 1, 1);
 			}
 		}
 	}
