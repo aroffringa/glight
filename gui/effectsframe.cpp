@@ -93,8 +93,6 @@ void EffectsFrame::initPropertiesPart()
 	_connectionsFrame.set_sensitive(false);
 	_propertiesHBox.pack_start(_connectionsFrame);
 
-	_propertiesHBox.pack_start(_connectionsBox, true, true, 5);
-
 	_propertiesFrame.add(_propertiesBox);
 	
 	_propertiesFrame.set_sensitive(false);
@@ -139,43 +137,15 @@ void EffectsFrame::onSelectedEffectChanged()
 			_nameFrame.SetNamedObject(*effect);
 			_connectionsFrame.set_sensitive(true);
 			_propertiesFrame.set_sensitive(true);
-			fillProperties(*effect);
+			fillConnectionsList(*effect);
+			_propertySet = PropertySet::Make(*effect);
+			_propertiesBox.SetPropertySet(_propertySet.get());
 		}
 		else
 		{
 			_nameFrame.SetNoNamedObject();
 			_connectionsFrame.set_sensitive(false);
 			_propertiesFrame.set_sensitive(false);
-		}
-	}
-}
-
-void EffectsFrame::fillProperties(Effect& effect)
-{
-	fillConnectionsList(effect);
-	
-	ThresholdEffect *threshold = dynamic_cast<ThresholdEffect*>(&effect);
-	if(threshold != nullptr)
-	{
-		_thresholdLowerStart.set_text(std::to_string(100.0*threshold->LowerStartLimit()/ControlValue::MaxUInt()));
-		_thresholdLowerEnd.set_text(std::to_string(100.0*threshold->LowerEndLimit()/ControlValue::MaxUInt()));
-		_thresholdUpperStart.set_text(std::to_string(100.0*threshold->UpperStartLimit()/ControlValue::MaxUInt()));
-		_thresholdUpperEnd.set_text(std::to_string(100.0*threshold->UpperEndLimit()/ControlValue::MaxUInt()));
-	}
-}
-
-void EffectsFrame::onApplyPropertiesClicked()
-{
-	Effect* effect = getSelectedEffect();
-	if(effect)
-	{
-		ThresholdEffect *threshold = dynamic_cast<ThresholdEffect*>(effect);
-		if(threshold != nullptr)
-		{
-			threshold->SetLowerStartLimit(unsigned(std::atof(_thresholdLowerStart.get_text().c_str())*ControlValue::MaxUInt()/100.0));
-			threshold->SetLowerEndLimit(unsigned(std::atof(_thresholdLowerEnd.get_text().c_str())*ControlValue::MaxUInt()/100.0));
-			threshold->SetUpperStartLimit(unsigned(std::atof(_thresholdUpperStart.get_text().c_str())*ControlValue::MaxUInt()/100.0));
-			threshold->SetUpperEndLimit(unsigned(std::atof(_thresholdUpperEnd.get_text().c_str())*ControlValue::MaxUInt()/100.0));
 		}
 	}
 }

@@ -18,7 +18,7 @@ class PropertiesBox : public Gtk::VBox
 public:
 	PropertiesBox();
 	
-	void SetPropertySet(PropertySet* propertySet);
+	void SetPropertySet(PropertySet* propertySet) { _propertySet = propertySet; fillProperties(); }
 	
 private:
 	struct PropertyRow {
@@ -26,22 +26,15 @@ private:
 		std::vector<std::unique_ptr<Gtk::Widget>> _widgets;
 	};
 	
+	PropertySet* _propertySet;
 	std::vector<PropertyRow> _rows;
-	Gtk::Grid _propertiesRightGrid;
-	Gtk::Label
-		_thresholdLowerStartLabel,
-		_thresholdLowerEndLabel,
-		_thresholdUpperStartLabel,
-		_thresholdUpperEndLabel;
-	Gtk::Entry
-		_thresholdLowerStart,
-		_thresholdLowerEnd,
-		_thresholdUpperStart,
-		_thresholdUpperEnd;
+	Gtk::Label _typeLabel;
+	Gtk::Grid _grid;
 	Gtk::ButtonBox _propertiesButtonBox;
-	Gtk::Button _applyPropertiesButton;
+	Gtk::Button _applyButton;
 	
-	void onApplyPropertiesClicked();
+	void onApplyClicked();
+	void fillProperties();
 };
 
 #endif

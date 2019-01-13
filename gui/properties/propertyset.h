@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 class PropertySet
 {
@@ -18,23 +19,24 @@ public:
 	iterator begin() { return _properties.begin(); }
 	const_iterator begin() const { return _properties.begin(); }
 	
-	static std::unique_ptr<PropertySet> Make(const Effect& object);
+	iterator end() { return _properties.end(); }
+	const_iterator end() const { return _properties.end(); }
 	
-	void SetControlValue(NamedObject& object, const Property& property, double value) const
+	static std::unique_ptr<PropertySet> Make(NamedObject& object);
+	
+	void SetControlValue(const Property& property, unsigned value) const
 	{
-		if(value < 0.0)
-			value = 0.0;
-		unsigned uv = value*ControlValue::MaxUInt()/100.0;
-		if(uv > ControlValue::MaxUInt())
-			uv = ControlValue::MaxUInt();
-		setControlValue(object, property._setIndex, uv);
+		if(value > ControlValue::MaxUInt())
+			value = ControlValue::MaxUInt();
+		setControlValue(*_object, property._setIndex, value);
 	}
 	
-	double GetControlValue(const NamedObject& object, const Property& property) const
+	unsigned GetControlValue(const Property& property) const
 	{
-		unsigned uv = getControlValue(object, property._setIndex);
-		return 100.0*uv/ControlValue::MaxUInt();
+		return getControlValue(*_object, property._setIndex);
 	}
+	
+	std::string GetTypeDescription() const;
 	
 protected:
 	virtual void setControlValue(NamedObject& object, size_t index, unsigned value) const
@@ -64,6 +66,7 @@ private:
 	{
 		throw std::runtime_error("A method of the property set was called for which the get method was not implemented");
 	}
+	NamedObject* _object;
 	std::vector<Property> _properties;
 };
 

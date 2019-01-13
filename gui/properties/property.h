@@ -19,6 +19,10 @@ public:
 		_title(title)
 	{ }
 	
+	Type GetType() const { return _type; }
+	
+	const std::string& Title() const { return _title; }
+	
 private:
 	friend class PropertySet;
 	

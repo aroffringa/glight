@@ -85,6 +85,7 @@ private:
 		
 		Gtk::HBox _propertiesHBox, _connectionsBox;
 		Gtk::Frame _connectionsFrame, _propertiesFrame;
+		std::unique_ptr<class PropertySet> _propertySet;
 		PropertiesBox _propertiesBox;
 		
 		Gtk::ScrolledWindow _connectionsScrolledWindow;

@@ -13,6 +13,7 @@ class NamedObject {
 		NamedObject() = default;
 		NamedObject(const std::string &name) : _name(name)
 		{ }
+		virtual ~NamedObject() { }
 
 		const std::string& Name() const { return _name; }
 		void SetName(const std::string &name) { _name = name; }

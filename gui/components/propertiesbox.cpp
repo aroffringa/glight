@@ -3,25 +3,61 @@
 #include <gtkmm/stock.h>
 
 PropertiesBox::PropertiesBox() :
-	_thresholdLowerStartLabel("Lower start:"),
-	_thresholdLowerEndLabel("Lower end:"),
-	_thresholdUpperStartLabel("Upper start:"),
-	_thresholdUpperEndLabel("Upper end:"),
-	_applyPropertiesButton(Gtk::Stock::APPLY)
+	_typeLabel("No object selected"),
+	_applyButton(Gtk::Stock::APPLY)
 {
-	_propertiesRightGrid.attach(_thresholdLowerStartLabel, 0, 0);
-	_propertiesRightGrid.attach(_thresholdLowerStart, 1, 0);
-	_propertiesRightGrid.attach(_thresholdLowerEndLabel, 0, 1);
-	_propertiesRightGrid.attach(_thresholdLowerEnd, 1, 1);
-	_propertiesRightGrid.attach(_thresholdUpperStartLabel, 0, 2);
-	_propertiesRightGrid.attach(_thresholdUpperStart, 1, 2);
-	_propertiesRightGrid.attach(_thresholdUpperEndLabel, 0, 3);
-	_propertiesRightGrid.attach(_thresholdUpperEnd, 1, 3);
-	pack_start(_propertiesRightGrid);
+	pack_start(_typeLabel);
+	pack_start(_grid);
 	
-	_applyPropertiesButton.signal_clicked().connect(sigc::mem_fun(*this, &PropertiesBox::onApplyPropertiesClicked));
+	_applyButton.signal_clicked().connect(sigc::mem_fun(*this, &PropertiesBox::onApplyClicked));
+	_propertiesButtonBox.pack_start(_applyButton);
 	
-	_propertiesButtonBox.pack_start(_applyPropertiesButton);
 	pack_end(_propertiesButtonBox);
+	
+	show_all_children();
 }
 
+void PropertiesBox::fillProperties()
+{
+	_rows.clear();
+	_typeLabel.set_text(_propertySet->GetTypeDescription());
+	for(Property& property : *_propertySet)
+	{
+		size_t rowIndex = _rows.size();
+		_rows.emplace_back();
+		PropertyRow& row = _rows.back();
+		
+		switch(property.GetType())
+		{
+			case Property::ControlValue: {
+				std::string entryText =
+					std::to_string(100.0*_propertySet->GetControlValue(property)/ControlValue::MaxUInt());
+					
+				row._widgets.emplace_back(new Gtk::Label(property.Title()));
+				_grid.attach(*row._widgets.back(), 0, rowIndex);
+				
+				Gtk::Entry* entry = new Gtk::Entry();
+				row._widgets.emplace_back(entry);
+				entry->set_text(entryText);
+				_grid.attach(*entry, 1, rowIndex);
+			}
+		}
+	}
+	_grid.show_all_children();
+}
+
+void PropertiesBox::onApplyClicked()
+{
+	auto rowIter = _rows.begin();
+	for(Property& property : *_propertySet)
+	{
+		switch(property.GetType())
+		{
+		case Property::ControlValue: {
+			std::string entryText = static_cast<Gtk::Entry*>(rowIter->_widgets[1].get())->get_text();
+			_propertySet->SetControlValue(property, unsigned(std::atof(entryText.c_str())*ControlValue::MaxUInt()/100.0));
+			} break;
+		}
+		++rowIter;
+	}
+}
