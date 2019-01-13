@@ -58,6 +58,7 @@ set(GUIFILES
 
 set(THEATREFILES
   libtheatre/defaultchase.cpp
+  libtheatre/effect.cpp
   libtheatre/fixture.cpp
   libtheatre/fixturefunction.cpp
   libtheatre/management.cpp

@@ -9,6 +9,7 @@ PropertiesBox::PropertiesBox() :
 	pack_start(_typeLabel);
 	pack_start(_grid);
 	
+	_applyButton.set_sensitive(false);
 	_applyButton.signal_clicked().connect(sigc::mem_fun(*this, &PropertiesBox::onApplyClicked));
 	_propertiesButtonBox.pack_start(_applyButton);
 	
@@ -17,10 +18,18 @@ PropertiesBox::PropertiesBox() :
 	show_all_children();
 }
 
+void PropertiesBox::Clear()
+{
+	_typeLabel.set_text("No object selected");
+	_propertySet = nullptr;
+	_rows.clear();
+	_applyButton.set_sensitive(false);
+}
+
 void PropertiesBox::fillProperties()
 {
 	_rows.clear();
-	_typeLabel.set_text(_propertySet->GetTypeDescription());
+	_typeLabel.set_text(_propertySet->Object().Name() + " (" + _propertySet->GetTypeDescription() + ")");
 	for(Property& property : *_propertySet)
 	{
 		size_t rowIndex = _rows.size();
@@ -44,6 +53,7 @@ void PropertiesBox::fillProperties()
 		}
 	}
 	_grid.show_all_children();
+	_applyButton.set_sensitive(true);
 }
 
 void PropertiesBox::onApplyClicked()

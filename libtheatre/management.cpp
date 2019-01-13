@@ -124,7 +124,8 @@ void Management::GetChannelValues(unsigned* values, unsigned universe)
 	double relTimeInMs = GetOffsetTimeInMS();
 	double beatValue, beatConfidence;
 	_beatFinder->GetBeatValue(beatValue, beatConfidence);
-	Timing relTiming(relTimeInMs, beatValue);
+	unsigned audioLevel = _beatFinder->GetAudioLevel();
+	Timing relTiming(relTimeInMs, beatValue, audioLevel);
 
 	std::lock_guard<std::mutex> lock(_mutex);
 

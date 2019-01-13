@@ -33,8 +33,8 @@ EffectsFrame::EffectsFrame(Management &management, ShowWindow &parentWindow) :
 
 void EffectsFrame::initEffectsPart()
 {
-	_newEffectButton.signal_clicked().
-		connect(sigc::mem_fun(*this, &EffectsFrame::onNewEffectClicked));
+	_newEffectButton.set_events(Gdk::BUTTON_PRESS_MASK);
+	_newEffectButton.signal_button_press_event().connect(sigc::mem_fun(*this, &EffectsFrame::onNewEffectClicked), false);
 	_effectsButtonBox.pack_start(_newEffectButton);
 
 	_deleteEffectButton.signal_clicked().
@@ -174,10 +174,38 @@ void EffectsFrame::onSelectedConnectionChanged()
 	_removeConnectionButton.set_sensitive(bool(selected));
 }
 
-void EffectsFrame::onNewEffectClicked()
+bool EffectsFrame::onNewEffectClicked(GdkEventButton* event)
 {
-	std::unique_ptr<Effect> effect(new ThresholdEffect());
-	effect->SetName("Threshold");
+	if(event->button == 1)
+	{
+		_popupEffectMenuItems.clear();
+		_popupEffectMenu.reset(new Gtk::Menu());
+	
+		std::vector<std::pair<std::string, enum Effect::Type>> list {
+			{ "Audio level", Effect::AudioLevelType },
+			{ "Threshold effect", Effect::ThresholdType }
+		};
+		
+		for(std::pair<std::string, enum Effect::Type> item : list)
+		{
+			std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(item.first));
+			mi->signal_activate().connect(sigc::bind<enum Effect::Type>( 
+			sigc::mem_fun(*this, &EffectsFrame::onNewEffectMenuClicked), item.second));
+			_popupEffectMenu->append(*mi);
+			_popupEffectMenuItems.emplace_back(std::move(mi));
+		}
+		
+		_popupEffectMenu->show_all_children();
+		_popupEffectMenu->popup(event->button, event->time);
+		return true;
+	}
+	return false;
+}
+
+void EffectsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
+{
+	std::unique_ptr<Effect> effect(Effect::Make(effectType));
+	effect->SetName(Effect::TypeName(effectType));
 	Effect* added = &_management->AddEffect(std::move(effect));
 	for(EffectControl* ec : added->Controls())
 		_management->AddPreset(*ec);

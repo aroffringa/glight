@@ -44,7 +44,8 @@ private:
 		
 		Effect* getSelectedEffect();
 
-		void onNewEffectClicked();
+		bool onNewEffectClicked(GdkEventButton* event);
+		void onNewEffectMenuClicked(enum Effect::Type effectType);
 		void onDeleteEffectClicked();
 		void onSelectedEffectChanged();
 		bool onAddConnectionClicked(GdkEventButton* event);
@@ -95,6 +96,8 @@ private:
 		Management* _management;
 		class ShowWindow& _parentWindow;
 		ControllableSelectMenu _controllablesMenu;
+		std::unique_ptr<Gtk::Menu> _popupEffectMenu;
+		std::vector<std::unique_ptr<Gtk::MenuItem>> _popupEffectMenuItems;
 		AvoidRecursion _delayUpdates;
 };
 

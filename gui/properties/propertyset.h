@@ -38,6 +38,10 @@ public:
 	
 	std::string GetTypeDescription() const;
 	
+	NamedObject& Object() const {
+		return *_object;
+	}
+	
 protected:
 	virtual void setControlValue(NamedObject& object, size_t index, unsigned value) const
 	{ setterNotImplemented(); }

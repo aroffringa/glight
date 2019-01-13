@@ -18,7 +18,10 @@ class PropertiesBox : public Gtk::VBox
 public:
 	PropertiesBox();
 	
-	void SetPropertySet(PropertySet* propertySet) { _propertySet = propertySet; fillProperties(); }
+	void SetPropertySet(PropertySet* propertySet)
+	{ _propertySet = propertySet; fillProperties(); }
+	
+	void Clear();
 	
 private:
 	struct PropertyRow {

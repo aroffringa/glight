@@ -1,5 +1,5 @@
-#ifndef EFFECT_PS
-#define EFFECT_PS
+#ifndef THRESHOLD_EFFECT_PS
+#define THRESHOLD_EFFECT_PS
 
 #include "propertyset.h"
 

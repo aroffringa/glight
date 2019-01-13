@@ -14,6 +14,11 @@
 class Effect : public NamedObject
 {
 public:
+	enum Type {
+		AudioLevelType,
+		ThresholdType
+	};
+	
 	Effect(size_t controlCount) :
 		_values(controlCount, 0),
 		_nValuesSet(0),
@@ -26,6 +31,10 @@ public:
 		for(sigc::connection& c : _onDeleteConnections)
 			c.disconnect();
 	}
+	
+	static std::unique_ptr<Effect> Make(Type type);
+	
+	static std::string TypeName(Type type);
 	
 	std::vector<std::unique_ptr<class EffectControl>> ConstructControls();
 	
