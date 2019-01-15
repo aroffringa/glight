@@ -52,6 +52,7 @@ class Reader{
 		void parseSequence(xmlNode *node);
 		void parseChase(xmlNode *node);
 		void parsePresetValue(xmlNode *node);
+		void parseEffect(xmlNode* node);
 
 		void parseFixtureFunction(xmlNode *node, class Fixture &parentFixture);
 		void parseDmxChannel(xmlNode *node, class DmxChannel &dmxChannel);

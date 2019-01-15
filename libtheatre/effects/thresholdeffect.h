@@ -28,6 +28,8 @@ public:
 		_upperEndLimit(ControlValue::MaxUInt())
 	{ }
 	
+	virtual Effect::Type GetType() const override { return ThresholdType; }
+	
 	unsigned LowerStartLimit() const { return _lowerStartLimit; }
 	unsigned LowerEndLimit() const { return _lowerEndLimit; }
 	unsigned UpperStartLimit() const { return _upperStartLimit; }
@@ -66,7 +68,7 @@ protected:
 		}
 	}
 	
-	virtual std::string getControlName(size_t) const final override { return Name(); }
+	virtual std::string getControlName(size_t) const final override { return Name() + "_M"; }
 	
 private:
 	unsigned

@@ -32,9 +32,13 @@ public:
 			c.disconnect();
 	}
 	
+	virtual Type GetType() const = 0;
+	
 	static std::unique_ptr<Effect> Make(Type type);
 	
-	static std::string TypeName(Type type);
+	static std::string TypeToName(Type type);
+	
+	static Type NameToType(const std::string& name);
 	
 	std::vector<std::unique_ptr<class EffectControl>> ConstructControls();
 	
@@ -58,12 +62,14 @@ public:
 		// convert to index to also remove corresponding connection
 		size_t index = item - _connections.begin();
 		_connections.erase(item);
+		_onDeleteConnections[index].disconnect();
 		_onDeleteConnections.erase(_onDeleteConnections.begin() + index);
 	}
 	
 	void RemoveConnection(size_t index)
 	{
 		_connections.erase(_connections.begin() + index);
+		_onDeleteConnections[index].disconnect();
 		_onDeleteConnections.erase(_onDeleteConnections.begin() + index);
 	}
 	
@@ -75,6 +81,8 @@ public:
 			v.Set(0);
 		_nValuesSet = 0;
 	}
+	
+	void SetNameGlobally(const std::string& effectName);
 	
 protected:
 	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const class Timing& timing) = 0;

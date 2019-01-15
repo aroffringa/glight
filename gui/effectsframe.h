@@ -26,13 +26,13 @@ class EffectsFrame : public Gtk::VPaned
 		EffectsFrame(class Management& management, class ShowWindow& parentWindow);
 
 		void Update() { fillEffectsList(); }
-		void UpdateAfterPresetRemoval() { fillEffectsList(); }
+		void UpdateAfterPresetRemoval() { Update(); }
 		
 		void ChangeManagement(class Management &management)
 		{
 			_nameFrame.ChangeManagement(management);
 			_management = &management;
-			fillEffectsList();
+			Update();
 		}
 private:
 		void fillEffectsList();
@@ -51,7 +51,7 @@ private:
 		bool onAddConnectionClicked(GdkEventButton* event);
 		void onRemoveConnectionClicked();
 		void onSelectedConnectionChanged();
-		void onNameChange() { fillEffectsList(); }
+		void onNameChange();
 		void onControllableSelected(class PresetValue* preset);
 
 		Gtk::TreeView _effectsListView;

@@ -21,7 +21,12 @@ private:
 	void onMenuItemClicked(class PresetValue *item);
 
 	std::vector<std::unique_ptr<Gtk::MenuItem>> _popupMenuItems;
-	std::unique_ptr<Gtk::Menu> _popupMenu, _popupChaseMenu, _popupPresetMenu, _popupFunctionMenu;
+	std::unique_ptr<Gtk::Menu>
+		_popupMenu,
+		_popupChaseMenu,
+		_popupPresetMenu,
+		_popupFunctionMenu,
+		_popupEffectsMenu;
 	sigc::signal<void(class PresetValue*)> _signalControllableSelected;
 };
 

@@ -113,7 +113,7 @@ void BeatFinder::open()
 				localAudioLevel = std::abs(alsaBuffer[i*2+1]);
 			fvec_set_sample(ibuf, s, i);
 		}
-		_audioLevel = localAudioLevel;
+		_audioLevel = std::min<uint32_t>(localAudioLevel*2, std::numeric_limits<uint16_t>::max());
 		aubio_tempo_do(tempo, ibuf, tempo_out);
 		smpl_t is_beat = fvec_get_sample(tempo_out, 0);
 		if(silence_threshold != -90)

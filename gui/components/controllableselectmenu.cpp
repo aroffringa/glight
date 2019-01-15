@@ -2,6 +2,7 @@
 
 #include "../../libtheatre/chase.h"
 #include "../../libtheatre/controllable.h"
+#include "../../libtheatre/effectcontrol.h"
 #include "../../libtheatre/management.h"
 #include "../../libtheatre/presetcollection.h"
 #include "../../libtheatre/presetvalue.h"
@@ -12,6 +13,7 @@ void ControllableSelectMenu::Popup(Management& management, GdkEventButton* event
 	_popupChaseMenu.reset(new Gtk::Menu());
 	_popupPresetMenu.reset(new Gtk::Menu());
 	_popupFunctionMenu.reset(new Gtk::Menu());
+	_popupEffectsMenu.reset(new Gtk::Menu());
 	_popupMenuItems.clear();
 	
 	std::unique_ptr<Gtk::MenuItem> submi;
@@ -30,6 +32,11 @@ void ControllableSelectMenu::Popup(Management& management, GdkEventButton* event
 	submi->set_submenu(*_popupChaseMenu);
 	_popupMenu->append(*submi);
 	_popupMenuItems.emplace_back(std::move(submi));
+	
+	submi.reset(new Gtk::MenuItem("Effects"));
+	submi->set_submenu(*_popupEffectsMenu);
+	_popupMenu->append(*submi);
+	_popupMenuItems.emplace_back(std::move(submi));
 
 	const std::vector<std::unique_ptr<PresetValue>>&
 		presets = management.PresetValues();
@@ -41,6 +48,8 @@ void ControllableSelectMenu::Popup(Management& management, GdkEventButton* event
 			subMenu = _popupChaseMenu.get();
 		else if(dynamic_cast<PresetCollection*>(&c))
 			subMenu = _popupPresetMenu.get();
+		else if(dynamic_cast<EffectControl*>(&c))
+			subMenu = _popupEffectsMenu.get();
 		else
 			subMenu = _popupFunctionMenu.get();
 		

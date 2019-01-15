@@ -21,7 +21,7 @@ EffectsFrame::EffectsFrame(Management &management, ShowWindow &parentWindow) :
 	_management(&management),
 	_parentWindow(parentWindow)
 {
-	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &EffectsFrame::fillEffectsList));
+	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &EffectsFrame::Update));
 	
 	initEffectsPart();
 	initPropertiesPart();
@@ -99,21 +99,42 @@ void EffectsFrame::initPropertiesPart()
 	_propertiesHBox.pack_start(_propertiesFrame);
 }
 
+void EffectsFrame::onNameChange()
+{
+	Effect* e = getSelectedEffect();
+	if(e != nullptr)
+	e->SetNameGlobally(e->Name());
+	fillEffectsList();
+}
+
 void EffectsFrame::fillEffectsList()
 {
+	Effect* selectedEffect = getSelectedEffect();
+	
 	AvoidRecursion::Token token(_delayUpdates);
 	_effectsListModel->clear();
 
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	const std::vector<std::unique_ptr<Effect>>&
 		effects = _management->Effects();
+	bool selectionChanged = (selectedEffect != nullptr);
 	for(const std::unique_ptr<Effect>& effect : effects)
 	{
 		Gtk::TreeModel::iterator iter = _effectsListModel->append();
 		Gtk::TreeModel::Row row = *iter;
 		row[_effectsListColumns._title] = effect->Name();
 		row[_effectsListColumns._effect] = effect.get();
+		if(effect.get() == selectedEffect)
+		{
+			Glib::RefPtr<Gtk::TreeSelection> selection =
+				_effectsListView.get_selection();
+			selection->select(iter);
+			selectionChanged = false;
+		}
 	}
+	token.Release();
+	if(selectionChanged)
+		onSelectedEffectChanged();
 }
 
 Effect* EffectsFrame::getSelectedEffect()
@@ -146,6 +167,9 @@ void EffectsFrame::onSelectedEffectChanged()
 			_nameFrame.SetNoNamedObject();
 			_connectionsFrame.set_sensitive(false);
 			_propertiesFrame.set_sensitive(false);
+			_connectionsListModel->clear();
+			_propertySet.reset();
+			_propertiesBox.Clear();
 		}
 	}
 }
@@ -205,7 +229,7 @@ bool EffectsFrame::onNewEffectClicked(GdkEventButton* event)
 void EffectsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 {
 	std::unique_ptr<Effect> effect(Effect::Make(effectType));
-	effect->SetName(Effect::TypeName(effectType));
+	effect->SetNameGlobally(Effect::TypeToName(effectType) + std::to_string(_management->Effects().size()+1));
 	Effect* added = &_management->AddEffect(std::move(effect));
 	for(EffectControl* ec : added->Controls())
 		_management->AddPreset(*ec);

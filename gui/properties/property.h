@@ -13,22 +13,25 @@ public:
 	enum Type {
 		ControlValue
 	};
-	Property(const std::string& title, Type type) :
+	Property(const std::string& name, const std::string& description, Type type) :
 		_type(type),
 		_setIndex(0),
-		_title(title)
+		_name(name),
+		_description(description)
 	{ }
 	
 	Type GetType() const { return _type; }
 	
-	const std::string& Title() const { return _title; }
+	const std::string& Name() const { return _name; }
+	
+	const std::string& Description() const { return _description; }
 	
 private:
 	friend class PropertySet;
 	
 	Type _type;
 	size_t _setIndex;
-	std::string _title;
+	std::string _name, _description;
 };
 
 #endif

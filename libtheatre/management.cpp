@@ -37,10 +37,6 @@ Management::~Management()
 		_thread->join();
 		_thread.reset();
 	}
-
-	_beatFinder.reset();
-	
-	Clear();
 }
 
 void Management::Clear()
@@ -50,6 +46,7 @@ void Management::Clear()
 	_controllables.clear();
 	_presetValues.clear();
 	_sequences.clear();
+	_effects.clear();
 
 	_theatre->Clear();
 

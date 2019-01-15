@@ -42,7 +42,7 @@ void PropertiesBox::fillProperties()
 				std::string entryText =
 					std::to_string(100.0*_propertySet->GetControlValue(property)/ControlValue::MaxUInt());
 					
-				row._widgets.emplace_back(new Gtk::Label(property.Title()));
+				row._widgets.emplace_back(new Gtk::Label(property.Description()));
 				_grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
 				
 				Gtk::Entry* entry = new Gtk::Entry();

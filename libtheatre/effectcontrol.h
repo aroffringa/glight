@@ -6,9 +6,13 @@
 class EffectControl : public Controllable
 {
 public:
-	EffectControl() : _effect(nullptr), _isLast(false) { }
+	EffectControl() :
+		_effect(nullptr),
+		_index(0)
+	{ }
 	
-	class Effect& GetEffect();
+	class Effect& GetEffect() { return *_effect; }
+	const class Effect& GetEffect() const { return *_effect; }
 	
 	virtual void Mix(const ControlValue& value, unsigned* channelValues, unsigned universe, const class Timing& timing) final override;
 private:
@@ -20,7 +24,6 @@ private:
 	}
 	class Effect* _effect;
 	size_t _index;
-	bool _isLast;
 };
 
 #include "effect.h"

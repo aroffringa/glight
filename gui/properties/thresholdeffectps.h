@@ -8,10 +8,10 @@ class ThresholdEffectPS final : public PropertySet
 public:
 	ThresholdEffectPS()
 	{
-		addProperty(Property("Lower start limit", Property::ControlValue));
-		addProperty(Property("Upper start limit", Property::ControlValue));
-		addProperty(Property("Lower end limit", Property::ControlValue));
-		addProperty(Property("Upper end limit", Property::ControlValue));
+		addProperty(Property("lowerstartlim", "Lower start limit", Property::ControlValue));
+		addProperty(Property("upperstartlim", "Upper start limit", Property::ControlValue));
+		addProperty(Property("lowerendlim", "Lower end limit", Property::ControlValue));
+		addProperty(Property("upperendlim", "Upper end limit", Property::ControlValue));
 	}
 	
 protected:

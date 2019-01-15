@@ -24,6 +24,9 @@ public:
 	
 	static std::unique_ptr<PropertySet> Make(NamedObject& object);
 	
+	static std::unique_ptr<PropertySet> Make(const NamedObject& object)
+	{ return Make(const_cast<NamedObject&>(object)); }
+	
 	void SetControlValue(const Property& property, unsigned value) const
 	{
 		if(value > ControlValue::MaxUInt())
@@ -40,6 +43,16 @@ public:
 	
 	NamedObject& Object() const {
 		return *_object;
+	}
+	
+	Property& GetProperty(const std::string& name)
+	{
+		for(Property& p : _properties)
+		{
+			if(p.Name() == name)
+				return p;
+		}
+		throw std::runtime_error("Property not found: " + name);
 	}
 	
 protected:

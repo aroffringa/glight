@@ -14,6 +14,8 @@ public:
 		_decaySpeed(((1<<24)-1)/100) // fully decay in 100 ms
 	{ }
 	
+	virtual Effect::Type GetType() const override { return AudioLevelType; }
+	
 	unsigned DecaySpeed() const { return _decaySpeed; }
 	
 	void SetDecaySpeed(unsigned decaySpeed) { _decaySpeed = decaySpeed; }
@@ -39,7 +41,7 @@ protected:
 		}
 	}
 	
-	virtual std::string getControlName(size_t) const final override { return Name(); }
+	virtual std::string getControlName(size_t) const final override { return Name() + "_M"; }
 	
 private:
 	unsigned _lastValue;

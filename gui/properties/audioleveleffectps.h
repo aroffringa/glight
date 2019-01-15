@@ -10,7 +10,7 @@ class AudioLevelEffectPS final : public PropertySet
 public:
 	AudioLevelEffectPS()
 	{
-		addProperty(Property("Decay speed", Property::ControlValue));
+		addProperty(Property("decayspeed", "Decay speed", Property::ControlValue));
 	}
 	
 protected:
