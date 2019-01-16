@@ -1,5 +1,7 @@
 #include "reader.h"
 
+#include "libtheatre/properties/propertyset.h"
+
 #include "libtheatre/chase.h"
 #include "libtheatre/controllable.h"
 #include "libtheatre/effect.h"
@@ -12,7 +14,6 @@
 #include "libtheatre/theatre.h"
 
 #include "gui/guistate.h"
-#include "gui/properties/propertyset.h"
 
 Reader::Reader(Management &management) : _management(management), _theatre(management.Theatre()), _guiState(nullptr)
 {

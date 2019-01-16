@@ -53,8 +53,7 @@ set(GUIFILES
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp
   gui/components/controllableselectmenu.cpp
-  gui/components/propertiesbox.cpp
-  gui/properties/propertyset.cpp)
+  gui/components/propertiesbox.cpp)
 
 set(THEATREFILES
   libtheatre/defaultchase.cpp
@@ -65,7 +64,8 @@ set(THEATREFILES
   libtheatre/oladevice.cpp
   libtheatre/scene.cpp
   libtheatre/show.cpp
-  libtheatre/theatre.cpp)
+  libtheatre/theatre.cpp
+  libtheatre/properties/propertyset.cpp)
   
 add_executable(glight ${MAINFILES} ${GUIFILES} ${THEATREFILES})
 

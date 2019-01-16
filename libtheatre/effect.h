@@ -84,11 +84,23 @@ public:
 	
 	void SetNameGlobally(const std::string& effectName);
 	
+	std::unique_ptr<Effect> Copy() const;
+	
 protected:
 	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const class Timing& timing) = 0;
 	
 	virtual std::string getControlName(size_t index) const = 0;
 	
+	void shallowAssign(const Effect& effect)
+	{
+		_values = effect._values;
+		_nValuesSet = effect._nValuesSet;
+		for(sigc::connection& c : _onDeleteConnections)
+			c.disconnect();
+		_controls.assign(effect._controls.size(), nullptr);
+		_connections.clear();
+		_onDeleteConnections.clear();
+	}
 private:
 	friend class EffectControl;
 	

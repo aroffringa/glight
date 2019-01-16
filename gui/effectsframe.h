@@ -28,12 +28,6 @@ class EffectsFrame : public Gtk::VPaned
 		void Update() { fillEffectsList(); }
 		void UpdateAfterPresetRemoval() { Update(); }
 		
-		void ChangeManagement(class Management &management)
-		{
-			_nameFrame.ChangeManagement(management);
-			_management = &management;
-			Update();
-		}
 private:
 		void fillEffectsList();
 		void fillProperties(class Effect& effect);
@@ -53,6 +47,12 @@ private:
 		void onSelectedConnectionChanged();
 		void onNameChange();
 		void onControllableSelected(class PresetValue* preset);
+		void onChangeManagement(class Management &management)
+		{
+			_nameFrame.ChangeManagement(management);
+			_management = &management;
+			Update();
+		}
 
 		Gtk::TreeView _effectsListView;
 		Glib::RefPtr<Gtk::ListStore> _effectsListModel;

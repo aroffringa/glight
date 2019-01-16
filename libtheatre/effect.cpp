@@ -3,6 +3,8 @@
 #include "effects/audioleveleffect.h"
 #include "effects/thresholdeffect.h"
 
+#include "properties/propertyset.h"
+
 std::unique_ptr<Effect> Effect::Make(Effect::Type type)
 {
 	using up = std::unique_ptr<Effect>;
@@ -42,4 +44,18 @@ void Effect::SetNameGlobally(const std::string& effectName)
 		if(_controls[i] != nullptr)
 			_controls[i]->SetName(getControlName(i));
 	}
+}
+
+std::unique_ptr<Effect> Effect::Copy() const
+{
+	std::unique_ptr<Effect> copy = Make(GetType());
+	std::unique_ptr<PropertySet>
+		psSrc = PropertySet::Make(*this),
+		psDest = PropertySet::Make(*copy);
+	for(size_t i=0; i!=psSrc->size(); ++i)
+	{
+		psDest->AssignProperty((*psDest)[i], (*psSrc)[i], *psSrc);
+	}
+	copy->SetName(Name());
+	return std::move(copy);
 }

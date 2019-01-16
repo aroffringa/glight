@@ -30,3 +30,15 @@ std::string PropertySet::GetTypeDescription() const
 	else
 		return "Unknown object";
 }
+
+void PropertySet::AssignProperty(const Property& to, const Property& from, const PropertySet& fromSet)
+{
+	if(from._type != to._type)
+		throw std::runtime_error("Copying different types");
+	switch(from._type)
+	{
+	case Property::ControlValue:
+		SetControlValue(to, fromSet.GetControlValue(from));
+		break;
+	}
+}

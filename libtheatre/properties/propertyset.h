@@ -22,6 +22,11 @@ public:
 	iterator end() { return _properties.end(); }
 	const_iterator end() const { return _properties.end(); }
 	
+	size_t size() const { return _properties.size(); }
+	
+	Property& operator[](size_t index) { return _properties[index]; }
+	const Property& operator[](size_t index) const { return _properties[index]; }
+	
 	static std::unique_ptr<PropertySet> Make(NamedObject& object);
 	
 	static std::unique_ptr<PropertySet> Make(const NamedObject& object)
@@ -54,6 +59,8 @@ public:
 		}
 		throw std::runtime_error("Property not found: " + name);
 	}
+	
+	void AssignProperty(const Property& to, const Property& from, const PropertySet& fromSet);
 	
 protected:
 	virtual void setControlValue(NamedObject& object, size_t index, unsigned value) const

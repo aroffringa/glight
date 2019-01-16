@@ -78,6 +78,8 @@ class Management {
 		size_t PresetValueIndex(const class PresetValue* presetValue) const;
 		class ValueSnapshot Snapshot();
 		
+		size_t EffectIndex(const Effect* effect) const;
+		
 		double GetOffsetTimeInMS() const
 		{
 			boost::posix_time::ptime currentTime(boost::posix_time::microsec_clock::local_time());
@@ -111,6 +113,7 @@ class Management {
 		
 		void dryCopySequenceDependency(const Management& forDryCopy, size_t index);
 		void dryCopyControllerDependency(const Management& forDryCopy, size_t index);
+		void dryCopyEffectDependency(const Management& forDryCopy, size_t index);
 
 		bool IsQuitting()
 		{

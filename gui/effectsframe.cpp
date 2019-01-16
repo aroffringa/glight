@@ -22,6 +22,7 @@ EffectsFrame::EffectsFrame(Management &management, ShowWindow &parentWindow) :
 	_parentWindow(parentWindow)
 {
 	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &EffectsFrame::Update));
+	parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &EffectsFrame::onChangeManagement));
 	
 	initEffectsPart();
 	initPropertiesPart();
@@ -103,7 +104,7 @@ void EffectsFrame::onNameChange()
 {
 	Effect* e = getSelectedEffect();
 	if(e != nullptr)
-	e->SetNameGlobally(e->Name());
+		e->SetNameGlobally(e->Name());
 	fillEffectsList();
 }
 
@@ -114,7 +115,7 @@ void EffectsFrame::fillEffectsList()
 	AvoidRecursion::Token token(_delayUpdates);
 	_effectsListModel->clear();
 
-	std::lock_guard<std::mutex> lock(_management->Mutex());
+	std::unique_lock<std::mutex> lock(_management->Mutex());
 	const std::vector<std::unique_ptr<Effect>>&
 		effects = _management->Effects();
 	bool selectionChanged = (selectedEffect != nullptr);
@@ -132,6 +133,7 @@ void EffectsFrame::fillEffectsList()
 			selectionChanged = false;
 		}
 	}
+	lock.unlock();
 	token.Release();
 	if(selectionChanged)
 		onSelectedEffectChanged();

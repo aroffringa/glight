@@ -1,7 +1,7 @@
 #ifndef PROPERTIES_BOX_H
 #define PROPERTIES_BOX_H
 
-#include "../properties/propertyset.h"
+#include "../../libtheatre/properties/propertyset.h"
 
 #include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>

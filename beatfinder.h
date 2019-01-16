@@ -51,7 +51,7 @@ public:
 		confidence = beat.confidence;
 	}
 	
-	unsigned GetAudioLevel() const
+	uint16_t GetAudioLevel() const
 	{
 		return _audioLevel;
 	}

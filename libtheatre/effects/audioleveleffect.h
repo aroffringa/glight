@@ -6,20 +6,22 @@
 
 #include <string>
 
-class AudioLevelEffect : public Effect
+class AudioLevelEffect final : public Effect
 {
 public:
 	AudioLevelEffect() :
 		Effect(1),
+		_lastValue(0),
+		_lastTime(0),
 		_decaySpeed(((1<<24)-1)/100) // fully decay in 100 ms
 	{ }
 	
-	virtual Effect::Type GetType() const override { return AudioLevelType; }
+	virtual Effect::Type GetType() const final override { return AudioLevelType; }
 	
 	unsigned DecaySpeed() const { return _decaySpeed; }
 	
 	void SetDecaySpeed(unsigned decaySpeed) { _decaySpeed = decaySpeed; }
-	
+
 protected:
 	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const Timing& timing) final override
 	{

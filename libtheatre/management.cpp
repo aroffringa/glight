@@ -359,6 +359,11 @@ ValueSnapshot Management::Snapshot()
 	return *_snapshot;
 }
 
+size_t Management::EffectIndex(const Effect* effect) const
+{
+	return NamedObject::FindIndex(_effects, effect);
+}
+
 /**
  * Copy constructor for making a dry mode copy.
  */
@@ -376,11 +381,12 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 	_snapshot.reset(new ValueSnapshot(*forDryCopy._snapshot));
 	_show.reset(new class Show(*this)); // TODO For now we don't copy the show
 	
-	// The controllables can have dependencies to other controllables, hence dependences
+	// The controllables can have dependencies to other controllables, hence dependencies
 	// need to be resolved and copied first.
 	_controllables.resize(forDryCopy._controllables.size());
 	_presetValues.resize(forDryCopy._presetValues.size());
 	_sequences.resize(forDryCopy._sequences.size());
+	_effects.resize(forDryCopy._effects.size());
 	for(size_t i=0; i!=forDryCopy._controllables.size(); ++i)
 	{
 		if(_controllables[i] == nullptr) // not already resolved?
@@ -399,6 +405,11 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 		if(_sequences[i] == nullptr)
 			dryCopySequenceDependency(forDryCopy, i);
 	}
+	for(size_t i=0; i!=forDryCopy._effects.size(); ++i)
+	{
+		if(_effects[i] == nullptr)
+			dryCopyEffectDependency(forDryCopy, i);
+	}
 }
 
 void Management::dryCopyControllerDependency(const Management& forDryCopy, size_t index)
@@ -407,6 +418,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 	FixtureFunctionControl* ffc = dynamic_cast<FixtureFunctionControl*>(controllable);
 	const Chase* chase = dynamic_cast<const Chase *>(controllable);
 	const PresetCollection* presetCollection = dynamic_cast<const PresetCollection *>(controllable);
+	const EffectControl* effectControl = dynamic_cast<const EffectControl*>(controllable);
 	if(ffc != nullptr)
 	{
 		FixtureFunction& ff = _theatre->GetFixtureFunction(ffc->Function().Name());
@@ -432,6 +444,11 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 			pc.AddPresetValue(*value, *_controllables[cIndex]);
 		}
 	}
+	else if(effectControl != nullptr)
+	{
+		size_t eIndex = forDryCopy.EffectIndex(&effectControl->GetEffect());
+		dryCopyEffectDependency(forDryCopy, eIndex);
+	}
 	else throw std::runtime_error("Unknown controllable in manager");
 }
 
@@ -446,6 +463,25 @@ void Management::dryCopySequenceDependency(const Management& forDryCopy, size_t 
 		if(_controllables[pIndex] == nullptr)
 			dryCopyControllerDependency(forDryCopy, pIndex);
 		destSequence->AddPreset(static_cast<PresetCollection*>(_controllables[pIndex].get()));
+	}
+}
+
+void Management::dryCopyEffectDependency(const Management& forDryCopy, size_t index)
+{
+	const Effect* effect = forDryCopy._effects[index].get();
+	_effects[index] = effect->Copy();
+	std::vector<std::unique_ptr<EffectControl>> controls = _effects[index]->ConstructControls();
+	for(size_t i=0; i!=controls.size(); ++i)
+	{
+		size_t cIndex = forDryCopy.ControllableIndex(effect->Controls()[i]);
+		_controllables[cIndex] = std::move(controls[i]);
+	}
+	for(Controllable* c : effect->Connections())
+	{
+		size_t cIndex = forDryCopy.ControllableIndex(c);
+		if(_controllables[cIndex] == nullptr)
+			dryCopyControllerDependency(forDryCopy, cIndex);
+		_effects[index]->AddConnection(_controllables[cIndex].get());
 	}
 }
 

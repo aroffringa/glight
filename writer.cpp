@@ -2,6 +2,8 @@
 
 #include "writer.h"
 
+#include "libtheatre/properties/propertyset.h"
+
 #include "libtheatre/chase.h"
 #include "libtheatre/controllable.h"
 #include "libtheatre/effect.h"
@@ -14,7 +16,6 @@
 #include "libtheatre/theatre.h"
 
 #include "gui/guistate.h"
-#include "gui/properties/propertyset.h"
 
 Writer::Writer(Management &management) : _management(management), _guiState(nullptr), _encoding("UTF-8")
 {
