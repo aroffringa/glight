@@ -1,15 +1,18 @@
 #include "defaultchase.h"
 
-#include "management.h"
-
 #include "color.h"
 #include "fixture.h"
 #include "fixturefunctioncontrol.h"
+#include "management.h"
 #include "presetcollection.h"
 #include "sequence.h"
 
+#include "effects/audioleveleffect.h"
+#include "effects/thresholdeffect.h"
+
 #include <algorithm>
 #include <random>
+
 
 Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
 {
@@ -100,7 +103,7 @@ void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCol
 		}
 	}
 }
-#include <iostream>
+
 Sequence& DefaultChase::MakeColorVariation(class Management& management, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors, double variation)
 {
 	Sequence& seq = management.AddSequence();
@@ -135,4 +138,40 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 		management.AddPreset(pc);
 	}
 	return seq;
+}
+
+Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors)
+{
+	if(colors.size() != fixtures.size())
+		throw std::runtime_error("Number of colours did not match number of fixtures");
+	std::unique_ptr<AudioLevelEffect> audioLevel(new AudioLevelEffect());
+	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel));
+	for(EffectControl* ec : newAudioLevel.Controls())
+		management.AddPreset(*ec);
+	newAudioLevel.SetNameGlobally("VUMeter");
+	for(size_t i=0; i!=fixtures.size(); ++i)
+	{
+		unsigned
+			red = colors[i].Red()*((1<<24)-1)/255,
+			green = colors[i].Green()*((1<<24)-1)/255,
+			blue = colors[i].Blue()*((1<<24)-1)/255,
+			master = 0;
+		if(red != 0 || green != 0 || blue != 0)
+			master = (1<<24)-1;
+		PresetCollection& pc = management.AddPresetCollection();
+		pc.SetName("VUM" + std::to_string(i+1));
+		addColorPresets(management, *fixtures[i], pc, red, green, blue, master);
+		
+		std::unique_ptr<ThresholdEffect> threshold(new ThresholdEffect());
+		threshold->SetLowerStartLimit(((1<<24)-1)*i/fixtures.size());
+		threshold->SetLowerEndLimit(((1<<24)-1)*(i+1)/fixtures.size());
+		Effect& newEffect = management.AddEffect(std::move(threshold));
+		for(EffectControl* ec : newEffect.Controls())
+			management.AddPreset(*ec);
+		newEffect.SetNameGlobally("VUM" + std::to_string(i+1) + "_Thr");
+		newEffect.AddConnection(&pc);
+		
+		newAudioLevel.AddConnection(newEffect.Controls().front());
+	}
+	return *newAudioLevel.Controls()[0];
 }
