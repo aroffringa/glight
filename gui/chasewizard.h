@@ -72,7 +72,12 @@ private:
 	Gtk::Scale _variation;
 	
 	ColorSequenceWidget _colorsWidgetP3_3;
-	
+	Gtk::RadioButton
+		_vuIncreasingRB,
+		_vuDecreasingRB,
+		_vuInwardRunRB,
+		_vuOutwardRunRB;
+		
 	Gtk::ButtonBox _buttonBox;
 	Gtk::Button _nextButton;
 	Page _currentPage;

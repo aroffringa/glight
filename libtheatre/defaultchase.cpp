@@ -140,7 +140,7 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 	return seq;
 }
 
-Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors)
+Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors, VUMeterDirection direction)
 {
 	if(colors.size() != fixtures.size())
 		throw std::runtime_error("Number of colours did not match number of fixtures");
@@ -149,28 +149,58 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 	for(EffectControl* ec : newAudioLevel.Controls())
 		management.AddPreset(*ec);
 	newAudioLevel.SetNameGlobally("VUMeter");
-	for(size_t i=0; i!=fixtures.size(); ++i)
+	size_t nLevels;
+	if(direction == VUInward || direction == VUOutward)
+		nLevels = (fixtures.size()+1) / 2;
+	else
+		nLevels = fixtures.size();
+	for(size_t i=0; i!=nLevels; ++i)
 	{
-		unsigned
-			red = colors[i].Red()*((1<<24)-1)/255,
-			green = colors[i].Green()*((1<<24)-1)/255,
-			blue = colors[i].Blue()*((1<<24)-1)/255,
-			master = 0;
-		if(red != 0 || green != 0 || blue != 0)
-			master = (1<<24)-1;
-		PresetCollection& pc = management.AddPresetCollection();
-		pc.SetName("VUM" + std::to_string(i+1));
-		addColorPresets(management, *fixtures[i], pc, red, green, blue, master);
-		
 		std::unique_ptr<ThresholdEffect> threshold(new ThresholdEffect());
-		threshold->SetLowerStartLimit(((1<<24)-1)*i/fixtures.size());
-		threshold->SetLowerEndLimit(((1<<24)-1)*(i+1)/fixtures.size());
+		threshold->SetLowerStartLimit(((1<<24)-1)*i/nLevels);
+		threshold->SetLowerEndLimit(((1<<24)-1)*(i+1)/nLevels);
 		Effect& newEffect = management.AddEffect(std::move(threshold));
 		for(EffectControl* ec : newEffect.Controls())
 			management.AddPreset(*ec);
 		newEffect.SetNameGlobally("VUM" + std::to_string(i+1) + "_Thr");
-		newEffect.AddConnection(&pc);
 		
+		size_t nFixInLevel = 1;
+		if((direction == VUInward && (i != nLevels-1 || fixtures.size()%2==0) ) ||
+			(direction == VUOutward && (i != 0 || fixtures.size()%2==0) ) )
+			nFixInLevel = 2;
+		
+		PresetCollection& pc = management.AddPresetCollection();
+		pc.SetName("VUM" + std::to_string(i+1));
+		for(size_t fixInLevel=0; fixInLevel!=nFixInLevel; ++fixInLevel)
+		{
+			size_t fixIndex;
+			if(fixInLevel == 0)
+			{
+				switch(direction)
+				{
+					case VUIncreasing:
+					case VUInward: fixIndex = i; break;
+					case VUOutward: fixIndex = fixtures.size()/2 - i; break;
+					case VUDecreasing: fixIndex = nLevels - i - 1; break;
+				}
+			}
+			else {
+				if(direction == VUInward)
+					fixIndex = fixtures.size() - i - 1;
+				else
+					fixIndex = nLevels + i - 1;
+			}
+			unsigned
+				red = colors[fixIndex].Red()*((1<<24)-1)/255,
+				green = colors[fixIndex].Green()*((1<<24)-1)/255,
+				blue = colors[fixIndex].Blue()*((1<<24)-1)/255,
+				master = 0;
+			if(red != 0 || green != 0 || blue != 0)
+				master = (1<<24)-1;
+			addColorPresets(management, *fixtures[fixIndex], pc, red, green, blue, master);
+		}
+		management.AddPreset(pc);
+		newEffect.AddConnection(&pc);
 		newAudioLevel.AddConnection(newEffect.Controls().front());
 	}
 	return *newAudioLevel.Controls()[0];

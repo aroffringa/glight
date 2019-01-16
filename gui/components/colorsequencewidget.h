@@ -69,6 +69,8 @@ public:
 	
 	void SetMinCount(size_t minCount)
 	{
+		if(_maxCount < minCount)
+			SetMaxCount(minCount);
 		while(_widgets.size() < minCount)
 			onIncreaseColors();
 		_minCount = minCount;
@@ -78,6 +80,8 @@ public:
 	
 	void SetMaxCount(size_t maxCount)
 	{
+		if(_minCount > maxCount)
+			SetMinCount(maxCount);
 		_maxCount = maxCount;
 		if(_maxCount!=0)
 		{

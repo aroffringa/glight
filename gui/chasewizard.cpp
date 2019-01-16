@@ -27,6 +27,10 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow) :
 	_colorsWidgetP3_2(this),
 	_variationLabel("Variation:"),
 	_colorsWidgetP3_3(this),
+	_vuIncreasingRB("Increasing direction"),
+	_vuDecreasingRB("Decreasing direction"),
+	_vuInwardRunRB("Inward direction"),
+	_vuOutwardRunRB("Outward direcion"),
 	_nextButton("Next"),
 	_currentPage(Page1_SelFixtures)
 {
@@ -111,6 +115,15 @@ void ChaseWizard::initPage3_2SingleColour()
 void ChaseWizard::initPage3_3VUMeter()
 {
 	_vBoxPage3_3.pack_start(_colorsWidgetP3_3, true, false);
+	Gtk::RadioButtonGroup group;
+	_vuIncreasingRB.set_group(group);
+	_vBoxPage3_3.pack_start(_vuIncreasingRB, true, false);
+	_vuDecreasingRB.set_group(group);
+	_vBoxPage3_3.pack_start(_vuDecreasingRB, true, false);
+	_vuInwardRunRB.set_group(group);
+	_vBoxPage3_3.pack_start(_vuInwardRunRB, true, false);
+	_vuOutwardRunRB.set_group(group);
+	_vBoxPage3_3.pack_start(_vuOutwardRunRB, true, false);
 }
 
 void ChaseWizard::fillFixturesList()
@@ -205,14 +218,23 @@ void ChaseWizard::onNextClicked()
 		hide();
 		break;
 		
-		case Page3_3_VUMeter:
-		_mainBox.remove(_vBoxPage3_3);
-		_mainBox.pack_start(_vBoxPage1, true, true);
-		_vBoxPage1.show_all();
-		_currentPage = Page1_SelFixtures;
-		DefaultChase::MakeVUMeter(*_management, _selectedFixtures, _colorsWidgetP3_3.GetColors());
-		_showWindow->EmitUpdate();
-		hide();
-		break;
+		case Page3_3_VUMeter: {
+			_mainBox.remove(_vBoxPage3_3);
+			_mainBox.pack_start(_vBoxPage1, true, true);
+			_vBoxPage1.show_all();
+			_currentPage = Page1_SelFixtures;
+			DefaultChase::VUMeterDirection direction;
+			if(_vuIncreasingRB.get_active())
+				direction = DefaultChase::VUIncreasing;
+			else if(_vuDecreasingRB.get_active())
+				direction = DefaultChase::VUDecreasing;
+			else if(_vuInwardRunRB.get_active())
+				direction = DefaultChase::VUInward;
+			else //if(_vuOutwardRunRB.get_active())
+				direction = DefaultChase::VUOutward;
+			DefaultChase::MakeVUMeter(*_management, _selectedFixtures, _colorsWidgetP3_3.GetColors(), direction);
+			_showWindow->EmitUpdate();
+			hide();
+		} break;
 	}
 }
