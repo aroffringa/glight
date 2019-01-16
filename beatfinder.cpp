@@ -82,6 +82,7 @@ void BeatFinder::open()
 	std::vector<int16_t> alsaBuffer(hop_size*2);
 	
 	_beat = Beat(0.0, 0.0);
+	_audioLevel = 0;
 	
 	while(!_isStopping)
 	{
@@ -100,17 +101,24 @@ void BeatFinder::open()
 			if (rc != (int) readAtATime)
 				std::cout << "Only " << rc << " frames were read in snd_pcm_readi().\n";
 		}
+		uint16_t localAudioLevel = 0;
 		for(size_t i=0; i!=hop_size; ++i)
 		{
 			smpl_t s;
 			s = alsaBuffer[i*2];
+			if(unsigned(std::abs(alsaBuffer[i*2])) > localAudioLevel)
+				localAudioLevel = std::abs(alsaBuffer[i*2]);
 			s += alsaBuffer[i*2+1];
+			if(unsigned(std::abs(alsaBuffer[i*2+1])) > localAudioLevel)
+				localAudioLevel = std::abs(alsaBuffer[i*2+1]);
 			fvec_set_sample(ibuf, s, i);
 		}
+		_audioLevel = std::min<uint32_t>(localAudioLevel*2, std::numeric_limits<uint16_t>::max());
 		aubio_tempo_do(tempo, ibuf, tempo_out);
 		smpl_t is_beat = fvec_get_sample(tempo_out, 0);
 		if(silence_threshold != -90)
 			is_silence = aubio_silence_detection(ibuf, silence_threshold);
+
 		if(is_beat && !is_silence)
 		{
 			smpl_t confidence = aubio_tempo_get_confidence(tempo);

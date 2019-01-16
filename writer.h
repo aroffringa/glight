@@ -43,7 +43,9 @@ class Writer {
 		void writeChase(const class Chase &control);
 		void writeTransition(const class Transition &transition);
 		void writeTrigger(const class Trigger &trigger);
-		void writeSequence(const class Sequence &sequence);
+		void writeSequence(const class Sequence& sequence);
+		void writeEffect(const class Effect& effect);
+		
 		void writeScene(const class Scene &scene);
 		void writeSceneItem(const class SceneItem &item);
 		void writeKeySceneItem(const class KeySceneItem &item);
@@ -68,11 +70,15 @@ class Writer {
 		xmlTextWriterPtr _writer;
 		const char *_encoding;
 
-		void requireSequence(const class Sequence &sequence);
-		void requireControllable(const class Controllable &controllable);
+		void requireSequence(const class Sequence& sequence)
+		{ writeSequence(sequence); }
+
+		void requireControllable(const class Controllable& controllable)
+		{ writeControllable(controllable); }
 
 		std::set<std::string> _sequencesWritten;
 		std::set<std::string> _controllablesWritten;
+		std::set<std::string> _effectsWritten;
 };
 
 #endif

@@ -6,10 +6,9 @@
 #include <alsa/asoundlib.h>
 
 #include <mutex>
-#include <thread>
-
-#include <string>
 #include <stdexcept>
+#include <string>
+#include <thread>
 
 class SyncListener
 {
@@ -65,7 +64,6 @@ class AudioPlayer : private SyncListener {
 				void operator()()
 				{
 					_player.open();
-					std::cout << "Alsa thread finished." << std::endl;
 				}
 		};
 		

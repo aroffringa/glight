@@ -1,7 +1,10 @@
 #include "reader.h"
 
+#include "libtheatre/properties/propertyset.h"
+
 #include "libtheatre/chase.h"
 #include "libtheatre/controllable.h"
+#include "libtheatre/effect.h"
 #include "libtheatre/fixture.h"
 #include "libtheatre/fixturefunction.h"
 #include "libtheatre/fixturefunctioncontrol.h"
@@ -119,6 +122,8 @@ void Reader::parseControlItem(xmlNode *node)
 		parseChase(node);
 	else if(n == "preset-value")
 		parsePresetValue(node);
+	else if(n == "effect")
+		parseEffect(node);
 	else throw std::runtime_error(std::string("Invalid node while expecting a control item: ") + n);
 }
 
@@ -253,6 +258,38 @@ void Reader::parsePresetValue(xmlNode *node)
 		_management.GetControllable(getStringAttribute(node, "controllable-ref"));
 	PresetValue &value = _management.AddPreset(getIntAttribute(node, "id"), controllable);
 	value.SetValue(ControlValue(getIntAttribute(node, "value")));
+}
+
+void Reader::parseEffect(xmlNode* node)
+{
+	Effect::Type type = Effect::NameToType(getStringAttribute(node, "type"));
+	std::unique_ptr<Effect> effect = Effect::Make(type);
+	effect->SetName(getStringAttribute(node, "name"));
+	Effect* effectPtr = &_management.AddEffect(std::move(effect));
+	std::unique_ptr<PropertySet> ps = PropertySet::Make(*effectPtr);
+	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
+	{
+		if(curNode->type == XML_ELEMENT_NODE)
+		{
+			if(name(curNode) == "property")
+			{
+				std::string propName = getStringAttribute(curNode, "name");
+				Property& p = ps->GetProperty(propName);
+				switch(p.GetType())
+				{
+				case Property::ControlValue:
+					ps->SetControlValue(p, getIntAttribute(curNode, "value"));
+					break;
+				}
+			}
+			else if(name(curNode) == "connection-ref")
+			{
+				std::string cName = getStringAttribute(curNode, "name");
+				effectPtr->AddConnection(&_management.GetControllable(cName));
+			}
+			else throw std::runtime_error("Bad element in effect");
+		}
+	}
 }
 
 void Reader::parseTrigger(xmlNode *node, class Trigger &trigger)

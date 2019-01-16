@@ -2,8 +2,12 @@
 
 #include "writer.h"
 
+#include "libtheatre/properties/propertyset.h"
+
 #include "libtheatre/chase.h"
 #include "libtheatre/controllable.h"
+#include "libtheatre/effect.h"
+#include "libtheatre/effectcontrol.h"
 #include "libtheatre/fixture.h"
 #include "libtheatre/fixturefunction.h"
 #include "libtheatre/fixturefunctioncontrol.h"
@@ -110,6 +114,11 @@ void Writer::writeGlightShow()
 	for(const std::unique_ptr<Sequence>& s : sequences)
 		writeSequence(*s);
 
+	const std::vector<std::unique_ptr<Effect>>&
+		effects = _management.Effects();
+	for(const std::unique_ptr<Effect>& e : effects)
+		writeEffect(*e);
+
 	endElement(); // control
 
 	startElement("show");
@@ -173,9 +182,10 @@ void Writer::writeControllable(const Controllable &controllable)
 {
 	if(_controllablesWritten.count(controllable.Name()) == 0)
 	{
-		const FixtureFunctionControl *fixtureFunctionControl = dynamic_cast<const FixtureFunctionControl *>(&controllable);
-		const Chase *chase = dynamic_cast<const Chase *>(&controllable);
-		const PresetCollection *presetCollection = dynamic_cast<const PresetCollection *>(&controllable);
+		const FixtureFunctionControl* fixtureFunctionControl = dynamic_cast<const FixtureFunctionControl *>(&controllable);
+		const Chase* chase = dynamic_cast<const Chase *>(&controllable);
+		const PresetCollection* presetCollection = dynamic_cast<const PresetCollection *>(&controllable);
+		const EffectControl* effectControl = dynamic_cast<const EffectControl*>(&controllable);
 	
 		if(fixtureFunctionControl != nullptr)
 			writeFixtureFunctionControl(*fixtureFunctionControl);
@@ -183,6 +193,8 @@ void Writer::writeControllable(const Controllable &controllable)
 			writeChase(*chase);
 		else if(presetCollection != nullptr)
 			writePresetCollection(*presetCollection);
+		else if(effectControl != nullptr)
+			writeEffect(effectControl->GetEffect());
 		else
 			throw std::runtime_error("Unknown controllable");
 	}
@@ -252,15 +264,15 @@ void Writer::writeSequence(const Sequence &sequence)
 	if(_sequencesWritten.count(sequence.Name()) == 0)
 	{
 		const std::vector<PresetCollection*> &presets = sequence.Presets();
-		for(std::vector<PresetCollection*>::const_iterator i=presets.begin();i!=presets.end();++i)
-			requireControllable(**i);
+		for(const PresetCollection* pc : presets)
+			requireControllable(*pc);
 	
 		startElement("sequence");
 		writeAttribute("name", sequence.Name());
-		for(std::vector<PresetCollection*>::const_iterator i=presets.begin();i!=presets.end();++i)
+		for(const PresetCollection* pc : presets)
 		{
 			startElement("preset-collection-ref");
-			writeAttribute("name", (*i)->Name());
+			writeAttribute("name", pc->Name());
 			endElement();
 		}
 		endElement();
@@ -268,16 +280,42 @@ void Writer::writeSequence(const Sequence &sequence)
 	}
 }
 
-void Writer::requireSequence(const Sequence &sequence)
+void Writer::writeEffect(const class Effect& effect)
 {
-	if(_sequencesWritten.count(sequence.Name()) == 0)
-		writeSequence(sequence);
-}
-
-void Writer::requireControllable(const Controllable &controllable)
-{
-	if(_controllablesWritten.count(controllable.Name()) == 0)
-		writeControllable(controllable);
+	if(_effectsWritten.count(effect.Name()) == 0)
+	{
+		for(const Controllable* c : effect.Connections())
+			requireControllable(*c);
+			
+		startElement("effect");
+		writeAttribute("type", effect.TypeToName(effect.GetType()));
+		writeAttribute("name", effect.Name());
+		std::unique_ptr<PropertySet> ps = PropertySet::Make(effect);
+		
+		// the number and name of the effect controls are implied from the
+		// effect type, so do not require to be stored.
+		
+		for(const Property& p : *ps)
+		{
+			startElement("property");
+			writeAttribute("name", p.Name());
+			switch(p.GetType())
+			{
+				case Property::ControlValue:
+					writeAttribute("value", ps->GetControlValue(p));
+					break;
+			}
+			endElement();
+		}
+		for(const Controllable* c : effect.Connections())
+		{
+			startElement("connection-ref");
+			writeAttribute("name", c->Name());
+			endElement();
+		}
+		endElement();
+		_effectsWritten.insert(effect.Name());
+	}
 }
 
 void Writer::writeScene(const Scene &scene)

@@ -25,14 +25,9 @@ PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 	initNewSequencePart();
 
 	pack1(_presetsFrame);
-	_presetsFrame.show();
-
 	pack2(_newSequenceFrame);
-	_newSequenceFrame.show();
-}
-
-PresetsFrame::~PresetsFrame()
-{
+	
+	show_all_children();
 }
 
 void PresetsFrame::initPresetsPart()
@@ -40,15 +35,12 @@ void PresetsFrame::initPresetsPart()
 	_newPresetButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onNewPresetButtonClicked));
 	_presetsButtonBox.pack_start(_newPresetButton);
-	_newPresetButton.show();
 
 	_deletePresetButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onDeletePresetButtonClicked));
 	_presetsButtonBox.pack_start(_deletePresetButton);
-	_deletePresetButton.show();
 
 	_presetsHBox.pack_start(_presetsButtonBox, false, false, 5);
-	_presetsButtonBox.show();
 
 	_presetListModel =
     Gtk::ListStore::create(_presetListColumns);
@@ -58,21 +50,16 @@ void PresetsFrame::initPresetsPart()
 	_presetListView.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PresetsFrame::onSelectedPresetChanged));
 	FillPresetsList();
 	_presetsScrolledWindow.add(_presetListView);
-	_presetListView.show();
 
 	_presetsScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_presetsHBox.pack_start(_presetsScrolledWindow);
-	_presetsScrolledWindow.show();
 
 	_presetsVBox.pack_start(_presetsHBox);
-	_presetsHBox.show();
 
 	_nameFrame.SignalNameChange().connect(sigc::mem_fun(*this, &PresetsFrame::onNameChange));
 	_presetsVBox.pack_start(_nameFrame, false, false, 2);
-	_nameFrame.show();
 
 	_presetsFrame.add(_presetsVBox);
-	_presetsVBox.show();
 }
 
 void PresetsFrame::initNewSequencePart()
@@ -81,20 +68,16 @@ void PresetsFrame::initNewSequencePart()
 		connect(sigc::mem_fun(*this, &PresetsFrame::onAddPresetToSequenceButtonClicked));
 	_newSequenceButtonBox.pack_start(_addPresetToSequenceButton);
 	_addPresetToSequenceButton.set_sensitive(false);
-	_addPresetToSequenceButton.show();
 
 	_clearSequenceButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onClearSequenceButtonClicked));
 	_newSequenceButtonBox.pack_start(_clearSequenceButton);
-	_clearSequenceButton.show();
 
 	_createSequenceButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onCreateSequenceButtonClicked));
 	_newSequenceButtonBox.pack_start(_createSequenceButton);
-	_createSequenceButton.show();
 
 	_newSequenceBox.pack_start(_newSequenceButtonBox, false, false, 5);
-	_newSequenceButtonBox.show();
 	
 	_newSequenceListModel =
     Gtk::ListStore::create(_newSequenceListColumns);
@@ -102,14 +85,11 @@ void PresetsFrame::initNewSequencePart()
 	_newSequenceListView.set_model(_newSequenceListModel);
 	_newSequenceListView.append_column("Preset", _newSequenceListColumns._title);
 	_newSequenceScrolledWindow.add(_newSequenceListView);
-	_newSequenceListView.show();
 
 	_newSequenceScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_newSequenceBox.pack_start(_newSequenceScrolledWindow);
-	_newSequenceScrolledWindow.show();
 
 	_newSequenceFrame.add(_newSequenceBox);
-	_newSequenceBox.show();
 }
 
 void PresetsFrame::FillPresetsList()

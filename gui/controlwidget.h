@@ -6,9 +6,10 @@
 #include <gtkmm/scale.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/eventbox.h>
-#include <gtkmm/menu.h>
 
 #include <memory>
+
+#include "components/controllableselectmenu.h"
 
 /**
 	@author Andre Offringa
@@ -48,19 +49,16 @@ class ControlWidget : public Gtk::VBox {
 		void onScaleChange();
 		void onOnButtonClicked();
 		bool onNameLabelClicked(GdkEventButton* event);
-		void onMenuItemClicked(class PresetValue *item);
+		void onControllableSelected(PresetValue *item);
 		bool onFlashButtonPressed(GdkEventButton* event);
 		bool onFlashButtonReleased(GdkEventButton* event);
-
-		void DestroyPopupMenu();
 
 		Gtk::VScale _scale;
 		Gtk::Button _flashButton;
 		Gtk::CheckButton _onCheckButton;
 		Gtk::EventBox _eventBox;
 		Gtk::Label _nameLabel;
-		std::vector<std::unique_ptr<Gtk::MenuItem>> _popupMenuItems;
-		std::unique_ptr<Gtk::Menu> _popupMenu, _popupChaseMenu, _popupPresetMenu, _popupFunctionMenu;
+		ControllableSelectMenu _menu;
 
 		class Management* _management;
 		class PresetValue* _preset;

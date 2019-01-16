@@ -23,6 +23,14 @@ public:
 	~ChaseWizard();
 	
 private:
+	enum Page {
+		Page1_SelFixtures,
+		Page2_SelType,
+		Page3_1_RunningLight,
+		Page3_2_SingleColour,
+		Page3_3_VUMeter
+	};
+	
 	void fillFixturesList();
 	void onManagementChange(class Management& newManagement)
 	{
@@ -32,23 +40,25 @@ private:
 	void onNextClicked();
 	void initPage1();
 	void initPage2();
-	void initPage3();
-	void initPage4();
+	void initPage3_1RunningLight();
+	void initPage3_2SingleColour();
+	void initPage3_3VUMeter();
 	
 	class ShowWindow* _showWindow;
 	class Management* _management;
 	
 	Gtk::VBox _mainBox;
-	Gtk::VBox _vBoxPage1, _vBoxPage2, _vBoxPage3, _vBoxPage4;
+	Gtk::VBox _vBoxPage1, _vBoxPage2, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3;
 	Gtk::Label _selectLabel;
 	Gtk::TreeView _fixturesListView;
 	std::vector<class Fixture*> _selectedFixtures;
 	
 	Gtk::RadioButton
 		_runningLightBtn,
-		_randomAroundSingleColourBtn;
+		_singleColourBtn,
+		_vuMeterBtn;
 	
-	ColorSequenceWidget _colorsWidgetP3;
+	ColorSequenceWidget _colorsWidgetP3_1;
 	Gtk::RadioButton
 		_increasingRunRB,
 		_decreasingRunRB,
@@ -57,13 +67,20 @@ private:
 		_outwardRunRB,
 		_randomRunRB;
 	
-	ColorSequenceWidget _colorsWidgetP4;
+	ColorSequenceWidget _colorsWidgetP3_2;
 	Gtk::Label _variationLabel;
 	Gtk::Scale _variation;
 	
+	ColorSequenceWidget _colorsWidgetP3_3;
+	Gtk::RadioButton
+		_vuIncreasingRB,
+		_vuDecreasingRB,
+		_vuInwardRunRB,
+		_vuOutwardRunRB;
+		
 	Gtk::ButtonBox _buttonBox;
 	Gtk::Button _nextButton;
-	int _currentPage;
+	Page _currentPage;
 	
 	Glib::RefPtr<Gtk::ListStore> _fixturesListModel;
 	struct FixturesListColumns : public Gtk::TreeModelColumnRecord

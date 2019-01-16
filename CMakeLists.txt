@@ -43,6 +43,7 @@ set(GUIFILES
   gui/configurationwindow.cpp
   gui/controlwidget.cpp
   gui/controlwindow.cpp
+  gui/effectsframe.cpp
   gui/guistate.cpp
   gui/nameframe.cpp
   gui/presetsframe.cpp
@@ -50,17 +51,21 @@ set(GUIFILES
   gui/sequenceframe.cpp
   gui/showwindow.cpp
   gui/visualizationwindow.cpp
-  gui/components/colorselectwidget.cpp)
+  gui/components/colorselectwidget.cpp
+  gui/components/controllableselectmenu.cpp
+  gui/components/propertiesbox.cpp)
 
 set(THEATREFILES
   libtheatre/defaultchase.cpp
+  libtheatre/effect.cpp
   libtheatre/fixture.cpp
   libtheatre/fixturefunction.cpp
   libtheatre/management.cpp
   libtheatre/oladevice.cpp
   libtheatre/scene.cpp
   libtheatre/show.cpp
-  libtheatre/theatre.cpp)
+  libtheatre/theatre.cpp
+  libtheatre/properties/propertyset.cpp)
   
 add_executable(glight ${MAINFILES} ${GUIFILES} ${THEATREFILES})
 

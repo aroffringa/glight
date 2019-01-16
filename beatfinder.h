@@ -29,6 +29,7 @@ public:
 		_isStopping(false),
 		_isOpen(false),
 		_beat(Beat()),
+		_audioLevel(0),
 		_minimumConfidence(0.05)
 	{
 	}
@@ -48,6 +49,11 @@ public:
 		Beat beat = _beat;
 		beatValue = beat.value;
 		confidence = beat.confidence;
+	}
+	
+	uint16_t GetAudioLevel() const
+	{
+		return _audioLevel;
 	}
 private:
 	struct AlsaThread {
@@ -77,8 +83,9 @@ private:
 		Beat(float c, float v) : value(v), confidence(c) { }
 		float value;
 		float confidence;
-	} _beatValue;
+	};
 	std::atomic<Beat> _beat;
+	std::atomic<uint16_t> _audioLevel;
 	float _minimumConfidence;
 
 	void open();

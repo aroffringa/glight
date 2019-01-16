@@ -21,7 +21,6 @@ class PresetsFrame : public Gtk::VPaned
 {
 	public:
 		PresetsFrame(class Management& management, class ShowWindow& parentWindow);
-		~PresetsFrame();
 
 		void Update() { FillPresetsList(); }
 		void UpdateAfterPresetRemoval() { FillPresetsList(); }
