@@ -76,6 +76,7 @@ void Management::ManagementThread::operator()()
 {
 	std::unique_ptr<ValueSnapshot> nextSnapshot(new ValueSnapshot());
 	nextSnapshot->SetUniverseCount(parent->_devices.size());
+	unsigned timestepNumber = 0;
 	while(!parent->IsQuitting())
 	{
 		for(unsigned universe=0; universe < parent->_devices.size(); ++universe)
@@ -86,7 +87,7 @@ void Management::ManagementThread::operator()()
 			for(unsigned i=0;i<512;++i)
 				values[i] = 0;
 	
-			parent->GetChannelValues(values, universe);
+			parent->GetChannelValues(timestepNumber, values, universe);
 	
 			for(unsigned i=0;i<512;++i)
 			{
@@ -105,6 +106,8 @@ void Management::ManagementThread::operator()()
 
 		std::lock_guard<std::mutex> lock(parent->_mutex);
 		std::swap(parent->_snapshot, nextSnapshot);
+		
+		++timestepNumber;
 	}
 }
 
@@ -116,23 +119,23 @@ void Management::AbortAllDevices()
 	}
 }
 
-void Management::GetChannelValues(unsigned* values, unsigned universe)
+void Management::GetChannelValues(unsigned timestepNumber, unsigned* values, unsigned universe)
 {
 	double relTimeInMs = GetOffsetTimeInMS();
 	double beatValue, beatConfidence;
 	_beatFinder->GetBeatValue(beatValue, beatConfidence);
 	unsigned audioLevel = _beatFinder->GetAudioLevel();
-	Timing relTiming(relTimeInMs, beatValue, audioLevel);
+	Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel);
 
 	std::lock_guard<std::mutex> lock(_mutex);
 
 	for(const std::unique_ptr<class Effect>& effect : _effects)
 		effect->StartIteration();
 
-	_show->Mix(values, universe, relTiming);
+	_show->Mix(values, universe, timing);
 	
 	for(const std::unique_ptr<class PresetValue>& pv : _presetValues)
-		pv->Controllable().Mix(pv->Value(), values, universe, relTiming);
+		pv->Controllable().Mix(pv->Value(), values, universe, timing);
 }
 
 PresetCollection& Management::AddPresetCollection()

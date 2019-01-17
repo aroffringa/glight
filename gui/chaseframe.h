@@ -41,8 +41,11 @@ class ChaseFrame : public Gtk::VPaned {
 		void onTriggerTypeChanged();
 		void onTriggerSpeedChanged();
 		void onTransitionSpeedChanged();
+		void onSyncCountChanged();
 		void onBeatSpeedChanged();
 		void onDeleteChaseClicked();
+		
+		class Chase* getSelectedChase();
 
 		struct ChaseListColumns : public Gtk::TreeModelColumnRecord
 		{
@@ -62,11 +65,17 @@ class ChaseFrame : public Gtk::VPaned {
 		
 		Gtk::Frame _bottomFrame;
 		Gtk::VBox _bottomBox;
+		
 		Gtk::RadioButton _delayTriggerCheckButton;
 		Gtk::Label _triggerSpeedLabel;
 		Gtk::HScale _triggerSpeed;
 		Gtk::Label _transitionSpeedLabel;
 		Gtk::HScale _transitionSpeed;
+		
+		Gtk::RadioButton _synchronizedTriggerCheckButton;
+		Gtk::Label _synchronizationsLabel;
+		Gtk::HScale _synchronizationsCount;
+		
 		Gtk::RadioButton _beatTriggerCheckButton;
 		Gtk::Label _beatSpeedLabel;
 		Gtk::HScale _beatSpeed;

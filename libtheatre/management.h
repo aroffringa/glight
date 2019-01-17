@@ -106,7 +106,7 @@ class Management {
 		
 		Management(const Management& forDryCopy, std::shared_ptr<class BeatFinder>& beatFinder);
 
-		void GetChannelValues(unsigned *values, unsigned universe);
+		void GetChannelValues(unsigned timestepNumber, unsigned *values, unsigned universe);
 		void removeControllable(std::vector<std::unique_ptr<class Controllable>>::iterator controllablePtr);
 		void removePreset(std::vector<std::unique_ptr<class PresetValue>>::iterator presetValuePtr);
 		void removeSequence(std::vector<std::unique_ptr<class Sequence>>::iterator sequencePtr);

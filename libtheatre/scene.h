@@ -56,7 +56,7 @@ class Scene : public Startable, private SyncListener {
 		void Mix(unsigned *channelValues, unsigned universe, const Timing& globalTiming)
 		{
 			double relTimeInMs = globalTiming.TimeInMS() - StartTimeInMS();
-			Timing relTiming(relTimeInMs, globalTiming.BeatValue(), globalTiming.AudioLevel());
+			Timing relTiming(relTimeInMs, globalTiming.TimestepNumber(), globalTiming.BeatValue(), globalTiming.AudioLevel());
 			skipTo(relTimeInMs);
 
 			for(std::vector<SceneItem*>::const_iterator i=_startedItems.begin();i!=_startedItems.end();++i)
