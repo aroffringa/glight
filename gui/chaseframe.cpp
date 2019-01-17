@@ -8,11 +8,17 @@ ChaseFrame::ChaseFrame(Management &management, ShowWindow &parentWindow) :
 	_upperFrame("All chases"),
 	_deleteChaseButton("Delete"),
 	_bottomFrame("Selected chase"),
+	
 	_delayTriggerCheckButton("Trigger by delay"),
 	_triggerSpeedLabel("Trigger speed (ms) :"),
 	_triggerSpeed(1.0, 10000.0, 100.0),
 	_transitionSpeedLabel("Transition speed (ms) :"),
 	_transitionSpeed(0.0, 10000.0, 100.0),
+	
+	_synchronizedTriggerCheckButton("Synchronized trigger"),
+	_synchronizationsLabel("Number of synchronizations"),
+	_synchronizationsCount(1.0, 100.0, 1.0),
+		
 	_beatTriggerCheckButton("Trigger by beat"),
 	_beatSpeedLabel("Beats per trigger :"),
 	_beatSpeed(0.25, 4.0, 0.25),
@@ -89,6 +95,16 @@ void ChaseFrame::initLowerPanel()
 	_bottomBox.pack_start(_transitionSpeed, false, false, 1);
 	_transitionSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTransitionSpeedChanged));
+		
+	_bottomBox.pack_start(_synchronizedTriggerCheckButton, false, false, 1);
+	_synchronizedTriggerCheckButton.set_group(group);
+	_synchronizedTriggerCheckButton.signal_clicked().
+		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
+	_bottomBox.pack_start(_synchronizationsLabel, false, false, 1);
+	_bottomBox.pack_start(_synchronizationsCount, false, false, 1);
+	_synchronizationsCount.set_value(1.0);
+	_synchronizationsCount.signal_value_changed().
+		connect(sigc::mem_fun(*this, &ChaseFrame::onSyncCountChanged));
 
 	_bottomBox.pack_start(_beatTriggerCheckButton, false, false, 1);
 	_beatTriggerCheckButton.set_group(group);
@@ -107,17 +123,26 @@ void ChaseFrame::initLowerPanel()
 	pack2(_bottomFrame);
 }
 
+Chase* ChaseFrame::getSelectedChase()
+{
+	Gtk::TreeModel::const_iterator selected =
+		_chaseListView.get_selection()->get_selected();
+	if(selected)
+		return (*selected)[_chaseListColumns._chase];
+	else
+		return nullptr;
+}
+
 void ChaseFrame::onTriggerTypeChanged()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _chaseListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	Chase* chase = getSelectedChase();
+	if(chase)
 	{
 		std::lock_guard<std::mutex> lock(_management->Mutex());
-		Chase *chase = (*selected)[_chaseListColumns._chase];
 		if(_delayTriggerCheckButton.get_active())
 			chase->Trigger().SetType(Trigger::DelayTriggered);
+		else if(_synchronizedTriggerCheckButton.get_active())
+			chase->Trigger().SetType(Trigger::SyncTriggered);
 		else
 			chase->Trigger().SetType(Trigger::BeatTriggered);
 	}
@@ -125,39 +150,40 @@ void ChaseFrame::onTriggerTypeChanged()
 
 void ChaseFrame::onTriggerSpeedChanged()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _chaseListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	Chase* chase = getSelectedChase();
+	if(chase)
 	{
 		std::lock_guard<std::mutex> lock(_management->Mutex());
-		Chase *chase = (*selected)[_chaseListColumns._chase];
 		chase->Trigger().SetDelayInMs(_triggerSpeed.get_value());
 	}
 }
 
 void ChaseFrame::onTransitionSpeedChanged()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _chaseListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	Chase* chase = getSelectedChase();
+	if(chase)
 	{
 		std::lock_guard<std::mutex> lock(_management->Mutex());
-		Chase *chase = (*selected)[_chaseListColumns._chase];
 		chase->Transition().SetLengthInMs(_transitionSpeed.get_value());
+	}
+}
+
+void ChaseFrame::onSyncCountChanged()
+{
+	Chase* chase = getSelectedChase();
+	if(chase)
+	{
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		chase->Trigger().SetDelayInSyncs(_synchronizationsCount.get_value());
 	}
 }
 
 void ChaseFrame::onBeatSpeedChanged()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _chaseListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	Chase* chase = getSelectedChase();
+	if(chase)
 	{
 		std::lock_guard<std::mutex> lock(_management->Mutex());
-		Chase *chase = (*selected)[_chaseListColumns._chase];
 		chase->Trigger().SetDelayInBeats(_beatSpeed.get_value());
 	}
 }
@@ -166,14 +192,10 @@ void ChaseFrame::onSelectedChaseChanged()
 {
 	if(_delayUpdates.IsFirst())
 	{
-		Glib::RefPtr<Gtk::TreeSelection> selection =
-			_chaseListView.get_selection();
-		Gtk::TreeModel::iterator selected = selection->get_selected();
-		if(selected)
+		Chase* chase = getSelectedChase();
+		if(chase)
 		{
 			_bottomFrame.set_sensitive(true);
-
-			Chase *chase = (*selected)[_chaseListColumns._chase];
 			std::unique_lock<std::mutex> lock(_management->Mutex());
 			enum Trigger::Type triggerType = chase->Trigger().Type();
 			double triggerSpeed = chase->Trigger().DelayInMs();
@@ -197,12 +219,9 @@ void ChaseFrame::onSelectedChaseChanged()
 
 void ChaseFrame::onDeleteChaseClicked()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _chaseListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	Chase* chase = getSelectedChase();
+	if(chase)
 	{
-		Chase *chase = (*selected)[_chaseListColumns._chase];
 		_management->RemoveControllable(*chase);
 		_parentWindow.EmitUpdateAfterPresetRemoval();
 	}
