@@ -19,6 +19,9 @@ class Transition {
 		double LengthInMs() const { return _lengthInMs; }
 		void SetLengthInMs(double length) { _lengthInMs = length; }
 
+		/**
+		 * @param transitionTime value between 0 and _lengthInMS.
+		 */
 		void Mix(PresetCollection &first, PresetCollection &second, double transitionTime, const ControlValue &value, unsigned *channelValues, unsigned universe, const Timing& timing)
 		{
 			switch(_type)
@@ -32,18 +35,18 @@ class Transition {
 				case Fade:
 				{
 					unsigned secondChannelValues[512];
-					for(unsigned i=0;i<512;++i)
+					for(unsigned i=0;i<512;++i) {
+						channelValues[i] /= 2;
 						secondChannelValues[i] = channelValues[i];
-					first.Mix(value, channelValues, universe, timing);
-					second.Mix(value, secondChannelValues, universe, timing);
+					}
 					unsigned secondRatioValue = (unsigned) ((transitionTime / _lengthInMs) * 256.0);
 					unsigned firstRatioValue = 255 - secondRatioValue;
+					first.Mix((value.UInt()*firstRatioValue) >> 8, channelValues, universe, timing);
+					second.Mix((value.UInt()*secondRatioValue) >> 8, secondChannelValues, universe, timing);
 					for(unsigned i=0;i<512;++i)
 					{
-						channelValues[i] = 
-								(channelValues[i] * firstRatioValue +
-								secondChannelValues[i] * secondRatioValue)
-							>> 8;
+						channelValues[i] = std::min(ControlValue::MaxUInt(),
+							(channelValues[i] + secondChannelValues[i]));
 					}
 				}
 				break;

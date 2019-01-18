@@ -11,7 +11,8 @@ class Property final
 {
 public:
 	enum Type {
-		ControlValue
+		ControlValue,
+		Duration
 	};
 	Property(const std::string& name, const std::string& description, Type type) :
 		_type(type),

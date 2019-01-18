@@ -44,7 +44,15 @@ public:
 		return getControlValue(*_object, property._setIndex);
 	}
 	
-	std::string GetTypeDescription() const;
+	void SetDuration(const Property& property, double value) const
+	{
+		setDuration(*_object, property._setIndex, value);
+	}
+	
+	double GetDuration(const Property& property) const
+	{
+		return getDuration(*_object, property._setIndex);
+	}
 	
 	NamedObject& Object() const {
 		return *_object;
@@ -66,6 +74,11 @@ protected:
 	virtual void setControlValue(NamedObject& object, size_t index, unsigned value) const
 	{ setterNotImplemented(); }
 	virtual unsigned getControlValue(const NamedObject& object, size_t index) const
+	{ getterNotImplemented(); return 0; }
+	
+	virtual void setDuration(NamedObject& object, size_t index, double value) const
+	{ setterNotImplemented(); }
+	virtual double getDuration(const NamedObject& object, size_t index) const
 	{ getterNotImplemented(); return 0; }
 	
 	size_t addProperty(const Property& property)

@@ -280,6 +280,9 @@ void Reader::parseEffect(xmlNode* node)
 				case Property::ControlValue:
 					ps->SetControlValue(p, getIntAttribute(curNode, "value"));
 					break;
+				case Property::Duration:
+					ps->SetDuration(p, getDoubleAttribute(curNode, "value"));
+					break;
 				}
 			}
 			else if(name(curNode) == "connection-ref")

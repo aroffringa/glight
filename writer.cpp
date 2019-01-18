@@ -304,6 +304,9 @@ void Writer::writeEffect(const class Effect& effect)
 				case Property::ControlValue:
 					writeAttribute("value", ps->GetControlValue(p));
 					break;
+				case Property::Duration:
+					writeAttribute("value", ps->GetDuration(p));
+					break;
 			}
 			endElement();
 		}
