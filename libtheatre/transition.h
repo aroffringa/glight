@@ -8,7 +8,7 @@
 */
 class Transition {
 	public:
-		enum Type { None, Fade, FadeWithBlack };
+		enum Type { None, Fade, FadeThroughBlack, Erratic };
 
 		Transition() : _lengthInMs(250.0), _type(Fade) { }
 		~Transition() { }
@@ -50,7 +50,7 @@ class Transition {
 					}
 				}
 				break;
-				case FadeWithBlack:
+				case FadeThroughBlack:
 				{
 					unsigned ratio = (unsigned) ((transitionTime / _lengthInMs) * 512.0);
 					if(ratio < 256)
@@ -65,6 +65,14 @@ class Transition {
 					}
 				}
 				break;
+				case Erratic:
+				{
+					unsigned ratio = (unsigned) ((transitionTime / _lengthInMs) * ControlValue::MaxUInt());
+					if(ratio < timing.DrawRandomValue())
+						first.Mix(value, channelValues, universe, timing);
+					else
+						second.Mix(value, channelValues, universe, timing);
+				}
 			}
 		}
 	private:

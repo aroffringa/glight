@@ -20,6 +20,7 @@ Management::Management() :
 	_thread(),
 	_isQuitting(false),
 	_createTime(boost::posix_time::microsec_clock::local_time()),
+	_rndDistribution(0, ControlValue::MaxUInt()+1),
 	_nextPresetValueId(1),
 	_theatre(new class Theatre()),
 	_snapshot(new ValueSnapshot()),
@@ -125,7 +126,8 @@ void Management::GetChannelValues(unsigned timestepNumber, unsigned* values, uns
 	double beatValue, beatConfidence;
 	_beatFinder->GetBeatValue(beatValue, beatConfidence);
 	unsigned audioLevel = _beatFinder->GetAudioLevel();
-	Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel);
+	unsigned randomValue = _rndDistribution(_randomGenerator);
+	Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel, randomValue);
 
 	std::lock_guard<std::mutex> lock(_mutex);
 

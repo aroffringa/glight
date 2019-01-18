@@ -41,6 +41,7 @@ class ChaseFrame : public Gtk::VPaned {
 		void onTriggerTypeChanged();
 		void onTriggerSpeedChanged();
 		void onTransitionSpeedChanged();
+		void onTransitionTypeChanged();
 		void onSyncCountChanged();
 		void onBeatSpeedChanged();
 		void onDeleteChaseClicked();
@@ -71,6 +72,9 @@ class ChaseFrame : public Gtk::VPaned {
 		Gtk::HScale _triggerSpeed;
 		Gtk::Label _transitionSpeedLabel;
 		Gtk::HScale _transitionSpeed;
+		Gtk::HBox _transitionTypeBox;
+		Gtk::Label _transitionTypeLabel;
+		Gtk::RadioButton _transitionNoneRB, _transitionFadeRB, _transitionFadeThroughBlackRB, _transitionErraticRB;
 		
 		Gtk::RadioButton _synchronizedTriggerCheckButton;
 		Gtk::Label _synchronizationsLabel;
