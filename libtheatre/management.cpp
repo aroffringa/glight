@@ -316,6 +316,23 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect)
 	return *_effects.back();
 }
 
+void Management::RemoveEffect(Effect& effect)
+{
+	std::vector<EffectControl*> controls = effect.Controls();
+	for(EffectControl* ec : controls)
+		RemoveControllable(*ec);
+	using iter = std::vector<std::unique_ptr<class Effect>>::iterator;
+	for(iter i=_effects.begin(); i!=_effects.end(); ++i)
+	{
+		if(i->get() == &effect)
+		{
+			_effects.erase(i);
+			return;
+		}
+	}
+	throw std::runtime_error("Effect not found");
+}
+
 Controllable& Management::GetControllable(const std::string &name) const
 {
 	return NamedObject::FindNamedObject(_controllables, name);

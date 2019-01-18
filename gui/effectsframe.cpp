@@ -236,6 +236,14 @@ void EffectsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 
 void EffectsFrame::onDeleteEffectClicked()
 {
+	Effect* e = getSelectedEffect();
+	if(e)
+	{
+		std::unique_lock<std::mutex> lock(_management->Mutex());
+		_management->RemoveEffect(*e);
+		lock.unlock();
+		_parentWindow.EmitUpdate();
+	}
 }
 
 bool EffectsFrame::onAddConnectionClicked(GdkEventButton* event)
