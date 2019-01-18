@@ -9,6 +9,8 @@ Glight is specifically aimed at shows or events in which the lighting is control
 * The interface is carefully designed, with clearly visible key-bindings to adjust sliders, for careful and precise live control of lights.
 * Lights can be visualized on-screen. This makes it possible to follow the state / show on the screen (although the real lights are much more exiting to watch!), and also allows dry testing without having a DMX interface connected. 
 
+<img src="https://raw.githubusercontent.com/aroffringa/glight/master/doc/Screenshot-2019-01-18.png" alt="Screenshot" title="Screenshot of Glight in action"/>
+
 ## Installation
 The source of Glight can be downloaded from Github, currently from https://github.com/aroffringa/glight/. Glight has a few dependencies. Fortunately, these are all available as precompiled packages in Debian, Ubuntu and most other distributions. Apart from system tools such as cmake, these are the important dependencies:
 
