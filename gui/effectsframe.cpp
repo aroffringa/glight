@@ -207,16 +207,12 @@ bool EffectsFrame::onNewEffectClicked(GdkEventButton* event)
 		_popupEffectMenuItems.clear();
 		_popupEffectMenu.reset(new Gtk::Menu());
 	
-		std::vector<std::pair<std::string, enum Effect::Type>> list {
-			{ "Audio level", Effect::AudioLevelType },
-			{ "Threshold effect", Effect::ThresholdType }
-		};
-		
-		for(std::pair<std::string, enum Effect::Type> item : list)
+		std::vector<enum Effect::Type> fxtypes = Effect::GetTypes();
+		for(enum Effect::Type t : fxtypes)
 		{
-			std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(item.first));
+			std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(Effect::TypeToName(t)));
 			mi->signal_activate().connect(sigc::bind<enum Effect::Type>( 
-			sigc::mem_fun(*this, &EffectsFrame::onNewEffectMenuClicked), item.second));
+			sigc::mem_fun(*this, &EffectsFrame::onNewEffectMenuClicked), t));
 			_popupEffectMenu->append(*mi);
 			_popupEffectMenuItems.emplace_back(std::move(mi));
 		}

@@ -16,6 +16,7 @@ class Effect : public NamedObject
 public:
 	enum Type {
 		AudioLevelType,
+		DelayType,
 		ThresholdType
 	};
 	
@@ -39,6 +40,8 @@ public:
 	static std::string TypeToName(Type type);
 	
 	static Type NameToType(const std::string& name);
+	
+	static std::vector<Type> GetTypes();
 	
 	std::vector<std::unique_ptr<class EffectControl>> ConstructControls();
 	

@@ -15,6 +15,7 @@ public:
 	const class Effect& GetEffect() const { return *_effect; }
 	
 	virtual void Mix(const ControlValue& value, unsigned* channelValues, unsigned universe, const class Timing& timing) final override;
+	
 private:
 	friend class Effect;
 	void attach(class Effect* effect, size_t index)

@@ -63,16 +63,15 @@ private:
 	{
 		double timeInMs = timing.TimeInMS();
 		double chaseTime = fmod(timeInMs, _trigger.DelayInMs() + _transition.LengthInMs());
+		unsigned step = (unsigned) fmod(timeInMs / (_trigger.DelayInMs() + _transition.LengthInMs()), _sequence.Size());
 		if(chaseTime < _trigger.DelayInMs())
 		{
 			// We are not in a transition, just mix the corresponding preset
-			unsigned step = (unsigned) fmod(timeInMs / (_trigger.DelayInMs() + _transition.LengthInMs()), _sequence.Size());
 			_sequence.Presets()[step]->Mix(value, channelValues, universe, timing);
 		}
 		else
 		{
 			// We are in a transition
-			unsigned step = (unsigned) fmod(timeInMs / (_trigger.DelayInMs() + _transition.LengthInMs()), _sequence.Size());
 			double transitionTime = chaseTime - _trigger.DelayInMs();
 			PresetCollection
 				&first = *_sequence.Presets()[step],
