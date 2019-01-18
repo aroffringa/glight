@@ -1,14 +1,18 @@
 #ifndef TIMING_H
 #define TIMING_H
 
+#include <random>
+
 class Timing
 {
 public:
-	Timing(double timeInMS, unsigned timestepNumber, double beatValue, unsigned audioLevel) :
+	Timing(double timeInMS, unsigned timestepNumber, double beatValue, unsigned audioLevel, unsigned randomValue) :
 		_timeInMs(timeInMS),
 		_timestepNumber(timestepNumber),
 		_beatValue(beatValue),
-		_audioLevel(audioLevel)
+		_audioLevel(audioLevel),
+		_randomValue(randomValue),
+		_rng(randomValue)
 	{ }
 	
 	double TimeInMS() const { return _timeInMs; }
@@ -16,11 +20,17 @@ public:
 	unsigned TimestepNumber() const { return _timestepNumber; }
 	unsigned AudioLevel() const { return _audioLevel; }
 	
+	unsigned TimestepRandomValue() const { return _randomValue; }
+	unsigned DrawRandomValue() const {
+		return std::uniform_int_distribution<unsigned>(0, ControlValue::MaxUInt()+1)(_rng);
+	}
+	
 private:
 	double _timeInMs;
 	unsigned _timestepNumber;
 	double _beatValue;
-	unsigned _audioLevel;
+	unsigned _audioLevel, _randomValue;
+	mutable std::mt19937 _rng;
 };
 
 #endif

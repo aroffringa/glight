@@ -14,6 +14,11 @@ ChaseFrame::ChaseFrame(Management &management, ShowWindow &parentWindow) :
 	_triggerSpeed(1.0, 10000.0, 100.0),
 	_transitionSpeedLabel("Transition speed (ms) :"),
 	_transitionSpeed(0.0, 10000.0, 100.0),
+	_transitionTypeLabel("Type:"),
+	_transitionNoneRB("None"),
+	_transitionFadeRB("Fade"),
+	_transitionFadeThroughBlackRB("Through black"),
+	_transitionErraticRB("Erratic"),
 	
 	_synchronizedTriggerCheckButton("Synchronized trigger"),
 	_synchronizationsLabel("Number of synchronizations"),
@@ -95,7 +100,32 @@ void ChaseFrame::initLowerPanel()
 	_bottomBox.pack_start(_transitionSpeed, false, false, 1);
 	_transitionSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTransitionSpeedChanged));
+	
+	_transitionTypeBox.pack_start(_transitionTypeLabel);
 		
+	Gtk::RadioButtonGroup transTypeGroup;
+	_transitionNoneRB.set_group(transTypeGroup);
+	_transitionNoneRB.signal_clicked().connect(
+		sigc::mem_fun(*this, &ChaseFrame::onTransitionTypeChanged));
+	_transitionTypeBox.pack_start(_transitionNoneRB);
+	
+	_transitionFadeRB.set_group(transTypeGroup);
+	_transitionFadeRB.signal_clicked().connect(
+		sigc::mem_fun(*this, &ChaseFrame::onTransitionTypeChanged));
+	_transitionTypeBox.pack_start(_transitionFadeRB);
+	
+	_transitionFadeThroughBlackRB.set_group(transTypeGroup);
+	_transitionFadeThroughBlackRB.signal_clicked().connect(
+		sigc::mem_fun(*this, &ChaseFrame::onTransitionTypeChanged));
+	_transitionTypeBox.pack_start(_transitionFadeThroughBlackRB);
+	
+	_transitionErraticRB.set_group(transTypeGroup);
+	_transitionErraticRB.signal_clicked().connect(
+		sigc::mem_fun(*this, &ChaseFrame::onTransitionTypeChanged));
+	_transitionTypeBox.pack_start(_transitionErraticRB);
+	
+	_bottomBox.pack_start(_transitionTypeBox, false, false, 1);
+	
 	_bottomBox.pack_start(_synchronizedTriggerCheckButton, false, false, 1);
 	_synchronizedTriggerCheckButton.set_group(group);
 	_synchronizedTriggerCheckButton.signal_clicked().
@@ -168,6 +198,25 @@ void ChaseFrame::onTransitionSpeedChanged()
 	}
 }
 
+void ChaseFrame::onTransitionTypeChanged()
+{
+	Chase* chase = getSelectedChase();
+	if(chase)
+	{
+		enum Transition::Type type;
+		if(_transitionNoneRB.get_active())
+			type = Transition::None;
+		else if(_transitionFadeRB.get_active())
+			type = Transition::Fade;
+		else if(_transitionFadeThroughBlackRB.get_active())
+			type = Transition::FadeThroughBlack;
+		else //if(_transitionErraticRB.get_active())
+			type = Transition::Erratic;
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		chase->Transition().SetType(type);
+	}
+}
+
 void ChaseFrame::onSyncCountChanged()
 {
 	Chase* chase = getSelectedChase();
@@ -198,6 +247,7 @@ void ChaseFrame::onSelectedChaseChanged()
 			_bottomFrame.set_sensitive(true);
 			std::unique_lock<std::mutex> lock(_management->Mutex());
 			enum Trigger::Type triggerType = chase->Trigger().Type();
+			enum Transition::Type transitionType = chase->Transition().Type();
 			double triggerSpeed = chase->Trigger().DelayInMs();
 			double transitionSpeed = chase->Transition().LengthInMs();
 			double beatSpeed = chase->Trigger().DelayInBeats();
@@ -209,6 +259,21 @@ void ChaseFrame::onSelectedChaseChanged()
 				_delayTriggerCheckButton.set_active(true);
 			else
 				_beatTriggerCheckButton.set_active(true);
+			switch(transitionType)
+			{
+				case Transition::None:
+					_transitionNoneRB.set_active();
+					break;
+				case Transition::Fade:
+					_transitionFadeRB.set_active();
+					break;
+				case Transition::FadeThroughBlack:
+					_transitionFadeRB.set_active();
+					break;
+				case Transition::Erratic:
+					_transitionErraticRB.set_active();
+					break;
+			}
 		}
 		else
 		{

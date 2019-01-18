@@ -4,6 +4,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <random>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
@@ -135,6 +136,8 @@ class Management {
 		bool _isQuitting;
 		std::mutex _mutex;
 		boost::posix_time::ptime _createTime;
+		std::mt19937 _randomGenerator;
+		std::uniform_int_distribution<unsigned> _rndDistribution;
 		unsigned _nextPresetValueId;
 
 		std::unique_ptr<class Theatre> _theatre;
