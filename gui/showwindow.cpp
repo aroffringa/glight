@@ -98,37 +98,8 @@ void ShowWindow::EmitUpdate()
 {
 	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
 		cw->Update();
-	_presetsFrame->Update();
-	_sequenceFrame->Update();
-	_chaseFrame->Update();
 	_sceneFrame->Update();
 	_signalUpdateControllables();
-}
-
-void ShowWindow::EmitUpdateAfterPresetRemoval()
-{
-	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
-		cw->UpdateAfterPresetRemoval();
-	_presetsFrame->UpdateAfterPresetRemoval();
-	_sequenceFrame->UpdateAfterPresetRemoval();
-	_chaseFrame->UpdateAfterPresetRemoval();
-	_signalUpdateControllables();
-}
-
-void ShowWindow::EmitUpdateAfterAddPreset()
-{
-	_sceneFrame->Update();
-	_signalUpdateControllables();
-}
-
-void ShowWindow::UpdateSequenceList()
-{
-	_sequenceFrame->Update();
-}
-
-void ShowWindow::UpdateChaseList()
-{
-	_chaseFrame->Update();
 }
 
 void ShowWindow::addControlWindow(FaderSetupState* stateOrNull)
@@ -433,4 +404,16 @@ size_t ShowWindow::nextControlKeyRow() const
 void ShowWindow::onMIChaseWizardClicked()
 {
 	_chaseWizard->show();
+}
+
+void ShowWindow::MakeSequenceTabActive(class Sequence& sequence)
+{
+	_notebook.set_current_page(1);
+	_sequenceFrame->Select(sequence);
+}
+
+void ShowWindow::MakeChaseTabActive(class Chase& chase)
+{
+	_notebook.set_current_page(2);
+	_chaseFrame->Select(chase);
 }

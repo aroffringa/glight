@@ -20,6 +20,10 @@ class NameFrame : public Gtk::HBox {
 			_namedObject = &namedObject;
 			update();
 		}
+		NamedObject* GetNamedObject() const
+		{
+			return _namedObject;
+		}
 		void SetNoNamedObject()
 		{
 			_namedObject = 0;

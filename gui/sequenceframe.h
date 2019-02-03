@@ -14,6 +14,8 @@
 #include "avoidrecursion.h"
 #include "nameframe.h"
 
+#include "components/objecttree.h"
+
 /**
 	@author Andre Offringa
 */
@@ -22,36 +24,23 @@ class SequenceFrame : public Gtk::VPaned {
 		SequenceFrame(class Management& management, class ShowWindow& parentWindow);
 		~SequenceFrame();
 
-		void Update() { fillSequenceList(); }
-		void UpdateAfterPresetRemoval() { fillSequenceList(); }
-		
 		void ChangeManagement(class Management& management)
 		{
 			_nameFrame.ChangeManagement(management);
 			_management = &management;
-			fillSequenceList();
 		}
+		
+		void Select(const class Sequence& sequence);
 	private:
-		void fillSequenceList();
 		void onCreateChaseButtonClicked();
 		void onSelectedSequenceChanged();
-		void onNameChange() { fillSequenceList(); }
 
-		struct SequenceListColumns : public Gtk::TreeModelColumnRecord
-		{
-			SequenceListColumns()
-				{ add(_title); add(_sequence); }
-		
-			Gtk::TreeModelColumn<Glib::ustring> _title;
-			Gtk::TreeModelColumn<class Sequence *> _sequence;
-		} _sequenceListColumns;
-		Gtk::TreeView _sequenceListView;
-		Glib::RefPtr<Gtk::ListStore> _sequenceListModel;
+		Gtk::Frame _sequenceFrame;
+		ObjectTree _sequenceList;
 		Gtk::HBox _sequenceInnerBox;
 		Gtk::VBox _sequenceOuterBox;
 		Gtk::ScrolledWindow _sequenceScrolledWindow;
 		Gtk::VButtonBox _sequenceButtonBox;
-		Gtk::Frame _sequenceFrame;
 		Gtk::Button _createChaseButton;
 
 		AvoidRecursion _delayUpdates;

@@ -9,6 +9,7 @@
 #include "effect.h"
 #include "effectcontrol.h"
 #include "fixturefunctioncontrol.h"
+#include "folder.h"
 #include "presetcollection.h"
 #include "presetvalue.h"
 #include "sequence.h"
@@ -27,6 +28,9 @@ Management::Management() :
 	_beatFinder(new BeatFinder()),
 	_show(new class Show(*this))
 {
+	_folders.emplace_back(new Folder());
+	_rootFolder = _folders.back().get();
+	_rootFolder->SetName("Root");
 	_beatFinder->Start();
 }
 
@@ -34,7 +38,8 @@ Management::~Management()
 {
 	if(_thread != nullptr)
 	{
-		Quit();
+		_isQuitting = true;
+		abortAllDevices();
 		_thread->join();
 		_thread.reset();
 	}
@@ -78,7 +83,7 @@ void Management::ManagementThread::operator()()
 	std::unique_ptr<ValueSnapshot> nextSnapshot(new ValueSnapshot());
 	nextSnapshot->SetUniverseCount(parent->_devices.size());
 	unsigned timestepNumber = 0;
-	while(!parent->IsQuitting())
+	while(!parent->_isQuitting)
 	{
 		for(unsigned universe=0; universe < parent->_devices.size(); ++universe)
 		{
@@ -88,7 +93,7 @@ void Management::ManagementThread::operator()()
 			for(unsigned i=0;i<512;++i)
 				values[i] = 0;
 	
-			parent->GetChannelValues(timestepNumber, values, universe);
+			parent->getChannelValues(timestepNumber, values, universe);
 	
 			for(unsigned i=0;i<512;++i)
 			{
@@ -112,7 +117,7 @@ void Management::ManagementThread::operator()()
 	}
 }
 
-void Management::AbortAllDevices()
+void Management::abortAllDevices()
 {
 	for(std::unique_ptr<DmxDevice>& device : _devices)
 	{
@@ -120,7 +125,7 @@ void Management::AbortAllDevices()
 	}
 }
 
-void Management::GetChannelValues(unsigned timestepNumber, unsigned* values, unsigned universe)
+void Management::getChannelValues(unsigned timestepNumber, unsigned* values, unsigned universe)
 {
 	double relTimeInMs = GetOffsetTimeInMS();
 	double beatValue, beatConfidence;
@@ -144,6 +149,19 @@ PresetCollection& Management::AddPresetCollection()
 {
 	_controllables.emplace_back(new PresetCollection());
 	return static_cast<PresetCollection&>(*_controllables.back());
+}
+
+Folder& Management::AddFolder(Folder& parent)
+{
+	_folders.emplace_back(new Folder());
+	_folders.back()->SetParent(parent);
+	parent.Add(*_folders.back());
+	return *_folders.back();
+}
+
+Folder& Management::GetFolder(const std::string& path)
+{
+	return _rootFolder->FollowDown(path);
 }
 
 void Management::RemoveControllable(Controllable& controllable)
@@ -175,6 +193,8 @@ void Management::removeControllable(std::vector<std::unique_ptr<Controllable>>::
 			removePreset(i+1);
 		}
 	}
+	
+	controllable->Parent().Remove(*controllable.get());
 
 	PresetCollection*
 		presetCollection = dynamic_cast<PresetCollection*>(controllable.get());
@@ -217,6 +237,8 @@ bool Management::Contains(Controllable &controllable) const
 FixtureFunctionControl& Management::AddFixtureFunctionControl(FixtureFunction &function)
 {
 	_controllables.emplace_back(new FixtureFunctionControl(function));
+	_controllables.back()->SetParent(*_rootFolder); // TODO
+	_rootFolder->Add(*_controllables.back());
 	return static_cast<FixtureFunctionControl&>(*_controllables.back());
 }
 
@@ -313,6 +335,8 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect)
 	for(std::unique_ptr<EffectControl>& control : controls)
 		_controllables.emplace_back(std::move(control));
 	_effects.emplace_back(std::move(effect));
+	_effects.back()->SetParent(*_rootFolder); // TODO
+	_rootFolder->Add(*_effects.back());
 	return *_effects.back();
 }
 
@@ -333,9 +357,26 @@ void Management::RemoveEffect(Effect& effect)
 	throw std::runtime_error("Effect not found");
 }
 
-Controllable& Management::GetControllable(const std::string &name) const
+Controllable& Management::GetControllable(const std::string& name) const
 {
 	return NamedObject::FindNamedObject(_controllables, name);
+}
+
+NamedObject& Management::GetObjectFromPath(const std::string& path) const
+{
+	auto sep = std::find(path.begin(), path.end(), '/');
+	if(sep == path.end())
+	{
+		if(path == _rootFolder->Name())
+			return *_rootFolder;
+	}
+	else {
+		std::string left = path.substr(0, sep-path.begin());
+		std::string right = path.substr(sep+1-path.begin());
+		if(left == _rootFolder->Name())
+			return _rootFolder->FollowRelPath(path);
+	}
+	throw std::runtime_error("Could not find object with path " + path);
 }
 
 size_t Management::ControllableIndex(const Controllable* controllable) const
@@ -521,13 +562,15 @@ void Management::SwapDevices(Management& source)
 		thisRunning = _thread != nullptr;
 	if(thisRunning)
 	{
-		Quit();
+		_isQuitting = true;
+		abortAllDevices();
 		_thread->join();
 		_thread.reset();
 	}
 	if(sourceRunning)
 	{
-		source.Quit();
+		source._isQuitting = true;
+		source.abortAllDevices();
 		source._thread->join();
 		source._thread.reset();
 	}

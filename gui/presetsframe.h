@@ -9,80 +9,69 @@
 #include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
+#include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 
 #include "avoidrecursion.h"
 #include "nameframe.h"
+
+#include "components/objecttree.h"
 
 /**
 	@author Andre Offringa
 */
 class PresetsFrame : public Gtk::VPaned
 {
-	public:
-		PresetsFrame(class Management& management, class ShowWindow& parentWindow);
+public:
+	PresetsFrame(class Management& management, class ShowWindow& parentWindow);
 
-		void Update() { FillPresetsList(); }
-		void UpdateAfterPresetRemoval() { FillPresetsList(); }
-		
-		void ChangeManagement(class Management &management)
-		{
-			_nameFrame.ChangeManagement(management);
-			_management = &management;
-			FillPresetsList();
-		}
+	void ChangeManagement(class Management &management)
+	{
+		_nameFrame.ChangeManagement(management);
+		_management = &management;
+	}
+	
 private:
-		void FillPresetsList();
+	void initNewSequencePart();
+	void initPresetsPart();
 
-		void initNewSequencePart();
-		void initPresetsPart();
+	void onNewPresetButtonClicked();
+	void onNewFolderButtonClicked();
+	void onDeletePresetButtonClicked();
+	void onAddPresetToSequenceButtonClicked();
+	void onClearSequenceButtonClicked();
+	void onCreateSequenceButtonClicked();
+	void onSelectedPresetChanged();
+	
+	Gtk::Frame _presetsFrame;
+	ObjectTree _presetsList;
+	
+	Gtk::TreeView _newSequenceListView;
+	Glib::RefPtr<Gtk::ListStore> _newSequenceListModel;
+	struct NewSequenceListColumns : public Gtk::TreeModelColumnRecord
+	{
+		NewSequenceListColumns()
+			{ add(_title); add(_preset); }
+	
+		Gtk::TreeModelColumn<Glib::ustring> _title;
+		Gtk::TreeModelColumn<class PresetCollection *> _preset;
+	} _newSequenceListColumns;
 
-		void onNewPresetButtonClicked();
-		void onDeletePresetButtonClicked();
-		void onAddPresetToSequenceButtonClicked();
-		void onClearSequenceButtonClicked();
-		void onCreateSequenceButtonClicked();
-		void onSelectedPresetChanged();
-		void onNameChange() { FillPresetsList(); }
+	Gtk::VBox _presetsVBox;
+	Gtk::HBox _presetsHBox, _newSequenceBox;
 
-		Gtk::TreeView _presetListView;
-		Glib::RefPtr<Gtk::ListStore> _presetListModel;
-		struct PresetListColumns : public Gtk::TreeModelColumnRecord
-		{
-			PresetListColumns()
-				{ add(_title); add(_preset); }
-		
-			Gtk::TreeModelColumn<Glib::ustring> _title;
-			Gtk::TreeModelColumn<class PresetCollection *> _preset;
-		} _presetListColumns;
+	Gtk::Frame _newSequenceFrame;
 
-		Gtk::TreeView _newSequenceListView;
-		Glib::RefPtr<Gtk::ListStore> _newSequenceListModel;
-		struct NewSequenceListColumns : public Gtk::TreeModelColumnRecord
-		{
-			NewSequenceListColumns()
-				{ add(_title); add(_preset); }
-		
-			Gtk::TreeModelColumn<Glib::ustring> _title;
-			Gtk::TreeModelColumn<class PresetCollection *> _preset;
-		} _newSequenceListColumns;
+	Gtk::ScrolledWindow _newSequenceScrolledWindow;
 
-		Gtk::VBox _presetsVBox;
-		Gtk::HBox _presetsHBox, _newSequenceBox;
-		Gtk::Frame _presetsFrame;
+	Gtk::VButtonBox _presetsButtonBox, _newSequenceButtonBox;
+	Gtk::Button _newPresetButton, _newFolderButton, _deletePresetButton;
+	Gtk::Button _addPresetToSequenceButton, _clearSequenceButton, _createSequenceButton;
 
-		Gtk::Frame _newSequenceFrame;
-
-		Gtk::ScrolledWindow _presetsScrolledWindow, _newSequenceScrolledWindow;
-
-		Gtk::VButtonBox _presetsButtonBox, _newSequenceButtonBox;
-		Gtk::Button _newPresetButton, _deletePresetButton;
-		Gtk::Button _addPresetToSequenceButton, _clearSequenceButton, _createSequenceButton;
-
-		Management* _management;
-		class ShowWindow& _parentWindow;
-		NameFrame _nameFrame;
-		AvoidRecursion _delayUpdates;
+	Management* _management;
+	class ShowWindow& _parentWindow;
+	NameFrame _nameFrame;
+	AvoidRecursion _delayUpdates;
 };
 
 #endif

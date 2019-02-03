@@ -5,6 +5,10 @@ FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type, const std:
 {
 }
 
+FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type) : NamedObject(), _theatre(theatre), _type(type), _firstChannel(0, 0)
+{
+}
+
 FixtureFunction::FixtureFunction(const FixtureFunction& source, class Theatre& theatre) :
 	NamedObject(source),
 	_theatre(theatre),

@@ -27,8 +27,6 @@ public:
 	~ShowWindow();
 	
 	void EmitUpdate();
-	void EmitUpdateAfterPresetRemoval();
-	void EmitUpdateAfterAddPreset();
 	
 	GUIState& State() { return _state; }
 	
@@ -37,11 +35,8 @@ public:
 	
 	Management& GetManagement() const { return *_management; }
 	
-	void MakeSequenceTabActive() { _notebook.set_current_page(1); }
-	void MakeChasesTabActive() { _notebook.set_current_page(2); }
-	
-	void UpdateSequenceList();
-	void UpdateChaseList();
+	void MakeSequenceTabActive(class Sequence& sequence);
+	void MakeChaseTabActive(class Chase& chase);
 private:
 	void onControlWindowButtonClicked()
 	{

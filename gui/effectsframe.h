@@ -15,6 +15,7 @@
 #include "nameframe.h"
 
 #include "components/controllableselectmenu.h"
+#include "components/objecttree.h"
 #include "components/propertiesbox.h"
 
 /**
@@ -25,11 +26,7 @@ class EffectsFrame : public Gtk::VPaned
 	public:
 		EffectsFrame(class Management& management, class ShowWindow& parentWindow);
 
-		void Update() { fillEffectsList(); }
-		void UpdateAfterPresetRemoval() { Update(); }
-		
 private:
-		void fillEffectsList();
 		void fillProperties(class Effect& effect);
 		void fillConnectionsList(class Effect& effect);
 
@@ -51,24 +48,12 @@ private:
 		{
 			_nameFrame.ChangeManagement(management);
 			_management = &management;
-			Update();
 		}
 
-		Gtk::TreeView _effectsListView;
-		Glib::RefPtr<Gtk::ListStore> _effectsListModel;
-		struct EffectsListColumns : public Gtk::TreeModelColumnRecord
-		{
-			EffectsListColumns()
-				{ add(_title); add(_effect); }
-		
-			Gtk::TreeModelColumn<Glib::ustring> _title;
-			Gtk::TreeModelColumn<class Effect *> _effect;
-		} _effectsListColumns;
-
+		Gtk::Frame _effectsFrame;
+		ObjectTree _effectsList;
 		Gtk::VBox _effectsVBox;
 		Gtk::HBox _effectsHBox;
-		Gtk::Frame _effectsFrame;
-		Gtk::ScrolledWindow _effectsScrolledWindow;
 		Gtk::VButtonBox _effectsButtonBox;
 		Gtk::Button _newEffectButton, _deleteEffectButton;
 		NameFrame _nameFrame;

@@ -6,6 +6,7 @@
 
 ChaseFrame::ChaseFrame(Management &management, ShowWindow &parentWindow) :
 	_upperFrame("All chases"),
+	_chaseList(management, parentWindow),
 	_deleteChaseButton("Delete"),
 	_bottomFrame("Selected chase"),
 	
@@ -27,36 +28,15 @@ ChaseFrame::ChaseFrame(Management &management, ShowWindow &parentWindow) :
 	_beatTriggerCheckButton("Trigger by beat"),
 	_beatSpeedLabel("Beats per trigger :"),
 	_beatSpeed(0.25, 4.0, 0.25),
-	_management(&management), _parentWindow(parentWindow)
+	_management(&management),
+	_parentWindow(parentWindow)
 {
 	initUpperPanel();
-
 	initLowerPanel();
 }
 
 ChaseFrame::~ChaseFrame()
 {
-}
-
-void ChaseFrame::fillChaseList()
-{
-	AvoidRecursion::Token token(_delayUpdates);
-	_chaseListModel->clear();
-
-	std::lock_guard<std::mutex> lock(_management->Mutex());
-	const std::vector<std::unique_ptr<Controllable>>&
-		controllables = _management->Controllables();
-	for(const std::unique_ptr<Controllable>& c : controllables)
-	{
-		Chase* chase = dynamic_cast<Chase*>(c.get());
-		if(chase != nullptr)
-		{
-			Gtk::TreeModel::iterator iter = _chaseListModel->append();
-			Gtk::TreeModel::Row row = *iter;
-			row[_chaseListColumns._title] = chase->Name();
-			row[_chaseListColumns._chase] = chase;
-		}
-	}
 }
 
 void ChaseFrame::initUpperPanel()
@@ -66,17 +46,10 @@ void ChaseFrame::initUpperPanel()
 	
 	_upperBox.pack_start(_upperButtonBox, false, false, 5);
 
-	_chaseListModel =
-    Gtk::ListStore::create(_chaseListColumns);
-
-	_chaseListView.set_model(_chaseListModel);
-	_chaseListView.append_column("Chase", _chaseListColumns._title);
-	_chaseListView.get_selection()->signal_changed().
-		connect(sigc::mem_fun(*this, &ChaseFrame::onSelectedChaseChanged));
-	_chaseScrolledWindow.add(_chaseListView);
-
-	_chaseScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	_upperBox.pack_start(_chaseScrolledWindow);
+	_chaseList.SetDisplayType(ObjectTree::OnlyChases);
+	_chaseList.SignalSelectionChange().connect(
+		sigc::mem_fun(*this, &ChaseFrame::onSelectedChaseChanged));
+	_upperBox.pack_start(_chaseList);
 
 	_upperFrame.add(_upperBox);
 
@@ -155,12 +128,7 @@ void ChaseFrame::initLowerPanel()
 
 Chase* ChaseFrame::getSelectedChase()
 {
-	Gtk::TreeModel::const_iterator selected =
-		_chaseListView.get_selection()->get_selected();
-	if(selected)
-		return (*selected)[_chaseListColumns._chase];
-	else
-		return nullptr;
+	return dynamic_cast<Chase*>(_chaseList.SelectedObject());
 }
 
 void ChaseFrame::onTriggerTypeChanged()
@@ -288,6 +256,11 @@ void ChaseFrame::onDeleteChaseClicked()
 	if(chase)
 	{
 		_management->RemoveControllable(*chase);
-		_parentWindow.EmitUpdateAfterPresetRemoval();
+		_parentWindow.EmitUpdate();
 	}
+}
+
+void ChaseFrame::Select(const Chase& chase)
+{
+	_chaseList.SelectObject(chase);
 }

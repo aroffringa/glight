@@ -39,8 +39,11 @@ class Reader{
 		double getDoubleAttribute(xmlNode *node, const char *name) const;
 		std::string name(xmlNode *node) { return std::string((const char *) node->name); }
 
+		void parseNameAttr(xmlNode* node, class NamedObject& object);
+		
 		void parseGlightShow(xmlNode *node);
 		void parseGroup(xmlNode *node);
+		void parseFolders(xmlNode *node);
 		void parseTheatre(xmlNode *node);
 		void parseTheatreItem(xmlNode *node);
 		void parseControl(xmlNode *node);

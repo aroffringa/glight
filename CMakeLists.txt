@@ -31,12 +31,11 @@ set(MAINFILES
   audioplayer.cpp
   beatfinder.cpp
   flacdecoder.cpp
-  glight.cpp
   reader.cpp
   writer.cpp)
 
 set(GUIFILES
-  gui/application.cpp
+  gui/application.cpp  
   gui/audiowidget.cpp
   gui/chaseframe.cpp
   gui/chasewizard.cpp
@@ -53,6 +52,7 @@ set(GUIFILES
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp
   gui/components/controllableselectmenu.cpp
+  gui/components/objecttree.cpp
   gui/components/propertiesbox.cpp)
 
 set(THEATREFILES
@@ -61,17 +61,21 @@ set(THEATREFILES
   libtheatre/fixture.cpp
   libtheatre/fixturefunction.cpp
   libtheatre/management.cpp
+  libtheatre/namedobject.cpp
   libtheatre/oladevice.cpp
   libtheatre/scene.cpp
   libtheatre/show.cpp
   libtheatre/theatre.cpp
   libtheatre/properties/propertyset.cpp)
-  
-add_executable(glight ${MAINFILES} ${GUIFILES} ${THEATREFILES})
+
+add_library(glight-object OBJECT
+  ${MAINFILES} ${GUIFILES} ${THEATREFILES})
+
+add_executable(glight $<TARGET_OBJECTS:glight-object> glight.cpp)
 
 link_directories(${GTKMM_LIBDIR})
 
-target_link_libraries(glight 
+set(GLIGHT_LIBRARIES
   ${Boost_SYSTEM_LIBRARY} 
   ${FLACPP_LIBRARIES} 
   ${ALSA_LIBRARIES} 
@@ -82,4 +86,21 @@ target_link_libraries(glight
   ${LIBOLA_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT})
 
+target_link_libraries(glight ${GLIGHT_LIBRARIES})
+
+find_package(Boost COMPONENTS system filesystem unit_test_framework)
+if(Boost_FOUND)
+	include_directories(${Boost_INCLUDE_DIR})
+  add_executable(runtests EXCLUDE_FROM_ALL
+    $<TARGET_OBJECTS:glight-object>
+    tests/runtests.cpp 
+    tests/testfolder.cpp
+    )
+  target_link_libraries(runtests ${GLIGHT_LIBRARIES})
+  add_test(runtests runtests)
+  add_custom_target(check COMMAND runtests -l unit_scope DEPENDS runtests)
+else()
+  message("Boost testing framework not found.")
+endif()
+  
 install(TARGETS glight RUNTIME DESTINATION bin)

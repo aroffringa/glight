@@ -26,6 +26,10 @@ class Management {
 		
 		class Theatre &Theatre() const { return *_theatre; }
 
+		const std::vector<std::unique_ptr<class Folder>>& Folders() const
+		{
+			return _folders;
+		}
 		const std::vector<std::unique_ptr<class Controllable>>& Controllables() const
 		{
 			return _controllables;
@@ -47,9 +51,12 @@ class Management {
 			return _devices;
 		}
 
-		class PresetCollection &AddPresetCollection();
+		class PresetCollection& AddPresetCollection();
 		void RemoveControllable(class Controllable &controllable);
 		bool Contains(class Controllable &controllable) const;
+		
+		class Folder& AddFolder(Folder& parent);
+		class Folder& GetFolder(const std::string& path);
 
 		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction &function);
 
@@ -69,7 +76,8 @@ class Management {
 
 		std::mutex& Mutex() { return _mutex; }
 
-		class Controllable& GetControllable(const std::string &name) const;
+		class Controllable& GetControllable(const std::string& name) const;
+		class NamedObject& GetObjectFromPath(const std::string& path) const;
 		size_t ControllableIndex(const Controllable* controllable) const;
 		
 		class Sequence& GetSequence(const std::string &name) const;
@@ -100,6 +108,10 @@ class Management {
 		 * This can be called while running, and is e.g. useful for switching from dry mode.
 		 */
 		void SwapDevices(Management& source);
+		
+		const class Folder& RootFolder() const { return *_rootFolder; }
+		class Folder& RootFolder() { return *_rootFolder; }
+		
 	private:
 		struct ManagementThread {
 			Management *parent;
@@ -108,7 +120,7 @@ class Management {
 		
 		Management(const Management& forDryCopy, std::shared_ptr<class BeatFinder>& beatFinder);
 
-		void GetChannelValues(unsigned timestepNumber, unsigned *values, unsigned universe);
+		void getChannelValues(unsigned timestepNumber, unsigned *values, unsigned universe);
 		void removeControllable(std::vector<std::unique_ptr<class Controllable>>::iterator controllablePtr);
 		void removePreset(std::vector<std::unique_ptr<class PresetValue>>::iterator presetValuePtr);
 		void removeSequence(std::vector<std::unique_ptr<class Sequence>>::iterator sequencePtr);
@@ -117,24 +129,10 @@ class Management {
 		void dryCopyControllerDependency(const Management& forDryCopy, size_t index);
 		void dryCopyEffectDependency(const Management& forDryCopy, size_t index);
 
-		bool IsQuitting()
-		{
-			std::lock_guard<std::mutex> lock(_mutex);
-			return _isQuitting;
-		}
-
-		void Quit()
-		{
-			std::unique_lock<std::mutex> lock(_mutex);
-			_isQuitting = true;
-			lock.unlock();
-
-			AbortAllDevices();
-		}
-		void AbortAllDevices();
+		void abortAllDevices();
 
 		std::unique_ptr<std::thread> _thread;
-		bool _isQuitting;
+		std::atomic<bool> _isQuitting;
 		std::mutex _mutex;
 		boost::posix_time::ptime _createTime;
 		std::mt19937 _randomGenerator;
@@ -146,6 +144,8 @@ class Management {
 		std::shared_ptr<class BeatFinder> _beatFinder;
 		std::unique_ptr<class Show> _show;
 
+		class Folder* _rootFolder;
+		std::vector<std::unique_ptr<class Folder>> _folders;
 		std::vector<std::unique_ptr<class Controllable>> _controllables;
 		std::vector<std::unique_ptr<class PresetValue>> _presetValues;
 		std::vector<std::unique_ptr<class Sequence>> _sequences;
