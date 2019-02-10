@@ -63,7 +63,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_sequenceFrame.reset(new SequenceFrame(*_management, *this));
 	_chaseFrame.reset(new ChaseFrame(*_management, *this));
 	_effectsFrame.reset(new EffectsFrame(*_management, *this));
-	_sceneFrame.reset(new SceneFrame(*_management));
+	_sceneFrame.reset(new SceneFrame(*_management, *this));
 
 	_notebook.append_page(*_presetsFrame, "Presets");
 	_notebook.append_page(*_sequenceFrame, "Sequences");

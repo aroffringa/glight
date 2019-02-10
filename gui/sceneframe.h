@@ -23,7 +23,7 @@
 */
 class SceneFrame : public Gtk::Frame {
 	public:
-		SceneFrame(class Management &management);
+		SceneFrame(class Management& management, class ShowWindow& parentWindow);
 		~SceneFrame();
 
 		void Update();

@@ -14,7 +14,7 @@ EffectsFrame::EffectsFrame(Management &management, ShowWindow &parentWindow) :
 	_effectsList(management, parentWindow),
 	_newEffectButton(Gtk::Stock::NEW), 
 	_deleteEffectButton(Gtk::Stock::DELETE),
-	_nameFrame(management),
+	_nameFrame(management, parentWindow),
 	_connectionsFrame("Connections"),
 	_propertiesFrame("Properties"),
 	_addConnectionButton(Gtk::Stock::ADD),

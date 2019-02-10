@@ -22,7 +22,7 @@ PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 	_createSequenceButton("Create"),
 	_management(&management),
 	_parentWindow(parentWindow),
-	_nameFrame(management)
+	_nameFrame(management, parentWindow)
 {
 	initPresetsPart();
 	initNewSequencePart();

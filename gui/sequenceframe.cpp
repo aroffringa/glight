@@ -10,7 +10,7 @@ SequenceFrame::SequenceFrame(Management &management, ShowWindow &parentWindow) :
 	_sequenceFrame("All sequences"),
 	_sequenceList(management, parentWindow),
 	_createChaseButton("Create chase"),
-	_nameFrame(management),
+	_nameFrame(management, parentWindow),
 	_management(&management),
 	_parentWindow(parentWindow)
 {

@@ -14,7 +14,7 @@
 
 #include "sceneframe.h"
 
-SceneFrame::SceneFrame(Management &management)
+SceneFrame::SceneFrame(Management& management, ShowWindow& parentWindow)
  : Gtk::Frame("Scene"),
 	_management(&management),
 	_show(&_management->Show()),
@@ -37,7 +37,7 @@ SceneFrame::SceneFrame(Management &management)
 	_createTransitionItemButton("Add transition"),
 	_startScale(0, ControlValue::MaxUInt()+1, ControlValue::MaxUInt()/100.0),
 	_endScale(0, ControlValue::MaxUInt()+1, ControlValue::MaxUInt()/100.0),
-	_nameFrame(management),
+	_nameFrame(management, parentWindow),
 	_selectedScene(nullptr),
 	_isUpdating(false)
 {

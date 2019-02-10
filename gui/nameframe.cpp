@@ -1,12 +1,15 @@
 #include "nameframe.h"
 
+#include "showwindow.h"
+
 #include "../libtheatre/management.h"
 #include "../libtheatre/namedobject.h"
 
 #include <gtkmm/stock.h>
 
-NameFrame::NameFrame(Management& management) :
+NameFrame::NameFrame(Management& management, ShowWindow& showWindow) :
 	_management(&management),
+	_showWindow(showWindow),
 	_namedObject(0),
 	_label("Name:"),
 	_button(Gtk::Stock::APPLY)
@@ -33,7 +36,7 @@ NameFrame::~NameFrame()
 
 void NameFrame::update()
 {
-	if(_namedObject == 0)
+	if(_namedObject == nullptr)
 	{
 		_entry.set_text("");
 		set_sensitive(false);
@@ -45,12 +48,13 @@ void NameFrame::update()
 
 void NameFrame::onButtonClicked()
 {
-	if(_namedObject != 0)
+	if(_namedObject != nullptr)
 	{
 		std::unique_lock<std::mutex> lock(_management->Mutex());
 		_namedObject->SetName(_entry.get_text());
 		lock.unlock();
 
+		_showWindow.EmitUpdate();
 		_signalNameChange();
 	}
 }
