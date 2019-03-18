@@ -149,12 +149,13 @@ void PresetsFrame::onDeletePresetButtonClicked()
 		PresetCollection* preset = dynamic_cast<PresetCollection*>(selectedObj);
 		if(preset)
 		{
+			Folder& parent = preset->Parent();
 			std::unique_lock<std::mutex> lock(_management->Mutex());
 			_management->RemoveControllable(*preset);
 			lock.unlock();
+			_presetsList.SelectObject(parent);
+			_parentWindow.EmitUpdate();
 		}
-	
-		_parentWindow.EmitUpdate();
 	}
 }
 
@@ -225,8 +226,8 @@ void PresetsFrame::onSelectedPresetChanged()
 		if(selectedObj)
 		{
 			_nameFrame.SetNamedObject(*selectedObj);
-			preset = dynamic_cast<PresetCollection*>(_nameFrame.GetNamedObject());
-			folder = dynamic_cast<Folder*>(_nameFrame.GetNamedObject());
+			preset = dynamic_cast<PresetCollection*>(selectedObj);
+			folder = dynamic_cast<Folder*>(selectedObj);
 		}
 		else {
 			_nameFrame.SetNoNamedObject();

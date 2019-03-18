@@ -235,9 +235,9 @@ void Reader::parsePresetCollection(xmlNode *node)
 		{
 			if(name(curNode) == "preset-value")
 			{
-				size_t folderId = getIntAttribute(node, "folder");
+				size_t folderId = getIntAttribute(curNode, "folder");
 				Controllable& controllable = static_cast<Controllable&>(
-					_management.Folders()[folderId]->GetChild(getStringAttribute(node, "controllable-ref")));
+					_management.Folders()[folderId]->GetChild(getStringAttribute(curNode, "controllable-ref")));
 
 				PresetValue &value = collection.AddPresetValue(getIntAttribute(curNode, "id"), controllable);
 				value.SetValue(ControlValue(getIntAttribute(curNode, "value")));

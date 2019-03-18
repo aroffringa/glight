@@ -26,12 +26,12 @@ class PresetValue {
 		~PresetValue() { _signalDelete(); }
 
 		void SetValue(const ControlValue &value) { _value = value; }
-		const ControlValue &Value() const { return _value; }
-		ControlValue &Value() { return _value; }
+		const ControlValue& Value() const { return _value; }
+		ControlValue& Value() { return _value; }
 
 		unsigned Id() const { return _id; }
 
-		class Controllable &Controllable() const { return *_controllable; }
+		class Controllable& Controllable() const { return *_controllable; }
 		bool IsIgnorable() const { return _value.UInt() == 0; }
 		
 		sigc::signal<void()>& SignalDelete() { return _signalDelete; }

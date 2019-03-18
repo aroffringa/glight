@@ -53,6 +53,10 @@ void Management::Clear()
 	_presetValues.clear();
 	_sequences.clear();
 	_effects.clear();
+	_folders.clear();
+	_folders.emplace_back(new Folder());
+	_rootFolder = _folders.back().get();
+	_rootFolder->SetName("Root");
 
 	_theatre->Clear();
 

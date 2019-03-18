@@ -38,7 +38,6 @@ void ObjectTree::fillList()
 	Gtk::TreeModel::iterator selected = selection->get_selected();
 	NamedObject* selectedObj = selected ?
 		static_cast<NamedObject*>((*selected)[_listColumns._object]) : nullptr;
-	
 	_listModel->clear();
 
 	std::lock_guard<std::mutex> lock(_management->Mutex());
@@ -51,7 +50,7 @@ void ObjectTree::fillList()
 			row[_listColumns._title] = "all";
 			break;
 		case OnlyPresetCollections:
-			row[_listColumns._title] = "present collections";
+			row[_listColumns._title] = "preset collections";
 			break;
 		case OnlySequences:
 			row[_listColumns._title] = "sequences";
@@ -67,6 +66,7 @@ void ObjectTree::fillList()
 	if(selectedObj == &_management->RootFolder())
 		_listView.get_selection()->select(iter);
 	fillListFolder(_management->RootFolder(), row, selectedObj);
+	_listView.expand_row(_listModel->get_path(row), false);
 }
 
 void ObjectTree::fillListFolder(const Folder& folder, Gtk::TreeModel::Row& row, const NamedObject* selectedObj)
@@ -98,7 +98,10 @@ void ObjectTree::fillListFolder(const Folder& folder, Gtk::TreeModel::Row& row, 
 			childRow[_listColumns._title] = obj->Name();
 			childRow[_listColumns._object] = obj;
 			if(obj == selectedObj)
+			{
+				_listView.expand_to_path(_listModel->get_path(iter));
 				_listView.get_selection()->select(iter);
+			}
 			if(childFolder)
 				fillListFolder(*childFolder, childRow, selectedObj);
 		}

@@ -2,6 +2,7 @@
 
 #include "showwindow.h"
 
+#include "../libtheatre/folder.h"
 #include "../libtheatre/management.h"
 #include "../libtheatre/namedobject.h"
 
@@ -39,6 +40,11 @@ void NameFrame::update()
 	if(_namedObject == nullptr)
 	{
 		_entry.set_text("");
+		set_sensitive(false);
+	}
+	else if(_namedObject == &_management->RootFolder())
+	{
+		_entry.set_text("Root");
 		set_sensitive(false);
 	} else {
 		_entry.set_text(_namedObject->Name());
