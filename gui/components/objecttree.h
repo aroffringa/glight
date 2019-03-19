@@ -14,6 +14,7 @@ public:
 		All,
 		OnlyPresetCollections,
 		OnlySequences,
+		PresetsAndSequences,
 		OnlyChases,
 		OnlyEffects
 	};

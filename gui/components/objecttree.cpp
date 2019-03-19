@@ -55,6 +55,9 @@ void ObjectTree::fillList()
 		case OnlySequences:
 			row[_listColumns._title] = "sequences";
 			break;
+		case PresetsAndSequences:
+			row[_listColumns._title] = "presets / sequences";
+			break;
 		case OnlyChases:
 			row[_listColumns._title] = "chases";
 			break;
@@ -72,9 +75,9 @@ void ObjectTree::fillList()
 void ObjectTree::fillListFolder(const Folder& folder, Gtk::TreeModel::Row& row, const NamedObject* selectedObj)
 {
 	bool showPresetCollections =
-		_displayType==OnlyPresetCollections || _displayType==All;
+		_displayType==OnlyPresetCollections || _displayType==PresetsAndSequences || _displayType==All;
 	bool showSequences =
-		_displayType==OnlySequences || _displayType==All;
+		_displayType==OnlySequences || _displayType==PresetsAndSequences || _displayType==All;
 	bool showChases =
 		_displayType==OnlyChases || _displayType==All;
 	bool showEffects =

@@ -4,6 +4,7 @@
 
 #include "showwindow.h"
 
+#include "../libtheatre/chase.h"
 #include "../libtheatre/folder.h"
 #include "../libtheatre/management.h"
 #include "../libtheatre/presetvalue.h"
@@ -16,6 +17,7 @@ PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 	_newSequenceFrame("New sequence"),
 	_newPresetButton(Gtk::Stock::NEW),
 	_newFolderButton("New folder"),
+	_createChaseButton("New chase"),
 	_deletePresetButton(Gtk::Stock::DELETE), 
 	_addPresetToSequenceButton(Gtk::Stock::ADD),
 	_clearSequenceButton("Clear"),
@@ -46,6 +48,11 @@ void PresetsFrame::initPresetsPart()
 	_newFolderButton.set_image_from_icon_name("directory");
 	_presetsButtonBox.pack_start(_newFolderButton);
 
+	_createChaseButton.signal_clicked().
+		connect(sigc::mem_fun(*this, &PresetsFrame::onCreateChaseButtonClicked));
+	_createChaseButton.set_sensitive(false);
+	_presetsButtonBox.pack_start(_createChaseButton);
+	
 	_deletePresetButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onDeletePresetButtonClicked));
 	_presetsButtonBox.pack_start(_deletePresetButton);
@@ -53,12 +60,11 @@ void PresetsFrame::initPresetsPart()
 	_presetsHBox.pack_start(_presetsButtonBox, false, false, 5);
 	
 	_presetsList.SignalSelectionChange().connect(sigc::mem_fun(this, &PresetsFrame::onSelectedPresetChanged));
-	_presetsList.SetDisplayType(ObjectTree::OnlyPresetCollections);
+	_presetsList.SetDisplayType(ObjectTree::PresetsAndSequences);
 	_presetsHBox.pack_start(_presetsList);
 	
 	_presetsVBox.pack_start(_presetsHBox);
-
-	//_nameFrame.SignalNameChange().connect(sigc::mem_fun(*this, &PresetsFrame::onNameChange));
+	
 	_presetsVBox.pack_start(_nameFrame, false, false, 2);
 
 	_presetsFrame.add(_presetsVBox);
@@ -141,21 +147,49 @@ void PresetsFrame::onNewFolderButtonClicked()
 	}
 }
 
+void PresetsFrame::onCreateChaseButtonClicked()
+{
+	NamedObject* object = _presetsList.SelectedObject();
+	if(object)
+	{
+		Sequence* sequence = dynamic_cast<Sequence*>(object);
+		if(sequence && sequence->Size() != 0)
+		{
+			Folder& parent = sequence->Parent();
+			std::unique_lock<std::mutex> lock(_management->Mutex());
+			Chase& chase = _management->AddChase(*sequence);
+			chase.SetName(sequence->Name());
+			parent.Add(chase);
+
+			_management->AddPreset(chase);
+			lock.unlock();
+
+			_parentWindow.EmitUpdate();
+			_parentWindow.MakeChaseTabActive(chase);
+		}
+	}
+}
+
 void PresetsFrame::onDeletePresetButtonClicked()
 {
 	NamedObject* selectedObj = _presetsList.SelectedObject();
-	if(selectedObj)
+	if(selectedObj && selectedObj != &_management->RootFolder())
 	{
 		PresetCollection* preset = dynamic_cast<PresetCollection*>(selectedObj);
+		Sequence* sequence = dynamic_cast<Sequence*>(selectedObj);
+		Folder& parent = selectedObj->Parent();
 		if(preset)
 		{
-			Folder& parent = preset->Parent();
-			std::unique_lock<std::mutex> lock(_management->Mutex());
+			std::lock_guard<std::mutex> lock(_management->Mutex());
 			_management->RemoveControllable(*preset);
-			lock.unlock();
-			_presetsList.SelectObject(parent);
-			_parentWindow.EmitUpdate();
 		}
+		if(sequence)
+		{
+			std::lock_guard<std::mutex> lock(_management->Mutex());
+			_management->RemoveSequence(*sequence);
+		}
+		_presetsList.SelectObject(parent);
+		_parentWindow.EmitUpdate();
 	}
 }
 
@@ -195,7 +229,7 @@ void PresetsFrame::onCreateSequenceButtonClicked()
 		folder = &_management->RootFolder();
 	}
 	std::unique_lock<std::mutex> lock(_management->Mutex());
-	Sequence &sequence = _management->AddSequence();
+	Sequence& sequence = _management->AddSequence();
 
 	Gtk::TreeModel::Children children = _newSequenceListModel->children();
 	for(Gtk::TreeModel::Children::const_iterator i=children.begin();
@@ -212,7 +246,7 @@ void PresetsFrame::onCreateSequenceButtonClicked()
 	lock.unlock();
 
 	_parentWindow.EmitUpdate();
-	_parentWindow.MakeSequenceTabActive(sequence);
+	_presetsList.SelectObject(sequence);
 	_newSequenceListModel->clear();
 }
 
@@ -223,14 +257,18 @@ void PresetsFrame::onSelectedPresetChanged()
 		NamedObject* selectedObj = _presetsList.SelectedObject();
 		PresetCollection *preset = nullptr;
 		Folder *folder = nullptr;
+		Sequence* sequence = nullptr;
 		if(selectedObj)
 		{
 			_nameFrame.SetNamedObject(*selectedObj);
+			_deletePresetButton.set_sensitive(selectedObj != &_management->RootFolder());
 			preset = dynamic_cast<PresetCollection*>(selectedObj);
 			folder = dynamic_cast<Folder*>(selectedObj);
+			sequence = dynamic_cast<Sequence*>(selectedObj);
 		}
 		else {
 			_nameFrame.SetNoNamedObject();
+			_deletePresetButton.set_sensitive(false);
 		}
 		if(preset)
 			_addPresetToSequenceButton.set_sensitive(true);
@@ -245,5 +283,9 @@ void PresetsFrame::onSelectedPresetChanged()
 			_newPresetButton.set_sensitive(false);
 			_newFolderButton.set_sensitive(false);
 		}
+		if(sequence)
+			_createChaseButton.set_sensitive(true);
+		else
+			_createChaseButton.set_sensitive(false);
 	}
 }

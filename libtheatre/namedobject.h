@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <sigc++/signal.h>
+
 /**
 	@author Andre Offringa
 */
@@ -14,7 +16,10 @@ public:
 	{ }
 	NamedObject(const std::string &name) : _name(name), _parent(nullptr)
 	{ }
-	virtual ~NamedObject() { }
+	virtual ~NamedObject()
+	{
+		_signalDelete();
+	}
 
 	const std::string& Name() const { return _name; }
 	void SetName(const std::string &name) { _name = name; }
@@ -61,11 +66,14 @@ public:
 		throw std::runtime_error("Could not find object in container.");
 	}
 	
+	sigc::signal<void()>& SignalDelete() { return _signalDelete; }
+		
 private:
 	friend class Folder;
 	
 	std::string _name;
 	class Folder* _parent;
+	sigc::signal<void()> _signalDelete;
 };
 
 #endif

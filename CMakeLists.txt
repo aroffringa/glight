@@ -47,7 +47,6 @@ set(GUIFILES
   gui/nameframe.cpp
   gui/presetsframe.cpp
   gui/sceneframe.cpp
-  gui/sequenceframe.cpp
   gui/showwindow.cpp
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp

@@ -37,6 +37,7 @@ private:
 
 	void onNewPresetButtonClicked();
 	void onNewFolderButtonClicked();
+	void onCreateChaseButtonClicked();
 	void onDeletePresetButtonClicked();
 	void onAddPresetToSequenceButtonClicked();
 	void onClearSequenceButtonClicked();
@@ -65,7 +66,7 @@ private:
 	Gtk::ScrolledWindow _newSequenceScrolledWindow;
 
 	Gtk::VButtonBox _presetsButtonBox, _newSequenceButtonBox;
-	Gtk::Button _newPresetButton, _newFolderButton, _deletePresetButton;
+	Gtk::Button _newPresetButton, _newFolderButton, _createChaseButton, _deletePresetButton;
 	Gtk::Button _addPresetToSequenceButton, _clearSequenceButton, _createSequenceButton;
 
 	Management* _management;

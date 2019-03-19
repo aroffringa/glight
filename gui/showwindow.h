@@ -35,7 +35,6 @@ public:
 	
 	Management& GetManagement() const { return *_management; }
 	
-	void MakeSequenceTabActive(class Sequence& sequence);
 	void MakeChaseTabActive(class Chase& chase);
 private:
 	void onControlWindowButtonClicked()
@@ -88,7 +87,6 @@ private:
 	class PresetCollection *_preset;
 
 	std::unique_ptr<class PresetsFrame> _presetsFrame;
-	std::unique_ptr<class SequenceFrame> _sequenceFrame;
 	std::unique_ptr<class ChaseFrame> _chaseFrame;
 	std::unique_ptr<class EffectsFrame> _effectsFrame;
 	std::unique_ptr<class SceneFrame> _sceneFrame;

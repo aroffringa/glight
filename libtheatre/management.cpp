@@ -310,7 +310,7 @@ void Management::RemoveSequence(Sequence &sequence)
 void Management::removeSequence(std::vector<std::unique_ptr<Sequence>>::iterator sequencePtr)
 {
 	std::unique_ptr<Sequence> sequence = std::move(*sequencePtr);
-
+	sequence->Parent().Remove(*sequence);
 	for(std::vector<std::unique_ptr<Controllable>>::iterator i=_controllables.begin();
 		i!=_controllables.end(); ++i)
 	{
