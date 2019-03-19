@@ -5,6 +5,8 @@
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 
+#include "../avoidrecursion.h"
+
 class ObjectTree : public Gtk::ScrolledWindow
 {
 public:
@@ -58,6 +60,7 @@ private:
 	}
 	
 	sigc::signal<void()> _signalSelectionChange;
+	AvoidRecursion _avoidRecursion;
 };
 
 #endif

@@ -25,7 +25,10 @@ ObjectTree::ObjectTree(Management &management, ShowWindow &parentWindow) :
 	_listView.append_column("Object", _listColumns._title);
 	_listView.set_headers_visible(false);
 	_listView.get_selection()->signal_changed().connect([&]()
-		{ _signalSelectionChange.emit(); });
+		{ 
+			if(_avoidRecursion.IsFirst())
+				_signalSelectionChange.emit(); 
+		});
 	fillList();
 	add(_listView);
 	set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -33,6 +36,7 @@ ObjectTree::ObjectTree(Management &management, ShowWindow &parentWindow) :
 
 void ObjectTree::fillList()
 {
+	AvoidRecursion::Token token(_avoidRecursion);
 	Glib::RefPtr<Gtk::TreeSelection> selection =
 		_listView.get_selection();
 	Gtk::TreeModel::iterator selected = selection->get_selected();
