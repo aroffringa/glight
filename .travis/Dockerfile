@@ -16,4 +16,4 @@ RUN apt-get update && \
 ADD . /src
 WORKDIR /src
 
-RUN mkdir /build && cd /build && cmake ../src && make -j2 && make install
+RUN mkdir /build && cd /build && cmake ../src && make -j2 && make install && make check
