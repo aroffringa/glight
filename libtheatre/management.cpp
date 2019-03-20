@@ -343,8 +343,14 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect)
 	for(std::unique_ptr<EffectControl>& control : controls)
 		_controllables.emplace_back(std::move(control));
 	_effects.emplace_back(std::move(effect));
-	_rootFolder->Add(*_effects.back()); // TODO
 	return *_effects.back();
+}
+
+Effect& Management::AddEffect(std::unique_ptr<Effect> effect, Folder& folder)
+{
+	Effect& newEffect = AddEffect(std::move(effect));
+	folder.Add(newEffect);
+	return newEffect;
 }
 
 void Management::RemoveEffect(Effect& effect)

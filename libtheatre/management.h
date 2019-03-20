@@ -73,6 +73,7 @@ class Management {
 		class Chase& AddChase(class Sequence &sequence);
 		
 		class Effect& AddEffect(std::unique_ptr<class Effect> effect);
+		class Effect& AddEffect(std::unique_ptr<class Effect> effect, Folder& folder);
 		void RemoveEffect(class Effect& effect);
 
 		std::mutex& Mutex() { return _mutex; }

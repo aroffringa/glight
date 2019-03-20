@@ -183,7 +183,7 @@ void EffectsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 {
 	std::unique_ptr<Effect> effect(Effect::Make(effectType));
 	effect->SetNameGlobally(Effect::TypeToName(effectType) + std::to_string(_management->Effects().size()+1));
-	Effect* added = &_management->AddEffect(std::move(effect));
+	Effect* added = &_management->AddEffect(std::move(effect), _management->RootFolder() /* TODO */);
 	for(EffectControl* ec : added->Controls())
 		_management->AddPreset(*ec);
 	_parentWindow.EmitUpdate();

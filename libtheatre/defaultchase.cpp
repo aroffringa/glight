@@ -151,7 +151,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 	if(colors.size() != fixtures.size())
 		throw std::runtime_error("Number of colours did not match number of fixtures");
 	std::unique_ptr<AudioLevelEffect> audioLevel(new AudioLevelEffect());
-	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel));
+	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel), folder);
 	for(EffectControl* ec : newAudioLevel.Controls())
 		management.AddPreset(*ec);
 	newAudioLevel.SetNameGlobally("VUMeter");
@@ -165,7 +165,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 		std::unique_ptr<ThresholdEffect> threshold(new ThresholdEffect());
 		threshold->SetLowerStartLimit(((1<<24)-1)*i/nLevels);
 		threshold->SetLowerEndLimit(((1<<24)-1)*(i+1)/nLevels);
-		Effect& newEffect = management.AddEffect(std::move(threshold));
+		Effect& newEffect = management.AddEffect(std::move(threshold), folder);
 		for(EffectControl* ec : newEffect.Controls())
 			management.AddPreset(*ec);
 		newEffect.SetNameGlobally("VUM" + std::to_string(i+1) + "_Thr");
