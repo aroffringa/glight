@@ -84,10 +84,12 @@ void Reader::parseGroup(xmlNode *node)
 	else throw std::runtime_error(std::string("Invalid node: ") + name(node));
 }
 
-void Reader::parseNameAttr(xmlNode* node, class NamedObject& object)
+void Reader::parseNameAttr(xmlNode* node, class NamedObject& object, bool hasFolder)
 {
-	size_t parent = getIntAttribute(node, "parent");
-	_management.Folders()[parent]->Add(object);
+	if(hasFolder) {
+		size_t parent = getIntAttribute(node, "parent");
+		_management.Folders()[parent]->Add(object);
+	}
 	object.SetName(getStringAttribute(node, "name"));
 }
 
@@ -192,7 +194,7 @@ void Reader::parseFixtureFunction(xmlNode *node, Fixture &parentFixture)
 {
 	FixtureFunction &function =
 		parentFixture.AddFunction((enum FixtureFunction::FunctionType) getIntAttribute(node, "type"));
-	parseNameAttr(node, function);
+	parseNameAttr(node, function, false);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -220,7 +222,7 @@ void Reader::parseFixtureFunctionControl(xmlNode *node)
 {
 	FixtureFunction &function =
 		_theatre.GetFixtureFunction(getStringAttribute(node, "fixture-function-ref"));
-	FixtureFunctionControl &control = _management.AddFixtureFunctionControl(function);
+	FixtureFunctionControl &control = _management.AddFixtureFunctionControl(function, _management.RootFolder() /* TODO */);
 	parseNameAttr(node, control);
 }
 
@@ -235,11 +237,12 @@ void Reader::parsePresetCollection(xmlNode *node)
 		{
 			if(name(curNode) == "preset-value")
 			{
-				size_t folderId = getIntAttribute(curNode, "folder");
-				Controllable& controllable = static_cast<Controllable&>(
-					_management.Folders()[folderId]->GetChild(getStringAttribute(curNode, "controllable-ref")));
-
-				PresetValue &value = collection.AddPresetValue(getIntAttribute(curNode, "id"), controllable);
+				Folder& folder = *_management.Folders()[getIntAttribute(curNode, "folder")];
+				NamedObject& obj = folder.GetChild(getStringAttribute(curNode, "controllable-ref"));
+				Controllable* controllable = dynamic_cast<Controllable*>(&obj);
+				if(controllable == nullptr)
+					throw std::runtime_error("Expecting a controllable in controllable-ref, but object named " + obj.Name() + " in folder " + folder.Name() + " is something different");
+				PresetValue &value = collection.AddPresetValue(getIntAttribute(curNode, "id"), *controllable);
 				value.SetValue(ControlValue(getIntAttribute(curNode, "value")));
 			}
 			else

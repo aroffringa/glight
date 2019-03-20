@@ -183,10 +183,10 @@ void Writer::writeFixture(const Fixture &fixture)
 	endElement();
 }
 
-void Writer::writeFixtureFunction(const FixtureFunction &fixtureFunction)
+void Writer::writeFixtureFunction(const FixtureFunction& fixtureFunction)
 {
 	startElement("fixture-function");
-	writeNameAttributes(fixtureFunction);
+	writeAttribute("name", fixtureFunction.Name());
 	writeAttribute("type", fixtureFunction.Type());
 	writeDmxChannel(fixtureFunction.FirstChannel());
 	endElement();

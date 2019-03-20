@@ -12,6 +12,8 @@
 */
 class NamedObject {
 public:
+	friend class Folder;
+	
 	NamedObject() : _name(), _parent(nullptr)
 	{ }
 	NamedObject(const std::string &name) : _name(name), _parent(nullptr)
@@ -29,7 +31,6 @@ public:
 	bool IsRoot() const { return _parent == nullptr; }
 	const class Folder& Parent() const { return *_parent; }
 	class Folder& Parent() { return *_parent; }
-	void SetParent(class Folder& parent) { _parent = &parent; }
 
 	template<typename NamedObjectType>
 	static NamedObjectType& FindNamedObject(const std::vector<std::unique_ptr<NamedObjectType>>& container, const std::string& name)
@@ -69,6 +70,8 @@ public:
 	sigc::signal<void()>& SignalDelete() { return _signalDelete; }
 		
 private:
+	void SetParent(class Folder& parent) { _parent = &parent; }
+	
 	friend class Folder;
 	
 	std::string _name;

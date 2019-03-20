@@ -94,6 +94,7 @@ if(Boost_FOUND)
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
     tests/testfolder.cpp
+    tests/testsequence.cpp
     )
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})
   add_test(runtests runtests)

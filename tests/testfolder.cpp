@@ -6,6 +6,18 @@
 
 BOOST_AUTO_TEST_SUITE(folder)
 
+BOOST_AUTO_TEST_CASE( AddItem )
+{
+	std::unique_ptr<Folder> a(new Folder("a"));
+	BOOST_CHECK_EQUAL( a->Children().size() , 0 );
+	std::unique_ptr<Folder> b(new Folder("b"));
+	BOOST_CHECK_EQUAL( b->Children().size() , 0 );
+	a->Add(*b);
+	BOOST_CHECK_EQUAL( a->Children().size() , 1 );
+	BOOST_CHECK_EQUAL( b->Children().size() , 0 );
+	BOOST_CHECK_EQUAL( b->Parent().Name() , a->Name() );
+}
+
 BOOST_AUTO_TEST_CASE( ParentPath )
 {
 	BOOST_CHECK_EQUAL( "" , Folder::ParentPath("") );
@@ -33,10 +45,7 @@ BOOST_AUTO_TEST_CASE( FollowDown )
 	std::unique_ptr<Folder> a(new Folder("a"));
 	std::unique_ptr<Folder> b(new Folder("b"));
 	std::unique_ptr<Folder> c(new Folder("c"));
-	c->SetParent(*b);
 	b->Add(*c);
-	
-	b->SetParent(*a);
 	a->Add(*b);
 	
 	BOOST_CHECK_EQUAL( &a->FollowDown("b") , b.get() );
@@ -53,10 +62,7 @@ BOOST_AUTO_TEST_CASE( FollowRelPath )
 	std::unique_ptr<Folder> b(new Folder("b"));
 	std::unique_ptr<NamedObject> c(new NamedObject("c"));
 	
-	c->SetParent(*b);
 	b->Add(*c);
-	
-	b->SetParent(*a);
 	a->Add(*b);
 	
 	BOOST_CHECK_EQUAL( &a->FollowRelPath("b") , b.get() );

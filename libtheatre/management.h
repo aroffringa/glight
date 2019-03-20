@@ -59,6 +59,7 @@ class Management {
 		class Folder& GetFolder(const std::string& path);
 
 		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction &function);
+		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction &function, Folder& parent);
 
 		class PresetValue& AddPreset(Controllable &controllable);
 		class PresetValue& AddPreset(unsigned id, Controllable &controllable);

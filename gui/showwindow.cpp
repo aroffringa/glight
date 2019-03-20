@@ -404,6 +404,6 @@ void ShowWindow::onMIChaseWizardClicked()
 
 void ShowWindow::MakeChaseTabActive(class Chase& chase)
 {
-	_notebook.set_current_page(2);
+	_notebook.set_current_page(1);
 	_chaseFrame->Select(chase);
 }

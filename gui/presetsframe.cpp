@@ -15,7 +15,7 @@ PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 	_presetsFrame("Preset programming"),
 	_presetsList(management, parentWindow),
 	_newSequenceFrame("New sequence"),
-	_newPresetButton(Gtk::Stock::NEW),
+	_newPresetButton("New preset"),
 	_newFolderButton("New folder"),
 	_createChaseButton("New chase"),
 	_deletePresetButton(Gtk::Stock::DELETE), 
@@ -40,17 +40,19 @@ void PresetsFrame::initPresetsPart()
 	_newPresetButton.set_sensitive(false);
 	_newPresetButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onNewPresetButtonClicked));
+	_newPresetButton.set_image_from_icon_name("document-new");
 	_presetsButtonBox.pack_start(_newPresetButton);
 
 	_newFolderButton.set_sensitive(false);
 	_newFolderButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onNewFolderButtonClicked));
-	_newFolderButton.set_image_from_icon_name("directory");
+	_newFolderButton.set_image_from_icon_name("folder-new");
 	_presetsButtonBox.pack_start(_newFolderButton);
 
 	_createChaseButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onCreateChaseButtonClicked));
 	_createChaseButton.set_sensitive(false);
+	_createChaseButton.set_image_from_icon_name("document-new");
 	_presetsButtonBox.pack_start(_createChaseButton);
 	
 	_deletePresetButton.signal_clicked().
@@ -158,7 +160,7 @@ void PresetsFrame::onCreateChaseButtonClicked()
 			Folder& parent = sequence->Parent();
 			std::unique_lock<std::mutex> lock(_management->Mutex());
 			Chase& chase = _management->AddChase(*sequence);
-			chase.SetName(sequence->Name());
+			chase.SetName(sequence->Name()+"_Ch");
 			parent.Add(chase);
 
 			_management->AddPreset(chase);

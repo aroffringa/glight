@@ -158,7 +158,6 @@ PresetCollection& Management::AddPresetCollection()
 Folder& Management::AddFolder(Folder& parent)
 {
 	_folders.emplace_back(new Folder());
-	_folders.back()->SetParent(parent);
 	parent.Add(*_folders.back());
 	return *_folders.back();
 }
@@ -241,8 +240,13 @@ bool Management::Contains(Controllable &controllable) const
 FixtureFunctionControl& Management::AddFixtureFunctionControl(FixtureFunction &function)
 {
 	_controllables.emplace_back(new FixtureFunctionControl(function));
-	_controllables.back()->SetParent(*_rootFolder); // TODO
-	_rootFolder->Add(*_controllables.back());
+	return static_cast<FixtureFunctionControl&>(*_controllables.back());
+}
+
+FixtureFunctionControl& Management::AddFixtureFunctionControl(FixtureFunction &function, Folder& parent)
+{
+	_controllables.emplace_back(new FixtureFunctionControl(function));
+	parent.Add(*_controllables.back());
 	return static_cast<FixtureFunctionControl&>(*_controllables.back());
 }
 
@@ -339,8 +343,7 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect)
 	for(std::unique_ptr<EffectControl>& control : controls)
 		_controllables.emplace_back(std::move(control));
 	_effects.emplace_back(std::move(effect));
-	_effects.back()->SetParent(*_rootFolder); // TODO
-	_rootFolder->Add(*_effects.back());
+	_rootFolder->Add(*_effects.back()); // TODO
 	return *_effects.back();
 }
 
