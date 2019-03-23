@@ -14,8 +14,6 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
-#include "avoidrecursion.h"
-
 #include "components/objecttree.h"
 
 /**
@@ -73,8 +71,6 @@ class ChaseFrame : public Gtk::VPaned {
 		Gtk::RadioButton _beatTriggerCheckButton;
 		Gtk::Label _beatSpeedLabel;
 		Gtk::HScale _beatSpeed;
-
-		AvoidRecursion _delayUpdates;
 		
 		Management* _management;
 		ShowWindow& _parentWindow;

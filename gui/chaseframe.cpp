@@ -207,46 +207,43 @@ void ChaseFrame::onBeatSpeedChanged()
 
 void ChaseFrame::onSelectedChaseChanged()
 {
-	if(_delayUpdates.IsFirst())
+	Chase* chase = getSelectedChase();
+	if(chase)
 	{
-		Chase* chase = getSelectedChase();
-		if(chase)
-		{
-			_bottomFrame.set_sensitive(true);
-			std::unique_lock<std::mutex> lock(_management->Mutex());
-			enum Trigger::Type triggerType = chase->Trigger().Type();
-			enum Transition::Type transitionType = chase->Transition().Type();
-			double triggerSpeed = chase->Trigger().DelayInMs();
-			double transitionSpeed = chase->Transition().LengthInMs();
-			double beatSpeed = chase->Trigger().DelayInBeats();
-			lock.unlock();
-			_triggerSpeed.set_value(triggerSpeed);
-			_transitionSpeed.set_value(transitionSpeed);
-			_beatSpeed.set_value(beatSpeed);
-			if(triggerType == Trigger::DelayTriggered)
-				_delayTriggerCheckButton.set_active(true);
-			else
-				_beatTriggerCheckButton.set_active(true);
-			switch(transitionType)
-			{
-				case Transition::None:
-					_transitionNoneRB.set_active();
-					break;
-				case Transition::Fade:
-					_transitionFadeRB.set_active();
-					break;
-				case Transition::FadeThroughBlack:
-					_transitionFadeRB.set_active();
-					break;
-				case Transition::Erratic:
-					_transitionErraticRB.set_active();
-					break;
-			}
-		}
+		_bottomFrame.set_sensitive(true);
+		std::unique_lock<std::mutex> lock(_management->Mutex());
+		enum Trigger::Type triggerType = chase->Trigger().Type();
+		enum Transition::Type transitionType = chase->Transition().Type();
+		double triggerSpeed = chase->Trigger().DelayInMs();
+		double transitionSpeed = chase->Transition().LengthInMs();
+		double beatSpeed = chase->Trigger().DelayInBeats();
+		lock.unlock();
+		_triggerSpeed.set_value(triggerSpeed);
+		_transitionSpeed.set_value(transitionSpeed);
+		_beatSpeed.set_value(beatSpeed);
+		if(triggerType == Trigger::DelayTriggered)
+			_delayTriggerCheckButton.set_active(true);
 		else
+			_beatTriggerCheckButton.set_active(true);
+		switch(transitionType)
 		{
-			_bottomFrame.set_sensitive(false);
+			case Transition::None:
+				_transitionNoneRB.set_active();
+				break;
+			case Transition::Fade:
+				_transitionFadeRB.set_active();
+				break;
+			case Transition::FadeThroughBlack:
+				_transitionFadeRB.set_active();
+				break;
+			case Transition::Erratic:
+				_transitionErraticRB.set_active();
+				break;
 		}
+	}
+	else
+	{
+		_bottomFrame.set_sensitive(false);
 	}
 }
 
