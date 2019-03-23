@@ -104,48 +104,38 @@ void PresetsFrame::initNewSequencePart()
 
 void PresetsFrame::onNewPresetButtonClicked()
 {
-	NamedObject* selectedObj =
-		_presetsList.SelectedObject();
-	if(selectedObj)
+	Folder* parent = _presetsList.SelectedFolder();
+	if(parent)
 	{
-		Folder* folder = dynamic_cast<Folder*>(selectedObj);
-		if(folder)
-		{
-			std::unique_lock<std::mutex> lock(_management->Mutex());
-			PresetCollection& presetCollection = _management->AddPresetCollection();
-			folder->Add(presetCollection);
-			presetCollection.SetFromCurrentSituation(*_management);
-			std::stringstream s;
-			s << "%" << _management->Controllables().size();
-			presetCollection.SetName(s.str());
-			_management->AddPreset(presetCollection);
-			lock.unlock();
+		std::unique_lock<std::mutex> lock(_management->Mutex());
+		PresetCollection& presetCollection = _management->AddPresetCollection();
+		parent->Add(presetCollection);
+		presetCollection.SetFromCurrentSituation(*_management);
+		std::stringstream s;
+		s << "%" << _management->Controllables().size();
+		presetCollection.SetName(s.str());
+		_management->AddPreset(presetCollection);
+		lock.unlock();
 
-			_parentWindow.EmitUpdate();
-			_presetsList.SelectObject(presetCollection);
-		}
+		_parentWindow.EmitUpdate();
+		_presetsList.SelectObject(presetCollection);
 	}
 }
 
 void PresetsFrame::onNewFolderButtonClicked()
 {
-	NamedObject* selectedObj = _presetsList.SelectedObject();
+	Folder* parent = _presetsList.SelectedFolder();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
-	if(selectedObj)
+	if(parent)
 	{
-		_nameFrame.SetNamedObject(*selectedObj);
-		Folder* parent = dynamic_cast<Folder*>(_nameFrame.GetNamedObject());
-		if(parent)
-		{
-			Folder& folder = _management->AddFolder(*parent);
-			std::stringstream s;
-			s << "Folder" << _management->Folders().size();
-			folder.SetName(s.str());
-			lock.unlock();
+		Folder& folder = _management->AddFolder(*parent);
+		std::stringstream s;
+		s << "Folder" << _management->Folders().size();
+		folder.SetName(s.str());
+		lock.unlock();
 
-			_parentWindow.EmitUpdate();
-			_presetsList.SelectObject(folder);
-		}
+		_parentWindow.EmitUpdate();
+		_presetsList.SelectObject(folder);
 	}
 }
 
@@ -258,33 +248,26 @@ void PresetsFrame::onSelectedPresetChanged()
 	{
 		NamedObject* selectedObj = _presetsList.SelectedObject();
 		PresetCollection *preset = nullptr;
-		Folder *folder = nullptr;
 		Sequence* sequence = nullptr;
 		if(selectedObj)
 		{
 			_nameFrame.SetNamedObject(*selectedObj);
 			_deletePresetButton.set_sensitive(selectedObj != &_management->RootFolder());
+			_newPresetButton.set_sensitive(true);
+			_newFolderButton.set_sensitive(true);
 			preset = dynamic_cast<PresetCollection*>(selectedObj);
-			folder = dynamic_cast<Folder*>(selectedObj);
 			sequence = dynamic_cast<Sequence*>(selectedObj);
 		}
 		else {
 			_nameFrame.SetNoNamedObject();
 			_deletePresetButton.set_sensitive(false);
+			_newPresetButton.set_sensitive(false);
+			_newFolderButton.set_sensitive(false);
 		}
 		if(preset)
 			_addPresetToSequenceButton.set_sensitive(true);
 		else
 			_addPresetToSequenceButton.set_sensitive(false);
-		if(folder)
-		{
-			_newPresetButton.set_sensitive(true);
-			_newFolderButton.set_sensitive(true);
-		}
-		else {
-			_newPresetButton.set_sensitive(false);
-			_newFolderButton.set_sensitive(false);
-		}
 		if(sequence)
 			_createChaseButton.set_sensitive(true);
 		else
