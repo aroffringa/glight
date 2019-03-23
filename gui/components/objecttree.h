@@ -30,6 +30,8 @@ public:
 	
 	class NamedObject* SelectedObject();
 	
+	class Folder* SelectedFolder();
+	
 	sigc::signal<void()>& SignalSelectionChange() { return _signalSelectionChange; }
 	
 	void SelectObject(const NamedObject& object);
