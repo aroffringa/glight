@@ -16,6 +16,8 @@
 
 #include "avoidrecursion.h"
 
+#include "components/objecttree.h"
+
 /**
 	@author Andre Offringa
 */
@@ -24,17 +26,14 @@ class ChaseFrame : public Gtk::VPaned {
 		ChaseFrame(class Management& management, class ShowWindow& parentWindow);
 		~ChaseFrame();
 
-		void Update() { fillChaseList(); }
-		void UpdateAfterPresetRemoval() { fillChaseList(); }
-		
 		void ChangeManagement(class Management& management)
 		{
 			_management = &management;
-			fillChaseList();
 		}
 		
+		void Select(const class Chase& chase);
+		
 	private:
-		void fillChaseList();
 		void initUpperPanel();
 		void initLowerPanel();
 		void onSelectedChaseChanged();
@@ -48,17 +47,8 @@ class ChaseFrame : public Gtk::VPaned {
 		
 		class Chase* getSelectedChase();
 
-		struct ChaseListColumns : public Gtk::TreeModelColumnRecord
-		{
-			ChaseListColumns()
-				{ add(_title); add(_chase); }
-		
-			Gtk::TreeModelColumn<Glib::ustring> _title;
-			Gtk::TreeModelColumn<class Chase *> _chase;
-		} _chaseListColumns;
 		Gtk::Frame _upperFrame;
-		Gtk::TreeView _chaseListView;
-		Glib::RefPtr<Gtk::ListStore> _chaseListModel;
+		ObjectTree _chaseList;
 		Gtk::HBox _upperBox;
 		Gtk::ScrolledWindow _chaseScrolledWindow;
 		Gtk::VButtonBox _upperButtonBox;

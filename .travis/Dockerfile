@@ -6,6 +6,7 @@ RUN apt-get update && \
     cmake \
     pkg-config \
     libboost-system-dev \
+    libboost-test-dev \
     libgtkmm-3.0-dev \
     libaubio-dev \
     libflac++-dev \
@@ -16,4 +17,4 @@ RUN apt-get update && \
 ADD . /src
 WORKDIR /src
 
-RUN mkdir /build && cd /build && cmake ../src && make -j2 && make install
+RUN mkdir /build && cd /build && cmake ../src && make -j2 && make install && make check

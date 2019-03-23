@@ -11,6 +11,7 @@
 #include "libtheatre/fixture.h"
 #include "libtheatre/fixturefunction.h"
 #include "libtheatre/fixturefunctioncontrol.h"
+#include "libtheatre/folder.h"
 #include "libtheatre/presetvalue.h"
 #include "libtheatre/show.h"
 #include "libtheatre/theatre.h"
@@ -28,6 +29,11 @@ void Writer::CheckXmlVersion()
 
 void Writer::Write(const Glib::ustring &filename)
 {
+	_sequencesWritten.clear();
+	_controllablesWritten.clear();
+	_effectsWritten.clear();
+	_folderIds.clear();
+	
 	/* Create a new XmlWriter for uri, with no compression. */
 	_writer = xmlNewTextWriterFilename(filename.c_str(), 0);
 	if (_writer == NULL)
@@ -81,6 +87,10 @@ void Writer::writeGlightShow()
 {
 	startElement("glight-show");
 
+	startElement("folders");
+	writeFolders();
+	endElement();
+	
 	startElement("theatre");
 
 	Theatre &theatre = _management.Theatre();
@@ -141,10 +151,31 @@ void Writer::writeGlightShow()
 	endElement(); // glight-show
 }
 
+void Writer::writeFolders()
+{
+	for(size_t i=0; i!=_management.Folders().size(); ++i)
+	{
+		const Folder& folder = *_management.Folders()[i];
+		_folderIds.emplace(&folder, i);
+		startElement("folder");
+		writeAttribute("id", i);
+		writeAttribute("name", folder.Name());
+		if(!folder.IsRoot())
+			writeAttribute("parent", _folderIds.find(&folder.Parent())->second);
+		endElement();
+	}
+}	
+
+void Writer::writeNameAttributes(const NamedObject& obj)
+{
+	writeAttribute("name", obj.Name());
+	writeAttribute("parent", _folderIds.find(&obj.Parent())->second);
+}
+
 void Writer::writeFixture(const Fixture &fixture)
 {
 	startElement("fixture");
-	writeAttribute("name", fixture.Name());
+	writeNameAttributes(fixture);
 	writeAttribute("type", fixture.Type().Name());
 	const std::vector<std::unique_ptr<FixtureFunction>>& functions = fixture.Functions();
 	for(const std::unique_ptr<FixtureFunction>& ff : functions)
@@ -152,7 +183,7 @@ void Writer::writeFixture(const Fixture &fixture)
 	endElement();
 }
 
-void Writer::writeFixtureFunction(const FixtureFunction &fixtureFunction)
+void Writer::writeFixtureFunction(const FixtureFunction& fixtureFunction)
 {
 	startElement("fixture-function");
 	writeAttribute("name", fixtureFunction.Name());
@@ -173,7 +204,7 @@ void Writer::writeDmxChannel(const DmxChannel &dmxChannel)
 void Writer::writeFixtureType(const FixtureType &fixtureType)
 {
 	startElement("fixture-type");
-	writeAttribute("name", fixtureType.Name());
+	writeNameAttributes(fixtureType);
 	writeAttribute("fixture-class", fixtureType.FixtureClass());
 	endElement();
 }
@@ -204,7 +235,7 @@ void Writer::writeControllable(const Controllable &controllable)
 void Writer::writePresetCollection(const class PresetCollection &presetCollection)
 {
 	startElement("preset-collection");
-	writeAttribute("name", presetCollection.Name());
+	writeNameAttributes(presetCollection);
 	const std::vector<std::unique_ptr<PresetValue>>&
 		values = presetCollection.PresetValues();
 	for(const std::unique_ptr<PresetValue>& pv : values)
@@ -218,6 +249,7 @@ void Writer::writePresetValue(const PresetValue &presetValue)
 
 	startElement("preset-value");
 	writeAttribute("controllable-ref", presetValue.Controllable().Name());
+	writeAttribute("folder", _folderIds[&presetValue.Controllable().Parent()]);
 	writeAttribute("value", presetValue.Value().UInt());
 	writeAttribute("id", presetValue.Id());
 	endElement();
@@ -226,7 +258,7 @@ void Writer::writePresetValue(const PresetValue &presetValue)
 void Writer::writeFixtureFunctionControl(const FixtureFunctionControl &control)
 {
 	startElement("fixture-function-control");
-	writeAttribute("name", control.Name());
+	writeNameAttributes(control);
 	writeAttribute("fixture-function-ref", control.Function().Name());
 	endElement();
 }
@@ -236,7 +268,7 @@ void Writer::writeChase(const Chase &chase)
 	requireSequence(chase.Sequence());
 
 	startElement("chase");
-	writeAttribute("name", chase.Name());
+	writeNameAttributes(chase);
 	writeAttribute("sequence-ref", chase.Sequence().Name());
 	writeTrigger(chase.Trigger());
 	writeTransition(chase.Transition());
@@ -268,10 +300,11 @@ void Writer::writeSequence(const Sequence &sequence)
 			requireControllable(*pc);
 	
 		startElement("sequence");
-		writeAttribute("name", sequence.Name());
+		writeNameAttributes(sequence);
 		for(const PresetCollection* pc : presets)
 		{
 			startElement("preset-collection-ref");
+			writeAttribute("folder", _folderIds[&pc->Parent()]);
 			writeAttribute("name", pc->Name());
 			endElement();
 		}
@@ -286,10 +319,10 @@ void Writer::writeEffect(const class Effect& effect)
 	{
 		for(const Controllable* c : effect.Connections())
 			requireControllable(*c);
-			
+		
 		startElement("effect");
+		writeNameAttributes(effect);
 		writeAttribute("type", effect.TypeToName(effect.GetType()));
-		writeAttribute("name", effect.Name());
 		std::unique_ptr<PropertySet> ps = PropertySet::Make(effect);
 		
 		// the number and name of the effect controls are implied from the
@@ -313,6 +346,7 @@ void Writer::writeEffect(const class Effect& effect)
 		for(const Controllable* c : effect.Connections())
 		{
 			startElement("connection-ref");
+			writeAttribute("folder", _folderIds[&c->Parent()]);
 			writeAttribute("name", c->Name());
 			endElement();
 		}
@@ -325,7 +359,7 @@ void Writer::writeScene(const Scene &scene)
 {
 	startElement("scene");
 
-	writeAttribute("name", scene.Name());
+	writeNameAttributes(scene);
 	writeAttribute("audio-file", scene.AudioFile());
 
 	const std::multimap<double, std::unique_ptr<SceneItem>> &items = scene.SceneItems();

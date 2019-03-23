@@ -31,7 +31,10 @@ class Writer {
 
 	private:
 		void writeGlightShow();
+		void writeFolders();
 
+		void writeNameAttributes(const class NamedObject& obj);
+		
 		void writeDmxChannel(const class DmxChannel &dmxChannel);
 		void writeFixtureType(const class FixtureType &fixtureType);
 		void writeFixture(const class Fixture &fixture);
@@ -79,6 +82,7 @@ class Writer {
 		std::set<std::string> _sequencesWritten;
 		std::set<std::string> _controllablesWritten;
 		std::set<std::string> _effectsWritten;
+		std::map<const Folder*, size_t> _folderIds;
 };
 
 #endif

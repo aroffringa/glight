@@ -18,14 +18,12 @@
 #include "nameframe.h"
 #include "audiowidget.h"
 
-#define MAX_SCALE_VALUE (1<<24)
-
 /**
 	@author Andre Offringa
 */
 class SceneFrame : public Gtk::Frame {
 	public:
-		SceneFrame(class Management &management);
+		SceneFrame(class Management& management, class ShowWindow& parentWindow);
 		~SceneFrame();
 
 		void Update();
@@ -139,7 +137,7 @@ class SceneFrame : public Gtk::Frame {
 			return _sceneItemsListView.get_selection()->count_selected_rows();
 		}
 
-		SceneItem *selectedItem()
+		SceneItem* selectedItem()
 		{
 			if(selectedSceneItemCount() == 1)
 			{
@@ -148,7 +146,7 @@ class SceneFrame : public Gtk::Frame {
 				Gtk::TreeModel::Path selected = *selection->get_selected_rows().begin();
 				return (*_sceneItemsListModel->get_iter(selected))[_sceneItemsListColumns._item];
 			} else {
-				return 0;
+				return nullptr;
 			}
 		}
 };

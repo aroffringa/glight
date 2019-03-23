@@ -20,6 +20,8 @@ class FixtureFunction : public NamedObject {
 
 		FixtureFunction(class Theatre &theatre, FunctionType type, const std::string &name);
 		
+		FixtureFunction(class Theatre &theatre, FunctionType type);
+		
 		FixtureFunction(const FixtureFunction& source, class Theatre& theatre);
 
 		FixtureFunction(const FixtureFunction& source) = delete;

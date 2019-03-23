@@ -4,6 +4,8 @@
 
 #include "showwindow.h"
 
+#include "../libtheatre/chase.h"
+#include "../libtheatre/folder.h"
 #include "../libtheatre/management.h"
 #include "../libtheatre/presetvalue.h"
 #include "../libtheatre/presetcollection.h"
@@ -11,15 +13,18 @@
 
 PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 	_presetsFrame("Preset programming"),
+	_presetsList(management, parentWindow),
 	_newSequenceFrame("New sequence"),
-	_newPresetButton(Gtk::Stock::NEW), 
+	_newPresetButton("New preset"),
+	_newFolderButton("New folder"),
+	_createChaseButton("New chase"),
 	_deletePresetButton(Gtk::Stock::DELETE), 
 	_addPresetToSequenceButton(Gtk::Stock::ADD),
 	_clearSequenceButton("Clear"),
 	_createSequenceButton("Create"),
 	_management(&management),
 	_parentWindow(parentWindow),
-	_nameFrame(management)
+	_nameFrame(management, parentWindow)
 {
 	initPresetsPart();
 	initNewSequencePart();
@@ -32,31 +37,36 @@ PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 
 void PresetsFrame::initPresetsPart()
 {
+	_newPresetButton.set_sensitive(false);
 	_newPresetButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onNewPresetButtonClicked));
+	_newPresetButton.set_image_from_icon_name("document-new");
 	_presetsButtonBox.pack_start(_newPresetButton);
 
+	_newFolderButton.set_sensitive(false);
+	_newFolderButton.signal_clicked().
+		connect(sigc::mem_fun(*this, &PresetsFrame::onNewFolderButtonClicked));
+	_newFolderButton.set_image_from_icon_name("folder-new");
+	_presetsButtonBox.pack_start(_newFolderButton);
+
+	_createChaseButton.signal_clicked().
+		connect(sigc::mem_fun(*this, &PresetsFrame::onCreateChaseButtonClicked));
+	_createChaseButton.set_sensitive(false);
+	_createChaseButton.set_image_from_icon_name("document-new");
+	_presetsButtonBox.pack_start(_createChaseButton);
+	
 	_deletePresetButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onDeletePresetButtonClicked));
 	_presetsButtonBox.pack_start(_deletePresetButton);
 
 	_presetsHBox.pack_start(_presetsButtonBox, false, false, 5);
-
-	_presetListModel =
-    Gtk::ListStore::create(_presetListColumns);
-
-	_presetListView.set_model(_presetListModel);
-	_presetListView.append_column("Preset", _presetListColumns._title);
-	_presetListView.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &PresetsFrame::onSelectedPresetChanged));
-	FillPresetsList();
-	_presetsScrolledWindow.add(_presetListView);
-
-	_presetsScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	_presetsHBox.pack_start(_presetsScrolledWindow);
-
+	
+	_presetsList.SignalSelectionChange().connect(sigc::mem_fun(this, &PresetsFrame::onSelectedPresetChanged));
+	_presetsList.SetDisplayType(ObjectTree::PresetsAndSequences);
+	_presetsHBox.pack_start(_presetsList);
+	
 	_presetsVBox.pack_start(_presetsHBox);
-
-	_nameFrame.SignalNameChange().connect(sigc::mem_fun(*this, &PresetsFrame::onNameChange));
+	
 	_presetsVBox.pack_start(_nameFrame, false, false, 2);
 
 	_presetsFrame.add(_presetsVBox);
@@ -92,72 +102,112 @@ void PresetsFrame::initNewSequencePart()
 	_newSequenceFrame.add(_newSequenceBox);
 }
 
-void PresetsFrame::FillPresetsList()
+void PresetsFrame::onNewPresetButtonClicked()
 {
-	AvoidRecursion::Token token(_delayUpdates);
-	_presetListModel->clear();
-
-	std::lock_guard<std::mutex> lock(_management->Mutex());
-	const std::vector<std::unique_ptr<Controllable>>&
-		controllables = _management->Controllables();
-	for(const std::unique_ptr<Controllable>& contr : controllables)
+	NamedObject* selectedObj =
+		_presetsList.SelectedObject();
+	if(selectedObj)
 	{
-		PresetCollection *presetCollection =
-			dynamic_cast<PresetCollection*>(contr.get());
-		if(presetCollection != nullptr)
+		Folder* folder = dynamic_cast<Folder*>(selectedObj);
+		if(folder)
 		{
-			Gtk::TreeModel::iterator iter = _presetListModel->append();
-			Gtk::TreeModel::Row row = *iter;
-			row[_presetListColumns._title] = presetCollection->Name();
-			row[_presetListColumns._preset] = presetCollection;
+			std::unique_lock<std::mutex> lock(_management->Mutex());
+			PresetCollection& presetCollection = _management->AddPresetCollection();
+			folder->Add(presetCollection);
+			presetCollection.SetFromCurrentSituation(*_management);
+			std::stringstream s;
+			s << "%" << _management->Controllables().size();
+			presetCollection.SetName(s.str());
+			_management->AddPreset(presetCollection);
+			lock.unlock();
+
+			_parentWindow.EmitUpdate();
+			_presetsList.SelectObject(presetCollection);
 		}
 	}
 }
 
-void PresetsFrame::onNewPresetButtonClicked()
+void PresetsFrame::onNewFolderButtonClicked()
 {
+	NamedObject* selectedObj = _presetsList.SelectedObject();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
-	PresetCollection &presetCollection = _management->AddPresetCollection();
-	presetCollection.SetFromCurrentSituation(*_management);
-	std::stringstream s;
-	s << "%" << _presetListModel->children().size();
-	presetCollection.SetName(s.str());
-	_management->AddPreset(presetCollection);
-	lock.unlock();
+	if(selectedObj)
+	{
+		_nameFrame.SetNamedObject(*selectedObj);
+		Folder* parent = dynamic_cast<Folder*>(_nameFrame.GetNamedObject());
+		if(parent)
+		{
+			Folder& folder = _management->AddFolder(*parent);
+			std::stringstream s;
+			s << "Folder" << _management->Folders().size();
+			folder.SetName(s.str());
+			lock.unlock();
 
-	FillPresetsList();
-	_parentWindow.EmitUpdateAfterAddPreset();
+			_parentWindow.EmitUpdate();
+			_presetsList.SelectObject(folder);
+		}
+	}
+}
+
+void PresetsFrame::onCreateChaseButtonClicked()
+{
+	NamedObject* object = _presetsList.SelectedObject();
+	if(object)
+	{
+		Sequence* sequence = dynamic_cast<Sequence*>(object);
+		if(sequence && sequence->Size() != 0)
+		{
+			Folder& parent = sequence->Parent();
+			std::unique_lock<std::mutex> lock(_management->Mutex());
+			Chase& chase = _management->AddChase(*sequence);
+			chase.SetName(sequence->Name()+"_Ch");
+			parent.Add(chase);
+
+			_management->AddPreset(chase);
+			lock.unlock();
+
+			_parentWindow.EmitUpdate();
+			_parentWindow.MakeChaseTabActive(chase);
+		}
+	}
 }
 
 void PresetsFrame::onDeletePresetButtonClicked()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _presetListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	NamedObject* selectedObj = _presetsList.SelectedObject();
+	if(selectedObj && selectedObj != &_management->RootFolder())
 	{
-		PresetCollection *preset = (*selected)[_presetListColumns._preset];
-		_presetListModel->erase(selected);
-		std::unique_lock<std::mutex> lock(_management->Mutex());
-		_management->RemoveControllable(*preset);
-		lock.unlock();
-	
-		_parentWindow.EmitUpdateAfterPresetRemoval();
+		PresetCollection* preset = dynamic_cast<PresetCollection*>(selectedObj);
+		Sequence* sequence = dynamic_cast<Sequence*>(selectedObj);
+		Folder& parent = selectedObj->Parent();
+		if(preset)
+		{
+			std::lock_guard<std::mutex> lock(_management->Mutex());
+			_management->RemoveControllable(*preset);
+		}
+		if(sequence)
+		{
+			std::lock_guard<std::mutex> lock(_management->Mutex());
+			_management->RemoveSequence(*sequence);
+		}
+		_presetsList.SelectObject(parent);
+		_parentWindow.EmitUpdate();
 	}
 }
 
 void PresetsFrame::onAddPresetToSequenceButtonClicked()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-    _presetListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
+	NamedObject* selectedObj = _presetsList.SelectedObject();
+	if(selectedObj)
 	{
-		PresetCollection *preset = (*selected)[_presetListColumns._preset];
-		Gtk::TreeModel::iterator newRow = _newSequenceListModel->append();
-		std::lock_guard<std::mutex> lock(_management->Mutex());
-		(*newRow)[_newSequenceListColumns._title] = preset->Name();
-		(*newRow)[_newSequenceListColumns._preset] = preset;
+		PresetCollection* preset = dynamic_cast<PresetCollection*>(selectedObj);
+		if(preset)
+		{
+			Gtk::TreeModel::iterator newRow = _newSequenceListModel->append();
+			std::lock_guard<std::mutex> lock(_management->Mutex());
+			(*newRow)[_newSequenceListColumns._title] = preset->Name();
+			(*newRow)[_newSequenceListColumns._preset] = preset;
+		}
 	}
 }
 
@@ -168,8 +218,20 @@ void PresetsFrame::onClearSequenceButtonClicked()
 
 void PresetsFrame::onCreateSequenceButtonClicked()
 {
+	// Determine folder
+	Folder* folder;
+	NamedObject* selectedObj = _presetsList.SelectedObject();
+	if(selectedObj)
+	{
+		folder = dynamic_cast<Folder*>(selectedObj);
+		if(!folder)
+			folder = &selectedObj->Parent();
+	}
+	else {
+		folder = &_management->RootFolder();
+	}
 	std::unique_lock<std::mutex> lock(_management->Mutex());
-	Sequence &sequence = _management->AddSequence();
+	Sequence& sequence = _management->AddSequence();
 
 	Gtk::TreeModel::Children children = _newSequenceListModel->children();
 	for(Gtk::TreeModel::Children::const_iterator i=children.begin();
@@ -182,10 +244,11 @@ void PresetsFrame::onCreateSequenceButtonClicked()
 	std::stringstream s;
 	s << "#" << _management->Sequences().size();
 	sequence.SetName(s.str());
+	folder->Add(sequence);
 	lock.unlock();
 
-	_parentWindow.UpdateSequenceList();
-	_parentWindow.MakeSequenceTabActive();
+	_parentWindow.EmitUpdate();
+	_presetsList.SelectObject(sequence);
 	_newSequenceListModel->clear();
 }
 
@@ -193,21 +256,38 @@ void PresetsFrame::onSelectedPresetChanged()
 {
 	if(_delayUpdates.IsFirst())
 	{
-		Glib::RefPtr<Gtk::TreeSelection> selection =
-			_presetListView.get_selection();
-		Gtk::TreeModel::iterator selected = selection->get_selected();
-		if(selected)
+		NamedObject* selectedObj = _presetsList.SelectedObject();
+		PresetCollection *preset = nullptr;
+		Folder *folder = nullptr;
+		Sequence* sequence = nullptr;
+		if(selectedObj)
 		{
-			PresetCollection *preset = (*selected)[_presetListColumns._preset];
-			_nameFrame.SetNamedObject(*preset);
-
-			_addPresetToSequenceButton.set_sensitive(true);
+			_nameFrame.SetNamedObject(*selectedObj);
+			_deletePresetButton.set_sensitive(selectedObj != &_management->RootFolder());
+			preset = dynamic_cast<PresetCollection*>(selectedObj);
+			folder = dynamic_cast<Folder*>(selectedObj);
+			sequence = dynamic_cast<Sequence*>(selectedObj);
 		}
-		else
-		{
+		else {
 			_nameFrame.SetNoNamedObject();
-
-			_addPresetToSequenceButton.set_sensitive(false);
+			_deletePresetButton.set_sensitive(false);
 		}
+		if(preset)
+			_addPresetToSequenceButton.set_sensitive(true);
+		else
+			_addPresetToSequenceButton.set_sensitive(false);
+		if(folder)
+		{
+			_newPresetButton.set_sensitive(true);
+			_newFolderButton.set_sensitive(true);
+		}
+		else {
+			_newPresetButton.set_sensitive(false);
+			_newFolderButton.set_sensitive(false);
+		}
+		if(sequence)
+			_createChaseButton.set_sensitive(true);
+		else
+			_createChaseButton.set_sensitive(false);
 	}
 }

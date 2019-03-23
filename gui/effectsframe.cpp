@@ -11,9 +11,10 @@
 
 EffectsFrame::EffectsFrame(Management &management, ShowWindow &parentWindow) :
 	_effectsFrame("Effects"),
+	_effectsList(management, parentWindow),
 	_newEffectButton(Gtk::Stock::NEW), 
 	_deleteEffectButton(Gtk::Stock::DELETE),
-	_nameFrame(management),
+	_nameFrame(management, parentWindow),
 	_connectionsFrame("Connections"),
 	_propertiesFrame("Properties"),
 	_addConnectionButton(Gtk::Stock::ADD),
@@ -21,7 +22,6 @@ EffectsFrame::EffectsFrame(Management &management, ShowWindow &parentWindow) :
 	_management(&management),
 	_parentWindow(parentWindow)
 {
-	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &EffectsFrame::Update));
 	parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &EffectsFrame::onChangeManagement));
 	
 	initEffectsPart();
@@ -44,17 +44,9 @@ void EffectsFrame::initEffectsPart()
 
 	_effectsHBox.pack_start(_effectsButtonBox, false, false, 5);
 
-	_effectsListModel =
-    Gtk::ListStore::create(_effectsListColumns);
-
-	_effectsListView.set_model(_effectsListModel);
-	_effectsListView.append_column("Effect", _effectsListColumns._title);
-	_effectsListView.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &EffectsFrame::onSelectedEffectChanged));
-	fillEffectsList();
-	_effectsScrolledWindow.add(_effectsListView);
-
-	_effectsScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	_effectsHBox.pack_start(_effectsScrolledWindow);
+	_effectsList.SetDisplayType(ObjectTree::OnlyEffects);
+	_effectsList.SignalSelectionChange().connect(sigc::mem_fun(*this, &EffectsFrame::onSelectedEffectChanged));
+	_effectsHBox.pack_start(_effectsList);
 
 	_effectsVBox.pack_start(_effectsHBox);
 
@@ -105,49 +97,12 @@ void EffectsFrame::onNameChange()
 	Effect* e = getSelectedEffect();
 	if(e != nullptr)
 		e->SetNameGlobally(e->Name());
-	fillEffectsList();
-}
-
-void EffectsFrame::fillEffectsList()
-{
-	Effect* selectedEffect = getSelectedEffect();
-	
-	AvoidRecursion::Token token(_delayUpdates);
-	_effectsListModel->clear();
-
-	std::unique_lock<std::mutex> lock(_management->Mutex());
-	const std::vector<std::unique_ptr<Effect>>&
-		effects = _management->Effects();
-	bool selectionChanged = (selectedEffect != nullptr);
-	for(const std::unique_ptr<Effect>& effect : effects)
-	{
-		Gtk::TreeModel::iterator iter = _effectsListModel->append();
-		Gtk::TreeModel::Row row = *iter;
-		row[_effectsListColumns._title] = effect->Name();
-		row[_effectsListColumns._effect] = effect.get();
-		if(effect.get() == selectedEffect)
-		{
-			Glib::RefPtr<Gtk::TreeSelection> selection =
-				_effectsListView.get_selection();
-			selection->select(iter);
-			selectionChanged = false;
-		}
-	}
-	lock.unlock();
-	token.Release();
-	if(selectionChanged)
-		onSelectedEffectChanged();
+	_parentWindow.EmitUpdate();
 }
 
 Effect* EffectsFrame::getSelectedEffect()
 {
-	Glib::RefPtr<Gtk::TreeSelection> selection =
-		_effectsListView.get_selection();
-	Gtk::TreeModel::iterator selected = selection->get_selected();
-	if(selected)
-		return (*selected)[_effectsListColumns._effect];
-	else
-		return nullptr;
+	return dynamic_cast<Effect*>(_effectsList.SelectedObject());
 }
 
 void EffectsFrame::onSelectedEffectChanged()
@@ -228,7 +183,7 @@ void EffectsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 {
 	std::unique_ptr<Effect> effect(Effect::Make(effectType));
 	effect->SetNameGlobally(Effect::TypeToName(effectType) + std::to_string(_management->Effects().size()+1));
-	Effect* added = &_management->AddEffect(std::move(effect));
+	Effect* added = &_management->AddEffect(std::move(effect), _management->RootFolder() /* TODO */);
 	for(EffectControl* ec : added->Controls())
 		_management->AddPreset(*ec);
 	_parentWindow.EmitUpdate();

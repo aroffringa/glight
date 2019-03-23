@@ -38,9 +38,9 @@ class Fixture : public NamedObject {
 		{
 			_functions.clear();
 		}
-		FixtureFunction& AddFunction(FixtureFunction::FunctionType type, const std::string &name)
+		FixtureFunction& AddFunction(FixtureFunction::FunctionType type)
 		{
-			_functions.emplace_back(new FixtureFunction(_theatre, type, name));
+			_functions.emplace_back(new FixtureFunction(_theatre, type));
 			return *_functions.back();
 		}
 		inline Color GetColor(const class ValueSnapshot &snapshot) const;

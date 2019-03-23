@@ -27,8 +27,6 @@ public:
 	~ShowWindow();
 	
 	void EmitUpdate();
-	void EmitUpdateAfterPresetRemoval();
-	void EmitUpdateAfterAddPreset();
 	
 	GUIState& State() { return _state; }
 	
@@ -37,11 +35,7 @@ public:
 	
 	Management& GetManagement() const { return *_management; }
 	
-	void MakeSequenceTabActive() { _notebook.set_current_page(1); }
-	void MakeChasesTabActive() { _notebook.set_current_page(2); }
-	
-	void UpdateSequenceList();
-	void UpdateChaseList();
+	void MakeChaseTabActive(class Chase& chase);
 private:
 	void onControlWindowButtonClicked()
 	{
@@ -93,7 +87,6 @@ private:
 	class PresetCollection *_preset;
 
 	std::unique_ptr<class PresetsFrame> _presetsFrame;
-	std::unique_ptr<class SequenceFrame> _sequenceFrame;
 	std::unique_ptr<class ChaseFrame> _chaseFrame;
 	std::unique_ptr<class EffectsFrame> _effectsFrame;
 	std::unique_ptr<class SceneFrame> _sceneFrame;

@@ -11,7 +11,6 @@
 #include "effectsframe.h"
 #include "presetsframe.h"
 #include "sceneframe.h"
-#include "sequenceframe.h"
 #include "visualizationwindow.h"
 
 #include "../libtheatre/dmxdevice.h"
@@ -60,13 +59,11 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	createMenu();
 	
 	_presetsFrame.reset(new PresetsFrame(*_management, *this));
-	_sequenceFrame.reset(new SequenceFrame(*_management, *this));
 	_chaseFrame.reset(new ChaseFrame(*_management, *this));
 	_effectsFrame.reset(new EffectsFrame(*_management, *this));
-	_sceneFrame.reset(new SceneFrame(*_management));
+	_sceneFrame.reset(new SceneFrame(*_management, *this));
 
 	_notebook.append_page(*_presetsFrame, "Presets");
-	_notebook.append_page(*_sequenceFrame, "Sequences");
 	_notebook.append_page(*_chaseFrame, "Chases");
 	_notebook.append_page(*_effectsFrame, "Effects");
 	_notebook.append_page(*_sceneFrame, "Timeline");
@@ -98,37 +95,8 @@ void ShowWindow::EmitUpdate()
 {
 	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
 		cw->Update();
-	_presetsFrame->Update();
-	_sequenceFrame->Update();
-	_chaseFrame->Update();
 	_sceneFrame->Update();
 	_signalUpdateControllables();
-}
-
-void ShowWindow::EmitUpdateAfterPresetRemoval()
-{
-	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
-		cw->UpdateAfterPresetRemoval();
-	_presetsFrame->UpdateAfterPresetRemoval();
-	_sequenceFrame->UpdateAfterPresetRemoval();
-	_chaseFrame->UpdateAfterPresetRemoval();
-	_signalUpdateControllables();
-}
-
-void ShowWindow::EmitUpdateAfterAddPreset()
-{
-	_sceneFrame->Update();
-	_signalUpdateControllables();
-}
-
-void ShowWindow::UpdateSequenceList()
-{
-	_sequenceFrame->Update();
-}
-
-void ShowWindow::UpdateChaseList()
-{
-	_chaseFrame->Update();
 }
 
 void ShowWindow::addControlWindow(FaderSetupState* stateOrNull)
@@ -392,7 +360,6 @@ void ShowWindow::changeManagement(Management* newManagement, bool moveControlSli
 	for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
 		cw->ChangeManagement(*newManagement, moveControlSliders);
 	_presetsFrame->ChangeManagement(*newManagement);
-	_sequenceFrame->ChangeManagement(*newManagement);
 	_chaseFrame->ChangeManagement(*newManagement);
 	_sceneFrame->ChangeManagement(*newManagement);
 	EmitUpdate();
@@ -433,4 +400,10 @@ size_t ShowWindow::nextControlKeyRow() const
 void ShowWindow::onMIChaseWizardClicked()
 {
 	_chaseWizard->show();
+}
+
+void ShowWindow::MakeChaseTabActive(class Chase& chase)
+{
+	_notebook.set_current_page(1);
+	_chaseFrame->Select(chase);
 }
