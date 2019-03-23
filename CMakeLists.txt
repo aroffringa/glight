@@ -87,7 +87,7 @@ set(GLIGHT_LIBRARIES
 
 target_link_libraries(glight ${GLIGHT_LIBRARIES})
 
-find_package(Boost COMPONENTS system filesystem unit_test_framework)
+find_package(Boost COMPONENTS system unit_test_framework)
 if(Boost_FOUND)
 	include_directories(${Boost_INCLUDE_DIR})
   add_executable(runtests EXCLUDE_FROM_ALL
