@@ -6,6 +6,7 @@ RUN apt-get update && \
     cmake \
     pkg-config \
     libboost-system-dev \
+    libboost-test-dev \
     libgtkmm-3.0-dev \
     libaubio-dev \
     libflac++-dev \
