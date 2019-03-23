@@ -74,6 +74,8 @@ void ObjectTree::fillList()
 		_listView.get_selection()->select(iter);
 	fillListFolder(_management->RootFolder(), row, selectedObj);
 	_listView.expand_row(_listModel->get_path(row), false);
+	if(selectedObj && !SelectedObject())
+		_signalSelectionChange.emit();
 }
 
 void ObjectTree::fillListFolder(const Folder& folder, Gtk::TreeModel::Row& row, const NamedObject* selectedObj)
@@ -122,6 +124,23 @@ NamedObject* ObjectTree::SelectedObject()
 	Gtk::TreeModel::iterator selected = selection->get_selected();
 	if(selected)
 		return (*selected)[_listColumns._object];
+	else
+		return nullptr;
+}
+
+Folder* ObjectTree::SelectedFolder()
+{
+	NamedObject* selected = SelectedObject();
+	if(selected)
+	{
+		Folder* folder = dynamic_cast<Folder*>(selected);
+		// If a folder is selected, return it. If not, return
+		// parent folder of selected object.
+		if(folder)
+			return folder;
+		else 
+			return &selected->Parent();
+	}
 	else
 		return nullptr;
 }
