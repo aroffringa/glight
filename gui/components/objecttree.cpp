@@ -12,7 +12,8 @@
 ObjectTree::ObjectTree(Management &management, ShowWindow &parentWindow) :
 	_management(&management),
 	_parentWindow(parentWindow),
-	_displayType(All)
+	_displayType(All),
+	_listView(*this)
 {
 	_parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &ObjectTree::changeManagement));
 	
@@ -29,6 +30,7 @@ ObjectTree::ObjectTree(Management &management, ShowWindow &parentWindow) :
 			if(_avoidRecursion.IsFirst())
 				_signalSelectionChange.emit(); 
 		});
+	
 	fillList();
 	add(_listView);
 	set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -166,4 +168,109 @@ bool ObjectTree::selectObject(const NamedObject& object, const Gtk::TreeModel::C
 			return true;
 	}
 	return false;
+}
+
+void ObjectTree::constructContextMenu()
+{
+	_contextMenuItems.clear();
+	_contextMenu = Gtk::Menu();
+	
+	NamedObject* obj = SelectedObject();
+	if(obj != &_management->RootFolder())
+	{
+		// Move up & down
+		std::unique_ptr<Gtk::MenuItem> miMoveUp(new Gtk::MenuItem("Move _up", true));
+		miMoveUp->signal_activate().connect(sigc::mem_fun(this, &ObjectTree::onMoveUpSelected));
+		_contextMenu.append(*miMoveUp);
+		miMoveUp->show();
+		_contextMenuItems.emplace_back(std::move(miMoveUp));
+		
+		std::unique_ptr<Gtk::MenuItem> miMoveDown(new Gtk::MenuItem("Move _down", true));
+		miMoveDown->signal_activate().connect(sigc::mem_fun(this, &ObjectTree::onMoveDownSelected));
+		_contextMenu.append(*miMoveDown);
+		miMoveDown->show();
+		_contextMenuItems.emplace_back(std::move(miMoveDown));
+		
+		// Move submenu
+		std::unique_ptr<Gtk::Menu> menuMove(new Gtk::Menu());
+		menuMove->set_title("Move");
+		std::unique_ptr<Gtk::MenuItem> miMove(new Gtk::MenuItem("Move _to", true));
+		_contextMenu.append(*miMove);
+		miMove->show();
+		
+		constructFolderMenu(*menuMove, _management->RootFolder());
+		miMove->set_submenu(*menuMove);
+		
+		_contextMenuItems.emplace_back(std::move(miMove));
+		_contextMenuItems.emplace_back(std::move(menuMove));
+	}
+}
+
+void ObjectTree::constructFolderMenu(Gtk::Menu& menu, Folder& folder)
+{
+	std::unique_ptr<Gtk::MenuItem> item(new Gtk::MenuItem(folder.Name()));
+	menu.append(*item);
+	item->show();
+	if(&folder == SelectedObject())
+		item->set_sensitive(false);
+	else
+	{
+		Gtk::Menu* subMenu = nullptr;
+		for(NamedObject* object : folder.Children())
+		{
+			Folder* subFolder = dynamic_cast<Folder*>(object);
+			if(subFolder)
+			{
+				if(!subMenu)
+				{
+					_contextMenuItems.emplace_back(new Gtk::Menu());
+					subMenu = static_cast<Gtk::Menu*>(_contextMenuItems.back().get());
+					subMenu->set_title(folder.Name());
+					item->set_submenu(*subMenu);
+					
+					std::unique_ptr<Gtk::MenuItem> selfMI(new Gtk::MenuItem("."));
+					selfMI->show();
+					selfMI->signal_activate().connect([&]() { onMoveSelected(&folder); });
+					subMenu->append(*selfMI);
+					_contextMenuItems.emplace_back(std::move(selfMI));
+				}
+				constructFolderMenu(*subMenu, *subFolder);
+			}
+		}
+		if(subMenu == nullptr)
+			item->signal_activate().connect([&]() { onMoveSelected(&folder); });
+	}
+	_contextMenuItems.emplace_back(std::move(item));
+}
+
+bool ObjectTree::TreeViewWithMenu::on_button_press_event(GdkEventButton* button_event)
+{
+	bool result = TreeView::on_button_press_event(button_event);
+	
+	if((button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3))
+  {
+		_parent.constructContextMenu();
+		_parent._contextMenu.popup_at_pointer((GdkEvent*)button_event);
+	}
+	
+	return result;
+}
+
+void ObjectTree::onMoveSelected(Folder* destination)
+{
+	NamedObject* object = SelectedObject();
+	Folder::Move(*object, *destination);
+	_parentWindow.EmitUpdate();
+}
+
+void ObjectTree::onMoveUpSelected()
+{
+	SelectedObject()->Parent().MoveUp(*SelectedObject());
+	_parentWindow.EmitUpdate();
+}
+
+void ObjectTree::onMoveDownSelected()
+{
+	SelectedObject()->Parent().MoveDown(*SelectedObject());
+	_parentWindow.EmitUpdate();
 }

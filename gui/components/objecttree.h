@@ -1,6 +1,7 @@
 #ifndef OBJECT_TREE_H
 #define OBJECT_TREE_H
 
+#include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
@@ -41,7 +42,15 @@ private:
 	class ShowWindow& _parentWindow;
 	enum ObjectType _displayType;
 	
-	Gtk::TreeView _listView;
+	class TreeViewWithMenu : public Gtk::TreeView
+	{
+	public:
+		TreeViewWithMenu(ObjectTree& parent) : _parent(parent) { }
+	private:
+		ObjectTree& _parent;
+		bool on_button_press_event(GdkEventButton* button_event) final override;
+	} _listView;
+	
 	Glib::RefPtr<Gtk::TreeStore> _listModel;
 	struct ListColumns : public Gtk::TreeModelColumnRecord
 	{
@@ -60,9 +69,16 @@ private:
 		_management = &management;
 		fillList();
 	}
+	void constructContextMenu();
+	void constructFolderMenu(Gtk::Menu& menu, Folder& folder);
+	void onMoveSelected(Folder* destination);
+	void onMoveUpSelected();
+	void onMoveDownSelected();
 	
 	sigc::signal<void()> _signalSelectionChange;
 	AvoidRecursion _avoidRecursion;
+	Gtk::Menu _contextMenu;
+	std::vector<std::unique_ptr<Gtk::Widget>> _contextMenuItems;
 };
 
 #endif
