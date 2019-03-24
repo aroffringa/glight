@@ -167,6 +167,40 @@ Folder& Management::GetFolder(const std::string& path)
 	return _rootFolder->FollowDown(path);
 }
 
+void Management::RemoveObject(NamedObject& object)
+{
+	Folder* folder = dynamic_cast<Folder*>(&object);
+	if(folder)
+		RemoveFolder(*folder);
+	else {
+		Controllable* controllable = dynamic_cast<Controllable*>(&object);
+		if(controllable)
+			RemoveControllable(*controllable);
+		else {
+			Sequence* sequence = dynamic_cast<Sequence*>(&object);
+			if(sequence)
+				RemoveSequence(*sequence);
+			else {
+				Effect* effect = dynamic_cast<Effect*>(&object);
+				if(effect)
+					RemoveEffect(*effect);
+				throw std::runtime_error("Can not remove unknown object " + object.Name());
+			}
+		}
+	}
+}
+
+void Management::RemoveFolder(Folder& folder)
+{
+	if(&folder == _rootFolder)
+		throw std::runtime_error("Can not remove root folder");
+	for(NamedObject* object : folder.Children())
+	{
+		RemoveObject(*object);
+	}
+	folder.Parent().Remove(folder);
+}
+
 void Management::RemoveControllable(Controllable& controllable)
 {
 	for(std::vector<std::unique_ptr<Controllable>>::iterator i=_controllables.begin();

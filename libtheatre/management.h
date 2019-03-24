@@ -50,13 +50,16 @@ class Management {
 		{
 			return _devices;
 		}
+		
+		void RemoveObject(class NamedObject& object);
 
 		class PresetCollection& AddPresetCollection();
 		void RemoveControllable(class Controllable &controllable);
 		bool Contains(class Controllable &controllable) const;
 		
-		class Folder& AddFolder(Folder& parent);
+		class Folder& AddFolder(class Folder& parent);
 		class Folder& GetFolder(const std::string& path);
+		void RemoveFolder(class Folder& folder);
 
 		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction &function);
 		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction &function, Folder& parent);
