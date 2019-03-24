@@ -25,13 +25,11 @@ Management::Management() :
 	_nextPresetValueId(1),
 	_theatre(new class Theatre()),
 	_snapshot(new ValueSnapshot()),
-	_beatFinder(new BeatFinder()),
 	_show(new class Show(*this))
 {
 	_folders.emplace_back(new Folder());
 	_rootFolder = _folders.back().get();
 	_rootFolder->SetName("Root");
-	_beatFinder->Start();
 }
 
 Management::~Management()
@@ -43,6 +41,12 @@ Management::~Management()
 		_thread->join();
 		_thread.reset();
 	}
+}
+
+void Management::StartBeatFinder()
+{
+	_beatFinder.reset(new BeatFinder());
+	_beatFinder->Start();
 }
 
 void Management::Clear()
@@ -133,8 +137,17 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned* values, uns
 {
 	double relTimeInMs = GetOffsetTimeInMS();
 	double beatValue, beatConfidence;
-	_beatFinder->GetBeatValue(beatValue, beatConfidence);
-	unsigned audioLevel = _beatFinder->GetAudioLevel();
+	unsigned audioLevel;
+	if(_beatFinder)
+	{
+		_beatFinder->GetBeatValue(beatValue, beatConfidence);
+		audioLevel = _beatFinder->GetAudioLevel();
+	}
+	else {
+		beatValue = 0.0;
+		beatConfidence = 0.0;
+		audioLevel = 0;
+	}
 	unsigned randomValue = _rndDistribution(_randomGenerator);
 	Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel, randomValue);
 

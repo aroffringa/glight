@@ -43,6 +43,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 
 	_management.reset(new Management());
 	_management->AddDevice(std::move(device));
+	_management->StartBeatFinder();
 
 	_management->Run();
 

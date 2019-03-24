@@ -24,6 +24,8 @@ class Management {
 		
 		void Run();
 		
+		void StartBeatFinder();
+		
 		class Theatre &Theatre() const { return *_theatre; }
 
 		const std::vector<std::unique_ptr<class Folder>>& Folders() const
