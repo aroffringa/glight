@@ -86,6 +86,29 @@ public:
 		_objects.erase(srciter);
 	}
 	
+	void MoveUp(NamedObject& object)
+	{
+		std::vector<NamedObject*>::iterator srciter = std::find(_objects.begin(), _objects.end(), &object);
+		if(srciter != _objects.begin() && srciter != _objects.end())
+		{
+			std::vector<NamedObject*>::iterator previous = srciter;
+			--previous;
+			std::swap(*previous, *srciter);
+		}
+	}
+	
+	void MoveDown(NamedObject& object)
+	{
+		std::vector<NamedObject*>::iterator srciter = std::find(_objects.begin(), _objects.end(), &object);
+		if(srciter != _objects.end())
+		{
+			std::vector<NamedObject*>::iterator next = srciter;
+			++next;
+			if(_objects.end() != next)
+				std::swap(*next, *srciter);
+		}
+	}
+	
 	const std::vector<NamedObject*> Children() const { return _objects; }
 	
 	Folder& FollowDown(const std::string& path)
