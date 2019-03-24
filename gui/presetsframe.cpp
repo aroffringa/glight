@@ -167,18 +167,10 @@ void PresetsFrame::onDeletePresetButtonClicked()
 	NamedObject* selectedObj = _presetsList.SelectedObject();
 	if(selectedObj && selectedObj != &_management->RootFolder())
 	{
-		PresetCollection* preset = dynamic_cast<PresetCollection*>(selectedObj);
-		Sequence* sequence = dynamic_cast<Sequence*>(selectedObj);
 		Folder& parent = selectedObj->Parent();
-		if(preset)
 		{
 			std::lock_guard<std::mutex> lock(_management->Mutex());
-			_management->RemoveControllable(*preset);
-		}
-		if(sequence)
-		{
-			std::lock_guard<std::mutex> lock(_management->Mutex());
-			_management->RemoveSequence(*sequence);
+			_management->RemoveObject(*selectedObj);
 		}
 		_presetsList.SelectObject(parent);
 		_parentWindow.EmitUpdate();
