@@ -15,7 +15,7 @@
 class FixtureFunction : public NamedObject {
 	public:
 		enum FunctionType {
-			Brightness, RedIntensity, GreenIntensity, BlueIntensity, AmberIntensity, Strobe, Pulse, Rotation, ColorMacro, Pan, Tilt
+			Brightness, RedIntensity, GreenIntensity, BlueIntensity, AmberIntensity, WhiteIntensity, Strobe, Pulse, Rotation, ColorMacro, Pan, Tilt
 		};
 
 		FixtureFunction(class Theatre &theatre, FunctionType type, const std::string &name);
