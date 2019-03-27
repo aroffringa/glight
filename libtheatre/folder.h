@@ -14,6 +14,21 @@ public:
 	
 	Folder(const std::string& name) : NamedObject(name) { }
 	
+	Folder* CopyHierarchy(std::vector<std::unique_ptr<Folder>>& newFolders) const
+	{
+		newFolders.emplace_back(new Folder(_name));
+		Folder* copy = newFolders.back().get();
+		for(const NamedObject* object : _objects)
+		{
+			const Folder* folder = dynamic_cast<const Folder*>(object);
+			if(folder)
+			{
+				copy->_objects.emplace_back(folder->CopyHierarchy(newFolders));
+			}
+		}
+		return copy;
+	}
+	
 	static void Move(NamedObject& object, Folder& destination)
 	{
 		object._parent->Remove(object);

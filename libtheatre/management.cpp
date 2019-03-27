@@ -504,6 +504,8 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 	_snapshot.reset(new ValueSnapshot(*forDryCopy._snapshot));
 	_show.reset(new class Show(*this)); // TODO For now we don't copy the show
 	
+	_rootFolder = forDryCopy._rootFolder->CopyHierarchy(_folders);
+	
 	// The controllables can have dependencies to other controllables, hence dependencies
 	// need to be resolved and copied first.
 	_controllables.resize(forDryCopy._controllables.size());
