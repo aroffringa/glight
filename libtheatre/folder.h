@@ -86,6 +86,28 @@ public:
 		}
 	}
 	
+	static std::string RemoveRoot(const std::string& path)
+	{
+		auto separator = std::find(path.begin(), path.end(), '/');
+		if(separator == path.end())
+			return path;
+		else
+		{
+			return path.substr(separator-path.begin()+1);
+		}
+	}
+	
+	static std::string RemoveRoot(std::string&& path)
+	{
+		auto separator = std::find(path.begin(), path.end(), '/');
+		if(separator == path.end())
+			return std::string();
+		else
+		{
+			return std::move(path).substr(separator-path.begin()+1);
+		}
+	}
+	
 	/**
 	 * This also sets the parent of the object to this.
 	 */

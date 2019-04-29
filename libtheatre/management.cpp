@@ -548,6 +548,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 	{
 		FixtureFunction& ff = _theatre->GetFixtureFunction(ffc->Function().Name());
 		_controllables[index].reset(new FixtureFunctionControl(ff));
+		GetFolder(ffc->Parent().FullPath()).Add(*_controllables[index]);
 	}
 	else if(chase != nullptr)
 	{
@@ -555,6 +556,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 		if(_sequences[sIndex] == nullptr)
 			dryCopySequenceDependency(forDryCopy, sIndex);
 		_controllables[index].reset(new Chase(*chase, *_sequences[sIndex]));
+		GetFolder(chase->Parent().FullPath()).Add(*_controllables[index]);
 	}
 	else if(presetCollection != nullptr)
 	{
@@ -568,6 +570,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 				dryCopyControllerDependency(forDryCopy, cIndex);
 			pc.AddPresetValue(*value, *_controllables[cIndex]);
 		}
+		GetFolder(presetCollection->Parent().FullPath()).Add(pc);
 	}
 	else if(effectControl != nullptr)
 	{
@@ -589,12 +592,14 @@ void Management::dryCopySequenceDependency(const Management& forDryCopy, size_t 
 			dryCopyControllerDependency(forDryCopy, pIndex);
 		destSequence->AddPreset(static_cast<PresetCollection*>(_controllables[pIndex].get()));
 	}
+	GetFolder(sourceSequence->Parent().FullPath()).Add(*destSequence);
 }
 
 void Management::dryCopyEffectDependency(const Management& forDryCopy, size_t index)
 {
 	const Effect* effect = forDryCopy._effects[index].get();
 	_effects[index] = effect->Copy();
+	GetFolder(effect->FullPath()).Add(*_effects[index]);
 	std::vector<std::unique_ptr<EffectControl>> controls = _effects[index]->ConstructControls();
 	for(size_t i=0; i!=controls.size(); ++i)
 	{

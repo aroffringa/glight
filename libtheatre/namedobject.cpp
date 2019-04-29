@@ -11,19 +11,21 @@ std::string NamedObject::FullPath() const
 	// is faster though.
 	std::vector<const std::string*> list;
 	const NamedObject* obj = this;
-	while(obj->_parent != nullptr)
-	{
+	do {
 		list.emplace_back(&obj->Name());
 		obj = obj->_parent;
-	}
+	} while(obj != nullptr);
 	std::ostringstream str;
 	auto iter = list.rbegin();
-	str << **iter;
-	++iter;
-	while(iter != list.rend())
+	if(iter != list.rend())
 	{
-		str << '/' << **iter;
+		str << **iter;
 		++iter;
+		while(iter != list.rend())
+		{
+			str << '/' << **iter;
+			++iter;
+		}
 	}
 	return str.str();
 }
