@@ -128,7 +128,7 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 	{
 		//std::stringstream funcName;
 		//funcName << fixture.Name() << number;
-		FixtureFunctionControl &control = _management->AddFixtureFunctionControl(*ff, _management->RootFolder() /* TODO */);
+		FixtureFunctionControl& control = _management->AddFixtureFunctionControl(*ff, _management->RootFolder() /* TODO */);
 		_management->AddPreset(control);
 		control.SetName(ff->Name());
 		++number;

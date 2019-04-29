@@ -14,6 +14,22 @@ public:
 	
 	Folder(const std::string& name) : NamedObject(name) { }
 	
+	Folder* CopyHierarchy(std::vector<std::unique_ptr<Folder>>& newFolders) const
+	{
+		newFolders.emplace_back(new Folder(_name));
+		Folder* copy = newFolders.back().get();
+		for(const NamedObject* object : _objects)
+		{
+			const Folder* child = dynamic_cast<const Folder*>(object);
+			if(child)
+			{
+				copy->_objects.emplace_back(child->CopyHierarchy(newFolders));
+				copy->_objects.back()->SetParent(*copy);
+			}
+		}
+		return copy;
+	}
+	
 	static void Move(NamedObject& object, Folder& destination)
 	{
 		object._parent->Remove(object);
@@ -68,6 +84,28 @@ public:
 		{
 			size_t sepIndex = path.size() - (separator - path.rbegin());
 			return std::move(path).substr(sepIndex);
+		}
+	}
+	
+	static std::string RemoveRoot(const std::string& path)
+	{
+		auto separator = std::find(path.begin(), path.end(), '/');
+		if(separator == path.end())
+			return std::string();
+		else
+		{
+			return path.substr(separator-path.begin()+1);
+		}
+	}
+	
+	static std::string RemoveRoot(std::string&& path)
+	{
+		auto separator = std::find(path.begin(), path.end(), '/');
+		if(separator == path.end())
+			return std::string();
+		else
+		{
+			return std::move(path).substr(separator-path.begin()+1);
 		}
 	}
 	

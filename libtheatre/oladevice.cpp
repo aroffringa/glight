@@ -53,5 +53,5 @@ void OLADevice::GetValues(unsigned char *destination, size_t size)
 
 void OLADevice::WaitForNextSync()
 {
-	usleep(1000);
+	usleep(40000);
 }

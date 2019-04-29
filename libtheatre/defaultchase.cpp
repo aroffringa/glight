@@ -20,6 +20,7 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vect
 	Folder& folder = management.RootFolder(); // TODO
 	Sequence& seq = management.AddSequence();
 	seq.SetName("Runchase");
+	folder.Add(seq);
 	size_t frames = colors.size();
 	if(runType == InwardRun || runType == OutwardRun)
 		frames = (frames+1)/2;
@@ -112,6 +113,7 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 	Folder& folder = management.RootFolder(); // TODO
 	Sequence& seq = management.AddSequence();
 	seq.SetName("Colorseq");
+	folder.Add(seq);
 	std::random_device rd;
 	std::mt19937 rnd(rd());
 	std::normal_distribution<double> distribution(0.0, variation*double((1<<24)-1)/255.0);
@@ -176,8 +178,8 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 			nFixInLevel = 2;
 		
 		PresetCollection& pc = management.AddPresetCollection();
-		folder.Add(pc);
 		pc.SetName("VUM" + std::to_string(i+1));
+		folder.Add(pc);
 		for(size_t fixInLevel=0; fixInLevel!=nFixInLevel; ++fixInLevel)
 		{
 			size_t fixIndex;

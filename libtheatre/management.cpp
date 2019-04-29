@@ -177,7 +177,9 @@ Folder& Management::AddFolder(Folder& parent)
 
 Folder& Management::GetFolder(const std::string& path)
 {
-	return _rootFolder->FollowDown(path);
+	std::cout << "In: " << path << " (" << Folder::RemoveRoot(path) << ")" << '\n';
+	std::cout << "Out: " << _rootFolder->FollowDown(Folder::RemoveRoot(path)).FullPath() << '\n';
+	return _rootFolder->FollowDown(Folder::RemoveRoot(path));
 }
 
 void Management::RemoveObject(NamedObject& object)
@@ -504,6 +506,8 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 	_snapshot.reset(new ValueSnapshot(*forDryCopy._snapshot));
 	_show.reset(new class Show(*this)); // TODO For now we don't copy the show
 	
+	_rootFolder = forDryCopy._rootFolder->CopyHierarchy(_folders);
+	
 	// The controllables can have dependencies to other controllables, hence dependencies
 	// need to be resolved and copied first.
 	_controllables.resize(forDryCopy._controllables.size());
@@ -546,6 +550,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 	{
 		FixtureFunction& ff = _theatre->GetFixtureFunction(ffc->Function().Name());
 		_controllables[index].reset(new FixtureFunctionControl(ff));
+		GetFolder(ffc->Parent().FullPath()).Add(*_controllables[index]);
 	}
 	else if(chase != nullptr)
 	{
@@ -553,6 +558,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 		if(_sequences[sIndex] == nullptr)
 			dryCopySequenceDependency(forDryCopy, sIndex);
 		_controllables[index].reset(new Chase(*chase, *_sequences[sIndex]));
+		GetFolder(chase->Parent().FullPath()).Add(*_controllables[index]);
 	}
 	else if(presetCollection != nullptr)
 	{
@@ -566,6 +572,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 				dryCopyControllerDependency(forDryCopy, cIndex);
 			pc.AddPresetValue(*value, *_controllables[cIndex]);
 		}
+		GetFolder(presetCollection->Parent().FullPath()).Add(pc);
 	}
 	else if(effectControl != nullptr)
 	{
@@ -587,12 +594,14 @@ void Management::dryCopySequenceDependency(const Management& forDryCopy, size_t 
 			dryCopyControllerDependency(forDryCopy, pIndex);
 		destSequence->AddPreset(static_cast<PresetCollection*>(_controllables[pIndex].get()));
 	}
+	GetFolder(sourceSequence->Parent().FullPath()).Add(*destSequence);
 }
 
 void Management::dryCopyEffectDependency(const Management& forDryCopy, size_t index)
 {
 	const Effect* effect = forDryCopy._effects[index].get();
 	_effects[index] = effect->Copy();
+	GetFolder(effect->Parent().FullPath()).Add(*_effects[index]);
 	std::vector<std::unique_ptr<EffectControl>> controls = _effects[index]->ConstructControls();
 	for(size_t i=0; i!=controls.size(); ++i)
 	{
