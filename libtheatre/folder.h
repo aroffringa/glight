@@ -20,10 +20,11 @@ public:
 		Folder* copy = newFolders.back().get();
 		for(const NamedObject* object : _objects)
 		{
-			const Folder* folder = dynamic_cast<const Folder*>(object);
-			if(folder)
+			const Folder* child = dynamic_cast<const Folder*>(object);
+			if(child)
 			{
-				copy->_objects.emplace_back(folder->CopyHierarchy(newFolders));
+				copy->_objects.emplace_back(child->CopyHierarchy(newFolders));
+				copy->_objects.back()->SetParent(*copy);
 			}
 		}
 		return copy;
@@ -90,7 +91,7 @@ public:
 	{
 		auto separator = std::find(path.begin(), path.end(), '/');
 		if(separator == path.end())
-			return path;
+			return std::string();
 		else
 		{
 			return path.substr(separator-path.begin()+1);

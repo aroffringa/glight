@@ -177,7 +177,9 @@ Folder& Management::AddFolder(Folder& parent)
 
 Folder& Management::GetFolder(const std::string& path)
 {
-	return _rootFolder->FollowDown(path);
+	std::cout << "In: " << path << " (" << Folder::RemoveRoot(path) << ")" << '\n';
+	std::cout << "Out: " << _rootFolder->FollowDown(Folder::RemoveRoot(path)).FullPath() << '\n';
+	return _rootFolder->FollowDown(Folder::RemoveRoot(path));
 }
 
 void Management::RemoveObject(NamedObject& object)
@@ -599,7 +601,7 @@ void Management::dryCopyEffectDependency(const Management& forDryCopy, size_t in
 {
 	const Effect* effect = forDryCopy._effects[index].get();
 	_effects[index] = effect->Copy();
-	GetFolder(effect->FullPath()).Add(*_effects[index]);
+	GetFolder(effect->Parent().FullPath()).Add(*_effects[index]);
 	std::vector<std::unique_ptr<EffectControl>> controls = _effects[index]->ConstructControls();
 	for(size_t i=0; i!=controls.size(); ++i)
 	{

@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( LastName )
 	BOOST_CHECK_EQUAL( "a" , Folder::LastName(Folder::LastName("a/b/a")) );
 }
 
-BOOST_AUTO_TEST_CASE( RemoveRoot )
+BOOST_AUTO_TEST_CASE( RemoveRoot_move )
 {
 	BOOST_CHECK_EQUAL( "" , Folder::RemoveRoot("") );
 	BOOST_CHECK_EQUAL( "" , Folder::RemoveRoot("root") );
@@ -64,6 +64,24 @@ BOOST_AUTO_TEST_CASE( RemoveRoot )
 	BOOST_CHECK_EQUAL( "a and b/c" , Folder::RemoveRoot("a/a and b/c") );
 	BOOST_CHECK_EQUAL( "2/3/4" , Folder::RemoveRoot("1/2/3/4") );
 	BOOST_CHECK_EQUAL( "b/a" , Folder::RemoveRoot("a/b/a") );
+}
+
+BOOST_AUTO_TEST_CASE( RemoveRoot_ref )
+{
+	std::string path = "";
+	BOOST_CHECK_EQUAL( "" , Folder::RemoveRoot(path) );
+	path = "root";
+	BOOST_CHECK_EQUAL( "" , Folder::RemoveRoot(path) );
+	path = "root/file";
+	BOOST_CHECK_EQUAL( "file" , Folder::RemoveRoot(path) );
+	path = "a/b/c";
+	BOOST_CHECK_EQUAL( "b/c" , Folder::RemoveRoot(path) );
+	path = "a/a and b/c";
+	BOOST_CHECK_EQUAL( "a and b/c" , Folder::RemoveRoot(path) );
+	path = "1/2/3/4";
+	BOOST_CHECK_EQUAL( "2/3/4" , Folder::RemoveRoot(path) );
+	path = "a/b/a";
+	BOOST_CHECK_EQUAL( "b/a" , Folder::RemoveRoot(path) );
 }
 
 BOOST_AUTO_TEST_CASE( FollowDown )
