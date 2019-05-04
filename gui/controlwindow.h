@@ -6,6 +6,7 @@
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/grid.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/window.h>
@@ -81,6 +82,7 @@ class ControlWindow  : public Gtk::Window {
 		Gtk::ComboBox _faderSetup;
 		Glib::RefPtr<Gtk::ListStore> _faderSetupList;
 		Gtk::HBox _hBoxUpper, _hBox2;
+		Gtk::Grid _controlGrid;
 		Gtk::Button _nameButton, _newFaderSetupButton;
 		Gtk::CheckButton _soloCheckButton;
 		Gtk::HScale _fadeUpSpeed, _fadeDownSpeed;

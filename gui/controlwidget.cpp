@@ -9,14 +9,19 @@
 ControlWidget::ControlWidget(class Management &management, char key)
  :
   _scale(0, MAX_SCALE_VALUE_DEF, MAX_SCALE_VALUE_DEF/100),
-	_flashButton(std::string(1, key)), _nameLabel("<..>"),
-	_management(&management), _preset(nullptr),
-	_fadeUpSpeed(0.0), _fadeDownSpeed(0.0),
-	_fadingValue(0), _targetValue(0),
+	_flashButton(std::string(1, key)),
+	_nameLabel("<..>"),
+	_management(&management),
+	_preset(nullptr),
+	_fadeUpSpeed(0.0),
+	_fadeDownSpeed(0.0),
+	_fadingValue(0),
+	_targetValue(0),
 	_holdUpdates(false)
 {
 	_scale.set_inverted(true);
 	_scale.set_draw_value(false);
+	_scale.set_vexpand(true);
 	_scale.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ControlWidget::onScaleChange));
 	pack_start(_scale, true, true, 0);
@@ -29,12 +34,13 @@ ControlWidget::ControlWidget(class Management &management, char key)
 	pack_start(_flashButton, false, false, 0);
 	_flashButton.show();
 
+	_onCheckButton.set_halign(Gtk::ALIGN_CENTER);
 	_onCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &ControlWidget::onOnButtonClicked));
 	pack_start(_onCheckButton, false, false, 0);
 	_onCheckButton.show();
 
-	pack_start(_eventBox, false, false, 0);
+	//pack_start(_eventBox, false, false, 0);
 	_eventBox.set_events(Gdk::BUTTON_PRESS_MASK);
 	_eventBox.show();
 

@@ -114,6 +114,8 @@ void ControlWindow::initializeWidgets()
 
 	_vBox.pack_start(_hBox2, true, true);
 	_hBox2.pack_start(_buttonBox, false, false);
+	_controlGrid.set_column_spacing(3);
+	_hBox2.pack_start(_controlGrid, true, true);
 	
 	_soloCheckButton.signal_toggled().connect(sigc::mem_fun(*this, &ControlWindow::onSoloButtonToggled));
 	_buttonBox.pack_start(_soloCheckButton, false, false);
@@ -170,7 +172,12 @@ void ControlWindow::addControl()
 	size_t controlIndex = _controls.size();
 	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlValueChanged), control.get()));
 	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlAssigned), controlIndex));
-	_hBox2.pack_start(*control, true, false, 3);
+	
+	_controlGrid.attach(*control, _controls.size()*2+1, 0, 2, 1);
+	control->NameLabel().set_hexpand(true);
+	bool even = _controls.size()%2==0;
+	_controlGrid.attach(control->NameLabel(), _controls.size()*2, even ? 1 : 2, 4, 1);
+	
 	control->show();
 	_controls.emplace_back(std::move(control));
 }
