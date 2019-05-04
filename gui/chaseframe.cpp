@@ -64,15 +64,15 @@ void ChaseFrame::initLowerPanel()
 	_delayTriggerCheckButton.set_group(group);
 	_delayTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
-	_bottomGrid.attach(_triggerSpeedLabel, 1, 0);
+	_bottomGrid.attach(_triggerSpeedLabel, 1, 0, 1, 1);
 	_triggerSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_bottomGrid.attach(_triggerSpeed, 2, 0);
+	_bottomGrid.attach(_triggerSpeed, 2, 0, 1, 1);
 	_triggerSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerSpeedChanged));
 
 	_transitionSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_bottomGrid.attach(_transitionSpeedLabel, 1, 1);
-	_bottomGrid.attach(_transitionSpeed, 2, 1);
+	_bottomGrid.attach(_transitionSpeedLabel, 1, 1, 1, 1);
+	_bottomGrid.attach(_transitionSpeed, 2, 1, 1, 1);
 	_transitionSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTransitionSpeedChanged));
 	
@@ -107,20 +107,20 @@ void ChaseFrame::initLowerPanel()
 	_synchronizedTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
 	_synchronizationsLabel.set_halign(Gtk::ALIGN_END);
-	_bottomGrid.attach(_synchronizationsLabel, 1, 4);
-	_bottomGrid.attach(_synchronizationsCount, 2, 4);
+	_bottomGrid.attach(_synchronizationsLabel, 1, 4, 1, 1);
+	_bottomGrid.attach(_synchronizationsCount, 2, 4, 1, 1);
 	_synchronizationsCount.set_value(1.0);
 	_synchronizationsCount.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onSyncCountChanged));
 	_bottomGrid.attach(_synchronizedSep, 0, 5, 3, 1);
 
-	_bottomGrid.attach(_beatTriggerCheckButton, 0, 6);
+	_bottomGrid.attach(_beatTriggerCheckButton, 0, 6, 1, 1);
 	_beatTriggerCheckButton.set_group(group);
 	_beatTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
 	_beatSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_bottomGrid.attach(_beatSpeedLabel, 1, 6);
-	_bottomGrid.attach(_beatSpeed, 2, 6);
+	_bottomGrid.attach(_beatSpeedLabel, 1, 6, 1, 1);
+	_bottomGrid.attach(_beatSpeed, 2, 6, 1, 1);
 	_beatSpeed.set_hexpand(true);
 	_beatSpeed.set_value(1.0);
 	_beatSpeed.signal_value_changed().
