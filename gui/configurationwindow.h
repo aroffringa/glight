@@ -32,6 +32,7 @@ class ConfigurationWindow : public Gtk::Window {
 		bool onAddButtonClicked(GdkEventButton* event);
 		void onIncChannelButtonClicked();
 		void onDecChannelButtonClicked();
+		void onSetChannelButtonClicked();
 		void onMenuItemClicked(enum FixtureType::FixtureClass cl);
 		void updateFixture(const class Fixture *fixture);
 		static std::string getChannelString(const class Fixture& fixture);
@@ -56,7 +57,7 @@ class ConfigurationWindow : public Gtk::Window {
 		Gtk::VBox _mainBox;
 		Gtk::HButtonBox _buttonBox;
 
-		Gtk::Button _addButton, _incChannelButton, _decChannelButton;
+		Gtk::Button _addButton, _incChannelButton, _decChannelButton, _setChannelButton;
 		std::unique_ptr<Gtk::Menu> _popupMenu;
 		std::vector<std::unique_ptr<Gtk::MenuItem>> _popupMenuItems;
 };

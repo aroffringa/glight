@@ -33,6 +33,8 @@ class Fixture : public NamedObject {
 		void IncChannel();
 
 		void DecChannel();
+		
+		void SetChannel(unsigned dmxChannel);
 
 		void ClearFunctions()
 		{

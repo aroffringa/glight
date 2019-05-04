@@ -170,3 +170,20 @@ void Fixture::DecChannel()
 	
 	_theatre.NotifyDmxChange();
 }
+
+void Fixture::SetChannel(unsigned dmxChannel)
+{
+	for(std::unique_ptr<FixtureFunction>& ff : _functions)
+	{
+		dmxChannel = dmxChannel % 512;
+		DmxChannel c = ff->FirstChannel();
+		c.SetChannel(dmxChannel);
+		ff->SetChannel(c);
+		if(ff->IsSingleChannel())
+			++dmxChannel;
+		else
+			dmxChannel += 2;
+	}
+	
+	_theatre.NotifyDmxChange();
+}
