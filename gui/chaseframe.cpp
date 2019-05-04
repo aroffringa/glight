@@ -10,7 +10,7 @@ ChaseFrame::ChaseFrame(Management &management, ShowWindow &parentWindow) :
 	_deleteChaseButton("Delete"),
 	_bottomFrame("Selected chase"),
 	
-	_delayTriggerCheckButton("Trigger by delay"),
+	_delayTriggerCheckButton("Delayed trigger"),
 	_triggerSpeedLabel("Trigger speed (ms) :"),
 	_triggerSpeed(1.0, 10000.0, 100.0),
 	_transitionSpeedLabel("Transition speed (ms) :"),
@@ -21,8 +21,8 @@ ChaseFrame::ChaseFrame(Management &management, ShowWindow &parentWindow) :
 	_transitionFadeThroughBlackRB("Through black"),
 	_transitionErraticRB("Erratic"),
 	
-	_synchronizedTriggerCheckButton("Synchronized trigger"),
-	_synchronizationsLabel("Number of synchronizations"),
+	_synchronizedTriggerCheckButton("Synchronized"),
+	_synchronizationsLabel("Nr. of synchronizations:"),
 	_synchronizationsCount(1.0, 100.0, 1.0),
 		
 	_beatTriggerCheckButton("Trigger by beat"),
@@ -60,17 +60,19 @@ void ChaseFrame::initUpperPanel()
 void ChaseFrame::initLowerPanel()
 {
 	Gtk::RadioButtonGroup group;
-	_bottomBox.pack_start(_delayTriggerCheckButton, false, false, 1);
+	_bottomGrid.attach(_delayTriggerCheckButton, 0, 0, 1, 3);
 	_delayTriggerCheckButton.set_group(group);
 	_delayTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
-	_bottomBox.pack_start(_triggerSpeedLabel, false, false, 1);
-	_bottomBox.pack_start(_triggerSpeed, false, false, 1);
+	_bottomGrid.attach(_triggerSpeedLabel, 1, 0, 1, 1);
+	_triggerSpeedLabel.set_halign(Gtk::ALIGN_END);
+	_bottomGrid.attach(_triggerSpeed, 2, 0, 1, 1);
 	_triggerSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerSpeedChanged));
 
-	_bottomBox.pack_start(_transitionSpeedLabel, false, false, 1);
-	_bottomBox.pack_start(_transitionSpeed, false, false, 1);
+	_transitionSpeedLabel.set_halign(Gtk::ALIGN_END);
+	_bottomGrid.attach(_transitionSpeedLabel, 1, 1, 1, 1);
+	_bottomGrid.attach(_transitionSpeed, 2, 1, 1, 1);
 	_transitionSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTransitionSpeedChanged));
 	
@@ -97,29 +99,35 @@ void ChaseFrame::initLowerPanel()
 		sigc::mem_fun(*this, &ChaseFrame::onTransitionTypeChanged));
 	_transitionTypeBox.pack_start(_transitionErraticRB);
 	
-	_bottomBox.pack_start(_transitionTypeBox, false, false, 1);
+	_bottomGrid.attach(_transitionTypeBox, 1, 2, 2, 1);
+	_bottomGrid.attach(_transitionSep, 0, 3, 3, 1);
 	
-	_bottomBox.pack_start(_synchronizedTriggerCheckButton, false, false, 1);
+	_bottomGrid.attach(_synchronizedTriggerCheckButton, 0, 4, 1, 1);
 	_synchronizedTriggerCheckButton.set_group(group);
 	_synchronizedTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
-	_bottomBox.pack_start(_synchronizationsLabel, false, false, 1);
-	_bottomBox.pack_start(_synchronizationsCount, false, false, 1);
+	_synchronizationsLabel.set_halign(Gtk::ALIGN_END);
+	_bottomGrid.attach(_synchronizationsLabel, 1, 4, 1, 1);
+	_bottomGrid.attach(_synchronizationsCount, 2, 4, 1, 1);
 	_synchronizationsCount.set_value(1.0);
 	_synchronizationsCount.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onSyncCountChanged));
+	_bottomGrid.attach(_synchronizedSep, 0, 5, 3, 1);
 
-	_bottomBox.pack_start(_beatTriggerCheckButton, false, false, 1);
+	_bottomGrid.attach(_beatTriggerCheckButton, 0, 6, 1, 1);
 	_beatTriggerCheckButton.set_group(group);
 	_beatTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
-	_bottomBox.pack_start(_beatSpeedLabel, false, false, 1);
-	_bottomBox.pack_start(_beatSpeed, false, false, 1);
+	_beatSpeedLabel.set_halign(Gtk::ALIGN_END);
+	_bottomGrid.attach(_beatSpeedLabel, 1, 6, 1, 1);
+	_bottomGrid.attach(_beatSpeed, 2, 6, 1, 1);
+	_beatSpeed.set_hexpand(true);
 	_beatSpeed.set_value(1.0);
 	_beatSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onBeatSpeedChanged));
 	
-	_bottomFrame.add(_bottomBox);
+	_bottomGrid.set_hexpand(true);
+	_bottomFrame.add(_bottomGrid);
 
 	_bottomFrame.set_sensitive(false);
 	_bottomFrame.show_all();
