@@ -44,6 +44,8 @@ class ControlWidget : public Gtk::VBox {
 		void UpdateValue(double timePassed);
 		void ChangeManagement(class Management& management, bool moveSliders);
 		
+		Gtk::Widget& NameLabel() { return _eventBox; }
+		
 	private:
 		void writeValue();
 		void onScaleChange();
