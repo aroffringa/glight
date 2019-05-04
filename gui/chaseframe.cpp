@@ -102,7 +102,7 @@ void ChaseFrame::initLowerPanel()
 	_bottomGrid.attach(_transitionTypeBox, 1, 2, 2, 1);
 	_bottomGrid.attach(_transitionSep, 0, 3, 3, 1);
 	
-	_bottomGrid.attach(_synchronizedTriggerCheckButton, 0, 4);
+	_bottomGrid.attach(_synchronizedTriggerCheckButton, 0, 4, 1, 1);
 	_synchronizedTriggerCheckButton.set_group(group);
 	_synchronizedTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
