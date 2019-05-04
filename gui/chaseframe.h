@@ -5,12 +5,14 @@
 #include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/paned.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/separator.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
@@ -53,7 +55,7 @@ class ChaseFrame : public Gtk::VPaned {
 		Gtk::Button _deleteChaseButton;
 		
 		Gtk::Frame _bottomFrame;
-		Gtk::VBox _bottomBox;
+		Gtk::Grid _bottomGrid;
 		
 		Gtk::RadioButton _delayTriggerCheckButton;
 		Gtk::Label _triggerSpeedLabel;
@@ -63,10 +65,12 @@ class ChaseFrame : public Gtk::VPaned {
 		Gtk::HBox _transitionTypeBox;
 		Gtk::Label _transitionTypeLabel;
 		Gtk::RadioButton _transitionNoneRB, _transitionFadeRB, _transitionFadeThroughBlackRB, _transitionErraticRB;
+		Gtk::HSeparator _transitionSep;
 		
 		Gtk::RadioButton _synchronizedTriggerCheckButton;
 		Gtk::Label _synchronizationsLabel;
 		Gtk::HScale _synchronizationsCount;
+		Gtk::HSeparator _synchronizedSep;
 		
 		Gtk::RadioButton _beatTriggerCheckButton;
 		Gtk::Label _beatSpeedLabel;

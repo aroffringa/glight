@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <random>
 
-
 Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
 {
 	Folder& folder = management.RootFolder(); // TODO
