@@ -4,6 +4,7 @@
 #include <boost/thread/locks.hpp>
 
 #include <gtkmm/stock.h>
+#include <gtkmm/messagedialog.h>
 
 #include "../libtheatre/fixture.h"
 #include "../libtheatre/fixturefunctioncontrol.h"
@@ -15,7 +16,8 @@ ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
 	_management(&showWindow->GetManagement()),
 	_addButton(Gtk::Stock::ADD),
 	_incChannelButton("+channel"),
-	_decChannelButton("-channel")
+	_decChannelButton("-channel"),
+	_setChannelButton("Set...")
 {
 	set_title("Glight - configuration");
 	
@@ -31,30 +33,27 @@ ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
 	_fixturesListView.append_column("Channels", _fixturesListColumns._channels);
 	fillFixturesList();
 	_fixturesScrolledWindow.add(_fixturesListView);
-	_fixturesListView.show();
 
 	_fixturesScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_mainBox.pack_start(_fixturesScrolledWindow);
-	_fixturesScrolledWindow.show();
 
 	_addButton.set_events(Gdk::BUTTON_PRESS_MASK);
 	_addButton.signal_button_press_event().connect(sigc::mem_fun(*this, &ConfigurationWindow::onAddButtonClicked), false);
 	_buttonBox.pack_start(_addButton);
-	_addButton.show();
 
 	_decChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &ConfigurationWindow::onDecChannelButtonClicked));
 	_buttonBox.pack_start(_decChannelButton);
-	_decChannelButton.show();
 
 	_incChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &ConfigurationWindow::onIncChannelButtonClicked));
 	_buttonBox.pack_start(_incChannelButton);
-	_incChannelButton.show();
+
+	_setChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &ConfigurationWindow::onSetChannelButtonClicked));
+	_buttonBox.pack_start(_setChannelButton);
 
 	_mainBox.pack_start(_buttonBox, false, false, 0);
-	_buttonBox.show();
 
 	add(_mainBox);
-	_mainBox.show();
+	_mainBox.show_all();
 }
 
 void ConfigurationWindow::fillFixturesList()
@@ -144,7 +143,7 @@ void ConfigurationWindow::onIncChannelButtonClicked()
 	Gtk::TreeModel::iterator selected = selection->get_selected();
 	if(selected)
 	{
-		Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
+		Fixture* fixture = (*selected)[_fixturesListColumns._fixture];
 		fixture->IncChannel();
 		updateFixture(fixture);
 	}
@@ -157,9 +156,40 @@ void ConfigurationWindow::onDecChannelButtonClicked()
 	Gtk::TreeModel::iterator selected = selection->get_selected();
 	if(selected)
 	{
-		Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
+		Fixture* fixture = (*selected)[_fixturesListColumns._fixture];
 		fixture->DecChannel();
 		updateFixture(fixture);
+	}
+}
+
+void ConfigurationWindow::onSetChannelButtonClicked()
+{
+	Glib::RefPtr<Gtk::TreeSelection> selection =
+    _fixturesListView.get_selection();
+	Gtk::TreeModel::iterator selected = selection->get_selected();
+	if(selected)
+	{
+		Fixture* fixture = (*selected)[_fixturesListColumns._fixture];
+		Gtk::MessageDialog dialog(*this, "Set DMX channel",
+			false, Gtk::MESSAGE_QUESTION,
+			Gtk::BUTTONS_OK_CANCEL);
+		Gtk::Entry entry;
+		entry.set_text(std::to_string(fixture->Functions().front()->FirstChannel().Channel()+1));
+		dialog.get_vbox()->pack_start(entry, Gtk::PACK_SHRINK);
+		dialog.get_vbox()->show_all_children();
+		dialog.set_secondary_text(
+			"Please enter the new DMX channel for this fixture");
+		int result = dialog.run();
+		if(result == Gtk::RESPONSE_OK)
+		{
+			std::string dmxChannel = entry.get_text();
+			unsigned value = std::atoi(dmxChannel.c_str());
+			if(value > 0 && value <= 512)
+			{
+				fixture->SetChannel(value-1);
+				updateFixture(fixture);
+			}
+		}
 	}
 }
 
