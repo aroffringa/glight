@@ -63,8 +63,11 @@ class Management {
 		class Folder& GetFolder(const std::string& path);
 		void RemoveFolder(class Folder& folder);
 
-		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction &function);
-		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction &function, Folder& parent);
+		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction& function);
+		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction& function, Folder& parent);
+		class FixtureFunctionControl& GetFixtureFunctionControl(class FixtureFunction& function);
+		
+		void RemoveFixture(class Fixture& fixture);
 
 		class PresetValue& AddPreset(Controllable &controllable);
 		class PresetValue& AddPreset(unsigned id, Controllable &controllable);

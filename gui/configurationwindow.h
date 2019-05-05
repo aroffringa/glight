@@ -29,7 +29,8 @@ class ConfigurationWindow : public Gtk::Window {
 		}
 		void update() { fillFixturesList(); }
 		void fillFixturesList();
-		bool onAddButtonClicked(GdkEventButton* event);
+		bool onNewButtonClicked(GdkEventButton* event);
+		void onRemoveButtonClicked();
 		void onIncChannelButtonClicked();
 		void onDecChannelButtonClicked();
 		void onSetChannelButtonClicked();
@@ -57,7 +58,8 @@ class ConfigurationWindow : public Gtk::Window {
 		Gtk::VBox _mainBox;
 		Gtk::HButtonBox _buttonBox;
 
-		Gtk::Button _addButton, _incChannelButton, _decChannelButton, _setChannelButton;
+		Gtk::Button _newButton, _removeButton;
+		Gtk::Button _incChannelButton, _decChannelButton, _setChannelButton;
 		std::unique_ptr<Gtk::Menu> _popupMenu;
 		std::vector<std::unique_ptr<Gtk::MenuItem>> _popupMenuItems;
 };
