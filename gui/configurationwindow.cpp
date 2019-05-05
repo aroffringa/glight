@@ -76,9 +76,9 @@ void ConfigurationWindow::fillFixturesList()
 
 std::string ConfigurationWindow::getChannelString(const class Fixture& fixture)
 {
-	std::set<unsigned> channels = fixture.GetChannels();
+	std::vector<unsigned> channels = fixture.GetChannels();
 	
-	std::set<unsigned>::const_iterator i=channels.begin();
+	std::vector<unsigned>::const_iterator i=channels.begin();
 	std::ostringstream s;
 	// Note that DMX channels start counting at one on fixtures, but internally are represented
 	// zero-indexed. Hence, add one.
