@@ -152,11 +152,11 @@ bool ControlWindow::onResize(GdkEventConfigure *event)
 	return false;
 }
 
-void ControlWindow::UpdateAfterPresetRemoval()
+void ControlWindow::Update()
 {
 	for(std::unique_ptr<ControlWidget>& cWidget : _controls)
 	{
-		cWidget->UpdateAfterPresetRemoval();
+		cWidget->Update();
 	}
 }
 

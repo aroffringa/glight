@@ -19,7 +19,7 @@ class ControlWidget : public Gtk::VBox {
 		ControlWidget(class Management& management, char key);
 		~ControlWidget();
 
-		void UpdateAfterPresetRemoval();
+		void Update();
 		void Toggle();
 		void FullOn();
 		void FullOff();
