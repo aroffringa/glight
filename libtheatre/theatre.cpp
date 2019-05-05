@@ -73,10 +73,12 @@ void Theatre::NotifyDmxChange()
 	unsigned highest = 0;
 	for(const std::unique_ptr<class Fixture>& fixture : _fixtures)
 	{
-		std::set<unsigned> channels = fixture->GetChannels();
-		unsigned curHighest = *channels.rbegin();
-		if(curHighest > highest)
-			highest = curHighest;
+		std::vector<unsigned> channels = fixture->GetChannels();
+		for(unsigned channel : channels)
+		{
+			if(channel > highest)
+				highest = channel;
+		}
 	}
 	_highestChannel = highest;
 }

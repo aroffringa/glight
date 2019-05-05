@@ -20,13 +20,13 @@ class Fixture : public NamedObject {
 		{ return _functions; }
 		
 		FixtureType &Type() const { return _type; }
-		std::set<unsigned> GetChannels() const
+		std::vector<unsigned> GetChannels() const
 		{
-			std::set<unsigned> channels;
+			std::vector<unsigned> channels;
 			for(const std::unique_ptr<FixtureFunction>& ff : _functions)
 			{
 				if(ff->IsSingleChannel())
-					channels.insert(ff->FirstChannel().Channel());
+					channels.emplace_back(ff->FirstChannel().Channel());
 			}
 			return channels;
 		}
