@@ -159,15 +159,20 @@ void ControlWidget::onControllableSelected(PresetValue *item)
 	Assign(item, true);
 }
 
-void ControlWidget::UpdateAfterPresetRemoval()
+void ControlWidget::Update()
 {
 	if(_preset != nullptr)
 	{
+		// The preset might be removed, if so update label
 		if(!_management->Contains(*_preset))
 		{
 			_nameLabel.set_text("<..>");
 			_preset = nullptr;
 			_scale.set_value(0.0);
+		}
+		// Only if not removed: if preset is renamed, update
+		else {
+			_nameLabel.set_text(_preset->Controllable().Name());
 		}
 	}
 }

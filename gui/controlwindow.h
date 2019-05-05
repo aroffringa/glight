@@ -32,8 +32,7 @@ class ControlWindow  : public Gtk::Window {
 		
 		~ControlWindow();
 
-		void Update() { UpdateAfterPresetRemoval(); }
-		void UpdateAfterPresetRemoval();
+		void Update();
 		bool HandleKeyDown(char key);
 		bool HandleKeyUp(char key);
 		bool IsAssigned(class PresetValue* presetValue);
