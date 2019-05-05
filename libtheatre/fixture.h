@@ -14,12 +14,12 @@ class Fixture : public NamedObject {
 	public:
 		Fixture(class Theatre &theatre, class FixtureType &type, const std::string &name);
 		Fixture(const Fixture& source, class Theatre& theatre);
-		~Fixture();
 
 		const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const
 		{ return _functions; }
 		
 		FixtureType &Type() const { return _type; }
+		
 		std::vector<unsigned> GetChannels() const
 		{
 			std::vector<unsigned> channels;
@@ -30,6 +30,7 @@ class Fixture : public NamedObject {
 			}
 			return channels;
 		}
+		
 		void IncChannel();
 
 		void DecChannel();
@@ -47,8 +48,8 @@ class Fixture : public NamedObject {
 		}
 		inline Color GetColor(const class ValueSnapshot &snapshot) const;
 	private:
-		class Theatre &_theatre;
-		FixtureType &_type;
+		class Theatre& _theatre;
+		FixtureType& _type;
 		std::vector<std::unique_ptr<FixtureFunction>> _functions;
 };
 

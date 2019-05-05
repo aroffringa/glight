@@ -23,14 +23,26 @@ void Theatre::Clear()
 
 Fixture& Theatre::AddFixture(FixtureType &type)
 {
+	// Find free name
 	std::string name;
-	if(_fixtures.size() < 26)
-		name = std::string(1, (char) ('A' + _fixtures.size()));
-	else
+	bool found = false;
+	for(size_t i=0; i!=26; ++i)
+	{
+		name = std::string(1, (char) ('A' + i));
+		if(!NamedObject::Contains(_fixtures, name))
+		{
+			found = true;
+			break;
+		}
+	}
+	size_t number = 1;
+	while(!found)
 	{
 		std::stringstream s;
-		s << type.Name() << (_fixtures.size() + 1);
+		s << type.Name() << number;
 		name = s.str();
+		if(!NamedObject::Contains(_fixtures, name))
+			found = true;
 	}
 	_fixtures.emplace_back(new Fixture(*this, type, name));
 	Fixture& f = *_fixtures.back();
@@ -66,6 +78,32 @@ FixtureFunction& Theatre::GetFixtureFunction(const std::string &name) const
 		}
 	}
 	throw std::runtime_error(std::string("Can not find fixture function with name ") + name);
+}
+
+void Theatre::RemoveFixture(Fixture& fixture)
+{
+	FixtureType* t = &fixture.Type();
+	
+	size_t fIndex = NamedObject::FindIndex(_fixtures, &fixture);
+	_fixtures.erase(_fixtures.begin() + fIndex);
+	
+	if(!IsUsed(*t))
+	{
+		size_t ftIndex = NamedObject::FindIndex(_fixtureTypes, t);
+		_fixtureTypes.erase(_fixtureTypes.begin() + ftIndex);
+	}
+}
+
+bool Theatre::IsUsed(FixtureType& fixtureType) const
+{
+	for(const std::unique_ptr<Fixture>& f : _fixtures)
+	{
+		if(&f->Type() == &fixtureType)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void Theatre::NotifyDmxChange()

@@ -218,15 +218,8 @@ void Management::RemoveFolder(Folder& folder)
 
 void Management::RemoveControllable(Controllable& controllable)
 {
-	for(std::vector<std::unique_ptr<Controllable>>::iterator i=_controllables.begin();
-		i!=_controllables.end(); ++i)
-	{
-		if(i->get() == &controllable)
-		{
-			removeControllable(i);
-			return;
-		}
-	}
+	removeControllable(_controllables.begin() +
+		NamedObject::FindIndex(_controllables, &controllable));
 }
 
 void Management::removeControllable(std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr)
@@ -297,6 +290,29 @@ FixtureFunctionControl& Management::AddFixtureFunctionControl(FixtureFunction &f
 	_controllables.emplace_back(new FixtureFunctionControl(function));
 	parent.Add(*_controllables.back());
 	return static_cast<FixtureFunctionControl&>(*_controllables.back());
+}
+
+FixtureFunctionControl& Management::GetFixtureFunctionControl(class FixtureFunction& function)
+{
+	for(const std::unique_ptr<Controllable>& contr : _controllables)
+	{
+		FixtureFunctionControl* ffc = dynamic_cast<FixtureFunctionControl*>(contr.get());
+		if(ffc)
+		{
+			if(&ffc->Function() == &function)
+				return *ffc;
+		}
+	}
+	throw std::runtime_error("GetFixtureFunctionControl() : Fixture function control not found");
+}
+
+void Management::RemoveFixture(Fixture& fixture)
+{
+	for(const std::unique_ptr<FixtureFunction>& function : fixture.Functions())
+	{
+		RemoveControllable(GetFixtureFunctionControl(*function));
+	}
+	_theatre->RemoveFixture(fixture);
 }
 
 PresetValue &Management::AddPreset(unsigned id, Controllable &controllable)

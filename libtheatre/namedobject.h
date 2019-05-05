@@ -67,6 +67,28 @@ public:
 		throw std::runtime_error("Could not find object in container.");
 	}
 	
+	template<typename ObjectType>
+	static bool Contains(const std::vector<std::unique_ptr<ObjectType>>& container, const ObjectType* element)
+	{
+		for(const std::unique_ptr<ObjectType>& obj : container)
+		{
+			if(obj.get() == &element)
+				return true;
+		}
+		return false;
+	}
+	
+	template<typename ObjectType>
+	static bool Contains(const std::vector<std::unique_ptr<ObjectType>>& container, const std::string& name)
+	{
+		for(const std::unique_ptr<ObjectType>& obj : container)
+		{
+			if(obj->_name == name)
+				return true;
+		}
+		return false;
+	}
+	
 	sigc::signal<void()>& SignalDelete() { return _signalDelete; }
 		
 private:

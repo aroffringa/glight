@@ -29,6 +29,10 @@ class Theatre {
 		class Fixture& GetFixture(const std::string &name) const;
 		class FixtureType& GetFixtureType(const std::string &name) const;
 		class FixtureFunction& GetFixtureFunction(const std::string &name) const;
+		
+		void RemoveFixture(Fixture& fixture);
+		
+		bool IsUsed(FixtureType& fixtureType) const;
 
 		unsigned HighestChannel() const { return _highestChannel; }
 		unsigned FirstFreeChannel() const { return _fixtures.empty() ? 0 : _highestChannel+1; }

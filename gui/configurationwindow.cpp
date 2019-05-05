@@ -14,7 +14,8 @@
 ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
 	_showWindow(showWindow),
 	_management(&showWindow->GetManagement()),
-	_addButton(Gtk::Stock::ADD),
+	_newButton("New"),
+	_removeButton("Remove"),
 	_incChannelButton("+channel"),
 	_decChannelButton("-channel"),
 	_setChannelButton("Set...")
@@ -37,9 +38,14 @@ ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
 	_fixturesScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_mainBox.pack_start(_fixturesScrolledWindow);
 
-	_addButton.set_events(Gdk::BUTTON_PRESS_MASK);
-	_addButton.signal_button_press_event().connect(sigc::mem_fun(*this, &ConfigurationWindow::onAddButtonClicked), false);
-	_buttonBox.pack_start(_addButton);
+	_newButton.set_image_from_icon_name("document-new");
+	_newButton.set_events(Gdk::BUTTON_PRESS_MASK);
+	_newButton.signal_button_press_event().connect(sigc::mem_fun(*this, &ConfigurationWindow::onNewButtonClicked), false);
+	_buttonBox.pack_start(_newButton);
+
+	_removeButton.set_image_from_icon_name("edit-delete");
+	_removeButton.signal_clicked().connect(sigc::mem_fun(*this, &ConfigurationWindow::onRemoveButtonClicked));
+	_buttonBox.pack_start(_removeButton);
 
 	_decChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &ConfigurationWindow::onDecChannelButtonClicked));
 	_buttonBox.pack_start(_decChannelButton);
@@ -91,7 +97,7 @@ std::string ConfigurationWindow::getChannelString(const class Fixture& fixture)
 	return s.str();
 }
 
-bool ConfigurationWindow::onAddButtonClicked(GdkEventButton* event)
+bool ConfigurationWindow::onNewButtonClicked(GdkEventButton* event)
 {
 	if(event->button == 1)
 	{
@@ -100,12 +106,11 @@ bool ConfigurationWindow::onAddButtonClicked(GdkEventButton* event)
 		_popupMenu.reset(new Gtk::Menu());
 	
 		const std::vector<enum FixtureType::FixtureClass> &classes = FixtureType::GetClassList();
-		for(std::vector<enum FixtureType::FixtureClass>::const_iterator c=classes.begin();
-			c<classes.end();++c)
+		for(enum FixtureType::FixtureClass fc : classes)
 		{
-			std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(FixtureType::ClassName(*c)));
+			std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(FixtureType::ClassName(fc)));
 			mi->signal_activate().connect(sigc::bind<enum FixtureType::FixtureClass>( 
-			sigc::mem_fun(*this, &ConfigurationWindow::onMenuItemClicked), (*c)));
+			sigc::mem_fun(*this, &ConfigurationWindow::onMenuItemClicked), fc));
 			_popupMenu->append(*mi);
 			_popupMenuItems.emplace_back(std::move(mi));
 		}
@@ -116,10 +121,26 @@ bool ConfigurationWindow::onAddButtonClicked(GdkEventButton* event)
 	return false;
 }
 
+void ConfigurationWindow::onRemoveButtonClicked()
+{
+	Glib::RefPtr<Gtk::TreeSelection> selection =
+    _fixturesListView.get_selection();
+	Gtk::TreeModel::iterator selected = selection->get_selected();
+	if(selected)
+	{
+		Fixture* fixture = (*selected)[_fixturesListColumns._fixture];
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_management->RemoveFixture(*fixture);
+	}	
+	_showWindow->EmitUpdate();
+}
+
 void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 {
+	std::unique_lock<std::mutex> lock(_management->Mutex());
 	FixtureType &type = _management->Theatre().AddFixtureType(cl);
 	Fixture &fixture = _management->Theatre().AddFixture(type);
+	
 	const std::vector<std::unique_ptr<FixtureFunction>> &functions = fixture.Functions();
 
 	int number = 1;
@@ -132,6 +153,7 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 		control.SetName(ff->Name());
 		++number;
 	}
+	lock.unlock();
 
 	_showWindow->EmitUpdate();
 }

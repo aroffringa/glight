@@ -152,9 +152,6 @@ Fixture::Fixture(const Fixture& source, class Theatre& theatre) :
 		_functions.emplace_back(new FixtureFunction(*ff, theatre));
 }
 
-Fixture::~Fixture()
-{ }
-
 void Fixture::IncChannel()
 {
 	for(std::unique_ptr<FixtureFunction>& ff : _functions)
