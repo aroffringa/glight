@@ -17,20 +17,23 @@ public:
 	enum Type {
 		AudioLevelType,
 		DelayType,
+		FadeType,
 		ThresholdType
 	};
 	
 	Effect(size_t controlCount) :
 		_values(controlCount, 0),
-		_nValuesSet(0),
-		_controls(controlCount, nullptr)
+		_controls(controlCount, nullptr),
+		_visitLevel(0)
 	{
 	}
 	
 	virtual ~Effect()
 	{ 
-		for(sigc::connection& c : _onDeleteConnections)
-			c.disconnect();
+		while(!_connections.empty())
+		{
+			RemoveConnection(_connections.size()-1);
+		}
 	}
 	
 	virtual Type GetType() const = 0;
@@ -64,9 +67,7 @@ public:
 			throw std::runtime_error("RemoveConnection() called for unconnected controllable");
 		// convert to index to also remove corresponding connection
 		size_t index = item - _connections.begin();
-		_connections.erase(item);
-		_onDeleteConnections[index].disconnect();
-		_onDeleteConnections.erase(_onDeleteConnections.begin() + index);
+		RemoveConnection(index);
 	}
 	
 	void RemoveConnection(size_t index)
@@ -78,16 +79,19 @@ public:
 	
 	const std::vector<Controllable*>& Connections() const { return _connections; }
 	
-	void StartIteration()
-	{
-		for(ControlValue& v : _values)
-			v.Set(0);
-		_nValuesSet = 0;
-	}
-	
 	void SetNameGlobally(const std::string& effectName);
 	
 	std::unique_ptr<Effect> Copy() const;
+	
+	char VisitLevel() const { return _visitLevel; }
+	void SetVisitLevel(char visitLevel) { _visitLevel = visitLevel; }
+	
+	void Mix(unsigned* channelValues, unsigned universe, const class Timing& timing)
+	{
+		mix(_values.data(), channelValues, universe, timing);
+		for(ControlValue& v : _values)
+			v.Set(0);
+	}
 	
 protected:
 	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const class Timing& timing) = 0;
@@ -97,7 +101,7 @@ protected:
 	void shallowAssign(const Effect& effect)
 	{
 		_values = effect._values;
-		_nValuesSet = effect._nValuesSet;
+		_visitLevel = effect._visitLevel;
 		for(sigc::connection& c : _onDeleteConnections)
 			c.disconnect();
 		_controls.assign(effect._controls.size(), nullptr);
@@ -107,28 +111,17 @@ protected:
 private:
 	friend class EffectControl;
 	
-	bool setControlValue(size_t index, const ControlValue& value)
+	void mixControlValue(size_t index, const ControlValue& value)
 	{
-		_values[index] = value;
-		++_nValuesSet;
-		if(_nValuesSet == _values.size())
-		{
-			_nValuesSet = 0;
-			return true;
-		}
-		else return false;
-	}
-	
-	void mix(unsigned* channelValues, unsigned universe, const class Timing& timing)
-	{
-		mix(_values.data(), channelValues, universe, timing);
+		unsigned mixVal = ControlValue::Mix(_values[index].UInt(), value.UInt(), ControlValue::Default);
+		_values[index] = ControlValue(mixVal);
 	}
 	
 	std::vector<ControlValue> _values;
-	size_t _nValuesSet;
 	std::vector<class EffectControl*> _controls;
 	std::vector<Controllable*> _connections;
 	std::vector<sigc::connection> _onDeleteConnections;
+	char _visitLevel;
 };
 
 #include "effectcontrol.h"

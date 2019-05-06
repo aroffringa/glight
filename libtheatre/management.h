@@ -140,6 +140,9 @@ class Management {
 		void dryCopyEffectDependency(const Management& forDryCopy, size_t index);
 
 		void abortAllDevices();
+		
+		std::vector<class Effect*> topologicalOrderEffects();
+		void topologicalOrderVisit(Effect& effect, std::vector<class Effect*>& list);
 
 		std::unique_ptr<std::thread> _thread;
 		std::atomic<bool> _isQuitting;

@@ -29,10 +29,9 @@ private:
 
 #include "effect.h"
 
-inline void EffectControl::Mix(const ControlValue& value, unsigned* channelValues, unsigned universe, const class Timing& timing)
+inline void EffectControl::Mix(const ControlValue& value, unsigned*, unsigned, const class Timing&)
 { 
-	if(_effect->setControlValue(_index, value))
-		_effect->mix(channelValues, universe, timing);
+	_effect->mixControlValue(_index, value);
 }
 
 #endif
