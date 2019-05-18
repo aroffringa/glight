@@ -153,13 +153,15 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned* values, uns
 
 	std::lock_guard<std::mutex> lock(_mutex);
 
-	for(const std::unique_ptr<class Effect>& effect : _effects)
-		effect->StartIteration();
-
 	_show->Mix(values, universe, timing);
 	
 	for(const std::unique_ptr<class PresetValue>& pv : _presetValues)
 		pv->Controllable().Mix(pv->Value(), values, universe, timing);
+	
+	// Solve dependency graph of effects
+	std::vector<Effect*> orderedList = topologicalOrderEffects();
+	for(Effect* e : orderedList)
+		e->Mix(values, universe, timing);
 }
 
 PresetCollection& Management::AddPresetCollection()
@@ -415,6 +417,8 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect, Folder& folder)
 {
 	Effect& newEffect = AddEffect(std::move(effect));
 	folder.Add(newEffect);
+	for(const EffectControl* control : newEffect.Controls())
+		folder.Add(*const_cast<EffectControl*>(control));
 	return newEffect;
 }
 
@@ -428,6 +432,7 @@ void Management::RemoveEffect(Effect& effect)
 	{
 		if(i->get() == &effect)
 		{
+			effect.Parent().Remove(effect);
 			_effects.erase(i);
 			return;
 		}
@@ -672,4 +677,33 @@ void Management::SwapDevices(Management& source)
 		source.Run();
 	if(thisRunning)
 		Run();
+}
+
+std::vector<Effect*> Management::topologicalOrderEffects()
+{
+	for(const std::unique_ptr<Effect>& effect : _effects)
+		effect->SetVisitLevel(0);
+	std::vector<Effect*> list;
+	for(const std::unique_ptr<Effect>& effect : _effects)
+	{
+		topologicalOrderVisit(*effect, list);
+	}
+	return list;
+}
+
+void Management::topologicalOrderVisit(Effect& effect, std::vector<Effect*>& list)
+{
+	if(effect.VisitLevel() == 0)
+	{
+		effect.SetVisitLevel(1);
+		for(Controllable* controllable : effect.Connections())
+		{
+			EffectControl* other = dynamic_cast<EffectControl*>(controllable);
+			if(other) topologicalOrderVisit(other->GetEffect(), list);
+		}
+		effect.SetVisitLevel(2);
+		list.emplace_back(&effect);
+	}
+	else if(effect.VisitLevel() == 1)
+		throw std::runtime_error("Cycle in effect dependencies");
 }

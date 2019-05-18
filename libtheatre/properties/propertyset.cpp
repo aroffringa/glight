@@ -2,6 +2,7 @@
 
 #include "audioleveleffectps.h"
 #include "delayeffectps.h"
+#include "fadeeffectps.h"
 #include "thresholdeffectps.h"
 
 std::unique_ptr<PropertySet> PropertySet::Make(NamedObject& object)
@@ -9,6 +10,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(NamedObject& object)
 	std::unique_ptr<PropertySet> ps;
 	const AudioLevelEffect* afx = dynamic_cast<const AudioLevelEffect*>(&object);
 	const DelayEffect* dfx = dynamic_cast<const DelayEffect*>(&object);
+	const FadeEffect* ffx = dynamic_cast<const FadeEffect*>(&object);
 	const ThresholdEffect* tfx = dynamic_cast<const ThresholdEffect*>(&object);
 	if(afx != nullptr)
 	{
@@ -17,6 +19,10 @@ std::unique_ptr<PropertySet> PropertySet::Make(NamedObject& object)
 	else if(dfx != nullptr)
 	{
 		ps.reset(new DelayEffectPS());
+	}
+	else if(ffx != nullptr)
+	{
+		ps.reset(new FadeEffectPS());
 	}
 	else if(tfx != nullptr)
 	{

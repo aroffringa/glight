@@ -3,6 +3,8 @@
 
 #include "propertyset.h"
 
+#include "../effects/thresholdeffect.h"
+
 class ThresholdEffectPS final : public PropertySet
 {
 public:
