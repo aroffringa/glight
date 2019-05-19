@@ -20,9 +20,9 @@ class Scene : public Startable, private SyncListener {
 
 		~Scene();
 
-		ControlSceneItem *AddControlSceneItem(double offsetInMS, Controllable &controllable)
+		ControlSceneItem *AddControlSceneItem(double offsetInMS, Controllable &controllable, size_t input)
 		{
-			ControlSceneItem *item = new ControlSceneItem(controllable);
+			ControlSceneItem *item = new ControlSceneItem(controllable, input);
 			item->SetOffsetInMS(offsetInMS);
 			_items.insert(std::pair<double, SceneItem*>(offsetInMS, item));
 			resetCurrentOffset();

@@ -37,9 +37,9 @@ protected:
 		
 		unsigned v = ControlValue::Mix(_lastValue, values[0].UInt(), ControlValue::Multiply);
 		ControlValue audioLevelCV(v);
-		for(Controllable* connection : Connections())
+		for(const std::pair<Controllable*,size_t>& connection : Connections())
 		{
-			connection->Mix(audioLevelCV, channelValues, universe, timing);
+			connection.first->MixInput(connection.second, audioLevelCV);
 		}
 	}
 	

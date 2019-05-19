@@ -63,14 +63,14 @@ class Management {
 		class Folder& GetFolder(const std::string& path);
 		void RemoveFolder(class Folder& folder);
 
-		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction& function);
-		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction& function, Folder& parent);
-		class FixtureFunctionControl& GetFixtureFunctionControl(class FixtureFunction& function);
+		class FixtureControl& AddFixtureControl(class Fixture& function);
+		class FixtureControl& AddFixtureControl(class Fixture& function, Folder& parent);
+		class FixtureControl& GetFixtureControl(class Fixture& function);
 		
 		void RemoveFixture(class Fixture& fixture);
 
-		class PresetValue& AddPreset(Controllable &controllable);
-		class PresetValue& AddPreset(unsigned id, Controllable &controllable);
+		class PresetValue& AddPreset(Controllable &controllable, size_t inputIndex);
+		class PresetValue& AddPreset(unsigned id, Controllable &controllable, size_t inputIndex);
 
 		void RemovePreset(class PresetValue &presetValue);
 		bool Contains(class PresetValue &controllable) const;
@@ -94,7 +94,7 @@ class Management {
 		size_t SequenceIndex(const Sequence* sequence) const;
 		
 		class PresetValue* GetPresetValue(unsigned id) const;
-		class PresetValue* GetPresetValue(Controllable& controllable) const;
+		class PresetValue* GetPresetValue(Controllable& controllable, size_t inputIndex) const;
 		size_t PresetValueIndex(const class PresetValue* presetValue) const;
 		class ValueSnapshot Snapshot();
 		

@@ -2,7 +2,6 @@
 
 #include "color.h"
 #include "fixture.h"
-#include "fixturefunctioncontrol.h"
 #include "folder.h"
 #include "management.h"
 #include "presetcollection.h"
@@ -70,7 +69,7 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vect
 			}
 		}
 		seq.AddPreset(&pc);
-		management.AddPreset(pc);
+		management.AddPreset(pc, 0);
 	}
 	if(runType == BackAndForthRun)
 	{
@@ -82,27 +81,28 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vect
 
 void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master)
 {
-	for(const std::unique_ptr<FixtureFunction>& ff : f.Functions())
+	for(size_t i=0; i!=f.Functions().size(); ++i)
 	{
+		const std::unique_ptr<FixtureFunction>& ff = f.Functions()[i];
 		if(ff->Type() == FixtureFunction::RedIntensity && red != 0)
 		{
-			Controllable& c = management.GetControllable(ff->Name());
-			pc.AddPresetValue(*management.GetPresetValue(c)).SetValue(red);
+			Controllable& c = management.GetControllable(f.Name());
+			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(red);
 		}
 		else if(ff->Type() == FixtureFunction::GreenIntensity && green != 0)
 		{
-			Controllable& c = management.GetControllable(ff->Name());
-			pc.AddPresetValue(*management.GetPresetValue(c)).SetValue(green);
+			Controllable& c = management.GetControllable(f.Name());
+			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(green);
 		}
 		else if(ff->Type() == FixtureFunction::BlueIntensity && blue != 0)
 		{
-			Controllable& c = management.GetControllable(ff->Name());
-			pc.AddPresetValue(*management.GetPresetValue(c)).SetValue(blue);
+			Controllable& c = management.GetControllable(f.Name());
+			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(blue);
 		}
 		else if(ff->Type() == FixtureFunction::Brightness && master != 0)
 		{
-			Controllable& c = management.GetControllable(ff->Name());
-			pc.AddPresetValue(*management.GetPresetValue(c)).SetValue(master);
+			Controllable& c = management.GetControllable(f.Name());
+			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(master);
 		}
 	}
 }
@@ -141,7 +141,7 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 			addColorPresets(management, *f, pc, rv, gv, bv, master);
 		}
 		seq.AddPreset(&pc);
-		management.AddPreset(pc);
+		management.AddPreset(pc, 0);
 	}
 	return seq;
 }
@@ -153,9 +153,9 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 		throw std::runtime_error("Number of colours did not match number of fixtures");
 	std::unique_ptr<AudioLevelEffect> audioLevel(new AudioLevelEffect());
 	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel), folder);
-	for(EffectControl* ec : newAudioLevel.Controls())
-		management.AddPreset(*ec);
-	newAudioLevel.SetNameGlobally("VUMeter");
+	for(size_t o=0; o!=newAudioLevel.NOutputs(); ++o)
+		management.AddPreset(newAudioLevel, o);
+	newAudioLevel.SetName("VUMeter");
 	size_t nLevels;
 	if(direction == VUInward || direction == VUOutward)
 		nLevels = (fixtures.size()+1) / 2;
@@ -167,9 +167,9 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 		threshold->SetLowerStartLimit(((1<<24)-1)*i/nLevels);
 		threshold->SetLowerEndLimit(((1<<24)-1)*(i+1)/nLevels);
 		Effect& newEffect = management.AddEffect(std::move(threshold), folder);
-		for(EffectControl* ec : newEffect.Controls())
-			management.AddPreset(*ec);
-		newEffect.SetNameGlobally("VUM" + std::to_string(i+1) + "_Thr");
+		for(size_t o=0; o!=newAudioLevel.NOutputs(); ++o)
+			management.AddPreset(newEffect, o);
+		newEffect.SetName("VUM" + std::to_string(i+1) + "_Thr");
 		
 		size_t nFixInLevel = 1;
 		if((direction == VUInward && (i != nLevels-1 || fixtures.size()%2==0) ) ||
@@ -207,9 +207,9 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 				master = (1<<24)-1;
 			addColorPresets(management, *fixtures[fixIndex], pc, red, green, blue, master);
 		}
-		management.AddPreset(pc);
-		newEffect.AddConnection(&pc);
-		newAudioLevel.AddConnection(newEffect.Controls().front());
+		management.AddPreset(pc, 0);
+		newEffect.AddConnection(&pc, 0);
+		newAudioLevel.AddConnection(&newEffect, 0);
 	}
-	return *newAudioLevel.Controls()[0];
+	return newAudioLevel;
 }

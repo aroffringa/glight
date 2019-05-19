@@ -7,8 +7,7 @@
 #include "dmxdevice.h"
 #include "dummydevice.h"
 #include "effect.h"
-#include "effectcontrol.h"
-#include "fixturefunctioncontrol.h"
+#include "fixturecontrol.h"
 #include "folder.h"
 #include "presetcollection.h"
 #include "presetvalue.h"
@@ -155,8 +154,12 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned* values, uns
 
 	_show->Mix(values, universe, timing);
 	
+	// TODO fix dependencies
 	for(const std::unique_ptr<class PresetValue>& pv : _presetValues)
-		pv->Controllable().Mix(pv->Value(), values, universe, timing);
+		pv->Controllable().MixInput(pv->InputIndex(), pv->Value());
+	
+	for(const std::unique_ptr<class PresetValue>& pv : _presetValues)
+		pv->Controllable().Mix(values, universe, timing);
 	
 	// Solve dependency graph of effects
 	std::vector<Effect*> orderedList = topologicalOrderEffects();
@@ -281,52 +284,48 @@ bool Management::Contains(Controllable &controllable) const
 	return false;
 }
 
-FixtureFunctionControl& Management::AddFixtureFunctionControl(FixtureFunction &function)
+FixtureControl& Management::AddFixtureControl(Fixture& fixture)
 {
-	_controllables.emplace_back(new FixtureFunctionControl(function));
-	return static_cast<FixtureFunctionControl&>(*_controllables.back());
+	_controllables.emplace_back(new FixtureControl(fixture));
+	return static_cast<FixtureControl&>(*_controllables.back());
 }
 
-FixtureFunctionControl& Management::AddFixtureFunctionControl(FixtureFunction &function, Folder& parent)
+FixtureControl& Management::AddFixtureControl(Fixture& fixture, Folder& parent)
 {
-	_controllables.emplace_back(new FixtureFunctionControl(function));
+	_controllables.emplace_back(new FixtureControl(fixture));
 	parent.Add(*_controllables.back());
-	return static_cast<FixtureFunctionControl&>(*_controllables.back());
+	return static_cast<FixtureControl&>(*_controllables.back());
 }
 
-FixtureFunctionControl& Management::GetFixtureFunctionControl(class FixtureFunction& function)
+FixtureControl& Management::GetFixtureControl(class Fixture& fixture)
 {
 	for(const std::unique_ptr<Controllable>& contr : _controllables)
 	{
-		FixtureFunctionControl* ffc = dynamic_cast<FixtureFunctionControl*>(contr.get());
-		if(ffc)
+		FixtureControl* fc = dynamic_cast<FixtureControl*>(contr.get());
+		if(fc)
 		{
-			if(&ffc->Function() == &function)
-				return *ffc;
+			if(&fc->Fixture() == &fixture)
+				return *fc;
 		}
 	}
-	throw std::runtime_error("GetFixtureFunctionControl() : Fixture function control not found");
+	throw std::runtime_error("GetFixtureControl() : Fixture control not found");
 }
 
 void Management::RemoveFixture(Fixture& fixture)
 {
-	for(const std::unique_ptr<FixtureFunction>& function : fixture.Functions())
-	{
-		RemoveControllable(GetFixtureFunctionControl(*function));
-	}
 	_theatre->RemoveFixture(fixture);
 }
 
-PresetValue &Management::AddPreset(unsigned id, Controllable &controllable)
+PresetValue &Management::AddPreset(unsigned id, Controllable &controllable, size_t inputIndex)
 {
-	_presetValues.emplace_back(new PresetValue(id, controllable));
+	_presetValues.emplace_back(new PresetValue(id, controllable, inputIndex));
 	if(_nextPresetValueId <= id) _nextPresetValueId = id+1;
 	return *_presetValues.back();
 }
 
-PresetValue &Management::AddPreset(Controllable &controllable)
+PresetValue &Management::AddPreset(Controllable &controllable, size_t inputIndex)
 {
-	_presetValues.emplace_back(new PresetValue(_nextPresetValueId, controllable));
+	_presetValues.emplace_back(new PresetValue(_nextPresetValueId, controllable, inputIndex));
 	++_nextPresetValueId;
 	return *_presetValues.back();
 }
@@ -406,9 +405,6 @@ Chase &Management::AddChase(Sequence &sequence)
 
 Effect& Management::AddEffect(std::unique_ptr<Effect> effect)
 {
-	std::vector<std::unique_ptr<EffectControl>> controls = effect->ConstructControls();
-	for(std::unique_ptr<EffectControl>& control : controls)
-		_controllables.emplace_back(std::move(control));
 	_effects.emplace_back(std::move(effect));
 	return *_effects.back();
 }
@@ -417,16 +413,11 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect, Folder& folder)
 {
 	Effect& newEffect = AddEffect(std::move(effect));
 	folder.Add(newEffect);
-	for(const EffectControl* control : newEffect.Controls())
-		folder.Add(*const_cast<EffectControl*>(control));
 	return newEffect;
 }
 
 void Management::RemoveEffect(Effect& effect)
 {
-	std::vector<EffectControl*> controls = effect.Controls();
-	for(EffectControl* ec : controls)
-		RemoveControllable(*ec);
 	using iter = std::vector<std::unique_ptr<class Effect>>::iterator;
 	for(iter i=_effects.begin(); i!=_effects.end(); ++i)
 	{
@@ -485,10 +476,10 @@ PresetValue* Management::GetPresetValue(unsigned id) const
 	return nullptr;
 }
 
-PresetValue* Management::GetPresetValue(Controllable& controllable) const
+PresetValue* Management::GetPresetValue(Controllable& controllable, size_t inputIndex) const
 {
 	for(const std::unique_ptr<PresetValue>& pv : _presetValues)
-		if(&pv->Controllable() == &controllable)
+		if(&pv->Controllable() == &controllable && pv->InputIndex() == inputIndex)
 			return pv.get();
 	return nullptr;
 }
@@ -563,15 +554,15 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 void Management::dryCopyControllerDependency(const Management& forDryCopy, size_t index)
 {
 	Controllable* controllable = forDryCopy._controllables[index].get();
-	FixtureFunctionControl* ffc = dynamic_cast<FixtureFunctionControl*>(controllable);
+	FixtureControl* fc = dynamic_cast<FixtureControl*>(controllable);
 	const Chase* chase = dynamic_cast<const Chase *>(controllable);
 	const PresetCollection* presetCollection = dynamic_cast<const PresetCollection *>(controllable);
-	const EffectControl* effectControl = dynamic_cast<const EffectControl*>(controllable);
-	if(ffc != nullptr)
+	const Effect* effect = dynamic_cast<const Effect*>(controllable);
+	if(fc != nullptr)
 	{
-		FixtureFunction& ff = _theatre->GetFixtureFunction(ffc->Function().Name());
-		_controllables[index].reset(new FixtureFunctionControl(ff));
-		GetFolder(ffc->Parent().FullPath()).Add(*_controllables[index]);
+		Fixture& fixture = _theatre->GetFixture(fc->Fixture().Name());
+		_controllables[index].reset(new FixtureControl(fixture));
+		GetFolder(fc->Parent().FullPath()).Add(*_controllables[index]);
 	}
 	else if(chase != nullptr)
 	{
@@ -595,9 +586,9 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 		}
 		GetFolder(presetCollection->Parent().FullPath()).Add(pc);
 	}
-	else if(effectControl != nullptr)
+	else if(effect != nullptr)
 	{
-		size_t eIndex = forDryCopy.EffectIndex(&effectControl->GetEffect());
+		size_t eIndex = forDryCopy.EffectIndex(effect);
 		dryCopyEffectDependency(forDryCopy, eIndex);
 	}
 	else throw std::runtime_error("Unknown controllable in manager");
@@ -623,18 +614,12 @@ void Management::dryCopyEffectDependency(const Management& forDryCopy, size_t in
 	const Effect* effect = forDryCopy._effects[index].get();
 	_effects[index] = effect->Copy();
 	GetFolder(effect->Parent().FullPath()).Add(*_effects[index]);
-	std::vector<std::unique_ptr<EffectControl>> controls = _effects[index]->ConstructControls();
-	for(size_t i=0; i!=controls.size(); ++i)
+	for(const std::pair<Controllable*, size_t>& c : effect->Connections())
 	{
-		size_t cIndex = forDryCopy.ControllableIndex(effect->Controls()[i]);
-		_controllables[cIndex] = std::move(controls[i]);
-	}
-	for(Controllable* c : effect->Connections())
-	{
-		size_t cIndex = forDryCopy.ControllableIndex(c);
+		size_t cIndex = forDryCopy.ControllableIndex(c.first);
 		if(_controllables[cIndex] == nullptr)
 			dryCopyControllerDependency(forDryCopy, cIndex);
-		_effects[index]->AddConnection(_controllables[cIndex].get());
+		_effects[index]->AddConnection(_controllables[cIndex].get(), c.second);
 	}
 }
 
@@ -696,10 +681,10 @@ void Management::topologicalOrderVisit(Effect& effect, std::vector<Effect*>& lis
 	if(effect.VisitLevel() == 0)
 	{
 		effect.SetVisitLevel(1);
-		for(Controllable* controllable : effect.Connections())
+		for(const std::pair<Controllable*, size_t>& connection : effect.Connections())
 		{
-			EffectControl* other = dynamic_cast<EffectControl*>(controllable);
-			if(other) topologicalOrderVisit(other->GetEffect(), list);
+			Effect* other = dynamic_cast<Effect*>(connection.first);
+			if(other) topologicalOrderVisit(*other, list);
 		}
 		effect.SetVisitLevel(2);
 		list.emplace_back(&effect);

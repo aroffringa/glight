@@ -10,8 +10,8 @@
 */
 class PresetValue {
 	public:
-		PresetValue(unsigned id, class Controllable &controllable)
-			: _id(id), _value(0), _controllable(&controllable)
+		PresetValue(unsigned id, class Controllable &controllable, size_t inputIndex)
+			: _id(id), _value(0), _controllable(&controllable), _inputIndex(inputIndex)
 		{ }
 		
 		PresetValue(const PresetValue &source) = default;
@@ -20,7 +20,7 @@ class PresetValue {
 		 * Copy constructor that copies the source but associates it with the given controllable.
 		 */
 		PresetValue(const PresetValue &source, class Controllable &controllable) :
-			_id(source._id), _value(source._value), _controllable(&controllable)
+			_id(source._id), _value(source._value), _controllable(&controllable), _inputIndex(source._inputIndex)
 		{ }
 		
 		~PresetValue() { _signalDelete(); }
@@ -32,6 +32,9 @@ class PresetValue {
 		unsigned Id() const { return _id; }
 
 		class Controllable& Controllable() const { return *_controllable; }
+		
+		size_t InputIndex() const { return _inputIndex; }
+		
 		bool IsIgnorable() const { return _value.UInt() == 0; }
 		
 		sigc::signal<void()>& SignalDelete() { return _signalDelete; }
@@ -40,6 +43,7 @@ class PresetValue {
 		unsigned _id;
 		ControlValue _value;
 		class Controllable *_controllable;
+		size_t _inputIndex;
 		
 		sigc::signal<void()> _signalDelete;
 };

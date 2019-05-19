@@ -50,7 +50,7 @@ class Reader{
 		void parseControlItem(xmlNode *node);
 		void parseFixtureType(xmlNode *node);
 		void parseFixture(xmlNode *node);
-		void parseFixtureFunctionControl(xmlNode *node);
+		void parseFixtureControl(xmlNode *node);
 		void parsePresetCollection(xmlNode *node);
 		void parseSequence(xmlNode *node);
 		void parseChase(xmlNode *node);

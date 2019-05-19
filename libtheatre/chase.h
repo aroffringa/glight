@@ -22,17 +22,29 @@ public:
 		_transition(chase._transition)
 	{ }
 
-	virtual void Mix(const ControlValue &value, unsigned *channelValues, unsigned universe, const Timing& timing) final override
+	size_t NInputs() const final override
+	{ return 1; }
+	
+	ControlValue& InputValue(size_t index) final override
+	{ return _inputValue; }
+	
+	size_t NOutputs() const final override
+	{ return _sequence.Presets().size(); }
+	
+	std::pair<Controllable*, size_t> Output(size_t index) final override
+	{ return std::make_pair(_sequence.Presets()[index], 0); }
+	
+	virtual void Mix(unsigned *channelValues, unsigned universe, const Timing& timing) final override
 	{
 		switch(_trigger.Type()) {
 		case Trigger::DelayTriggered:
-			mixDelayChase(value, channelValues, universe, timing);
+			mixDelayChase(_inputValue, channelValues, universe, timing);
 			break;
 		case Trigger::SyncTriggered:
-			mixSyncedChase(value, channelValues, universe, timing);
+			mixSyncedChase(_inputValue, channelValues, universe, timing);
 			break;
 		case Trigger::BeatTriggered:
-			mixBeatChase(value, channelValues, universe, timing);
+			mixBeatChase(_inputValue, channelValues, universe, timing);
 			break;
 		}
 	}
@@ -50,13 +62,13 @@ private:
 	{
 		double timeInMs = timing.BeatValue();
 		unsigned step = (unsigned) fmod(timeInMs / _trigger.DelayInBeats(), _sequence.Size());
-		_sequence.Presets()[step]->Mix(value, channelValues, universe, timing);
+		_sequence.Presets()[step]->MixInput(0, value);
 	}
 	
 	void mixSyncedChase(const ControlValue& value, unsigned* channelValues, unsigned universe, const Timing& timing)
 	{
 		unsigned step = (timing.TimestepNumber() / _trigger.DelayInSyncs()) % _sequence.Size();
-		_sequence.Presets()[step]->Mix(value, channelValues, universe, timing);
+		_sequence.Presets()[step]->MixInput(0, value);
 	}
 	
 	void mixDelayChase(const ControlValue& value, unsigned* channelValues, unsigned universe, const Timing& timing)
@@ -67,7 +79,7 @@ private:
 		if(chaseTime < _trigger.DelayInMs())
 		{
 			// We are not in a transition, just mix the corresponding preset
-			_sequence.Presets()[step]->Mix(value, channelValues, universe, timing);
+			_sequence.Presets()[step]->MixInput(0, value);
 		}
 		else
 		{
@@ -76,10 +88,11 @@ private:
 			PresetCollection
 				&first = *_sequence.Presets()[step],
 				&second = *_sequence.Presets()[(step + 1) % _sequence.Size()];
-			_transition.Mix(first, second, transitionTime, value, channelValues, universe, timing);
+			_transition.Mix(first, 0, second, 0, transitionTime, value, timing);
 		}
 	}
 	
+	ControlValue _inputValue;
 	class Sequence &_sequence;
 	class Trigger _trigger;
 	class Transition _transition;

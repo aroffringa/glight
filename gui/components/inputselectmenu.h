@@ -7,14 +7,14 @@
 
 #include <sigc++/signal.h>
 
-class ControllableSelectMenu
+class InputSelectMenu
 {
 public:
 	void Popup(class Management& management, GdkEventButton* event);
 	
-	sigc::signal<void(class PresetValue*)>& SignalControllableSelected()
+	sigc::signal<void(class PresetValue*)>& SignalInputSelected()
 	{
-		return _signalControllableSelected;
+		return _signalInputSelected;
 	}
 	
 private:
@@ -27,7 +27,7 @@ private:
 		_popupPresetMenu,
 		_popupFunctionMenu,
 		_popupEffectsMenu;
-	sigc::signal<void(class PresetValue*)> _signalControllableSelected;
+	sigc::signal<void(class PresetValue*)> _signalInputSelected;
 };
 
 #endif

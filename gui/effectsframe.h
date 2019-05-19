@@ -14,7 +14,7 @@
 #include "avoidrecursion.h"
 #include "nameframe.h"
 
-#include "components/controllableselectmenu.h"
+#include "components/inputselectmenu.h"
 #include "components/objecttree.h"
 #include "components/propertiesbox.h"
 
@@ -42,8 +42,7 @@ private:
 		bool onAddConnectionClicked(GdkEventButton* event);
 		void onRemoveConnectionClicked();
 		void onSelectedConnectionChanged();
-		void onNameChange();
-		void onControllableSelected(class PresetValue* preset);
+		void onInputSelected(class PresetValue* preset);
 		void onChangeManagement(class Management &management)
 		{
 			_nameFrame.ChangeManagement(management);
@@ -67,6 +66,7 @@ private:
 		
 			Gtk::TreeModelColumn<Glib::ustring> _title;
 			Gtk::TreeModelColumn<size_t> _index;
+			Gtk::TreeModelColumn<size_t> _inputIndex;
 		} _connectionsListColumns;
 		
 		Gtk::HBox _propertiesHBox, _connectionsBox;
@@ -80,7 +80,7 @@ private:
 
 		Management* _management;
 		class ShowWindow& _parentWindow;
-		ControllableSelectMenu _controllablesMenu;
+		InputSelectMenu _controllablesMenu;
 		std::unique_ptr<Gtk::Menu> _popupEffectMenu;
 		std::vector<std::unique_ptr<Gtk::MenuItem>> _popupEffectMenuItems;
 		AvoidRecursion _delayUpdates;

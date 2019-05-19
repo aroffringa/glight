@@ -13,8 +13,8 @@
 */
 class PresetCollection : public Controllable {
 	public:
-		PresetCollection() { }
-		PresetCollection(const std::string& name) : Controllable(name) { }
+		PresetCollection() : _inputValue(0) { }
+		PresetCollection(const std::string& name) : Controllable(name), _inputValue(0) { }
 		~PresetCollection() { Clear(); }
 
 		void Clear()
@@ -23,15 +23,27 @@ class PresetCollection : public Controllable {
 		}
 		inline void SetFromCurrentSituation(const Management &management);
 
-		virtual void Mix(const ControlValue &value, unsigned *channelValues, unsigned universe, const Timing& timing) final override
+		size_t NInputs() const final override
+		{ return 1; }
+		
+		ControlValue& InputValue(size_t index) final override
+		{ return _inputValue; }
+		
+		size_t NOutputs() const final override
+		{ return _presetValues.size(); }
+		
+		std::pair<Controllable*, size_t> Output(size_t index) final override
+		{ return std::make_pair(&_presetValues[index]->Controllable(), _presetValues[index]->InputIndex()); }
+		
+		void Mix(unsigned *channelValues, unsigned universe, const Timing& timing) final override
 		{
-			unsigned leftHand = value.UInt();
+			unsigned leftHand = _inputValue.UInt();
 			for(const std::unique_ptr<PresetValue>& pv : _presetValues)
 			{
 				unsigned rightHand = pv->Value().UInt();
 				ControlValue value(ControlValue::Mix(leftHand, rightHand, ControlValue::Multiply));
 
-				pv->Controllable().Mix(value, channelValues, universe, timing);
+				pv->Controllable().MixInput(pv->InputIndex(), value);
 			}
 		}
 		const std::vector<std::unique_ptr<PresetValue>> &PresetValues() const { return _presetValues; }
@@ -40,9 +52,9 @@ class PresetCollection : public Controllable {
 			_presetValues.emplace_back(new PresetValue(source));
 			return *_presetValues.back();
 		}
-		PresetValue& AddPresetValue(unsigned id, class Controllable &controllable)
+		PresetValue& AddPresetValue(unsigned id, class Controllable &controllable, size_t input)
 		{
-			_presetValues.emplace_back(new PresetValue(id, controllable));
+			_presetValues.emplace_back(new PresetValue(id, controllable, input));
 			return *_presetValues.back();
 		}
 		PresetValue& AddPresetValue(class PresetValue& source, class Controllable &controllable)
@@ -57,6 +69,7 @@ class PresetCollection : public Controllable {
 			return false;
 		}
 	private:
+		ControlValue _inputValue;
 		std::vector<std::unique_ptr<PresetValue>> _presetValues;
 };
 

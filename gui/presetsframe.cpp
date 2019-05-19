@@ -114,7 +114,7 @@ void PresetsFrame::onNewPresetButtonClicked()
 		std::stringstream s;
 		s << "%" << _management->Controllables().size();
 		presetCollection.SetName(s.str());
-		_management->AddPreset(presetCollection);
+		_management->AddPreset(presetCollection, 0);
 		lock.unlock();
 
 		_parentWindow.EmitUpdate();
@@ -153,7 +153,7 @@ void PresetsFrame::onCreateChaseButtonClicked()
 			chase.SetName(sequence->Name()+"_Ch");
 			parent.Add(chase);
 
-			_management->AddPreset(chase);
+			_management->AddPreset(chase, 0);
 			lock.unlock();
 
 			_parentWindow.EmitUpdate();

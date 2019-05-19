@@ -49,9 +49,9 @@ protected:
 				_bufferReadPos = (_bufferReadPos+1) % _buffer.size();
 			}
 		}
-		for(Controllable* connection : Connections())
+		for(const std::pair<Controllable*,size_t>& connection : Connections())
 		{
-			connection->Mix(_buffer[_bufferReadPos].second, channelValues, universe, timing);
+			connection.first->MixInput(connection.second, _buffer[_bufferReadPos].second);
 		}
 	}
 	

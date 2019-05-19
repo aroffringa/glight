@@ -7,10 +7,9 @@
 #include "libtheatre/chase.h"
 #include "libtheatre/controllable.h"
 #include "libtheatre/effect.h"
-#include "libtheatre/effectcontrol.h"
 #include "libtheatre/fixture.h"
+#include "libtheatre/fixturecontrol.h"
 #include "libtheatre/fixturefunction.h"
-#include "libtheatre/fixturefunctioncontrol.h"
 #include "libtheatre/folder.h"
 #include "libtheatre/presetvalue.h"
 #include "libtheatre/show.h"
@@ -213,19 +212,19 @@ void Writer::writeControllable(const Controllable &controllable)
 {
 	if(_controllablesWritten.count(controllable.Name()) == 0)
 	{
-		const FixtureFunctionControl* fixtureFunctionControl = dynamic_cast<const FixtureFunctionControl *>(&controllable);
+		const FixtureControl* fixtureControl = dynamic_cast<const FixtureControl *>(&controllable);
 		const Chase* chase = dynamic_cast<const Chase *>(&controllable);
 		const PresetCollection* presetCollection = dynamic_cast<const PresetCollection *>(&controllable);
-		const EffectControl* effectControl = dynamic_cast<const EffectControl*>(&controllable);
+		const Effect* effect = dynamic_cast<const Effect*>(&controllable);
 	
-		if(fixtureFunctionControl != nullptr)
-			writeFixtureFunctionControl(*fixtureFunctionControl);
-		else if(chase != nullptr)
+		if(fixtureControl)
+			writeFixtureControl(*fixtureControl);
+		else if(chase)
 			writeChase(*chase);
-		else if(presetCollection != nullptr)
+		else if(presetCollection)
 			writePresetCollection(*presetCollection);
-		else if(effectControl != nullptr)
-			writeEffect(effectControl->GetEffect());
+		else if(effect)
+			writeEffect(*effect);
 		else
 			throw std::runtime_error("Unknown controllable");
 	}
@@ -255,11 +254,11 @@ void Writer::writePresetValue(const PresetValue &presetValue)
 	endElement();
 }
 
-void Writer::writeFixtureFunctionControl(const FixtureFunctionControl &control)
+void Writer::writeFixtureControl(const FixtureControl &control)
 {
-	startElement("fixture-function-control");
+	startElement("fixture-control");
 	writeNameAttributes(control);
-	writeAttribute("fixture-function-ref", control.Function().Name());
+	writeAttribute("fixture-ref", control.Name());
 	endElement();
 }
 
@@ -317,8 +316,8 @@ void Writer::writeEffect(const class Effect& effect)
 {
 	if(_effectsWritten.count(effect.Name()) == 0)
 	{
-		for(const Controllable* c : effect.Connections())
-			requireControllable(*c);
+		for(const std::pair<Controllable*, size_t>& c : effect.Connections())
+			requireControllable(*c.first);
 		
 		startElement("effect");
 		writeNameAttributes(effect);
@@ -343,11 +342,12 @@ void Writer::writeEffect(const class Effect& effect)
 			}
 			endElement();
 		}
-		for(const Controllable* c : effect.Connections())
+		for(const std::pair<Controllable*, size_t>& c : effect.Connections())
 		{
 			startElement("connection-ref");
-			writeAttribute("folder", _folderIds[&c->Parent()]);
-			writeAttribute("name", c->Name());
+			writeAttribute("input-index", c.second);
+			writeAttribute("folder", _folderIds[&c.first->Parent()]);
+			writeAttribute("name", c.first->Name());
 			endElement();
 		}
 		endElement();

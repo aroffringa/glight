@@ -62,9 +62,9 @@ protected:
 				thresholded.Set(ControlValue::Max().UInt() - v * 65536);
 			}
 		}
-		for(Controllable* connection : Connections())
+		for(const std::pair<Controllable*,size_t>& connection : Connections())
 		{
-			connection->Mix(thresholded, channelValues, universe, timing);
+			connection.first->MixInput(connection.second, thresholded);
 		}
 	}
 	

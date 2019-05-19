@@ -42,7 +42,7 @@ class Writer {
 		void writePresetCollection(const class PresetCollection &presetCollection);
 		void writePresetValue(const class PresetValue &presetValue);
 		void writeControllable(const class Controllable &controllable);
-		void writeFixtureFunctionControl(const class FixtureFunctionControl &control);
+		void writeFixtureControl(const class FixtureControl &control);
 		void writeChase(const class Chase &control);
 		void writeTransition(const class Transition &transition);
 		void writeTrigger(const class Trigger &trigger);

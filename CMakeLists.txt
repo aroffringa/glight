@@ -32,7 +32,8 @@ set(MAINFILES
   beatfinder.cpp
   flacdecoder.cpp
   reader.cpp
-  writer.cpp)
+  writer.cpp
+)
 
 set(GUIFILES
   gui/application.cpp  
@@ -50,7 +51,7 @@ set(GUIFILES
   gui/showwindow.cpp
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp
-  gui/components/controllableselectmenu.cpp
+  gui/components/inputselectmenu.cpp
   gui/components/objecttree.cpp
   gui/components/propertiesbox.cpp)
 
