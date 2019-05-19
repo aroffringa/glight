@@ -141,6 +141,12 @@ class Management {
 
 		void abortAllDevices();
 		
+		/**
+		 * Sorts controllables such that when A outputs to B, then A will come
+		 * after B in the ordered list.
+		 */
+		static void topologicalSort(const std::vector<Controllable*>& input, std::vector<Controllable*>& output);
+		static void topologicalSortVisit(Controllable& controllable, std::vector<Controllable*>& list);
 		std::vector<class Effect*> topologicalOrderEffects();
 		void topologicalOrderVisit(Effect& effect, std::vector<class Effect*>& list);
 

@@ -162,16 +162,25 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned* values, uns
 		}
 	}
 	
-	// TODO fix dependencies
 	for(const std::unique_ptr<class PresetValue>& pv : _presetValues)
 		pv->Controllable().MixInput(pv->InputIndex(), pv->Value());
 	
-	for(const std::unique_ptr<class PresetValue>& pv : _presetValues)
-		pv->Controllable().Mix(values, universe, timing);
-	
 	// Solve dependency graph of effects
-	std::vector<Effect*> orderedList = topologicalOrderEffects();
-	for(Effect* e : orderedList)
+	std::vector<Controllable*> unorderedList, orderedList;
+	for(const std::unique_ptr<Controllable>& c : _controllables)
+		unorderedList.emplace_back(c.get());
+	topologicalSort(unorderedList, orderedList);
+	for(auto i : orderedList)
+		std::cout << i->Name() << '\n';
+	std::cout << '\n';
+	
+	for(auto c = orderedList.rbegin(); c != orderedList.rend(); ++c)
+	{
+		(*c)->Mix(values, universe, timing);
+	}
+	
+	std::vector<Effect*> orderedEffectList = topologicalOrderEffects();
+	for(Effect* e : orderedEffectList)
 		e->Mix(values, universe, timing);
 }
 
@@ -700,3 +709,31 @@ void Management::topologicalOrderVisit(Effect& effect, std::vector<Effect*>& lis
 	else if(effect.VisitLevel() == 1)
 		throw std::runtime_error("Cycle in effect dependencies");
 }
+
+void Management::topologicalSort(const std::vector<Controllable*>& input, std::vector<Controllable*>& output)
+{
+	for(Controllable* controllable : input)
+		controllable->SetVisitLevel(0);
+	for(Controllable* controllable : input)
+	{
+		topologicalSortVisit(*controllable, output);
+	}
+}
+
+void Management::topologicalSortVisit(Controllable& controllable, std::vector<Controllable*>& list)
+{
+	if(controllable.VisitLevel() == 0)
+	{
+		controllable.SetVisitLevel(1);
+		for(size_t i=0; i!=controllable.NOutputs(); ++i)
+		{
+			Controllable* other = controllable.Output(i).first;
+			topologicalSortVisit(*other, list);
+		}
+		controllable.SetVisitLevel(2);
+		list.emplace_back(&controllable);
+	}
+	else if(controllable.VisitLevel() == 1)
+		throw std::runtime_error("Cycle in effect dependencies");
+}
+
