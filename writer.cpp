@@ -123,11 +123,6 @@ void Writer::writeGlightShow()
 	for(const std::unique_ptr<Sequence>& s : sequences)
 		writeSequence(*s);
 
-	const std::vector<std::unique_ptr<Effect>>&
-		effects = _management.Effects();
-	for(const std::unique_ptr<Effect>& e : effects)
-		writeEffect(*e);
-
 	endElement(); // control
 
 	startElement("show");

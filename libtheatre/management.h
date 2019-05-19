@@ -44,10 +44,6 @@ class Management {
 		{
 			return _sequences;
 		}
-		const std::vector<std::unique_ptr<class Effect>>& Effects() const
-		{
-			return _effects;
-		}
 		const std::vector<std::unique_ptr<class DmxDevice>>& Devices() const
 		{
 			return _devices;
@@ -82,7 +78,6 @@ class Management {
 		
 		class Effect& AddEffect(std::unique_ptr<class Effect> effect);
 		class Effect& AddEffect(std::unique_ptr<class Effect> effect, Folder& folder);
-		void RemoveEffect(class Effect& effect);
 
 		std::mutex& Mutex() { return _mutex; }
 
@@ -97,8 +92,6 @@ class Management {
 		class PresetValue* GetPresetValue(Controllable& controllable, size_t inputIndex) const;
 		size_t PresetValueIndex(const class PresetValue* presetValue) const;
 		class ValueSnapshot Snapshot();
-		
-		size_t EffectIndex(const Effect* effect) const;
 		
 		double GetOffsetTimeInMS() const
 		{
@@ -147,8 +140,6 @@ class Management {
 		 */
 		static void topologicalSort(const std::vector<Controllable*>& input, std::vector<Controllable*>& output);
 		static void topologicalSortVisit(Controllable& controllable, std::vector<Controllable*>& list);
-		std::vector<class Effect*> topologicalOrderEffects();
-		void topologicalOrderVisit(Effect& effect, std::vector<class Effect*>& list);
 
 		std::unique_ptr<std::thread> _thread;
 		std::atomic<bool> _isQuitting;
@@ -168,7 +159,6 @@ class Management {
 		std::vector<std::unique_ptr<class Controllable>> _controllables;
 		std::vector<std::unique_ptr<class PresetValue>> _presetValues;
 		std::vector<std::unique_ptr<class Sequence>> _sequences;
-		std::vector<std::unique_ptr<class Effect>> _effects;
 		std::vector<std::unique_ptr<class DmxDevice>> _devices;
 };
 

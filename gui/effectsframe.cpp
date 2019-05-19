@@ -172,7 +172,7 @@ bool EffectsFrame::onNewEffectClicked(GdkEventButton* event)
 void EffectsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 {
 	std::unique_ptr<Effect> effect(Effect::Make(effectType));
-	effect->SetName(Effect::TypeToName(effectType) + std::to_string(_management->Effects().size()+1));
+	effect->SetName(Effect::TypeToName(effectType) + std::to_string(_management->Controllables().size()+1));
 	_management->AddEffect(std::move(effect), _management->RootFolder() /* TODO */);
 	_parentWindow.EmitUpdate();
 }
@@ -183,7 +183,7 @@ void EffectsFrame::onDeleteEffectClicked()
 	if(e)
 	{
 		std::unique_lock<std::mutex> lock(_management->Mutex());
-		_management->RemoveEffect(*e);
+		_management->RemoveControllable(*e);
 		lock.unlock();
 		_parentWindow.EmitUpdate();
 	}

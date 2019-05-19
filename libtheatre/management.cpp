@@ -55,7 +55,6 @@ void Management::Clear()
 	_controllables.clear();
 	_presetValues.clear();
 	_sequences.clear();
-	_effects.clear();
 	_folders.clear();
 	_folders.emplace_back(new Folder());
 	_rootFolder = _folders.back().get();
@@ -170,18 +169,11 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned* values, uns
 	for(const std::unique_ptr<Controllable>& c : _controllables)
 		unorderedList.emplace_back(c.get());
 	topologicalSort(unorderedList, orderedList);
-	for(auto i : orderedList)
-		std::cout << i->Name() << '\n';
-	std::cout << '\n';
 	
 	for(auto c = orderedList.rbegin(); c != orderedList.rend(); ++c)
 	{
 		(*c)->Mix(values, universe, timing);
 	}
-	
-	std::vector<Effect*> orderedEffectList = topologicalOrderEffects();
-	for(Effect* e : orderedEffectList)
-		e->Mix(values, universe, timing);
 }
 
 PresetCollection& Management::AddPresetCollection()
@@ -218,9 +210,6 @@ void Management::RemoveObject(NamedObject& object)
 			if(sequence)
 				RemoveSequence(*sequence);
 			else {
-				Effect* effect = dynamic_cast<Effect*>(&object);
-				if(effect)
-					RemoveEffect(*effect);
 				throw std::runtime_error("Can not remove unknown object " + object.Name());
 			}
 		}
@@ -422,8 +411,8 @@ Chase &Management::AddChase(Sequence &sequence)
 
 Effect& Management::AddEffect(std::unique_ptr<Effect> effect)
 {
-	_effects.emplace_back(std::move(effect));
-	return *_effects.back();
+	_controllables.emplace_back(std::move(effect));
+	return static_cast<Effect&>(*_controllables.back());
 }
 
 Effect& Management::AddEffect(std::unique_ptr<Effect> effect, Folder& folder)
@@ -431,21 +420,6 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect, Folder& folder)
 	Effect& newEffect = AddEffect(std::move(effect));
 	folder.Add(newEffect);
 	return newEffect;
-}
-
-void Management::RemoveEffect(Effect& effect)
-{
-	using iter = std::vector<std::unique_ptr<class Effect>>::iterator;
-	for(iter i=_effects.begin(); i!=_effects.end(); ++i)
-	{
-		if(i->get() == &effect)
-		{
-			effect.Parent().Remove(effect);
-			_effects.erase(i);
-			return;
-		}
-	}
-	throw std::runtime_error("Effect not found");
 }
 
 Controllable& Management::GetControllable(const std::string& name) const
@@ -513,11 +487,6 @@ ValueSnapshot Management::Snapshot()
 	return *_snapshot;
 }
 
-size_t Management::EffectIndex(const Effect* effect) const
-{
-	return NamedObject::FindIndex(_effects, effect);
-}
-
 /**
  * Copy constructor for making a dry mode copy.
  */
@@ -542,7 +511,6 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 	_controllables.resize(forDryCopy._controllables.size());
 	_presetValues.resize(forDryCopy._presetValues.size());
 	_sequences.resize(forDryCopy._sequences.size());
-	_effects.resize(forDryCopy._effects.size());
 	for(size_t i=0; i!=forDryCopy._controllables.size(); ++i)
 	{
 		if(_controllables[i] == nullptr) // not already resolved?
@@ -560,11 +528,6 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 	{
 		if(_sequences[i] == nullptr)
 			dryCopySequenceDependency(forDryCopy, i);
-	}
-	for(size_t i=0; i!=forDryCopy._effects.size(); ++i)
-	{
-		if(_effects[i] == nullptr)
-			dryCopyEffectDependency(forDryCopy, i);
 	}
 }
 
@@ -605,7 +568,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 	}
 	else if(effect != nullptr)
 	{
-		size_t eIndex = forDryCopy.EffectIndex(effect);
+		size_t eIndex = forDryCopy.ControllableIndex(effect);
 		dryCopyEffectDependency(forDryCopy, eIndex);
 	}
 	else throw std::runtime_error("Unknown controllable in manager");
@@ -628,15 +591,15 @@ void Management::dryCopySequenceDependency(const Management& forDryCopy, size_t 
 
 void Management::dryCopyEffectDependency(const Management& forDryCopy, size_t index)
 {
-	const Effect* effect = forDryCopy._effects[index].get();
-	_effects[index] = effect->Copy();
-	GetFolder(effect->Parent().FullPath()).Add(*_effects[index]);
+	const Effect* effect = static_cast<const Effect*>(forDryCopy._controllables[index].get());
+	_controllables[index] = effect->Copy();
+	GetFolder(effect->Parent().FullPath()).Add(*_controllables[index]);
 	for(const std::pair<Controllable*, size_t>& c : effect->Connections())
 	{
 		size_t cIndex = forDryCopy.ControllableIndex(c.first);
 		if(_controllables[cIndex] == nullptr)
 			dryCopyControllerDependency(forDryCopy, cIndex);
-		_effects[index]->AddConnection(_controllables[cIndex].get(), c.second);
+		static_cast<Effect&>(*_controllables[index]).AddConnection(_controllables[cIndex].get(), c.second);
 	}
 }
 
@@ -679,35 +642,6 @@ void Management::SwapDevices(Management& source)
 		source.Run();
 	if(thisRunning)
 		Run();
-}
-
-std::vector<Effect*> Management::topologicalOrderEffects()
-{
-	for(const std::unique_ptr<Effect>& effect : _effects)
-		effect->SetVisitLevel(0);
-	std::vector<Effect*> list;
-	for(const std::unique_ptr<Effect>& effect : _effects)
-	{
-		topologicalOrderVisit(*effect, list);
-	}
-	return list;
-}
-
-void Management::topologicalOrderVisit(Effect& effect, std::vector<Effect*>& list)
-{
-	if(effect.VisitLevel() == 0)
-	{
-		effect.SetVisitLevel(1);
-		for(const std::pair<Controllable*, size_t>& connection : effect.Connections())
-		{
-			Effect* other = dynamic_cast<Effect*>(connection.first);
-			if(other) topologicalOrderVisit(*other, list);
-		}
-		effect.SetVisitLevel(2);
-		list.emplace_back(&effect);
-	}
-	else if(effect.VisitLevel() == 1)
-		throw std::runtime_error("Cycle in effect dependencies");
 }
 
 void Management::topologicalSort(const std::vector<Controllable*>& input, std::vector<Controllable*>& output)
