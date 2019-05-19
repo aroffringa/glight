@@ -94,6 +94,7 @@ if(Boost_FOUND)
   add_executable(runtests EXCLUDE_FROM_ALL
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
+    tests/testfixturecontrol.cpp
     tests/testfolder.cpp
     tests/testsequence.cpp
     )

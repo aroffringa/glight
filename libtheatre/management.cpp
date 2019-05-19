@@ -97,8 +97,7 @@ void Management::ManagementThread::operator()()
 			unsigned values[512];
 			unsigned char valuesChar[512];
 
-			for(unsigned i=0;i<512;++i)
-				values[i] = 0;
+			std::fill_n(values, 512, 0);
 	
 			parent->getChannelValues(timestepNumber, values, universe);
 	
@@ -153,6 +152,15 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned* values, uns
 	std::lock_guard<std::mutex> lock(_mutex);
 
 	_show->Mix(values, universe, timing);
+	
+	// Reset all inputs
+	for(const std::unique_ptr<class PresetValue>& pv : _presetValues)
+	{
+		for(size_t inputIndex=0; inputIndex != pv->Controllable().NInputs(); ++inputIndex)
+		{
+			pv->Controllable().InputValue(inputIndex) = 0;
+		}
+	}
 	
 	// TODO fix dependencies
 	for(const std::unique_ptr<class PresetValue>& pv : _presetValues)

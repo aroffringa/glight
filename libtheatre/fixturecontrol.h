@@ -30,7 +30,14 @@ public:
 	std::pair<Controllable*, size_t> Output(size_t) final override
 	{ return std::pair<Controllable*, size_t>(nullptr, 0); }
 	
-	void Mix(unsigned int *, unsigned int, const class Timing &) final override { }
+	void Mix(unsigned* channelValues, unsigned universe, const class Timing&) final override
+	{
+		for(size_t i=0; i!=_fixture->Functions().size(); ++i)
+		{
+			const std::unique_ptr<FixtureFunction>& ff = _fixture->Functions()[i];
+			ff->Mix(_values[i].UInt(), ControlValue::Default, channelValues, universe);
+		}
+	}
 		
 private:
 	class Fixture *_fixture;

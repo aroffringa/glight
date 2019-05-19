@@ -63,9 +63,9 @@ class Management {
 		class Folder& GetFolder(const std::string& path);
 		void RemoveFolder(class Folder& folder);
 
-		class FixtureControl& AddFixtureControl(class Fixture& function);
-		class FixtureControl& AddFixtureControl(class Fixture& function, Folder& parent);
-		class FixtureControl& GetFixtureControl(class Fixture& function);
+		class FixtureControl& AddFixtureControl(class Fixture& fixture);
+		class FixtureControl& AddFixtureControl(class Fixture& fixture, Folder& parent);
+		class FixtureControl& GetFixtureControl(class Fixture& fixture);
 		
 		void RemoveFixture(class Fixture& fixture);
 

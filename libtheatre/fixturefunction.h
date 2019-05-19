@@ -37,7 +37,7 @@ class FixtureFunction : public NamedObject {
 				channels[_firstChannel.Channel()] =
 					ControlValue::Mix(channels[_firstChannel.Channel()], value, combiMixStyle);
 			}
-			else throw;
+			else throw std::runtime_error("Can't handle 16-bit values or multiple universes");
 		}
 
 		void SetChannel(const DmxChannel &channel);
