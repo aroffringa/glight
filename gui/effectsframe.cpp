@@ -173,7 +173,9 @@ void EffectsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 {
 	std::unique_ptr<Effect> effect(Effect::Make(effectType));
 	effect->SetName(Effect::TypeToName(effectType) + std::to_string(_management->Controllables().size()+1));
-	_management->AddEffect(std::move(effect), _management->RootFolder() /* TODO */);
+	Effect* added = &_management->AddEffect(std::move(effect), _management->RootFolder() /* TODO */);
+	for(size_t i=0; i!=added->NInputs(); ++i)
+		_management->AddPreset(*added, i);
 	_parentWindow.EmitUpdate();
 }
 

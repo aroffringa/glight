@@ -62,7 +62,7 @@ private:
 		struct ConnectionsListColumns : public Gtk::TreeModelColumnRecord
 		{
 			ConnectionsListColumns()
-				{ add(_title); add(_index); }
+				{ add(_title); add(_index); add(_inputIndex); }
 		
 			Gtk::TreeModelColumn<Glib::ustring> _title;
 			Gtk::TreeModelColumn<size_t> _index;

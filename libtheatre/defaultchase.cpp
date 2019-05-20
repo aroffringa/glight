@@ -153,8 +153,8 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 		throw std::runtime_error("Number of colours did not match number of fixtures");
 	std::unique_ptr<AudioLevelEffect> audioLevel(new AudioLevelEffect());
 	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel), folder);
-	for(size_t o=0; o!=newAudioLevel.NOutputs(); ++o)
-		management.AddPreset(newAudioLevel, o);
+	for(size_t inp=0; inp!=newAudioLevel.NInputs(); ++inp)
+		management.AddPreset(newAudioLevel, inp);
 	newAudioLevel.SetName("VUMeter");
 	size_t nLevels;
 	if(direction == VUInward || direction == VUOutward)
@@ -167,8 +167,8 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 		threshold->SetLowerStartLimit(((1<<24)-1)*i/nLevels);
 		threshold->SetLowerEndLimit(((1<<24)-1)*(i+1)/nLevels);
 		Effect& newEffect = management.AddEffect(std::move(threshold), folder);
-		for(size_t o=0; o!=newAudioLevel.NOutputs(); ++o)
-			management.AddPreset(newEffect, o);
+		for(size_t inp=0; inp!=newEffect.NInputs(); ++inp)
+			management.AddPreset(newEffect, inp);
 		newEffect.SetName("VUM" + std::to_string(i+1) + "_Thr");
 		
 		size_t nFixInLevel = 1;
