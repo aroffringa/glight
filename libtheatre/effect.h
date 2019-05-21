@@ -98,15 +98,6 @@ protected:
 	
 	virtual std::string getControlName(size_t index) const = 0;
 	
-	void shallowAssignOld(const Effect& effect)
-	{
-		_inputValues = effect._inputValues;
-		for(sigc::connection& c : _onDeleteConnections)
-			c.disconnect();
-		//_controls.assign(effect._controls.size(), nullptr);
-		_connections.clear();
-		_onDeleteConnections.clear();
-	}
 private:
 	friend class EffectControl;
 	

@@ -243,6 +243,7 @@ void Writer::writePresetValue(const PresetValue &presetValue)
 
 	startElement("preset-value");
 	writeAttribute("controllable-ref", presetValue.Controllable().Name());
+	writeAttribute("input-index", presetValue.InputIndex());
 	writeAttribute("folder", _folderIds[&presetValue.Controllable().Parent()]);
 	writeAttribute("value", presetValue.Value().UInt());
 	writeAttribute("id", presetValue.Id());
