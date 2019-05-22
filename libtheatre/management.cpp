@@ -196,7 +196,7 @@ Folder& Management::GetFolder(const std::string& path)
 	return _rootFolder->FollowDown(Folder::RemoveRoot(path));
 }
 
-void Management::RemoveObject(NamedObject& object)
+void Management::RemoveObject(FolderObject& object)
 {
 	Folder* folder = dynamic_cast<Folder*>(&object);
 	if(folder)
@@ -220,7 +220,7 @@ void Management::RemoveFolder(Folder& folder)
 {
 	if(&folder == _rootFolder)
 		throw std::runtime_error("Can not remove root folder");
-	for(NamedObject* object : folder.Children())
+	for(FolderObject* object : folder.Children())
 	{
 		RemoveObject(*object);
 	}
@@ -230,7 +230,7 @@ void Management::RemoveFolder(Folder& folder)
 void Management::RemoveControllable(Controllable& controllable)
 {
 	removeControllable(_controllables.begin() +
-		NamedObject::FindIndex(_controllables, &controllable));
+		                     FolderObject::FindIndex(_controllables, &controllable));
 }
 
 void Management::removeControllable(std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr)
@@ -424,10 +424,10 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect, Folder& folder)
 
 Controllable& Management::GetControllable(const std::string& name) const
 {
-	return NamedObject::FindNamedObject(_controllables, name);
+	return FolderObject::FindNamedObject(_controllables, name);
 }
 
-NamedObject& Management::GetObjectFromPath(const std::string& path) const
+FolderObject& Management::GetObjectFromPath(const std::string& path) const
 {
 	auto sep = std::find(path.begin(), path.end(), '/');
 	if(sep == path.end())
@@ -446,17 +446,17 @@ NamedObject& Management::GetObjectFromPath(const std::string& path) const
 
 size_t Management::ControllableIndex(const Controllable* controllable) const
 {
-	return NamedObject::FindIndex(_controllables, controllable);
+	return FolderObject::FindIndex(_controllables, controllable);
 }
 
 Sequence& Management::GetSequence(const std::string &name) const
 {
-	return NamedObject::FindNamedObject(_sequences, name);
+	return FolderObject::FindNamedObject(_sequences, name);
 }
 
 size_t Management::SequenceIndex(const Sequence* sequence) const
 {
-	return NamedObject::FindIndex(_sequences, sequence);
+	return FolderObject::FindIndex(_sequences, sequence);
 }
 
 PresetValue* Management::GetPresetValue(unsigned id) const
@@ -477,7 +477,7 @@ PresetValue* Management::GetPresetValue(Controllable& controllable, size_t input
 
 size_t Management::PresetValueIndex(const PresetValue* presetValue) const
 {
-	return NamedObject::FindIndex(_presetValues, presetValue);
+	return FolderObject::FindIndex(_presetValues, presetValue);
 }
 
 

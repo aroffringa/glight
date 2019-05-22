@@ -60,8 +60,8 @@ set(THEATREFILES
   libtheatre/effect.cpp
   libtheatre/fixture.cpp
   libtheatre/fixturefunction.cpp
+  libtheatre/folderobject.cpp
   libtheatre/management.cpp
-  libtheatre/namedobject.cpp
   libtheatre/oladevice.cpp
   libtheatre/scene.cpp
   libtheatre/show.cpp

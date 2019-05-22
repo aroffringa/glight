@@ -84,7 +84,7 @@ void Reader::parseGroup(xmlNode *node)
 	else throw std::runtime_error(std::string("Invalid node: ") + name(node));
 }
 
-void Reader::parseNameAttr(xmlNode* node, class NamedObject& object, bool hasFolder)
+void Reader::parseNameAttr(xmlNode* node, class FolderObject& object, bool hasFolder)
 {
 	if(hasFolder) {
 		size_t parent = getIntAttribute(node, "parent");
@@ -238,7 +238,7 @@ void Reader::parsePresetCollection(xmlNode *node)
 			if(name(curNode) == "preset-value")
 			{
 				Folder& folder = *_management.Folders()[getIntAttribute(curNode, "folder")];
-				NamedObject& obj = folder.GetChild(getStringAttribute(curNode, "controllable-ref"));
+				FolderObject& obj = folder.GetChild(getStringAttribute(curNode, "controllable-ref"));
 				size_t inputIndex = getIntAttribute(curNode, "input-index");
 				Controllable* controllable = dynamic_cast<Controllable*>(&obj);
 				if(controllable == nullptr)

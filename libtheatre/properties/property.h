@@ -1,7 +1,7 @@
 #ifndef PROPERTY_H
 #define PROPERTY_H
 
-#include "../../libtheatre/namedobject.h"
+#include "../../libtheatre/folderobject.h"
 
 #include "../../libtheatre/effects/thresholdeffect.h"
 

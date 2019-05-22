@@ -1,12 +1,12 @@
 #ifndef STARTABLE_H
 #define STARTABLE_H
 
-#include "namedobject.h"
+#include "folderobject.h"
 
 /**
 	@author Andre Offringa
 */
-class Startable : public NamedObject {
+class Startable : public FolderObject {
 	public:
 		Startable()
 		{

@@ -33,7 +33,7 @@ class Writer {
 		void writeGlightShow();
 		void writeFolders();
 
-		void writeNameAttributes(const class NamedObject& obj);
+		void writeNameAttributes(const class FolderObject& obj);
 		
 		void writeDmxChannel(const class DmxChannel &dmxChannel);
 		void writeFixtureType(const class FixtureType &fixtureType);

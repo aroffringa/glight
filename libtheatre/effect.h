@@ -1,7 +1,7 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
-#include "namedobject.h"
+#include "folderobject.h"
 
 #include "../libtheatre/controllable.h"
 

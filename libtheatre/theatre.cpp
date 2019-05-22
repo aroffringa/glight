@@ -29,7 +29,7 @@ Fixture& Theatre::AddFixture(FixtureType &type)
 	for(size_t i=0; i!=26; ++i)
 	{
 		name = std::string(1, (char) ('A' + i));
-		if(!NamedObject::Contains(_fixtures, name))
+		if(!FolderObject::Contains(_fixtures, name))
 		{
 			found = true;
 			break;
@@ -41,7 +41,7 @@ Fixture& Theatre::AddFixture(FixtureType &type)
 		std::stringstream s;
 		s << type.Name() << number;
 		name = s.str();
-		if(!NamedObject::Contains(_fixtures, name))
+		if(!FolderObject::Contains(_fixtures, name))
 			found = true;
 	}
 	_fixtures.emplace_back(new Fixture(*this, type, name));
@@ -58,12 +58,12 @@ FixtureType& Theatre::AddFixtureType(enum FixtureType::FixtureClass fixtureClass
 
 Fixture& Theatre::GetFixture(const std::string &name) const
 {
-	return NamedObject::FindNamedObject(_fixtures, name);
+	return FolderObject::FindNamedObject(_fixtures, name);
 }
 
 FixtureType& Theatre::GetFixtureType(const std::string &name) const
 {
-	return NamedObject::FindNamedObject(_fixtureTypes, name);
+	return FolderObject::FindNamedObject(_fixtureTypes, name);
 }
 
 FixtureFunction& Theatre::GetFixtureFunction(const std::string &name) const
@@ -84,12 +84,12 @@ void Theatre::RemoveFixture(Fixture& fixture)
 {
 	FixtureType* t = &fixture.Type();
 	
-	size_t fIndex = NamedObject::FindIndex(_fixtures, &fixture);
+	size_t fIndex = FolderObject::FindIndex(_fixtures, &fixture);
 	_fixtures.erase(_fixtures.begin() + fIndex);
 	
 	if(!IsUsed(*t))
 	{
-		size_t ftIndex = NamedObject::FindIndex(_fixtureTypes, t);
+		size_t ftIndex = FolderObject::FindIndex(_fixtureTypes, t);
 		_fixtureTypes.erase(_fixtureTypes.begin() + ftIndex);
 	}
 }

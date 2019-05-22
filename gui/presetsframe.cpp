@@ -141,7 +141,7 @@ void PresetsFrame::onNewFolderButtonClicked()
 
 void PresetsFrame::onCreateChaseButtonClicked()
 {
-	NamedObject* object = _presetsList.SelectedObject();
+	FolderObject* object = _presetsList.SelectedObject();
 	if(object)
 	{
 		Sequence* sequence = dynamic_cast<Sequence*>(object);
@@ -164,7 +164,7 @@ void PresetsFrame::onCreateChaseButtonClicked()
 
 void PresetsFrame::onDeletePresetButtonClicked()
 {
-	NamedObject* selectedObj = _presetsList.SelectedObject();
+	FolderObject* selectedObj = _presetsList.SelectedObject();
 	if(selectedObj && selectedObj != &_management->RootFolder())
 	{
 		Folder& parent = selectedObj->Parent();
@@ -179,7 +179,7 @@ void PresetsFrame::onDeletePresetButtonClicked()
 
 void PresetsFrame::onAddPresetToSequenceButtonClicked()
 {
-	NamedObject* selectedObj = _presetsList.SelectedObject();
+	FolderObject* selectedObj = _presetsList.SelectedObject();
 	if(selectedObj)
 	{
 		PresetCollection* preset = dynamic_cast<PresetCollection*>(selectedObj);
@@ -202,7 +202,7 @@ void PresetsFrame::onCreateSequenceButtonClicked()
 {
 	// Determine folder
 	Folder* folder;
-	NamedObject* selectedObj = _presetsList.SelectedObject();
+	FolderObject* selectedObj = _presetsList.SelectedObject();
 	if(selectedObj)
 	{
 		folder = dynamic_cast<Folder*>(selectedObj);
@@ -238,7 +238,7 @@ void PresetsFrame::onSelectedPresetChanged()
 {
 	if(_delayUpdates.IsFirst())
 	{
-		NamedObject* selectedObj = _presetsList.SelectedObject();
+		FolderObject* selectedObj = _presetsList.SelectedObject();
 		PresetCollection *preset = nullptr;
 		Sequence* sequence = nullptr;
 		if(selectedObj)

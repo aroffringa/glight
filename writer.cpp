@@ -160,7 +160,7 @@ void Writer::writeFolders()
 	}
 }	
 
-void Writer::writeNameAttributes(const NamedObject& obj)
+void Writer::writeNameAttributes(const FolderObject& obj)
 {
 	writeAttribute("name", obj.Name());
 	writeAttribute("parent", _folderIds.find(&obj.Parent())->second);

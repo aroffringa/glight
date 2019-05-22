@@ -14,24 +14,23 @@ class NamedObject {
 public:
 	friend class Folder;
 	
-	NamedObject() : _name(), _parent(nullptr)
+	NamedObject() : _name()
 	{ }
-	NamedObject(const std::string &name) : _name(name), _parent(nullptr)
+	NamedObject(const std::string& name) : _name(name)
 	{ }
 	virtual ~NamedObject()
 	{
 		_signalDelete();
 	}
 
+	NamedObject(const NamedObject&) = default;
+	NamedObject(NamedObject&&) = default;
+	NamedObject& operator=(const NamedObject&) = default;
+	NamedObject& operator=(NamedObject&&) = default;
+	
 	const std::string& Name() const { return _name; }
-	void SetName(const std::string &name) { _name = name; }
+	void SetName(const std::string& name) { _name = name; }
 	
-	std::string FullPath() const;
-	
-	bool IsRoot() const { return _parent == nullptr; }
-	const class Folder& Parent() const { return *_parent; }
-	class Folder& Parent() { return *_parent; }
-
 	template<typename NamedObjectType>
 	static NamedObjectType& FindNamedObject(const std::vector<std::unique_ptr<NamedObjectType>>& container, const std::string& name)
 	{
@@ -92,13 +91,9 @@ public:
 	sigc::signal<void()>& SignalDelete() { return _signalDelete; }
 		
 private:
-	void SetParent(class Folder& parent) { _parent = &parent; }
-	
-	friend class Folder;
-	
 	std::string _name;
-	class Folder* _parent;
 	sigc::signal<void()> _signalDelete;
 };
 
 #endif
+

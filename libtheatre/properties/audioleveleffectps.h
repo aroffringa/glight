@@ -14,7 +14,7 @@ public:
 	}
 	
 protected:
-	virtual void setControlValue(NamedObject& object, size_t index, unsigned value) const final override
+	virtual void setControlValue(FolderObject& object, size_t index, unsigned value) const final override
 	{
 		AudioLevelEffect& tfx = static_cast<AudioLevelEffect&>(object);
 		switch(index) {
@@ -22,7 +22,7 @@ protected:
 		}
 	}
 	
-	virtual unsigned getControlValue(const NamedObject& object, size_t index) const final override
+	virtual unsigned getControlValue(const FolderObject& object, size_t index) const final override
 	{
 		const AudioLevelEffect& tfx = static_cast<const AudioLevelEffect&>(object);
 		switch(index) {

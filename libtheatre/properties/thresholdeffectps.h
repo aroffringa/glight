@@ -17,7 +17,7 @@ public:
 	}
 	
 protected:
-	virtual void setControlValue(NamedObject& object, size_t index, unsigned value) const final override
+	virtual void setControlValue(FolderObject& object, size_t index, unsigned value) const final override
 	{
 		ThresholdEffect& tfx = static_cast<ThresholdEffect&>(object);
 		switch(index) {
@@ -28,7 +28,7 @@ protected:
 		}
 	}
 	
-	virtual unsigned getControlValue(const NamedObject& object, size_t index) const final override
+	virtual unsigned getControlValue(const FolderObject& object, size_t index) const final override
 	{
 		const ThresholdEffect& tfx = static_cast<const ThresholdEffect&>(object);
 		switch(index) {

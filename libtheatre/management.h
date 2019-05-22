@@ -49,7 +49,7 @@ class Management {
 			return _devices;
 		}
 		
-		void RemoveObject(class NamedObject& object);
+		void RemoveObject(class FolderObject& object);
 
 		class PresetCollection& AddPresetCollection();
 		void RemoveControllable(class Controllable &controllable);
@@ -82,7 +82,7 @@ class Management {
 		std::mutex& Mutex() { return _mutex; }
 
 		class Controllable& GetControllable(const std::string& name) const;
-		class NamedObject& GetObjectFromPath(const std::string& path) const;
+		class FolderObject& GetObjectFromPath(const std::string& path) const;
 		size_t ControllableIndex(const Controllable* controllable) const;
 		
 		class Sequence& GetSequence(const std::string &name) const;

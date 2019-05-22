@@ -4,16 +4,16 @@
 #include <string>
 
 #include "controlvalue.h"
-#include "namedobject.h"
+#include "folderobject.h"
 
 /**
 	@author Andre Offringa
 */
-class Controllable : public NamedObject {
+class Controllable : public FolderObject {
 public:
 	Controllable() : _visitLevel(0) { }
-	Controllable(const Controllable& source) : NamedObject(source), _visitLevel(0) { }
-	Controllable(const std::string& name) : NamedObject(name), _visitLevel(0) { }
+	Controllable(const Controllable& source) : FolderObject(source), _visitLevel(0) { }
+	Controllable(const std::string& name) : FolderObject(name), _visitLevel(0) { }
 	
 	virtual size_t NInputs() const = 0;
 	

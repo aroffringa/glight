@@ -6,13 +6,13 @@
 
 #include "controlvalue.h"
 #include "dmxchannel.h"
-#include "namedobject.h"
+#include "folderobject.h"
 #include "valuesnapshot.h"
 
 /**
 	@author Andre Offringa
 */
-class FixtureFunction : public NamedObject {
+class FixtureFunction : public FolderObject {
 	public:
 		enum FunctionType {
 			Brightness, RedIntensity, GreenIntensity, BlueIntensity, AmberIntensity, WhiteIntensity, Strobe, Pulse, Rotation, ColorMacro, Pan, Tilt
