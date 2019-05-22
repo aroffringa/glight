@@ -1,16 +1,16 @@
 #include "fixturefunction.h"
 #include "theatre.h"
 
-FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type, const std::string &name) : FolderObject(name), _theatre(theatre), _type(type), _firstChannel(0, 0)
+FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type, const std::string &name) : NamedObject(name), _theatre(theatre), _type(type), _firstChannel(0, 0)
 {
 }
 
-FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type) : FolderObject(), _theatre(theatre), _type(type), _firstChannel(0, 0)
+FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type) : NamedObject(), _theatre(theatre), _type(type), _firstChannel(0, 0)
 {
 }
 
 FixtureFunction::FixtureFunction(const FixtureFunction& source, class Theatre& theatre) :
-	   FolderObject(source),
+	NamedObject(source),
 	_theatre(theatre),
 	_type(source._type),
 	_firstChannel(source._firstChannel)

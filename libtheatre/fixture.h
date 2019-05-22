@@ -5,12 +5,12 @@
 
 #include "color.h"
 #include "fixturefunction.h"
-#include "folderobject.h"
+#include "namedobject.h"
 
 /**
 	@author Andre Offringa
 */
-class Fixture : public FolderObject {
+class Fixture : public NamedObject {
 	public:
 		Fixture(class Theatre &theatre, class FixtureType &type, const std::string &name);
 		Fixture(const Fixture& source, class Theatre& theatre);

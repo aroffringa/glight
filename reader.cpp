@@ -84,13 +84,18 @@ void Reader::parseGroup(xmlNode *node)
 	else throw std::runtime_error(std::string("Invalid node: ") + name(node));
 }
 
-void Reader::parseNameAttr(xmlNode* node, class FolderObject& object, bool hasFolder)
+void Reader::parseNameAttr(xmlNode* node, class NamedObject& object)
+{
+	object.SetName(getStringAttribute(node, "name"));
+}
+
+void Reader::parseFolderAttr(xmlNode* node, class FolderObject& object, bool hasFolder)
 {
 	if(hasFolder) {
 		size_t parent = getIntAttribute(node, "parent");
 		_management.Folders()[parent]->Add(object);
 	}
-	object.SetName(getStringAttribute(node, "name"));
+	parseNameAttr(node, object);
 }
 
 void Reader::parseFolders(xmlNode *node)
@@ -166,7 +171,7 @@ void Reader::parseFixtureType(xmlNode *node)
 {
 	FixtureType &type =
 		_theatre.AddFixtureType((enum FixtureType::FixtureClass) getIntAttribute(node, "fixture-class"));
-	parseNameAttr(node, type);
+	   parseFolderAttr(node, type);
 }
 
 void Reader::parseFixture(xmlNode *node)
@@ -194,7 +199,7 @@ void Reader::parseFixtureFunction(xmlNode *node, Fixture &parentFixture)
 {
 	FixtureFunction &function =
 		parentFixture.AddFunction((enum FixtureFunction::FunctionType) getIntAttribute(node, "type"));
-	parseNameAttr(node, function, false);
+	parseNameAttr(node, function);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -223,14 +228,14 @@ void Reader::parseFixtureControl(xmlNode *node)
 	Fixture &fixture =
 		_theatre.GetFixture(getStringAttribute(node, "fixture-ref"));
 	FixtureControl &control = _management.AddFixtureControl(fixture, _management.RootFolder() /* TODO */);
-	parseNameAttr(node, control);
+	   parseFolderAttr(node, control);
 }
 
 void Reader::parsePresetCollection(xmlNode *node)
 {
 	PresetCollection &collection =
 		_management.AddPresetCollection();
-	parseNameAttr(node, collection);
+	   parseFolderAttr(node, collection);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -256,7 +261,7 @@ void Reader::parseSequence(xmlNode *node)
 {
 	Sequence &sequence =
 		_management.AddSequence();
-	parseNameAttr(node, sequence);
+	   parseFolderAttr(node, sequence);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -279,7 +284,7 @@ void Reader::parseChase(xmlNode *node)
 	Sequence &sequence =
 		_management.GetSequence(getStringAttribute(node, "sequence-ref"));
 	Chase &chase = _management.AddChase(sequence);
-	parseNameAttr(node, chase);
+	   parseFolderAttr(node, chase);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -306,7 +311,7 @@ void Reader::parseEffect(xmlNode* node)
 {
 	Effect::Type type = Effect::NameToType(getStringAttribute(node, "type"));
 	std::unique_ptr<Effect> effect = Effect::Make(type);
-	parseNameAttr(node, *effect);
+	   parseFolderAttr(node, *effect);
 	Effect* effectPtr = &_management.AddEffect(std::move(effect));
 	std::unique_ptr<PropertySet> ps = PropertySet::Make(*effectPtr);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
@@ -370,7 +375,7 @@ void Reader::parseShowItem(xmlNode *node)
 void Reader::parseScene(xmlNode *node)
 {
 	Scene *scene = _management.Show().AddScene();
-	parseNameAttr(node, *scene);
+	   parseFolderAttr(node, *scene);
 	scene->SetAudioFile(getStringAttribute(node, "audio-file"));
 
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)

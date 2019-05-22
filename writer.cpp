@@ -160,9 +160,14 @@ void Writer::writeFolders()
 	}
 }	
 
-void Writer::writeNameAttributes(const FolderObject& obj)
+void Writer::writeNameAttributes(const NamedObject& obj)
 {
 	writeAttribute("name", obj.Name());
+}
+
+void Writer::writeFolderAttributes(const FolderObject& obj)
+{
+	writeNameAttributes(obj);
 	writeAttribute("parent", _folderIds.find(&obj.Parent())->second);
 }
 
@@ -198,7 +203,7 @@ void Writer::writeDmxChannel(const DmxChannel &dmxChannel)
 void Writer::writeFixtureType(const FixtureType &fixtureType)
 {
 	startElement("fixture-type");
-	writeNameAttributes(fixtureType);
+	   writeFolderAttributes(fixtureType);
 	writeAttribute("fixture-class", fixtureType.FixtureClass());
 	endElement();
 }
@@ -229,7 +234,7 @@ void Writer::writeControllable(const Controllable &controllable)
 void Writer::writePresetCollection(const class PresetCollection &presetCollection)
 {
 	startElement("preset-collection");
-	writeNameAttributes(presetCollection);
+	   writeFolderAttributes(presetCollection);
 	const std::vector<std::unique_ptr<PresetValue>>&
 		values = presetCollection.PresetValues();
 	for(const std::unique_ptr<PresetValue>& pv : values)
@@ -253,7 +258,7 @@ void Writer::writePresetValue(const PresetValue &presetValue)
 void Writer::writeFixtureControl(const FixtureControl &control)
 {
 	startElement("fixture-control");
-	writeNameAttributes(control);
+	   writeFolderAttributes(control);
 	writeAttribute("fixture-ref", control.Name());
 	endElement();
 }
@@ -263,7 +268,7 @@ void Writer::writeChase(const Chase &chase)
 	requireSequence(chase.Sequence());
 
 	startElement("chase");
-	writeNameAttributes(chase);
+	   writeFolderAttributes(chase);
 	writeAttribute("sequence-ref", chase.Sequence().Name());
 	writeTrigger(chase.Trigger());
 	writeTransition(chase.Transition());
@@ -295,7 +300,7 @@ void Writer::writeSequence(const Sequence &sequence)
 			requireControllable(*pc);
 	
 		startElement("sequence");
-		writeNameAttributes(sequence);
+		      writeFolderAttributes(sequence);
 		for(const PresetCollection* pc : presets)
 		{
 			startElement("preset-collection-ref");
@@ -316,7 +321,7 @@ void Writer::writeEffect(const class Effect& effect)
 			requireControllable(*c.first);
 		
 		startElement("effect");
-		writeNameAttributes(effect);
+		      writeFolderAttributes(effect);
 		writeAttribute("type", effect.TypeToName(effect.GetType()));
 		std::unique_ptr<PropertySet> ps = PropertySet::Make(effect);
 		
@@ -355,7 +360,7 @@ void Writer::writeScene(const Scene &scene)
 {
 	startElement("scene");
 
-	writeNameAttributes(scene);
+	   writeFolderAttributes(scene);
 	writeAttribute("audio-file", scene.AudioFile());
 
 	const std::multimap<double, std::unique_ptr<SceneItem>> &items = scene.SceneItems();
