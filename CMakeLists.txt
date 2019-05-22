@@ -32,7 +32,8 @@ set(MAINFILES
   beatfinder.cpp
   flacdecoder.cpp
   reader.cpp
-  writer.cpp)
+  writer.cpp
+)
 
 set(GUIFILES
   gui/application.cpp  
@@ -50,7 +51,7 @@ set(GUIFILES
   gui/showwindow.cpp
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp
-  gui/components/controllableselectmenu.cpp
+  gui/components/inputselectmenu.cpp
   gui/components/objecttree.cpp
   gui/components/propertiesbox.cpp)
 
@@ -59,8 +60,8 @@ set(THEATREFILES
   libtheatre/effect.cpp
   libtheatre/fixture.cpp
   libtheatre/fixturefunction.cpp
+  libtheatre/folderobject.cpp
   libtheatre/management.cpp
-  libtheatre/namedobject.cpp
   libtheatre/oladevice.cpp
   libtheatre/scene.cpp
   libtheatre/show.cpp
@@ -93,7 +94,9 @@ if(Boost_FOUND)
   add_executable(runtests EXCLUDE_FROM_ALL
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
+    tests/testfixturecontrol.cpp
     tests/testfolder.cpp
+    tests/testpresetcollection.cpp
     tests/testsequence.cpp
     )
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})

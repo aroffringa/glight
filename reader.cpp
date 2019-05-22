@@ -6,8 +6,8 @@
 #include "libtheatre/controllable.h"
 #include "libtheatre/effect.h"
 #include "libtheatre/fixture.h"
+#include "libtheatre/fixturecontrol.h"
 #include "libtheatre/fixturefunction.h"
-#include "libtheatre/fixturefunctioncontrol.h"
 #include "libtheatre/folder.h"
 #include "libtheatre/presetvalue.h"
 #include "libtheatre/scene.h"
@@ -84,13 +84,18 @@ void Reader::parseGroup(xmlNode *node)
 	else throw std::runtime_error(std::string("Invalid node: ") + name(node));
 }
 
-void Reader::parseNameAttr(xmlNode* node, class NamedObject& object, bool hasFolder)
+void Reader::parseNameAttr(xmlNode* node, class NamedObject& object)
+{
+	object.SetName(getStringAttribute(node, "name"));
+}
+
+void Reader::parseFolderAttr(xmlNode* node, class FolderObject& object, bool hasFolder)
 {
 	if(hasFolder) {
 		size_t parent = getIntAttribute(node, "parent");
 		_management.Folders()[parent]->Add(object);
 	}
-	object.SetName(getStringAttribute(node, "name"));
+	parseNameAttr(node, object);
 }
 
 void Reader::parseFolders(xmlNode *node)
@@ -147,8 +152,8 @@ void Reader::parseTheatreItem(xmlNode *node)
 void Reader::parseControlItem(xmlNode *node)
 {
 	const std::string n = name(node);
-	if(n == "fixture-function-control")
-		parseFixtureFunctionControl(node);
+	if(n == "fixture-control")
+		parseFixtureControl(node);
 	else if(n == "preset-collection")
 		parsePresetCollection(node);
 	else if(n == "sequence")
@@ -166,7 +171,7 @@ void Reader::parseFixtureType(xmlNode *node)
 {
 	FixtureType &type =
 		_theatre.AddFixtureType((enum FixtureType::FixtureClass) getIntAttribute(node, "fixture-class"));
-	parseNameAttr(node, type);
+	   parseFolderAttr(node, type);
 }
 
 void Reader::parseFixture(xmlNode *node)
@@ -194,7 +199,7 @@ void Reader::parseFixtureFunction(xmlNode *node, Fixture &parentFixture)
 {
 	FixtureFunction &function =
 		parentFixture.AddFunction((enum FixtureFunction::FunctionType) getIntAttribute(node, "type"));
-	parseNameAttr(node, function, false);
+	parseNameAttr(node, function);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -218,19 +223,19 @@ void Reader::parseDmxChannel(xmlNode *node, class DmxChannel &dmxChannel)
 	dmxChannel.SetDefaultMixStyle((ControlValue::MixStyle) getIntAttribute(node, "default-mix-style"));
 }
 
-void Reader::parseFixtureFunctionControl(xmlNode *node)
+void Reader::parseFixtureControl(xmlNode *node)
 {
-	FixtureFunction &function =
-		_theatre.GetFixtureFunction(getStringAttribute(node, "fixture-function-ref"));
-	FixtureFunctionControl &control = _management.AddFixtureFunctionControl(function, _management.RootFolder() /* TODO */);
-	parseNameAttr(node, control);
+	Fixture &fixture =
+		_theatre.GetFixture(getStringAttribute(node, "fixture-ref"));
+	FixtureControl &control = _management.AddFixtureControl(fixture, _management.RootFolder() /* TODO */);
+	   parseFolderAttr(node, control);
 }
 
 void Reader::parsePresetCollection(xmlNode *node)
 {
 	PresetCollection &collection =
 		_management.AddPresetCollection();
-	parseNameAttr(node, collection);
+	   parseFolderAttr(node, collection);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -238,11 +243,12 @@ void Reader::parsePresetCollection(xmlNode *node)
 			if(name(curNode) == "preset-value")
 			{
 				Folder& folder = *_management.Folders()[getIntAttribute(curNode, "folder")];
-				NamedObject& obj = folder.GetChild(getStringAttribute(curNode, "controllable-ref"));
+				FolderObject& obj = folder.GetChild(getStringAttribute(curNode, "controllable-ref"));
+				size_t inputIndex = getIntAttribute(curNode, "input-index");
 				Controllable* controllable = dynamic_cast<Controllable*>(&obj);
 				if(controllable == nullptr)
 					throw std::runtime_error("Expecting a controllable in controllable-ref, but object named " + obj.Name() + " in folder " + folder.Name() + " is something different");
-				PresetValue &value = collection.AddPresetValue(getIntAttribute(curNode, "id"), *controllable);
+				PresetValue &value = collection.AddPresetValue(getIntAttribute(curNode, "id"), *controllable, inputIndex);
 				value.SetValue(ControlValue(getIntAttribute(curNode, "value")));
 			}
 			else
@@ -255,7 +261,7 @@ void Reader::parseSequence(xmlNode *node)
 {
 	Sequence &sequence =
 		_management.AddSequence();
-	parseNameAttr(node, sequence);
+	   parseFolderAttr(node, sequence);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -278,7 +284,7 @@ void Reader::parseChase(xmlNode *node)
 	Sequence &sequence =
 		_management.GetSequence(getStringAttribute(node, "sequence-ref"));
 	Chase &chase = _management.AddChase(sequence);
-	parseNameAttr(node, chase);
+	   parseFolderAttr(node, chase);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -296,7 +302,8 @@ void Reader::parsePresetValue(xmlNode *node)
 {
 	Controllable &controllable =
 		_management.GetControllable(getStringAttribute(node, "controllable-ref"));
-	PresetValue &value = _management.AddPreset(getIntAttribute(node, "id"), controllable);
+	size_t inputIndex = getIntAttribute(node, "input-index");
+	PresetValue &value = _management.AddPreset(getIntAttribute(node, "id"), controllable, inputIndex);
 	value.SetValue(ControlValue(getIntAttribute(node, "value")));
 }
 
@@ -304,7 +311,7 @@ void Reader::parseEffect(xmlNode* node)
 {
 	Effect::Type type = Effect::NameToType(getStringAttribute(node, "type"));
 	std::unique_ptr<Effect> effect = Effect::Make(type);
-	parseNameAttr(node, *effect);
+	   parseFolderAttr(node, *effect);
 	Effect* effectPtr = &_management.AddEffect(std::move(effect));
 	std::unique_ptr<PropertySet> ps = PropertySet::Make(*effectPtr);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
@@ -328,7 +335,8 @@ void Reader::parseEffect(xmlNode* node)
 			else if(name(curNode) == "connection-ref")
 			{
 				std::string cName = getStringAttribute(curNode, "name");
-				effectPtr->AddConnection(&_management.GetControllable(cName));
+				size_t cInputIndex = getIntAttribute(curNode, "input-index");
+				effectPtr->AddConnection(&_management.GetControllable(cName), cInputIndex);
 			}
 			else throw std::runtime_error("Bad element in effect");
 		}
@@ -367,7 +375,7 @@ void Reader::parseShowItem(xmlNode *node)
 void Reader::parseScene(xmlNode *node)
 {
 	Scene *scene = _management.Show().AddScene();
-	parseNameAttr(node, *scene);
+	   parseFolderAttr(node, *scene);
 	scene->SetAudioFile(getStringAttribute(node, "audio-file"));
 
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
@@ -406,7 +414,7 @@ ControlSceneItem &Reader::parseControlSceneItem(xmlNode *node, Scene &scene)
 {
 	Controllable &controllable =
 		_management.GetControllable(getStringAttribute(node, "controllable-ref"));
-	ControlSceneItem *item = scene.AddControlSceneItem(getDoubleAttribute(node, "offset"), controllable);
+	ControlSceneItem *item = scene.AddControlSceneItem(getDoubleAttribute(node, "offset"), controllable, 0);
 	item->StartValue().Set(getIntAttribute(node, "start-value"));
 	item->EndValue().Set(getIntAttribute(node, "end-value"));
 	return *item;

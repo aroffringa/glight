@@ -379,7 +379,7 @@ void SceneFrame::onCreateControlItemButtonPressed()
 			if(nextPtr != pathHandle.end())
 				nextItem = (*_sceneItemsListModel->get_iter(*nextPtr))[_sceneItemsListColumns._item];
 	
-			ControlSceneItem *item = _selectedScene->AddControlSceneItem(selItem->OffsetInMS(), *(*activeControllable)[_controllablesListColumns._controllable]);
+			ControlSceneItem *item = _selectedScene->AddControlSceneItem(selItem->OffsetInMS(), *(*activeControllable)[_controllablesListColumns._controllable], 0);
 			if(nextItem != 0)
 				item->SetDurationInMS(nextItem->OffsetInMS() - item->OffsetInMS());
 			else
@@ -631,7 +631,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS)
 			_isUpdating = true;
 	
 			std::unique_lock<std::mutex> lock(_management->Mutex());
-			ControlSceneItem *item = _selectedScene->AddControlSceneItem(timeInMS, *(*activeControllable)[_controllablesListColumns._controllable]);
+			ControlSceneItem *item = _selectedScene->AddControlSceneItem(timeInMS, *(*activeControllable)[_controllablesListColumns._controllable], 0);
 			item->SetDurationInMS(1000);
 			lock.unlock();
 			

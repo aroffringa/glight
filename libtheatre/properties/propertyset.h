@@ -4,7 +4,7 @@
 #include "property.h"
 
 #include "../../libtheatre/controlvalue.h"
-#include "../../libtheatre/namedobject.h"
+#include "../../libtheatre/folderobject.h"
 
 #include <memory>
 #include <vector>
@@ -27,10 +27,10 @@ public:
 	Property& operator[](size_t index) { return _properties[index]; }
 	const Property& operator[](size_t index) const { return _properties[index]; }
 	
-	static std::unique_ptr<PropertySet> Make(NamedObject& object);
+	static std::unique_ptr<PropertySet> Make(FolderObject& object);
 	
-	static std::unique_ptr<PropertySet> Make(const NamedObject& object)
-	{ return Make(const_cast<NamedObject&>(object)); }
+	static std::unique_ptr<PropertySet> Make(const FolderObject& object)
+	{ return Make(const_cast<FolderObject&>(object)); }
 	
 	void SetControlValue(const Property& property, unsigned value) const
 	{
@@ -54,7 +54,7 @@ public:
 		return getDuration(*_object, property._setIndex);
 	}
 	
-	NamedObject& Object() const {
+	FolderObject& Object() const {
 		return *_object;
 	}
 	
@@ -71,14 +71,14 @@ public:
 	void AssignProperty(const Property& to, const Property& from, const PropertySet& fromSet);
 	
 protected:
-	virtual void setControlValue(NamedObject& object, size_t index, unsigned value) const
+	virtual void setControlValue(FolderObject& object, size_t index, unsigned value) const
 	{ setterNotImplemented(); }
-	virtual unsigned getControlValue(const NamedObject& object, size_t index) const
+	virtual unsigned getControlValue(const FolderObject& object, size_t index) const
 	{ getterNotImplemented(); return 0; }
 	
-	virtual void setDuration(NamedObject& object, size_t index, double value) const
+	virtual void setDuration(FolderObject& object, size_t index, double value) const
 	{ setterNotImplemented(); }
-	virtual double getDuration(const NamedObject& object, size_t index) const
+	virtual double getDuration(const FolderObject& object, size_t index) const
 	{ getterNotImplemented(); return 0; }
 	
 	size_t addProperty(const Property& property)
@@ -103,7 +103,7 @@ private:
 	{
 		throw std::runtime_error("A method of the property set was called for which the get method was not implemented");
 	}
-	NamedObject* _object;
+	FolderObject* _object;
 	std::vector<Property> _properties;
 };
 

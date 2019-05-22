@@ -42,8 +42,8 @@ void ObjectTree::fillList()
 	Glib::RefPtr<Gtk::TreeSelection> selection =
 		_listView.get_selection();
 	Gtk::TreeModel::iterator selected = selection->get_selected();
-	NamedObject* selectedObj = selected ?
-		static_cast<NamedObject*>((*selected)[_listColumns._object]) : nullptr;
+	FolderObject* selectedObj = selected ?
+		static_cast<FolderObject*>((*selected)[_listColumns._object]) : nullptr;
 	_listModel->clear();
 
 	std::lock_guard<std::mutex> lock(_management->Mutex());
@@ -80,7 +80,7 @@ void ObjectTree::fillList()
 		_signalSelectionChange.emit();
 }
 
-void ObjectTree::fillListFolder(const Folder& folder, Gtk::TreeModel::Row& row, const NamedObject* selectedObj)
+void ObjectTree::fillListFolder(const Folder& folder, Gtk::TreeModel::Row& row, const FolderObject* selectedObj)
 {
 	bool showPresetCollections =
 		_displayType==OnlyPresetCollections || _displayType==PresetsAndSequences || _displayType==All;
@@ -90,7 +90,7 @@ void ObjectTree::fillListFolder(const Folder& folder, Gtk::TreeModel::Row& row, 
 		_displayType==OnlyChases || _displayType==All;
 	bool showEffects =
 		_displayType==OnlyEffects || _displayType==All;
-	for(NamedObject* obj : folder.Children())
+	for(FolderObject* obj : folder.Children())
 	{
 		Folder* childFolder = dynamic_cast<Folder*>(obj);
 		PresetCollection* presetCollection =
@@ -119,7 +119,7 @@ void ObjectTree::fillListFolder(const Folder& folder, Gtk::TreeModel::Row& row, 
 	}
 }
 
-NamedObject* ObjectTree::SelectedObject()
+FolderObject* ObjectTree::SelectedObject()
 {
 	Glib::RefPtr<Gtk::TreeSelection> selection =
 		_listView.get_selection();
@@ -132,7 +132,7 @@ NamedObject* ObjectTree::SelectedObject()
 
 Folder* ObjectTree::SelectedFolder()
 {
-	NamedObject* selected = SelectedObject();
+	FolderObject* selected = SelectedObject();
 	if(selected)
 	{
 		Folder* folder = dynamic_cast<Folder*>(selected);
@@ -147,17 +147,17 @@ Folder* ObjectTree::SelectedFolder()
 		return nullptr;
 }
 
-void ObjectTree::SelectObject(const NamedObject& object)
+void ObjectTree::SelectObject(const FolderObject& object)
 {
 	if(!selectObject(object, _listModel->children()))
 		throw std::runtime_error("Object to select ('" + object.Name() + "') not found in list");
 }
 
-bool ObjectTree::selectObject(const NamedObject& object, const Gtk::TreeModel::Children& children)
+bool ObjectTree::selectObject(const FolderObject& object, const Gtk::TreeModel::Children& children)
 {
 	for(const Gtk::TreeRow& child : children)
 	{
-		const NamedObject* rowObject = child[_listColumns._object];
+		const FolderObject* rowObject = child[_listColumns._object];
 		if(rowObject == &object)
 		{
 			_listView.expand_to_path(_listModel->get_path(child));
@@ -175,7 +175,7 @@ void ObjectTree::constructContextMenu()
 	_contextMenuItems.clear();
 	_contextMenu = Gtk::Menu();
 	
-	NamedObject* obj = SelectedObject();
+	FolderObject* obj = SelectedObject();
 	if(obj != &_management->RootFolder())
 	{
 		// Move up & down
@@ -216,7 +216,7 @@ void ObjectTree::constructFolderMenu(Gtk::Menu& menu, Folder& folder)
 	else
 	{
 		Gtk::Menu* subMenu = nullptr;
-		for(NamedObject* object : folder.Children())
+		for(FolderObject* object : folder.Children())
 		{
 			Folder* subFolder = dynamic_cast<Folder*>(object);
 			if(subFolder)
@@ -258,7 +258,7 @@ bool ObjectTree::TreeViewWithMenu::on_button_press_event(GdkEventButton* button_
 
 void ObjectTree::onMoveSelected(Folder* destination)
 {
-	NamedObject* object = SelectedObject();
+	FolderObject* object = SelectedObject();
 	Folder::Move(*object, *destination);
 	_parentWindow.EmitUpdate();
 }

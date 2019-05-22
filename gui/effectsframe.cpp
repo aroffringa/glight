@@ -50,7 +50,6 @@ void EffectsFrame::initEffectsPart()
 
 	_effectsVBox.pack_start(_effectsHBox);
 
-	_nameFrame.SignalNameChange().connect(sigc::mem_fun(*this, &EffectsFrame::onNameChange));
 	_effectsVBox.pack_start(_nameFrame, false, false, 2);
 
 	_effectsFrame.add(_effectsVBox);
@@ -58,7 +57,7 @@ void EffectsFrame::initEffectsPart()
 
 void EffectsFrame::initPropertiesPart()
 {
-	_controllablesMenu.SignalControllableSelected().connect(sigc::mem_fun(*this, &EffectsFrame::onControllableSelected));
+	_controllablesMenu.SignalInputSelected().connect(sigc::mem_fun(*this, &EffectsFrame::onInputSelected));
 	
 	_addConnectionButton.set_events(Gdk::BUTTON_PRESS_MASK);
 	_addConnectionButton.signal_button_press_event().
@@ -90,14 +89,6 @@ void EffectsFrame::initPropertiesPart()
 	
 	_propertiesFrame.set_sensitive(false);
 	_propertiesHBox.pack_start(_propertiesFrame);
-}
-
-void EffectsFrame::onNameChange()
-{
-	Effect* e = getSelectedEffect();
-	if(e != nullptr)
-		e->SetNameGlobally(e->Name());
-	_parentWindow.EmitUpdate();
 }
 
 Effect* EffectsFrame::getSelectedEffect()
@@ -136,14 +127,13 @@ void EffectsFrame::fillConnectionsList(Effect& effect)
 	_connectionsListModel->clear();
 
 	std::lock_guard<std::mutex> lock(_management->Mutex());
-	const std::vector<Controllable*>&
-		connections = effect.Connections();
-	for(size_t index=0; index!=connections.size(); ++index)
+	for(size_t index=0; index!=effect.Connections().size(); ++index)
 	{
 		Gtk::TreeModel::iterator iter = _connectionsListModel->append();
 		Gtk::TreeModel::Row row = *iter;
-		row[_connectionsListColumns._title] = connections[index]->Name();
+		row[_connectionsListColumns._title] = effect.Connections()[index].first->Name();
 		row[_connectionsListColumns._index] = index;
+		row[_connectionsListColumns._inputIndex] = effect.Connections()[index].second;
 	}
 }
 
@@ -182,10 +172,10 @@ bool EffectsFrame::onNewEffectClicked(GdkEventButton* event)
 void EffectsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 {
 	std::unique_ptr<Effect> effect(Effect::Make(effectType));
-	effect->SetNameGlobally(Effect::TypeToName(effectType) + std::to_string(_management->Effects().size()+1));
+	effect->SetName(Effect::TypeToName(effectType) + std::to_string(_management->Controllables().size()+1));
 	Effect* added = &_management->AddEffect(std::move(effect), _management->RootFolder() /* TODO */);
-	for(EffectControl* ec : added->Controls())
-		_management->AddPreset(*ec);
+	for(size_t i=0; i!=added->NInputs(); ++i)
+		_management->AddPreset(*added, i);
 	_parentWindow.EmitUpdate();
 }
 
@@ -195,7 +185,7 @@ void EffectsFrame::onDeleteEffectClicked()
 	if(e)
 	{
 		std::unique_lock<std::mutex> lock(_management->Mutex());
-		_management->RemoveEffect(*e);
+		_management->RemoveControllable(*e);
 		lock.unlock();
 		_parentWindow.EmitUpdate();
 	}
@@ -221,12 +211,12 @@ void EffectsFrame::onRemoveConnectionClicked()
 	}
 }
 
-void EffectsFrame::onControllableSelected(class PresetValue* preset)
+void EffectsFrame::onInputSelected(class PresetValue* preset)
 {
 	Effect* effect = getSelectedEffect();
 	if(effect)
 	{
-		effect->AddConnection(&preset->Controllable());
+		effect->AddConnection(&preset->Controllable(), preset->InputIndex());
 		fillConnectionsList(*effect);
 	}
 }

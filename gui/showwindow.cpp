@@ -17,7 +17,6 @@
 #include "../libtheatre/management.h"
 #include "../libtheatre/theatre.h"
 #include "../libtheatre/fixture.h"
-#include "../libtheatre/fixturefunctioncontrol.h"
 #include "../libtheatre/presetcollection.h"
 #include "../libtheatre/show.h"
 

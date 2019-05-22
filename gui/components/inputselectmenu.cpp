@@ -1,13 +1,13 @@
-#include "controllableselectmenu.h"
+#include "inputselectmenu.h"
 
 #include "../../libtheatre/chase.h"
 #include "../../libtheatre/controllable.h"
-#include "../../libtheatre/effectcontrol.h"
+#include "../../libtheatre/effect.h"
 #include "../../libtheatre/management.h"
 #include "../../libtheatre/presetcollection.h"
 #include "../../libtheatre/presetvalue.h"
 
-void ControllableSelectMenu::Popup(Management& management, GdkEventButton* event)
+void InputSelectMenu::Popup(Management& management, GdkEventButton* event)
 {
 	_popupMenu.reset(new Gtk::Menu());
 	_popupChaseMenu.reset(new Gtk::Menu());
@@ -48,14 +48,14 @@ void ControllableSelectMenu::Popup(Management& management, GdkEventButton* event
 			subMenu = _popupChaseMenu.get();
 		else if(dynamic_cast<PresetCollection*>(&c))
 			subMenu = _popupPresetMenu.get();
-		else if(dynamic_cast<EffectControl*>(&c))
+		else if(dynamic_cast<Effect*>(&c))
 			subMenu = _popupEffectsMenu.get();
 		else
 			subMenu = _popupFunctionMenu.get();
 		
 		std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(c.Name()));
 		mi->signal_activate().connect(sigc::bind<PresetValue*>( 
-    sigc::mem_fun(*this, &ControllableSelectMenu::onMenuItemClicked), pv.get()));
+    sigc::mem_fun(*this, &InputSelectMenu::onMenuItemClicked), pv.get()));
 		subMenu->append(*mi);
 		_popupMenuItems.emplace_back(std::move(mi));
 	}
@@ -63,7 +63,7 @@ void ControllableSelectMenu::Popup(Management& management, GdkEventButton* event
 	_popupMenu->popup(event->button, event->time);
 }
 
-void ControllableSelectMenu::onMenuItemClicked(PresetValue* item)
+void InputSelectMenu::onMenuItemClicked(PresetValue* item)
 {
-	_signalControllableSelected(item);
+	_signalInputSelected(item);
 }

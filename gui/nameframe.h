@@ -15,12 +15,12 @@ class NameFrame : public Gtk::HBox {
 		NameFrame(class Management &management, class ShowWindow& showWindow);
 		~NameFrame();
 
-		void SetNamedObject(class NamedObject &namedObject)
+		void SetNamedObject(class FolderObject &namedObject)
 		{
 			_namedObject = &namedObject;
 			update();
 		}
-		NamedObject* GetNamedObject() const
+		FolderObject* GetNamedObject() const
 		{
 			return _namedObject;
 		}
@@ -40,7 +40,7 @@ class NameFrame : public Gtk::HBox {
 
 		class Management* _management;
 		class ShowWindow& _showWindow;
-		class NamedObject* _namedObject;
+		class FolderObject* _namedObject;
 
 		Gtk::Entry _entry;
 		Gtk::Label _label;

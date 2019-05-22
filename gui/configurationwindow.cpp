@@ -7,7 +7,7 @@
 #include <gtkmm/messagedialog.h>
 
 #include "../libtheatre/fixture.h"
-#include "../libtheatre/fixturefunctioncontrol.h"
+#include "../libtheatre/fixturecontrol.h"
 #include "../libtheatre/management.h"
 #include "../libtheatre/theatre.h"
 
@@ -144,13 +144,12 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 	const std::vector<std::unique_ptr<FixtureFunction>> &functions = fixture.Functions();
 
 	int number = 1;
-	for(const std::unique_ptr<FixtureFunction>& ff : functions)
+	FixtureControl& control = _management->AddFixtureControl(fixture, _management->RootFolder() /* TODO */);
+	for(size_t i=0; i!=functions.size(); ++i)
 	{
 		//std::stringstream funcName;
 		//funcName << fixture.Name() << number;
-		FixtureFunctionControl& control = _management->AddFixtureFunctionControl(*ff, _management->RootFolder() /* TODO */);
-		_management->AddPreset(control);
-		control.SetName(ff->Name());
+		_management->AddPreset(control, i);
 		++number;
 	}
 	lock.unlock();

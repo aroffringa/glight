@@ -11,8 +11,8 @@
 */
 class ControlSceneItem : public SceneItem {
 	public:
-		ControlSceneItem(class Controllable &controllable)
-		: _controllable(controllable), _startValue(ControlValue::Max()), _endValue(ControlValue::Max())
+		ControlSceneItem(class Controllable &controllable, size_t input)
+		: _controllable(controllable), _input(input), _startValue(ControlValue::Max()), _endValue(ControlValue::Max())
 		{
 		}
 		~ControlSceneItem()
@@ -31,11 +31,12 @@ class ControlSceneItem : public SceneItem {
 		virtual void Mix(unsigned *channelValues, unsigned universe, const Timing& timing)
 		{
 			double ratio = (timing.TimeInMS() - OffsetInMS()) / DurationInMS();
-			_controllable.Mix((unsigned int) (_startValue.UInt() * (1.0-ratio) + _endValue.UInt() * ratio), channelValues, universe, timing);
+			_controllable.MixInput(_input, (unsigned int) (_startValue.UInt() * (1.0-ratio) + _endValue.UInt() * ratio));
 		}
 		class Controllable &Controllable() const { return _controllable; }
 	private:
 		class Controllable &_controllable;
+		size_t _input;
 		ControlValue _startValue, _endValue;
 };
 

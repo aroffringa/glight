@@ -114,7 +114,7 @@ void PresetsFrame::onNewPresetButtonClicked()
 		std::stringstream s;
 		s << "%" << _management->Controllables().size();
 		presetCollection.SetName(s.str());
-		_management->AddPreset(presetCollection);
+		_management->AddPreset(presetCollection, 0);
 		lock.unlock();
 
 		_parentWindow.EmitUpdate();
@@ -141,7 +141,7 @@ void PresetsFrame::onNewFolderButtonClicked()
 
 void PresetsFrame::onCreateChaseButtonClicked()
 {
-	NamedObject* object = _presetsList.SelectedObject();
+	FolderObject* object = _presetsList.SelectedObject();
 	if(object)
 	{
 		Sequence* sequence = dynamic_cast<Sequence*>(object);
@@ -153,7 +153,7 @@ void PresetsFrame::onCreateChaseButtonClicked()
 			chase.SetName(sequence->Name()+"_Ch");
 			parent.Add(chase);
 
-			_management->AddPreset(chase);
+			_management->AddPreset(chase, 0);
 			lock.unlock();
 
 			_parentWindow.EmitUpdate();
@@ -164,7 +164,7 @@ void PresetsFrame::onCreateChaseButtonClicked()
 
 void PresetsFrame::onDeletePresetButtonClicked()
 {
-	NamedObject* selectedObj = _presetsList.SelectedObject();
+	FolderObject* selectedObj = _presetsList.SelectedObject();
 	if(selectedObj && selectedObj != &_management->RootFolder())
 	{
 		Folder& parent = selectedObj->Parent();
@@ -179,7 +179,7 @@ void PresetsFrame::onDeletePresetButtonClicked()
 
 void PresetsFrame::onAddPresetToSequenceButtonClicked()
 {
-	NamedObject* selectedObj = _presetsList.SelectedObject();
+	FolderObject* selectedObj = _presetsList.SelectedObject();
 	if(selectedObj)
 	{
 		PresetCollection* preset = dynamic_cast<PresetCollection*>(selectedObj);
@@ -202,7 +202,7 @@ void PresetsFrame::onCreateSequenceButtonClicked()
 {
 	// Determine folder
 	Folder* folder;
-	NamedObject* selectedObj = _presetsList.SelectedObject();
+	FolderObject* selectedObj = _presetsList.SelectedObject();
 	if(selectedObj)
 	{
 		folder = dynamic_cast<Folder*>(selectedObj);
@@ -238,7 +238,7 @@ void PresetsFrame::onSelectedPresetChanged()
 {
 	if(_delayUpdates.IsFirst())
 	{
-		NamedObject* selectedObj = _presetsList.SelectedObject();
+		FolderObject* selectedObj = _presetsList.SelectedObject();
 		PresetCollection *preset = nullptr;
 		Sequence* sequence = nullptr;
 		if(selectedObj)

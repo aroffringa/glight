@@ -57,9 +57,9 @@ protected:
 		if(_fadingValue != 0)
 		{
 			ControlValue faded(_fadingValue);
-			for(Controllable* connection : Connections())
+			for(const std::pair<Controllable*,size_t>& connection : Connections())
 			{
-				connection->Mix(faded, channelValues, universe, timing);
+				connection.first->MixInput(connection.second, faded);
 			}
 		}
 	}

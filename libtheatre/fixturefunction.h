@@ -15,7 +15,19 @@
 class FixtureFunction : public NamedObject {
 	public:
 		enum FunctionType {
-			Brightness, RedIntensity, GreenIntensity, BlueIntensity, AmberIntensity, WhiteIntensity, Strobe, Pulse, Rotation, ColorMacro, Pan, Tilt
+			Brightness,
+			RedIntensity, 
+			GreenIntensity, 
+			BlueIntensity, 
+			AmberIntensity, 
+			WhiteIntensity,
+			UVIntensity,
+			Strobe, 
+			Pulse, 
+			Rotation, 
+			ColorMacro, 
+			Pan, 
+			Tilt
 		};
 
 		FixtureFunction(class Theatre &theatre, FunctionType type, const std::string &name);
@@ -37,7 +49,7 @@ class FixtureFunction : public NamedObject {
 				channels[_firstChannel.Channel()] =
 					ControlValue::Mix(channels[_firstChannel.Channel()], value, combiMixStyle);
 			}
-			else throw;
+			else throw std::runtime_error("Can't handle 16-bit values or multiple universes");
 		}
 
 		void SetChannel(const DmxChannel &channel);

@@ -3,18 +3,18 @@
 
 #include <vector>
 
-#include "namedobject.h"
+#include "folderobject.h"
 
 /**
 	@author Andre Offringa
 */
-class Sequence : public NamedObject {
+class Sequence : public FolderObject {
 	public:
 		Sequence() = default;
 		
 		std::unique_ptr<Sequence> CopyWithoutPresets()
 		{
-			return std::unique_ptr<Sequence>(new Sequence(static_cast<NamedObject&>(*this)));
+			return std::unique_ptr<Sequence>(new Sequence(static_cast<FolderObject&>(*this)));
 		}
 
 		size_t Size() const { return _presets.size(); }
@@ -37,7 +37,7 @@ class Sequence : public NamedObject {
 			return false;
 		}
 	private:
-		Sequence(const NamedObject& namedObj) : NamedObject(namedObj)
+		Sequence(const FolderObject& namedObj) : FolderObject(namedObj)
 		{ }
 		
 		std::vector<class PresetCollection *> _presets;

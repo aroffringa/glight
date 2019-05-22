@@ -1,16 +1,16 @@
-#include "namedobject.h"
+#include "folderobject.h"
 #include "folder.h"
 
 #include <sstream>
 
-std::string NamedObject::FullPath() const
+std::string FolderObject::FullPath() const
 {
 	// This is more easy to do recursively (basically with
 	// return Name + "/" + Parent()->FullPath() ), but I've
 	// tried to avoid recursion. I'm actually not sure below
 	// is faster though.
 	std::vector<const std::string*> list;
-	const NamedObject* obj = this;
+	const FolderObject* obj = this;
 	do {
 		list.emplace_back(&obj->Name());
 		obj = obj->_parent;

@@ -29,13 +29,13 @@ public:
 		fillList();
 	}
 	
-	class NamedObject* SelectedObject();
+	class FolderObject* SelectedObject();
 	
 	class Folder* SelectedFolder();
 	
 	sigc::signal<void()>& SignalSelectionChange() { return _signalSelectionChange; }
 	
-	void SelectObject(const NamedObject& object);
+	void SelectObject(const FolderObject& object);
 	
 private:
 	class Management* _management;
@@ -58,12 +58,12 @@ private:
 			{ add(_title); add(_object); }
 	
 		Gtk::TreeModelColumn<Glib::ustring> _title;
-		Gtk::TreeModelColumn<class NamedObject *> _object;
+		Gtk::TreeModelColumn<class FolderObject *> _object;
 	} _listColumns;
 	
 	void fillList();
-	void fillListFolder(const class Folder& folder, Gtk::TreeModel::Row& row, const class NamedObject* selectedObj);
-	bool selectObject(const NamedObject& object, const Gtk::TreeModel::Children& children);
+	void fillListFolder(const class Folder& folder, Gtk::TreeModel::Row& row, const class FolderObject* selectedObj);
+	bool selectObject(const FolderObject& object, const Gtk::TreeModel::Children& children);
 	void changeManagement(class Management &management)
 	{
 		_management = &management;

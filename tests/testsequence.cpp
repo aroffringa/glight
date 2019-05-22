@@ -2,7 +2,7 @@
 #include "../libtheatre/management.h"
 #include "../libtheatre/sequence.h"
 #include "../libtheatre/theatre.h"
-#include "../libtheatre/fixturefunctioncontrol.h"
+#include "../libtheatre/fixturecontrol.h"
 #include "../libtheatre/presetvalue.h"
 #include "../libtheatre/presetcollection.h"
 #include "../libtheatre/folder.h"
@@ -20,8 +20,8 @@ BOOST_AUTO_TEST_CASE( remove_indirect )
 	Folder& root = management.RootFolder();
 	FixtureType& ft = management.Theatre().AddFixtureType(FixtureType::Light1Ch);
 	Fixture& f = management.Theatre().AddFixture(ft);
-	FixtureFunctionControl& ffc = management.AddFixtureFunctionControl(*f.Functions().front());
-	PresetValue& pv = management.AddPreset(ffc);
+	FixtureControl& fc = management.AddFixtureControl(f);
+	PresetValue& pv = management.AddPreset(fc, 0);
 	pv.SetValue(ControlValue::Max());
 	PresetCollection& pcA = management.AddPresetCollection();
 	root.Add(pcA);

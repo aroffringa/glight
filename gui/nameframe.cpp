@@ -3,8 +3,8 @@
 #include "showwindow.h"
 
 #include "../libtheatre/folder.h"
+#include "../libtheatre/folderobject.h"
 #include "../libtheatre/management.h"
-#include "../libtheatre/namedobject.h"
 
 #include <gtkmm/stock.h>
 

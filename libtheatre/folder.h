@@ -5,20 +5,20 @@
 #include <string>
 #include <vector>
 
-#include "namedobject.h"
+#include "folderobject.h"
 
-class Folder : public NamedObject
+class Folder : public FolderObject
 {
 public:
-	Folder() : NamedObject() { }
+	Folder() : FolderObject() { }
 	
-	Folder(const std::string& name) : NamedObject(name) { }
+	Folder(const std::string& name) : FolderObject(name) { }
 	
 	Folder* CopyHierarchy(std::vector<std::unique_ptr<Folder>>& newFolders) const
 	{
 		newFolders.emplace_back(new Folder(_name));
 		Folder* copy = newFolders.back().get();
-		for(const NamedObject* object : _objects)
+		for(const FolderObject* object : _objects)
 		{
 			const Folder* child = dynamic_cast<const Folder*>(object);
 			if(child)
@@ -30,7 +30,7 @@ public:
 		return copy;
 	}
 	
-	static void Move(NamedObject& object, Folder& destination)
+	static void Move(FolderObject& object, Folder& destination)
 	{
 		object._parent->Remove(object);
 		
@@ -112,42 +112,42 @@ public:
 	/**
 	 * This also sets the parent of the object to this.
 	 */
-	void Add(NamedObject& object)
+	void Add(FolderObject& object)
 	{
 		_objects.emplace_back(&object);
 		_objects.back()->SetParent(*this);
 	}
 	
-	void Remove(NamedObject& object)
+	void Remove(FolderObject& object)
 	{
-		std::vector<NamedObject*>::iterator srciter = std::find(_objects.begin(), _objects.end(), &object);
+		std::vector<FolderObject*>::iterator srciter = std::find(_objects.begin(), _objects.end(), &object);
 		_objects.erase(srciter);
 	}
 	
-	void MoveUp(NamedObject& object)
+	void MoveUp(FolderObject& object)
 	{
-		std::vector<NamedObject*>::iterator srciter = std::find(_objects.begin(), _objects.end(), &object);
+		std::vector<FolderObject*>::iterator srciter = std::find(_objects.begin(), _objects.end(), &object);
 		if(srciter != _objects.begin() && srciter != _objects.end())
 		{
-			std::vector<NamedObject*>::iterator previous = srciter;
+			std::vector<FolderObject*>::iterator previous = srciter;
 			--previous;
 			std::swap(*previous, *srciter);
 		}
 	}
 	
-	void MoveDown(NamedObject& object)
+	void MoveDown(FolderObject& object)
 	{
-		std::vector<NamedObject*>::iterator srciter = std::find(_objects.begin(), _objects.end(), &object);
+		std::vector<FolderObject*>::iterator srciter = std::find(_objects.begin(), _objects.end(), &object);
 		if(srciter != _objects.end())
 		{
-			std::vector<NamedObject*>::iterator next = srciter;
+			std::vector<FolderObject*>::iterator next = srciter;
 			++next;
 			if(_objects.end() != next)
 				std::swap(*next, *srciter);
 		}
 	}
 	
-	const std::vector<NamedObject*> Children() const { return _objects; }
+	const std::vector<FolderObject*> Children() const { return _objects; }
 	
 	Folder& FollowDown(const std::string& path)
 	{
@@ -165,18 +165,18 @@ public:
 			return *followDown(std::move(path), 0);
 	}
 	
-	NamedObject& GetChild(const std::string& name)
+	FolderObject& GetChild(const std::string& name)
 	{
 		return FindNamedObject(_objects, name);
 	}
 	
-	NamedObject& FollowRelPath(const std::string& path)
+	FolderObject& FollowRelPath(const std::string& path)
 	{
 		Folder& parentFolder = FollowDown(ParentPath(path));
 		return parentFolder.GetChild(LastName(path));
 	}
 	
-	NamedObject& FollowRelPath(std::string&& path)
+	FolderObject& FollowRelPath(std::string&& path)
 	{
 		Folder& parentFolder = FollowDown(ParentPath(path));
 		return parentFolder.GetChild(LastName(std::move(path)));
@@ -189,11 +189,11 @@ private:
 		std::string subpath;
 		if(sep == path.end())
 		{
-			NamedObject& obj = FindNamedObject(_objects, path.substr(strPos));
+			FolderObject& obj = FindNamedObject(_objects, path.substr(strPos));
 			return &static_cast<Folder&>(obj);
 		}
 		else {
-			NamedObject& obj = FindNamedObject(_objects, path.substr(strPos, sep-path.begin()));
+			FolderObject& obj = FindNamedObject(_objects, path.substr(strPos, sep-path.begin()));
 			return static_cast<Folder&>(obj).followDown(path, sep+1-path.begin());
 		}
 	}
@@ -204,16 +204,16 @@ private:
 		std::string subpath;
 		if(sep == path.end())
 		{
-			NamedObject& obj = FindNamedObject(_objects, std::move(path).substr(strPos));
+			FolderObject& obj = FindNamedObject(_objects, std::move(path).substr(strPos));
 			return &static_cast<Folder&>(obj);
 		}
 		else {
-			NamedObject& obj = FindNamedObject(_objects, path.substr(strPos, sep-path.begin()));
+			FolderObject& obj = FindNamedObject(_objects, path.substr(strPos, sep-path.begin()));
 			return static_cast<Folder&>(obj).followDown(std::move(path), sep+1-path.begin());
 		}
 	}
 	
-	std::vector<NamedObject*> _objects;
+	std::vector<FolderObject*> _objects;
 };
 
 #endif

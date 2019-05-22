@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( FollowRelPath )
 {
 	std::unique_ptr<Folder> a(new Folder("a"));
 	std::unique_ptr<Folder> b(new Folder("b"));
-	std::unique_ptr<NamedObject> c(new NamedObject("c"));
+	std::unique_ptr<FolderObject> c(new FolderObject("c"));
 	
 	b->Add(*c);
 	a->Add(*b);

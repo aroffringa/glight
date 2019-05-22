@@ -32,12 +32,12 @@ class ControlValue {
 			switch(mixStyle)
 			{
 				default:
-				case Default:
 				case HighestValue:
 					if(firstValue > secondValue)
 						return firstValue;
 					else
 						return secondValue;
+				case Default:
 				case Sum:
 					return firstValue + secondValue;
 				case LowestValue:
@@ -55,6 +55,7 @@ class ControlValue {
 					return secondValue;
 			}
 		}
+		
 		static MixStyle CombineMixStyles(MixStyle primaryStyle, MixStyle secondaryStyle)
 		{
 			if(primaryStyle == Default)

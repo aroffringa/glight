@@ -14,7 +14,7 @@ public:
 	}
 	
 protected:
-	virtual void setDuration(NamedObject& object, size_t index, double value) const final override
+	virtual void setDuration(FolderObject& object, size_t index, double value) const final override
 	{
 		DelayEffect& dfx = static_cast<DelayEffect&>(object);
 		switch(index) {
@@ -22,7 +22,7 @@ protected:
 		}
 	}
 	
-	virtual double getDuration(const NamedObject& object, size_t index) const final override
+	virtual double getDuration(const FolderObject& object, size_t index) const final override
 	{
 		const DelayEffect& dfx = static_cast<const DelayEffect&>(object);
 		switch(index) {

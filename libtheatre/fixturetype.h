@@ -5,13 +5,13 @@
 #include <vector>
 
 #include "color.h"
-#include "namedobject.h"
+#include "folderobject.h"
 #include "valuesnapshot.h"
 
 /**
 	@author Andre Offringa
 */
-class FixtureType : public NamedObject {
+class FixtureType : public FolderObject {
 	public:
 		enum FixtureClass {
 			Light1Ch,
@@ -26,11 +26,11 @@ class FixtureType : public NamedObject {
 			RGB_ADJ_7CH
 		};
 
-		FixtureType(FixtureClass fixtureClass) : NamedObject(ClassName(fixtureClass)), _class(fixtureClass)
+		FixtureType(FixtureClass fixtureClass) : FolderObject(ClassName(fixtureClass)), _class(fixtureClass)
 		{ }
 		
 		FixtureType(const FixtureType& fixtureType) :
-			NamedObject(fixtureType),
+			FolderObject(fixtureType),
 			_class(fixtureType._class)
 			{ }
 

@@ -56,16 +56,6 @@ std::vector<Effect::Type> Effect::GetTypes()
 	};
 }
 
-void Effect::SetNameGlobally(const std::string& effectName)
-{
-	SetName(effectName);
-	for(size_t i=0; i!=_controls.size(); ++i)
-	{
-		if(_controls[i] != nullptr)
-			_controls[i]->SetName(getControlName(i));
-	}
-}
-
 std::unique_ptr<Effect> Effect::Copy() const
 {
 	std::unique_ptr<Effect> copy = Make(GetType());

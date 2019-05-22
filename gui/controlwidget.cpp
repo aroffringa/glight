@@ -49,7 +49,7 @@ ControlWidget::ControlWidget(class Management &management, char key)
 	_eventBox.add(_nameLabel);
 	_nameLabel.show();
 	
-	_menu.SignalControllableSelected().connect(sigc::mem_fun(*this, &ControlWidget::onControllableSelected));
+	_menu.SignalInputSelected().connect(sigc::mem_fun(*this, &ControlWidget::onInputSelected));
 }
 
 ControlWidget::~ControlWidget()
@@ -154,7 +154,7 @@ void ControlWidget::Assign(PresetValue* item, bool moveFader)
 	}
 }
 
-void ControlWidget::onControllableSelected(PresetValue *item)
+void ControlWidget::onInputSelected(PresetValue *item)
 {
 	Assign(item, true);
 }

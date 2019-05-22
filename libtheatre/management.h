@@ -44,16 +44,12 @@ class Management {
 		{
 			return _sequences;
 		}
-		const std::vector<std::unique_ptr<class Effect>>& Effects() const
-		{
-			return _effects;
-		}
 		const std::vector<std::unique_ptr<class DmxDevice>>& Devices() const
 		{
 			return _devices;
 		}
 		
-		void RemoveObject(class NamedObject& object);
+		void RemoveObject(class FolderObject& object);
 
 		class PresetCollection& AddPresetCollection();
 		void RemoveControllable(class Controllable &controllable);
@@ -63,14 +59,14 @@ class Management {
 		class Folder& GetFolder(const std::string& path);
 		void RemoveFolder(class Folder& folder);
 
-		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction& function);
-		class FixtureFunctionControl& AddFixtureFunctionControl(class FixtureFunction& function, Folder& parent);
-		class FixtureFunctionControl& GetFixtureFunctionControl(class FixtureFunction& function);
+		class FixtureControl& AddFixtureControl(class Fixture& fixture);
+		class FixtureControl& AddFixtureControl(class Fixture& fixture, Folder& parent);
+		class FixtureControl& GetFixtureControl(class Fixture& fixture);
 		
 		void RemoveFixture(class Fixture& fixture);
 
-		class PresetValue& AddPreset(Controllable &controllable);
-		class PresetValue& AddPreset(unsigned id, Controllable &controllable);
+		class PresetValue& AddPreset(Controllable &controllable, size_t inputIndex);
+		class PresetValue& AddPreset(unsigned id, Controllable &controllable, size_t inputIndex);
 
 		void RemovePreset(class PresetValue &presetValue);
 		bool Contains(class PresetValue &controllable) const;
@@ -82,23 +78,20 @@ class Management {
 		
 		class Effect& AddEffect(std::unique_ptr<class Effect> effect);
 		class Effect& AddEffect(std::unique_ptr<class Effect> effect, Folder& folder);
-		void RemoveEffect(class Effect& effect);
 
 		std::mutex& Mutex() { return _mutex; }
 
 		class Controllable& GetControllable(const std::string& name) const;
-		class NamedObject& GetObjectFromPath(const std::string& path) const;
+		class FolderObject& GetObjectFromPath(const std::string& path) const;
 		size_t ControllableIndex(const Controllable* controllable) const;
 		
 		class Sequence& GetSequence(const std::string &name) const;
 		size_t SequenceIndex(const Sequence* sequence) const;
 		
 		class PresetValue* GetPresetValue(unsigned id) const;
-		class PresetValue* GetPresetValue(Controllable& controllable) const;
+		class PresetValue* GetPresetValue(Controllable& controllable, size_t inputIndex) const;
 		size_t PresetValueIndex(const class PresetValue* presetValue) const;
 		class ValueSnapshot Snapshot();
-		
-		size_t EffectIndex(const Effect* effect) const;
 		
 		double GetOffsetTimeInMS() const
 		{
@@ -141,8 +134,12 @@ class Management {
 
 		void abortAllDevices();
 		
-		std::vector<class Effect*> topologicalOrderEffects();
-		void topologicalOrderVisit(Effect& effect, std::vector<class Effect*>& list);
+		/**
+		 * Sorts controllables such that when A outputs to B, then A will come
+		 * after B in the ordered list.
+		 */
+		static void topologicalSort(const std::vector<Controllable*>& input, std::vector<Controllable*>& output);
+		static void topologicalSortVisit(Controllable& controllable, std::vector<Controllable*>& list);
 
 		std::unique_ptr<std::thread> _thread;
 		std::atomic<bool> _isQuitting;
@@ -162,7 +159,6 @@ class Management {
 		std::vector<std::unique_ptr<class Controllable>> _controllables;
 		std::vector<std::unique_ptr<class PresetValue>> _presetValues;
 		std::vector<std::unique_ptr<class Sequence>> _sequences;
-		std::vector<std::unique_ptr<class Effect>> _effects;
 		std::vector<std::unique_ptr<class DmxDevice>> _devices;
 };
 

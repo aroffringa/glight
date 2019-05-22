@@ -5,7 +5,7 @@
 #include "fadeeffectps.h"
 #include "thresholdeffectps.h"
 
-std::unique_ptr<PropertySet> PropertySet::Make(NamedObject& object)
+std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 {
 	std::unique_ptr<PropertySet> ps;
 	const AudioLevelEffect* afx = dynamic_cast<const AudioLevelEffect*>(&object);
