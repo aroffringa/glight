@@ -2,6 +2,8 @@
 #define PULSE_EFFECT_H
 
 #include "../effect.h"
+#include "../timing.h"
+#include "../transition.h"
 
 class PulseEffect : public Effect
 {
@@ -37,10 +39,63 @@ public:
 protected:
 	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const Timing& timing) final override
 	{
+		if(values[0].UInt() == 0)
+		{
+			_isActive = false;
+		}
+		else {
+			if(!_isActive)
+			{
+				_startTime = timing.TimeInMS();
+				_isActive = true;
+			}
+			double pos = timing.TimeInMS() - _startTime;
+			size_t cycleDuration = _attack + _hold + _release + _sleep;
+			if(_repeat || pos < cycleDuration)
+			{
+				pos = std::fmod(pos, cycleDuration);
+				bool handled = false;
+				
+				if(_attack != 0)
+				{
+					if(pos < _attack)
+					{
+						// Fade in
+						unsigned ratio = (unsigned) ((pos / double(_attack)) * 256.0);
+						setConnectedInputs( ControlValue( (values[0].UInt()*ratio) >> 8 ));
+						handled = true;
+					}
+					else pos -= _attack;
+				}
+				
+				if(_hold != 0 && !handled)
+				{
+					if(pos < _hold)
+					{
+						setConnectedInputs( ControlValue( values[0].UInt() ));
+						handled = true;
+					} else
+						pos -= _hold;
+				}
+				
+				if(_release != 0 && !handled)
+				{
+					if(pos < _release)
+					{
+						// Fade out
+						unsigned ratio = 255 - (unsigned) ((pos / double(_release)) * 256.0);
+						setConnectedInputs( ControlValue( (values[0].UInt()*ratio) >> 8 ));
+						handled = true;
+					} else
+						pos -= _hold;
+				}
+			}
+		}
 	}
 	
 	virtual std::string getControlName(size_t) const final override
 	{ return Name() + "_M"; }
+	
 private:
 	bool _isActive;
 	double _startTime;

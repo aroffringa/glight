@@ -56,11 +56,7 @@ protected:
 		}
 		if(_fadingValue != 0)
 		{
-			ControlValue faded(_fadingValue);
-			for(const std::pair<Controllable*,size_t>& connection : Connections())
-			{
-				connection.first->MixInput(connection.second, faded);
-			}
+			setConnectedInputs(ControlValue(_fadingValue));
 		}
 	}
 	

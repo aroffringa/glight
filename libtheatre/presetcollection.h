@@ -21,7 +21,7 @@ class PresetCollection : public Controllable {
 		{
 			_presetValues.clear();
 		}
-		inline void SetFromCurrentSituation(const Management &management);
+		inline void SetFromCurrentSituation(const class Management &management);
 
 		size_t NInputs() const final override
 		{ return 1; }
