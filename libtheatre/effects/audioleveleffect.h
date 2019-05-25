@@ -49,7 +49,7 @@ private:
 	unsigned _lastValue;
 	double _lastTime;
 	
-	// 2^24-1 means full slide every ms.
+	// 2^24-1 means fully fade down in one second
 	unsigned _decaySpeed;
 };
 

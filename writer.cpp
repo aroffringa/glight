@@ -340,6 +340,9 @@ void Writer::writeEffect(const class Effect& effect)
 				case Property::Duration:
 					writeAttribute("value", ps->GetDuration(p));
 					break;
+				case Property::Boolean:
+					writeAttribute("value", ps->GetBool(p));
+					break;
 			}
 			endElement();
 		}

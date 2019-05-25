@@ -3,6 +3,7 @@
 #include "audioleveleffectps.h"
 #include "delayeffectps.h"
 #include "fadeeffectps.h"
+#include "pulseeffectps.h"
 #include "thresholdeffectps.h"
 
 std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
@@ -11,6 +12,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 	const AudioLevelEffect* afx = dynamic_cast<const AudioLevelEffect*>(&object);
 	const DelayEffect* dfx = dynamic_cast<const DelayEffect*>(&object);
 	const FadeEffect* ffx = dynamic_cast<const FadeEffect*>(&object);
+	const PulseEffect* pfx = dynamic_cast<const PulseEffect*>(&object);
 	const ThresholdEffect* tfx = dynamic_cast<const ThresholdEffect*>(&object);
 	if(afx != nullptr)
 	{
@@ -23,6 +25,10 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 	else if(ffx != nullptr)
 	{
 		ps.reset(new FadeEffectPS());
+	}
+	else if(pfx != nullptr)
+	{
+		ps.reset(new PulseEffectPS());
 	}
 	else if(tfx != nullptr)
 	{
@@ -46,6 +52,9 @@ void PropertySet::AssignProperty(const Property& to, const Property& from, const
 		break;
 	case Property::Duration:
 		SetDuration(to, fromSet.GetDuration(from));
+		break;
+	case Property::Boolean:
+		SetBool(to, fromSet.GetBool(from));
 		break;
 	}
 }

@@ -54,6 +54,16 @@ public:
 		return getDuration(*_object, property._setIndex);
 	}
 	
+	void SetBool(const Property& property, double value)
+	{
+		setBool(*_object, property._setIndex, value);
+	}
+	
+	bool GetBool(const Property& property) const
+	{
+		return getBool(*_object, property._setIndex);
+	}
+	
 	FolderObject& Object() const {
 		return *_object;
 	}
@@ -79,6 +89,11 @@ protected:
 	virtual void setDuration(FolderObject& object, size_t index, double value) const
 	{ setterNotImplemented(); }
 	virtual double getDuration(const FolderObject& object, size_t index) const
+	{ getterNotImplemented(); return 0; }
+	
+	virtual void setBool(FolderObject& object, size_t index, bool value) const
+	{ setterNotImplemented(); }
+	virtual bool getBool(const FolderObject& object, size_t index) const
 	{ getterNotImplemented(); return 0; }
 	
 	size_t addProperty(const Property& property)
