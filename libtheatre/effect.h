@@ -18,6 +18,7 @@ public:
 		AudioLevelType,
 		DelayType,
 		FadeType,
+		PulseType,
 		ThresholdType
 	};
 	
@@ -97,6 +98,12 @@ protected:
 	virtual void mix(const ControlValue* inputValues, unsigned* channelValues, unsigned universe, const class Timing& timing) = 0;
 	
 	virtual std::string getControlName(size_t index) const = 0;
+	
+	void setConnectedInputs(const ControlValue& value) const
+	{
+		for(const std::pair<Controllable*,size_t>& connection : Connections())
+			connection.first->MixInput(connection.second, value);
+	}
 	
 private:
 	friend class EffectControl;

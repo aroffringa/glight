@@ -39,6 +39,12 @@ void PropertiesBox::fillProperties()
 		
 		switch(property.GetType())
 		{
+		case Property::Boolean: {
+			std::unique_ptr<Gtk::CheckButton> button(new Gtk::CheckButton(property.Description()));
+			button->set_active(_propertySet->GetBool(property));
+			row._widgets.emplace_back(std::move(button));
+			_grid.attach(*row._widgets.back(), 0, rowIndex, 2, 1);
+			} break;
 		case Property::ControlValue: {
 			std::string entryText =
 				std::to_string(100.0*_propertySet->GetControlValue(property)/ControlValue::MaxUInt());
@@ -76,6 +82,10 @@ void PropertiesBox::onApplyClicked()
 	{
 		switch(property.GetType())
 		{
+		case Property::Boolean: {
+			bool value = static_cast<Gtk::CheckButton*>(rowIter->_widgets[0].get())->get_active();
+			_propertySet->SetBool(property, value);
+			} break;
 		case Property::ControlValue: {
 			std::string entryText = static_cast<Gtk::Entry*>(rowIter->_widgets[1].get())->get_text();
 			_propertySet->SetControlValue(property, unsigned(std::atof(entryText.c_str())*ControlValue::MaxUInt()/100.0));
