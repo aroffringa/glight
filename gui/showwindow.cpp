@@ -359,7 +359,6 @@ void ShowWindow::changeManagement(Management* newManagement, bool moveControlSli
 	_signalChangeManagement(*newManagement);
 	for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
 		cw->ChangeManagement(*newManagement, moveControlSliders);
-	_presetsFrame->ChangeManagement(*newManagement);
 	_chaseFrame->ChangeManagement(*newManagement);
 	_sceneFrame->ChangeManagement(*newManagement);
 	EmitUpdate();

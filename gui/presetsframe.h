@@ -8,8 +8,6 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 
 #include "avoidrecursion.h"
@@ -25,48 +23,29 @@ class PresetsFrame : public Gtk::VPaned
 public:
 	PresetsFrame(class Management& management, class ShowWindow& parentWindow);
 
-	void ChangeManagement(class Management &management)
+private:
+	void initPresetsPart();
+
+	void onNewPresetButtonClicked();
+	void onNewChaseButtonClicked();
+	void onNewFolderButtonClicked();
+	void onDeletePresetButtonClicked();
+	void onSelectedPresetChanged();
+	
+	void changeManagement(class Management &management)
 	{
 		_nameFrame.ChangeManagement(management);
 		_management = &management;
 	}
 	
-private:
-	void initNewSequencePart();
-	void initPresetsPart();
-
-	void onNewPresetButtonClicked();
-	void onNewFolderButtonClicked();
-	void onDeletePresetButtonClicked();
-	void onAddPresetToSequenceButtonClicked();
-	void onClearSequenceButtonClicked();
-	void onCreateChaseButtonClicked();
-	void onSelectedPresetChanged();
-	
 	Gtk::Frame _presetsFrame;
 	ObjectBrowser _presetsList;
 	
-	Gtk::TreeView _newSequenceListView;
-	Glib::RefPtr<Gtk::ListStore> _newSequenceListModel;
-	struct NewSequenceListColumns : public Gtk::TreeModelColumnRecord
-	{
-		NewSequenceListColumns()
-			{ add(_title); add(_preset); }
-	
-		Gtk::TreeModelColumn<Glib::ustring> _title;
-		Gtk::TreeModelColumn<class PresetCollection *> _preset;
-	} _newSequenceListColumns;
-
 	Gtk::VBox _presetsVBox;
-	Gtk::HBox _presetsHBox, _newSequenceBox;
+	Gtk::HBox _presetsHBox;
 
-	Gtk::Frame _newSequenceFrame;
-
-	Gtk::ScrolledWindow _newSequenceScrolledWindow;
-
-	Gtk::VButtonBox _presetsButtonBox, _newSequenceButtonBox;
-	Gtk::Button _newPresetButton, _newFolderButton, _deletePresetButton;
-	Gtk::Button _addPresetToSequenceButton, _clearSequenceButton, _createChaseButton;
+	Gtk::VButtonBox _presetsButtonBox;
+	Gtk::Button _newPresetButton, _newChaseButton, _newFolderButton, _deletePresetButton;
 
 	Management* _management;
 	class ShowWindow& _parentWindow;
