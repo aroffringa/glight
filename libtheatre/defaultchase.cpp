@@ -20,6 +20,7 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vect
 	Chase& chase = management.AddChase();
 	chase.SetName("Runchase");
 	folder.Add(chase);
+	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
 	size_t frames = colors.size();
 	if(runType == InwardRun || runType == OutwardRun)
@@ -115,6 +116,7 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 	Chase& chase = management.AddChase();
 	chase.SetName("Colorseq");
 	folder.Add(chase);
+	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
 	std::random_device rd;
 	std::mt19937 rnd(rd());

@@ -250,7 +250,7 @@ void Reader::parsePresetCollection(xmlNode *node)
 				value.SetValue(ControlValue(getIntAttribute(curNode, "value")));
 			}
 			else
-				throw std::runtime_error("Bad node in preset collection");
+				throw std::runtime_error("Bad node " + name(curNode) + " in preset collection");
 		}
 	}
 }
@@ -288,7 +288,7 @@ void Reader::parseChase(xmlNode *node)
 				parseTransition(curNode, chase.Transition());
 			else if(name(curNode) == "sequence")
 				parseSequence(curNode, chase.Sequence());
-			else throw std::runtime_error("Bad node in chase");
+			else throw std::runtime_error("Bad node " + name(curNode) + " in chase");
 		}
 	}
 }
