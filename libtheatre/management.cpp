@@ -54,7 +54,6 @@ void Management::Clear()
 
 	_controllables.clear();
 	_presetValues.clear();
-	_sequences.clear();
 	_folders.clear();
 	_folders.emplace_back(new Folder());
 	_rootFolder = _folders.back().get();
@@ -205,14 +204,8 @@ void Management::RemoveObject(FolderObject& object)
 		Controllable* controllable = dynamic_cast<Controllable*>(&object);
 		if(controllable)
 			RemoveControllable(*controllable);
-		else {
-			Sequence* sequence = dynamic_cast<Sequence*>(&object);
-			if(sequence)
-				RemoveSequence(*sequence);
-			else {
-				throw std::runtime_error("Can not remove unknown object " + object.Name());
-			}
-		}
+		else
+			throw std::runtime_error("Can not remove unknown object " + object.Name());
 	}
 }
 
@@ -254,18 +247,9 @@ void Management::removeControllable(std::vector<std::unique_ptr<Controllable>>::
 
 	PresetCollection*
 		presetCollection = dynamic_cast<PresetCollection*>(controllable.get());
-	if(presetCollection != nullptr)
+	if(presetCollection)
 	{
-		for(std::vector<std::unique_ptr<Sequence>>::iterator i=_sequences.begin();
-			i!=_sequences.end(); ++i)
-		{
-			Sequence *s = i->get();
-			if(s->IsUsing(*presetCollection))
-			{
-				--i;
-				removeSequence(i+1);
-			}
-		}
+		// TODO
 	}
 
 	for(std::vector<std::unique_ptr<Controllable>>::iterator i=_controllables.begin();
@@ -364,48 +348,9 @@ bool Management::Contains(PresetValue& presetValue) const
 	return false;
 }
 
-Sequence& Management::AddSequence()
+Chase &Management::AddChase()
 {
-	_sequences.emplace_back(new Sequence());
-	return *_sequences.back();
-}
-
-void Management::RemoveSequence(Sequence &sequence)
-{
-	for(std::vector<std::unique_ptr<Sequence>>::iterator i=_sequences.begin();
-		i!=_sequences.end(); ++i)
-	{
-		if(i->get() == &sequence)
-		{
-			--i;
-			removeSequence(i+1);
-		}
-	}
-}
-
-void Management::removeSequence(std::vector<std::unique_ptr<Sequence>>::iterator sequencePtr)
-{
-	std::unique_ptr<Sequence> sequence = std::move(*sequencePtr);
-	sequence->Parent().Remove(*sequence);
-	for(std::vector<std::unique_ptr<Controllable>>::iterator i=_controllables.begin();
-		i!=_controllables.end(); ++i)
-	{
-		Chase *chase = dynamic_cast<Chase*>(i->get());
-		if(chase != 0)
-		{
-			if(&chase->Sequence() == sequence.get())
-			{
-				--i;
-				removeControllable(i+1);
-			}
-		}
-	}
-	_sequences.erase(sequencePtr);
-}
-
-Chase &Management::AddChase(Sequence &sequence)
-{
-	_controllables.emplace_back(new Chase(sequence));
+	_controllables.emplace_back(new Chase());
 	return static_cast<Chase&>(*_controllables.back());
 }
 
@@ -447,16 +392,6 @@ FolderObject& Management::GetObjectFromPath(const std::string& path) const
 size_t Management::ControllableIndex(const Controllable* controllable) const
 {
 	return FolderObject::FindIndex(_controllables, controllable);
-}
-
-Sequence& Management::GetSequence(const std::string &name) const
-{
-	return FolderObject::FindNamedObject(_sequences, name);
-}
-
-size_t Management::SequenceIndex(const Sequence* sequence) const
-{
-	return FolderObject::FindIndex(_sequences, sequence);
 }
 
 PresetValue* Management::GetPresetValue(unsigned id) const
@@ -510,7 +445,6 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 	// need to be resolved and copied first.
 	_controllables.resize(forDryCopy._controllables.size());
 	_presetValues.resize(forDryCopy._presetValues.size());
-	_sequences.resize(forDryCopy._sequences.size());
 	for(size_t i=0; i!=forDryCopy._controllables.size(); ++i)
 	{
 		if(_controllables[i] == nullptr) // not already resolved?
@@ -524,11 +458,6 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 			_presetValues[i].reset(new PresetValue(*forDryCopy._presetValues[i], *_controllables[cIndex]));
 		}
 	}
-	for(size_t i=0; i!=forDryCopy._sequences.size(); ++i)
-	{
-		if(_sequences[i] == nullptr)
-			dryCopySequenceDependency(forDryCopy, i);
-	}
 }
 
 void Management::dryCopyControllerDependency(const Management& forDryCopy, size_t index)
@@ -538,21 +467,18 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 	const Chase* chase = dynamic_cast<const Chase *>(controllable);
 	const PresetCollection* presetCollection = dynamic_cast<const PresetCollection *>(controllable);
 	const Effect* effect = dynamic_cast<const Effect*>(controllable);
-	if(fc != nullptr)
+	if(fc)
 	{
 		Fixture& fixture = _theatre->GetFixture(fc->Fixture().Name());
 		_controllables[index].reset(new FixtureControl(fixture));
 		GetFolder(fc->Parent().FullPath()).Add(*_controllables[index]);
 	}
-	else if(chase != nullptr)
+	else if(chase)
 	{
-		size_t sIndex = forDryCopy.SequenceIndex(&chase->Sequence());
-		if(_sequences[sIndex] == nullptr)
-			dryCopySequenceDependency(forDryCopy, sIndex);
-		_controllables[index].reset(new Chase(*chase, *_sequences[sIndex]));
+		_controllables[index].reset(new Chase(*chase));
 		GetFolder(chase->Parent().FullPath()).Add(*_controllables[index]);
 	}
-	else if(presetCollection != nullptr)
+	else if(presetCollection)
 	{
 		_controllables[index].reset(new PresetCollection(presetCollection->Name()));
 		PresetCollection& pc = static_cast<PresetCollection&>(*_controllables[index]);
@@ -566,27 +492,12 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 		}
 		GetFolder(presetCollection->Parent().FullPath()).Add(pc);
 	}
-	else if(effect != nullptr)
+	else if(effect)
 	{
 		size_t eIndex = forDryCopy.ControllableIndex(effect);
 		dryCopyEffectDependency(forDryCopy, eIndex);
 	}
 	else throw std::runtime_error("Unknown controllable in manager");
-}
-
-void Management::dryCopySequenceDependency(const Management& forDryCopy, size_t index)
-{
-	Sequence* sourceSequence = forDryCopy.Sequences()[index].get();
-	_sequences[index] = sourceSequence->CopyWithoutPresets();
-	Sequence* destSequence = static_cast<Sequence*>(_sequences[index].get());
-	for(const PresetCollection* preset : sourceSequence->Presets())
-	{
-		size_t pIndex = forDryCopy.ControllableIndex(preset);
-		if(_controllables[pIndex] == nullptr)
-			dryCopyControllerDependency(forDryCopy, pIndex);
-		destSequence->AddPreset(static_cast<PresetCollection*>(_controllables[pIndex].get()));
-	}
-	GetFolder(sourceSequence->Parent().FullPath()).Add(*destSequence);
 }
 
 void Management::dryCopyEffectDependency(const Management& forDryCopy, size_t index)

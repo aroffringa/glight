@@ -156,8 +156,6 @@ void Reader::parseControlItem(xmlNode *node)
 		parseFixtureControl(node);
 	else if(n == "preset-collection")
 		parsePresetCollection(node);
-	else if(n == "sequence")
-		parseSequence(node);
 	else if(n == "chase")
 		parseChase(node);
 	else if(n == "preset-value")
@@ -257,21 +255,18 @@ void Reader::parsePresetCollection(xmlNode *node)
 	}
 }
 
-void Reader::parseSequence(xmlNode *node)
+void Reader::parseSequence(xmlNode *node, Sequence& sequence)
 {
-	Sequence &sequence =
-		_management.AddSequence();
-	   parseFolderAttr(node, sequence);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
 		{
-			if(name(curNode) == "preset-collection-ref")
+			if(name(curNode) == "controllable-ref")
 			{
 				size_t folderId = getIntAttribute(curNode, "folder");
 				PresetCollection& pc = dynamic_cast<PresetCollection&>(
 					_management.Folders()[folderId]->GetChild(getStringAttribute(curNode, "name")));
-				sequence.AddPreset(&pc);
+				sequence.Add(&pc);
 			}
 			else
 				throw std::runtime_error("Bad node in sequence");
@@ -281,9 +276,7 @@ void Reader::parseSequence(xmlNode *node)
 
 void Reader::parseChase(xmlNode *node)
 {
-	Sequence &sequence =
-		_management.GetSequence(getStringAttribute(node, "sequence-ref"));
-	Chase &chase = _management.AddChase(sequence);
+	Chase &chase = _management.AddChase();
 	   parseFolderAttr(node, chase);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
@@ -293,6 +286,8 @@ void Reader::parseChase(xmlNode *node)
 				parseTrigger(curNode, chase.Trigger());
 			else if(name(curNode) == "transition")
 				parseTransition(curNode, chase.Transition());
+			else if(name(curNode) == "sequence")
+				parseSequence(curNode, chase.Sequence());
 			else throw std::runtime_error("Bad node in chase");
 		}
 	}

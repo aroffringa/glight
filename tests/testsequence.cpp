@@ -1,3 +1,4 @@
+#include "../libtheatre/chase.h"
 #include "../libtheatre/dummydevice.h"
 #include "../libtheatre/management.h"
 #include "../libtheatre/sequence.h"
@@ -28,13 +29,14 @@ BOOST_AUTO_TEST_CASE( remove_indirect )
 	PresetCollection& pcB = management.AddPresetCollection();
 	root.Add(pcB);
 	pcB.SetFromCurrentSituation(management);
-	Sequence& sequence = management.AddSequence();
-	root.Add(sequence);
-	sequence.AddPreset(&pcA);
-	sequence.AddPreset(&pcB);
-	BOOST_CHECK_EQUAL( management.Sequences().size(), 1);
+	Chase& chase = management.AddChase();
+	Sequence& sequence = chase.Sequence();
+	root.Add(chase);
+	sequence.Add(&pcA);
+	sequence.Add(&pcB);
+	BOOST_CHECK_EQUAL( management.Controllables().size(), 4); // 1 preset, 2 collections, 1 chase
 	management.RemoveControllable(pcA);
-	BOOST_CHECK_EQUAL( management.Sequences().size(), 0);
+	BOOST_CHECK_EQUAL( management.Controllables().size(), 2); // 1 preset, 1 collection, 0 chases
 }
 
 BOOST_AUTO_TEST_SUITE_END()

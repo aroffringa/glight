@@ -53,7 +53,7 @@ class Reader{
 		void parseFixture(xmlNode *node);
 		void parseFixtureControl(xmlNode *node);
 		void parsePresetCollection(xmlNode *node);
-		void parseSequence(xmlNode *node);
+		void parseSequence(xmlNode *node, class Sequence& sequence);
 		void parseChase(xmlNode *node);
 		void parsePresetValue(xmlNode *node);
 		void parseEffect(xmlNode* node);

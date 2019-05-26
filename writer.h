@@ -74,13 +74,9 @@ class Writer {
 		xmlTextWriterPtr _writer;
 		const char *_encoding;
 
-		void requireSequence(const class Sequence& sequence)
-		{ writeSequence(sequence); }
-
 		void requireControllable(const class Controllable& controllable)
 		{ writeControllable(controllable); }
 
-		std::set<std::string> _sequencesWritten;
 		std::set<std::string> _controllablesWritten;
 		std::set<std::string> _effectsWritten;
 		std::map<const Folder*, size_t> _folderIds;
