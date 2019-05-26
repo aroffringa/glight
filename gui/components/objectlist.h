@@ -3,21 +3,19 @@
 
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treestore.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/treeview.h>
 
 #include "../avoidrecursion.h"
 
-class ObjectTree : public Gtk::ScrolledWindow
+class ObjectList : public Gtk::ScrolledWindow
 {
 public:
-	ObjectTree(class Management& management, class ShowWindow& parentWindow);
+	ObjectList(class Management& management, class ShowWindow& parentWindow);
 	
 	enum ObjectType {
 		All,
 		OnlyPresetCollections,
-		OnlySequences,
-		PresetsAndSequences,
 		OnlyChases,
 		OnlyEffects
 	};
@@ -31,27 +29,40 @@ public:
 	
 	class FolderObject* SelectedObject();
 	
-	class Folder* SelectedFolder();
-	
 	sigc::signal<void()>& SignalSelectionChange() { return _signalSelectionChange; }
 	
 	void SelectObject(const FolderObject& object);
+	
+	void SetFolder(class Folder& folder)
+	{
+		if(&folder != _openFolder)
+		{
+			_openFolder = &folder;
+			bool doChangeSelection = (_listView.get_selection()->count_selected_rows() != 0);
+			if(doChangeSelection)
+				_listView.get_selection()->unselect_all();
+			fillList();
+			if(doChangeSelection)
+				_signalSelectionChange.emit();
+		}
+	}
 	
 private:
 	class Management* _management;
 	class ShowWindow& _parentWindow;
 	enum ObjectType _displayType;
+	class Folder* _openFolder;
 	
 	class TreeViewWithMenu : public Gtk::TreeView
 	{
 	public:
-		TreeViewWithMenu(ObjectTree& parent) : _parent(parent) { }
+		TreeViewWithMenu(ObjectList& parent) : _parent(parent) { }
 	private:
-		ObjectTree& _parent;
+		ObjectList& _parent;
 		bool on_button_press_event(GdkEventButton* button_event) final override;
 	} _listView;
 	
-	Glib::RefPtr<Gtk::TreeStore> _listModel;
+	Glib::RefPtr<Gtk::ListStore> _listModel;
 	struct ListColumns : public Gtk::TreeModelColumnRecord
 	{
 		ListColumns()
@@ -62,7 +73,7 @@ private:
 	} _listColumns;
 	
 	void fillList();
-	void fillListFolder(const class Folder& folder, Gtk::TreeModel::Row& row, const class FolderObject* selectedObj);
+	void fillListFolder(const class Folder& folder, const class FolderObject* selectedObj);
 	bool selectObject(const FolderObject& object, const Gtk::TreeModel::Children& children);
 	void changeManagement(class Management &management)
 	{

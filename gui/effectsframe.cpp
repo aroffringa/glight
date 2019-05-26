@@ -44,7 +44,7 @@ void EffectsFrame::initEffectsPart()
 
 	_effectsHBox.pack_start(_effectsButtonBox, false, false, 5);
 
-	_effectsList.SetDisplayType(ObjectTree::OnlyEffects);
+	_effectsList.SetDisplayType(ObjectList::OnlyEffects);
 	_effectsList.SignalSelectionChange().connect(sigc::mem_fun(*this, &EffectsFrame::onSelectedEffectChanged));
 	_effectsHBox.pack_start(_effectsList);
 

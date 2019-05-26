@@ -15,7 +15,7 @@
 #include "avoidrecursion.h"
 #include "nameframe.h"
 
-#include "components/objecttree.h"
+#include "components/objectbrowser.h"
 
 /**
 	@author Andre Offringa
@@ -44,7 +44,7 @@ private:
 	void onSelectedPresetChanged();
 	
 	Gtk::Frame _presetsFrame;
-	ObjectTree _presetsList;
+	ObjectBrowser _presetsList;
 	
 	Gtk::TreeView _newSequenceListView;
 	Glib::RefPtr<Gtk::ListStore> _newSequenceListModel;

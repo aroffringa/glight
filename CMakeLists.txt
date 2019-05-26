@@ -51,8 +51,9 @@ set(GUIFILES
   gui/showwindow.cpp
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp
+  gui/components/foldercombo.cpp
   gui/components/inputselectmenu.cpp
-  gui/components/objecttree.cpp
+  gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp)
 
 set(THEATREFILES
