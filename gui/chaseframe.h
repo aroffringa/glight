@@ -16,7 +16,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
-#include "components/objecttree.h"
+#include "components/objectbrowser.h"
 
 /**
 	@author Andre Offringa
@@ -48,7 +48,7 @@ class ChaseFrame : public Gtk::VPaned {
 		class Chase* getSelectedChase();
 
 		Gtk::Frame _upperFrame;
-		ObjectTree _chaseList;
+		ObjectBrowser _chaseList;
 		Gtk::HBox _upperBox;
 		Gtk::ScrolledWindow _chaseScrolledWindow;
 		Gtk::VButtonBox _upperButtonBox;

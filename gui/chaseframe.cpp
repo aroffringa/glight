@@ -46,7 +46,7 @@ void ChaseFrame::initUpperPanel()
 	
 	_upperBox.pack_start(_upperButtonBox, false, false, 5);
 
-	_chaseList.SetDisplayType(ObjectTree::OnlyChases);
+	_chaseList.SetDisplayType(ObjectList::OnlyChases);
 	_chaseList.SignalSelectionChange().connect(
 		sigc::mem_fun(*this, &ChaseFrame::onSelectedChaseChanged));
 	_upperBox.pack_start(_chaseList);

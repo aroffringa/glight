@@ -15,7 +15,7 @@
 #include "nameframe.h"
 
 #include "components/inputselectmenu.h"
-#include "components/objecttree.h"
+#include "components/objectbrowser.h"
 #include "components/propertiesbox.h"
 
 /**
@@ -50,7 +50,7 @@ private:
 		}
 
 		Gtk::Frame _effectsFrame;
-		ObjectTree _effectsList;
+		ObjectBrowser _effectsList;
 		Gtk::VBox _effectsVBox;
 		Gtk::HBox _effectsHBox;
 		Gtk::VButtonBox _effectsButtonBox;
