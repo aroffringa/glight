@@ -94,10 +94,10 @@ if(Boost_FOUND)
   add_executable(runtests EXCLUDE_FROM_ALL
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
+    tests/testchase.cpp
     tests/testfixturecontrol.cpp
     tests/testfolder.cpp
     tests/testpresetcollection.cpp
-    tests/testsequence.cpp
     )
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})
   add_test(runtests runtests)

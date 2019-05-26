@@ -28,7 +28,6 @@ void Writer::CheckXmlVersion()
 
 void Writer::Write(const Glib::ustring &filename)
 {
-	_sequencesWritten.clear();
 	_controllablesWritten.clear();
 	_effectsWritten.clear();
 	_folderIds.clear();
@@ -117,11 +116,6 @@ void Writer::writeGlightShow()
 		presetValues = _management.PresetValues();
 	for(const std::unique_ptr<PresetValue>& pv : presetValues)
 		writePresetValue(*pv);
-
-	const std::vector<std::unique_ptr<Sequence>>&
-		sequences = _management.Sequences();
-	for(const std::unique_ptr<Sequence>& s : sequences)
-		writeSequence(*s);
 
 	endElement(); // control
 
@@ -265,13 +259,15 @@ void Writer::writeFixtureControl(const FixtureControl &control)
 
 void Writer::writeChase(const Chase &chase)
 {
-	requireSequence(chase.Sequence());
+	const std::vector<Controllable*>& list = chase.Sequence().List();
+	for(const Controllable* c : list)
+		requireControllable(*c);
 
 	startElement("chase");
-	   writeFolderAttributes(chase);
-	writeAttribute("sequence-ref", chase.Sequence().Name());
+	writeFolderAttributes(chase);
 	writeTrigger(chase.Trigger());
 	writeTransition(chase.Transition());
+	writeSequence(chase.Sequence());
 	endElement();
 }
 
@@ -293,24 +289,15 @@ void Writer::writeTransition(const Transition &transition)
 
 void Writer::writeSequence(const Sequence &sequence)
 {
-	if(_sequencesWritten.count(sequence.Name()) == 0)
+	startElement("sequence");
+	for(const Controllable* c : sequence.List())
 	{
-		const std::vector<PresetCollection*> &presets = sequence.Presets();
-		for(const PresetCollection* pc : presets)
-			requireControllable(*pc);
-	
-		startElement("sequence");
-		      writeFolderAttributes(sequence);
-		for(const PresetCollection* pc : presets)
-		{
-			startElement("preset-collection-ref");
-			writeAttribute("folder", _folderIds[&pc->Parent()]);
-			writeAttribute("name", pc->Name());
-			endElement();
-		}
+		startElement("controllable-ref");
+		writeAttribute("folder", _folderIds[&c->Parent()]);
+		writeAttribute("name", c->Name());
 		endElement();
-		_sequencesWritten.insert(sequence.Name());
 	}
+	endElement();
 }
 
 void Writer::writeEffect(const class Effect& effect)

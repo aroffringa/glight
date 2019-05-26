@@ -32,7 +32,7 @@ class PresetCollection : public Controllable {
 		size_t NOutputs() const final override
 		{ return _presetValues.size(); }
 		
-		std::pair<Controllable*, size_t> Output(size_t index) final override
+		std::pair<Controllable*, size_t> Output(size_t index) const final override
 		{ return std::make_pair(&_presetValues[index]->Controllable(), _presetValues[index]->InputIndex()); }
 		
 		void Mix(unsigned *channelValues, unsigned universe, const Timing& timing) final override
@@ -62,6 +62,7 @@ class PresetCollection : public Controllable {
 			_presetValues.emplace_back(new PresetValue(source, controllable));
 			return *_presetValues.back();
 		}
+		[[ deprecated("Use the inut/outut system") ]]
 		bool IsUsing(const Controllable &controllable) const
 		{
 			for(const std::unique_ptr<PresetValue>& pv : _presetValues)

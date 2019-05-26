@@ -40,10 +40,6 @@ class Management {
 		{
 			return _presetValues;
 		}
-		const std::vector<std::unique_ptr<class Sequence>>& Sequences() const
-		{
-			return _sequences;
-		}
 		const std::vector<std::unique_ptr<class DmxDevice>>& Devices() const
 		{
 			return _devices;
@@ -71,10 +67,7 @@ class Management {
 		void RemovePreset(class PresetValue &presetValue);
 		bool Contains(class PresetValue &controllable) const;
 
-		class Sequence& AddSequence();
-		void RemoveSequence(class Sequence &sequence);
-
-		class Chase& AddChase(class Sequence &sequence);
+		class Chase& AddChase();
 		
 		class Effect& AddEffect(std::unique_ptr<class Effect> effect);
 		class Effect& AddEffect(std::unique_ptr<class Effect> effect, Folder& folder);
@@ -84,9 +77,6 @@ class Management {
 		class Controllable& GetControllable(const std::string& name) const;
 		class FolderObject& GetObjectFromPath(const std::string& path) const;
 		size_t ControllableIndex(const Controllable* controllable) const;
-		
-		class Sequence& GetSequence(const std::string &name) const;
-		size_t SequenceIndex(const Sequence* sequence) const;
 		
 		class PresetValue* GetPresetValue(unsigned id) const;
 		class PresetValue* GetPresetValue(Controllable& controllable, size_t inputIndex) const;
@@ -126,9 +116,7 @@ class Management {
 		void getChannelValues(unsigned timestepNumber, unsigned *values, unsigned universe);
 		void removeControllable(std::vector<std::unique_ptr<class Controllable>>::iterator controllablePtr);
 		void removePreset(std::vector<std::unique_ptr<class PresetValue>>::iterator presetValuePtr);
-		void removeSequence(std::vector<std::unique_ptr<class Sequence>>::iterator sequencePtr);
 		
-		void dryCopySequenceDependency(const Management& forDryCopy, size_t index);
 		void dryCopyControllerDependency(const Management& forDryCopy, size_t index);
 		void dryCopyEffectDependency(const Management& forDryCopy, size_t index);
 
@@ -158,7 +146,6 @@ class Management {
 		std::vector<std::unique_ptr<class Folder>> _folders;
 		std::vector<std::unique_ptr<class Controllable>> _controllables;
 		std::vector<std::unique_ptr<class PresetValue>> _presetValues;
-		std::vector<std::unique_ptr<class Sequence>> _sequences;
 		std::vector<std::unique_ptr<class DmxDevice>> _devices;
 };
 

@@ -84,7 +84,7 @@ public:
 	size_t NOutputs() const final override
 	{ return _connections.size(); }
 	
-	std::pair<Controllable*, size_t> Output(size_t index) final override
+	std::pair<Controllable*, size_t> Output(size_t index) const final override
 	{ return _connections[index]; }
 	
 	void Mix(unsigned* channelValues, unsigned universe, const class Timing& timing) final override

@@ -3,44 +3,34 @@
 
 #include <vector>
 
-#include "folderobject.h"
-
 /**
 	@author Andre Offringa
 */
-class Sequence : public FolderObject {
-	public:
-		Sequence() = default;
-		
-		std::unique_ptr<Sequence> CopyWithoutPresets()
-		{
-			return std::unique_ptr<Sequence>(new Sequence(static_cast<FolderObject&>(*this)));
-		}
+class Sequence {
+public:
+	Sequence() = default;
+	
+	size_t Size() const { return _list.size(); }
 
-		size_t Size() const { return _presets.size(); }
+	void Add(class Controllable* controllable)
+	{
+		_list.push_back(controllable);
+	}
 
-		void AddPreset(class PresetCollection *preset)
-		{
-			_presets.push_back(preset);
-		}
+	const std::vector<class Controllable *>& List() const
+	{
+		return _list;
+	}
 
-		const std::vector<class PresetCollection *> &Presets() const
-		{
-			return _presets;
-		}
-
-		bool IsUsing(class PresetCollection &presetCollection) const
-		{
-			for(std::vector<class PresetCollection *>::const_iterator i=_presets.begin();
-				i!=_presets.end();++i)
-				if(*i == &presetCollection) return true;
-			return false;
-		}
-	private:
-		Sequence(const FolderObject& namedObj) : FolderObject(namedObj)
-		{ }
-		
-		std::vector<class PresetCollection *> _presets;
+	bool IsUsing(class Controllable& object) const
+	{
+		for(class Controllable* controllable : _list)
+			if(controllable == &object) return true;
+		return false;
+	}
+	
+private:
+	std::vector<class Controllable*> _list;
 };
 
 #endif

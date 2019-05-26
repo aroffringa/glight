@@ -22,7 +22,7 @@ class Transition {
 		/**
 		 * @param transitionTime value between 0 and _lengthInMS.
 		 */
-		void Mix(PresetCollection &first, size_t firstInput, PresetCollection &second, size_t secondInput, double transitionTime, const ControlValue &value, const Timing& timing)
+		void Mix(Controllable &first, size_t firstInput, Controllable &second, size_t secondInput, double transitionTime, const ControlValue &value, const Timing& timing)
 		{
 			switch(_type)
 			{

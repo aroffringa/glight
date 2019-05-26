@@ -1,5 +1,6 @@
 #include "defaultchase.h"
 
+#include "chase.h"
 #include "color.h"
 #include "fixture.h"
 #include "folder.h"
@@ -16,9 +17,11 @@
 Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
 {
 	Folder& folder = management.RootFolder(); // TODO
-	Sequence& seq = management.AddSequence();
-	seq.SetName("Runchase");
-	folder.Add(seq);
+	Chase& chase = management.AddChase();
+	chase.SetName("Runchase");
+	folder.Add(chase);
+	management.AddPreset(chase, 0);
+	Sequence& seq = chase.Sequence();
 	size_t frames = colors.size();
 	if(runType == InwardRun || runType == OutwardRun)
 		frames = (frames+1)/2;
@@ -68,13 +71,13 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vect
 				addColorPresets(management, *f, pc, red, green, blue, master);
 			}
 		}
-		seq.AddPreset(&pc);
+		seq.Add(&pc);
 		management.AddPreset(pc, 0);
 	}
 	if(runType == BackAndForthRun)
 	{
 		for(size_t i=2; i<colors.size(); ++i)
-			seq.AddPreset(seq.Presets()[colors.size()-i]);
+			seq.Add(seq.List()[colors.size()-i]);
 	}
 	return seq;
 }
@@ -110,9 +113,11 @@ void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCol
 Sequence& DefaultChase::MakeColorVariation(class Management& management, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors, double variation)
 {
 	Folder& folder = management.RootFolder(); // TODO
-	Sequence& seq = management.AddSequence();
-	seq.SetName("Colorseq");
-	folder.Add(seq);
+	Chase& chase = management.AddChase();
+	chase.SetName("Colorseq");
+	folder.Add(chase);
+	management.AddPreset(chase, 0);
+	Sequence& seq = chase.Sequence();
 	std::random_device rd;
 	std::mt19937 rnd(rd());
 	std::normal_distribution<double> distribution(0.0, variation*double((1<<24)-1)/255.0);
@@ -140,7 +145,7 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 				bv = std::max<double>(0.0, std::min<double>(double(blue) + blueVar, (1<<24)-1));
 			addColorPresets(management, *f, pc, rv, gv, bv, master);
 		}
-		seq.AddPreset(&pc);
+		seq.Add(&pc);
 		management.AddPreset(pc, 0);
 	}
 	return seq;
