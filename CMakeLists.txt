@@ -43,6 +43,7 @@ set(GUIFILES
   gui/configurationwindow.cpp
   gui/controlwidget.cpp
   gui/controlwindow.cpp
+  gui/createchasedialog.cpp
   gui/effectsframe.cpp
   gui/guistate.cpp
   gui/nameframe.cpp
