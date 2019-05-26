@@ -12,7 +12,7 @@
 
 #include <memory>
 
-BOOST_AUTO_TEST_SUITE(sequence)
+BOOST_AUTO_TEST_SUITE(chase)
 
 BOOST_AUTO_TEST_CASE( remove_indirect )
 {

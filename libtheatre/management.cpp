@@ -245,18 +245,10 @@ void Management::removeControllable(std::vector<std::unique_ptr<Controllable>>::
 	
 	controllable->Parent().Remove(*controllable.get());
 
-	PresetCollection*
-		presetCollection = dynamic_cast<PresetCollection*>(controllable.get());
-	if(presetCollection)
-	{
-		// TODO
-	}
-
 	for(std::vector<std::unique_ptr<Controllable>>::iterator i=_controllables.begin();
 		i!=_controllables.end(); ++i)
 	{
-		PresetCollection *p = dynamic_cast<PresetCollection*>(i->get());
-		if(p!=0 && p->IsUsing(*controllable))
+		if((*i)->HasOutputConnection(*controllable))
 		{
 			--i;
 			removeControllable(i+1);

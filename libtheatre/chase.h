@@ -31,7 +31,7 @@ public:
 	size_t NOutputs() const final override
 	{ return _sequence.List().size(); }
 	
-	std::pair<Controllable*, size_t> Output(size_t index) final override
+	std::pair<Controllable*, size_t> Output(size_t index) const final override
 	{ return std::make_pair(_sequence.List()[index], 0); }
 	
 	virtual void Mix(unsigned *channelValues, unsigned universe, const Timing& timing) final override

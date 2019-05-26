@@ -27,9 +27,17 @@ public:
 	
 	virtual size_t NOutputs() const = 0;
 	
-	virtual std::pair<Controllable*, size_t> Output(size_t index) = 0;
+	virtual std::pair<Controllable*, size_t> Output(size_t index) const = 0;
 	
 	virtual void Mix(unsigned* channelValues, unsigned universe, const class Timing& timing) = 0;
+	
+	bool HasOutputConnection(const Controllable& controllable) const
+	{
+		for(size_t i=0; i!=NOutputs(); ++i)
+			if(Output(i).first == &controllable)
+				return true;
+		return false;
+	}
 	
 	/* Used for dependency analysis. */
 	char VisitLevel() const { return _visitLevel; }
