@@ -15,6 +15,8 @@ public:
 		_list.emplace_back(std::move(window));
 	}
 	
+	const std::vector<std::unique_ptr<Gtk::Window>>& List() const { return _list; }
+	
 private:
 	void onHideWindow(Gtk::Window* window)
 	{

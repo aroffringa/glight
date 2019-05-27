@@ -21,6 +21,7 @@ class ChaseFrame : public Gtk::Window {
 		ChaseFrame(class Chase& chase, class Management& management, class ShowWindow& parentWindow);
 		~ChaseFrame();
 
+		class Chase& GetChase() { return *_chase; }
 	private:
 		void loadChaseInfo(class Chase& chase);
 		void onTriggerTypeChanged();

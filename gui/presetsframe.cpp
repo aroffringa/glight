@@ -145,8 +145,22 @@ void PresetsFrame::onObjectActivated(FolderObject& object)
 	Chase* chase = dynamic_cast<Chase*>(&object);
 	if(chase)
 	{
-		std::unique_ptr<ChaseFrame> window(new ChaseFrame(*chase, *_management, _parentWindow));
-		window->present();
-		_windowList.Add(std::move(window));
+		bool windowAlreadyOpen = false;
+		for(auto& window : _windowList.List())
+		{
+			ChaseFrame* chaseFrame = dynamic_cast<ChaseFrame*>(window.get());
+			if(&chaseFrame->GetChase() == chase)
+			{
+				windowAlreadyOpen = true;
+				chaseFrame->present();
+				break;
+			}
+		}
+		if(!windowAlreadyOpen)
+		{
+			std::unique_ptr<ChaseFrame> window(new ChaseFrame(*chase, *_management, _parentWindow));
+			window->present();
+			_windowList.Add(std::move(window));
+		}
 	}
 }
