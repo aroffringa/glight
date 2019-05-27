@@ -31,6 +31,9 @@ public:
 	
 	sigc::signal<void()>& SignalSelectionChange() { return _signalSelectionChange; }
 	
+	sigc::signal<void(FolderObject& object)>& SignalObjectActivated()
+	{ return _signalObjectActivated; }
+	
 	void SelectObject(const FolderObject& object);
 	
 	void SetFolder(class Folder& folder)
@@ -87,6 +90,8 @@ private:
 	void onMoveDownSelected();
 	
 	sigc::signal<void()> _signalSelectionChange;
+	sigc::signal<void(FolderObject& object)> _signalObjectActivated;
+	
 	AvoidRecursion _avoidRecursion;
 	Gtk::Menu _contextMenu;
 	std::vector<std::unique_ptr<Gtk::Widget>> _contextMenuItems;

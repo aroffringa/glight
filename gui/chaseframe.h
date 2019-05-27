@@ -3,59 +3,41 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
-#include <gtkmm/liststore.h>
-#include <gtkmm/paned.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/scale.h>
-#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/separator.h>
-#include <gtkmm/treemodel.h>
-#include <gtkmm/treeview.h>
+#include <gtkmm/window.h>
 
 #include "components/objectbrowser.h"
 
 /**
 	@author Andre Offringa
 */
-class ChaseFrame : public Gtk::VPaned {
+class ChaseFrame : public Gtk::Window {
 	public:
-		ChaseFrame(class Management& management, class ShowWindow& parentWindow);
+		ChaseFrame(class Chase& chase, class Management& management, class ShowWindow& parentWindow);
 		~ChaseFrame();
 
-		void ChangeManagement(class Management& management)
-		{
-			_management = &management;
-		}
-		
-		void Select(const class Chase& chase);
-		
 	private:
-		void initUpperPanel();
-		void initLowerPanel();
-		void onSelectedChaseChanged();
+		void loadChaseInfo(class Chase& chase);
 		void onTriggerTypeChanged();
 		void onTriggerSpeedChanged();
 		void onTransitionSpeedChanged();
 		void onTransitionTypeChanged();
 		void onSyncCountChanged();
 		void onBeatSpeedChanged();
-		void onDeleteChaseClicked();
 		
-		class Chase* getSelectedChase();
-
-		Gtk::Frame _upperFrame;
-		ObjectBrowser _chaseList;
-		Gtk::HBox _upperBox;
-		Gtk::ScrolledWindow _chaseScrolledWindow;
-		Gtk::VButtonBox _upperButtonBox;
-		Gtk::Button _deleteChaseButton;
+		void onChangeManagement(class Management& management)
+		{
+			_management = &management;
+		}
+		void onUpdateControllables();
 		
-		Gtk::Frame _bottomFrame;
-		Gtk::Grid _bottomGrid;
+		Gtk::Frame _frame;
+		Gtk::Grid _grid;
 		
 		Gtk::RadioButton _delayTriggerCheckButton;
 		Gtk::Label _triggerSpeedLabel;
@@ -76,6 +58,7 @@ class ChaseFrame : public Gtk::VPaned {
 		Gtk::Label _beatSpeedLabel;
 		Gtk::HScale _beatSpeed;
 		
+		Chase* _chase;
 		Management* _management;
 		ShowWindow& _parentWindow;
 };

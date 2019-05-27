@@ -12,6 +12,7 @@
 
 #include "avoidrecursion.h"
 #include "nameframe.h"
+#include "windowlist.h"
 
 #include "components/objectbrowser.h"
 
@@ -31,6 +32,7 @@ private:
 	void onNewFolderButtonClicked();
 	void onDeletePresetButtonClicked();
 	void onSelectedPresetChanged();
+	void onObjectActivated(class FolderObject& object);
 	
 	void changeManagement(class Management &management)
 	{
@@ -39,7 +41,7 @@ private:
 	}
 	
 	Gtk::Frame _presetsFrame;
-	ObjectBrowser _presetsList;
+	ObjectBrowser _list;
 	
 	Gtk::VBox _presetsVBox;
 	Gtk::HBox _presetsHBox;
@@ -47,6 +49,8 @@ private:
 	Gtk::VButtonBox _presetsButtonBox;
 	Gtk::Button _newPresetButton, _newChaseButton, _newFolderButton, _deletePresetButton;
 
+	WindowList _windowList;
+	
 	Management* _management;
 	class ShowWindow& _parentWindow;
 	NameFrame _nameFrame;

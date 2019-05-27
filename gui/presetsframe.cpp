@@ -2,6 +2,7 @@
 
 #include <gtkmm/stock.h>
 
+#include "chaseframe.h"
 #include "showwindow.h"
 #include "createchasedialog.h"
 
@@ -14,7 +15,7 @@
 
 PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 	_presetsFrame("Preset programming"),
-	_presetsList(management, parentWindow),
+	_list(management, parentWindow),
 	_newPresetButton("New preset"),
 	_newChaseButton("New chase"),
 	_newFolderButton("New folder"),
@@ -57,9 +58,10 @@ void PresetsFrame::initPresetsPart()
 
 	_presetsHBox.pack_start(_presetsButtonBox, false, false);
 	
-	_presetsList.SignalSelectionChange().connect(sigc::mem_fun(this, &PresetsFrame::onSelectedPresetChanged));
-	_presetsList.SetDisplayType(ObjectList::OnlyPresetCollections);
-	_presetsHBox.pack_start(_presetsList);
+	_list.SignalSelectionChange().connect(sigc::mem_fun(this, &PresetsFrame::onSelectedPresetChanged));
+	_list.SignalObjectActivated().connect(sigc::mem_fun(this, &PresetsFrame::onObjectActivated));
+	_list.SetDisplayType(ObjectList::All);
+	_presetsHBox.pack_start(_list);
 	
 	_presetsVBox.pack_start(_presetsHBox);
 	
@@ -70,7 +72,7 @@ void PresetsFrame::initPresetsPart()
 
 void PresetsFrame::onNewPresetButtonClicked()
 {
-	Folder& parent = _presetsList.SelectedFolder();
+	Folder& parent = _list.SelectedFolder();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	PresetCollection& presetCollection = _management->AddPresetCollection();
 	parent.Add(presetCollection);
@@ -82,18 +84,21 @@ void PresetsFrame::onNewPresetButtonClicked()
 	lock.unlock();
 
 	_parentWindow.EmitUpdate();
-	_presetsList.SelectObject(presetCollection);
+	_list.SelectObject(presetCollection);
 }
 
 void PresetsFrame::onNewChaseButtonClicked()
 {
 	CreateChaseDialog dialog(*_management, _parentWindow);
-	dialog.run();
+	if(dialog.run() == Gtk::RESPONSE_OK)
+	{
+		_list.SelectObject(dialog.CreatedChase());
+	}
 }
 
 void PresetsFrame::onNewFolderButtonClicked()
 {
-	Folder& parent = _presetsList.SelectedFolder();
+	Folder& parent = _list.SelectedFolder();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	Folder& folder = _management->AddFolder(parent);
 	std::stringstream s;
@@ -102,12 +107,12 @@ void PresetsFrame::onNewFolderButtonClicked()
 	lock.unlock();
 
 	_parentWindow.EmitUpdate();
-	_presetsList.OpenFolder(folder);
+	_list.OpenFolder(folder);
 }
 
 void PresetsFrame::onDeletePresetButtonClicked()
 {
-	FolderObject* selectedObj = _presetsList.SelectedObject();
+	FolderObject* selectedObj = _list.SelectedObject();
 	if(selectedObj && selectedObj != &_management->RootFolder())
 	{
 		{
@@ -122,7 +127,7 @@ void PresetsFrame::onSelectedPresetChanged()
 {
 	if(_delayUpdates.IsFirst())
 	{
-		FolderObject* selectedObj = _presetsList.SelectedObject();
+		FolderObject* selectedObj = _list.SelectedObject();
 		if(selectedObj)
 		{
 			_nameFrame.SetNamedObject(*selectedObj);
@@ -132,5 +137,16 @@ void PresetsFrame::onSelectedPresetChanged()
 			_nameFrame.SetNoNamedObject();
 			_deletePresetButton.set_sensitive(false);
 		}
+	}
+}
+
+void PresetsFrame::onObjectActivated(FolderObject& object)
+{
+	Chase* chase = dynamic_cast<Chase*>(&object);
+	if(chase)
+	{
+		std::unique_ptr<ChaseFrame> window(new ChaseFrame(*chase, *_management, _parentWindow));
+		window->present();
+		_windowList.Add(std::move(window));
 	}
 }

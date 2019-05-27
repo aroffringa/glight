@@ -29,6 +29,13 @@ ObjectList::ObjectList(Management &management, ShowWindow &parentWindow) :
 			if(_avoidRecursion.IsFirst())
 				_signalSelectionChange.emit(); 
 		});
+	_listView.signal_row_activated().connect(
+		[&](const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*)
+		{
+			Gtk::TreeModel::iterator iter = _listModel->get_iter(path);
+			if(iter)
+				_signalObjectActivated.emit(*(*iter)[_listColumns._object]);
+		});
 	
 	fillList();
 	add(_listView);

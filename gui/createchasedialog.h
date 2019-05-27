@@ -23,6 +23,8 @@ class CreateChaseDialog : public Gtk::Dialog
 {
 public:
 	CreateChaseDialog(class Management& management, class ShowWindow& parentWindow);
+	
+	class Chase& CreatedChase() { return *_newChase; }
 
 private:
 	void initListPart();
@@ -70,6 +72,7 @@ private:
 	Management* _management;
 	class ShowWindow& _parentWindow;
 	AvoidRecursion _delayUpdates;
+	class Chase* _newChase;
 };
 
 #endif

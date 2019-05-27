@@ -38,6 +38,8 @@ public:
 	
 	sigc::signal<void()>& SignalFolderChange() { return _signalFolderChange; }
 	
+	sigc::signal<void(FolderObject& object)>& SignalObjectActivated() { return _list.SignalObjectActivated(); }
+	
 	void SelectObject(const FolderObject& object)
 	{
 		_folderCombo.Select(object.Parent());

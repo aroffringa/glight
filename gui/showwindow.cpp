@@ -4,7 +4,6 @@
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/messagedialog.h>
 
-#include "chaseframe.h"
 #include "chasewizard.h"
 #include "configurationwindow.h"
 #include "controlwindow.h"
@@ -59,12 +58,10 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	createMenu();
 	
 	_presetsFrame.reset(new PresetsFrame(*_management, *this));
-	_chaseFrame.reset(new ChaseFrame(*_management, *this));
 	_effectsFrame.reset(new EffectsFrame(*_management, *this));
 	_sceneFrame.reset(new SceneFrame(*_management, *this));
 
 	_notebook.append_page(*_presetsFrame, "Presets");
-	_notebook.append_page(*_chaseFrame, "Chases");
 	_notebook.append_page(*_effectsFrame, "Effects");
 	_notebook.append_page(*_sceneFrame, "Timeline");
 
@@ -359,7 +356,6 @@ void ShowWindow::changeManagement(Management* newManagement, bool moveControlSli
 	_signalChangeManagement(*newManagement);
 	for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
 		cw->ChangeManagement(*newManagement, moveControlSliders);
-	_chaseFrame->ChangeManagement(*newManagement);
 	_sceneFrame->ChangeManagement(*newManagement);
 	EmitUpdate();
 }
@@ -399,10 +395,4 @@ size_t ShowWindow::nextControlKeyRow() const
 void ShowWindow::onMIChaseWizardClicked()
 {
 	_chaseWizard->show();
-}
-
-void ShowWindow::MakeChaseTabActive(class Chase& chase)
-{
-	_notebook.set_current_page(1);
-	_chaseFrame->Select(chase);
 }
