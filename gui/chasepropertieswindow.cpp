@@ -1,11 +1,11 @@
-#include "chaseframe.h"
+#include "chasepropertieswindow.h"
 #include "showwindow.h"
 
 #include "../libtheatre/chase.h"
 #include "../libtheatre/management.h"
 
-ChaseFrame::ChaseFrame(class Chase& chase, Management &management, ShowWindow &parentWindow) :
-	Gtk::Window(),
+ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &management, ShowWindow &parentWindow) :
+	PropertiesWindow(),
 	_frame("Properties of " + chase.Name()),
 	_delayTriggerCheckButton("Delayed trigger"),
 	_triggerSpeedLabel("Trigger speed (ms) :"),
@@ -29,8 +29,8 @@ ChaseFrame::ChaseFrame(class Chase& chase, Management &management, ShowWindow &p
 	_management(&management),
 	_parentWindow(parentWindow)
 {
-	parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &ChaseFrame::onChangeManagement));
-	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &ChaseFrame::onUpdateControllables));
+	parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onChangeManagement));
+	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onUpdateControllables));
 	
 	set_title("glight - " + chase.Name());
 	
@@ -38,40 +38,40 @@ ChaseFrame::ChaseFrame(class Chase& chase, Management &management, ShowWindow &p
 	_grid.attach(_delayTriggerCheckButton, 0, 0, 1, 3);
 	_delayTriggerCheckButton.set_group(group);
 	_delayTriggerCheckButton.signal_clicked().
-		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
+		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTriggerTypeChanged));
 	_grid.attach(_triggerSpeedLabel, 1, 0, 1, 1);
 	_triggerSpeedLabel.set_halign(Gtk::ALIGN_END);
 	_grid.attach(_triggerSpeed, 2, 0, 1, 1);
 	_triggerSpeed.signal_value_changed().
-		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerSpeedChanged));
+		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTriggerSpeedChanged));
 
 	_transitionSpeedLabel.set_halign(Gtk::ALIGN_END);
 	_grid.attach(_transitionSpeedLabel, 1, 1, 1, 1);
 	_grid.attach(_transitionSpeed, 2, 1, 1, 1);
 	_transitionSpeed.signal_value_changed().
-		connect(sigc::mem_fun(*this, &ChaseFrame::onTransitionSpeedChanged));
+		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionSpeedChanged));
 	
 	_transitionTypeBox.pack_start(_transitionTypeLabel);
 		
 	Gtk::RadioButtonGroup transTypeGroup;
 	_transitionNoneRB.set_group(transTypeGroup);
 	_transitionNoneRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &ChaseFrame::onTransitionTypeChanged));
+		sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
 	_transitionTypeBox.pack_start(_transitionNoneRB);
 	
 	_transitionFadeRB.set_group(transTypeGroup);
 	_transitionFadeRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &ChaseFrame::onTransitionTypeChanged));
+		sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
 	_transitionTypeBox.pack_start(_transitionFadeRB);
 	
 	_transitionFadeThroughBlackRB.set_group(transTypeGroup);
 	_transitionFadeThroughBlackRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &ChaseFrame::onTransitionTypeChanged));
+		sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
 	_transitionTypeBox.pack_start(_transitionFadeThroughBlackRB);
 	
 	_transitionErraticRB.set_group(transTypeGroup);
 	_transitionErraticRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &ChaseFrame::onTransitionTypeChanged));
+		sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
 	_transitionTypeBox.pack_start(_transitionErraticRB);
 	
 	_grid.attach(_transitionTypeBox, 1, 2, 2, 1);
@@ -80,26 +80,26 @@ ChaseFrame::ChaseFrame(class Chase& chase, Management &management, ShowWindow &p
 	_grid.attach(_synchronizedTriggerCheckButton, 0, 4, 1, 1);
 	_synchronizedTriggerCheckButton.set_group(group);
 	_synchronizedTriggerCheckButton.signal_clicked().
-		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
+		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTriggerTypeChanged));
 	_synchronizationsLabel.set_halign(Gtk::ALIGN_END);
 	_grid.attach(_synchronizationsLabel, 1, 4, 1, 1);
 	_grid.attach(_synchronizationsCount, 2, 4, 1, 1);
 	_synchronizationsCount.set_value(1.0);
 	_synchronizationsCount.signal_value_changed().
-		connect(sigc::mem_fun(*this, &ChaseFrame::onSyncCountChanged));
+		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onSyncCountChanged));
 	_grid.attach(_synchronizedSep, 0, 5, 3, 1);
 
 	_grid.attach(_beatTriggerCheckButton, 0, 6, 1, 1);
 	_beatTriggerCheckButton.set_group(group);
 	_beatTriggerCheckButton.signal_clicked().
-		connect(sigc::mem_fun(*this, &ChaseFrame::onTriggerTypeChanged));
+		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTriggerTypeChanged));
 	_beatSpeedLabel.set_halign(Gtk::ALIGN_END);
 	_grid.attach(_beatSpeedLabel, 1, 6, 1, 1);
 	_grid.attach(_beatSpeed, 2, 6, 1, 1);
 	_beatSpeed.set_hexpand(true);
 	_beatSpeed.set_value(1.0);
 	_beatSpeed.signal_value_changed().
-		connect(sigc::mem_fun(*this, &ChaseFrame::onBeatSpeedChanged));
+		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onBeatSpeedChanged));
 	
 	_grid.set_hexpand(true);
 	_frame.add(_grid);
@@ -109,11 +109,16 @@ ChaseFrame::ChaseFrame(class Chase& chase, Management &management, ShowWindow &p
 	loadChaseInfo(chase);
 }
 
-ChaseFrame::~ChaseFrame()
+ChasePropertiesWindow::~ChasePropertiesWindow()
 {
 }
 
-void ChaseFrame::onTriggerTypeChanged()
+FolderObject& ChasePropertiesWindow::GetObject()
+{
+	return GetChase();
+}
+
+void ChasePropertiesWindow::onTriggerTypeChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	if(_delayTriggerCheckButton.get_active())
@@ -124,19 +129,19 @@ void ChaseFrame::onTriggerTypeChanged()
 		_chase->Trigger().SetType(Trigger::BeatTriggered);
 }
 
-void ChaseFrame::onTriggerSpeedChanged()
+void ChasePropertiesWindow::onTriggerSpeedChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	_chase->Trigger().SetDelayInMs(_triggerSpeed.get_value());
 }
 
-void ChaseFrame::onTransitionSpeedChanged()
+void ChasePropertiesWindow::onTransitionSpeedChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	_chase->Transition().SetLengthInMs(_transitionSpeed.get_value());
 }
 
-void ChaseFrame::onTransitionTypeChanged()
+void ChasePropertiesWindow::onTransitionTypeChanged()
 {
 	enum Transition::Type type;
 	if(_transitionNoneRB.get_active())
@@ -151,19 +156,19 @@ void ChaseFrame::onTransitionTypeChanged()
 	_chase->Transition().SetType(type);
 }
 
-void ChaseFrame::onSyncCountChanged()
+void ChasePropertiesWindow::onSyncCountChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	_chase->Trigger().SetDelayInSyncs(_synchronizationsCount.get_value());
 }
 
-void ChaseFrame::onBeatSpeedChanged()
+void ChasePropertiesWindow::onBeatSpeedChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	_chase->Trigger().SetDelayInBeats(_beatSpeed.get_value());
 }
 
-void ChaseFrame::loadChaseInfo(Chase& chase)
+void ChasePropertiesWindow::loadChaseInfo(Chase& chase)
 {
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	enum Trigger::Type triggerType = chase.Trigger().Type();
@@ -196,7 +201,7 @@ void ChaseFrame::loadChaseInfo(Chase& chase)
 	}
 }
 
-void ChaseFrame::onUpdateControllables()
+void ChasePropertiesWindow::onUpdateControllables()
 {
 	if(_management->Contains(*_chase))
 		loadChaseInfo(*_chase);

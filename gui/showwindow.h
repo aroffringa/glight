@@ -86,7 +86,6 @@ private:
 	class PresetCollection *_preset;
 
 	std::unique_ptr<class PresetsFrame> _presetsFrame;
-	std::unique_ptr<class EffectsFrame> _effectsFrame;
 	std::unique_ptr<class SceneFrame> _sceneFrame;
 
 	GUIState _state;

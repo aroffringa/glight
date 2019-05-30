@@ -2,9 +2,10 @@
 
 #include <gtkmm/stock.h>
 
-#include "chaseframe.h"
-#include "showwindow.h"
+#include "chasepropertieswindow.h"
 #include "createchasedialog.h"
+#include "effectpropertieswindow.h"
+#include "showwindow.h"
 
 #include "../libtheatre/chase.h"
 #include "../libtheatre/folder.h"
@@ -18,6 +19,7 @@ PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 	_list(management, parentWindow),
 	_newPresetButton("New preset"),
 	_newChaseButton("New chase"),
+	_newEffectButton("New effect"), 
 	_newFolderButton("New folder"),
 	_deletePresetButton(Gtk::Stock::DELETE), 
 	_management(&management),
@@ -46,6 +48,11 @@ void PresetsFrame::initPresetsPart()
 	_newChaseButton.set_image_from_icon_name("document-new");
 	_presetsButtonBox.pack_start(_newChaseButton, false, false, 5);
 	
+	_newEffectButton.set_events(Gdk::BUTTON_PRESS_MASK);
+	_newEffectButton.signal_button_press_event().connect(sigc::mem_fun(*this, &PresetsFrame::onNewEffectButtonClicked), false);
+	_newEffectButton.set_image_from_icon_name("document-new");
+	_presetsButtonBox.pack_start(_newEffectButton);
+
 	_newFolderButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &PresetsFrame::onNewFolderButtonClicked));
 	_newFolderButton.set_image_from_icon_name("folder-new");
@@ -96,6 +103,41 @@ void PresetsFrame::onNewChaseButtonClicked()
 	}
 }
 
+bool PresetsFrame::onNewEffectButtonClicked(GdkEventButton* event)
+{
+	if(event->button == 1)
+	{
+		_popupEffectMenuItems.clear();
+		_popupEffectMenu.reset(new Gtk::Menu());
+	
+		std::vector<enum Effect::Type> fxtypes = Effect::GetTypes();
+		for(enum Effect::Type t : fxtypes)
+		{
+			std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(Effect::TypeToName(t)));
+			mi->signal_activate().connect(sigc::bind<enum Effect::Type>( 
+			sigc::mem_fun(*this, &PresetsFrame::onNewEffectMenuClicked), t));
+			_popupEffectMenu->append(*mi);
+			_popupEffectMenuItems.emplace_back(std::move(mi));
+		}
+		
+		_popupEffectMenu->show_all_children();
+		_popupEffectMenu->popup(event->button, event->time);
+		return true;
+	}
+	return false;
+}
+
+void PresetsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
+{
+	std::unique_ptr<Effect> effect(Effect::Make(effectType));
+	effect->SetName(Effect::TypeToName(effectType) + std::to_string(_management->Controllables().size()+1));
+	Folder& parent = _list.SelectedFolder();
+	Effect* added = &_management->AddEffect(std::move(effect), parent);
+	for(size_t i=0; i!=added->NInputs(); ++i)
+		_management->AddPreset(*added, i);
+	_parentWindow.EmitUpdate();
+}
+
 void PresetsFrame::onNewFolderButtonClicked()
 {
 	Folder& parent = _list.SelectedFolder();
@@ -142,25 +184,25 @@ void PresetsFrame::onSelectedPresetChanged()
 
 void PresetsFrame::onObjectActivated(FolderObject& object)
 {
-	Chase* chase = dynamic_cast<Chase*>(&object);
-	if(chase)
+	PropertiesWindow* window = _windowList.GetOpenWindow(object);
+	if(window)
 	{
-		bool windowAlreadyOpen = false;
-		for(auto& window : _windowList.List())
+		window->present();
+	}
+	else {
+		Chase* chase = dynamic_cast<Chase*>(&object);
+		if(chase)
 		{
-			ChaseFrame* chaseFrame = dynamic_cast<ChaseFrame*>(window.get());
-			if(&chaseFrame->GetChase() == chase)
-			{
-				windowAlreadyOpen = true;
-				chaseFrame->present();
-				break;
-			}
+			std::unique_ptr<ChasePropertiesWindow> newWindow(new ChasePropertiesWindow(*chase, *_management, _parentWindow));
+			newWindow->present();
+			_windowList.Add(std::move(newWindow));
 		}
-		if(!windowAlreadyOpen)
+		Effect* effect = dynamic_cast<Effect*>(&object);
+		if(effect)
 		{
-			std::unique_ptr<ChaseFrame> window(new ChaseFrame(*chase, *_management, _parentWindow));
-			window->present();
-			_windowList.Add(std::move(window));
+			std::unique_ptr<EffectPropertiesWindow> newWindow(new EffectPropertiesWindow(*effect, *_management, _parentWindow));
+			newWindow->present();
+			_windowList.Add(std::move(newWindow));
 		}
 	}
 }

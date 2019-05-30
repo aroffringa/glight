@@ -12,9 +12,12 @@
 
 #include "avoidrecursion.h"
 #include "nameframe.h"
+#include "propertieswindow.h"
 #include "windowlist.h"
 
 #include "components/objectbrowser.h"
+
+#include "../libtheatre/effect.h"
 
 /**
 	@author Andre Offringa
@@ -29,10 +32,12 @@ private:
 
 	void onNewPresetButtonClicked();
 	void onNewChaseButtonClicked();
+	bool onNewEffectButtonClicked(GdkEventButton* event);
 	void onNewFolderButtonClicked();
 	void onDeletePresetButtonClicked();
 	void onSelectedPresetChanged();
 	void onObjectActivated(class FolderObject& object);
+	void onNewEffectMenuClicked(enum Effect::Type effectType);
 	
 	void changeManagement(class Management &management)
 	{
@@ -47,9 +52,12 @@ private:
 	Gtk::HBox _presetsHBox;
 
 	Gtk::VButtonBox _presetsButtonBox;
-	Gtk::Button _newPresetButton, _newChaseButton, _newFolderButton, _deletePresetButton;
+	Gtk::Button _newPresetButton, _newChaseButton, _newEffectButton, _newFolderButton, _deletePresetButton;
 
-	WindowList _windowList;
+	std::unique_ptr<Gtk::Menu> _popupEffectMenu;
+	std::vector<std::unique_ptr<Gtk::MenuItem>> _popupEffectMenuItems;
+		
+	WindowList<PropertiesWindow> _windowList;
 	
 	Management* _management;
 	class ShowWindow& _parentWindow;
