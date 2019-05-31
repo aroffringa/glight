@@ -38,16 +38,16 @@ set(MAINFILES
 set(GUIFILES
   gui/application.cpp  
   gui/audiowidget.cpp
-  gui/chaseframe.cpp
+  gui/chasepropertieswindow.cpp
   gui/chasewizard.cpp
   gui/configurationwindow.cpp
   gui/controlwidget.cpp
   gui/controlwindow.cpp
   gui/createchasedialog.cpp
-  gui/effectsframe.cpp
+  gui/effectpropertieswindow.cpp
   gui/guistate.cpp
   gui/nameframe.cpp
-  gui/presetsframe.cpp
+  gui/objectlistframe.cpp
   gui/sceneframe.cpp
   gui/showwindow.cpp
   gui/visualizationwindow.cpp

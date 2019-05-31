@@ -20,7 +20,8 @@ CreateChaseDialog::CreateChaseDialog(Management& management, ShowWindow& parentW
 	_addObjectToChaseButton(Gtk::Stock::ADD),
 	_clearChaseButton("Clear"),
 	_management(&management),
-	_parentWindow(parentWindow)
+	_parentWindow(parentWindow),
+	_newChase(nullptr)
 {
 	_parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &CreateChaseDialog::changeManagement));
 	
@@ -108,14 +109,14 @@ void CreateChaseDialog::onCreateChaseButtonClicked()
 		Folder& folder = _list.SelectedFolder();
 		std::unique_lock<std::mutex> lock(_management->Mutex());
 		
-		Chase& chase = _management->AddChase();
-		_management->AddPreset(chase, 0);
+		_newChase = &_management->AddChase();
+		_management->AddPreset(*_newChase, 0);
 		std::stringstream s;
 		s << "#" << _management->Controllables().size();
-		chase.SetName(s.str());
-		folder.Add(chase);
+		_newChase->SetName(s.str());
+		folder.Add(*_newChase);
 
-		Sequence& sequence = chase.Sequence();
+		Sequence& sequence = _newChase->Sequence();
 		Gtk::TreeModel::Children children = _newChaseListModel->children();
 		for(Gtk::TreeModel::Children::const_iterator i=children.begin();
 			i != children.end() ; ++i)
@@ -129,7 +130,6 @@ void CreateChaseDialog::onCreateChaseButtonClicked()
 		_parentWindow.EmitUpdate();
 		_newChaseListModel->clear();
 		_makeChaseButton->set_sensitive(false);
-		_parentWindow.MakeChaseTabActive(chase);
 	}
 }
 

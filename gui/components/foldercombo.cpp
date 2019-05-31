@@ -83,7 +83,8 @@ Folder& FolderCombo::Selection()
 
 void FolderCombo::Select(const Folder& object)
 {
-	if(&Selection() != &object)
+	Gtk::TreeModel::iterator selected = get_active();
+	if(!selected || (*selected)[_listColumns._folder] != &object)
 	{
 		if(!selectObject(object, _listModel->children()))
 			throw std::runtime_error("Object to select ('" + object.Name() + "') not found in list");
