@@ -22,10 +22,10 @@
 /**
 	@author Andre Offringa
 */
-class PresetsFrame : public Gtk::VPaned
+class ObjectListFrame : public Gtk::VPaned
 {
 public:
-	PresetsFrame(class Management& management, class ShowWindow& parentWindow);
+	ObjectListFrame(class Management& management, class ShowWindow& parentWindow);
 
 private:
 	void initPresetsPart();
@@ -45,7 +45,7 @@ private:
 		_management = &management;
 	}
 	
-	Gtk::Frame _presetsFrame;
+	Gtk::Frame _objectListFrame;
 	ObjectBrowser _list;
 	
 	Gtk::VBox _presetsVBox;

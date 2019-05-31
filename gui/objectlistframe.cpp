@@ -1,4 +1,4 @@
-#include "presetsframe.h"
+#include "objectlistframe.h"
 
 #include <gtkmm/stock.h>
 
@@ -14,8 +14,8 @@
 #include "../libtheatre/presetcollection.h"
 #include "../libtheatre/sequence.h"
 
-PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
-	_presetsFrame("Preset programming"),
+ObjectListFrame::ObjectListFrame(Management &management, ShowWindow &parentWindow) :
+	_objectListFrame("Object programming"),
 	_list(management, parentWindow),
 	_newPresetButton("New preset"),
 	_newChaseButton("New chase"),
@@ -26,47 +26,47 @@ PresetsFrame::PresetsFrame(Management &management, ShowWindow &parentWindow) :
 	_parentWindow(parentWindow),
 	_nameFrame(management, parentWindow)
 {
-	_parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &PresetsFrame::changeManagement));
+	_parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &ObjectListFrame::changeManagement));
 	
 	initPresetsPart();
 
-	pack1(_presetsFrame);
+	pack1(_objectListFrame);
 	//pack2(_newSequenceFrame);
 	
 	show_all_children();
 }
 
-void PresetsFrame::initPresetsPart()
+void ObjectListFrame::initPresetsPart()
 {
 	_newPresetButton.signal_clicked().
-		connect(sigc::mem_fun(*this, &PresetsFrame::onNewPresetButtonClicked));
+		connect(sigc::mem_fun(*this, &ObjectListFrame::onNewPresetButtonClicked));
 	_newPresetButton.set_image_from_icon_name("document-new");
 	_presetsButtonBox.pack_start(_newPresetButton, false, false, 5);
 
 	_newChaseButton.signal_clicked().
-		connect(sigc::mem_fun(*this, &PresetsFrame::onNewChaseButtonClicked));
+		connect(sigc::mem_fun(*this, &ObjectListFrame::onNewChaseButtonClicked));
 	_newChaseButton.set_image_from_icon_name("document-new");
 	_presetsButtonBox.pack_start(_newChaseButton, false, false, 5);
 	
 	_newEffectButton.set_events(Gdk::BUTTON_PRESS_MASK);
-	_newEffectButton.signal_button_press_event().connect(sigc::mem_fun(*this, &PresetsFrame::onNewEffectButtonClicked), false);
+	_newEffectButton.signal_button_press_event().connect(sigc::mem_fun(*this, &ObjectListFrame::onNewEffectButtonClicked), false);
 	_newEffectButton.set_image_from_icon_name("document-new");
 	_presetsButtonBox.pack_start(_newEffectButton);
 
 	_newFolderButton.signal_clicked().
-		connect(sigc::mem_fun(*this, &PresetsFrame::onNewFolderButtonClicked));
+		connect(sigc::mem_fun(*this, &ObjectListFrame::onNewFolderButtonClicked));
 	_newFolderButton.set_image_from_icon_name("folder-new");
 	_presetsButtonBox.pack_start(_newFolderButton, false, false, 5);
 
 	_deletePresetButton.set_sensitive(false);
 	_deletePresetButton.signal_clicked().
-		connect(sigc::mem_fun(*this, &PresetsFrame::onDeletePresetButtonClicked));
+		connect(sigc::mem_fun(*this, &ObjectListFrame::onDeletePresetButtonClicked));
 	_presetsButtonBox.pack_start(_deletePresetButton, false, false, 5);
 
 	_presetsHBox.pack_start(_presetsButtonBox, false, false);
 	
-	_list.SignalSelectionChange().connect(sigc::mem_fun(this, &PresetsFrame::onSelectedPresetChanged));
-	_list.SignalObjectActivated().connect(sigc::mem_fun(this, &PresetsFrame::onObjectActivated));
+	_list.SignalSelectionChange().connect(sigc::mem_fun(this, &ObjectListFrame::onSelectedPresetChanged));
+	_list.SignalObjectActivated().connect(sigc::mem_fun(this, &ObjectListFrame::onObjectActivated));
 	_list.SetDisplayType(ObjectList::All);
 	_presetsHBox.pack_start(_list);
 	
@@ -74,10 +74,10 @@ void PresetsFrame::initPresetsPart()
 	
 	_presetsVBox.pack_start(_nameFrame, false, false, 2);
 
-	_presetsFrame.add(_presetsVBox);
+	   _objectListFrame.add(_presetsVBox);
 }
 
-void PresetsFrame::onNewPresetButtonClicked()
+void ObjectListFrame::onNewPresetButtonClicked()
 {
 	Folder& parent = _list.SelectedFolder();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
@@ -94,7 +94,7 @@ void PresetsFrame::onNewPresetButtonClicked()
 	_list.SelectObject(presetCollection);
 }
 
-void PresetsFrame::onNewChaseButtonClicked()
+void ObjectListFrame::onNewChaseButtonClicked()
 {
 	CreateChaseDialog dialog(*_management, _parentWindow);
 	if(dialog.run() == Gtk::RESPONSE_OK)
@@ -103,7 +103,7 @@ void PresetsFrame::onNewChaseButtonClicked()
 	}
 }
 
-bool PresetsFrame::onNewEffectButtonClicked(GdkEventButton* event)
+bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton* event)
 {
 	if(event->button == 1)
 	{
@@ -115,7 +115,7 @@ bool PresetsFrame::onNewEffectButtonClicked(GdkEventButton* event)
 		{
 			std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(Effect::TypeToName(t)));
 			mi->signal_activate().connect(sigc::bind<enum Effect::Type>( 
-			sigc::mem_fun(*this, &PresetsFrame::onNewEffectMenuClicked), t));
+			sigc::mem_fun(*this, &ObjectListFrame::onNewEffectMenuClicked), t));
 			_popupEffectMenu->append(*mi);
 			_popupEffectMenuItems.emplace_back(std::move(mi));
 		}
@@ -127,7 +127,7 @@ bool PresetsFrame::onNewEffectButtonClicked(GdkEventButton* event)
 	return false;
 }
 
-void PresetsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
+void ObjectListFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 {
 	std::unique_ptr<Effect> effect(Effect::Make(effectType));
 	effect->SetName(Effect::TypeToName(effectType) + std::to_string(_management->Controllables().size()+1));
@@ -138,7 +138,7 @@ void PresetsFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 	_parentWindow.EmitUpdate();
 }
 
-void PresetsFrame::onNewFolderButtonClicked()
+void ObjectListFrame::onNewFolderButtonClicked()
 {
 	Folder& parent = _list.SelectedFolder();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
@@ -152,7 +152,7 @@ void PresetsFrame::onNewFolderButtonClicked()
 	_list.OpenFolder(folder);
 }
 
-void PresetsFrame::onDeletePresetButtonClicked()
+void ObjectListFrame::onDeletePresetButtonClicked()
 {
 	FolderObject* selectedObj = _list.SelectedObject();
 	if(selectedObj && selectedObj != &_management->RootFolder())
@@ -165,7 +165,7 @@ void PresetsFrame::onDeletePresetButtonClicked()
 	}
 }
 
-void PresetsFrame::onSelectedPresetChanged()
+void ObjectListFrame::onSelectedPresetChanged()
 {
 	if(_delayUpdates.IsFirst())
 	{
@@ -182,7 +182,7 @@ void PresetsFrame::onSelectedPresetChanged()
 	}
 }
 
-void PresetsFrame::onObjectActivated(FolderObject& object)
+void ObjectListFrame::onObjectActivated(FolderObject& object)
 {
 	PropertiesWindow* window = _windowList.GetOpenWindow(object);
 	if(window)

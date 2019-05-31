@@ -7,9 +7,10 @@
 
 #include <gtkmm/stock.h>
 
-EffectPropertiesWindow::EffectPropertiesWindow(class Effect& effect, Management &management, ShowWindow &parentWindow) :
+EffectPropertiesWindow::EffectPropertiesWindow(class Effect& effect, Management& management, ShowWindow& parentWindow) :
 	PropertiesWindow(),
 	
+	_titleLabel("Effect " + effect.Name() + " (" + effect.TypeToName(effect.GetType()) + ")"),
 	_connectionsFrame("Connections"),
 	_propertiesFrame("Properties"),
 	_addConnectionButton(Gtk::Stock::ADD),
@@ -19,10 +20,15 @@ EffectPropertiesWindow::EffectPropertiesWindow(class Effect& effect, Management 
 	_management(&management),
 	_parentWindow(parentWindow)
 {
+	set_title("glight - " + effect.Name());
+	set_size_request(650, 250);
+	
 	parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &EffectPropertiesWindow::onChangeManagement));
 	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &EffectPropertiesWindow::onUpdateControllables));
 	
 	_controllablesMenu.SignalInputSelected().connect(sigc::mem_fun(*this, &EffectPropertiesWindow::onInputSelected));
+	
+	_topBox.pack_start(_titleLabel);
 	
 	_addConnectionButton.set_events(Gdk::BUTTON_PRESS_MASK);
 	_addConnectionButton.signal_button_press_event().
@@ -47,13 +53,15 @@ EffectPropertiesWindow::EffectPropertiesWindow(class Effect& effect, Management 
 	_connectionsScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_connectionsBox.pack_start(_connectionsScrolledWindow, true, true);
 	_connectionsFrame.add(_connectionsBox);
-	_propertiesHBox.pack_start(_connectionsFrame);
+	   _mainHBox.pack_start(_connectionsFrame);
 
 	_propertiesFrame.add(_propertiesBox);
 	
-	_propertiesHBox.pack_start(_propertiesFrame);
+	   _mainHBox.pack_start(_propertiesFrame);
 	
-	add(_propertiesHBox);
+	_topBox.pack_start(_mainHBox);
+	
+	add(_topBox);
 	
 	fillConnectionsList();
 	_propertySet = PropertySet::Make(effect);

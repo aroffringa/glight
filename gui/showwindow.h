@@ -85,7 +85,7 @@ private:
 	std::unique_ptr<class Management> _backgroundManagement;
 	class PresetCollection *_preset;
 
-	std::unique_ptr<class PresetsFrame> _presetsFrame;
+	std::unique_ptr<class ObjectListFrame> _objectListFrame;
 	std::unique_ptr<class SceneFrame> _sceneFrame;
 
 	GUIState _state;

@@ -7,7 +7,7 @@
 #include "chasewizard.h"
 #include "configurationwindow.h"
 #include "controlwindow.h"
-#include "presetsframe.h"
+#include "objectlistframe.h"
 #include "sceneframe.h"
 #include "visualizationwindow.h"
 
@@ -56,10 +56,10 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 
 	createMenu();
 	
-	_presetsFrame.reset(new PresetsFrame(*_management, *this));
+	_objectListFrame.reset(new ObjectListFrame(*_management, *this));
 	_sceneFrame.reset(new SceneFrame(*_management, *this));
 
-	_notebook.append_page(*_presetsFrame, "Presets");
+	_notebook.append_page(*_objectListFrame, "Objects");
 	_notebook.append_page(*_sceneFrame, "Timeline");
 
 	_box.pack_start(_notebook);

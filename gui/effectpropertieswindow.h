@@ -7,6 +7,7 @@
 #include "components/propertiesbox.h"
 
 #include <gtkmm/frame.h>
+#include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
@@ -34,6 +35,7 @@ private:
 	}
 	void onUpdateControllables();
 
+	Gtk::Label _titleLabel;
 	Gtk::TreeView _connectionsListView;
 	Glib::RefPtr<Gtk::ListStore> _connectionsListModel;
 	struct ConnectionsListColumns : public Gtk::TreeModelColumnRecord
@@ -46,7 +48,8 @@ private:
 		Gtk::TreeModelColumn<size_t> _inputIndex;
 	} _connectionsListColumns;
 	
-	Gtk::HBox _propertiesHBox, _connectionsBox;
+	Gtk::VBox _topBox;
+	Gtk::HBox _mainHBox, _connectionsBox;
 	Gtk::Frame _connectionsFrame, _propertiesFrame;
 	std::unique_ptr<class PropertySet> _propertySet;
 	PropertiesBox _propertiesBox;

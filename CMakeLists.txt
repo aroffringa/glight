@@ -47,7 +47,7 @@ set(GUIFILES
   gui/effectpropertieswindow.cpp
   gui/guistate.cpp
   gui/nameframe.cpp
-  gui/presetsframe.cpp
+  gui/objectlistframe.cpp
   gui/sceneframe.cpp
   gui/showwindow.cpp
   gui/visualizationwindow.cpp
