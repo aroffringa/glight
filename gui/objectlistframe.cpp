@@ -68,6 +68,7 @@ void ObjectListFrame::initPresetsPart()
 	_list.SignalSelectionChange().connect(sigc::mem_fun(this, &ObjectListFrame::onSelectedPresetChanged));
 	_list.SignalObjectActivated().connect(sigc::mem_fun(this, &ObjectListFrame::onObjectActivated));
 	_list.SetDisplayType(ObjectList::All);
+	_list.SetShowTypeColumn(true);
 	_presetsHBox.pack_start(_list);
 	
 	_presetsVBox.pack_start(_presetsHBox);
@@ -149,7 +150,7 @@ void ObjectListFrame::onNewFolderButtonClicked()
 	lock.unlock();
 
 	_parentWindow.EmitUpdate();
-	_list.OpenFolder(folder);
+	_list.SelectObject(folder);
 }
 
 void ObjectListFrame::onDeletePresetButtonClicked()

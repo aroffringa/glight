@@ -4,6 +4,7 @@
 
 #include "../../libtheatre/chase.h"
 #include "../../libtheatre/effect.h"
+#include "../../libtheatre/fixturecontrol.h"
 #include "../../libtheatre/folder.h"
 #include "../../libtheatre/management.h"
 #include "../../libtheatre/presetcollection.h"
@@ -12,6 +13,7 @@ ObjectList::ObjectList(Management &management, ShowWindow &parentWindow) :
 	_management(&management),
 	_parentWindow(parentWindow),
 	_displayType(All),
+	_showTypeColumn(false),
 	_openFolder(&management.RootFolder()),
 	_listView(*this)
 {
@@ -42,6 +44,18 @@ ObjectList::ObjectList(Management &management, ShowWindow &parentWindow) :
 	set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 }
 
+void ObjectList::SetShowTypeColumn(bool showTypeColumn)
+{
+	if(showTypeColumn != _showTypeColumn)
+	{
+		_showTypeColumn = showTypeColumn;
+		if(_showTypeColumn)
+			_listView.insert_column("T", _listColumns._type, 0);
+		else
+			_listView.remove_column(*_listView.get_column(0));
+	}
+}
+
 void ObjectList::fillList()
 {
 	AvoidRecursion::Token token(_avoidRecursion);
@@ -51,20 +65,21 @@ void ObjectList::fillList()
 	FolderObject* selectedObj = selected ?
 		static_cast<FolderObject*>((*selected)[_listColumns._object]) : nullptr;
 	_listModel->clear();
-
+	Gtk::TreeViewColumn* objectColumn =
+		_showTypeColumn ? _listView.get_column(1) : _listView.get_column(0);
 	switch(_displayType)
 	{
 	case All:
-		_listView.get_column(0)->set_title("all");
+		objectColumn->set_title("objects");
 		break;
 	case OnlyPresetCollections:
-		_listView.get_column(0)->set_title("preset collections");
+		objectColumn->set_title("preset collections");
 		break;
 	case OnlyChases:
-		_listView.get_column(0)->set_title("chases");
+		objectColumn->set_title("chases");
 		break;
 	case OnlyEffects:
-		_listView.get_column(0)->set_title("effects");
+		objectColumn->set_title("effects");
 		break;
 	}
 	std::lock_guard<std::mutex> lock(_management->Mutex());
@@ -99,6 +114,16 @@ void ObjectList::fillListFolder(const Folder& folder, const FolderObject* select
 		{
 			Gtk::TreeModel::iterator iter = _listModel->append();
 			Gtk::TreeModel::Row childRow = *iter;
+			if(dynamic_cast<Chase*>(obj))
+				childRow[_listColumns._type] = "C";
+			else if(dynamic_cast<Folder*>(obj))
+				childRow[_listColumns._type] = "F";
+			else if(dynamic_cast<PresetCollection*>(obj))
+				childRow[_listColumns._type] = "P";
+			else if(dynamic_cast<FixtureControl*>(obj))
+				childRow[_listColumns._type] = "F";
+			else if(dynamic_cast<Effect*>(obj))
+				childRow[_listColumns._type] = "E";
 			childRow[_listColumns._title] = obj->Name();
 			childRow[_listColumns._object] = obj;
 			if(obj == selectedObj)
