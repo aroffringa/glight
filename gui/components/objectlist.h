@@ -50,10 +50,17 @@ public:
 		}
 	}
 	
+	void SetShowTypeColumn(bool showTypeColumn);
+	bool ShowTypeColumn() const
+	{
+		return _showTypeColumn;
+	}
+	
 private:
 	class Management* _management;
 	class ShowWindow& _parentWindow;
 	enum ObjectType _displayType;
+	bool _showTypeColumn;
 	class Folder* _openFolder;
 	
 	class TreeViewWithMenu : public Gtk::TreeView
@@ -69,8 +76,9 @@ private:
 	struct ListColumns : public Gtk::TreeModelColumnRecord
 	{
 		ListColumns()
-			{ add(_title); add(_object); }
+			{ add(_type); add(_title); add(_object); }
 	
+		Gtk::TreeModelColumn<Glib::ustring> _type;
 		Gtk::TreeModelColumn<Glib::ustring> _title;
 		Gtk::TreeModelColumn<class FolderObject *> _object;
 	} _listColumns;

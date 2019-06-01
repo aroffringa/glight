@@ -23,12 +23,16 @@ public:
 		_folderCombo.show();
 		
 		_list.SignalSelectionChange().connect([&]() { onSelectionChanged(); });
+		_list.SignalObjectActivated().connect([&](FolderObject& object) { onObjectActivated(object); });
 		pack_start(_list, true, true);
 		_list.show();
 	}
 	
 	ObjectList::ObjectType DisplayType() const { return _list.DisplayType(); }
 	void SetDisplayType(ObjectList::ObjectType displayType) { _list.SetDisplayType(displayType); }
+	
+	void SetShowTypeColumn(bool showTypeColumn) { _list.SetShowTypeColumn(showTypeColumn); }
+	bool ShowTypeColumn() const { return _list.ShowTypeColumn(); }
 	
 	FolderObject* SelectedObject() { return _list.SelectedObject(); }
 	
@@ -38,7 +42,7 @@ public:
 	
 	sigc::signal<void()>& SignalFolderChange() { return _signalFolderChange; }
 	
-	sigc::signal<void(FolderObject& object)>& SignalObjectActivated() { return _list.SignalObjectActivated(); }
+	sigc::signal<void(FolderObject& object)>& SignalObjectActivated() { return _signalObjectActivated; }
 	
 	void SelectObject(const FolderObject& object)
 	{
@@ -61,12 +65,21 @@ private:
 		_list.SetFolder(_folderCombo.Selection());
 		_signalFolderChange.emit();
 	}
+	void onObjectActivated(FolderObject& object)
+	{
+		Folder* folder = dynamic_cast<Folder*>(&object);
+		if(folder == nullptr)
+			_signalObjectActivated.emit(object);
+		else
+			_folderCombo.Select(*folder);
+	}
 	
 	FolderCombo _folderCombo;
 	ObjectList _list;
 	
 	sigc::signal<void()> _signalSelectionChange;
 	sigc::signal<void()> _signalFolderChange;
+	sigc::signal<void(FolderObject& object)> _signalObjectActivated;
 };
 
 #endif
