@@ -44,35 +44,36 @@ bool VisualizationWindow::onExpose(const Cairo::RefPtr<Cairo::Context>& context)
 	if(!_isInitialized)
 		initialize();
 
-	draw(context);
+	drawAll(context);
 	return true;
 }
 
-void VisualizationWindow::draw(const Cairo::RefPtr< Cairo::Context>& cairo, Management& management, size_t yOffset, size_t height)
+void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& cairo, Management& management, size_t yOffset, size_t height)
 {
 	double width = _drawingArea.get_width();
 
-	Theatre &theatre = management.Theatre();
-	ValueSnapshot snapshot = management.Snapshot();
+	const Theatre &theatre = management.Theatre();
+	const ValueSnapshot snapshot = management.Snapshot();
 	const std::vector<std::unique_ptr<Fixture>>& fixtures = theatre.Fixtures();
-	int position = 0;
-	size_t fixtureCount = fixtures.size();
-	double minDistance = std::min(width/(fixtureCount*2.0), height/2.0);
-	for(const std::unique_ptr<Fixture>& f : fixtures)
+	if(!fixtures.empty())
 	{
-		Color c = f->GetColor(snapshot);
+		Position extend = theatre.Extend();
+		double radius = std::min(width/(extend.X()*2.0), height/(extend.Y()*2.0));
+		for(const std::unique_ptr<Fixture>& f : fixtures)
+		{
+			Color c = f->GetColor(snapshot);
 
-		cairo->set_source_rgb((double) c.Red()/224.0+0.125, (double) c.Green()/224.0+0.125, (double) c.Blue()/224.0+0.125);
+			cairo->set_source_rgb((double) c.Red()/224.0+0.125, (double) c.Green()/224.0+0.125, (double) c.Blue()/224.0+0.125);
 
-		double x = ((double) position + 0.5) * (width / fixtureCount);
-		cairo->arc(x, height/2.0 + yOffset, minDistance*0.8, 0.0, 2.0 * M_PI);
-		cairo->fill();
-
-		++position;
+			double x = ((double) f->Position().X() + 0.5) * (width / extend.X());
+			double y = ((double) f->Position().Y() + 0.5) * (height / extend.Y());
+			cairo->arc(x, y + yOffset, radius*0.8, 0.0, 2.0 * M_PI);
+			cairo->fill();
+		}
 	}
 }
 
-void VisualizationWindow::draw(const Cairo::RefPtr< Cairo::Context>& cairo)
+void VisualizationWindow::drawAll(const Cairo::RefPtr< Cairo::Context>& cairo)
 {
 	double
 		width = _drawingArea.get_width(),
@@ -84,11 +85,11 @@ void VisualizationWindow::draw(const Cairo::RefPtr< Cairo::Context>& cairo)
 	
 	if(_dryManagement==nullptr)
 	{
-		draw(cairo, *_management, 0, height);
+		drawManagement(cairo, *_management, 0, height);
 	}
 	else {
-		draw(cairo, *_management, 0, height/2.0);
-		draw(cairo, *_dryManagement, height/2.0, height/2.0);
+		drawManagement(cairo, *_management, 0, height/2.0);
+		drawManagement(cairo, *_dryManagement, height/2.0, height/2.0);
 	}
 }
 

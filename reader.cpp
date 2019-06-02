@@ -179,6 +179,8 @@ void Reader::parseFixture(xmlNode *node)
 	Fixture &fixture =
 		_theatre.AddFixture(type);
 	parseNameAttr(node, fixture);
+	fixture.Position().X() = getDoubleAttribute(node, "position-x");
+	fixture.Position().Y() = getDoubleAttribute(node, "position-y");
 	fixture.ClearFunctions();
 
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)

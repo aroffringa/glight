@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "fixturetype.h"
+#include "position.h"
 
 /**
 	@author Andre Offringa
@@ -37,6 +38,10 @@ class Theatre {
 		unsigned HighestChannel() const { return _highestChannel; }
 		unsigned FirstFreeChannel() const { return _fixtures.empty() ? 0 : _highestChannel+1; }
 		void NotifyDmxChange();
+		
+		Position GetFreePosition() const;
+		
+		Position Extend() const;
 		
 	private:
 		std::vector<std::unique_ptr<class Fixture>> _fixtures;

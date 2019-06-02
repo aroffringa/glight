@@ -2,6 +2,7 @@
 
 #include "fixture.h"
 
+#include <cmath>
 #include <sstream>
 
 Theatre::Theatre(const Theatre& source) : _highestChannel(source._highestChannel)
@@ -121,3 +122,58 @@ void Theatre::NotifyDmxChange()
 	_highestChannel = highest;
 }
 
+#include <iostream>
+Position Theatre::GetFreePosition() const
+{
+	const size_t rowLength = 10.0;
+	size_t n = _fixtures.size()*2;
+	std::unique_ptr<bool[]> available(new bool[n]);
+	std::fill_n(available.get(), n, true);
+	std::cout << "_fixtures.size()=" << _fixtures.size() << '\n';
+	
+	for(const std::unique_ptr<class Fixture>& fixture : _fixtures)
+	{
+		double x = fixture->Position().X();
+		if(x < rowLength)
+		{
+			double index = x + fixture->Position().Y()*rowLength;
+			size_t midIndex = round(index);
+			if(midIndex < n)
+				available[midIndex] = false;
+			if(midIndex - index > 0.01)
+			{
+				size_t secIndex = index+1;
+				if(secIndex < n)
+					available[secIndex] = false;
+			}
+			else if(index - midIndex > 0.01)
+			{
+				size_t secIndex = index-1;
+				if(secIndex < n)
+					available[secIndex] = false;
+			}
+		}
+	}
+	for(size_t i=0; i!=n; ++i)
+	{
+		if(available[i])
+			return Position(i%rowLength, i/rowLength);
+	}
+	return Position(n%rowLength, n/rowLength);
+}
+
+Position Theatre::Extend() const
+{
+	Position extend;
+	for(const std::unique_ptr<class Fixture>& fixture : _fixtures)
+	{
+		double
+			right = fixture->Position().X()+1.0,
+			bottom = fixture->Position().Y()+1.0;
+		if(right > extend.X())
+			extend.X() = right;
+		if(bottom > extend.Y())
+			extend.Y() = bottom;
+	}
+	return extend;
+}
