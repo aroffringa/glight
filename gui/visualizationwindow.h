@@ -44,8 +44,8 @@ class VisualizationWindow : public Gtk::Window {
 		sigc::connection _timeoutConnection;
 
 		void initialize();
-		void draw(const Cairo::RefPtr< Cairo::Context>& cairo);
-		void draw(const Cairo::RefPtr< Cairo::Context>& cairo, class Management& management, size_t yOffset, size_t height);
+		void drawAll(const Cairo::RefPtr< Cairo::Context>& cairo);
+		void drawManagement(const Cairo::RefPtr< Cairo::Context>& cairo, class Management& management, size_t yOffset, size_t height);
 		bool onExpose(const Cairo::RefPtr<Cairo::Context>& context);
 		bool onTimeout()
 		{

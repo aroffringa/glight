@@ -135,13 +135,17 @@ void ConfigurationWindow::onRemoveButtonClicked()
 	_showWindow->EmitUpdate();
 }
 
+#include <iostream>
 void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 {
 	std::unique_lock<std::mutex> lock(_management->Mutex());
+	Position position = _management->Theatre().GetFreePosition();
 	FixtureType &type = _management->Theatre().AddFixtureType(cl);
 	Fixture &fixture = _management->Theatre().AddFixture(type);
+	fixture.Position() = position;
+	std::cout << position.X() << " " << position.Y() << '\n';
 	
-	const std::vector<std::unique_ptr<FixtureFunction>> &functions = fixture.Functions();
+	const std::vector<std::unique_ptr<FixtureFunction>>& functions = fixture.Functions();
 
 	int number = 1;
 	FixtureControl& control = _management->AddFixtureControl(fixture, _management->RootFolder() /* TODO */);
@@ -229,5 +233,5 @@ void ConfigurationWindow::updateFixture(const Fixture *fixture)
 		}
 		++iter;
 	}
-	throw;
+	throw std::runtime_error("ConfigurationWindow::updateFixture(): Could not find fixture");
 }
