@@ -190,8 +190,6 @@ Folder& Management::AddFolder(Folder& parent)
 
 Folder& Management::GetFolder(const std::string& path)
 {
-	std::cout << "In: " << path << " (" << Folder::RemoveRoot(path) << ")" << '\n';
-	std::cout << "Out: " << _rootFolder->FollowDown(Folder::RemoveRoot(path)).FullPath() << '\n';
 	return _rootFolder->FollowDown(Folder::RemoveRoot(path));
 }
 

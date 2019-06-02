@@ -122,14 +122,12 @@ void Theatre::NotifyDmxChange()
 	_highestChannel = highest;
 }
 
-#include <iostream>
 Position Theatre::GetFreePosition() const
 {
 	const size_t rowLength = 10.0;
 	size_t n = _fixtures.size()*2;
 	std::unique_ptr<bool[]> available(new bool[n]);
 	std::fill_n(available.get(), n, true);
-	std::cout << "_fixtures.size()=" << _fixtures.size() << '\n';
 	
 	for(const std::unique_ptr<class Fixture>& fixture : _fixtures)
 	{
