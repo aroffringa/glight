@@ -55,7 +55,6 @@ bool VisualizationWindow::onExpose(const Cairo::RefPtr<Cairo::Context>& context)
 double VisualizationWindow::scale(Management& management, double width, double height)
 {
 	const Theatre &theatre = management.Theatre();
-	const ValueSnapshot snapshot = management.Snapshot();
 	Position extend = theatre.Extend();
 	if(extend.X() == 0.0 || extend.Y() == 0.0)
 		return 0.0;
@@ -80,7 +79,7 @@ void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& c
 
 			double x = f->Position().X() + 0.5;
 			double y = f->Position().Y() + 0.5;
-			cairo->arc(x, y + yOffset, 0.4, 0.0, 2.0 * M_PI);
+			cairo->arc(x, y + yOffset/sc, 0.4, 0.0, 2.0 * M_PI);
 			cairo->fill();
 		}
 		cairo->restore();
@@ -130,7 +129,7 @@ Fixture* VisualizationWindow::fixtureAt(Management& management, const Position& 
 
 bool VisualizationWindow::onButtonPress(GdkEventButton* event)
 {
-	if(event->button == 1)
+	if(event->button == 1 && !_dryManagement)
 	{
 		double sc = invScale(*_management, _drawingArea.get_width(), _drawingArea.get_height());
 		_draggingStart = Position(event->x, event->y) * sc;
@@ -142,7 +141,7 @@ bool VisualizationWindow::onButtonPress(GdkEventButton* event)
 
 bool VisualizationWindow::onButtonRelease(GdkEventButton* event)
 {
-	if(event->button == 1)
+	if(event->button == 1 && !_dryManagement)
 	{
 		double sc = invScale(*_management, _drawingArea.get_width(), _drawingArea.get_height());
 		_draggingStart = Position(event->x, event->y) * sc;
@@ -154,7 +153,7 @@ bool VisualizationWindow::onButtonRelease(GdkEventButton* event)
 
 bool VisualizationWindow::onMotion(GdkEventMotion* event)
 {
-	if(_draggingFixture)
+	if(_draggingFixture && !_dryManagement)
 	{
 		double width = _drawingArea.get_width();
 		double height = _drawingArea.get_height();
