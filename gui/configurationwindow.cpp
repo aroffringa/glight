@@ -135,7 +135,6 @@ void ConfigurationWindow::onRemoveButtonClicked()
 	_showWindow->EmitUpdate();
 }
 
-#include <iostream>
 void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 {
 	std::unique_lock<std::mutex> lock(_management->Mutex());
@@ -143,7 +142,6 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 	FixtureType &type = _management->Theatre().AddFixtureType(cl);
 	Fixture &fixture = _management->Theatre().AddFixture(type);
 	fixture.Position() = position;
-	std::cout << position.X() << " " << position.Y() << '\n';
 	
 	const std::vector<std::unique_ptr<FixtureFunction>>& functions = fixture.Functions();
 
