@@ -143,7 +143,7 @@ void AudioWidget::UpdateKeys()
 {
 	_keys.clear();
 
-	if(_scene != 0)
+	if(_scene)
 	{
 		const std::multimap<double, std::unique_ptr<SceneItem>>&
 			items = _scene->SceneItems();

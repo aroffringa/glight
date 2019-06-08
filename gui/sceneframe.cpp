@@ -164,15 +164,17 @@ SceneFrame::~SceneFrame()
 
 void SceneFrame::Update()
 {
+	if(&_management->Show() != _show)
+	{
+		_show = &_management->Show();
+		_selectedScene = nullptr;
+	}
 	// For testing
 	if(_show->Scenes().empty())
-	{
 		_selectedScene = _show->AddScene();
-		_audioWidget.SetScene(*_selectedScene);
-	}
-	else {
+	else
 		_selectedScene = _show->Scenes()[0].get();
-	}
+	_audioWidget.SetScene(*_selectedScene);
 
 	fillControllablesList();
 	fillSceneItemList();
@@ -183,7 +185,6 @@ void SceneFrame::Update()
 void SceneFrame::ChangeManagement(class Management& management)
 {
 	_management = &management;
-	_show = &_management->Show();
 	Update();
 }
 
