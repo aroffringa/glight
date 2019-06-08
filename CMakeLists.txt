@@ -50,6 +50,7 @@ set(GUIFILES
   gui/objectlistframe.cpp
   gui/sceneframe.cpp
   gui/showwindow.cpp
+  gui/timesequencepropertieswindow.cpp
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp
   gui/components/foldercombo.cpp

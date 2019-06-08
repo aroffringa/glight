@@ -6,6 +6,7 @@
 #include "createchasedialog.h"
 #include "effectpropertieswindow.h"
 #include "showwindow.h"
+#include "timesequencepropertieswindow.h"
 
 #include "../libtheatre/chase.h"
 #include "../libtheatre/folder.h"
@@ -218,6 +219,13 @@ void ObjectListFrame::onObjectActivated(FolderObject& object)
 		if(chase)
 		{
 			std::unique_ptr<ChasePropertiesWindow> newWindow(new ChasePropertiesWindow(*chase, *_management, _parentWindow));
+			newWindow->present();
+			_windowList.Add(std::move(newWindow));
+		}
+		TimeSequence* timeSequence = dynamic_cast<TimeSequence*>(&object);
+		if(timeSequence)
+		{
+			std::unique_ptr<TimeSequencePropertiesWindow> newWindow(new TimeSequencePropertiesWindow(*timeSequence, *_management, _parentWindow));
 			newWindow->present();
 			_windowList.Add(std::move(newWindow));
 		}
