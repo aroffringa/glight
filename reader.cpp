@@ -279,7 +279,7 @@ void Reader::parseSequence(xmlNode *node, Sequence& sequence)
 void Reader::parseChase(xmlNode *node)
 {
 	Chase &chase = _management.AddChase();
-	   parseFolderAttr(node, chase);
+	parseFolderAttr(node, chase);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)

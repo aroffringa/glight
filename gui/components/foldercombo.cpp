@@ -39,7 +39,7 @@ void FolderCombo::fillList()
 		static_cast<Folder*>((*selected)[_listColumns._folder]) : nullptr;
 	_listModel->clear();
 
-	std::lock_guard<std::mutex> lock(_management->Mutex());
+	std::unique_lock<std::mutex> lock(_management->Mutex());
 	
 	Gtk::TreeModel::iterator iter = _listModel->append();
 	Gtk::TreeModel::Row row = *iter;
@@ -50,6 +50,7 @@ void FolderCombo::fillList()
 	fillListFolder(_management->RootFolder(), 1, selectedObj);
 	if(!get_active()) // in case it was removed, the selection changes
 	{
+		lock.unlock();
 		Select(_management->RootFolder());
 		_signalSelectionChange.emit();
 	}
