@@ -69,6 +69,8 @@ class Management {
 
 		class Chase& AddChase();
 		
+		class TimeSequence& AddTimeSequence();
+		
 		class Effect& AddEffect(std::unique_ptr<class Effect> effect);
 		class Effect& AddEffect(std::unique_ptr<class Effect> effect, Folder& folder);
 

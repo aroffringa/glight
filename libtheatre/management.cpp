@@ -14,6 +14,7 @@
 #include "sequence.h"
 #include "show.h"
 #include "theatre.h"
+#include "timesequence.h"
 #include "valuesnapshot.h"
 
 Management::Management() : 
@@ -344,6 +345,12 @@ Chase &Management::AddChase()
 {
 	_controllables.emplace_back(new Chase());
 	return static_cast<Chase&>(*_controllables.back());
+}
+
+TimeSequence &Management::AddTimeSequence()
+{
+	_controllables.emplace_back(new TimeSequence());
+	return static_cast<TimeSequence&>(*_controllables.back());
 }
 
 Effect& Management::AddEffect(std::unique_ptr<Effect> effect)

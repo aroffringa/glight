@@ -32,6 +32,7 @@ private:
 
 	void onNewPresetButtonClicked();
 	void onNewChaseButtonClicked();
+	void onNewTimeSequenceButtonClicked();
 	bool onNewEffectButtonClicked(GdkEventButton* event);
 	void onNewFolderButtonClicked();
 	void onDeletePresetButtonClicked();
@@ -52,7 +53,7 @@ private:
 	Gtk::HBox _presetsHBox;
 
 	Gtk::VButtonBox _presetsButtonBox;
-	Gtk::Button _newPresetButton, _newChaseButton, _newEffectButton, _newFolderButton, _deletePresetButton;
+	Gtk::Button _newPresetButton, _newChaseButton, _newTimeSequenceButton, _newEffectButton, _newFolderButton, _deletePresetButton;
 
 	std::unique_ptr<Gtk::Menu> _popupEffectMenu;
 	std::vector<std::unique_ptr<Gtk::MenuItem>> _popupEffectMenuItems;

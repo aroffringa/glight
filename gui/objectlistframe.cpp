@@ -13,12 +13,14 @@
 #include "../libtheatre/presetvalue.h"
 #include "../libtheatre/presetcollection.h"
 #include "../libtheatre/sequence.h"
+#include "../libtheatre/timesequence.h"
 
 ObjectListFrame::ObjectListFrame(Management &management, ShowWindow &parentWindow) :
 	_objectListFrame("Object programming"),
 	_list(management, parentWindow),
 	_newPresetButton("New preset"),
 	_newChaseButton("New chase"),
+	_newTimeSequenceButton("New sequence"),
 	_newEffectButton("New effect"), 
 	_newFolderButton("New folder"),
 	_deletePresetButton(Gtk::Stock::DELETE), 
@@ -48,6 +50,11 @@ void ObjectListFrame::initPresetsPart()
 	_newChaseButton.set_image_from_icon_name("document-new");
 	_presetsButtonBox.pack_start(_newChaseButton, false, false, 5);
 	
+	_newTimeSequenceButton.signal_clicked().
+		connect(sigc::mem_fun(*this, &ObjectListFrame::onNewTimeSequenceButtonClicked));
+	_newTimeSequenceButton.set_image_from_icon_name("document-new");
+	_presetsButtonBox.pack_start(_newTimeSequenceButton, false, false, 5);
+	
 	_newEffectButton.set_events(Gdk::BUTTON_PRESS_MASK);
 	_newEffectButton.signal_button_press_event().connect(sigc::mem_fun(*this, &ObjectListFrame::onNewEffectButtonClicked), false);
 	_newEffectButton.set_image_from_icon_name("document-new");
@@ -75,7 +82,7 @@ void ObjectListFrame::initPresetsPart()
 	
 	_presetsVBox.pack_start(_nameFrame, false, false, 2);
 
-	   _objectListFrame.add(_presetsVBox);
+	_objectListFrame.add(_presetsVBox);
 }
 
 void ObjectListFrame::onNewPresetButtonClicked()
@@ -102,6 +109,22 @@ void ObjectListFrame::onNewChaseButtonClicked()
 	{
 		_list.SelectObject(dialog.CreatedChase());
 	}
+}
+
+void ObjectListFrame::onNewTimeSequenceButtonClicked()
+{
+	Folder& parent = _list.SelectedFolder();
+	std::unique_lock<std::mutex> lock(_management->Mutex());
+	TimeSequence& tSequence = _management->AddTimeSequence();
+	parent.Add(tSequence);
+	std::stringstream s;
+	s << "T" << _management->Controllables().size();
+	tSequence.SetName(s.str());
+	_management->AddPreset(tSequence, 0);
+	lock.unlock();
+
+	_parentWindow.EmitUpdate();
+	_list.SelectObject(tSequence);
 }
 
 bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton* event)
