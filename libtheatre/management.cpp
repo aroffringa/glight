@@ -465,7 +465,15 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 	}
 	else if(chase)
 	{
-		_controllables[index].reset(new Chase(*chase));
+		_controllables[index]= chase->CopyWithoutSequence();
+		Chase& newChase = static_cast<Chase&>(*_controllables[index]);
+		for(const Controllable* c : chase->Sequence().List())
+		{
+			size_t cIndex = forDryCopy.ControllableIndex(c);
+			if(_controllables[cIndex] == nullptr)
+				dryCopyControllerDependency(forDryCopy, cIndex);
+			newChase.Sequence().Add(_controllables[cIndex].get());
+		}
 		GetFolder(chase->Parent().FullPath()).Add(*_controllables[index]);
 	}
 	else if(presetCollection)

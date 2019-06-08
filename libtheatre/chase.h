@@ -21,6 +21,11 @@ public:
 		_trigger(chase._trigger),
 		_transition(chase._transition)
 	{ }
+	
+	std::unique_ptr<Chase> CopyWithoutSequence() const
+	{
+		return std::unique_ptr<Chase>(new Chase(*this, std::true_type()));
+	}
 
 	size_t NInputs() const final override
 	{ return 1; }
@@ -59,6 +64,15 @@ public:
 	class Sequence& Sequence() { return _sequence; }
 
 private:
+	/**
+	 * Copy constructor for dry copy
+	 */
+	Chase(const Chase& chase, std::true_type) :
+		Controllable(chase),
+		_trigger(chase._trigger),
+		_transition(chase._transition)
+	{ }
+	
 	void mixBeatChase(const ControlValue& value, unsigned* channelValues, unsigned universe, const Timing& timing)
 	{
 		double timeInMs = timing.BeatValue();
