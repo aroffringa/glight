@@ -82,8 +82,9 @@ void ObjectList::fillList()
 		objectColumn->set_title("effects");
 		break;
 	}
-	std::lock_guard<std::mutex> lock(_management->Mutex());
+	std::unique_lock<std::mutex> lock(_management->Mutex());
 	fillListFolder(*_openFolder, selectedObj);
+	lock.unlock();
 	if(selectedObj && !SelectedObject()) // if the selected object is no longer in the list
 		_signalSelectionChange.emit();
 }
