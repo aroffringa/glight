@@ -293,7 +293,9 @@ FixtureControl& Management::GetFixtureControl(class Fixture& fixture)
 
 void Management::RemoveFixture(Fixture& fixture)
 {
+	FixtureControl& control = GetFixtureControl(fixture);
 	_theatre->RemoveFixture(fixture);
+	RemoveControllable(control);
 }
 
 PresetValue &Management::AddPreset(unsigned id, Controllable &controllable, size_t inputIndex)

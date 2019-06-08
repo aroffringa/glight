@@ -114,13 +114,13 @@ class AudioWidget : public Gtk::DrawingArea {
 			val /= size;
 			return round(std::sqrt(val));
 		}
-		void setColor(guint8 *dataPtr, char r, char g, char b)
+		void setColor(guint8 *dataPtr, unsigned char r, unsigned char g, unsigned char b)
 		{
 			dataPtr[0] = r;
 			dataPtr[1] = g;
 			dataPtr[2] = b;
 		}
-		void verticalLine(guint8 *dataPtr, size_t rowStride, int x, char r, char g, char b)
+		void verticalLine(guint8 *dataPtr, size_t rowStride, int x, unsigned char r, unsigned char g, unsigned char b)
 		{
 			if(x >= 0 && x < _width)
 			{
