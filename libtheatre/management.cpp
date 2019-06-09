@@ -464,6 +464,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 	Controllable* controllable = forDryCopy._controllables[index].get();
 	FixtureControl* fc = dynamic_cast<FixtureControl*>(controllable);
 	const Chase* chase = dynamic_cast<const Chase *>(controllable);
+	const TimeSequence* timeSequence = dynamic_cast<const TimeSequence *>(controllable);
 	const PresetCollection* presetCollection = dynamic_cast<const PresetCollection *>(controllable);
 	const Effect* effect = dynamic_cast<const Effect*>(controllable);
 	if(fc)
@@ -472,18 +473,31 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 		_controllables[index].reset(new FixtureControl(fixture));
 		GetFolder(fc->Parent().FullPath()).Add(*_controllables[index]);
 	}
-	else if(chase)
+	else if(chase || timeSequence)
 	{
-		_controllables[index]= chase->CopyWithoutSequence();
-		Chase& newChase = static_cast<Chase&>(*_controllables[index]);
-		for(const std::pair<Controllable*, size_t>& input : chase->Sequence().List())
+		const Sequence* sequence;
+		Sequence* newSequence;
+		if(chase)
+		{
+			_controllables[index] = chase->CopyWithoutSequence();
+			Chase& newChase = static_cast<Chase&>(*_controllables[index]);
+			sequence = &chase->Sequence();
+			newSequence = &newChase.Sequence();
+		}
+		else {
+			_controllables[index] = timeSequence->CopyWithoutSequence();
+			TimeSequence& newTimeSequence = static_cast<TimeSequence&>(*_controllables[index]);
+			sequence = &timeSequence->Sequence();
+			newSequence = &newTimeSequence.Sequence();
+		}
+		for(const std::pair<Controllable*, size_t>& input : sequence->List())
 		{
 			size_t cIndex = forDryCopy.ControllableIndex(input.first);
 			if(_controllables[cIndex] == nullptr)
 				dryCopyControllerDependency(forDryCopy, cIndex);
-			newChase.Sequence().Add(_controllables[cIndex].get(), input.second);
+			newSequence->Add(_controllables[cIndex].get(), input.second);
 		}
-		GetFolder(chase->Parent().FullPath()).Add(*_controllables[index]);
+		GetFolder(controllable->Parent().FullPath()).Add(*_controllables[index]);
 	}
 	else if(presetCollection)
 	{

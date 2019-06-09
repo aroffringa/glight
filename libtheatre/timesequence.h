@@ -152,8 +152,17 @@ private:
 	 * Copy constructor for dry copy
 	 */
 	TimeSequence(const TimeSequence& timeSequence) :
+	
 		Controllable(timeSequence),
-		_steps(timeSequence._steps)
+		
+		_inputValue(timeSequence._inputValue),
+		_lastValue(timeSequence._lastValue),
+		_stepStart(timeSequence._stepStart),
+		_stepNumber(timeSequence._stepNumber),
+		_transitionTriggered(timeSequence._transitionTriggered),
+		
+		_steps(timeSequence._steps),
+		_repeatCount(timeSequence._repeatCount)
 	{ }
 	
 	ControlValue _inputValue;
