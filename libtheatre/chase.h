@@ -30,7 +30,7 @@ public:
 	{ return _sequence.List().size(); }
 	
 	std::pair<Controllable*, size_t> Output(size_t index) const final override
-	{ return std::make_pair(_sequence.List()[index], 0); }
+	{ return _sequence.List()[index]; }
 	
 	virtual void Mix(unsigned *channelValues, unsigned universe, const Timing& timing) final override
 	{
@@ -70,13 +70,13 @@ private:
 	{
 		double timeInMs = timing.BeatValue();
 		unsigned step = (unsigned) fmod(timeInMs / _trigger.DelayInBeats(), _sequence.Size());
-		_sequence.List()[step]->MixInput(0, _inputValue);
+		_sequence.List()[step].first->MixInput(_sequence.List()[step].second, _inputValue);
 	}
 	
 	void mixSyncedChase(unsigned* channelValues, unsigned universe, const Timing& timing)
 	{
 		unsigned step = (timing.TimestepNumber() / _trigger.DelayInSyncs()) % _sequence.Size();
-		_sequence.List()[step]->MixInput(0, _inputValue);
+		_sequence.List()[step].first->MixInput(_sequence.List()[step].second, _inputValue);
 	}
 	
 	void mixDelayChase(unsigned* channelValues, unsigned universe, const Timing& timing)
@@ -87,16 +87,16 @@ private:
 		if(chaseTime < _trigger.DelayInMs())
 		{
 			// We are not in a transition, just mix the corresponding controllable
-			_sequence.List()[step]->MixInput(0, _inputValue);
+			_sequence.List()[step].first->MixInput(_sequence.List()[step].second, _inputValue);
 		}
 		else
 		{
 			// We are in a transition
 			double transitionTime = chaseTime - _trigger.DelayInMs();
 			Controllable
-				&first = *_sequence.List()[step],
-				&second = *_sequence.List()[(step + 1) % _sequence.Size()];
-			_transition.Mix(first, 0, second, 0, transitionTime, _inputValue, timing);
+				&first = *_sequence.List()[step].first,
+				&second = *_sequence.List()[(step + 1) % _sequence.Size()].first;
+			_transition.Mix(first, _sequence.List()[step].second, second, _sequence.List()[(step + 1) % _sequence.Size()].second, transitionTime, _inputValue, timing);
 		}
 	}
 	

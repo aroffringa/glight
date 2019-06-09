@@ -1,6 +1,7 @@
 #ifndef SEQUENCE_H
 #define SEQUENCE_H
 
+#include <utility>
 #include <vector>
 
 /**
@@ -12,25 +13,25 @@ public:
 	
 	size_t Size() const { return _list.size(); }
 
-	void Add(class Controllable* controllable)
+	void Add(class Controllable* controllable, size_t inputIndex)
 	{
-		_list.push_back(controllable);
+		_list.emplace_back(controllable, inputIndex);
 	}
 
-	const std::vector<class Controllable *>& List() const
+	const std::vector<std::pair<class Controllable*, size_t>>& List() const
 	{
 		return _list;
 	}
 
 	bool IsUsing(class Controllable& object) const
 	{
-		for(class Controllable* controllable : _list)
-			if(controllable == &object) return true;
+		for(const std::pair<class Controllable*, size_t>& input : _list)
+			if(input.first == &object) return true;
 		return false;
 	}
 	
 private:
-	std::vector<class Controllable*> _list;
+	std::vector<std::pair<class Controllable*, size_t>> _list;
 };
 
 #endif

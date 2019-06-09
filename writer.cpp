@@ -261,9 +261,9 @@ void Writer::writeFixtureControl(const FixtureControl &control)
 
 void Writer::writeChase(const Chase &chase)
 {
-	const std::vector<Controllable*>& list = chase.Sequence().List();
-	for(const Controllable* c : list)
-		requireControllable(*c);
+	const std::vector<std::pair<Controllable*,size_t>>& list = chase.Sequence().List();
+	for(const std::pair<Controllable*, size_t>& input : list)
+		requireControllable(*input.first);
 
 	startElement("chase");
 	writeFolderAttributes(chase);
@@ -292,11 +292,12 @@ void Writer::writeTransition(const Transition &transition)
 void Writer::writeSequence(const Sequence &sequence)
 {
 	startElement("sequence");
-	for(const Controllable* c : sequence.List())
+	for(const std::pair<Controllable*, size_t>& input : sequence.List())
 	{
-		startElement("controllable-ref");
-		writeAttribute("folder", _folderIds[&c->Parent()]);
-		writeAttribute("name", c->Name());
+		startElement("input-ref");
+		writeAttribute("input-index", input.second);
+		writeAttribute("folder", _folderIds[&input.first->Parent()]);
+		writeAttribute("name", input.first->Name());
 		endElement();
 	}
 	endElement();

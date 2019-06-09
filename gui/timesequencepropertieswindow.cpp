@@ -8,16 +8,16 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	PropertiesWindow(),
 	_objectBrowser(management, parentWindow),
 	
-	_delayTriggerCheckButton("Delayed trigger"),
-	_triggerSpeedLabel("Trigger speed (ms) :"),
+	_maxRepeatCB("Max repeats:"),
+	_maxRepeatCount(1.0, 100.0, 1.0),
+	
+	_delayTriggerCheckButton("Delayed trigger, in ms:"),
 	_triggerSpeed(1.0, 10000.0, 100.0),
 	
-	_synchronizedTriggerCheckButton("Synchronized"),
-	_synchronizationsLabel("Nr. of synchronizations:"),
+	_synchronizedTriggerCheckButton("Synchronized, count:"),
 	_synchronizationsCount(1.0, 100.0, 1.0),
 		
-	_beatTriggerCheckButton("Trigger by beat"),
-	_beatSpeedLabel("Beats per trigger :"),
+	_beatTriggerCheckButton("Trigger by beat, count:"),
 	_beatSpeed(0.25, 4.0, 0.25),
 	
 	_transitionSpeedLabel("Transition speed (ms) :"),
@@ -40,9 +40,17 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	_topBox.pack_start(_objectBrowser);
 	_objectBrowser.set_size_request(200, 200);
 	
-	_addButton.set_image_from_icon_name("go-next");
-	_addButton.set_valign(Gtk::ALIGN_CENTER);
-	_topBox.pack_start(_addButton, false, false, 4);
+	_addStepButton.set_image_from_icon_name("go-next");
+	_addStepButton.set_valign(Gtk::ALIGN_CENTER);
+	_addStepButton.signal_clicked().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onAddStep));
+	_topBox.pack_start(_addStepButton, false, false, 4);
+	
+	_maxRepeatCB.signal_clicked().
+		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onRepeatChanged));
+	_grid.attach(_maxRepeatCB, 0, 0, 1, 1);
+	_maxRepeatCount.signal_value_changed().
+		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onRepeatChanged));
+	_grid.attach(_maxRepeatCount, 1, 0, 1, 1);
 	
 	_stepsStore = Gtk::ListStore::create(_stepsListColumns);
 
@@ -50,51 +58,44 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	_stepsView.append_column("Controllable", _stepsListColumns._title);
 	_stepsView.append_column("Trigger", _stepsListColumns._trigger);
 	fillStepsList();
-	_stepsScrolledWindow.set_size_request(200, 200);
+	_stepsView.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onSelectedStepChanged));
 	_stepsScrolledWindow.add(_stepsView);
-
+	
+	_stepsScrolledWindow.set_size_request(200, 200);
 	_stepsScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	_grid.attach(_stepsScrolledWindow, 0, 0, 3, 1);
+	_grid.attach(_stepsScrolledWindow, 0, 1, 2, 1);
 	
 	Gtk::RadioButtonGroup group;
-	_grid.attach(_delayTriggerCheckButton, 0, 1, 1, 1);
+	_grid.attach(_delayTriggerCheckButton, 0, 2, 1, 1);
 	_delayTriggerCheckButton.set_group(group);
 	_delayTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
-	_grid.attach(_triggerSpeedLabel, 1, 1, 1, 1);
-	_triggerSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_grid.attach(_triggerSpeed, 2, 1, 1, 1);
+	_grid.attach(_triggerSpeed, 1, 2, 1, 1);
 	_triggerSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerSpeedChanged));
-	_grid.attach(_triggerSep, 0, 2, 3, 1);
 	
 	_grid.attach(_synchronizedTriggerCheckButton, 0, 3, 1, 1);
 	_synchronizedTriggerCheckButton.set_group(group);
 	_synchronizedTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
-	_synchronizationsLabel.set_halign(Gtk::ALIGN_END);
-	_grid.attach(_synchronizationsLabel, 1, 3, 1, 1);
-	_grid.attach(_synchronizationsCount, 2, 3, 1, 1);
+	_grid.attach(_synchronizationsCount, 1, 3, 1, 1);
 	_synchronizationsCount.set_value(1.0);
 	_synchronizationsCount.signal_value_changed().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onSyncCountChanged));
-	_grid.attach(_synchronizedSep, 0, 4, 3, 1);
 
-	_grid.attach(_beatTriggerCheckButton, 0, 5, 1, 1);
+	_grid.attach(_beatTriggerCheckButton, 0, 4, 1, 1);
 	_beatTriggerCheckButton.set_group(group);
 	_beatTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
-	_beatSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_grid.attach(_beatSpeedLabel, 1, 5, 1, 1);
-	_grid.attach(_beatSpeed, 2, 5, 1, 1);
+	_grid.attach(_beatSpeed, 1, 4, 1, 1);
 	_beatSpeed.set_hexpand(true);
 	_beatSpeed.set_value(1.0);
 	_beatSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onBeatSpeedChanged));
 	
 	_transitionSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_grid.attach(_transitionSpeedLabel, 0, 6, 1, 1);
-	_grid.attach(_transitionSpeed, 1, 6, 2, 1);
+	_grid.attach(_transitionSpeedLabel, 0, 5, 1, 1);
+	_grid.attach(_transitionSpeed, 1, 5, 1, 1);
 	_transitionSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionSpeedChanged));
 	
@@ -121,18 +122,30 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 		sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionTypeChanged));
 	_transitionTypeBox.pack_start(_transitionErraticRB);
 	
-	_grid.attach(_transitionTypeBox, 0, 7, 3, 1);
+	_grid.attach(_transitionTypeBox, 0, 6, 2, 1);
 	
 	_grid.set_hexpand(true);
 	_topBox.add(_grid);
 	add(_topBox);
 	show_all_children();
 	
-	load(timeSequence);
+	load();
+	onSelectedStepChanged();
 }
 
 TimeSequencePropertiesWindow::~TimeSequencePropertiesWindow()
 {
+}
+
+void TimeSequencePropertiesWindow::load()
+{
+	if(_timeSequence->RepeatCount() == 0)
+		_maxRepeatCB.set_active(false);
+	else {
+		_maxRepeatCount.set_value(_timeSequence->RepeatCount());
+		_maxRepeatCB.set_active(true);
+	}
+	fillStepsList();
 }
 
 FolderObject& TimeSequencePropertiesWindow::GetObject()
@@ -140,39 +153,100 @@ FolderObject& TimeSequencePropertiesWindow::GetObject()
 	return GetTimeSequence();
 }
 
-TimeSequence::Step& TimeSequencePropertiesWindow::selectedStep()
+TimeSequence::Step* TimeSequencePropertiesWindow::selectedStep()
 {
-	
+	Gtk::TreeModel::iterator selIter = _stepsView.get_selection()->get_selected();
+	if(selIter)
+	{
+		size_t index = (*selIter)[_stepsListColumns._step];
+		return &_timeSequence->GetStep(index);
+	}
+	else {
+		return nullptr;
+	}
 }
 
 void TimeSequencePropertiesWindow::fillStepsList()
 {
+	AvoidRecursion::Token token(_recursionLock);
+	Gtk::TreeModel::iterator iter = _stepsView.get_selection()->get_selected();
+	bool hasSelection = false;
+	size_t index = 0;
+	if(iter)
+	{
+		hasSelection = true;
+		index = (*iter)[_stepsListColumns._step];
+	}
+	_stepsStore->clear();
+	for(size_t i=0; i!=_timeSequence->Size(); ++i)
+	{
+		Gtk::TreeModel::iterator iter = _stepsStore->append();
+		Gtk::TreeModel::Row row = *iter;
+		row[_stepsListColumns._title] = _timeSequence->Sequence().List()[i].first->Name();
+		row[_stepsListColumns._trigger] = _timeSequence->GetStep(i).trigger.ToString();
+		row[_stepsListColumns._step] = i;
+		if(hasSelection && i == index)
+		{
+			_stepsView.get_selection()->select(row);
+		}
+	}
+}
+
+void TimeSequencePropertiesWindow::onAddStep()
+{
+	Controllable* object = dynamic_cast<Controllable*>(_objectBrowser.SelectedObject());
+	if(object)
+	{
+		_timeSequence->AddStep(object, 0);
+		fillStepsList();
+	}
+}
+
+void TimeSequencePropertiesWindow::onRepeatChanged()
+{
+	std::lock_guard<std::mutex> lock(_management->Mutex());
+	if(_maxRepeatCB.get_active())
+		_timeSequence->SetRepeatCount(_maxRepeatCount.get_value());
+	else
+		_timeSequence->SetRepeatCount(0);
 }
 
 void TimeSequencePropertiesWindow::onTriggerTypeChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
-	TimeSequence::Step& step = selectedStep();
-	if(_delayTriggerCheckButton.get_active())
-		step.trigger.SetType(Trigger::DelayTriggered);
-	else if(_synchronizedTriggerCheckButton.get_active())
-		step.trigger.SetType(Trigger::SyncTriggered);
-	else
-		step.trigger.SetType(Trigger::BeatTriggered);
+	TimeSequence::Step* step = selectedStep();
+	if(step)
+	{
+		if(_delayTriggerCheckButton.get_active())
+			step->trigger.SetType(Trigger::DelayTriggered);
+		else if(_synchronizedTriggerCheckButton.get_active())
+			step->trigger.SetType(Trigger::SyncTriggered);
+		else
+			step->trigger.SetType(Trigger::BeatTriggered);
+		fillStepsList();
+	}
 }
 
 void TimeSequencePropertiesWindow::onTriggerSpeedChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
-	TimeSequence::Step& step = selectedStep();
-	step.trigger.SetDelayInMs(_triggerSpeed.get_value());
+	TimeSequence::Step* step = selectedStep();
+	if(step)
+	{
+		step->trigger.SetDelayInMs(_triggerSpeed.get_value());
+		fillStepsList();
+	}
 }
 
 void TimeSequencePropertiesWindow::onTransitionSpeedChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
-	TimeSequence::Step& step = selectedStep();
-	step.transition.SetLengthInMs(_transitionSpeed.get_value());
+	TimeSequence::Step* step = selectedStep();
+	if(step)
+	{
+		step->transition.SetLengthInMs(_transitionSpeed.get_value());
+		fillStepsList();
+	}
 }
 
 void TimeSequencePropertiesWindow::onTransitionTypeChanged()
@@ -187,23 +261,50 @@ void TimeSequencePropertiesWindow::onTransitionTypeChanged()
 	else //if(_transitionErraticRB.get_active())
 		type = Transition::Erratic;
 	std::lock_guard<std::mutex> lock(_management->Mutex());
-	selectedStep().transition.SetType(type);
+	TimeSequence::Step* step = selectedStep();
+	if(step)
+	{
+		step->transition.SetType(type);
+		fillStepsList();
+	}
 }
 
 void TimeSequencePropertiesWindow::onSyncCountChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
-	selectedStep().trigger.SetDelayInSyncs(_synchronizationsCount.get_value());
+	TimeSequence::Step* step = selectedStep();
+	if(step)
+	{
+		step->trigger.SetDelayInSyncs(_synchronizationsCount.get_value());
+		fillStepsList();
+	}
 }
 
 void TimeSequencePropertiesWindow::onBeatSpeedChanged()
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
-	selectedStep().trigger.SetDelayInBeats(_beatSpeed.get_value());
+	TimeSequence::Step* step = selectedStep();
+	if(step)
+	{
+		step->trigger.SetDelayInBeats(_beatSpeed.get_value());
+		fillStepsList();
+	}
 }
 
-void TimeSequencePropertiesWindow::load(const TimeSequence& timeSequence)
+void TimeSequencePropertiesWindow::onSelectedStepChanged()
 {
+	if(_recursionLock.IsFirst())
+	{
+		TimeSequence::Step* step = selectedStep();
+		if(step)
+		{
+			loadStep(*step);
+			setStepSensitive(true);
+		}
+		else {
+			setStepSensitive(false);
+		}
+	}
 }
 
 void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step& step)
@@ -218,10 +319,18 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step& step)
 	_triggerSpeed.set_value(triggerSpeed);
 	_transitionSpeed.set_value(transitionSpeed);
 	_beatSpeed.set_value(beatSpeed);
-	if(triggerType == Trigger::DelayTriggered)
+	switch(triggerType)
+	{
+	case Trigger::DelayTriggered:
 		_delayTriggerCheckButton.set_active(true);
-	else
+		break;
+	case Trigger::SyncTriggered:
+		_synchronizedTriggerCheckButton.set_active(true);
+		break;
+	case Trigger::BeatTriggered:
 		_beatTriggerCheckButton.set_active(true);
+		break;
+	}	
 	switch(transitionType)
 	{
 		case Transition::None:
@@ -231,7 +340,7 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step& step)
 			_transitionFadeRB.set_active();
 			break;
 		case Transition::FadeThroughBlack:
-			_transitionFadeRB.set_active();
+			_transitionFadeThroughBlackRB.set_active();
 			break;
 		case Transition::Erratic:
 			_transitionErraticRB.set_active();
@@ -239,10 +348,26 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step& step)
 	}
 }
 
+void TimeSequencePropertiesWindow::setStepSensitive(bool sensitive)
+{
+	_delayTriggerCheckButton.set_sensitive(sensitive);
+	_triggerSpeed.set_sensitive(sensitive);
+	_synchronizedTriggerCheckButton.set_sensitive(sensitive);
+	_synchronizationsCount.set_sensitive(sensitive);
+	_beatTriggerCheckButton.set_sensitive(sensitive);
+	_beatSpeed.set_sensitive(sensitive);
+	_transitionErraticRB.set_sensitive(sensitive);
+	_transitionSpeed.set_sensitive(sensitive);
+	_transitionNoneRB.set_sensitive(sensitive);
+	_transitionFadeRB.set_sensitive(sensitive);
+	_transitionFadeThroughBlackRB.set_sensitive(sensitive);
+	_transitionErraticRB.set_sensitive(sensitive);
+}
+
 void TimeSequencePropertiesWindow::onUpdateControllables()
 {
 	if(_management->Contains(*_timeSequence))
-		load(*_timeSequence);
+		load();
 	else 
 		hide();
 }

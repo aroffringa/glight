@@ -263,12 +263,13 @@ void Reader::parseSequence(xmlNode *node, Sequence& sequence)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
 		{
-			if(name(curNode) == "controllable-ref")
+			if(name(curNode) == "input-ref")
 			{
+				size_t input = getIntAttribute(curNode, "input-index");
 				size_t folderId = getIntAttribute(curNode, "folder");
 				PresetCollection& pc = dynamic_cast<PresetCollection&>(
 					_management.Folders()[folderId]->GetChild(getStringAttribute(curNode, "name")));
-				sequence.Add(&pc);
+				sequence.Add(&pc, input);
 			}
 			else
 				throw std::runtime_error("Bad node in sequence");

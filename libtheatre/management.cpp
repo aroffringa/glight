@@ -476,12 +476,12 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 	{
 		_controllables[index]= chase->CopyWithoutSequence();
 		Chase& newChase = static_cast<Chase&>(*_controllables[index]);
-		for(const Controllable* c : chase->Sequence().List())
+		for(const std::pair<Controllable*, size_t>& input : chase->Sequence().List())
 		{
-			size_t cIndex = forDryCopy.ControllableIndex(c);
+			size_t cIndex = forDryCopy.ControllableIndex(input.first);
 			if(_controllables[cIndex] == nullptr)
 				dryCopyControllerDependency(forDryCopy, cIndex);
-			newChase.Sequence().Add(_controllables[cIndex].get());
+			newChase.Sequence().Add(_controllables[cIndex].get(), input.second);
 		}
 		GetFolder(chase->Parent().FullPath()).Add(*_controllables[index]);
 	}

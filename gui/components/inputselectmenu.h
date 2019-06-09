@@ -24,6 +24,7 @@ private:
 	std::unique_ptr<Gtk::Menu>
 		_popupMenu,
 		_popupChaseMenu,
+		_popupSequenceMenu,
 		_popupPresetMenu,
 		_popupFunctionMenu,
 		_popupEffectsMenu;

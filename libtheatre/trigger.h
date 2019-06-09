@@ -1,6 +1,8 @@
 #ifndef TRIGGER_H
 #define TRIGGER_H
 
+#include <string>
+
 /**
 	@author Andre Offringa
 */
@@ -26,6 +28,20 @@ class Trigger {
 		
 		enum Type Type() const { return _type; }
 		void SetType(enum Type type) { _type = type; }
+		
+		std::string ToString() const
+		{
+			switch(_type)
+			{
+				case DelayTriggered:
+					return std::to_string(_delayInMs/1000.0) + " s";
+				case SyncTriggered:
+					return std::to_string(_delaySynced) + " syncs";
+				case BeatTriggered:
+					return std::to_string(_delayInBeats) + " beats";
+			}
+			return std::string();
+		}
 		
 	private:
 		enum Type _type;

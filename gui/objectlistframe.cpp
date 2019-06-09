@@ -109,6 +109,7 @@ void ObjectListFrame::onNewChaseButtonClicked()
 	if(dialog.run() == Gtk::RESPONSE_OK)
 	{
 		_list.SelectObject(dialog.CreatedChase());
+		onObjectActivated(dialog.CreatedChase());
 	}
 }
 
@@ -126,6 +127,7 @@ void ObjectListFrame::onNewTimeSequenceButtonClicked()
 
 	_parentWindow.EmitUpdate();
 	_list.SelectObject(tSequence);
+	onObjectActivated(tSequence);
 }
 
 bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton* event)
@@ -161,6 +163,8 @@ void ObjectListFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 	for(size_t i=0; i!=added->NInputs(); ++i)
 		_management->AddPreset(*added, i);
 	_parentWindow.EmitUpdate();
+	_list.SelectObject(*added);
+	onObjectActivated(*added);
 }
 
 void ObjectListFrame::onNewFolderButtonClicked()

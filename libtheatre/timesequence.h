@@ -18,7 +18,7 @@ public:
 		_lastValue(0),
 		_stepStart(),
 		_stepNumber(0),
-		_transitionTriggered(0),
+		_transitionTriggered(false),
 		_sequence(),
 		_steps(),
 		_repeatCount(1)
@@ -39,7 +39,10 @@ public:
 	{ return _sequence.List().size(); }
 	
 	std::pair<Controllable*, size_t> Output(size_t index) const final override
-	{ return std::make_pair(_sequence.List()[index], 0); }
+	{ return std::make_pair(_sequence.List()[index].first, _sequence.List()[index].second); }
+	
+	size_t RepeatCount() const { return _repeatCount; }
+	void SetRepeatCount(size_t count) { _repeatCount = count; }
 	
 	virtual void Mix(unsigned *channelValues, unsigned universe, const Timing& timing) final override
 	{
@@ -67,8 +70,6 @@ public:
 								_transitionTriggered = true;
 								_stepStart = timing;
 							}
-							else
-								_sequence.List()[_stepNumber % _steps.size()]->MixInput(0, _inputValue);
 						} break;
 						case Trigger::SyncTriggered:
 						{
@@ -89,19 +90,35 @@ public:
 							}
 						} break;
 					}
+					if(!_transitionTriggered)
+					{
+						const std::pair<Controllable*, size_t>& input = _sequence.List()[_stepNumber % _steps.size()];
+						input.first->MixInput(input.second, _inputValue);
+					}
 				}
 				if(_transitionTriggered)
 				{
-					double transitionTime = timing.TimeInMS() - _stepStart.TimeInMS();
-					Controllable
-						&first = *_sequence.List()[_stepNumber % _steps.size()],
-						&second = *_sequence.List()[(_stepNumber+1) % _steps.size()];
-					activeStep.transition.Mix(first, 0, second, 0, transitionTime, _inputValue, timing);
-					if(activeStep.transition.LengthInMs() > transitionTime)
+					if(_repeatCount != 0 && _stepNumber+1 == _repeatCount * _steps.size())
 					{
 						++_stepNumber;
 						_stepStart = timing;
 						_transitionTriggered = false;
+					}
+					else {
+						double transitionTime = timing.TimeInMS() - _stepStart.TimeInMS();
+						const std::pair<Controllable*, size_t>
+							&a = _sequence.List()[_stepNumber % _steps.size()],
+							&b = _sequence.List()[(_stepNumber+1) % _steps.size()];
+						if(transitionTime >= activeStep.transition.LengthInMs())
+						{
+							++_stepNumber;
+							_stepStart = timing;
+							_transitionTriggered = false;
+							b.first->MixInput(b.second, _inputValue);
+						}
+						else {
+							activeStep.transition.Mix(*a.first, a.second, *b.first, b.second, transitionTime, _inputValue, timing);
+						}
 					}
 				}
 			}
@@ -110,12 +127,23 @@ public:
 	}
 	
 	const class Sequence& Sequence() const { return _sequence; }
-	class Sequence& Sequence() { return _sequence; }
-
+	
 	struct Step {
 		Transition transition;
 		Trigger trigger;
 	};
+	
+	void AddStep(Controllable* controllable, size_t input)
+	{
+		_sequence.Add(controllable, input);
+		_steps.emplace_back();
+	}
+	
+	const Step& GetStep(size_t index) const { return _steps[index]; }
+	Step& GetStep(size_t index) { return _steps[index]; }
+	
+	size_t Size() const { return _steps.size(); }
+	
 private:
 	/**
 	 * Copy constructor for dry copy

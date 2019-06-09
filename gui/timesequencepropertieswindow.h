@@ -1,6 +1,7 @@
 #ifndef TIME_SEQUENCE_PROPERTIES_WINDOW_H
 #define TIME_SEQUENCE_PROPERTIES_WINDOW_H
 
+#include "avoidrecursion.h"
 #include "propertieswindow.h"
 
 #include "components/objectbrowser.h"
@@ -31,9 +32,12 @@ public:
 	class TimeSequence& GetTimeSequence() { return *_timeSequence; }
 	
 private:
+	void onSelectedStepChanged();
+	void load();
 	void fillStepsList();
-	void load(const TimeSequence& timeSequence);
 	void loadStep(const TimeSequence::Step& step);
+	void onAddStep();
+	void onRepeatChanged();
 	void onTriggerTypeChanged();
 	void onTriggerSpeedChanged();
 	void onTransitionSpeedChanged();
@@ -46,13 +50,13 @@ private:
 		_management = &management;
 	}
 	void onUpdateControllables();
-	
-	TimeSequence::Step& selectedStep();
+	void setStepSensitive(bool sensitive);
+	TimeSequence::Step* selectedStep();
 	
 	Gtk::HBox _topBox;
 	ObjectBrowser _objectBrowser;
 	
-	Gtk::Button _addButton;
+	Gtk::Button _addStepButton;
 	
 	Gtk::Grid _grid;
 	Gtk::TreeView _stepsView;
@@ -68,18 +72,16 @@ private:
 	} _stepsListColumns;
 	Gtk::ScrolledWindow _stepsScrolledWindow;
 	
+	Gtk::CheckButton _maxRepeatCB;
+	Gtk::HScale _maxRepeatCount;
+	
 	Gtk::RadioButton _delayTriggerCheckButton;
-	Gtk::Label _triggerSpeedLabel;
 	Gtk::HScale _triggerSpeed;
-	Gtk::HSeparator _triggerSep;
 	
 	Gtk::RadioButton _synchronizedTriggerCheckButton;
-	Gtk::Label _synchronizationsLabel;
 	Gtk::HScale _synchronizationsCount;
-	Gtk::HSeparator _synchronizedSep;
 	
 	Gtk::RadioButton _beatTriggerCheckButton;
-	Gtk::Label _beatSpeedLabel;
 	Gtk::HScale _beatSpeed;
 	
 	Gtk::Label _transitionSpeedLabel;
@@ -87,6 +89,8 @@ private:
 	Gtk::HBox _transitionTypeBox;
 	Gtk::Label _transitionTypeLabel;
 	Gtk::RadioButton _transitionNoneRB, _transitionFadeRB, _transitionFadeThroughBlackRB, _transitionErraticRB;
+	
+	AvoidRecursion _recursionLock;
 	
 	TimeSequence* _timeSequence;
 	Management* _management;
