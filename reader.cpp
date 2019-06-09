@@ -302,6 +302,7 @@ void Reader::parseTimeSequence(xmlNode *node)
 {
 	TimeSequence &timeSequence = _management.AddTimeSequence();
 	parseFolderAttr(node, timeSequence);
+	timeSequence.SetSustain(getBoolAttribute(node, "sustain"));
 	timeSequence.SetRepeatCount(getIntAttribute(node, "repeat-count"));
 	
 	size_t stepIndex = 0;

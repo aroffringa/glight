@@ -285,6 +285,7 @@ void Writer::writeTimeSequence(const TimeSequence& timeSequence)
 
 	startElement("time-sequence");
 	writeFolderAttributes(timeSequence);
+	writeAttribute("sustain", timeSequence.Sustain());
 	writeAttribute("repeat-count", timeSequence.RepeatCount());
 	writeSequence(timeSequence.Sequence());
 	for(size_t i=0; i!=timeSequence.Size(); ++i)

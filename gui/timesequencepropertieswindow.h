@@ -37,6 +37,7 @@ private:
 	void fillStepsList();
 	void loadStep(const TimeSequence::Step& step);
 	void onAddStep();
+	void onSustainChanged();
 	void onRepeatChanged();
 	void onTriggerTypeChanged();
 	void onTriggerSpeedChanged();
@@ -72,6 +73,7 @@ private:
 	} _stepsListColumns;
 	Gtk::ScrolledWindow _stepsScrolledWindow;
 	
+	Gtk::CheckButton _sustainCB;
 	Gtk::CheckButton _maxRepeatCB;
 	Gtk::HScale _maxRepeatCount;
 	

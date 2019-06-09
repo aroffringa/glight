@@ -8,6 +8,7 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	PropertiesWindow(),
 	_objectBrowser(management, parentWindow),
 	
+	_sustainCB("Sustain"),
 	_maxRepeatCB("Max repeats:"),
 	_maxRepeatCount(1.0, 100.0, 1.0),
 	
@@ -45,12 +46,15 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	_addStepButton.signal_clicked().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onAddStep));
 	_topBox.pack_start(_addStepButton, false, false, 4);
 	
+	_sustainCB.signal_clicked().
+		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onSustainChanged));
+	_grid.attach(_sustainCB, 0, 0, 2, 1);
 	_maxRepeatCB.signal_clicked().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onRepeatChanged));
-	_grid.attach(_maxRepeatCB, 0, 0, 1, 1);
+	_grid.attach(_maxRepeatCB, 0, 1, 1, 1);
 	_maxRepeatCount.signal_value_changed().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onRepeatChanged));
-	_grid.attach(_maxRepeatCount, 1, 0, 1, 1);
+	_grid.attach(_maxRepeatCount, 1, 1, 1, 1);
 	
 	_stepsStore = Gtk::ListStore::create(_stepsListColumns);
 
@@ -63,39 +67,39 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	
 	_stepsScrolledWindow.set_size_request(200, 200);
 	_stepsScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	_grid.attach(_stepsScrolledWindow, 0, 1, 2, 1);
+	_grid.attach(_stepsScrolledWindow, 0, 2, 2, 1);
 	
 	Gtk::RadioButtonGroup group;
-	_grid.attach(_delayTriggerCheckButton, 0, 2, 1, 1);
+	_grid.attach(_delayTriggerCheckButton, 0, 3, 1, 1);
 	_delayTriggerCheckButton.set_group(group);
 	_delayTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
-	_grid.attach(_triggerSpeed, 1, 2, 1, 1);
+	_grid.attach(_triggerSpeed, 1, 3, 1, 1);
 	_triggerSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerSpeedChanged));
 	
-	_grid.attach(_synchronizedTriggerCheckButton, 0, 3, 1, 1);
+	_grid.attach(_synchronizedTriggerCheckButton, 0, 4, 1, 1);
 	_synchronizedTriggerCheckButton.set_group(group);
 	_synchronizedTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
-	_grid.attach(_synchronizationsCount, 1, 3, 1, 1);
+	_grid.attach(_synchronizationsCount, 1, 4, 1, 1);
 	_synchronizationsCount.set_value(1.0);
 	_synchronizationsCount.signal_value_changed().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onSyncCountChanged));
 
-	_grid.attach(_beatTriggerCheckButton, 0, 4, 1, 1);
+	_grid.attach(_beatTriggerCheckButton, 0, 5, 1, 1);
 	_beatTriggerCheckButton.set_group(group);
 	_beatTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
-	_grid.attach(_beatSpeed, 1, 4, 1, 1);
+	_grid.attach(_beatSpeed, 1, 5, 1, 1);
 	_beatSpeed.set_hexpand(true);
 	_beatSpeed.set_value(1.0);
 	_beatSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onBeatSpeedChanged));
 	
 	_transitionSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_grid.attach(_transitionSpeedLabel, 0, 5, 1, 1);
-	_grid.attach(_transitionSpeed, 1, 5, 1, 1);
+	_grid.attach(_transitionSpeedLabel, 0, 6, 1, 1);
+	_grid.attach(_transitionSpeed, 1, 6, 1, 1);
 	_transitionSpeed.signal_value_changed().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionSpeedChanged));
 	
@@ -122,7 +126,7 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 		sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionTypeChanged));
 	_transitionTypeBox.pack_start(_transitionErraticRB);
 	
-	_grid.attach(_transitionTypeBox, 0, 6, 2, 1);
+	_grid.attach(_transitionTypeBox, 0, 7, 2, 1);
 	
 	_grid.set_hexpand(true);
 	_topBox.add(_grid);
@@ -139,6 +143,7 @@ TimeSequencePropertiesWindow::~TimeSequencePropertiesWindow()
 
 void TimeSequencePropertiesWindow::load()
 {
+	_sustainCB.set_active(_timeSequence->Sustain());
 	if(_timeSequence->RepeatCount() == 0)
 		_maxRepeatCB.set_active(false);
 	else {
@@ -200,6 +205,12 @@ void TimeSequencePropertiesWindow::onAddStep()
 		_timeSequence->AddStep(object, 0);
 		fillStepsList();
 	}
+}
+
+void TimeSequencePropertiesWindow::onSustainChanged()
+{
+	std::lock_guard<std::mutex> lock(_management->Mutex());
+	_timeSequence->SetSustain(_sustainCB.get_active());
 }
 
 void TimeSequencePropertiesWindow::onRepeatChanged()

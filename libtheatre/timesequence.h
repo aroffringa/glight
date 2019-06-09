@@ -15,12 +15,13 @@ class TimeSequence : public Controllable {
 public:
 	TimeSequence() :
 		_inputValue(),
-		_lastValue(0),
+		_activeValue(0),
 		_stepStart(),
 		_stepNumber(0),
 		_transitionTriggered(false),
 		_sequence(),
 		_steps(),
+		_sustain(false),
 		_repeatCount(1)
 	{ }
 	
@@ -44,11 +45,14 @@ public:
 	size_t RepeatCount() const { return _repeatCount; }
 	void SetRepeatCount(size_t count) { _repeatCount = count; }
 	
+	bool Sustain() const { return _sustain; }
+	void SetSustain(bool sustain) { _sustain = sustain; }
+	
 	virtual void Mix(unsigned *channelValues, unsigned universe, const Timing& timing) final override
 	{
-		if(_inputValue)
+		if(_inputValue || (_sustain && _activeValue))
 		{
-			if(!_lastValue)
+			if(!_activeValue)
 			{
 				// Start the sequence
 				_stepNumber = 0;
@@ -57,6 +61,10 @@ public:
 			}
 			if(_repeatCount == 0 || _stepNumber < _repeatCount * _steps.size())
 			{
+				if(_sustain)
+					_activeValue = std::max(_activeValue.UInt(), _inputValue.UInt());
+				else
+					_activeValue = _inputValue;
 				const Step& activeStep = _steps[_stepNumber % _steps.size()];
 				if(!_transitionTriggered)
 				{
@@ -93,18 +101,19 @@ public:
 					if(!_transitionTriggered)
 					{
 						const std::pair<Controllable*, size_t>& input = _sequence.List()[_stepNumber % _steps.size()];
-						input.first->MixInput(input.second, _inputValue);
+						input.first->MixInput(input.second, _activeValue);
 					}
 				}
 				if(_transitionTriggered)
 				{
-					if(_repeatCount != 0 && _stepNumber+1 == _repeatCount * _steps.size())
+					// Are we in the final step?
+					if(_repeatCount != 0 && _stepNumber+1 >= _repeatCount * _steps.size())
 					{
 						++_stepNumber;
-						_stepStart = timing;
-						_transitionTriggered = false;
+						_activeValue = _inputValue;
 					}
 					else {
+						// Not there yet; transition to next state
 						double transitionTime = timing.TimeInMS() - _stepStart.TimeInMS();
 						const std::pair<Controllable*, size_t>
 							&a = _sequence.List()[_stepNumber % _steps.size()],
@@ -114,16 +123,21 @@ public:
 							++_stepNumber;
 							_stepStart = timing;
 							_transitionTriggered = false;
-							b.first->MixInput(b.second, _inputValue);
+							b.first->MixInput(b.second, _activeValue);
 						}
 						else {
-							activeStep.transition.Mix(*a.first, a.second, *b.first, b.second, transitionTime, _inputValue, timing);
+							activeStep.transition.Mix(*a.first, a.second, *b.first, b.second, transitionTime, _activeValue, timing);
 						}
 					}
 				}
 			}
+			else {
+				_activeValue = _inputValue;
+			}
 		}
-		_lastValue = _inputValue;
+		else {
+			_activeValue = 0;
+		}
 	}
 	
 	class Sequence& Sequence() { return _sequence; }
@@ -156,23 +170,25 @@ private:
 		Controllable(timeSequence),
 		
 		_inputValue(timeSequence._inputValue),
-		_lastValue(timeSequence._lastValue),
+		_activeValue(timeSequence._activeValue),
 		_stepStart(timeSequence._stepStart),
 		_stepNumber(timeSequence._stepNumber),
 		_transitionTriggered(timeSequence._transitionTriggered),
 		
 		_steps(timeSequence._steps),
+		_sustain(timeSequence._sustain),
 		_repeatCount(timeSequence._repeatCount)
 	{ }
 	
 	ControlValue _inputValue;
-	unsigned _lastValue;
+	ControlValue _activeValue;
 	Timing _stepStart;
 	size_t _stepNumber;
 	bool _transitionTriggered;
 	
 	class Sequence _sequence;
 	std::vector<Step> _steps;
+	bool _sustain;
 	size_t _repeatCount;
 };
 
