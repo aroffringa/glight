@@ -4,6 +4,8 @@
 
 #include "../libtheatre/management.h"
 
+#include <gtkmm/messagedialog.h>
+
 TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& timeSequence, Management &management, ShowWindow &parentWindow) :
 	PropertiesWindow(),
 	_objectBrowser(management, parentWindow),
@@ -42,9 +44,15 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	_objectBrowser.set_size_request(200, 200);
 	
 	_addStepButton.set_image_from_icon_name("go-next");
-	_addStepButton.set_valign(Gtk::ALIGN_CENTER);
 	_addStepButton.signal_clicked().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onAddStep));
-	_topBox.pack_start(_addStepButton, false, false, 4);
+	_buttonBox.pack_start(_addStepButton, false, false, 4);
+	
+	_removeStepButton.set_image_from_icon_name("go-previous");
+	_removeStepButton.signal_clicked().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onRemoveStep));
+	_buttonBox.pack_start(_removeStepButton, false, false, 4);
+	
+	_buttonBox.set_valign(Gtk::ALIGN_CENTER);
+	_topBox.pack_start(_buttonBox);
 	
 	_sustainCB.signal_clicked().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onSustainChanged));
@@ -171,6 +179,11 @@ TimeSequence::Step* TimeSequencePropertiesWindow::selectedStep()
 	}
 }
 
+void TimeSequencePropertiesWindow::selectStep(size_t index)
+{
+	_stepsView.get_selection()->select(_stepsStore->children()[index]);
+}
+
 void TimeSequencePropertiesWindow::fillStepsList()
 {
 	AvoidRecursion::Token token(_recursionLock);
@@ -195,6 +208,9 @@ void TimeSequencePropertiesWindow::fillStepsList()
 			_stepsView.get_selection()->select(row);
 		}
 	}
+	token.Release();
+	if(hasSelection && !_stepsView.get_selection()->get_selected())
+		onSelectedStepChanged();
 }
 
 void TimeSequencePropertiesWindow::onAddStep()
@@ -202,8 +218,42 @@ void TimeSequencePropertiesWindow::onAddStep()
 	Controllable* object = dynamic_cast<Controllable*>(_objectBrowser.SelectedObject());
 	if(object)
 	{
+		std::unique_lock<std::mutex> lock(_management->Mutex());
 		_timeSequence->AddStep(object, 0);
-		fillStepsList();
+		if(_management->HasCycle())
+		{
+			_timeSequence->RemoveStep(_timeSequence->Size()-1);
+			lock.unlock();
+			Gtk::MessageDialog dialog(
+				"Can not add this object to the time sequence: this would create a cycle in the connections.",
+				false,
+				Gtk::MESSAGE_ERROR
+			);
+			dialog.run();
+		}
+		else {
+			lock.unlock();
+			fillStepsList();
+			selectStep(_timeSequence->Size()-1);
+		}
+	}
+}
+
+void TimeSequencePropertiesWindow::onRemoveStep()
+{
+	Controllable* object = dynamic_cast<Controllable*>(_objectBrowser.SelectedObject());
+	if(object)
+	{
+		Gtk::TreeModel::iterator selIter = _stepsView.get_selection()->get_selected();
+		if(selIter)
+		{
+			size_t index = (*selIter)[_stepsListColumns._step];
+			std::unique_lock<std::mutex> lock(_management->Mutex());
+			_timeSequence->RemoveStep(index);
+			lock.unlock();
+			
+			fillStepsList();
+		}
 	}
 }
 
@@ -363,6 +413,8 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step& step)
 
 void TimeSequencePropertiesWindow::setStepSensitive(bool sensitive)
 {
+	_removeStepButton.set_sensitive(sensitive);
+	
 	_delayTriggerCheckButton.set_sensitive(sensitive);
 	_triggerSpeed.set_sensitive(sensitive);
 	_synchronizedTriggerCheckButton.set_sensitive(sensitive);

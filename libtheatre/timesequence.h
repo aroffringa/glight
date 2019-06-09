@@ -156,6 +156,12 @@ public:
 		_steps.emplace_back();
 	}
 	
+	void RemoveStep(size_t index)
+	{
+		_sequence.Remove(index);
+		_steps.erase(_steps.begin() + index);
+	}
+	
 	const Step& GetStep(size_t index) const { return _steps[index]; }
 	Step& GetStep(size_t index) { return _steps[index]; }
 	
