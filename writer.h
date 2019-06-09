@@ -68,6 +68,11 @@ class Writer {
 		void writeAttribute(const char *attributeName, const std::string &attributeValue)
 		{ writeAttribute(attributeName, attributeValue.c_str()); }
 		void writeAttribute(const char *attributeName, int attributeValue);
+		void writeAttribute(const char *attributeName, unsigned attributeValue)
+		{ writeAttribute(attributeName, int(attributeValue)); }
+		void writeAttribute(const char *attributeName, unsigned long attributeValue)
+		{ writeAttribute(attributeName, int(attributeValue)); }
+		void writeAttribute(const char *attributeName, double attributeValue);
 
 		class Management& _management;
 		class GUIState* _guiState;
