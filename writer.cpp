@@ -14,6 +14,7 @@
 #include "libtheatre/presetvalue.h"
 #include "libtheatre/show.h"
 #include "libtheatre/theatre.h"
+#include "libtheatre/timesequence.h"
 
 #include "gui/guistate.h"
 
@@ -210,6 +211,7 @@ void Writer::writeControllable(const Controllable &controllable)
 	{
 		const FixtureControl* fixtureControl = dynamic_cast<const FixtureControl *>(&controllable);
 		const Chase* chase = dynamic_cast<const Chase *>(&controllable);
+		const TimeSequence* tSequence = dynamic_cast<const TimeSequence *>(&controllable);
 		const PresetCollection* presetCollection = dynamic_cast<const PresetCollection *>(&controllable);
 		const Effect* effect = dynamic_cast<const Effect*>(&controllable);
 	
@@ -217,6 +219,8 @@ void Writer::writeControllable(const Controllable &controllable)
 			writeFixtureControl(*fixtureControl);
 		else if(chase)
 			writeChase(*chase);
+		else if(tSequence)
+			writeTimeSequence(*tSequence);
 		else if(presetCollection)
 			writePresetCollection(*presetCollection);
 		else if(effect)
@@ -259,7 +263,7 @@ void Writer::writeFixtureControl(const FixtureControl &control)
 	endElement();
 }
 
-void Writer::writeChase(const Chase &chase)
+void Writer::writeChase(const Chase& chase)
 {
 	const std::vector<std::pair<Controllable*,size_t>>& list = chase.Sequence().List();
 	for(const std::pair<Controllable*, size_t>& input : list)
@@ -273,11 +277,34 @@ void Writer::writeChase(const Chase &chase)
 	endElement();
 }
 
+void Writer::writeTimeSequence(const TimeSequence& timeSequence)
+{
+	const std::vector<std::pair<Controllable*,size_t>>& list = timeSequence.Sequence().List();
+	for(const std::pair<Controllable*, size_t>& input : list)
+		requireControllable(*input.first);
+
+	startElement("time-sequence");
+	writeFolderAttributes(timeSequence);
+	writeAttribute("repeat-count", timeSequence.RepeatCount());
+	writeSequence(timeSequence.Sequence());
+	for(size_t i=0; i!=timeSequence.Size(); ++i)
+	{
+		startElement("step");
+		const TimeSequence::Step& step = timeSequence.GetStep(i);
+		writeTrigger(step.trigger);
+		writeTransition(step.transition);
+		endElement();
+	}
+	endElement();
+}
+
 void Writer::writeTrigger(const Trigger &trigger)
 {
 	startElement("trigger");
-	writeAttribute("delay-in-ms", trigger.DelayInMs());
 	writeAttribute("type", trigger.Type());
+	writeAttribute("delay-in-ms", trigger.DelayInMs());
+	writeAttribute("delay-in-beats", trigger.DelayInBeats());
+	writeAttribute("delay-in-syncs", trigger.DelayInSyncs());
 	endElement();
 }
 

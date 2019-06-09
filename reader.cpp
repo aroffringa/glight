@@ -158,6 +158,8 @@ void Reader::parseControlItem(xmlNode *node)
 		parsePresetCollection(node);
 	else if(n == "chase")
 		parseChase(node);
+	else if(n == "time-sequence")
+		parseTimeSequence(node);
 	else if(n == "preset-value")
 		parsePresetValue(node);
 	else if(n == "effect")
@@ -296,6 +298,51 @@ void Reader::parseChase(xmlNode *node)
 	}
 }
 
+void Reader::parseTimeSequence(xmlNode *node)
+{
+	TimeSequence &timeSequence = _management.AddTimeSequence();
+	parseFolderAttr(node, timeSequence);
+	timeSequence.SetRepeatCount(getIntAttribute(node, "repeat-count"));
+	
+	size_t stepIndex = 0;
+	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
+	{
+		if(curNode->type == XML_ELEMENT_NODE)
+		{
+			if(name(curNode) == "sequence")
+			{
+				parseSequence(curNode, timeSequence.Sequence());
+			}
+			else if(name(curNode) == "step")
+			{
+				timeSequence.Steps().emplace_back();
+				parseTimeSequenceStep(curNode, timeSequence.Steps().back());
+				++stepIndex;
+			}
+			else
+				throw std::runtime_error("Bad node " + name(curNode) + " in time-sequence");
+		}
+	}
+	if(timeSequence.Steps().size() != timeSequence.Sequence().Size())
+		throw std::runtime_error("nr of steps in time sequence doesn't match sequence size");
+}
+
+void Reader::parseTimeSequenceStep(xmlNode *node, TimeSequence::Step& step)
+{
+	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
+	{
+		if(curNode->type == XML_ELEMENT_NODE)
+		{
+			if(name(curNode) == "trigger")
+				parseTrigger(curNode, step.trigger);
+			else if(name(curNode) == "transition")
+				parseTransition(curNode, step.transition);
+			else
+				throw std::runtime_error("Bad node " + name(curNode) + " in time-sequence step");
+		}
+	}
+}
+
 void Reader::parsePresetValue(xmlNode *node)
 {
 	Controllable &controllable =
@@ -348,6 +395,8 @@ void Reader::parseTrigger(xmlNode *node, class Trigger &trigger)
 {
 	trigger.SetType((enum Trigger::Type) getIntAttribute(node, "type"));
 	trigger.SetDelayInMs(getDoubleAttribute(node, "delay-in-ms"));
+	trigger.SetDelayInBeats(getDoubleAttribute(node, "delay-in-beats"));
+	trigger.SetDelayInSyncs(getDoubleAttribute(node, "delay-in-syncs"));
 }
 
 void Reader::parseTransition(xmlNode *node, class Transition &transition)

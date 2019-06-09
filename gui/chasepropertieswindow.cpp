@@ -176,10 +176,12 @@ void ChasePropertiesWindow::loadChaseInfo(Chase& chase)
 	double triggerSpeed = chase.Trigger().DelayInMs();
 	double transitionSpeed = chase.Transition().LengthInMs();
 	double beatSpeed = chase.Trigger().DelayInBeats();
+	double syncSpeed = chase.Trigger().DelayInSyncs();
 	lock.unlock();
 	_triggerSpeed.set_value(triggerSpeed);
 	_transitionSpeed.set_value(transitionSpeed);
 	_beatSpeed.set_value(beatSpeed);
+	_synchronizationsCount.set_value(syncSpeed);
 	switch(triggerType)
 	{
 	case Trigger::DelayTriggered:

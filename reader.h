@@ -1,6 +1,8 @@
 #ifndef READER_H
 #define READER_H
 
+#include "libtheatre/timesequence.h"
+
 #include <stdexcept>
 #include <string>
 
@@ -55,6 +57,8 @@ class Reader{
 		void parsePresetCollection(xmlNode *node);
 		void parseSequence(xmlNode *node, class Sequence& sequence);
 		void parseChase(xmlNode *node);
+		void parseTimeSequence(xmlNode *node);
+		void parseTimeSequenceStep(xmlNode *node, TimeSequence::Step& step);
 		void parsePresetValue(xmlNode *node);
 		void parseEffect(xmlNode* node);
 

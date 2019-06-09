@@ -315,10 +315,12 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step& step)
 	double triggerSpeed = step.trigger.DelayInMs();
 	double transitionSpeed = step.transition.LengthInMs();
 	double beatSpeed = step.trigger.DelayInBeats();
+	double syncSpeed = step.trigger.DelayInSyncs();
 	lock.unlock();
 	_triggerSpeed.set_value(triggerSpeed);
 	_transitionSpeed.set_value(transitionSpeed);
 	_beatSpeed.set_value(beatSpeed);
+	_synchronizationsCount.set_value(syncSpeed);
 	switch(triggerType)
 	{
 	case Trigger::DelayTriggered:

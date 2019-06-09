@@ -126,12 +126,15 @@ public:
 		_lastValue = _inputValue;
 	}
 	
+	class Sequence& Sequence() { return _sequence; }
 	const class Sequence& Sequence() const { return _sequence; }
 	
 	struct Step {
 		Transition transition;
 		Trigger trigger;
 	};
+	
+	std::vector<Step>& Steps() { return _steps; }
 	
 	void AddStep(Controllable* controllable, size_t input)
 	{
