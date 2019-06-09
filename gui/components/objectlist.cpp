@@ -8,6 +8,7 @@
 #include "../../libtheatre/folder.h"
 #include "../../libtheatre/management.h"
 #include "../../libtheatre/presetcollection.h"
+#include "../../libtheatre/timesequence.h"
 
 ObjectList::ObjectList(Management &management, ShowWindow &parentWindow) :
 	_management(&management),
@@ -108,22 +109,26 @@ void ObjectList::fillListFolder(const Folder& folder, const FolderObject* select
 			showPresetCollections ? dynamic_cast<PresetCollection*>(obj) : nullptr;
 		Chase* chase =
 			showChases ? dynamic_cast<Chase*>(obj) : nullptr;
+		TimeSequence* timeSequence =
+			showChases ? dynamic_cast<TimeSequence*>(obj) : nullptr;
 		Effect* effect =
 			showEffects ? dynamic_cast<Effect*>(obj) : nullptr;
 		
-		if(childFolder || presetCollection || chase || effect)
+		if(childFolder || presetCollection || chase || timeSequence || effect)
 		{
 			Gtk::TreeModel::iterator iter = _listModel->append();
 			Gtk::TreeModel::Row childRow = *iter;
-			if(dynamic_cast<Chase*>(obj))
+			if(chase)
 				childRow[_listColumns._type] = "C";
-			else if(dynamic_cast<Folder*>(obj))
+			else if(timeSequence)
+				childRow[_listColumns._type] = "C";
+			else if(childFolder)
 				childRow[_listColumns._type] = "F";
-			else if(dynamic_cast<PresetCollection*>(obj))
+			else if(presetCollection)
 				childRow[_listColumns._type] = "P";
 			else if(dynamic_cast<FixtureControl*>(obj))
 				childRow[_listColumns._type] = "F";
-			else if(dynamic_cast<Effect*>(obj))
+			else if(effect)
 				childRow[_listColumns._type] = "E";
 			childRow[_listColumns._title] = obj->Name();
 			childRow[_listColumns._object] = obj;

@@ -45,6 +45,7 @@ class Writer {
 		void writeControllable(const class Controllable &controllable);
 		void writeFixtureControl(const class FixtureControl &control);
 		void writeChase(const class Chase &control);
+		void writeTimeSequence(const class TimeSequence &control);
 		void writeTransition(const class Transition &transition);
 		void writeTrigger(const class Trigger &trigger);
 		void writeSequence(const class Sequence& sequence);

@@ -3,8 +3,6 @@
 
 #include "propertieswindow.h"
 
-#include "components/objectbrowser.h"
-
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/frame.h>

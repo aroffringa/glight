@@ -35,7 +35,7 @@ class DummyDevice : public DmxDevice {
 
 		virtual void WaitForNextSync() final override
 		{
-			usleep(1000);
+			usleep(40000);
 		}
 
 		virtual void Abort() final override

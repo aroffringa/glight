@@ -176,14 +176,24 @@ void ChasePropertiesWindow::loadChaseInfo(Chase& chase)
 	double triggerSpeed = chase.Trigger().DelayInMs();
 	double transitionSpeed = chase.Transition().LengthInMs();
 	double beatSpeed = chase.Trigger().DelayInBeats();
+	double syncSpeed = chase.Trigger().DelayInSyncs();
 	lock.unlock();
 	_triggerSpeed.set_value(triggerSpeed);
 	_transitionSpeed.set_value(transitionSpeed);
 	_beatSpeed.set_value(beatSpeed);
-	if(triggerType == Trigger::DelayTriggered)
+	_synchronizationsCount.set_value(syncSpeed);
+	switch(triggerType)
+	{
+	case Trigger::DelayTriggered:
 		_delayTriggerCheckButton.set_active(true);
-	else
+		break;
+	case Trigger::SyncTriggered:
+		_synchronizedTriggerCheckButton.set_active(true);
+		break;
+	case Trigger::BeatTriggered:
 		_beatTriggerCheckButton.set_active(true);
+		break;
+	}
 	switch(transitionType)
 	{
 		case Transition::None:
@@ -193,7 +203,7 @@ void ChasePropertiesWindow::loadChaseInfo(Chase& chase)
 			_transitionFadeRB.set_active();
 			break;
 		case Transition::FadeThroughBlack:
-			_transitionFadeRB.set_active();
+			_transitionFadeThroughBlackRB.set_active();
 			break;
 		case Transition::Erratic:
 			_transitionErraticRB.set_active();

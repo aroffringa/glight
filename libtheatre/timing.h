@@ -6,6 +6,15 @@
 class Timing
 {
 public:
+	Timing() :
+		_timeInMs(0),
+		_timestepNumber(0),
+		_beatValue(0),
+		_audioLevel(0),
+		_randomValue(0),
+		_rng()
+	{ }
+	
 	Timing(double timeInMS, unsigned timestepNumber, double beatValue, unsigned audioLevel, unsigned randomValue) :
 		_timeInMs(timeInMS),
 		_timestepNumber(timestepNumber),

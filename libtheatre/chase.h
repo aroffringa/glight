@@ -15,16 +15,9 @@ public:
 	Chase()
 	{ }
 	
-	Chase(const Chase& chase) :
-		Controllable(chase),
-		_sequence(chase._sequence),
-		_trigger(chase._trigger),
-		_transition(chase._transition)
-	{ }
-	
 	std::unique_ptr<Chase> CopyWithoutSequence() const
 	{
-		return std::unique_ptr<Chase>(new Chase(*this, std::true_type()));
+		return std::unique_ptr<Chase>(new Chase(*this));
 	}
 
 	size_t NInputs() const final override
@@ -37,19 +30,19 @@ public:
 	{ return _sequence.List().size(); }
 	
 	std::pair<Controllable*, size_t> Output(size_t index) const final override
-	{ return std::make_pair(_sequence.List()[index], 0); }
+	{ return _sequence.List()[index]; }
 	
 	virtual void Mix(unsigned *channelValues, unsigned universe, const Timing& timing) final override
 	{
 		switch(_trigger.Type()) {
 		case Trigger::DelayTriggered:
-			mixDelayChase(_inputValue, channelValues, universe, timing);
+			mixDelayChase(channelValues, universe, timing);
 			break;
 		case Trigger::SyncTriggered:
-			mixSyncedChase(_inputValue, channelValues, universe, timing);
+			mixSyncedChase(channelValues, universe, timing);
 			break;
 		case Trigger::BeatTriggered:
-			mixBeatChase(_inputValue, channelValues, universe, timing);
+			mixBeatChase(channelValues, universe, timing);
 			break;
 		}
 	}
@@ -67,26 +60,26 @@ private:
 	/**
 	 * Copy constructor for dry copy
 	 */
-	Chase(const Chase& chase, std::true_type) :
+	Chase(const Chase& chase) :
 		Controllable(chase),
 		_trigger(chase._trigger),
 		_transition(chase._transition)
 	{ }
 	
-	void mixBeatChase(const ControlValue& value, unsigned* channelValues, unsigned universe, const Timing& timing)
+	void mixBeatChase(unsigned* channelValues, unsigned universe, const Timing& timing)
 	{
 		double timeInMs = timing.BeatValue();
 		unsigned step = (unsigned) fmod(timeInMs / _trigger.DelayInBeats(), _sequence.Size());
-		_sequence.List()[step]->MixInput(0, value);
+		_sequence.List()[step].first->MixInput(_sequence.List()[step].second, _inputValue);
 	}
 	
-	void mixSyncedChase(const ControlValue& value, unsigned* channelValues, unsigned universe, const Timing& timing)
+	void mixSyncedChase(unsigned* channelValues, unsigned universe, const Timing& timing)
 	{
 		unsigned step = (timing.TimestepNumber() / _trigger.DelayInSyncs()) % _sequence.Size();
-		_sequence.List()[step]->MixInput(0, value);
+		_sequence.List()[step].first->MixInput(_sequence.List()[step].second, _inputValue);
 	}
 	
-	void mixDelayChase(const ControlValue& value, unsigned* channelValues, unsigned universe, const Timing& timing)
+	void mixDelayChase(unsigned* channelValues, unsigned universe, const Timing& timing)
 	{
 		double timeInMs = timing.TimeInMS();
 		double chaseTime = fmod(timeInMs, _trigger.DelayInMs() + _transition.LengthInMs());
@@ -94,16 +87,16 @@ private:
 		if(chaseTime < _trigger.DelayInMs())
 		{
 			// We are not in a transition, just mix the corresponding controllable
-			_sequence.List()[step]->MixInput(0, value);
+			_sequence.List()[step].first->MixInput(_sequence.List()[step].second, _inputValue);
 		}
 		else
 		{
 			// We are in a transition
 			double transitionTime = chaseTime - _trigger.DelayInMs();
 			Controllable
-				&first = *_sequence.List()[step],
-				&second = *_sequence.List()[(step + 1) % _sequence.Size()];
-			_transition.Mix(first, 0, second, 0, transitionTime, value, timing);
+				&first = *_sequence.List()[step].first,
+				&second = *_sequence.List()[(step + 1) % _sequence.Size()].first;
+			_transition.Mix(first, _sequence.List()[step].second, second, _sequence.List()[(step + 1) % _sequence.Size()].second, transitionTime, _inputValue, timing);
 		}
 	}
 	

@@ -6,11 +6,13 @@
 #include "../../libtheatre/management.h"
 #include "../../libtheatre/presetcollection.h"
 #include "../../libtheatre/presetvalue.h"
+#include "../../libtheatre/timesequence.h"
 
 void InputSelectMenu::Popup(Management& management, GdkEventButton* event)
 {
 	_popupMenu.reset(new Gtk::Menu());
 	_popupChaseMenu.reset(new Gtk::Menu());
+	_popupSequenceMenu.reset(new Gtk::Menu());
 	_popupPresetMenu.reset(new Gtk::Menu());
 	_popupFunctionMenu.reset(new Gtk::Menu());
 	_popupEffectsMenu.reset(new Gtk::Menu());
@@ -33,6 +35,11 @@ void InputSelectMenu::Popup(Management& management, GdkEventButton* event)
 	_popupMenu->append(*submi);
 	_popupMenuItems.emplace_back(std::move(submi));
 	
+	submi.reset(new Gtk::MenuItem("Sequences"));
+	submi->set_submenu(*_popupSequenceMenu);
+	_popupMenu->append(*submi);
+	_popupMenuItems.emplace_back(std::move(submi));
+	
 	submi.reset(new Gtk::MenuItem("Effects"));
 	submi->set_submenu(*_popupEffectsMenu);
 	_popupMenu->append(*submi);
@@ -48,6 +55,8 @@ void InputSelectMenu::Popup(Management& management, GdkEventButton* event)
 			subMenu = _popupChaseMenu.get();
 		else if(dynamic_cast<PresetCollection*>(&c))
 			subMenu = _popupPresetMenu.get();
+		else if(dynamic_cast<TimeSequence*>(&c))
+			subMenu = _popupSequenceMenu.get();
 		else if(dynamic_cast<Effect*>(&c))
 			subMenu = _popupEffectsMenu.get();
 		else

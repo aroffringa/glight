@@ -12,6 +12,8 @@ class ControlValue {
 		ControlValue(unsigned value) : _value(value) { }
 		ControlValue(const ControlValue &source) = default;
 
+		operator bool() const { return _value != 0; }
+		
 		unsigned int UInt() const { return _value; }
 
 		static ControlValue Zero()

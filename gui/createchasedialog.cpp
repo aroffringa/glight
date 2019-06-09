@@ -122,7 +122,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked()
 			i != children.end() ; ++i)
 		{
 			Controllable *object = (*i)[_newChaseListColumns._controllable];
-			sequence.Add(object);
+			sequence.Add(object, 0);
 		}
 
 		lock.unlock();
