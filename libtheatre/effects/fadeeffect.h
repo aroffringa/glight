@@ -12,7 +12,9 @@ public:
 		_fadingValue(0),
 		_fadeUpSpeed(1.0),
 		_fadeDownSpeed(1.0),
-		_previousTime(0.0)
+		_sustain(0.0),
+		_previousTime(0.0),
+		_sustainTimer(0.0)
 	{ }
 	
 	virtual Effect::Type GetType() const override { return FadeType; }
@@ -23,34 +25,45 @@ public:
 	double FadeDownSpeed() const { return _fadeDownSpeed; }
 	void SetFadeDownSpeed(double speed) { _fadeDownSpeed = speed; }
 	
+	double Sustain() const { return _sustain; }
+	void SetSustain(double sustain) { _sustain = sustain; }
+	
 protected:
-	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const Timing& timing) final override
+	virtual void mix(const ControlValue* values, unsigned*, unsigned, const Timing& timing) final override
 	{
 		double timePassed = 0.001*(timing.TimeInMS() - _previousTime);
 		_previousTime = timing.TimeInMS();
 		unsigned targetValue = values[0].UInt();
 		if(targetValue != _fadingValue)
 		{
-			double fadeSpeed =
-				(targetValue > _fadingValue) ? _fadeUpSpeed : _fadeDownSpeed;
-			if(fadeSpeed == 0.0)
+			if(targetValue > _fadingValue)
 			{
-				_fadingValue = targetValue;
-			}
-			else {
-				unsigned stepSize = unsigned(std::min<double>(timePassed * fadeSpeed * double(ControlValue::MaxUInt()), double(ControlValue::MaxUInt())));
-				if(targetValue > _fadingValue)
-				{
+				_sustainTimer = _sustain;
+				if(_fadeUpSpeed == 0.0)
+					_fadingValue = targetValue;
+				else {
+					unsigned stepSize = unsigned(std::min<double>(timePassed * _fadeUpSpeed * double(ControlValue::MaxUInt()), double(ControlValue::MaxUInt())));
 					if(_fadingValue + stepSize > targetValue)
 						_fadingValue = targetValue;
 					else
 						_fadingValue += stepSize;
 				}
+			}
+			else {
+				if(_sustainTimer > timePassed)
+					_sustainTimer -= timePassed;
 				else {
-					if(targetValue + stepSize > _fadingValue)
+					timePassed -= _sustainTimer;
+					_sustainTimer = 0.0;
+					if(_fadeDownSpeed == 0.0)
 						_fadingValue = targetValue;
-					else
-						_fadingValue -= stepSize;
+					else {
+						unsigned stepSize = unsigned(std::min<double>(timePassed * _fadeDownSpeed * double(ControlValue::MaxUInt()), double(ControlValue::MaxUInt())));
+						if(targetValue + stepSize > _fadingValue)
+							_fadingValue = targetValue;
+						else
+							_fadingValue -= stepSize;
+					}
 				}
 			}
 		}
@@ -65,7 +78,8 @@ protected:
 private:
 	unsigned _fadingValue;
 	double _fadeUpSpeed, _fadeDownSpeed;
-	double _previousTime;
+	double _sustain;
+	double _previousTime, _sustainTimer;
 };
 
 #endif
