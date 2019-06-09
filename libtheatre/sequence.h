@@ -17,6 +17,11 @@ public:
 	{
 		_list.emplace_back(controllable, inputIndex);
 	}
+	
+	void Remove(size_t index)
+	{
+		_list.erase(_list.begin() + index);
+	}
 
 	const std::vector<std::pair<class Controllable*, size_t>>& List() const
 	{

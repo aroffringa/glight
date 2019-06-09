@@ -168,12 +168,21 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned* values, uns
 	std::vector<Controllable*> unorderedList, orderedList;
 	for(const std::unique_ptr<Controllable>& c : _controllables)
 		unorderedList.emplace_back(c.get());
-	topologicalSort(unorderedList, orderedList);
+	if(!topologicalSort(unorderedList, orderedList))
+		throw std::runtime_error("Cycle in dependencies");
 	
 	for(auto c = orderedList.rbegin(); c != orderedList.rend(); ++c)
 	{
 		(*c)->Mix(values, universe, timing);
 	}
+}
+
+bool Management::HasCycle() const
+{
+	std::vector<Controllable*> unorderedList, orderedList;
+	for(const std::unique_ptr<Controllable>& c : _controllables)
+		unorderedList.emplace_back(c.get());
+	return !topologicalSort(unorderedList, orderedList);
 }
 
 PresetCollection& Management::AddPresetCollection()
@@ -576,17 +585,19 @@ void Management::SwapDevices(Management& source)
 		Run();
 }
 
-void Management::topologicalSort(const std::vector<Controllable*>& input, std::vector<Controllable*>& output)
+bool Management::topologicalSort(const std::vector<Controllable*>& input, std::vector<Controllable*>& output)
 {
 	for(Controllable* controllable : input)
 		controllable->SetVisitLevel(0);
 	for(Controllable* controllable : input)
 	{
-		topologicalSortVisit(*controllable, output);
+		if(!topologicalSortVisit(*controllable, output))
+			return false;
 	}
+	return true;
 }
 
-void Management::topologicalSortVisit(Controllable& controllable, std::vector<Controllable*>& list)
+bool Management::topologicalSortVisit(Controllable& controllable, std::vector<Controllable*>& list)
 {
 	if(controllable.VisitLevel() == 0)
 	{
@@ -594,12 +605,14 @@ void Management::topologicalSortVisit(Controllable& controllable, std::vector<Co
 		for(size_t i=0; i!=controllable.NOutputs(); ++i)
 		{
 			Controllable* other = controllable.Output(i).first;
-			topologicalSortVisit(*other, list);
+			if(!topologicalSortVisit(*other, list))
+				return false;
 		}
 		controllable.SetVisitLevel(2);
 		list.emplace_back(&controllable);
 	}
 	else if(controllable.VisitLevel() == 1)
-		throw std::runtime_error("Cycle in effect dependencies");
+		return false;
+	return true;
 }
 

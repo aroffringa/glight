@@ -37,6 +37,7 @@ private:
 	void fillStepsList();
 	void loadStep(const TimeSequence::Step& step);
 	void onAddStep();
+	void onRemoveStep();
 	void onSustainChanged();
 	void onRepeatChanged();
 	void onTriggerTypeChanged();
@@ -53,11 +54,14 @@ private:
 	void onUpdateControllables();
 	void setStepSensitive(bool sensitive);
 	TimeSequence::Step* selectedStep();
+	void selectStep(size_t index);
 	
 	Gtk::HBox _topBox;
 	ObjectBrowser _objectBrowser;
 	
+	Gtk::VBox _buttonBox;
 	Gtk::Button _addStepButton;
+	Gtk::Button _removeStepButton;
 	
 	Gtk::Grid _grid;
 	Gtk::TreeView _stepsView;

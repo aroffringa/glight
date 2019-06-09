@@ -107,6 +107,8 @@ class Management {
 		const class Folder& RootFolder() const { return *_rootFolder; }
 		class Folder& RootFolder() { return *_rootFolder; }
 		
+		bool HasCycle() const;
+		
 	private:
 		struct ManagementThread {
 			Management *parent;
@@ -128,8 +130,8 @@ class Management {
 		 * Sorts controllables such that when A outputs to B, then A will come
 		 * after B in the ordered list.
 		 */
-		static void topologicalSort(const std::vector<Controllable*>& input, std::vector<Controllable*>& output);
-		static void topologicalSortVisit(Controllable& controllable, std::vector<Controllable*>& list);
+		static bool topologicalSort(const std::vector<Controllable*>& input, std::vector<Controllable*>& output);
+		static bool topologicalSortVisit(Controllable& controllable, std::vector<Controllable*>& list);
 
 		std::unique_ptr<std::thread> _thread;
 		std::atomic<bool> _isQuitting;

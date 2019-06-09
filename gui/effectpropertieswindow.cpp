@@ -6,6 +6,7 @@
 #include "../libtheatre/presetvalue.h"
 
 #include <gtkmm/stock.h>
+#include <gtkmm/messagedialog.h>
 
 EffectPropertiesWindow::EffectPropertiesWindow(class Effect& effect, Management& management, ShowWindow& parentWindow) :
 	PropertiesWindow(),
@@ -116,8 +117,23 @@ void EffectPropertiesWindow::onRemoveConnectionClicked()
 
 void EffectPropertiesWindow::onInputSelected(class PresetValue* preset)
 {
+	std::unique_lock<std::mutex> lock(_management->Mutex());
 	_effect->AddConnection(&preset->Controllable(), preset->InputIndex());
-	fillConnectionsList();
+	if(_management->HasCycle())
+	{
+		_effect->RemoveConnection(_effect->Connections().size()-1);
+		lock.unlock();
+		Gtk::MessageDialog dialog(
+			"Can not add this connection to this effect: this would create a cycle in the connections.",
+			false,
+			Gtk::MESSAGE_ERROR
+		);
+		dialog.run();
+	}
+	else {
+		lock.unlock();
+		fillConnectionsList();
+	}		
 }
 
 void EffectPropertiesWindow::onUpdateControllables()
