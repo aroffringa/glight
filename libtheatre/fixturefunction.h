@@ -68,7 +68,6 @@ class FixtureFunction : public NamedObject {
 		}
 	private:
 		class Theatre &_theatre;
-		std::string _description;
 		enum FunctionType _type;
 		DmxChannel _firstChannel;
 		std::vector<DmxChannel> _additionalChannels;

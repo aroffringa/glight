@@ -81,6 +81,9 @@ public:
 	ControlValue& InputValue(size_t index) final override
 	{ return _inputValues[index]; }
 	
+	virtual std::string InputName(size_t index) final override
+	{ return std::string(1, ('a' + index)); }
+	
 	size_t NOutputs() const final override
 	{ return _connections.size(); }
 	

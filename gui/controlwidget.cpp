@@ -129,7 +129,7 @@ void ControlWidget::Assign(PresetValue* item, bool moveFader)
 		_preset = item;
 		if(_preset != nullptr)
 		{
-			_nameLabel.set_text(_preset->Controllable().Name());
+			_nameLabel.set_text(_preset->Title());
 			if(moveFader)
 			{
 				_fadingValue = _preset->Value().UInt();
@@ -172,7 +172,7 @@ void ControlWidget::Update()
 		}
 		// Only if not removed: if preset is renamed, update
 		else {
-			_nameLabel.set_text(_preset->Controllable().Name());
+			_nameLabel.set_text(_preset->Title());
 		}
 	}
 }

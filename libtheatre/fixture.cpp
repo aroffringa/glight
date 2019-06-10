@@ -17,9 +17,9 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 		case FixtureType::RGBLight3Ch:
 		{
 			FixtureFunction *r, *g, *b;
-			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, name + "_R");
-			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, name + "_G");
-			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, name + "_B");
+			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, "R");
+			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, "G");
+			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, "B");
 			_functions.emplace_back(r);
 			_functions.emplace_back(g);
 			_functions.emplace_back(b);
@@ -28,10 +28,10 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 		case FixtureType::RGBLight4Ch:
 		{
 			FixtureFunction *r, *g, *b, *m;
-			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, name + "_R");
-			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, name + "_G");
-			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, name + "_B");
-			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, name + "_M");
+			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, "R");
+			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, "G");
+			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, "B");
+			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, "M");
 			_functions.emplace_back(r);
 			_functions.emplace_back(g);
 			_functions.emplace_back(b);
@@ -41,10 +41,10 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 		case FixtureType::RGBALight4Ch:
 		{
 			FixtureFunction *r, *g, *b, *a;
-			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, name + "_R");
-			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, name + "_G");
-			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, name + "_B");
-			a = new FixtureFunction(_theatre, FixtureFunction::AmberIntensity, name + "_A");
+			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, "R");
+			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, "G");
+			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, "B");
+			a = new FixtureFunction(_theatre, FixtureFunction::AmberIntensity, "A");
 			_functions.emplace_back(r);
 			_functions.emplace_back(g);
 			_functions.emplace_back(b);
@@ -54,11 +54,11 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 		case FixtureType::RGBALight5Ch:
 		{
 			FixtureFunction *r, *g, *b, *a, *m;
-			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, name + "_R");
-			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, name + "_G");
-			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, name + "_B");
-			a = new FixtureFunction(_theatre, FixtureFunction::AmberIntensity, name + "_A");
-			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, name + "_M");
+			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, "R");
+			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, "G");
+			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, "B");
+			a = new FixtureFunction(_theatre, FixtureFunction::AmberIntensity, "A");
+			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, "M");
 			_functions.emplace_back(r);
 			_functions.emplace_back(g);
 			_functions.emplace_back(b);
@@ -69,10 +69,10 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 		case FixtureType::RGBWLight4Ch:
 		{
 			FixtureFunction *r, *g, *b, *w;
-			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, name + "_R");
-			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, name + "_G");
-			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, name + "_B");
-			w = new FixtureFunction(_theatre, FixtureFunction::WhiteIntensity, name + "_W");
+			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, "R");
+			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, "G");
+			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, "B");
+			w = new FixtureFunction(_theatre, FixtureFunction::WhiteIntensity, "W");
 			_functions.emplace_back(r);
 			_functions.emplace_back(g);
 			_functions.emplace_back(b);
@@ -82,9 +82,9 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 		case FixtureType::UVLight3Ch:
 		{
 			FixtureFunction *m, *s, *p;
-			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, name + "_M");
-			s = new FixtureFunction(_theatre, FixtureFunction::Strobe, name + "_S");
-			p = new FixtureFunction(_theatre, FixtureFunction::Pulse, name + "_P");
+			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, "M");
+			s = new FixtureFunction(_theatre, FixtureFunction::Strobe, "S");
+			p = new FixtureFunction(_theatre, FixtureFunction::Pulse, "P");
 			_functions.emplace_back(m);
 			_functions.emplace_back(s);
 			_functions.emplace_back(p);
@@ -93,9 +93,9 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 		case FixtureType::H2ODMXPro:
 		{
 			FixtureFunction *m, *r, *c;
-			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, name + "_M");
-			r = new FixtureFunction(_theatre, FixtureFunction::Rotation, name + "_R");
-			c = new FixtureFunction(_theatre, FixtureFunction::ColorMacro, name + "_C");
+			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, "M");
+			r = new FixtureFunction(_theatre, FixtureFunction::Rotation, "R");
+			c = new FixtureFunction(_theatre, FixtureFunction::ColorMacro, "C");
 			_functions.emplace_back(m);
 			_functions.emplace_back(r);
 			_functions.emplace_back(c);
@@ -104,12 +104,12 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 		case FixtureType::RGB_ADJ_6CH:
 		{
 			FixtureFunction *r, *g, *b, *c, *s, *p;
-			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, name + "_R");
-			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, name + "_G");
-			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, name + "_B");
-			c = new FixtureFunction(_theatre, FixtureFunction::ColorMacro, name + "_C");
-			s = new FixtureFunction(_theatre, FixtureFunction::Strobe, name + "_S");
-			p = new FixtureFunction(_theatre, FixtureFunction::Pulse, name + "_P");
+			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, "R");
+			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, "G");
+			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, "B");
+			c = new FixtureFunction(_theatre, FixtureFunction::ColorMacro, "C");
+			s = new FixtureFunction(_theatre, FixtureFunction::Strobe, "S");
+			p = new FixtureFunction(_theatre, FixtureFunction::Pulse, "P");
 			_functions.emplace_back(r);
 			_functions.emplace_back(g);
 			_functions.emplace_back(b);
@@ -121,13 +121,13 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 		case FixtureType::RGB_ADJ_7CH:
 		{
 			FixtureFunction *r, *g, *b, *c, *s, *p, *m;
-			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, name + "_R");
-			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, name + "_G");
-			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, name + "_B");
-			c = new FixtureFunction(_theatre, FixtureFunction::ColorMacro, name + "_C");
-			s = new FixtureFunction(_theatre, FixtureFunction::Strobe, name + "_S");
-			p = new FixtureFunction(_theatre, FixtureFunction::Pulse, name + "_P");
-			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, name + "_M");
+			r = new FixtureFunction(_theatre, FixtureFunction::RedIntensity, "R");
+			g = new FixtureFunction(_theatre, FixtureFunction::GreenIntensity, "G");
+			b = new FixtureFunction(_theatre, FixtureFunction::BlueIntensity, "B");
+			c = new FixtureFunction(_theatre, FixtureFunction::ColorMacro, "C");
+			s = new FixtureFunction(_theatre, FixtureFunction::Strobe, "S");
+			p = new FixtureFunction(_theatre, FixtureFunction::Pulse, "P");
+			m = new FixtureFunction(_theatre, FixtureFunction::Brightness, "M");
 			_functions.emplace_back(r);
 			_functions.emplace_back(g);
 			_functions.emplace_back(b);

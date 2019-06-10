@@ -62,7 +62,7 @@ void InputSelectMenu::Popup(Management& management, GdkEventButton* event)
 		else
 			subMenu = _popupFunctionMenu.get();
 		
-		std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(c.Name()));
+		std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(pv->Title()));
 		mi->signal_activate().connect(sigc::bind<PresetValue*>( 
     sigc::mem_fun(*this, &InputSelectMenu::onMenuItemClicked), pv.get()));
 		subMenu->append(*mi);

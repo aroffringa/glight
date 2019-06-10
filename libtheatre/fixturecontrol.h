@@ -24,6 +24,9 @@ public:
 	ControlValue& InputValue(size_t index) final override
 	{ return _values[index]; }
 	
+	virtual std::string InputName(size_t index) final override
+	{ return _fixture->Functions()[index]->Name(); }
+	
 	size_t NOutputs() const final override
 	{ return 0; }
 	
