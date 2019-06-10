@@ -213,8 +213,8 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 			addColorPresets(management, *fixtures[fixIndex], pc, red, green, blue, master);
 		}
 		management.AddPreset(pc, 0);
-		newEffect.AddConnection(&pc, 0);
-		newAudioLevel.AddConnection(&newEffect, 0);
+		newEffect.AddConnection(pc, 0);
+		newAudioLevel.AddConnection(newEffect, 0);
 	}
 	return newAudioLevel;
 }

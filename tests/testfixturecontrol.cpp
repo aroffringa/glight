@@ -12,10 +12,15 @@ BOOST_AUTO_TEST_SUITE(fixture_control)
 BOOST_AUTO_TEST_CASE( Add )
 {
 	Management management;
-	FixtureType& fixtureType = management.Theatre().AddFixtureType(FixtureType::Light1Ch);
+	FixtureType& fixtureType = management.Theatre().AddFixtureType(FixtureType::RGBLight3Ch);
 	Fixture& fixture = management.Theatre().AddFixture(fixtureType);
 	FixtureControl& control = management.AddFixtureControl(fixture);
 	BOOST_CHECK_EQUAL(&management.GetFixtureControl(fixture), &control);
+	BOOST_CHECK_EQUAL(&control.Fixture(), &fixture);
+	BOOST_CHECK_EQUAL(control.NInputs(), 3);
+	BOOST_CHECK_EQUAL(control.NOutputs(), 0);
+	BOOST_CHECK_NE(control.InputName(0), control.InputName(1));
+	BOOST_CHECK_NE(control.InputName(1), control.InputName(2));
 }
 
 BOOST_AUTO_TEST_CASE( SetValue )

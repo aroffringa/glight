@@ -101,6 +101,7 @@ if(Boost_FOUND)
     tests/testchase.cpp
     tests/testfixturecontrol.cpp
     tests/testfolder.cpp
+    tests/testmanagement.cpp
     tests/testpresetcollection.cpp
     )
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})

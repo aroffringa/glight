@@ -118,7 +118,7 @@ void EffectPropertiesWindow::onRemoveConnectionClicked()
 void EffectPropertiesWindow::onInputSelected(class PresetValue* preset)
 {
 	std::unique_lock<std::mutex> lock(_management->Mutex());
-	_effect->AddConnection(&preset->Controllable(), preset->InputIndex());
+	_effect->AddConnection(preset->Controllable(), preset->InputIndex());
 	if(_management->HasCycle())
 	{
 		_effect->RemoveConnection(_effect->Connections().size()-1);

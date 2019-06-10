@@ -385,7 +385,7 @@ void Reader::parseEffect(xmlNode* node)
 			{
 				std::string cName = getStringAttribute(curNode, "name");
 				size_t cInputIndex = getIntAttribute(curNode, "input-index");
-				effectPtr->AddConnection(&_management.GetControllable(cName), cInputIndex);
+				effectPtr->AddConnection(_management.GetControllable(cName), cInputIndex);
 			}
 			else throw std::runtime_error("Bad element in effect");
 		}

@@ -540,7 +540,7 @@ void Management::dryCopyEffectDependency(const Management& forDryCopy, size_t in
 		size_t cIndex = forDryCopy.ControllableIndex(c.first);
 		if(_controllables[cIndex] == nullptr)
 			dryCopyControllerDependency(forDryCopy, cIndex);
-		static_cast<Effect&>(*_controllables[index]).AddConnection(_controllables[cIndex].get(), c.second);
+		static_cast<Effect&>(*_controllables[index]).AddConnection(*_controllables[cIndex], c.second);
 	}
 }
 

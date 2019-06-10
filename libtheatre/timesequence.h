@@ -153,9 +153,9 @@ public:
 	
 	std::vector<Step>& Steps() { return _steps; }
 	
-	void AddStep(Controllable* controllable, size_t input)
+	void AddStep(Controllable& controllable, size_t input)
 	{
-		_sequence.Add(controllable, input);
+		_sequence.Add(&controllable, input);
 		_steps.emplace_back();
 	}
 	
