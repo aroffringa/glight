@@ -233,9 +233,10 @@ void ControlWidget::ChangeManagement(class Management& management, bool moveSlid
 		_management = &management;
 	}
 	else {
-		size_t presetId = _preset->Id();
+		Controllable& controllable = _preset->Controllable();
+		size_t input = _preset->InputIndex();
 		_management = &management;
-		PresetValue* pv = _management->GetPresetValue(presetId);
+		PresetValue* pv = _management->GetPresetValue(controllable, input);
 		if(pv == nullptr)
 			Unassign();
 		else {

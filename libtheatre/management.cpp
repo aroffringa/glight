@@ -22,7 +22,6 @@ Management::Management() :
 	_isQuitting(false),
 	_createTime(boost::posix_time::microsec_clock::local_time()),
 	_rndDistribution(0, ControlValue::MaxUInt()+1),
-	_nextPresetValueId(1),
 	_theatre(new class Theatre()),
 	_snapshot(new ValueSnapshot()),
 	_show(new class Show(*this))
@@ -61,8 +60,6 @@ void Management::Clear()
 	_rootFolder->SetName("Root");
 
 	_theatre->Clear();
-
-	_nextPresetValueId = 1;
 }
 
 void Management::AddDevice(std::unique_ptr<class DmxDevice> device)
@@ -308,17 +305,9 @@ void Management::RemoveFixture(Fixture& fixture)
 	RemoveControllable(control);
 }
 
-PresetValue &Management::AddPreset(unsigned id, Controllable &controllable, size_t inputIndex)
-{
-	_presetValues.emplace_back(new PresetValue(id, controllable, inputIndex));
-	if(_nextPresetValueId <= id) _nextPresetValueId = id+1;
-	return *_presetValues.back();
-}
-
 PresetValue &Management::AddPreset(Controllable &controllable, size_t inputIndex)
 {
-	_presetValues.emplace_back(new PresetValue(_nextPresetValueId, controllable, inputIndex));
-	++_nextPresetValueId;
+	_presetValues.emplace_back(new PresetValue(controllable, inputIndex));
 	return *_presetValues.back();
 }
 
@@ -375,11 +364,6 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect, Folder& folder)
 	return newEffect;
 }
 
-Controllable& Management::GetControllable(const std::string& name) const
-{
-	return FolderObject::FindNamedObject(_controllables, name);
-}
-
 FolderObject& Management::GetObjectFromPath(const std::string& path) const
 {
 	auto sep = std::find(path.begin(), path.end(), '/');
@@ -400,14 +384,6 @@ FolderObject& Management::GetObjectFromPath(const std::string& path) const
 size_t Management::ControllableIndex(const Controllable* controllable) const
 {
 	return FolderObject::FindIndex(_controllables, controllable);
-}
-
-PresetValue* Management::GetPresetValue(unsigned id) const
-{
-	for(const std::unique_ptr<PresetValue>& pv : _presetValues)
-		if(pv->Id() == id)
-			return pv.get();
-	return nullptr;
 }
 
 PresetValue* Management::GetPresetValue(Controllable& controllable, size_t inputIndex) const
@@ -437,7 +413,6 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 	_thread(),
 	_isQuitting(false),
 	_createTime(forDryCopy._createTime),
-	_nextPresetValueId(forDryCopy._nextPresetValueId),
 	_theatre(new class Theatre(*forDryCopy._theatre)),
 	_beatFinder(beatFinder)
 {

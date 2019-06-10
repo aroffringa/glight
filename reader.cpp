@@ -250,7 +250,7 @@ void Reader::parsePresetCollection(xmlNode *node)
 				Controllable* controllable = dynamic_cast<Controllable*>(&obj);
 				if(controllable == nullptr)
 					throw std::runtime_error("Expecting a controllable in controllable-ref, but object named " + obj.Name() + " in folder " + folder.Name() + " is something different");
-				PresetValue &value = collection.AddPresetValue(getIntAttribute(curNode, "id"), *controllable, inputIndex);
+				PresetValue &value = collection.AddPresetValue(*controllable, inputIndex);
 				value.SetValue(ControlValue(getIntAttribute(curNode, "value")));
 			}
 			else
@@ -346,10 +346,12 @@ void Reader::parseTimeSequenceStep(xmlNode *node, TimeSequence::Step& step)
 
 void Reader::parsePresetValue(xmlNode *node)
 {
-	Controllable &controllable =
-		_management.GetControllable(getStringAttribute(node, "controllable-ref"));
+	size_t folderId = getIntAttribute(node, "folder");
+	const std::string name = getStringAttribute(node, "controllable-ref");
+	Folder* folder = _management.Folders()[folderId].get();
+	Controllable& controllable = static_cast<Controllable&>(folder->GetChild(name));
 	size_t inputIndex = getIntAttribute(node, "input-index");
-	PresetValue &value = _management.AddPreset(getIntAttribute(node, "id"), controllable, inputIndex);
+	PresetValue &value = _management.AddPreset(controllable, inputIndex);
 	value.SetValue(ControlValue(getIntAttribute(node, "value")));
 }
 
@@ -385,7 +387,9 @@ void Reader::parseEffect(xmlNode* node)
 			{
 				std::string cName = getStringAttribute(curNode, "name");
 				size_t cInputIndex = getIntAttribute(curNode, "input-index");
-				effectPtr->AddConnection(_management.GetControllable(cName), cInputIndex);
+				size_t folderId = getIntAttribute(node, "folder");
+				Folder* folder = _management.Folders()[folderId].get();
+				effectPtr->AddConnection(static_cast<Controllable&>(folder->GetChild(cName)), cInputIndex);
 			}
 			else throw std::runtime_error("Bad element in effect");
 		}
@@ -463,8 +467,9 @@ KeySceneItem &Reader::parseKeySceneItem(xmlNode *node, Scene &scene)
 
 ControlSceneItem &Reader::parseControlSceneItem(xmlNode *node, Scene &scene)
 {
-	Controllable &controllable =
-		_management.GetControllable(getStringAttribute(node, "controllable-ref"));
+	size_t folderId = getIntAttribute(node, "folder");
+	Folder* folder = _management.Folders()[folderId].get();
+	Controllable& controllable = static_cast<Controllable&>(folder->GetChild(getStringAttribute(node, "controllable-ref")));
 	ControlSceneItem *item = scene.AddControlSceneItem(getDoubleAttribute(node, "offset"), controllable, 0);
 	item->StartValue().Set(getIntAttribute(node, "start-value"));
 	item->EndValue().Set(getIntAttribute(node, "end-value"));
@@ -513,10 +518,16 @@ void Reader::parseGUIFaders(xmlNode* node, GUIState& guiState)
 
 void Reader::parseGUIPresetRef(xmlNode* node, FaderSetupState& fader)
 {
-	if(hasAttribute(node, "preset-id"))
+	if(hasAttribute(node, "name"))
 	{
-		fader.faders.emplace_back(_management.GetPresetValue(getIntAttribute(node, "preset-id")));
+		size_t input = getIntAttribute(node, "input-index");
+		size_t folderId = getIntAttribute(node, "folder");
+		const std::string name = getStringAttribute(node, "name");
+		Folder* folder = _management.Folders()[folderId].get();
+		Controllable& controllable = static_cast<Controllable&>(folder->GetChild(name));
+		fader.faders.emplace_back(_management.GetPresetValue(controllable, input));
 	}
-	else
+	else {
 		fader.faders.emplace_back(nullptr);
+	}
 }

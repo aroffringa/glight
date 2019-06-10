@@ -41,11 +41,11 @@ BOOST_AUTO_TEST_CASE( HasCycles )
 	
 	PresetCollection& collection = management.AddPresetCollection();
 	BOOST_CHECK_EQUAL(management.HasCycle(), false);
-	collection.AddPresetValue(0, collection, 0);
+	collection.AddPresetValue(collection, 0);
 	BOOST_CHECK_EQUAL(management.HasCycle(), true);
 	collection.Clear();
 	BOOST_CHECK_EQUAL(management.HasCycle(), false);
-	collection.AddPresetValue(0, timeSeq, 0);
+	collection.AddPresetValue(timeSeq, 0);
 	BOOST_CHECK_EQUAL(management.HasCycle(), false);
 	timeSeq.AddStep(effect, 0);
 	BOOST_CHECK_EQUAL(management.HasCycle(), false);

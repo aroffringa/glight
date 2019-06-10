@@ -3,6 +3,7 @@
 #include "chase.h"
 #include "color.h"
 #include "fixture.h"
+#include "fixturecontrol.h"
 #include "folder.h"
 #include "management.h"
 #include "presetcollection.h"
@@ -89,22 +90,22 @@ void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCol
 		const std::unique_ptr<FixtureFunction>& ff = f.Functions()[i];
 		if(ff->Type() == FixtureFunction::RedIntensity && red != 0)
 		{
-			Controllable& c = management.GetControllable(f.Name());
+			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(red);
 		}
 		else if(ff->Type() == FixtureFunction::GreenIntensity && green != 0)
 		{
-			Controllable& c = management.GetControllable(f.Name());
+			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(green);
 		}
 		else if(ff->Type() == FixtureFunction::BlueIntensity && blue != 0)
 		{
-			Controllable& c = management.GetControllable(f.Name());
+			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(blue);
 		}
 		else if(ff->Type() == FixtureFunction::Brightness && master != 0)
 		{
-			Controllable& c = management.GetControllable(f.Name());
+			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(master);
 		}
 	}

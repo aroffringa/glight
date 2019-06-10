@@ -1,5 +1,6 @@
 #include "guistate.h"
 
+#include "../libtheatre/controllable.h"
 #include "../libtheatre/management.h"
 #include "../libtheatre/presetvalue.h"
 
@@ -46,8 +47,11 @@ void FaderSetupState::ChangeManagement(Management& management)
 	{
 		if(fader.GetPresetValue() != nullptr)
 		{
-			size_t presetId = fader.GetPresetValue()->Id();
-			fader.SetPresetValue(management.GetPresetValue(presetId));
+			Controllable *oldControllable = &fader.GetPresetValue()->Controllable();
+			size_t inputIndex = fader.GetPresetValue()->InputIndex();
+			Controllable& newControllable = static_cast<Controllable&>(management.GetObjectFromPath(oldControllable->FullPath()));
+			PresetValue* preset = management.GetPresetValue(newControllable, inputIndex);
+			fader.SetPresetValue(preset);
 		}
 	}
 }

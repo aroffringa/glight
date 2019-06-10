@@ -62,7 +62,6 @@ class Management {
 		void RemoveFixture(class Fixture& fixture);
 
 		class PresetValue& AddPreset(Controllable &controllable, size_t inputIndex);
-		class PresetValue& AddPreset(unsigned id, Controllable &controllable, size_t inputIndex);
 
 		void RemovePreset(class PresetValue &presetValue);
 		bool Contains(class PresetValue &controllable) const;
@@ -76,11 +75,9 @@ class Management {
 
 		std::mutex& Mutex() { return _mutex; }
 
-		class Controllable& GetControllable(const std::string& name) const;
 		class FolderObject& GetObjectFromPath(const std::string& path) const;
 		size_t ControllableIndex(const Controllable* controllable) const;
 		
-		class PresetValue* GetPresetValue(unsigned id) const;
 		class PresetValue* GetPresetValue(Controllable& controllable, size_t inputIndex) const;
 		size_t PresetValueIndex(const class PresetValue* presetValue) const;
 		class ValueSnapshot Snapshot();
@@ -139,7 +136,6 @@ class Management {
 		boost::posix_time::ptime _createTime;
 		std::mt19937 _randomGenerator;
 		std::uniform_int_distribution<unsigned> _rndDistribution;
-		unsigned _nextPresetValueId;
 
 		std::unique_ptr<class Theatre> _theatre;
 		std::unique_ptr<class ValueSnapshot> _snapshot;

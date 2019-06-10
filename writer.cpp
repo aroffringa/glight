@@ -258,7 +258,6 @@ void Writer::writePresetValue(const PresetValue &presetValue)
 	writeAttribute("input-index", presetValue.InputIndex());
 	writeAttribute("folder", _folderIds[&presetValue.Controllable().Parent()]);
 	writeAttribute("value", presetValue.Value().UInt());
-	writeAttribute("id", presetValue.Id());
 	endElement();
 }
 
@@ -430,6 +429,7 @@ void Writer::writeControlSceneItem(const ControlSceneItem &item)
 	writeAttribute("start-value", item.StartValue().UInt());
 	writeAttribute("end-value", item.EndValue().UInt());
 	writeAttribute("controllable-ref", item.Controllable().Name());
+	writeAttribute("folder", _folderIds[&item.Controllable().Parent()]);
 }
 
 void Writer::writeGUIState(const GUIState& guiState)
@@ -450,7 +450,11 @@ void Writer::writeFaderState(const FaderSetupState& guiState)
 	{
 		startElement("fader");
 		if(fader.GetPresetValue() != nullptr)
-			writeAttribute("preset-id", fader.GetPresetValue()->Id());
+		{
+			writeAttribute("input-index", fader.GetPresetValue()->InputIndex());
+			writeAttribute("folder", _folderIds[&fader.GetPresetValue()->Controllable().Parent()]);
+			writeAttribute("name", fader.GetPresetValue()->Controllable().Name());
+		}
 		endElement(); // preset
 	}
 	endElement(); // faders
