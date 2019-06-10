@@ -166,6 +166,7 @@ void ChaseWizard::onNextClicked()
 		_mainBox.remove(_vBoxPage2);
 		if(_runningLightBtn.get_active())
 		{
+			_colorsWidgetP3_1.SetColors(std::vector<Color>(_selectedFixtures.size(), Color::White()));
 			_colorsWidgetP3_1.SetMaxCount(_selectedFixtures.size());
 			_mainBox.pack_start(_vBoxPage3_1, true, true);
 			_vBoxPage3_1.show_all();

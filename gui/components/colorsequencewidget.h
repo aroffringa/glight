@@ -25,17 +25,17 @@ public:
 		_allEqual.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onToggleEqual));
 		pack_start(_allEqual, true, false);
 		
-		_widgets.emplace_back(new ColorSelectWidget(_parent));
-		pack_start(*_widgets.back(), true, false);
-		_widgets.back()->SignalColorChanged().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
-		
 		_minButton.set_sensitive(false);
 		_minButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onDecreaseColors));
 		_buttonBox.pack_start(_minButton);
 		
 		_plusButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onIncreaseColors));
 		_buttonBox.pack_start(_plusButton);
-		pack_end(_buttonBox, true, true);
+		pack_start(_buttonBox, true, true);
+		
+		_widgets.emplace_back(new ColorSelectWidget(_parent));
+		pack_start(*_widgets.back(), true, false);
+		_widgets.back()->SignalColorChanged().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
 		
 		show_all_children();
 	}
