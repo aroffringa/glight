@@ -223,6 +223,14 @@ void Management::RemoveFolder(Folder& folder)
 		RemoveObject(*object);
 	}
 	folder.Parent().Remove(folder);
+	for(auto iter = _folders.begin(); iter != _folders.end(); ++iter)
+	{
+		if(iter->get() == &folder)
+		{
+			_folders.erase(iter);
+			break;
+		}
+	}
 }
 
 void Management::RemoveControllable(Controllable& controllable)
