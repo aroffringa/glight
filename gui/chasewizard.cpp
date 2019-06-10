@@ -5,14 +5,16 @@
 
 #include "../theatre/defaultchase.h"
 #include "../theatre/fixture.h"
+#include "../theatre/folder.h"
 #include "../theatre/management.h"
 #include "../theatre/theatre.h"
 
 #include <memory>
 
-ChaseWizard::ChaseWizard(ShowWindow* showWindow) :
+ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationPath) :
 	_showWindow(showWindow),
 	_management(&showWindow->GetManagement()),
+	_destinationPath(destinationPath),
 	_selectLabel("Select fixtures:"),
 	_runningLightBtn("Running light"),
 	_singleColourBtn("Random around single colour"),
@@ -143,6 +145,15 @@ void ChaseWizard::fillFixturesList()
 	}
 }
 
+Folder& ChaseWizard::getFolder() const
+{
+	Folder* folder = dynamic_cast<Folder*>(_management->GetObjectFromPathIfExists(_destinationPath));
+	if(folder)
+		return *folder;
+	else
+		return _management->RootFolder();
+}
+
 void ChaseWizard::onNextClicked()
 {
 	switch(_currentPage)
@@ -203,7 +214,7 @@ void ChaseWizard::onNextClicked()
 				runType = DefaultChase::OutwardRun;
 			else //if(_randomRunRB.get_active())
 				runType = DefaultChase::RandomRun;
-			DefaultChase::MakeRunningLight(*_management, _selectedFixtures, _colorsWidgetP3_1.GetColors(), runType);
+			DefaultChase::MakeRunningLight(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_1.GetColors(), runType);
 			_showWindow->EmitUpdate();
 			hide();
 		} break;
@@ -213,7 +224,7 @@ void ChaseWizard::onNextClicked()
 		_mainBox.pack_start(_vBoxPage1, true, true);
 		_vBoxPage1.show_all();
 		_currentPage = Page1_SelFixtures;
-		DefaultChase::MakeColorVariation(*_management, _selectedFixtures, _colorsWidgetP3_2.GetColors(), _variation.get_value());
+		DefaultChase::MakeColorVariation(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_2.GetColors(), _variation.get_value());
 		_showWindow->EmitUpdate();
 		hide();
 		break;
@@ -232,7 +243,7 @@ void ChaseWizard::onNextClicked()
 				direction = DefaultChase::VUInward;
 			else //if(_vuOutwardRunRB.get_active())
 				direction = DefaultChase::VUOutward;
-			DefaultChase::MakeVUMeter(*_management, _selectedFixtures, _colorsWidgetP3_3.GetColors(), direction);
+			DefaultChase::MakeVUMeter(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_3.GetColors(), direction);
 			_showWindow->EmitUpdate();
 			hide();
 		} break;

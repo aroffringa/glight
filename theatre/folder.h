@@ -149,20 +149,20 @@ public:
 	
 	const std::vector<FolderObject*> Children() const { return _objects; }
 	
-	Folder& FollowDown(const std::string& path)
+	Folder* FollowDown(const std::string& path)
 	{
 		if(path.empty())
-			return *this;
+			return this;
 		else
-			return *followDown(path, 0);
+			return followDown(path, 0);
 	}
 	
-	Folder& FollowDown(std::string&& path)
+	Folder* FollowDown(std::string&& path)
 	{
 		if(path.empty())
-			return *this;
+			return this;
 		else
-			return *followDown(std::move(path), 0);
+			return followDown(std::move(path), 0);
 	}
 	
 	FolderObject& GetChild(const std::string& name)
@@ -170,16 +170,27 @@ public:
 		return FindNamedObject(_objects, name);
 	}
 	
-	FolderObject& FollowRelPath(const std::string& path)
+	FolderObject* GetChildIfExists(const std::string& name)
 	{
-		Folder& parentFolder = FollowDown(ParentPath(path));
-		return parentFolder.GetChild(LastName(path));
+		return FindNamedObjectIfExists(_objects, name);
 	}
 	
-	FolderObject& FollowRelPath(std::string&& path)
+	FolderObject* FollowRelPath(const std::string& path)
 	{
-		Folder& parentFolder = FollowDown(ParentPath(path));
-		return parentFolder.GetChild(LastName(std::move(path)));
+		Folder* parentFolder = FollowDown(ParentPath(path));
+		if(parentFolder)
+			return parentFolder->GetChildIfExists(LastName(path));
+		else
+			return nullptr;
+	}
+	
+	FolderObject* FollowRelPath(std::string&& path)
+	{
+		Folder* parentFolder = FollowDown(ParentPath(path));
+		if(parentFolder)
+			return parentFolder->GetChildIfExists(LastName(std::move(path)));
+		else
+			return nullptr;
 	}
 
 private:
@@ -189,12 +200,16 @@ private:
 		std::string subpath;
 		if(sep == path.end())
 		{
-			FolderObject& obj = FindNamedObject(_objects, path.substr(strPos));
-			return &static_cast<Folder&>(obj);
+			FolderObject* obj = FindNamedObjectIfExists(_objects, path.substr(strPos));
+			return dynamic_cast<Folder*>(obj);
 		}
 		else {
-			FolderObject& obj = FindNamedObject(_objects, path.substr(strPos, sep-path.begin()));
-			return static_cast<Folder&>(obj).followDown(path, sep+1-path.begin());
+			FolderObject* obj = FindNamedObjectIfExists(_objects, path.substr(strPos, sep-path.begin()));
+			Folder* folder = dynamic_cast<Folder*>(obj);
+			if(folder)
+				return folder->followDown(path, sep+1-path.begin());
+			else
+				return nullptr;
 		}
 	}
 	
@@ -204,12 +219,16 @@ private:
 		std::string subpath;
 		if(sep == path.end())
 		{
-			FolderObject& obj = FindNamedObject(_objects, std::move(path).substr(strPos));
-			return &static_cast<Folder&>(obj);
+			FolderObject* obj = FindNamedObjectIfExists(_objects, std::move(path).substr(strPos));
+			return dynamic_cast<Folder*>(obj);
 		}
 		else {
-			FolderObject& obj = FindNamedObject(_objects, path.substr(strPos, sep-path.begin()));
-			return static_cast<Folder&>(obj).followDown(std::move(path), sep+1-path.begin());
+			FolderObject* obj = FindNamedObjectIfExists(_objects, path.substr(strPos, sep-path.begin()));
+			Folder* folder = dynamic_cast<Folder*>(obj);
+			if(folder)
+				return folder->followDown(std::move(path), sep+1-path.begin());
+			else
+				return nullptr;
 		}
 	}
 	

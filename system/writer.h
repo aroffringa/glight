@@ -83,8 +83,7 @@ class Writer {
 		void requireControllable(const class Controllable& controllable)
 		{ writeControllable(controllable); }
 
-		std::set<std::string> _controllablesWritten;
-		std::set<std::string> _effectsWritten;
+		std::set<const class Controllable*> _controllablesWritten;
 		std::map<const Folder*, size_t> _folderIds;
 };
 

@@ -52,8 +52,6 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 
 	_visualizationWindow.reset(new VisualizationWindow(_management.get()));
 	
-	_chaseWizard.reset(new ChaseWizard(this));
-
 	createMenu();
 	
 	_objectListFrame.reset(new ObjectListFrame(*_management, *this));
@@ -391,5 +389,9 @@ size_t ShowWindow::nextControlKeyRow() const
 
 void ShowWindow::onMIChaseWizardClicked()
 {
-	_chaseWizard->show();
+	std::string path = _objectListFrame->SelectedFolder().FullPath();
+	if(!_chaseWizard || !_chaseWizard->is_visible())
+		_chaseWizard.reset(new ChaseWizard(this, path));
+	_chaseWizard->SetDestinationPath(path);
+	_chaseWizard->present();
 }

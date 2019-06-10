@@ -19,8 +19,13 @@
 class ChaseWizard : public Gtk::Window
 {
 public:
-	ChaseWizard(class ShowWindow*);
+	ChaseWizard(class ShowWindow*, const std::string& destinationPath);
 	~ChaseWizard();
+	
+	void SetDestinationPath(const std::string& destinationPath)
+	{
+		_destinationPath = destinationPath;
+	}
 	
 private:
 	enum Page {
@@ -43,9 +48,11 @@ private:
 	void initPage3_1RunningLight();
 	void initPage3_2SingleColour();
 	void initPage3_3VUMeter();
+	class Folder& getFolder() const;
 	
 	class ShowWindow* _showWindow;
 	class Management* _management;
+	std::string _destinationPath;
 	
 	Gtk::VBox _mainBox;
 	Gtk::VBox _vBoxPage1, _vBoxPage2, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3;

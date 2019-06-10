@@ -15,12 +15,11 @@
 #include <algorithm>
 #include <random>
 
-Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
+Sequence& DefaultChase::MakeRunningLight(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
 {
-	Folder& folder = management.RootFolder(); // TODO
 	Chase& chase = management.AddChase();
 	chase.SetName("Runchase");
-	folder.Add(chase);
+	destination.Add(chase);
 	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
 	size_t frames = colors.size();
@@ -39,7 +38,7 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vect
 	for(size_t frameIndex=0; frameIndex!=frames; ++frameIndex)
 	{
 		PresetCollection& pc = management.AddPresetCollection();
-		folder.Add(pc);
+		destination.Add(pc);
 		pc.SetName("Runchase" + std::to_string(frameIndex+1));
 		unsigned
 			red = colors[frameIndex].Red()*((1<<24)-1)/255,
@@ -111,12 +110,11 @@ void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCol
 	}
 }
 
-Sequence& DefaultChase::MakeColorVariation(class Management& management, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors, double variation)
+Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& destination, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors, double variation)
 {
-	Folder& folder = management.RootFolder(); // TODO
 	Chase& chase = management.AddChase();
 	chase.SetName("Colorseq");
-	folder.Add(chase);
+	destination.Add(chase);
 	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
 	std::random_device rd;
@@ -125,7 +123,7 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 	for(size_t chaseIndex=0; chaseIndex!=colors.size(); ++chaseIndex)
 	{
 		PresetCollection& pc = management.AddPresetCollection();
-		folder.Add(pc);
+		destination.Add(pc);
 		pc.SetName("Colorseq" + std::to_string(chaseIndex+1));
 		unsigned
 			red = colors[chaseIndex].Red()*((1<<24)-1)/255,
@@ -149,16 +147,15 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
 	}
-	return seq;
+	return chase;
 }
 
-Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors, VUMeterDirection direction)
+Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors, VUMeterDirection direction)
 {
-	Folder& folder = management.RootFolder(); // TODO
 	if(colors.size() != fixtures.size())
 		throw std::runtime_error("Number of colours did not match number of fixtures");
 	std::unique_ptr<AudioLevelEffect> audioLevel(new AudioLevelEffect());
-	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel), folder);
+	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel), destination);
 	for(size_t inp=0; inp!=newAudioLevel.NInputs(); ++inp)
 		management.AddPreset(newAudioLevel, inp);
 	newAudioLevel.SetName("VUMeter");
@@ -172,7 +169,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 		std::unique_ptr<ThresholdEffect> threshold(new ThresholdEffect());
 		threshold->SetLowerStartLimit(((1<<24)-1)*i/nLevels);
 		threshold->SetLowerEndLimit(((1<<24)-1)*(i+1)/nLevels);
-		Effect& newEffect = management.AddEffect(std::move(threshold), folder);
+		Effect& newEffect = management.AddEffect(std::move(threshold), destination);
 		for(size_t inp=0; inp!=newEffect.NInputs(); ++inp)
 			management.AddPreset(newEffect, inp);
 		newEffect.SetName("VUM" + std::to_string(i+1) + "_Thr");
@@ -184,7 +181,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 		
 		PresetCollection& pc = management.AddPresetCollection();
 		pc.SetName("VUM" + std::to_string(i+1));
-		folder.Add(pc);
+		destination.Add(pc);
 		for(size_t fixInLevel=0; fixInLevel!=nFixInLevel; ++fixInLevel)
 		{
 			size_t fixIndex;

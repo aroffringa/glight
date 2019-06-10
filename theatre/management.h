@@ -76,6 +76,7 @@ class Management {
 		std::mutex& Mutex() { return _mutex; }
 
 		class FolderObject& GetObjectFromPath(const std::string& path) const;
+		class FolderObject* GetObjectFromPathIfExists(const std::string& path) const;
 		size_t ControllableIndex(const Controllable* controllable) const;
 		
 		class PresetValue* GetPresetValue(Controllable& controllable, size_t inputIndex) const;

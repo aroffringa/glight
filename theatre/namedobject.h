@@ -32,25 +32,45 @@ public:
 	void SetName(const std::string& name) { _name = name; }
 	
 	template<typename NamedObjectType>
-	static NamedObjectType& FindNamedObject(const std::vector<std::unique_ptr<NamedObjectType>>& container, const std::string& name)
+	static NamedObjectType* FindNamedObjectIfExists(const std::vector<std::unique_ptr<NamedObjectType>>& container, const std::string& name)
 	{
 		for(const std::unique_ptr<NamedObjectType>& obj : container)
 		{
 			if(obj->_name == name)
-				return *obj;
+				return obj.get();
 		}
-		throw std::runtime_error("Could not find named object " + name + " in container.");
+		return nullptr;
+	}
+	
+	template<typename NamedObjectType>
+	static NamedObjectType* FindNamedObjectIfExists(const std::vector<NamedObjectType*>& container, const std::string& name)
+	{
+		for(NamedObjectType* obj : container)
+		{
+			if(obj->_name == name)
+				return obj;
+		}
+		return nullptr;
+	}
+	
+	template<typename NamedObjectType>
+	static NamedObjectType& FindNamedObject(const std::vector<std::unique_ptr<NamedObjectType>>& container, const std::string& name)
+	{
+		NamedObjectType* obj = FindNamedObjectIfExists(container, name);
+		if(obj)
+			return *obj;
+		else
+			throw std::runtime_error("Could not find named object " + name + " in container.");
 	}
 	
 	template<typename NamedObjectType>
 	static NamedObjectType& FindNamedObject(const std::vector<NamedObjectType*>& container, const std::string& name)
 	{
-		for(NamedObjectType* obj : container)
-		{
-			if(obj->_name == name)
-				return *obj;
-		}
-		throw std::runtime_error("Could not find named object " + name + " in container.");
+		NamedObjectType* obj = FindNamedObjectIfExists(container, name);
+		if(obj)
+			return *obj;
+		else
+			throw std::runtime_error("Could not find named object " + name + " in container.");
 	}
 	
 	template<typename ObjectType>
