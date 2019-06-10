@@ -8,13 +8,13 @@
 #include "showwindow.h"
 #include "timesequencepropertieswindow.h"
 
-#include "../libtheatre/chase.h"
-#include "../libtheatre/folder.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/presetvalue.h"
-#include "../libtheatre/presetcollection.h"
-#include "../libtheatre/sequence.h"
-#include "../libtheatre/timesequence.h"
+#include "../theatre/chase.h"
+#include "../theatre/folder.h"
+#include "../theatre/management.h"
+#include "../theatre/presetvalue.h"
+#include "../theatre/presetcollection.h"
+#include "../theatre/sequence.h"
+#include "../theatre/timesequence.h"
 
 ObjectListFrame::ObjectListFrame(Management &management, ShowWindow &parentWindow) :
 	_objectListFrame("Object programming"),

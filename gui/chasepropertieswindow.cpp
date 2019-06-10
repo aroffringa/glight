@@ -1,8 +1,8 @@
 #include "chasepropertieswindow.h"
 #include "showwindow.h"
 
-#include "../libtheatre/chase.h"
-#include "../libtheatre/management.h"
+#include "../theatre/chase.h"
+#include "../theatre/management.h"
 
 ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &management, ShowWindow &parentWindow) :
 	PropertiesWindow(),

@@ -6,7 +6,7 @@
 
 #include "components/objectbrowser.h"
 
-#include "../libtheatre/timesequence.h"
+#include "../theatre/timesequence.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>

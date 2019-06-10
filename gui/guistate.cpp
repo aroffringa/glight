@@ -1,8 +1,8 @@
 #include "guistate.h"
 
-#include "../libtheatre/controllable.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/presetvalue.h"
+#include "../theatre/controllable.h"
+#include "../theatre/management.h"
+#include "../theatre/presetvalue.h"
 
 FaderState::FaderState(class PresetValue* presetValue) :
 	_presetValue(presetValue)

@@ -1,8 +1,8 @@
-#include "../libtheatre/management.h"
-#include "../libtheatre/presetcollection.h"
-#include "../libtheatre/timesequence.h"
+#include "../theatre/management.h"
+#include "../theatre/presetcollection.h"
+#include "../theatre/timesequence.h"
 
-#include "../libtheatre/effects/fadeeffect.h"
+#include "../theatre/effects/fadeeffect.h"
 
 #include <boost/test/unit_test.hpp>
 

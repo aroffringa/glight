@@ -6,10 +6,10 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/messagedialog.h>
 
-#include "../libtheatre/fixture.h"
-#include "../libtheatre/fixturecontrol.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/theatre.h"
+#include "../theatre/fixture.h"
+#include "../theatre/fixturecontrol.h"
+#include "../theatre/management.h"
+#include "../theatre/theatre.h"
 
 ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
 	_showWindow(showWindow),

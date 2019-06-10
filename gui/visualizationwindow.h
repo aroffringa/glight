@@ -1,7 +1,7 @@
 #ifndef VISUALIZATIONWINDOW_H
 #define VISUALIZATIONWINDOW_H
 
-#include "../libtheatre/position.h"
+#include "../theatre/position.h"
 
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/window.h>

@@ -1,9 +1,9 @@
 #include "audiowidget.h"
 
-#include "../flacdecoder.h"
+#include "../system/flacdecoder.h"
 
-#include "../libtheatre/scene.h"
-#include "../libtheatre/sceneitem.h"
+#include "../theatre/scene.h"
+#include "../theatre/sceneitem.h"
 
 #include <cairomm/context.h>
 #include <gdkmm/general.h> // set_source_pixbuf()

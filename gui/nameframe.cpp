@@ -2,9 +2,9 @@
 
 #include "showwindow.h"
 
-#include "../libtheatre/folder.h"
-#include "../libtheatre/folderobject.h"
-#include "../libtheatre/management.h"
+#include "../theatre/folder.h"
+#include "../theatre/folderobject.h"
+#include "../theatre/management.h"
 
 #include <gtkmm/stock.h>
 

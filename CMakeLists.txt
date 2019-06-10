@@ -27,14 +27,6 @@ include_directories(${AUBIO_INCLUDE_DIR})
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${LIBXML2_INCLUDE_DIR})
 
-set(MAINFILES
-  audioplayer.cpp
-  beatfinder.cpp
-  flacdecoder.cpp
-  reader.cpp
-  writer.cpp
-)
-
 set(GUIFILES
   gui/application.cpp  
   gui/audiowidget.cpp
@@ -58,22 +50,30 @@ set(GUIFILES
   gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp)
 
+set(SYSTEMFILES
+  system/audioplayer.cpp
+  system/beatfinder.cpp
+  system/flacdecoder.cpp
+  system/reader.cpp
+  system/writer.cpp
+)
+
 set(THEATREFILES
-  libtheatre/defaultchase.cpp
-  libtheatre/effect.cpp
-  libtheatre/fixture.cpp
-  libtheatre/fixturefunction.cpp
-  libtheatre/folderobject.cpp
-  libtheatre/management.cpp
-  libtheatre/oladevice.cpp
-  libtheatre/presetvalue.cpp
-  libtheatre/scene.cpp
-  libtheatre/show.cpp
-  libtheatre/theatre.cpp
-  libtheatre/properties/propertyset.cpp)
+  theatre/defaultchase.cpp
+  theatre/effect.cpp
+  theatre/fixture.cpp
+  theatre/fixturefunction.cpp
+  theatre/folderobject.cpp
+  theatre/management.cpp
+  theatre/oladevice.cpp
+  theatre/presetvalue.cpp
+  theatre/scene.cpp
+  theatre/show.cpp
+  theatre/theatre.cpp
+  theatre/properties/propertyset.cpp)
 
 add_library(glight-object OBJECT
-  ${MAINFILES} ${GUIFILES} ${THEATREFILES})
+  ${GUIFILES} ${SYSTEMFILES} ${THEATREFILES})
 
 add_executable(glight $<TARGET_OBJECTS:glight-object> glight.cpp)
 

@@ -3,8 +3,8 @@
 
 #include "property.h"
 
-#include "../../libtheatre/controlvalue.h"
-#include "../../libtheatre/folderobject.h"
+#include "../../theatre/controlvalue.h"
+#include "../../theatre/folderobject.h"
 
 #include <memory>
 #include <vector>

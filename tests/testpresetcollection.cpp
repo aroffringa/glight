@@ -1,8 +1,8 @@
-#include "../libtheatre/fixturecontrol.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/presetcollection.h"
-#include "../libtheatre/theatre.h"
-#include "../libtheatre/timing.h"
+#include "../theatre/fixturecontrol.h"
+#include "../theatre/management.h"
+#include "../theatre/presetcollection.h"
+#include "../theatre/theatre.h"
+#include "../theatre/timing.h"
 
 #include <boost/test/unit_test.hpp>
 

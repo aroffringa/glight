@@ -1,4 +1,4 @@
-#include "../libtheatre/folder.h"
+#include "../theatre/folder.h"
 
 #include <boost/test/unit_test.hpp>
 

@@ -6,7 +6,7 @@
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
 
-#include "../../libtheatre/color.h"
+#include "../../theatre/color.h"
 
 class ColorSelectWidget : public Gtk::HBox
 {

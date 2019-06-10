@@ -2,21 +2,21 @@
 
 #include "writer.h"
 
-#include "libtheatre/properties/propertyset.h"
+#include "../theatre/properties/propertyset.h"
 
-#include "libtheatre/chase.h"
-#include "libtheatre/controllable.h"
-#include "libtheatre/effect.h"
-#include "libtheatre/fixture.h"
-#include "libtheatre/fixturecontrol.h"
-#include "libtheatre/fixturefunction.h"
-#include "libtheatre/folder.h"
-#include "libtheatre/presetvalue.h"
-#include "libtheatre/show.h"
-#include "libtheatre/theatre.h"
-#include "libtheatre/timesequence.h"
+#include "../theatre/chase.h"
+#include "../theatre/controllable.h"
+#include "../theatre/effect.h"
+#include "../theatre/fixture.h"
+#include "../theatre/fixturecontrol.h"
+#include "../theatre/fixturefunction.h"
+#include "../theatre/folder.h"
+#include "../theatre/presetvalue.h"
+#include "../theatre/show.h"
+#include "../theatre/theatre.h"
+#include "../theatre/timesequence.h"
 
-#include "gui/guistate.h"
+#include "../gui/guistate.h"
 
 Writer::Writer(Management &management) : _management(management), _guiState(nullptr), _encoding("UTF-8")
 {

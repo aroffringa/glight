@@ -2,13 +2,13 @@
 
 #include "../showwindow.h"
 
-#include "../../libtheatre/chase.h"
-#include "../../libtheatre/effect.h"
-#include "../../libtheatre/fixturecontrol.h"
-#include "../../libtheatre/folder.h"
-#include "../../libtheatre/management.h"
-#include "../../libtheatre/presetcollection.h"
-#include "../../libtheatre/timesequence.h"
+#include "../../theatre/chase.h"
+#include "../../theatre/effect.h"
+#include "../../theatre/fixturecontrol.h"
+#include "../../theatre/folder.h"
+#include "../../theatre/management.h"
+#include "../../theatre/presetcollection.h"
+#include "../../theatre/timesequence.h"
 
 ObjectList::ObjectList(Management &management, ShowWindow &parentWindow) :
 	_management(&management),

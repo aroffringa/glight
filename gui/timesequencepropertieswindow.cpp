@@ -2,7 +2,7 @@
 #include "timesequencepropertieswindow.h"
 #include "showwindow.h"
 
-#include "../libtheatre/management.h"
+#include "../theatre/management.h"
 
 #include <gtkmm/messagedialog.h>
 

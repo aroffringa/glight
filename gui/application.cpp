@@ -7,8 +7,8 @@
 #include "showwindow.h"
 
 //#include "../libtheatre/ftdidevice.h"
-#include "../libtheatre/oladevice.h"
-#include "../libtheatre/dummydevice.h"
+#include "../theatre/oladevice.h"
+#include "../theatre/dummydevice.h"
 
 Application::Application()
 { }

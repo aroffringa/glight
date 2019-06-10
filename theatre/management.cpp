@@ -1,6 +1,6 @@
 #include "management.h"
 
-#include "../beatfinder.h"
+#include "../system/beatfinder.h"
 
 #include "chase.h"
 #include "controllable.h"

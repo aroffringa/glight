@@ -5,7 +5,7 @@
 
 #include <mutex>
 
-#include "../audioplayer.h"
+#include "../system/audioplayer.h"
 
 #include "controlsceneitem.h"
 #include "keysceneitem.h"

@@ -1,8 +1,8 @@
 #include "controlwidget.h"
 
-#include "../libtheatre/presetvalue.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/controllable.h"
+#include "../theatre/presetvalue.h"
+#include "../theatre/management.h"
+#include "../theatre/controllable.h"
 
 #define MAX_SCALE_VALUE_DEF (1<<24)
 

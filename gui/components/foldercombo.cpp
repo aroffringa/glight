@@ -2,11 +2,11 @@
 
 #include "../showwindow.h"
 
-#include "../../libtheatre/chase.h"
-#include "../../libtheatre/effect.h"
-#include "../../libtheatre/folder.h"
-#include "../../libtheatre/management.h"
-#include "../../libtheatre/presetcollection.h"
+#include "../../theatre/chase.h"
+#include "../../theatre/effect.h"
+#include "../../theatre/folder.h"
+#include "../../theatre/management.h"
+#include "../../theatre/presetcollection.h"
 
 FolderCombo::FolderCombo(Management &management, ShowWindow &parentWindow) :
 	Gtk::ComboBox(false),

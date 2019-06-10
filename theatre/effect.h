@@ -3,7 +3,7 @@
 
 #include "folderobject.h"
 
-#include "../libtheatre/controllable.h"
+#include "../theatre/controllable.h"
 
 #include <sigc++/connection.h>
 

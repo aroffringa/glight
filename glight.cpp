@@ -1,10 +1,11 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "libtheatre/dmxdevice.h"
+#include "theatre/dmxdevice.h"
 
 #include "gui/application.h"
-#include "writer.h"
+
+#include "system/writer.h"
 
 using namespace std;
 

@@ -4,8 +4,8 @@
 #include "foldercombo.h"
 #include "objectlist.h"
 
-#include "../../libtheatre/folder.h"
-#include "../../libtheatre/folderobject.h"
+#include "../../theatre/folder.h"
+#include "../../theatre/folderobject.h"
 
 #include <gtkmm/box.h>
 

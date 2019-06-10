@@ -1,9 +1,9 @@
 #include "effectpropertieswindow.h"
 #include "showwindow.h"
 
-#include "../libtheatre/effect.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/presetvalue.h"
+#include "../theatre/effect.h"
+#include "../theatre/management.h"
+#include "../theatre/presetvalue.h"
 
 #include <gtkmm/stock.h>
 #include <gtkmm/messagedialog.h>

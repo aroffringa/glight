@@ -8,9 +8,9 @@
 
 #include <glibmm/main.h>
 
-#include "../libtheatre/management.h"
-#include "../libtheatre/scene.h"
-#include "../libtheatre/show.h"
+#include "../theatre/management.h"
+#include "../theatre/scene.h"
+#include "../theatre/show.h"
 
 #include "sceneframe.h"
 
