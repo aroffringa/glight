@@ -82,6 +82,13 @@ void Writer::writeAttribute(const char *attributeName, int attributeValue)
 	writeAttribute(attributeName, s.str());
 }
 
+void Writer::writeAttribute(const char *attributeName, double attributeValue)
+{
+	std::stringstream s;
+	s << attributeValue;
+	writeAttribute(attributeName, s.str());
+}
+
 void Writer::writeGlightShow()
 {
 	startElement("glight-show");
