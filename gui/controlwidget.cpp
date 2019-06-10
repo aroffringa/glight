@@ -1,8 +1,8 @@
 #include "controlwidget.h"
 
-#include "../libtheatre/presetvalue.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/controllable.h"
+#include "../theatre/presetvalue.h"
+#include "../theatre/management.h"
+#include "../theatre/controllable.h"
 
 #define MAX_SCALE_VALUE_DEF (1<<24)
 
@@ -233,9 +233,11 @@ void ControlWidget::ChangeManagement(class Management& management, bool moveSlid
 		_management = &management;
 	}
 	else {
-		size_t presetId = _preset->Id();
+		std::string controllablePath = _preset->Controllable().FullPath();
+		size_t input = _preset->InputIndex();
 		_management = &management;
-		PresetValue* pv = _management->GetPresetValue(presetId);
+		Controllable& controllable = static_cast<Controllable&>(_management->GetObjectFromPath(controllablePath));
+		PresetValue* pv = _management->GetPresetValue(controllable, input);
 		if(pv == nullptr)
 			Unassign();
 		else {

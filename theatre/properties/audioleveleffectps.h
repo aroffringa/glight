@@ -3,7 +3,7 @@
 
 #include "propertyset.h"
 
-#include "../../libtheatre/effects/audioleveleffect.h"
+#include "../../theatre/effects/audioleveleffect.h"
 
 class AudioLevelEffectPS final : public PropertySet
 {

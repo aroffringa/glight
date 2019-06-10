@@ -2,9 +2,9 @@
 #include "controlwidget.h"
 #include "showwindow.h"
 
-#include "../libtheatre/management.h"
-#include "../libtheatre/presetvalue.h"
-#include "../libtheatre/chase.h"
+#include "../theatre/management.h"
+#include "../theatre/presetvalue.h"
+#include "../theatre/chase.h"
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>

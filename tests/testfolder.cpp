@@ -1,4 +1,5 @@
-#include "../libtheatre/folder.h"
+#include "../theatre/folder.h"
+#include "../theatre/management.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -114,6 +115,18 @@ BOOST_AUTO_TEST_CASE( FollowRelPath )
 	BOOST_CHECK_EQUAL( &a->FollowRelPath("b/c") , c.get() );
 	
 	BOOST_CHECK_EQUAL( &b->FollowRelPath("c") , c.get() );
+}
+
+BOOST_AUTO_TEST_CASE( FolderManagement )
+{
+	Management management;
+	Folder& root = management.RootFolder();
+	BOOST_CHECK(root.Children().empty());
+	root.SetName("a");
+	BOOST_CHECK_EQUAL(&management.GetObjectFromPath("a"), &root);
+	Folder& folderB = management.AddFolder(root);
+	folderB.SetName("b");
+	BOOST_CHECK_EQUAL(&management.GetObjectFromPath("a/b"), &folderB);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

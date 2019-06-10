@@ -8,7 +8,7 @@ pkg_check_modules(FLACPP flac++ REQUIRED)
 pkg_check_modules(ALSA alsa REQUIRED)
 pkg_check_modules(LIBOLA libola REQUIRED)
 
-find_package(Boost COMPONENTS system REQUIRED)
+find_package(Boost COMPONENTS filesystem system REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(Threads REQUIRED)
 
@@ -26,14 +26,6 @@ include_directories(${AUBIO_INCLUDE_DIR})
 
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${LIBXML2_INCLUDE_DIR})
-
-set(MAINFILES
-  audioplayer.cpp
-  beatfinder.cpp
-  flacdecoder.cpp
-  reader.cpp
-  writer.cpp
-)
 
 set(GUIFILES
   gui/application.cpp  
@@ -58,28 +50,37 @@ set(GUIFILES
   gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp)
 
+set(SYSTEMFILES
+  system/audioplayer.cpp
+  system/beatfinder.cpp
+  system/flacdecoder.cpp
+  system/reader.cpp
+  system/writer.cpp
+)
+
 set(THEATREFILES
-  libtheatre/defaultchase.cpp
-  libtheatre/effect.cpp
-  libtheatre/fixture.cpp
-  libtheatre/fixturefunction.cpp
-  libtheatre/folderobject.cpp
-  libtheatre/management.cpp
-  libtheatre/oladevice.cpp
-  libtheatre/presetvalue.cpp
-  libtheatre/scene.cpp
-  libtheatre/show.cpp
-  libtheatre/theatre.cpp
-  libtheatre/properties/propertyset.cpp)
+  theatre/defaultchase.cpp
+  theatre/effect.cpp
+  theatre/fixture.cpp
+  theatre/fixturefunction.cpp
+  theatre/folderobject.cpp
+  theatre/management.cpp
+  theatre/oladevice.cpp
+  theatre/presetvalue.cpp
+  theatre/scene.cpp
+  theatre/show.cpp
+  theatre/theatre.cpp
+  theatre/properties/propertyset.cpp)
 
 add_library(glight-object OBJECT
-  ${MAINFILES} ${GUIFILES} ${THEATREFILES})
+  ${GUIFILES} ${SYSTEMFILES} ${THEATREFILES})
 
 add_executable(glight $<TARGET_OBJECTS:glight-object> glight.cpp)
 
 link_directories(${GTKMM_LIBDIR})
 
 set(GLIGHT_LIBRARIES
+  ${Boost_FILESYSTEM_LIBRARY} 
   ${Boost_SYSTEM_LIBRARY} 
   ${FLACPP_LIBRARIES} 
   ${ALSA_LIBRARIES} 
@@ -92,15 +93,17 @@ set(GLIGHT_LIBRARIES
 
 target_link_libraries(glight ${GLIGHT_LIBRARIES})
 
-find_package(Boost COMPONENTS system unit_test_framework)
+find_package(Boost COMPONENTS filesystem system unit_test_framework)
 if(Boost_FOUND)
 	include_directories(${Boost_INCLUDE_DIR})
   add_executable(runtests EXCLUDE_FROM_ALL
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
     tests/testchase.cpp
+    tests/testfileformat.cpp
     tests/testfixturecontrol.cpp
     tests/testfolder.cpp
+    tests/testmanagement.cpp
     tests/testpresetcollection.cpp
     )
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})

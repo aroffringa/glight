@@ -2,21 +2,21 @@
 
 #include "writer.h"
 
-#include "libtheatre/properties/propertyset.h"
+#include "../theatre/properties/propertyset.h"
 
-#include "libtheatre/chase.h"
-#include "libtheatre/controllable.h"
-#include "libtheatre/effect.h"
-#include "libtheatre/fixture.h"
-#include "libtheatre/fixturecontrol.h"
-#include "libtheatre/fixturefunction.h"
-#include "libtheatre/folder.h"
-#include "libtheatre/presetvalue.h"
-#include "libtheatre/show.h"
-#include "libtheatre/theatre.h"
-#include "libtheatre/timesequence.h"
+#include "../theatre/chase.h"
+#include "../theatre/controllable.h"
+#include "../theatre/effect.h"
+#include "../theatre/fixture.h"
+#include "../theatre/fixturecontrol.h"
+#include "../theatre/fixturefunction.h"
+#include "../theatre/folder.h"
+#include "../theatre/presetvalue.h"
+#include "../theatre/show.h"
+#include "../theatre/theatre.h"
+#include "../theatre/timesequence.h"
 
-#include "gui/guistate.h"
+#include "../gui/guistate.h"
 
 Writer::Writer(Management &management) : _management(management), _guiState(nullptr), _encoding("UTF-8")
 {
@@ -207,7 +207,7 @@ void Writer::writeDmxChannel(const DmxChannel &dmxChannel)
 void Writer::writeFixtureType(const FixtureType &fixtureType)
 {
 	startElement("fixture-type");
-	   writeFolderAttributes(fixtureType);
+	writeFolderAttributes(fixtureType);
 	writeAttribute("fixture-class", fixtureType.FixtureClass());
 	endElement();
 }
@@ -258,15 +258,14 @@ void Writer::writePresetValue(const PresetValue &presetValue)
 	writeAttribute("input-index", presetValue.InputIndex());
 	writeAttribute("folder", _folderIds[&presetValue.Controllable().Parent()]);
 	writeAttribute("value", presetValue.Value().UInt());
-	writeAttribute("id", presetValue.Id());
 	endElement();
 }
 
 void Writer::writeFixtureControl(const FixtureControl &control)
 {
 	startElement("fixture-control");
-	   writeFolderAttributes(control);
-	writeAttribute("fixture-ref", control.Name());
+	writeFolderAttributes(control);
+	writeAttribute("fixture-ref", control.Fixture().Name());
 	endElement();
 }
 
@@ -346,7 +345,7 @@ void Writer::writeEffect(const class Effect& effect)
 			requireControllable(*c.first);
 		
 		startElement("effect");
-		      writeFolderAttributes(effect);
+		writeFolderAttributes(effect);
 		writeAttribute("type", effect.TypeToName(effect.GetType()));
 		std::unique_ptr<PropertySet> ps = PropertySet::Make(effect);
 		
@@ -430,6 +429,7 @@ void Writer::writeControlSceneItem(const ControlSceneItem &item)
 	writeAttribute("start-value", item.StartValue().UInt());
 	writeAttribute("end-value", item.EndValue().UInt());
 	writeAttribute("controllable-ref", item.Controllable().Name());
+	writeAttribute("folder", _folderIds[&item.Controllable().Parent()]);
 }
 
 void Writer::writeGUIState(const GUIState& guiState)
@@ -450,7 +450,11 @@ void Writer::writeFaderState(const FaderSetupState& guiState)
 	{
 		startElement("fader");
 		if(fader.GetPresetValue() != nullptr)
-			writeAttribute("preset-id", fader.GetPresetValue()->Id());
+		{
+			writeAttribute("input-index", fader.GetPresetValue()->InputIndex());
+			writeAttribute("folder", _folderIds[&fader.GetPresetValue()->Controllable().Parent()]);
+			writeAttribute("name", fader.GetPresetValue()->Controllable().Name());
+		}
 		endElement(); // preset
 	}
 	endElement(); // faders

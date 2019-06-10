@@ -13,7 +13,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
-#include "../libtheatre/keysceneitem.h"
+#include "../theatre/keysceneitem.h"
 
 #include "nameframe.h"
 #include "audiowidget.h"

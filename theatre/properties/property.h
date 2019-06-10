@@ -1,9 +1,9 @@
 #ifndef PROPERTY_H
 #define PROPERTY_H
 
-#include "../../libtheatre/folderobject.h"
+#include "../../theatre/folderobject.h"
 
-#include "../../libtheatre/effects/thresholdeffect.h"
+#include "../../theatre/effects/thresholdeffect.h"
 
 #include <string>
 

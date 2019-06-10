@@ -50,28 +50,22 @@ class PresetCollection : public Controllable {
 			}
 		}
 		const std::vector<std::unique_ptr<PresetValue>> &PresetValues() const { return _presetValues; }
-		PresetValue& AddPresetValue(class PresetValue& source)
+		PresetValue& AddPresetValue(const class PresetValue& source)
 		{
 			_presetValues.emplace_back(new PresetValue(source));
 			return *_presetValues.back();
 		}
-		PresetValue& AddPresetValue(unsigned id, class Controllable &controllable, size_t input)
+		PresetValue& AddPresetValue(class Controllable &controllable, size_t input)
 		{
-			_presetValues.emplace_back(new PresetValue(id, controllable, input));
+			_presetValues.emplace_back(new PresetValue(controllable, input));
 			return *_presetValues.back();
 		}
-		PresetValue& AddPresetValue(class PresetValue& source, class Controllable &controllable)
+		PresetValue& AddPresetValue(const class PresetValue& source, class Controllable &controllable)
 		{
 			_presetValues.emplace_back(new PresetValue(source, controllable));
 			return *_presetValues.back();
 		}
-		[[ deprecated("Use the inut/outut system") ]]
-		bool IsUsing(const Controllable &controllable) const
-		{
-			for(const std::unique_ptr<PresetValue>& pv : _presetValues)
-				if((&pv->Controllable()) == &controllable) return true;
-			return false;
-		}
+		
 	private:
 		ControlValue _inputValue;
 		std::vector<std::unique_ptr<PresetValue>> _presetValues;

@@ -3,6 +3,7 @@
 #include "chase.h"
 #include "color.h"
 #include "fixture.h"
+#include "fixturecontrol.h"
 #include "folder.h"
 #include "management.h"
 #include "presetcollection.h"
@@ -71,13 +72,13 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vect
 				addColorPresets(management, *f, pc, red, green, blue, master);
 			}
 		}
-		seq.Add(&pc, 0);
+		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
 	}
 	if(runType == BackAndForthRun)
 	{
 		for(size_t i=2; i<colors.size(); ++i)
-			seq.Add(seq.List()[colors.size()-i].first, 0);
+			seq.Add(*seq.List()[colors.size()-i].first, 0);
 	}
 	return seq;
 }
@@ -89,22 +90,22 @@ void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCol
 		const std::unique_ptr<FixtureFunction>& ff = f.Functions()[i];
 		if(ff->Type() == FixtureFunction::RedIntensity && red != 0)
 		{
-			Controllable& c = management.GetControllable(f.Name());
+			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(red);
 		}
 		else if(ff->Type() == FixtureFunction::GreenIntensity && green != 0)
 		{
-			Controllable& c = management.GetControllable(f.Name());
+			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(green);
 		}
 		else if(ff->Type() == FixtureFunction::BlueIntensity && blue != 0)
 		{
-			Controllable& c = management.GetControllable(f.Name());
+			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(blue);
 		}
 		else if(ff->Type() == FixtureFunction::Brightness && master != 0)
 		{
-			Controllable& c = management.GetControllable(f.Name());
+			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(master);
 		}
 	}
@@ -145,7 +146,7 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 				bv = std::max<double>(0.0, std::min<double>(double(blue) + blueVar, (1<<24)-1));
 			addColorPresets(management, *f, pc, rv, gv, bv, master);
 		}
-		seq.Add(&pc, 0);
+		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
 	}
 	return seq;
@@ -213,8 +214,8 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, const std::vecto
 			addColorPresets(management, *fixtures[fixIndex], pc, red, green, blue, master);
 		}
 		management.AddPreset(pc, 0);
-		newEffect.AddConnection(&pc, 0);
-		newAudioLevel.AddConnection(&newEffect, 0);
+		newEffect.AddConnection(pc, 0);
+		newAudioLevel.AddConnection(newEffect, 0);
 	}
 	return newAudioLevel;
 }

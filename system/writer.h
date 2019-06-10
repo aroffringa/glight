@@ -9,7 +9,7 @@
 
 #include <libxml/xmlwriter.h>
 
-#include "libtheatre/management.h"
+#include "../theatre/management.h"
 
 class WriterException : public std::runtime_error {
 	public:

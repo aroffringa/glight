@@ -5,12 +5,12 @@
 
 #include "showwindow.h"
 
-#include "../libtheatre/chase.h"
-#include "../libtheatre/folder.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/presetvalue.h"
-#include "../libtheatre/presetcollection.h"
-#include "../libtheatre/sequence.h"
+#include "../theatre/chase.h"
+#include "../theatre/folder.h"
+#include "../theatre/management.h"
+#include "../theatre/presetvalue.h"
+#include "../theatre/presetcollection.h"
+#include "../theatre/sequence.h"
 
 CreateChaseDialog::CreateChaseDialog(Management& management, ShowWindow& parentWindow) :
 	Dialog("Create chase", true),
@@ -122,7 +122,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked()
 			i != children.end() ; ++i)
 		{
 			Controllable *object = (*i)[_newChaseListColumns._controllable];
-			sequence.Add(object, 0);
+			sequence.Add(*object, 0);
 		}
 
 		lock.unlock();

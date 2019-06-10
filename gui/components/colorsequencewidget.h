@@ -3,7 +3,7 @@
 
 #include "colorselectwidget.h"
 
-#include "../../libtheatre/color.h"
+#include "../../theatre/color.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>

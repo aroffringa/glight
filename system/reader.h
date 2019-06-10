@@ -1,7 +1,7 @@
 #ifndef READER_H
 #define READER_H
 
-#include "libtheatre/timesequence.h"
+#include "../theatre/timesequence.h"
 
 #include <stdexcept>
 #include <string>

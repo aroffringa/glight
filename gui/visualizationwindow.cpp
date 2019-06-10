@@ -1,10 +1,10 @@
 #include "visualizationwindow.h"
 
-#include "../libtheatre/management.h"
-#include "../libtheatre/dmxdevice.h"
-#include "../libtheatre/fixture.h"
-#include "../libtheatre/theatre.h"
-#include "../libtheatre/valuesnapshot.h"
+#include "../theatre/management.h"
+#include "../theatre/dmxdevice.h"
+#include "../theatre/fixture.h"
+#include "../theatre/theatre.h"
+#include "../theatre/valuesnapshot.h"
 
 #include <glibmm/main.h>
 

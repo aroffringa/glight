@@ -1,12 +1,12 @@
 #include "inputselectmenu.h"
 
-#include "../../libtheatre/chase.h"
-#include "../../libtheatre/controllable.h"
-#include "../../libtheatre/effect.h"
-#include "../../libtheatre/management.h"
-#include "../../libtheatre/presetcollection.h"
-#include "../../libtheatre/presetvalue.h"
-#include "../../libtheatre/timesequence.h"
+#include "../../theatre/chase.h"
+#include "../../theatre/controllable.h"
+#include "../../theatre/effect.h"
+#include "../../theatre/management.h"
+#include "../../theatre/presetcollection.h"
+#include "../../theatre/presetvalue.h"
+#include "../../theatre/timesequence.h"
 
 void InputSelectMenu::Popup(Management& management, GdkEventButton* event)
 {

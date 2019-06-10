@@ -11,15 +11,15 @@
 #include "sceneframe.h"
 #include "visualizationwindow.h"
 
-#include "../libtheatre/dmxdevice.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/theatre.h"
-#include "../libtheatre/fixture.h"
-#include "../libtheatre/presetcollection.h"
-#include "../libtheatre/show.h"
+#include "../theatre/dmxdevice.h"
+#include "../theatre/management.h"
+#include "../theatre/theatre.h"
+#include "../theatre/fixture.h"
+#include "../theatre/presetcollection.h"
+#include "../theatre/show.h"
 
-#include "../reader.h"
-#include "../writer.h"
+#include "../system/reader.h"
+#include "../system/writer.h"
 
 ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miFile("_File", true),

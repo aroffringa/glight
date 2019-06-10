@@ -1,20 +1,20 @@
 #include "reader.h"
 
-#include "libtheatre/properties/propertyset.h"
+#include "../theatre/properties/propertyset.h"
 
-#include "libtheatre/chase.h"
-#include "libtheatre/controllable.h"
-#include "libtheatre/effect.h"
-#include "libtheatre/fixture.h"
-#include "libtheatre/fixturecontrol.h"
-#include "libtheatre/fixturefunction.h"
-#include "libtheatre/folder.h"
-#include "libtheatre/presetvalue.h"
-#include "libtheatre/scene.h"
-#include "libtheatre/show.h"
-#include "libtheatre/theatre.h"
+#include "../theatre/chase.h"
+#include "../theatre/controllable.h"
+#include "../theatre/effect.h"
+#include "../theatre/fixture.h"
+#include "../theatre/fixturecontrol.h"
+#include "../theatre/fixturefunction.h"
+#include "../theatre/folder.h"
+#include "../theatre/presetvalue.h"
+#include "../theatre/scene.h"
+#include "../theatre/show.h"
+#include "../theatre/theatre.h"
 
-#include "gui/guistate.h"
+#include "../gui/guistate.h"
 
 Reader::Reader(Management &management) : _management(management), _theatre(management.Theatre()), _guiState(nullptr)
 {
@@ -171,7 +171,7 @@ void Reader::parseFixtureType(xmlNode *node)
 {
 	FixtureType &type =
 		_theatre.AddFixtureType((enum FixtureType::FixtureClass) getIntAttribute(node, "fixture-class"));
-	   parseFolderAttr(node, type);
+	parseFolderAttr(node, type);
 }
 
 void Reader::parseFixture(xmlNode *node)
@@ -229,15 +229,15 @@ void Reader::parseFixtureControl(xmlNode *node)
 {
 	Fixture &fixture =
 		_theatre.GetFixture(getStringAttribute(node, "fixture-ref"));
-	FixtureControl &control = _management.AddFixtureControl(fixture, _management.RootFolder() /* TODO */);
-	   parseFolderAttr(node, control);
+	FixtureControl &control = _management.AddFixtureControl(fixture);
+	parseFolderAttr(node, control);
 }
 
 void Reader::parsePresetCollection(xmlNode *node)
 {
 	PresetCollection &collection =
 		_management.AddPresetCollection();
-	   parseFolderAttr(node, collection);
+	parseFolderAttr(node, collection);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{
 		if(curNode->type == XML_ELEMENT_NODE)
@@ -250,7 +250,7 @@ void Reader::parsePresetCollection(xmlNode *node)
 				Controllable* controllable = dynamic_cast<Controllable*>(&obj);
 				if(controllable == nullptr)
 					throw std::runtime_error("Expecting a controllable in controllable-ref, but object named " + obj.Name() + " in folder " + folder.Name() + " is something different");
-				PresetValue &value = collection.AddPresetValue(getIntAttribute(curNode, "id"), *controllable, inputIndex);
+				PresetValue &value = collection.AddPresetValue(*controllable, inputIndex);
 				value.SetValue(ControlValue(getIntAttribute(curNode, "value")));
 			}
 			else
@@ -271,7 +271,7 @@ void Reader::parseSequence(xmlNode *node, Sequence& sequence)
 				size_t folderId = getIntAttribute(curNode, "folder");
 				PresetCollection& pc = dynamic_cast<PresetCollection&>(
 					_management.Folders()[folderId]->GetChild(getStringAttribute(curNode, "name")));
-				sequence.Add(&pc, input);
+				sequence.Add(pc, input);
 			}
 			else
 				throw std::runtime_error("Bad node in sequence");
@@ -346,10 +346,12 @@ void Reader::parseTimeSequenceStep(xmlNode *node, TimeSequence::Step& step)
 
 void Reader::parsePresetValue(xmlNode *node)
 {
-	Controllable &controllable =
-		_management.GetControllable(getStringAttribute(node, "controllable-ref"));
+	size_t folderId = getIntAttribute(node, "folder");
+	const std::string name = getStringAttribute(node, "controllable-ref");
+	Folder* folder = _management.Folders()[folderId].get();
+	Controllable& controllable = static_cast<Controllable&>(folder->GetChild(name));
 	size_t inputIndex = getIntAttribute(node, "input-index");
-	PresetValue &value = _management.AddPreset(getIntAttribute(node, "id"), controllable, inputIndex);
+	PresetValue &value = _management.AddPreset(controllable, inputIndex);
 	value.SetValue(ControlValue(getIntAttribute(node, "value")));
 }
 
@@ -357,7 +359,7 @@ void Reader::parseEffect(xmlNode* node)
 {
 	Effect::Type type = Effect::NameToType(getStringAttribute(node, "type"));
 	std::unique_ptr<Effect> effect = Effect::Make(type);
-	   parseFolderAttr(node, *effect);
+	parseFolderAttr(node, *effect);
 	Effect* effectPtr = &_management.AddEffect(std::move(effect));
 	std::unique_ptr<PropertySet> ps = PropertySet::Make(*effectPtr);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
@@ -385,7 +387,9 @@ void Reader::parseEffect(xmlNode* node)
 			{
 				std::string cName = getStringAttribute(curNode, "name");
 				size_t cInputIndex = getIntAttribute(curNode, "input-index");
-				effectPtr->AddConnection(&_management.GetControllable(cName), cInputIndex);
+				size_t folderId = getIntAttribute(curNode, "folder");
+				Folder* folder = _management.Folders()[folderId].get();
+				effectPtr->AddConnection(static_cast<Controllable&>(folder->GetChild(cName)), cInputIndex);
 			}
 			else throw std::runtime_error("Bad element in effect");
 		}
@@ -426,7 +430,7 @@ void Reader::parseShowItem(xmlNode *node)
 void Reader::parseScene(xmlNode *node)
 {
 	Scene *scene = _management.Show().AddScene();
-	   parseFolderAttr(node, *scene);
+	parseFolderAttr(node, *scene);
 	scene->SetAudioFile(getStringAttribute(node, "audio-file"));
 
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
@@ -463,8 +467,9 @@ KeySceneItem &Reader::parseKeySceneItem(xmlNode *node, Scene &scene)
 
 ControlSceneItem &Reader::parseControlSceneItem(xmlNode *node, Scene &scene)
 {
-	Controllable &controllable =
-		_management.GetControllable(getStringAttribute(node, "controllable-ref"));
+	size_t folderId = getIntAttribute(node, "folder");
+	Folder* folder = _management.Folders()[folderId].get();
+	Controllable& controllable = static_cast<Controllable&>(folder->GetChild(getStringAttribute(node, "controllable-ref")));
 	ControlSceneItem *item = scene.AddControlSceneItem(getDoubleAttribute(node, "offset"), controllable, 0);
 	item->StartValue().Set(getIntAttribute(node, "start-value"));
 	item->EndValue().Set(getIntAttribute(node, "end-value"));
@@ -513,10 +518,16 @@ void Reader::parseGUIFaders(xmlNode* node, GUIState& guiState)
 
 void Reader::parseGUIPresetRef(xmlNode* node, FaderSetupState& fader)
 {
-	if(hasAttribute(node, "preset-id"))
+	if(hasAttribute(node, "name"))
 	{
-		fader.faders.emplace_back(_management.GetPresetValue(getIntAttribute(node, "preset-id")));
+		size_t input = getIntAttribute(node, "input-index");
+		size_t folderId = getIntAttribute(node, "folder");
+		const std::string name = getStringAttribute(node, "name");
+		Folder* folder = _management.Folders()[folderId].get();
+		Controllable& controllable = static_cast<Controllable&>(folder->GetChild(name));
+		fader.faders.emplace_back(_management.GetPresetValue(controllable, input));
 	}
-	else
+	else {
 		fader.faders.emplace_back(nullptr);
+	}
 }

@@ -3,7 +3,7 @@
 
 #include "folderobject.h"
 
-#include "../libtheatre/controllable.h"
+#include "../theatre/controllable.h"
 
 #include <sigc++/connection.h>
 
@@ -45,18 +45,18 @@ public:
 	
 	static std::vector<Type> GetTypes();
 	
-	void AddConnection(Controllable* controllable, size_t input)
+	void AddConnection(Controllable& controllable, size_t input)
 	{
-		_connections.emplace_back(controllable, input);
+		_connections.emplace_back(&controllable, input);
 		_onDeleteConnections.emplace_back(
-			controllable->SignalDelete().connect([controllable,input,this]() { RemoveConnection(controllable, input); })
+			controllable.SignalDelete().connect([&controllable,input,this]() { RemoveConnection(controllable, input); })
 		);
 	}
 	
-	void RemoveConnection(Controllable* controllable, size_t input)
+	void RemoveConnection(Controllable& controllable, size_t input)
 	{
 		std::vector<std::pair<Controllable*, size_t>>::iterator
-			item = std::find(_connections.begin(), _connections.end(), std::make_pair(controllable, input));
+			item = std::find(_connections.begin(), _connections.end(), std::make_pair(&controllable, input));
 		if(item == _connections.end())
 			throw std::runtime_error("RemoveConnection() called for unconnected controllable");
 		// convert to index to also remove corresponding connection

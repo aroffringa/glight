@@ -10,7 +10,7 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
-#include "../libtheatre/fixturetype.h"
+#include "../theatre/fixturetype.h"
 
 #include <memory>
 

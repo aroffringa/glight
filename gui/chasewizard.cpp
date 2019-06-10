@@ -3,10 +3,10 @@
 
 #include "components/colorselectwidget.h"
 
-#include "../libtheatre/defaultchase.h"
-#include "../libtheatre/fixture.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/theatre.h"
+#include "../theatre/defaultchase.h"
+#include "../theatre/fixture.h"
+#include "../theatre/management.h"
+#include "../theatre/theatre.h"
 
 #include <memory>
 

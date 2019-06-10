@@ -1,12 +1,12 @@
-#include "../libtheatre/chase.h"
-#include "../libtheatre/dummydevice.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/sequence.h"
-#include "../libtheatre/theatre.h"
-#include "../libtheatre/fixturecontrol.h"
-#include "../libtheatre/presetvalue.h"
-#include "../libtheatre/presetcollection.h"
-#include "../libtheatre/folder.h"
+#include "../theatre/chase.h"
+#include "../theatre/dummydevice.h"
+#include "../theatre/management.h"
+#include "../theatre/sequence.h"
+#include "../theatre/theatre.h"
+#include "../theatre/fixturecontrol.h"
+#include "../theatre/presetvalue.h"
+#include "../theatre/presetcollection.h"
+#include "../theatre/folder.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -32,8 +32,8 @@ BOOST_AUTO_TEST_CASE( remove_indirect )
 	Chase& chase = management.AddChase();
 	Sequence& sequence = chase.Sequence();
 	root.Add(chase);
-	sequence.Add(&pcA, 0);
-	sequence.Add(&pcB, 0);
+	sequence.Add(pcA, 0);
+	sequence.Add(pcB, 0);
 	BOOST_CHECK_EQUAL( management.Controllables().size(), 4); // 1 preset, 2 collections, 1 chase
 	management.RemoveControllable(pcA);
 	BOOST_CHECK_EQUAL( management.Controllables().size(), 2); // 1 preset, 1 collection, 0 chases

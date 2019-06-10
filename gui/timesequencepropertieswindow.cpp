@@ -2,7 +2,7 @@
 #include "timesequencepropertieswindow.h"
 #include "showwindow.h"
 
-#include "../libtheatre/management.h"
+#include "../theatre/management.h"
 
 #include <gtkmm/messagedialog.h>
 
@@ -219,7 +219,7 @@ void TimeSequencePropertiesWindow::onAddStep()
 	if(object)
 	{
 		std::unique_lock<std::mutex> lock(_management->Mutex());
-		_timeSequence->AddStep(object, 0);
+		_timeSequence->AddStep(*object, 0);
 		if(_management->HasCycle())
 		{
 			_timeSequence->RemoveStep(_timeSequence->Size()-1);

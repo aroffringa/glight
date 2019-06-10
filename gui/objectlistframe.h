@@ -17,7 +17,7 @@
 
 #include "components/objectbrowser.h"
 
-#include "../libtheatre/effect.h"
+#include "../theatre/effect.h"
 
 /**
 	@author Andre Offringa

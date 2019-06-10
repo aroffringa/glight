@@ -5,6 +5,7 @@ RUN apt-get update && \
     g++ \
     cmake \
     pkg-config \
+    libboost-filesystem-dev \
     libboost-system-dev \
     libboost-test-dev \
     libgtkmm-3.0-dev \

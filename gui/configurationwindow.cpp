@@ -6,10 +6,11 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/messagedialog.h>
 
-#include "../libtheatre/fixture.h"
-#include "../libtheatre/fixturecontrol.h"
-#include "../libtheatre/management.h"
-#include "../libtheatre/theatre.h"
+#include "../theatre/fixture.h"
+#include "../theatre/fixturecontrol.h"
+#include "../theatre/folder.h"
+#include "../theatre/management.h"
+#include "../theatre/theatre.h"
 
 ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
 	_showWindow(showWindow),
@@ -140,6 +141,7 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	Position position = _management->Theatre().GetFreePosition();
 	FixtureType &type = _management->Theatre().AddFixtureType(cl);
+	_management->RootFolder().Add(type);
 	Fixture &fixture = _management->Theatre().AddFixture(type);
 	fixture.Position() = position;
 	
