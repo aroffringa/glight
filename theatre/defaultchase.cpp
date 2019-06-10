@@ -72,13 +72,13 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, const std::vect
 				addColorPresets(management, *f, pc, red, green, blue, master);
 			}
 		}
-		seq.Add(&pc, 0);
+		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
 	}
 	if(runType == BackAndForthRun)
 	{
 		for(size_t i=2; i<colors.size(); ++i)
-			seq.Add(seq.List()[colors.size()-i].first, 0);
+			seq.Add(*seq.List()[colors.size()-i].first, 0);
 	}
 	return seq;
 }
@@ -146,7 +146,7 @@ Sequence& DefaultChase::MakeColorVariation(class Management& management, const s
 				bv = std::max<double>(0.0, std::min<double>(double(blue) + blueVar, (1<<24)-1));
 			addColorPresets(management, *f, pc, rv, gv, bv, master);
 		}
-		seq.Add(&pc, 0);
+		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
 	}
 	return seq;

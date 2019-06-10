@@ -155,7 +155,7 @@ public:
 	
 	void AddStep(Controllable& controllable, size_t input)
 	{
-		_sequence.Add(&controllable, input);
+		_sequence.Add(controllable, input);
 		_steps.emplace_back();
 	}
 	

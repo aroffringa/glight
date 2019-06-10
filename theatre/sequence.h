@@ -13,9 +13,9 @@ public:
 	
 	size_t Size() const { return _list.size(); }
 
-	void Add(class Controllable* controllable, size_t inputIndex)
+	void Add(class Controllable& controllable, size_t inputIndex)
 	{
-		_list.emplace_back(controllable, inputIndex);
+		_list.emplace_back(&controllable, inputIndex);
 	}
 	
 	void Remove(size_t index)

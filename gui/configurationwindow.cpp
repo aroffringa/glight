@@ -8,6 +8,7 @@
 
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
+#include "../theatre/folder.h"
 #include "../theatre/management.h"
 #include "../theatre/theatre.h"
 
@@ -140,6 +141,7 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	Position position = _management->Theatre().GetFreePosition();
 	FixtureType &type = _management->Theatre().AddFixtureType(cl);
+	_management->RootFolder().Add(type);
 	Fixture &fixture = _management->Theatre().AddFixture(type);
 	fixture.Position() = position;
 	

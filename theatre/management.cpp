@@ -376,7 +376,7 @@ FolderObject& Management::GetObjectFromPath(const std::string& path) const
 		std::string left = path.substr(0, sep-path.begin());
 		std::string right = path.substr(sep+1-path.begin());
 		if(left == _rootFolder->Name())
-			return _rootFolder->FollowRelPath(path);
+			return _rootFolder->FollowRelPath(right);
 	}
 	throw std::runtime_error("Could not find object with path " + path);
 }
@@ -398,7 +398,6 @@ size_t Management::PresetValueIndex(const PresetValue* presetValue) const
 {
 	return FolderObject::FindIndex(_presetValues, presetValue);
 }
-
 
 ValueSnapshot Management::Snapshot()
 {
@@ -479,7 +478,7 @@ void Management::dryCopyControllerDependency(const Management& forDryCopy, size_
 			size_t cIndex = forDryCopy.ControllableIndex(input.first);
 			if(_controllables[cIndex] == nullptr)
 				dryCopyControllerDependency(forDryCopy, cIndex);
-			newSequence->Add(_controllables[cIndex].get(), input.second);
+			newSequence->Add(*_controllables[cIndex], input.second);
 		}
 		GetFolder(controllable->Parent().FullPath()).Add(*_controllables[index]);
 	}

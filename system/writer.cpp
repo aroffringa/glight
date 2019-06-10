@@ -207,7 +207,7 @@ void Writer::writeDmxChannel(const DmxChannel &dmxChannel)
 void Writer::writeFixtureType(const FixtureType &fixtureType)
 {
 	startElement("fixture-type");
-	   writeFolderAttributes(fixtureType);
+	writeFolderAttributes(fixtureType);
 	writeAttribute("fixture-class", fixtureType.FixtureClass());
 	endElement();
 }
@@ -264,8 +264,8 @@ void Writer::writePresetValue(const PresetValue &presetValue)
 void Writer::writeFixtureControl(const FixtureControl &control)
 {
 	startElement("fixture-control");
-	   writeFolderAttributes(control);
-	writeAttribute("fixture-ref", control.Name());
+	writeFolderAttributes(control);
+	writeAttribute("fixture-ref", control.Fixture().Name());
 	endElement();
 }
 
@@ -345,7 +345,7 @@ void Writer::writeEffect(const class Effect& effect)
 			requireControllable(*c.first);
 		
 		startElement("effect");
-		      writeFolderAttributes(effect);
+		writeFolderAttributes(effect);
 		writeAttribute("type", effect.TypeToName(effect.GetType()));
 		std::unique_ptr<PropertySet> ps = PropertySet::Make(effect);
 		
