@@ -93,11 +93,11 @@ BOOST_AUTO_TEST_CASE( FollowDown )
 	b->Add(*c);
 	a->Add(*b);
 	
-	BOOST_CHECK_EQUAL( &a->FollowDown("b") , b.get() );
+	BOOST_CHECK_EQUAL( a->FollowDown("b") , b.get() );
 	
-	BOOST_CHECK_EQUAL( &a->FollowDown("b/c") , c.get() );
+	BOOST_CHECK_EQUAL( a->FollowDown("b/c") , c.get() );
 	
-	BOOST_CHECK_EQUAL( &b->FollowDown("c") , c.get() );
+	BOOST_CHECK_EQUAL( b->FollowDown("c") , c.get() );
 }
 
 
@@ -110,11 +110,11 @@ BOOST_AUTO_TEST_CASE( FollowRelPath )
 	b->Add(*c);
 	a->Add(*b);
 	
-	BOOST_CHECK_EQUAL( &a->FollowRelPath("b") , b.get() );
+	BOOST_CHECK_EQUAL( a->FollowRelPath("b") , b.get() );
 	
-	BOOST_CHECK_EQUAL( &a->FollowRelPath("b/c") , c.get() );
+	BOOST_CHECK_EQUAL( a->FollowRelPath("b/c") , c.get() );
 	
-	BOOST_CHECK_EQUAL( &b->FollowRelPath("c") , c.get() );
+	BOOST_CHECK_EQUAL( b->FollowRelPath("c") , c.get() );
 }
 
 BOOST_AUTO_TEST_CASE( FolderManagement )

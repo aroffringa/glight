@@ -197,7 +197,7 @@ Folder& Management::AddFolder(Folder& parent)
 
 Folder& Management::GetFolder(const std::string& path)
 {
-	return _rootFolder->FollowDown(Folder::RemoveRoot(path));
+	return *_rootFolder->FollowDown(Folder::RemoveRoot(path));
 }
 
 void Management::RemoveObject(FolderObject& object)
@@ -364,13 +364,13 @@ Effect& Management::AddEffect(std::unique_ptr<Effect> effect, Folder& folder)
 	return newEffect;
 }
 
-FolderObject& Management::GetObjectFromPath(const std::string& path) const
+FolderObject* Management::GetObjectFromPathIfExists(const std::string& path) const
 {
 	auto sep = std::find(path.begin(), path.end(), '/');
 	if(sep == path.end())
 	{
 		if(path == _rootFolder->Name())
-			return *_rootFolder;
+			return _rootFolder;
 	}
 	else {
 		std::string left = path.substr(0, sep-path.begin());
@@ -378,7 +378,16 @@ FolderObject& Management::GetObjectFromPath(const std::string& path) const
 		if(left == _rootFolder->Name())
 			return _rootFolder->FollowRelPath(right);
 	}
-	throw std::runtime_error("Could not find object with path " + path);
+	return nullptr;
+}
+
+FolderObject& Management::GetObjectFromPath(const std::string& path) const
+{
+	FolderObject* result = GetObjectFromPathIfExists(path);
+	if(result)
+		return *result;
+	else
+		throw std::runtime_error("Could not find object with path " + path);
 }
 
 size_t Management::ControllableIndex(const Controllable* controllable) const

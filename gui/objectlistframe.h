@@ -27,6 +27,7 @@ class ObjectListFrame : public Gtk::VPaned
 public:
 	ObjectListFrame(class Management& management, class ShowWindow& parentWindow);
 
+	Folder& SelectedFolder() { return _list.SelectedFolder(); }
 private:
 	void initPresetsPart();
 

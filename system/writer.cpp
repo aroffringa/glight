@@ -30,7 +30,6 @@ void Writer::CheckXmlVersion()
 void Writer::Write(const Glib::ustring &filename)
 {
 	_controllablesWritten.clear();
-	_effectsWritten.clear();
 	_folderIds.clear();
 	
 	/* Create a new XmlWriter for uri, with no compression. */
@@ -214,7 +213,7 @@ void Writer::writeFixtureType(const FixtureType &fixtureType)
 
 void Writer::writeControllable(const Controllable &controllable)
 {
-	if(_controllablesWritten.count(controllable.Name()) == 0)
+	if(_controllablesWritten.count(&controllable) == 0)
 	{
 		const FixtureControl* fixtureControl = dynamic_cast<const FixtureControl *>(&controllable);
 		const Chase* chase = dynamic_cast<const Chase *>(&controllable);
@@ -235,7 +234,7 @@ void Writer::writeControllable(const Controllable &controllable)
 		else
 			throw std::runtime_error("Unknown controllable");
 	}
-	_controllablesWritten.insert(controllable.Name());
+	_controllablesWritten.insert(&controllable);
 }
 
 void Writer::writePresetCollection(const class PresetCollection &presetCollection)
@@ -339,7 +338,7 @@ void Writer::writeSequence(const Sequence &sequence)
 
 void Writer::writeEffect(const class Effect& effect)
 {
-	if(_effectsWritten.count(effect.Name()) == 0)
+	if(_controllablesWritten.count(&effect) == 0)
 	{
 		for(const std::pair<Controllable*, size_t>& c : effect.Connections())
 			requireControllable(*c.first);
@@ -379,7 +378,7 @@ void Writer::writeEffect(const class Effect& effect)
 			endElement();
 		}
 		endElement();
-		_effectsWritten.insert(effect.Name());
+		_controllablesWritten.insert(&effect);
 	}
 }
 
