@@ -19,6 +19,8 @@ public:
 	
 	virtual ControlValue& InputValue(size_t index) = 0;
 	
+	virtual std::string InputName(size_t index) = 0;
+	
 	void MixInput(size_t index, const ControlValue& value)
 	{
 		unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(), value.UInt(), ControlValue::Default);

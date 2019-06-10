@@ -29,6 +29,9 @@ class PresetCollection : public Controllable {
 		ControlValue& InputValue(size_t index) final override
 		{ return _inputValue; }
 		
+		virtual std::string InputName(size_t index) final override
+		{ return "M"; }
+	
 		size_t NOutputs() const final override
 		{ return _presetValues.size(); }
 		

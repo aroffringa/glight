@@ -5,6 +5,8 @@
 
 #include <sigc++/signal.h>
 
+#include <string>
+
 /**
 	@author Andre Offringa
 */
@@ -38,6 +40,8 @@ class PresetValue {
 		bool IsIgnorable() const { return _value.UInt() == 0; }
 		
 		sigc::signal<void()>& SignalDelete() { return _signalDelete; }
+		
+		std::string Title() const;
 		
 	private:
 		unsigned _id;

@@ -36,6 +36,9 @@ public:
 	ControlValue& InputValue(size_t) final override
 	{ return _inputValue; }
 	
+	virtual std::string InputName(size_t index) final override
+	{ return "M"; }
+	
 	size_t NOutputs() const final override
 	{ return _sequence.List().size(); }
 	

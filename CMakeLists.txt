@@ -66,6 +66,7 @@ set(THEATREFILES
   libtheatre/folderobject.cpp
   libtheatre/management.cpp
   libtheatre/oladevice.cpp
+  libtheatre/presetvalue.cpp
   libtheatre/scene.cpp
   libtheatre/show.cpp
   libtheatre/theatre.cpp
