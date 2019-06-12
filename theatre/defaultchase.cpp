@@ -164,23 +164,23 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 		nLevels = (fixtures.size()+1) / 2;
 	else
 		nLevels = fixtures.size();
-	for(size_t i=0; i!=nLevels; ++i)
+	for(size_t level=0; level!=nLevels; ++level)
 	{
 		std::unique_ptr<ThresholdEffect> threshold(new ThresholdEffect());
-		threshold->SetLowerStartLimit(((1<<24)-1)*i/nLevels);
-		threshold->SetLowerEndLimit(((1<<24)-1)*(i+1)/nLevels);
+		threshold->SetLowerStartLimit(((1<<24)-1)*level/nLevels);
+		threshold->SetLowerEndLimit(((1<<24)-1)*(level+1)/nLevels);
 		Effect& newEffect = management.AddEffect(std::move(threshold), destination);
 		for(size_t inp=0; inp!=newEffect.NInputs(); ++inp)
 			management.AddPreset(newEffect, inp);
-		newEffect.SetName("VUM" + std::to_string(i+1) + "_Thr");
+		newEffect.SetName("VUM" + std::to_string(level+1) + "_Thr");
 		
 		size_t nFixInLevel = 1;
-		if((direction == VUInward && (i != nLevels-1 || fixtures.size()%2==0) ) ||
-			(direction == VUOutward && (i != 0 || fixtures.size()%2==0) ) )
+		if((direction == VUInward && (level != nLevels-1 || fixtures.size()%2==0) ) ||
+			(direction == VUOutward && (level != 0 || fixtures.size()%2==0) ) )
 			nFixInLevel = 2;
 		
 		PresetCollection& pc = management.AddPresetCollection();
-		pc.SetName("VUM" + std::to_string(i+1));
+		pc.SetName("VUM" + std::to_string(level+1));
 		destination.Add(pc);
 		for(size_t fixInLevel=0; fixInLevel!=nFixInLevel; ++fixInLevel)
 		{
@@ -190,16 +190,16 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 				switch(direction)
 				{
 					case VUIncreasing:
-					case VUInward: fixIndex = i; break;
-					case VUOutward: fixIndex = fixtures.size()/2 - i; break;
-					case VUDecreasing: fixIndex = nLevels - i - 1; break;
+					case VUInward: fixIndex = level; break;
+					case VUOutward:
+					case VUDecreasing: fixIndex = nLevels - level - 1; break;
 				}
 			}
 			else {
 				if(direction == VUInward)
-					fixIndex = fixtures.size() - i - 1;
-				else
-					fixIndex = nLevels + i - 1;
+					fixIndex = fixtures.size() - level - 1;
+				else // VUOutward
+					fixIndex = nLevels + level;
 			}
 			unsigned
 				red = colors[fixIndex].Red()*((1<<24)-1)/255,

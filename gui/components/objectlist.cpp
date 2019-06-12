@@ -121,7 +121,7 @@ void ObjectList::fillListFolder(const Folder& folder, const FolderObject* select
 			if(chase)
 				childRow[_listColumns._type] = "C";
 			else if(timeSequence)
-				childRow[_listColumns._type] = "C";
+				childRow[_listColumns._type] = "T";
 			else if(childFolder)
 				childRow[_listColumns._type] = "F";
 			else if(presetCollection)
