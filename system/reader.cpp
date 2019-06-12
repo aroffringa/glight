@@ -269,9 +269,9 @@ void Reader::parseSequence(xmlNode *node, Sequence& sequence)
 			{
 				size_t input = getIntAttribute(curNode, "input-index");
 				size_t folderId = getIntAttribute(curNode, "folder");
-				PresetCollection& pc = dynamic_cast<PresetCollection&>(
+				Controllable& c = dynamic_cast<Controllable&>(
 					_management.Folders()[folderId]->GetChild(getStringAttribute(curNode, "name")));
-				sequence.Add(pc, input);
+				sequence.Add(c, input);
 			}
 			else
 				throw std::runtime_error("Bad node in sequence");
@@ -300,7 +300,7 @@ void Reader::parseChase(xmlNode *node)
 
 void Reader::parseTimeSequence(xmlNode *node)
 {
-	TimeSequence &timeSequence = _management.AddTimeSequence();
+	TimeSequence& timeSequence = _management.AddTimeSequence();
 	parseFolderAttr(node, timeSequence);
 	timeSequence.SetSustain(getBoolAttribute(node, "sustain"));
 	timeSequence.SetRepeatCount(getIntAttribute(node, "repeat-count"));

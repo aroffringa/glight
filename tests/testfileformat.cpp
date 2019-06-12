@@ -62,6 +62,13 @@ BOOST_AUTO_TEST_CASE( ReadAndWrite )
 	chase.Sequence().Add(b, 0);
 	management.AddPreset(chase, 0);
 	
+	TimeSequence& timeSequence = management.AddTimeSequence();
+	timeSequence.SetName("A time sequence");
+	subFolder.Add(timeSequence);
+	timeSequence.AddStep(chase, 0);
+	timeSequence.AddStep(b, 0);
+	management.AddPreset(timeSequence, 0);
+	
 	Folder& effectFolder = management.AddFolder(root);
 	effectFolder.SetName("Effect folder");
 	std::unique_ptr<AudioLevelEffect> effectPtr(new AudioLevelEffect());
