@@ -239,10 +239,13 @@ void Writer::writeControllable(const Controllable &controllable)
 
 void Writer::writePresetCollection(const class PresetCollection &presetCollection)
 {
-	startElement("preset-collection");
-	   writeFolderAttributes(presetCollection);
 	const std::vector<std::unique_ptr<PresetValue>>&
 		values = presetCollection.PresetValues();
+	for(const std::unique_ptr<PresetValue>& pv : values)
+		requireControllable(pv->Controllable());
+	
+	startElement("preset-collection");
+	writeFolderAttributes(presetCollection);
 	for(const std::unique_ptr<PresetValue>& pv : values)
 		writePresetValue(*pv);
 	endElement();
