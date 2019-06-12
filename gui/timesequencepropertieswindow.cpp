@@ -241,19 +241,15 @@ void TimeSequencePropertiesWindow::onAddStep()
 
 void TimeSequencePropertiesWindow::onRemoveStep()
 {
-	Controllable* object = dynamic_cast<Controllable*>(_objectBrowser.SelectedObject());
-	if(object)
+	Gtk::TreeModel::iterator selIter = _stepsView.get_selection()->get_selected();
+	if(selIter)
 	{
-		Gtk::TreeModel::iterator selIter = _stepsView.get_selection()->get_selected();
-		if(selIter)
-		{
-			size_t index = (*selIter)[_stepsListColumns._step];
-			std::unique_lock<std::mutex> lock(_management->Mutex());
-			_timeSequence->RemoveStep(index);
-			lock.unlock();
-			
-			fillStepsList();
-		}
+		size_t index = (*selIter)[_stepsListColumns._step];
+		std::unique_lock<std::mutex> lock(_management->Mutex());
+		_timeSequence->RemoveStep(index);
+		lock.unlock();
+		
+		fillStepsList();
 	}
 }
 
