@@ -304,7 +304,10 @@ void ShowWindow::onMIQuitClicked()
 
 void ShowWindow::onMIDryModeClicked()
 {
-	if(_miDryMode.get_active() && _backgroundManagement == nullptr)
+	Folder& activeFolder = _objectListFrame->SelectedFolder();
+	std::string path = activeFolder.FullPath();
+	bool enterDryMode = _miDryMode.get_active();
+	if(enterDryMode && _backgroundManagement == nullptr)
 	{
 		// Switch from real mode to dry mode
 		_backgroundManagement = std::move(_management);
@@ -312,16 +315,19 @@ void ShowWindow::onMIDryModeClicked()
 		_management->Run();
 		_visualizationWindow->SetDryMode(_management.get());
 		changeManagement(_management.get(), false);
-		_miCancelDryMode.set_sensitive(true);
 	}
-	else if(!_miDryMode.get_active() && _backgroundManagement != nullptr)
+	else if(!enterDryMode && _backgroundManagement != nullptr)
 	{
 		// Switch from dry mode to real mode
 		_management->SwapDevices(*_backgroundManagement);
 		_visualizationWindow->MakeDryModeReal();
 		_backgroundManagement.reset();
-		_miCancelDryMode.set_sensitive(false);
 	}
+	_miCancelDryMode.set_sensitive(enterDryMode);
+	_miOpen.set_sensitive(!enterDryMode);
+	_miSave.set_sensitive(!enterDryMode);
+	FolderObject& folder = _management->GetObjectFromPath(path);
+	_objectListFrame->OpenFolder(static_cast<Folder&>(folder));
 }
 
 void ShowWindow::onMICancelDryModeClicked()
@@ -335,12 +341,18 @@ void ShowWindow::onMICancelDryModeClicked()
 		int result = dialog.run();
 		if(result == Gtk::RESPONSE_OK)
 		{
+			Folder& activeFolder = _objectListFrame->SelectedFolder();
+			std::string path = activeFolder.FullPath();
+			
 			std::swap(_backgroundManagement, _management);
 			_visualizationWindow->SetRealMode();
 			changeManagement(_management.get(), true);
 			_backgroundManagement.reset();
 			_miCancelDryMode.set_sensitive(false);
 			_miDryMode.set_active(false);
+			
+			FolderObject& folder = _management->GetObjectFromPath(path);
+			_objectListFrame->OpenFolder(static_cast<Folder&>(folder));
 		}
 	}
 }
