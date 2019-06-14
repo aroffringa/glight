@@ -28,6 +28,7 @@ public:
 	ObjectListFrame(class Management& management, class ShowWindow& parentWindow);
 
 	Folder& SelectedFolder() { return _list.SelectedFolder(); }
+	void OpenFolder(const Folder& folder) { _list.OpenFolder(folder); }
 private:
 	void initPresetsPart();
 
