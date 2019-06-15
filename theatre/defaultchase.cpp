@@ -22,9 +22,11 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, Folder& destina
 	destination.Add(chase);
 	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
-	size_t frames = colors.size();
+	size_t frames;
 	if(runType == InwardRun || runType == OutwardRun)
-		frames = (frames+1)/2;
+		frames = (colors.size()+1)/2;
+	else
+		frames = colors.size();
 	std::vector<size_t> pos;
 	if(runType == RandomRun)
 	{
@@ -37,38 +39,60 @@ Sequence& DefaultChase::MakeRunningLight(Management& management, Folder& destina
 	}
 	for(size_t frameIndex=0; frameIndex!=frames; ++frameIndex)
 	{
+		size_t nFixInPattern = 1;
+		if((runType == InwardRun && (frameIndex != frames-1 || colors.size()%2==0) ) ||
+			(runType == OutwardRun && (frameIndex != 0 || colors.size()%2==0) ) )
+			nFixInPattern = 2;
+		
 		PresetCollection& pc = management.AddPresetCollection();
 		destination.Add(pc);
 		pc.SetName("Runchase" + std::to_string(frameIndex+1));
-		unsigned
-			red = colors[frameIndex].Red()*((1<<24)-1)/255,
-			green = colors[frameIndex].Green()*((1<<24)-1)/255,
-			blue = colors[frameIndex].Blue()*((1<<24)-1)/255,
-			master = 0;
-		if(red != 0 || green != 0 || blue != 0)
-			master = (1<<24)-1;
-		for(size_t i = 0; i < (fixtures.size() + colors.size() - 1) / colors.size(); ++i)
+		// If there are less colours given than fixtures, the sequence is repeated
+		// several times. This loop is for that purpose.
+		for(size_t patternIndex = 0; patternIndex < (fixtures.size() + colors.size() - 1) / colors.size(); ++patternIndex)
 		{
-			size_t fixIndex = 0;
-			switch(runType)
+			for(size_t fixInPatIndex = 0; fixInPatIndex != nFixInPattern; ++fixInPatIndex)
 			{
-				case IncreasingRun:
-				case BackAndForthRun:
-				case InwardRun:
-					fixIndex = frameIndex + i * colors.size();
-					break;
-				case DecreasingRun:
-				case OutwardRun:
-					fixIndex = frames - frameIndex - 1 + i * colors.size();
-					break;
-				case RandomRun:
-					fixIndex = pos[frameIndex] + i * colors.size();
-					break;
-			}
-			if(fixIndex < fixtures.size())
-			{
-				Fixture* f = fixtures[fixIndex];
-				addColorPresets(management, *f, pc, red, green, blue, master);
+				size_t fixIndex = 0;
+				switch(runType)
+				{
+					case IncreasingRun:
+					case BackAndForthRun:
+						fixIndex = frameIndex + patternIndex * colors.size();
+						break;
+					case DecreasingRun:
+						fixIndex = frames - frameIndex - 1 + patternIndex * colors.size();
+						break;
+					case RandomRun:
+						fixIndex = pos[frameIndex] + patternIndex * colors.size();
+						break;
+					case InwardRun:
+						if(fixInPatIndex == 0)
+							fixIndex = frameIndex + patternIndex * colors.size();
+						else
+							fixIndex = (colors.size() - frameIndex - 1) + patternIndex * colors.size();
+						break;
+					case OutwardRun:
+						if(fixInPatIndex == 0)
+							fixIndex = frames - frameIndex - 1 + patternIndex * colors.size();
+						else
+							fixIndex = frames + frameIndex + patternIndex * colors.size();
+						break;
+				}
+				if(fixIndex < fixtures.size())
+				{
+					size_t colourIndex = fixIndex % colors.size();
+					unsigned
+						red = colors[colourIndex].Red()*((1<<24)-1)/255,
+						green = colors[colourIndex].Green()*((1<<24)-1)/255,
+						blue = colors[colourIndex].Blue()*((1<<24)-1)/255,
+						master = 0;
+					if(red != 0 || green != 0 || blue != 0)
+						master = (1<<24)-1;
+					
+					Fixture* f = fixtures[fixIndex];
+					addColorPresets(management, *f, pc, red, green, blue, master);
+				}
 			}
 		}
 		seq.Add(pc, 0);
