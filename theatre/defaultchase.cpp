@@ -15,73 +15,6 @@
 #include <algorithm>
 #include <random>
 
-Sequence& DefaultChase::MakeRunningLight(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
-{
-	Chase& chase = management.AddChase();
-	chase.SetName("Runchase");
-	destination.Add(chase);
-	management.AddPreset(chase, 0);
-	Sequence& seq = chase.Sequence();
-	size_t frames = colors.size();
-	if(runType == InwardRun || runType == OutwardRun)
-		frames = (frames+1)/2;
-	std::vector<size_t> pos;
-	if(runType == RandomRun)
-	{
-		pos.resize(frames);
-		for(size_t i=0; i!=frames; ++i)
-			pos[i] = i;
-		std::random_device rd;
-		std::mt19937 mt(rd());
-		std::shuffle(pos.begin(), pos.end(), mt);
-	}
-	for(size_t frameIndex=0; frameIndex!=frames; ++frameIndex)
-	{
-		PresetCollection& pc = management.AddPresetCollection();
-		destination.Add(pc);
-		pc.SetName("Runchase" + std::to_string(frameIndex+1));
-		unsigned
-			red = colors[frameIndex].Red()*((1<<24)-1)/255,
-			green = colors[frameIndex].Green()*((1<<24)-1)/255,
-			blue = colors[frameIndex].Blue()*((1<<24)-1)/255,
-			master = 0;
-		if(red != 0 || green != 0 || blue != 0)
-			master = (1<<24)-1;
-		for(size_t i = 0; i < (fixtures.size() + colors.size() - 1) / colors.size(); ++i)
-		{
-			size_t fixIndex = 0;
-			switch(runType)
-			{
-				case IncreasingRun:
-				case BackAndForthRun:
-				case InwardRun:
-					fixIndex = frameIndex + i * colors.size();
-					break;
-				case DecreasingRun:
-				case OutwardRun:
-					fixIndex = frames - frameIndex - 1 + i * colors.size();
-					break;
-				case RandomRun:
-					fixIndex = pos[frameIndex] + i * colors.size();
-					break;
-			}
-			if(fixIndex < fixtures.size())
-			{
-				Fixture* f = fixtures[fixIndex];
-				addColorPresets(management, *f, pc, red, green, blue, master);
-			}
-		}
-		seq.Add(pc, 0);
-		management.AddPreset(pc, 0);
-	}
-	if(runType == BackAndForthRun)
-	{
-		for(size_t i=2; i<colors.size(); ++i)
-			seq.Add(*seq.List()[colors.size()-i].first, 0);
-	}
-	return seq;
-}
-
 void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master)
 {
 	for(size_t i=0; i!=f.Functions().size(); ++i)
@@ -108,6 +41,97 @@ void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCol
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(master);
 		}
 	}
+}
+
+Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
+{
+	Chase& chase = management.AddChase();
+	chase.SetName("Runchase");
+	destination.Add(chase);
+	management.AddPreset(chase, 0);
+	Sequence& seq = chase.Sequence();
+	size_t frames;
+	if(runType == InwardRun || runType == OutwardRun)
+		frames = (colors.size()+1)/2;
+	else
+		frames = colors.size();
+	std::vector<size_t> pos;
+	if(runType == RandomRun)
+	{
+		pos.resize(frames);
+		for(size_t i=0; i!=frames; ++i)
+			pos[i] = i;
+		std::random_device rd;
+		std::mt19937 mt(rd());
+		std::shuffle(pos.begin(), pos.end(), mt);
+	}
+	for(size_t frameIndex=0; frameIndex!=frames; ++frameIndex)
+	{
+		size_t nFixInPattern = 1;
+		if((runType == InwardRun && (frameIndex != frames-1 || colors.size()%2==0) ) ||
+			(runType == OutwardRun && (frameIndex != 0 || colors.size()%2==0) ) )
+			nFixInPattern = 2;
+		
+		PresetCollection& pc = management.AddPresetCollection();
+		destination.Add(pc);
+		pc.SetName("Runchase" + std::to_string(frameIndex+1));
+		// If there are less colours given than fixtures, the sequence is repeated
+		// several times. This loop is for that purpose.
+		for(size_t patternIndex = 0; patternIndex < (fixtures.size() + colors.size() - 1) / colors.size(); ++patternIndex)
+		{
+			for(size_t fixInPatIndex = 0; fixInPatIndex != nFixInPattern; ++fixInPatIndex)
+			{
+				size_t fixIndex = 0;
+				switch(runType)
+				{
+					case IncreasingRun:
+					case BackAndForthRun:
+						fixIndex = frameIndex + patternIndex * colors.size();
+						break;
+					case DecreasingRun:
+						fixIndex = frames - frameIndex - 1 + patternIndex * colors.size();
+						break;
+					case RandomRun:
+						fixIndex = pos[frameIndex] + patternIndex * colors.size();
+						break;
+					case InwardRun:
+						if(fixInPatIndex == 0)
+							fixIndex = frameIndex + patternIndex * colors.size();
+						else
+							fixIndex = (colors.size() - frameIndex - 1) + patternIndex * colors.size();
+						break;
+					case OutwardRun:
+						if(fixInPatIndex == 0)
+							fixIndex = frames - frameIndex - 1 + patternIndex * colors.size();
+						else
+							fixIndex = frames + frameIndex + patternIndex * colors.size();
+						break;
+				}
+				if(fixIndex < fixtures.size())
+				{
+					size_t colourIndex = fixIndex % colors.size();
+					unsigned
+						red = colors[colourIndex].Red()*((1<<24)-1)/255,
+						green = colors[colourIndex].Green()*((1<<24)-1)/255,
+						blue = colors[colourIndex].Blue()*((1<<24)-1)/255,
+						master = 0;
+					if(red != 0 || green != 0 || blue != 0)
+						master = (1<<24)-1;
+					
+					Fixture* f = fixtures[fixIndex];
+					addColorPresets(management, *f, pc, red, green, blue, master);
+				}
+			}
+		}
+		seq.Add(pc, 0);
+		management.AddPreset(pc, 0);
+	}
+	if(runType == BackAndForthRun)
+	{
+		for(size_t i=2; i<colors.size(); ++i)
+			seq.Add(*seq.List()[colors.size()-i].first, 0);
+	}
+	return chase;
 }
 
 Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& destination, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors, double variation)
@@ -146,6 +170,90 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 		}
 		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
+	}
+	return chase;
+}
+
+Chase& DefaultChase::MakeColourShift(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors, ShiftType shiftType)
+{
+	Chase& chase = management.AddChase();
+	chase.SetName("Colourshift");
+	destination.Add(chase);
+	management.AddPreset(chase, 0);
+	Sequence& seq = chase.Sequence();
+	size_t frames = fixtures.size();
+	std::vector<std::vector<size_t>> pos(frames);
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	for(size_t frameIndex=0; frameIndex!=frames; ++frameIndex)
+	{
+		if(shiftType == RandomShift)
+		{
+			pos[frameIndex].resize(fixtures.size());
+			bool duplicate;
+			do {
+				for(size_t i=0; i!=pos[frameIndex].size(); ++i)
+					pos[frameIndex][i] = i;
+				std::shuffle(pos[frameIndex].begin(), pos[frameIndex].end(), mt);
+				duplicate = false;
+				// Check whether previous frames are equal to the new frame
+				for(size_t i=0; i!=frameIndex; ++i)
+					duplicate = duplicate || pos[i] == pos[frameIndex];
+				// Check whether all fixtures are switched to a new position
+				// (if all colours are different, this guarantees that the
+				//  fixture changes colour)
+				if(frameIndex != 0)
+				{
+					for(size_t i=0; i!=pos[frameIndex].size(); ++i)
+						duplicate = duplicate || pos[frameIndex][i] == pos[frameIndex-1][i];
+				}
+				// For the last frame, also check whether all positions are different compared
+				// to the first frame.
+				if(frameIndex == frames-1)
+				{
+					for(size_t i=0; i!=pos[frameIndex].size(); ++i)
+						duplicate = duplicate || pos[frameIndex][i] == pos[0][i];
+				}
+			} while(duplicate);
+		}
+		
+		PresetCollection& pc = management.AddPresetCollection();
+		destination.Add(pc);
+		pc.SetName("Colourshift" + std::to_string(frameIndex+1));
+		
+		for(size_t fixIndex=0; fixIndex!=fixtures.size(); ++fixIndex)
+		{
+			size_t colourIndex;
+			switch(shiftType)
+			{
+				case IncreasingShift:
+				case BackAndForthShift:
+					colourIndex = (fixIndex + frames - frameIndex) % frames;
+					break;
+				case DecreasingShift:
+					colourIndex = (fixIndex + frameIndex) % frames;
+					break;
+				case RandomShift:
+					colourIndex = pos[frameIndex][fixIndex];
+					break;
+			}
+			unsigned
+				red = colors[colourIndex].Red()*((1<<24)-1)/255,
+				green = colors[colourIndex].Green()*((1<<24)-1)/255,
+				blue = colors[colourIndex].Blue()*((1<<24)-1)/255,
+				master = 0;
+			if(red != 0 || green != 0 || blue != 0)
+				master = (1<<24)-1;
+			Fixture* f = fixtures[fixIndex];
+			addColorPresets(management, *f, pc, red, green, blue, master);
+		}
+		seq.Add(pc, 0);
+		management.AddPreset(pc, 0);
+	}
+	if(shiftType == BackAndForthShift)
+	{
+		for(size_t i=2; i<frames; ++i)
+			seq.Add(*seq.List()[frames-i].first, 0);
 	}
 	return chase;
 }

@@ -18,6 +18,7 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationP
 	_selectLabel("Select fixtures:"),
 	_runningLightBtn("Running light"),
 	_singleColourBtn("Random around single colour"),
+	_shiftColoursBtn("Shifting colours"),
 	_vuMeterBtn("VU meter"),
 	_colorsWidgetP3_1(this),
 	_increasingRunRB("Increasing order"),
@@ -29,6 +30,11 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationP
 	_colorsWidgetP3_2(this),
 	_variationLabel("Variation:"),
 	_colorsWidgetP3_3(this),
+	_shiftIncreasingRB("Increasing shift"),
+	_shiftDecreasingRB("Decreasing shift"),
+	_shiftBackAndForthRB("Back and forth"),
+	_shiftRandomRB("Move randomly"),
+	_colorsWidgetP3_4(this),
 	_vuIncreasingRB("Increasing direction"),
 	_vuDecreasingRB("Decreasing direction"),
 	_vuInwardRunRB("Inward direction"),
@@ -43,7 +49,8 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationP
 	initPage2();
 	initPage3_1RunningLight();
 	initPage3_2SingleColour();
-	initPage3_3VUMeter();
+	initPage3_3ShiftColours();
+	initPage3_4VUMeter();
 	
 	_mainBox.pack_start(_vBoxPage1, true, true);
 	_vBoxPage1.show_all();
@@ -83,6 +90,8 @@ void ChaseWizard::initPage2()
 	_vBoxPage2.pack_start(_runningLightBtn);
 	_singleColourBtn.set_group(group);
 	_vBoxPage2.pack_start(_singleColourBtn);
+	_shiftColoursBtn.set_group(group);
+	_vBoxPage2.pack_start(_shiftColoursBtn);
 	_vuMeterBtn.set_group(group);
 	_vBoxPage2.pack_start(_vuMeterBtn);
 }
@@ -114,18 +123,32 @@ void ChaseWizard::initPage3_2SingleColour()
 	_vBoxPage3_2.pack_start(_variation, true, false);
 }
 
-void ChaseWizard::initPage3_3VUMeter()
+void ChaseWizard::initPage3_3ShiftColours()
 {
 	_vBoxPage3_3.pack_start(_colorsWidgetP3_3, true, false);
 	Gtk::RadioButtonGroup group;
+	_shiftIncreasingRB.set_group(group);
+	_vBoxPage3_3.pack_start(_shiftIncreasingRB, true, false);
+	_shiftDecreasingRB.set_group(group);
+	_vBoxPage3_3.pack_start(_shiftDecreasingRB, true, false);
+	_shiftBackAndForthRB.set_group(group);
+	_vBoxPage3_3.pack_start(_shiftBackAndForthRB, true, false);
+	_shiftRandomRB.set_group(group);
+	_vBoxPage3_3.pack_start(_shiftRandomRB, true, false);
+}
+
+void ChaseWizard::initPage3_4VUMeter()
+{
+	_vBoxPage3_4.pack_start(_colorsWidgetP3_4, true, false);
+	Gtk::RadioButtonGroup group;
 	_vuIncreasingRB.set_group(group);
-	_vBoxPage3_3.pack_start(_vuIncreasingRB, true, false);
+	_vBoxPage3_4.pack_start(_vuIncreasingRB, true, false);
 	_vuDecreasingRB.set_group(group);
-	_vBoxPage3_3.pack_start(_vuDecreasingRB, true, false);
+	_vBoxPage3_4.pack_start(_vuDecreasingRB, true, false);
 	_vuInwardRunRB.set_group(group);
-	_vBoxPage3_3.pack_start(_vuInwardRunRB, true, false);
+	_vBoxPage3_4.pack_start(_vuInwardRunRB, true, false);
 	_vuOutwardRunRB.set_group(group);
-	_vBoxPage3_3.pack_start(_vuOutwardRunRB, true, false);
+	_vBoxPage3_4.pack_start(_vuOutwardRunRB, true, false);
 }
 
 void ChaseWizard::fillFixturesList()
@@ -188,20 +211,23 @@ void ChaseWizard::onNextClicked()
 			_vBoxPage3_2.show_all();
 			_currentPage = Page3_2_SingleColour;
 		}
-		else {
+		else if(_shiftColoursBtn.get_active()) {
 			_colorsWidgetP3_3.SetMinCount(_selectedFixtures.size());
 			_colorsWidgetP3_3.SetMaxCount(_selectedFixtures.size());
 			_mainBox.pack_start(_vBoxPage3_3, true, true);
 			_vBoxPage3_3.show_all();
-			_currentPage = Page3_3_VUMeter;
+			_currentPage = Page3_3_ShiftingColours;
+		}
+		else {
+			_colorsWidgetP3_4.SetMinCount(_selectedFixtures.size());
+			_colorsWidgetP3_4.SetMaxCount(_selectedFixtures.size());
+			_mainBox.pack_start(_vBoxPage3_4, true, true);
+			_vBoxPage3_4.show_all();
+			_currentPage = Page3_4_VUMeter;
 		}
 		break;
 		
 		case Page3_1_RunningLight: {
-			_mainBox.remove(_vBoxPage3_1);
-			_mainBox.pack_start(_vBoxPage1, true, true);
-			_vBoxPage1.show_all();
-			_currentPage = Page1_SelFixtures;
 			enum DefaultChase::RunType runType;
 			if(_increasingRunRB.get_active())
 				runType = DefaultChase::IncreasingRun;
@@ -221,20 +247,27 @@ void ChaseWizard::onNextClicked()
 		} break;
 		
 		case Page3_2_SingleColour:
-		_mainBox.remove(_vBoxPage3_2);
-		_mainBox.pack_start(_vBoxPage1, true, true);
-		_vBoxPage1.show_all();
-		_currentPage = Page1_SelFixtures;
 		DefaultChase::MakeColorVariation(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_2.GetColors(), _variation.get_value());
 		_showWindow->EmitUpdate();
 		hide();
 		break;
 		
-		case Page3_3_VUMeter: {
-			_mainBox.remove(_vBoxPage3_3);
-			_mainBox.pack_start(_vBoxPage1, true, true);
-			_vBoxPage1.show_all();
-			_currentPage = Page1_SelFixtures;
+		case Page3_3_ShiftingColours: {
+			enum DefaultChase::ShiftType shiftType;
+			if(_shiftIncreasingRB.get_active())
+				shiftType = DefaultChase::IncreasingShift;
+			else if(_shiftDecreasingRB.get_active())
+				shiftType = DefaultChase::DecreasingShift;
+			else if(_shiftBackAndForthRB.get_active())
+				shiftType = DefaultChase::BackAndForthShift;
+			else
+				shiftType = DefaultChase::RandomShift;
+			DefaultChase::MakeColourShift(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_3.GetColors(), shiftType);
+			_showWindow->EmitUpdate();
+			hide();
+		} break;
+		
+		case Page3_4_VUMeter: {
 			DefaultChase::VUMeterDirection direction;
 			if(_vuIncreasingRB.get_active())
 				direction = DefaultChase::VUIncreasing;
@@ -244,7 +277,7 @@ void ChaseWizard::onNextClicked()
 				direction = DefaultChase::VUInward;
 			else //if(_vuOutwardRunRB.get_active())
 				direction = DefaultChase::VUOutward;
-			DefaultChase::MakeVUMeter(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_3.GetColors(), direction);
+			DefaultChase::MakeVUMeter(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_4.GetColors(), direction);
 			_showWindow->EmitUpdate();
 			hide();
 		} break;

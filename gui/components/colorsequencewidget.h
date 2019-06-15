@@ -17,6 +17,7 @@ public:
 	ColorSequenceWidget(Gtk::Window* parent) :
 		_allEqual("Use one color for all"),
 		_plusButton("+"),
+		_gradientButton("Gradient"),
 		_minButton("-"),
 		_parent(parent),
 		_minCount(1),
@@ -28,6 +29,10 @@ public:
 		_minButton.set_sensitive(false);
 		_minButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onDecreaseColors));
 		_buttonBox.pack_start(_minButton);
+		
+		_gradientButton.set_sensitive(false);
+		_gradientButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onGradient));
+		_buttonBox.pack_start(_gradientButton);
 		
 		_plusButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onIncreaseColors));
 		_buttonBox.pack_start(_plusButton);
@@ -56,6 +61,7 @@ public:
 			_widgets.back()->show();
 		}
 		_minButton.set_sensitive(colors.size() > _minCount);
+		_gradientButton.set_sensitive(colors.size() > 2);
 		_plusButton.set_sensitive(_maxCount==0 || _maxCount > colors.size());
 	}
 	
@@ -75,6 +81,7 @@ public:
 			onIncreaseColors();
 		_minCount = minCount;
 		_minButton.set_sensitive(_widgets.size() > _minCount);
+		_gradientButton.set_sensitive(_widgets.size() > 2);
 		_plusButton.set_sensitive(_maxCount == 0 || _widgets.size() < _maxCount);
 	}
 	
@@ -86,7 +93,10 @@ public:
 		if(_maxCount!=0)
 		{
 			if(_widgets.size() > _maxCount)
+			{
 				_widgets.resize(_maxCount);
+				_gradientButton.set_sensitive(_widgets.size() > 2);
+			}
 			_minButton.set_sensitive(_widgets.size() > _minCount);
 		}
 		_plusButton.set_sensitive(_maxCount == 0 || _widgets.size() < _maxCount);
@@ -96,7 +106,7 @@ private:
 	Gtk::CheckButton _allEqual;
 	std::vector<std::unique_ptr<class ColorSelectWidget>> _widgets;
 	Gtk::ButtonBox _buttonBox;
-	Gtk::Button _plusButton, _minButton;
+	Gtk::Button _plusButton, _gradientButton, _minButton;
 	Gtk::Window* _parent;
 	size_t _minCount, _maxCount;
 	
@@ -106,6 +116,7 @@ private:
 		{
 			_widgets.pop_back();
 			_minButton.set_sensitive(_widgets.size() > _minCount);
+			_gradientButton.set_sensitive(_widgets.size() > 2);
 			_plusButton.set_sensitive(_maxCount == 0 || _widgets.size() < _maxCount);
 		}
 	}
@@ -120,10 +131,30 @@ private:
 				_widgets.back()->set_sensitive(false);
 			}
 			_minButton.set_sensitive(_widgets.size() > _minCount);
+			_gradientButton.set_sensitive(_widgets.size() > 2);
 			_plusButton.set_sensitive(_maxCount == 0 || _widgets.size() < _maxCount);
 			pack_start(*_widgets.back(), true, false);
 			_widgets.back()->show();
 			queue_resize();
+		}
+	}
+	void onGradient()
+	{
+		if(!_allEqual.get_active() && _widgets.size() > 2)
+		{
+			Color frontColor = _widgets.front()->GetColor();
+			Color backColor = _widgets.back()->GetColor();
+			for(size_t i=1; i+1<_widgets.size(); ++i)
+			{
+				unsigned
+					red = (backColor.Red() * i +
+						frontColor.Red() * (_widgets.size() - 1 - i)) / (_widgets.size() - 1),
+					green = (backColor.Green() * i +
+						frontColor.Green() * (_widgets.size() - 1 - i)) / (_widgets.size() - 1),
+					blue = (backColor.Blue() * i +
+						frontColor.Blue() * (_widgets.size() - 1 - i)) / (_widgets.size() - 1);
+				_widgets[i]->SetColor(Color(red, green, blue));
+			}
 		}
 	}
 	void onFirstColorChange()
