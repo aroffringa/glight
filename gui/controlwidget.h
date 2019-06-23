@@ -9,8 +9,6 @@
 
 #include <memory>
 
-#include "components/inputselectmenu.h"
-
 /**
 	@author Andre Offringa
 */

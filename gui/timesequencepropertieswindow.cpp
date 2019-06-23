@@ -203,15 +203,7 @@ void TimeSequencePropertiesWindow::fillStepsList()
 		Gtk::TreeModel::iterator iter = _stepsStore->append();
 		Gtk::TreeModel::Row row = *iter;
 		std::pair<Controllable*, size_t> input = _timeSequence->Sequence().List()[i];
-		std::string label;
-		if(input.first->NInputs() == 1)
-			label = input.first->Name();
-		else
-			label =
-				input.first->Name() + " (" +
-				AbbreviatedFunctionType(input.first->InputType(input.second)) +
-				")";
-		row[_stepsListColumns._title] = label;
+		row[_stepsListColumns._title] = input.first->InputName(input.second);
 		row[_stepsListColumns._trigger] = _timeSequence->GetStep(i).trigger.ToString();
 		row[_stepsListColumns._step] = i;
 		if(hasSelection && i == index)

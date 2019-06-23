@@ -46,9 +46,9 @@ set(GUIFILES
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp
   gui/components/foldercombo.cpp
-  gui/components/inputselectmenu.cpp
   gui/components/objectlist.cpp
-  gui/components/propertiesbox.cpp)
+  gui/components/propertiesbox.cpp
+  gui/dialogs/inputselectdialog.cpp)
 
 set(SYSTEMFILES
   system/audioplayer.cpp

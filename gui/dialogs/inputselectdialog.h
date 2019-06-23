@@ -11,8 +11,9 @@
 class InputSelectDialog : public Gtk::Dialog
 {
 public:
-	InputSelectDialog(Management& management, ShowWindow& parentWindow) :
+	InputSelectDialog(class Management& management, class ShowWindow& parentWindow) :
 		Dialog("Select input", true),
+		_management(management),
 		_inputSelector(management, parentWindow)
 	{ 
 		set_size_request(600, 400);
@@ -34,12 +35,15 @@ public:
 			_inputSelector.SelectedInput()
 		);
 	}
-	
+
+	class PresetValue* SelectedInputPreset() const;
+
 private:
 	void onSelectionChanged()
 	{
 		_selectButton->set_sensitive(_inputSelector.HasInputSelected());
 	}
+	Management& _management;
 	InputSelectWidget _inputSelector;
 	Gtk::Button* _selectButton;
 };

@@ -106,9 +106,7 @@ bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
 	InputSelectDialog dialog(*_management, _showWindow);
 	if(dialog.run() == Gtk::RESPONSE_OK)
 	{
-		std::pair<Controllable*,size_t> input = dialog.SelectedInput();
-		PresetValue* preset = _management->GetPresetValue(*input.first, input.second);
-		Assign(preset, true);
+		Assign(dialog.SelectedInputPreset(), true);
 	}
 	return true;
 }

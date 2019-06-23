@@ -24,7 +24,7 @@ public:
 	ControlValue& InputValue(size_t index) final override
 	{ return _values[index]; }
 	
-	virtual FunctionType InputType(size_t index) final override
+	virtual FunctionType InputType(size_t index) const final override
 	{ return _fixture->Functions()[index]->Type(); }
 	
 	size_t NOutputs() const final override

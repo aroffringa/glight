@@ -81,7 +81,7 @@ public:
 	ControlValue& InputValue(size_t index) final override
 	{ return _inputValues[index]; }
 	
-	virtual FunctionType InputType(size_t) final override
+	virtual FunctionType InputType(size_t) const final override
 	{ return FunctionType::Master; }
 	
 	size_t NOutputs() const final override

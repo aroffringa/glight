@@ -3,7 +3,6 @@
 
 #include "propertieswindow.h"
 
-#include "components/inputselectmenu.h"
 #include "components/propertiesbox.h"
 
 #include <gtkmm/frame.h>
@@ -25,7 +24,7 @@ private:
 	void fillProperties();
 	void fillConnectionsList();
 
-	bool onAddConnectionClicked(GdkEventButton* event);
+	void onAddConnectionClicked();
 	void onRemoveConnectionClicked();
 	void onSelectedConnectionChanged();
 	void onInputSelected(class PresetValue* preset);
@@ -57,8 +56,6 @@ private:
 	Gtk::ScrolledWindow _connectionsScrolledWindow;
 	Gtk::VButtonBox _connectionsButtonBox;
 	Gtk::Button _addConnectionButton, _removeConnectionButton;
-	
-	InputSelectMenu _controllablesMenu;
 	
 	Effect* _effect;
 	Management* _management;
