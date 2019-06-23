@@ -1,17 +1,19 @@
 #include "controlwidget.h"
 
+#include "dialogs/inputselectdialog.h"
+
 #include "../theatre/presetvalue.h"
 #include "../theatre/management.h"
 #include "../theatre/controllable.h"
 
 #define MAX_SCALE_VALUE_DEF (1<<24)
 
-ControlWidget::ControlWidget(class Management &management, char key)
- :
+ControlWidget::ControlWidget(class Management &management, ShowWindow& showWindow, char key) :
   _scale(0, MAX_SCALE_VALUE_DEF, MAX_SCALE_VALUE_DEF/100),
 	_flashButton(std::string(1, key)),
 	_nameLabel("<..>"),
 	_management(&management),
+	_showWindow(showWindow),
 	_preset(nullptr),
 	_fadeUpSpeed(0.0),
 	_fadeDownSpeed(0.0),
@@ -48,8 +50,6 @@ ControlWidget::ControlWidget(class Management &management, char key)
 		connect(sigc::mem_fun(*this, &ControlWidget::onNameLabelClicked));
 	_eventBox.add(_nameLabel);
 	_nameLabel.show();
-	
-	_menu.SignalInputSelected().connect(sigc::mem_fun(*this, &ControlWidget::onInputSelected));
 }
 
 ControlWidget::~ControlWidget()
@@ -103,7 +103,13 @@ void ControlWidget::onScaleChange()
 
 bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
 {
-	_menu.Popup(*_management, event);
+	InputSelectDialog dialog(*_management, _showWindow);
+	if(dialog.run() == Gtk::RESPONSE_OK)
+	{
+		std::pair<Controllable*,size_t> input = dialog.SelectedInput();
+		PresetValue* preset = _management->GetPresetValue(*input.first, input.second);
+		Assign(preset, true);
+	}
 	return true;
 }
 
@@ -152,11 +158,6 @@ void ControlWidget::Assign(PresetValue* item, bool moveFader)
 		if(moveFader)
 			_signalValueChange.emit(_scale.get_value());
 	}
-}
-
-void ControlWidget::onInputSelected(PresetValue *item)
-{
-	Assign(item, true);
 }
 
 void ControlWidget::Update()

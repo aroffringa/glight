@@ -5,6 +5,7 @@
 
 #include "controlvalue.h"
 #include "folderobject.h"
+#include "fixturefunction.h"
 
 /**
 	@author Andre Offringa
@@ -19,7 +20,7 @@ public:
 	
 	virtual ControlValue& InputValue(size_t index) = 0;
 	
-	virtual std::string InputName(size_t index) = 0;
+	virtual FunctionType InputType(size_t index) = 0;
 	
 	void MixInput(size_t index, const ControlValue& value)
 	{

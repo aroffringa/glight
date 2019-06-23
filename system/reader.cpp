@@ -200,7 +200,7 @@ void Reader::parseFixture(xmlNode *node)
 void Reader::parseFixtureFunction(xmlNode *node, Fixture &parentFixture)
 {
 	FixtureFunction &function =
-		parentFixture.AddFunction((enum FixtureFunction::FunctionType) getIntAttribute(node, "type"));
+		parentFixture.AddFunction((FunctionType) getIntAttribute(node, "type"));
 	parseNameAttr(node, function);
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
 	{

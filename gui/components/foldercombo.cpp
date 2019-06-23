@@ -18,7 +18,7 @@ FolderCombo::FolderCombo(Management &management, ShowWindow &parentWindow) :
 	_parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &FolderCombo::fillList));
 	
 	_listModel =
-    Gtk::ListStore::create(_listColumns);
+		Gtk::ListStore::create(_listColumns);
 
 	set_model(_listModel);
 	pack_start(_listColumns._title);
@@ -33,7 +33,7 @@ FolderCombo::FolderCombo(Management &management, ShowWindow &parentWindow) :
 
 void FolderCombo::fillList()
 {
-	AvoidRecursion::Token token(_avoidRecursion);
+	RecursionLock::Token token(_avoidRecursion);
 	Gtk::TreeModel::iterator selected = get_active();
 	Folder* selectedObj = selected ?
 		static_cast<Folder*>((*selected)[_listColumns._folder]) : nullptr;

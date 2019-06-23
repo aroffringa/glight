@@ -11,7 +11,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
-#include "avoidrecursion.h"
+#include "recursionlock.h"
 #include "nameframe.h"
 
 #include "components/objectbrowser.h"
@@ -71,7 +71,7 @@ private:
 
 	Management* _management;
 	class ShowWindow& _parentWindow;
-	AvoidRecursion _delayUpdates;
+	RecursionLock _delayUpdates;
 	class Chase* _newChase;
 };
 

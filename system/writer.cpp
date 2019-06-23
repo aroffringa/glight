@@ -189,7 +189,7 @@ void Writer::writeFixtureFunction(const FixtureFunction& fixtureFunction)
 {
 	startElement("fixture-function");
 	writeAttribute("name", fixtureFunction.Name());
-	writeAttribute("type", fixtureFunction.Type());
+	writeAttribute("type", (int) fixtureFunction.Type());
 	writeDmxChannel(fixtureFunction.FirstChannel());
 	endElement();
 }

@@ -42,7 +42,7 @@ public:
 	{
 		_functions.clear();
 	}
-	FixtureFunction& AddFunction(FixtureFunction::FunctionType type)
+	FixtureFunction& AddFunction(FunctionType type)
 	{
 		_functions.emplace_back(new FixtureFunction(_theatre, type));
 		return *_functions.back();

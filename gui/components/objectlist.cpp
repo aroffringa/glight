@@ -13,7 +13,7 @@
 ObjectList::ObjectList(Management &management, ShowWindow &parentWindow) :
 	_management(&management),
 	_parentWindow(parentWindow),
-	_displayType(All),
+	_displayType(AllExceptFixtures),
 	_showTypeColumn(false),
 	_openFolder(&management.RootFolder()),
 	_listView(*this)
@@ -59,7 +59,7 @@ void ObjectList::SetShowTypeColumn(bool showTypeColumn)
 
 void ObjectList::fillList()
 {
-	AvoidRecursion::Token token(_avoidRecursion);
+	RecursionLock::Token token(_avoidRecursion);
 	Glib::RefPtr<Gtk::TreeSelection> selection =
 		_listView.get_selection();
 	Gtk::TreeModel::iterator selected = selection->get_selected();
@@ -70,6 +70,7 @@ void ObjectList::fillList()
 		_showTypeColumn ? _listView.get_column(1) : _listView.get_column(0);
 	switch(_displayType)
 	{
+	case AllExceptFixtures:
 	case All:
 		objectColumn->set_title("objects");
 		break;
@@ -92,14 +93,17 @@ void ObjectList::fillList()
 
 void ObjectList::fillListFolder(const Folder& folder, const FolderObject* selectedObj)
 {
+	bool almostAll = _displayType==AllExceptFixtures || _displayType==All;
 	bool showFolders =
-		_displayType==OnlyPresetCollections || _displayType==All;
+		_displayType==OnlyPresetCollections || almostAll;
 	bool showPresetCollections =
-		_displayType==OnlyPresetCollections || _displayType==All;
+		_displayType==OnlyPresetCollections || almostAll;
 	bool showChases =
-		_displayType==OnlyChases || _displayType==All;
+		_displayType==OnlyChases || almostAll;
 	bool showEffects =
-		_displayType==OnlyEffects || _displayType==All;
+		_displayType==OnlyEffects || almostAll;
+	bool showFixtures =
+		_displayType==All;
 		
 	for(FolderObject* obj : folder.Children())
 	{
@@ -113,8 +117,10 @@ void ObjectList::fillListFolder(const Folder& folder, const FolderObject* select
 			showChases ? dynamic_cast<TimeSequence*>(obj) : nullptr;
 		Effect* effect =
 			showEffects ? dynamic_cast<Effect*>(obj) : nullptr;
+		FixtureControl* fixtureControl =
+			showFixtures ? dynamic_cast<FixtureControl*>(obj) : nullptr;
 		
-		if(childFolder || presetCollection || chase || timeSequence || effect)
+		if(childFolder || presetCollection || chase || timeSequence || effect || fixtureControl)
 		{
 			Gtk::TreeModel::iterator iter = _listModel->append();
 			Gtk::TreeModel::Row childRow = *iter;
@@ -130,6 +136,8 @@ void ObjectList::fillListFolder(const Folder& folder, const FolderObject* select
 				childRow[_listColumns._type] = "F";
 			else if(effect)
 				childRow[_listColumns._type] = "E";
+			else if(fixtureControl)
+				childRow[_listColumns._type] = "L";
 			childRow[_listColumns._title] = obj->Name();
 			childRow[_listColumns._object] = obj;
 			if(obj == selectedObj)
