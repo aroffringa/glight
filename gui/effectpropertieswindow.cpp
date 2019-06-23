@@ -1,6 +1,8 @@
 #include "effectpropertieswindow.h"
 #include "showwindow.h"
 
+#include "dialogs/inputselectdialog.h"
+
 #include "../theatre/effect.h"
 #include "../theatre/management.h"
 #include "../theatre/presetvalue.h"
@@ -27,13 +29,9 @@ EffectPropertiesWindow::EffectPropertiesWindow(class Effect& effect, Management&
 	parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &EffectPropertiesWindow::onChangeManagement));
 	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &EffectPropertiesWindow::onUpdateControllables));
 	
-	_controllablesMenu.SignalInputSelected().connect(sigc::mem_fun(*this, &EffectPropertiesWindow::onInputSelected));
-	
 	_topBox.pack_start(_titleLabel);
 	
-	_addConnectionButton.set_events(Gdk::BUTTON_PRESS_MASK);
-	_addConnectionButton.signal_button_press_event().
-		connect(sigc::mem_fun(*this, &EffectPropertiesWindow::onAddConnectionClicked), false);
+	_addConnectionButton.signal_pressed().connect(sigc::mem_fun(*this, &EffectPropertiesWindow::onAddConnectionClicked));
 	_connectionsButtonBox.pack_start(_addConnectionButton);
 
 	_removeConnectionButton.signal_clicked().
@@ -54,11 +52,11 @@ EffectPropertiesWindow::EffectPropertiesWindow(class Effect& effect, Management&
 	_connectionsScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_connectionsBox.pack_start(_connectionsScrolledWindow, true, true);
 	_connectionsFrame.add(_connectionsBox);
-	   _mainHBox.pack_start(_connectionsFrame);
+	_mainHBox.pack_start(_connectionsFrame);
 
 	_propertiesFrame.add(_propertiesBox);
 	
-	   _mainHBox.pack_start(_propertiesFrame);
+	_mainHBox.pack_start(_propertiesFrame);
 	
 	_topBox.pack_start(_mainHBox);
 	
@@ -85,7 +83,7 @@ void EffectPropertiesWindow::fillConnectionsList()
 	{
 		Gtk::TreeModel::iterator iter = _connectionsListModel->append();
 		Gtk::TreeModel::Row row = *iter;
-		row[_connectionsListColumns._title] = _effect->Connections()[index].first->Name();
+		row[_connectionsListColumns._title] = _effect->Connections()[index].first->InputName(_effect->Connections()[index].second);
 		row[_connectionsListColumns._index] = index;
 		row[_connectionsListColumns._inputIndex] = _effect->Connections()[index].second;
 	}
@@ -99,10 +97,13 @@ void EffectPropertiesWindow::onSelectedConnectionChanged()
 	_removeConnectionButton.set_sensitive(bool(selected));
 }
 
-bool EffectPropertiesWindow::onAddConnectionClicked(GdkEventButton* event)
+void EffectPropertiesWindow::onAddConnectionClicked()
 {
-	_controllablesMenu.Popup(*_management, event);
-	return true;
+	InputSelectDialog dialog(*_management, _parentWindow);
+	if(dialog.run() == Gtk::RESPONSE_OK)
+	{
+		onInputSelected(dialog.SelectedInputPreset());
+	}
 }
 
 void EffectPropertiesWindow::onRemoveConnectionClicked()

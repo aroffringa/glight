@@ -1,10 +1,10 @@
 #ifndef TIME_SEQUENCE_PROPERTIES_WINDOW_H
 #define TIME_SEQUENCE_PROPERTIES_WINDOW_H
 
-#include "avoidrecursion.h"
+#include "recursionlock.h"
 #include "propertieswindow.h"
 
-#include "components/objectbrowser.h"
+#include "components/inputselectwidget.h"
 
 #include "../theatre/timesequence.h"
 
@@ -32,6 +32,7 @@ public:
 	class TimeSequence& GetTimeSequence() { return *_timeSequence; }
 	
 private:
+	void onInputSelectionChanged();
 	void onSelectedStepChanged();
 	void load();
 	void fillStepsList();
@@ -57,7 +58,7 @@ private:
 	void selectStep(size_t index);
 	
 	Gtk::HBox _topBox;
-	ObjectBrowser _objectBrowser;
+	InputSelectWidget _inputSelector;
 	
 	Gtk::VBox _buttonBox;
 	Gtk::Button _addStepButton;
@@ -96,7 +97,7 @@ private:
 	Gtk::Label _transitionTypeLabel;
 	Gtk::RadioButton _transitionNoneRB, _transitionFadeRB, _transitionFadeThroughBlackRB, _transitionErraticRB;
 	
-	AvoidRecursion _recursionLock;
+	RecursionLock _recursionLock;
 	
 	TimeSequence* _timeSequence;
 	Management* _management;

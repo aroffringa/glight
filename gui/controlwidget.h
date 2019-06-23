@@ -9,14 +9,12 @@
 
 #include <memory>
 
-#include "components/inputselectmenu.h"
-
 /**
 	@author Andre Offringa
 */
 class ControlWidget : public Gtk::VBox {
 	public:
-		ControlWidget(class Management& management, char key);
+		ControlWidget(class Management& management, class ShowWindow& showWindow, char key);
 		~ControlWidget();
 
 		void Update();
@@ -51,7 +49,6 @@ class ControlWidget : public Gtk::VBox {
 		void onScaleChange();
 		void onOnButtonClicked();
 		bool onNameLabelClicked(GdkEventButton* event);
-		void onInputSelected(PresetValue *item);
 		bool onFlashButtonPressed(GdkEventButton* event);
 		bool onFlashButtonReleased(GdkEventButton* event);
 
@@ -60,9 +57,9 @@ class ControlWidget : public Gtk::VBox {
 		Gtk::CheckButton _onCheckButton;
 		Gtk::EventBox _eventBox;
 		Gtk::Label _nameLabel;
-		InputSelectMenu _menu;
 
 		class Management* _management;
+		class ShowWindow& _showWindow;
 		class PresetValue* _preset;
 		double _fadeUpSpeed, _fadeDownSpeed;
 		unsigned _fadingValue, _targetValue;

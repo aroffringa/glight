@@ -75,7 +75,7 @@ void ObjectListFrame::initPresetsPart()
 	
 	_list.SignalSelectionChange().connect(sigc::mem_fun(this, &ObjectListFrame::onSelectedPresetChanged));
 	_list.SignalObjectActivated().connect(sigc::mem_fun(this, &ObjectListFrame::onObjectActivated));
-	_list.SetDisplayType(ObjectList::All);
+	_list.SetDisplayType(ObjectList::AllExceptFixtures);
 	_list.SetShowTypeColumn(true);
 	_presetsHBox.pack_start(_list);
 	

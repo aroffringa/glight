@@ -2,6 +2,7 @@
 #include "showwindow.h"
 
 #include "../theatre/chase.h"
+#include "../theatre/functiontype.h"
 #include "../theatre/management.h"
 
 ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &management, ShowWindow &parentWindow) :

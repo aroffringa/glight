@@ -20,22 +20,22 @@ void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCol
 	for(size_t i=0; i!=f.Functions().size(); ++i)
 	{
 		const std::unique_ptr<FixtureFunction>& ff = f.Functions()[i];
-		if(ff->Type() == FixtureFunction::RedIntensity && red != 0)
+		if(ff->Type() == FunctionType::Red && red != 0)
 		{
 			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(red);
 		}
-		else if(ff->Type() == FixtureFunction::GreenIntensity && green != 0)
+		else if(ff->Type() == FunctionType::Green && green != 0)
 		{
 			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(green);
 		}
-		else if(ff->Type() == FixtureFunction::BlueIntensity && blue != 0)
+		else if(ff->Type() == FunctionType::Blue && blue != 0)
 		{
 			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(blue);
 		}
-		else if(ff->Type() == FixtureFunction::Brightness && master != 0)
+		else if(ff->Type() == FunctionType::Master && master != 0)
 		{
 			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(master);

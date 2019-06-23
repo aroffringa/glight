@@ -47,7 +47,7 @@ ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &man
 	
 	_state->width = std::max(100, get_width());
 	_state->height = std::max(300, get_height());
-	AvoidRecursion::Token token(_delayUpdates);
+	RecursionLock::Token token(_delayUpdates);
 	loadState();
 }
 
@@ -70,7 +70,7 @@ ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &man
 {
 	_state->isActive = true;
 	initializeWidgets();
-	AvoidRecursion::Token token(_delayUpdates);
+	RecursionLock::Token token(_delayUpdates);
 	loadState();
 }
 
@@ -168,7 +168,7 @@ void ControlWindow::addControl()
 	}
 	bool hasKey = _controls.size()<10 && _keyRowIndex<3;
 	char key = hasKey ? _keyRowsLower[_keyRowIndex][_controls.size()] : ' ';
-	std::unique_ptr<ControlWidget> control(new ControlWidget(*_management, key));
+	std::unique_ptr<ControlWidget> control(new ControlWidget(*_management, *_showWindow, key));
 	size_t controlIndex = _controls.size();
 	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlValueChanged), control.get()));
 	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlAssigned), controlIndex));
@@ -250,7 +250,7 @@ void ControlWindow::onControlValueChanged(double newValue, ControlWidget* widget
 		// other faders.
 		if(_delayUpdates.IsFirst())
 		{
-			AvoidRecursion::Token token(_delayUpdates);
+			RecursionLock::Token token(_delayUpdates);
 			double limitValue = ControlWidget::MAX_SCALE_VALUE() - newValue - ControlWidget::MAX_SCALE_VALUE()*0.01;
 			if(limitValue < 0.0)
 				limitValue = 0.0;
@@ -341,7 +341,7 @@ void ControlWindow::onNameButtonClicked()
 
 void ControlWindow::onNewFaderSetupButtonClicked()
 {
-	AvoidRecursion::Token token(_delayUpdates);
+	RecursionLock::Token token(_delayUpdates);
 	_state->isActive = false;
 	_showWindow->State().FaderSetups().emplace_back(new FaderSetupState());
 	_state = _showWindow->State().FaderSetups().back().get();
@@ -360,7 +360,7 @@ void ControlWindow::onNewFaderSetupButtonClicked()
 
 void ControlWindow::updateFaderSetupList()
 {
-	AvoidRecursion::Token token(_delayUpdates);
+	RecursionLock::Token token(_delayUpdates);
 	GUIState& state = _showWindow->State();
 	_faderSetupList->clear();
 	for(const std::unique_ptr<FaderSetupState>& fState : state.FaderSetups())
@@ -383,7 +383,7 @@ void ControlWindow::onFaderSetupChanged()
 {
 	if(_delayUpdates.IsFirst())
 	{
-		AvoidRecursion::Token token(_delayUpdates);
+		RecursionLock::Token token(_delayUpdates);
 		_state->isActive = false;
 		_state->height = get_height();
 		_state->width = get_width();

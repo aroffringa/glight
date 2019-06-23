@@ -13,7 +13,7 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "avoidrecursion.h"
+#include "recursionlock.h"
 
 /**
 	@author Andre Offringa
@@ -91,7 +91,7 @@ class ControlWindow  : public Gtk::Window {
 		std::vector<std::unique_ptr<class ControlWidget>> _controls;
 		class ShowWindow* _showWindow;
 		class FaderSetupState* _state;
-		AvoidRecursion _delayUpdates;
+		RecursionLock _delayUpdates;
 		sigc::connection _faderSetupChangeConnection, _timeoutConnection;
 		static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
 		

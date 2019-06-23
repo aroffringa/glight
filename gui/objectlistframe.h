@@ -10,7 +10,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
-#include "avoidrecursion.h"
+#include "recursionlock.h"
 #include "nameframe.h"
 #include "propertieswindow.h"
 #include "windowlist.h"
@@ -65,7 +65,7 @@ private:
 	Management* _management;
 	class ShowWindow& _parentWindow;
 	NameFrame _nameFrame;
-	AvoidRecursion _delayUpdates;
+	RecursionLock _delayUpdates;
 };
 
 #endif

@@ -6,7 +6,7 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/treeview.h>
 
-#include "../avoidrecursion.h"
+#include "../recursionlock.h"
 
 class ObjectList : public Gtk::ScrolledWindow
 {
@@ -14,6 +14,7 @@ public:
 	ObjectList(class Management& management, class ShowWindow& parentWindow);
 	
 	enum ObjectType {
+		AllExceptFixtures,
 		All,
 		OnlyPresetCollections,
 		OnlyChases,
@@ -100,7 +101,7 @@ private:
 	sigc::signal<void()> _signalSelectionChange;
 	sigc::signal<void(FolderObject& object)> _signalObjectActivated;
 	
-	AvoidRecursion _avoidRecursion;
+	RecursionLock _avoidRecursion;
 	Gtk::Menu _contextMenu;
 	std::vector<std::unique_ptr<Gtk::Widget>> _contextMenuItems;
 };

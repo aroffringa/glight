@@ -3,9 +3,8 @@
 
 #include <gtkmm/combobox.h>
 #include <gtkmm/liststore.h>
-#include <gtkmm/treeview.h>
 
-#include "../avoidrecursion.h"
+#include "../recursionlock.h"
 
 class FolderCombo : public Gtk::ComboBox
 {
@@ -42,7 +41,7 @@ private:
 	}
 	
 	sigc::signal<void()> _signalSelectionChange;
-	AvoidRecursion _avoidRecursion;
+	RecursionLock _avoidRecursion;
 };
 
 #endif

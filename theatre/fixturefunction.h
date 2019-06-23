@@ -6,6 +6,7 @@
 
 #include "controlvalue.h"
 #include "dmxchannel.h"
+#include "functiontype.h"
 #include "namedobject.h"
 #include "valuesnapshot.h"
 
@@ -14,21 +15,6 @@
 */
 class FixtureFunction : public NamedObject {
 	public:
-		enum FunctionType {
-			Brightness,
-			RedIntensity, 
-			GreenIntensity, 
-			BlueIntensity, 
-			AmberIntensity, 
-			WhiteIntensity,
-			UVIntensity,
-			Strobe, 
-			Pulse, 
-			Rotation, 
-			ColorMacro, 
-			Pan, 
-			Tilt
-		};
 
 		FixtureFunction(class Theatre &theatre, FunctionType type, const std::string &name);
 		

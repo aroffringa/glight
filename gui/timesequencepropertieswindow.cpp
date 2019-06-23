@@ -8,7 +8,7 @@
 
 TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& timeSequence, Management &management, ShowWindow &parentWindow) :
 	PropertiesWindow(),
-	_objectBrowser(management, parentWindow),
+	_inputSelector(management, parentWindow),
 	
 	_sustainCB("Sustain"),
 	_maxRepeatCB("Max repeats:"),
@@ -40,10 +40,12 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	
 	set_title("glight - " + timeSequence.Name());
 	
-	_topBox.pack_start(_objectBrowser);
-	_objectBrowser.set_size_request(200, 200);
+	_inputSelector.SignalSelectionChange().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onInputSelectionChanged));
+	_topBox.pack_start(_inputSelector);
+	_inputSelector.set_size_request(200, 200);
 	
 	_addStepButton.set_image_from_icon_name("go-next");
+	_addStepButton.set_sensitive(false);
 	_addStepButton.signal_clicked().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onAddStep));
 	_buttonBox.pack_start(_addStepButton, false, false, 4);
 	
@@ -186,7 +188,7 @@ void TimeSequencePropertiesWindow::selectStep(size_t index)
 
 void TimeSequencePropertiesWindow::fillStepsList()
 {
-	AvoidRecursion::Token token(_recursionLock);
+	RecursionLock::Token token(_recursionLock);
 	Gtk::TreeModel::iterator iter = _stepsView.get_selection()->get_selected();
 	bool hasSelection = false;
 	size_t index = 0;
@@ -200,7 +202,8 @@ void TimeSequencePropertiesWindow::fillStepsList()
 	{
 		Gtk::TreeModel::iterator iter = _stepsStore->append();
 		Gtk::TreeModel::Row row = *iter;
-		row[_stepsListColumns._title] = _timeSequence->Sequence().List()[i].first->Name();
+		std::pair<Controllable*, size_t> input = _timeSequence->Sequence().List()[i];
+		row[_stepsListColumns._title] = input.first->InputName(input.second);
 		row[_stepsListColumns._trigger] = _timeSequence->GetStep(i).trigger.ToString();
 		row[_stepsListColumns._step] = i;
 		if(hasSelection && i == index)
@@ -213,13 +216,19 @@ void TimeSequencePropertiesWindow::fillStepsList()
 		onSelectedStepChanged();
 }
 
+void TimeSequencePropertiesWindow::onInputSelectionChanged()
+{
+	_addStepButton.set_sensitive(_inputSelector.HasInputSelected());
+}
+
 void TimeSequencePropertiesWindow::onAddStep()
 {
-	Controllable* object = dynamic_cast<Controllable*>(_objectBrowser.SelectedObject());
-	if(object)
+	Controllable* object = _inputSelector.SelectedObject();
+	size_t input = _inputSelector.SelectedInput();
+	if(object && input != InputSelectWidget::NO_INPUT_SELECTED)
 	{
 		std::unique_lock<std::mutex> lock(_management->Mutex());
-		_timeSequence->AddStep(*object, 0);
+		_timeSequence->AddStep(*object, input);
 		if(_management->HasCycle())
 		{
 			_timeSequence->RemoveStep(_timeSequence->Size()-1);
