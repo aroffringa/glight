@@ -4,9 +4,9 @@
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/messagedialog.h>
 
-#include "chasewizard.h"
 #include "configurationwindow.h"
 #include "controlwindow.h"
+#include "designwizard.h"
 #include "objectlistframe.h"
 #include "sceneframe.h"
 #include "visualizationwindow.h"
@@ -31,7 +31,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miQuit(Gtk::Stock::QUIT),
 	_miDryMode("Dry mode"),
 	_miCancelDryMode("Cancel dry mode"),
-	_miChaseWizard("Chase wizard"),
+	   _miDesignWizard("Design wizard"),
 	_miConfigWindow("Fixtures config"),
 	_miNewControlWindow("New faders window"),
 	_miVisualizationWindow("Visualization")
@@ -183,8 +183,8 @@ void ShowWindow::createMenu()
 	
 	_menuDesign.append(_miDesignSep1);
 		
-	_miChaseWizard.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMIChaseWizardClicked));
-	_menuDesign.append(_miChaseWizard);
+	_miDesignWizard.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMIDesignWizardClicked));
+	_menuDesign.append(_miDesignWizard);
 	
 	_miDesign.set_submenu(_menuDesign);
 	_menuBar.append(_miDesign);
@@ -399,11 +399,11 @@ size_t ShowWindow::nextControlKeyRow() const
 	throw std::runtime_error("Error in nextControlKeyRow()");
 }
 
-void ShowWindow::onMIChaseWizardClicked()
+void ShowWindow::onMIDesignWizardClicked()
 {
 	std::string path = _objectListFrame->SelectedFolder().FullPath();
-	if(!_chaseWizard || !_chaseWizard->is_visible())
-		_chaseWizard.reset(new ChaseWizard(this, path));
-	_chaseWizard->SetDestinationPath(path);
-	_chaseWizard->present();
+	if(!_designWizard || !_designWizard->is_visible())
+		_designWizard.reset(new DesignWizard(this, path));
+	_designWizard->SetDestinationPath(path);
+	_designWizard->present();
 }

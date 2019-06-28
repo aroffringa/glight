@@ -61,7 +61,7 @@ private:
 	
 	void onMIDryModeClicked();
 	void onMICancelDryModeClicked();
-	void onMIChaseWizardClicked();
+	void onMIDesignWizardClicked();
 	
 	void onControlWindowHidden(class ControlWindow* window);
 	
@@ -74,7 +74,7 @@ private:
 	std::vector<std::unique_ptr<class ControlWindow>> _controlWindows;
 	std::unique_ptr<class ConfigurationWindow> _configurationWindow;
 	std::unique_ptr<class VisualizationWindow> _visualizationWindow;
-	std::unique_ptr<class ChaseWizard> _chaseWizard;
+	std::unique_ptr<class DesignWizard> _designWizard;
 
 	std::unique_ptr<class Management> _management;
 	/**
@@ -100,7 +100,7 @@ private:
 	Gtk::CheckMenuItem _miDryMode;
 	Gtk::MenuItem _miCancelDryMode;
 	Gtk::SeparatorMenuItem _miDesignSep1;
-	Gtk::MenuItem _miChaseWizard;
+	Gtk::MenuItem _miDesignWizard;
 	Gtk::CheckMenuItem _miConfigWindow;
 	Gtk::MenuItem _miNewControlWindow;
 	Gtk::CheckMenuItem _miVisualizationWindow;

@@ -13,7 +13,7 @@ public:
 		Effect(1),
 		_lastValue(0),
 		_lastTime(0),
-		_decaySpeed(((1<<24)-1)/100) // fully decay in 100 ms
+		_decaySpeed(((1<<24)-1)/300) // fully decay in 300 ms
 	{ }
 	
 	virtual Effect::Type GetType() const final override { return AudioLevelType; }

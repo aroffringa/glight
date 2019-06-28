@@ -1,4 +1,4 @@
-#include "chasewizard.h"
+#include "designwizard.h"
 #include "showwindow.h"
 
 #include "components/colorselectwidget.h"
@@ -11,15 +11,18 @@
 
 #include <memory>
 
-ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationPath) :
+DesignWizard::DesignWizard(ShowWindow* showWindow, const std::string& destinationPath) :
 	_showWindow(showWindow),
 	_management(&showWindow->GetManagement()),
 	_destinationPath(destinationPath),
 	_selectLabel("Select fixtures:"),
+	
+	_colorPresetBtn("Colour preset"),
 	_runningLightBtn("Running light"),
-	_singleColourBtn("Random around single colour"),
-	_shiftColoursBtn("Shifting colours"),
+	_singleColorBtn("Random around single colour"),
+	_shiftColorsBtn("Shifting colours"),
 	_vuMeterBtn("VU meter"),
+	
 	_colorsWidgetP3_1(this),
 	_increasingRunRB("Increasing order"),
 	_decreasingRunRB("Decreasing order"),
@@ -39,23 +42,25 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationP
 	_vuDecreasingRB("Decreasing direction"),
 	_vuInwardRunRB("Inward direction"),
 	_vuOutwardRunRB("Outward direcion"),
+	_colorsWidgetP3_5(this),
 	_nextButton("Next"),
 	_currentPage(Page1_SelFixtures)
 {
-	showWindow->SignalChangeManagement().connect(sigc::mem_fun(*this, &ChaseWizard::onManagementChange));
-	showWindow->SignalUpdateControllables().connect(sigc::mem_fun(*this, &ChaseWizard::fillFixturesList));
+	showWindow->SignalChangeManagement().connect(sigc::mem_fun(*this, &DesignWizard::onManagementChange));
+	showWindow->SignalUpdateControllables().connect(sigc::mem_fun(*this, &DesignWizard::fillFixturesList));
 	
 	initPage1();
 	initPage2();
 	initPage3_1RunningLight();
-	initPage3_2SingleColour();
-	initPage3_3ShiftColours();
+	initPage3_2SingleColor();
+	initPage3_3ShiftColors();
 	initPage3_4VUMeter();
+	initPage3_5ColorPreset();
 	
 	_mainBox.pack_start(_vBoxPage1, true, true);
 	_vBoxPage1.show_all();
 	
-	_nextButton.signal_clicked().connect(sigc::mem_fun(*this, &ChaseWizard::onNextClicked));
+	_nextButton.signal_clicked().connect(sigc::mem_fun(*this, &DesignWizard::onNextClicked));
 	_buttonBox.pack_start(_nextButton);
 	_buttonBox.show_all();
 	_mainBox.pack_end(_buttonBox);
@@ -64,10 +69,10 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationP
 	_mainBox.show();
 }
 
-ChaseWizard::~ChaseWizard()
+DesignWizard::~DesignWizard()
 { }
 
-void ChaseWizard::initPage1()
+void DesignWizard::initPage1()
 {
 	_vBoxPage1.pack_start(_selectLabel);
 	
@@ -83,20 +88,22 @@ void ChaseWizard::initPage1()
 	_vBoxPage1.pack_start(_fixturesScrolledWindow);
 }
 
-void ChaseWizard::initPage2()
+void DesignWizard::initPage2()
 {
 	Gtk::RadioButtonGroup group;
+	_colorPresetBtn.set_group(group);
+	_vBoxPage2.pack_start(_colorPresetBtn);
 	_runningLightBtn.set_group(group);
 	_vBoxPage2.pack_start(_runningLightBtn);
-	_singleColourBtn.set_group(group);
-	_vBoxPage2.pack_start(_singleColourBtn);
-	_shiftColoursBtn.set_group(group);
-	_vBoxPage2.pack_start(_shiftColoursBtn);
+	_singleColorBtn.set_group(group);
+	_vBoxPage2.pack_start(_singleColorBtn);
+	_shiftColorsBtn.set_group(group);
+	_vBoxPage2.pack_start(_shiftColorsBtn);
 	_vuMeterBtn.set_group(group);
 	_vBoxPage2.pack_start(_vuMeterBtn);
 }
 
-void ChaseWizard::initPage3_1RunningLight()
+void DesignWizard::initPage3_1RunningLight()
 {
 	_vBoxPage3_1.pack_start(_colorsWidgetP3_1, true, false);
 	Gtk::RadioButtonGroup group;
@@ -114,7 +121,7 @@ void ChaseWizard::initPage3_1RunningLight()
 	_vBoxPage3_1.pack_start(_randomRunRB, true, false);
 }
 
-void ChaseWizard::initPage3_2SingleColour()
+void DesignWizard::initPage3_2SingleColor()
 {
 	_vBoxPage3_2.pack_start(_colorsWidgetP3_2, true, false);
 	_vBoxPage3_2.pack_start(_variationLabel, true, false);
@@ -123,7 +130,7 @@ void ChaseWizard::initPage3_2SingleColour()
 	_vBoxPage3_2.pack_start(_variation, true, false);
 }
 
-void ChaseWizard::initPage3_3ShiftColours()
+void DesignWizard::initPage3_3ShiftColors()
 {
 	_vBoxPage3_3.pack_start(_colorsWidgetP3_3, true, false);
 	Gtk::RadioButtonGroup group;
@@ -137,7 +144,7 @@ void ChaseWizard::initPage3_3ShiftColours()
 	_vBoxPage3_3.pack_start(_shiftRandomRB, true, false);
 }
 
-void ChaseWizard::initPage3_4VUMeter()
+void DesignWizard::initPage3_4VUMeter()
 {
 	_vBoxPage3_4.pack_start(_colorsWidgetP3_4, true, false);
 	Gtk::RadioButtonGroup group;
@@ -151,7 +158,12 @@ void ChaseWizard::initPage3_4VUMeter()
 	_vBoxPage3_4.pack_start(_vuOutwardRunRB, true, false);
 }
 
-void ChaseWizard::fillFixturesList()
+void DesignWizard::initPage3_5ColorPreset()
+{
+	_vBoxPage3_5.pack_start(_colorsWidgetP3_5, true, false);
+}
+
+void DesignWizard::fillFixturesList()
 {
 	_fixturesListModel->clear();
 
@@ -168,7 +180,7 @@ void ChaseWizard::fillFixturesList()
 	}
 }
 
-Folder& ChaseWizard::getFolder() const
+Folder& DesignWizard::getFolder() const
 {
 	Folder* folder = dynamic_cast<Folder*>(_management->GetObjectFromPathIfExists(_destinationPath));
 	if(folder)
@@ -177,7 +189,7 @@ Folder& ChaseWizard::getFolder() const
 		return _management->RootFolder();
 }
 
-void ChaseWizard::onNextClicked()
+void DesignWizard::onNextClicked()
 {
 	switch(_currentPage)
 	{
@@ -198,7 +210,16 @@ void ChaseWizard::onNextClicked()
 		
 		case Page2_SelType:
 		_mainBox.remove(_vBoxPage2);
-		if(_runningLightBtn.get_active())
+		if(_colorPresetBtn.get_active())
+		{
+			_colorsWidgetP3_5.SetColors(std::vector<Color>(_selectedFixtures.size(), Color::White()));
+			_colorsWidgetP3_5.SetMinCount(_selectedFixtures.size());
+			_colorsWidgetP3_5.SetMaxCount(_selectedFixtures.size());
+			_mainBox.pack_start(_vBoxPage3_5, true, true);
+			_vBoxPage3_5.show_all();
+			_currentPage = Page3_5_ColorPreset;
+		}
+		else if(_runningLightBtn.get_active())
 		{
 			_colorsWidgetP3_1.SetColors(std::vector<Color>(_selectedFixtures.size(), Color::White()));
 			_colorsWidgetP3_1.SetMaxCount(_selectedFixtures.size());
@@ -206,17 +227,17 @@ void ChaseWizard::onNextClicked()
 			_vBoxPage3_1.show_all();
 			_currentPage = Page3_1_RunningLight;
 		}
-		else if(_singleColourBtn.get_active()) {
+		else if(_singleColorBtn.get_active()) {
 			_mainBox.pack_start(_vBoxPage3_2, true, true);
 			_vBoxPage3_2.show_all();
-			_currentPage = Page3_2_SingleColour;
+			_currentPage = Page3_2_SingleColor;
 		}
-		else if(_shiftColoursBtn.get_active()) {
+		else if(_shiftColorsBtn.get_active()) {
 			_colorsWidgetP3_3.SetMinCount(_selectedFixtures.size());
 			_colorsWidgetP3_3.SetMaxCount(_selectedFixtures.size());
 			_mainBox.pack_start(_vBoxPage3_3, true, true);
 			_vBoxPage3_3.show_all();
-			_currentPage = Page3_3_ShiftingColours;
+			_currentPage = Page3_3_ShiftingColors;
 		}
 		else {
 			_colorsWidgetP3_4.SetMinCount(_selectedFixtures.size());
@@ -246,13 +267,13 @@ void ChaseWizard::onNextClicked()
 			hide();
 		} break;
 		
-		case Page3_2_SingleColour:
+		case Page3_2_SingleColor:
 		DefaultChase::MakeColorVariation(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_2.GetColors(), _variation.get_value());
 		_showWindow->EmitUpdate();
 		hide();
 		break;
 		
-		case Page3_3_ShiftingColours: {
+		case Page3_3_ShiftingColors: {
 			enum DefaultChase::ShiftType shiftType;
 			if(_shiftIncreasingRB.get_active())
 				shiftType = DefaultChase::IncreasingShift;
@@ -262,7 +283,7 @@ void ChaseWizard::onNextClicked()
 				shiftType = DefaultChase::BackAndForthShift;
 			else
 				shiftType = DefaultChase::RandomShift;
-			DefaultChase::MakeColourShift(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_3.GetColors(), shiftType);
+			DefaultChase::MakeColorShift(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_3.GetColors(), shiftType);
 			_showWindow->EmitUpdate();
 			hide();
 		} break;
@@ -278,6 +299,12 @@ void ChaseWizard::onNextClicked()
 			else //if(_vuOutwardRunRB.get_active())
 				direction = DefaultChase::VUOutward;
 			DefaultChase::MakeVUMeter(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_4.GetColors(), direction);
+			_showWindow->EmitUpdate();
+			hide();
+		} break;
+		
+		case Page3_5_ColorPreset: {
+			DefaultChase::MakeColorPreset(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_5.GetColors());
 			_showWindow->EmitUpdate();
 			hide();
 		} break;

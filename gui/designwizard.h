@@ -16,11 +16,11 @@
 
 #include <vector>
 
-class ChaseWizard : public Gtk::Window
+class DesignWizard : public Gtk::Window
 {
 public:
-	ChaseWizard(class ShowWindow*, const std::string& destinationPath);
-	~ChaseWizard();
+	DesignWizard(class ShowWindow*, const std::string& destinationPath);
+	~DesignWizard();
 	
 	void SetDestinationPath(const std::string& destinationPath)
 	{
@@ -32,9 +32,10 @@ private:
 		Page1_SelFixtures,
 		Page2_SelType,
 		Page3_1_RunningLight,
-		Page3_2_SingleColour,
-		Page3_3_ShiftingColours,
-		Page3_4_VUMeter
+		Page3_2_SingleColor,
+		Page3_3_ShiftingColors,
+		Page3_4_VUMeter,
+		Page3_5_ColorPreset
 	};
 	
 	void fillFixturesList();
@@ -47,9 +48,10 @@ private:
 	void initPage1();
 	void initPage2();
 	void initPage3_1RunningLight();
-	void initPage3_2SingleColour();
-	void initPage3_3ShiftColours();
+	void initPage3_2SingleColor();
+	void initPage3_3ShiftColors();
 	void initPage3_4VUMeter();
+	void initPage3_5ColorPreset();
 	class Folder& getFolder() const;
 	
 	class ShowWindow* _showWindow;
@@ -57,15 +59,16 @@ private:
 	std::string _destinationPath;
 	
 	Gtk::VBox _mainBox;
-	Gtk::VBox _vBoxPage1, _vBoxPage2, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3, _vBoxPage3_4;
+	Gtk::VBox _vBoxPage1, _vBoxPage2, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3, _vBoxPage3_4, _vBoxPage3_5;
 	Gtk::Label _selectLabel;
 	Gtk::TreeView _fixturesListView;
 	std::vector<class Fixture*> _selectedFixtures;
 	
 	Gtk::RadioButton
+		_colorPresetBtn,
 		_runningLightBtn,
-		_singleColourBtn,
-		_shiftColoursBtn,
+		_singleColorBtn,
+		_shiftColorsBtn,
 		_vuMeterBtn;
 	
 	ColorSequenceWidget _colorsWidgetP3_1;
@@ -95,6 +98,8 @@ private:
 		_vuInwardRunRB,
 		_vuOutwardRunRB;
 		
+	ColorSequenceWidget _colorsWidgetP3_5;
+	
 	Gtk::ButtonBox _buttonBox;
 	Gtk::Button _nextButton;
 	Page _currentPage;
