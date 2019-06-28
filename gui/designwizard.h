@@ -16,11 +16,11 @@
 
 #include <vector>
 
-class ChaseWizard : public Gtk::Window
+class DesignWizard : public Gtk::Window
 {
 public:
-	ChaseWizard(class ShowWindow*, const std::string& destinationPath);
-	~ChaseWizard();
+	DesignWizard(class ShowWindow*, const std::string& destinationPath);
+	~DesignWizard();
 	
 	void SetDestinationPath(const std::string& destinationPath)
 	{

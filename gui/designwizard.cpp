@@ -1,4 +1,4 @@
-#include "chasewizard.h"
+#include "designwizard.h"
 #include "showwindow.h"
 
 #include "components/colorselectwidget.h"
@@ -11,7 +11,7 @@
 
 #include <memory>
 
-ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationPath) :
+DesignWizard::DesignWizard(ShowWindow* showWindow, const std::string& destinationPath) :
 	_showWindow(showWindow),
 	_management(&showWindow->GetManagement()),
 	_destinationPath(destinationPath),
@@ -42,8 +42,8 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationP
 	_nextButton("Next"),
 	_currentPage(Page1_SelFixtures)
 {
-	showWindow->SignalChangeManagement().connect(sigc::mem_fun(*this, &ChaseWizard::onManagementChange));
-	showWindow->SignalUpdateControllables().connect(sigc::mem_fun(*this, &ChaseWizard::fillFixturesList));
+	showWindow->SignalChangeManagement().connect(sigc::mem_fun(*this, &DesignWizard::onManagementChange));
+	showWindow->SignalUpdateControllables().connect(sigc::mem_fun(*this, &DesignWizard::fillFixturesList));
 	
 	initPage1();
 	initPage2();
@@ -55,7 +55,7 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationP
 	_mainBox.pack_start(_vBoxPage1, true, true);
 	_vBoxPage1.show_all();
 	
-	_nextButton.signal_clicked().connect(sigc::mem_fun(*this, &ChaseWizard::onNextClicked));
+	_nextButton.signal_clicked().connect(sigc::mem_fun(*this, &DesignWizard::onNextClicked));
 	_buttonBox.pack_start(_nextButton);
 	_buttonBox.show_all();
 	_mainBox.pack_end(_buttonBox);
@@ -64,10 +64,10 @@ ChaseWizard::ChaseWizard(ShowWindow* showWindow, const std::string& destinationP
 	_mainBox.show();
 }
 
-ChaseWizard::~ChaseWizard()
+DesignWizard::~DesignWizard()
 { }
 
-void ChaseWizard::initPage1()
+void DesignWizard::initPage1()
 {
 	_vBoxPage1.pack_start(_selectLabel);
 	
@@ -83,7 +83,7 @@ void ChaseWizard::initPage1()
 	_vBoxPage1.pack_start(_fixturesScrolledWindow);
 }
 
-void ChaseWizard::initPage2()
+void DesignWizard::initPage2()
 {
 	Gtk::RadioButtonGroup group;
 	_runningLightBtn.set_group(group);
@@ -96,7 +96,7 @@ void ChaseWizard::initPage2()
 	_vBoxPage2.pack_start(_vuMeterBtn);
 }
 
-void ChaseWizard::initPage3_1RunningLight()
+void DesignWizard::initPage3_1RunningLight()
 {
 	_vBoxPage3_1.pack_start(_colorsWidgetP3_1, true, false);
 	Gtk::RadioButtonGroup group;
@@ -114,7 +114,7 @@ void ChaseWizard::initPage3_1RunningLight()
 	_vBoxPage3_1.pack_start(_randomRunRB, true, false);
 }
 
-void ChaseWizard::initPage3_2SingleColour()
+void DesignWizard::initPage3_2SingleColour()
 {
 	_vBoxPage3_2.pack_start(_colorsWidgetP3_2, true, false);
 	_vBoxPage3_2.pack_start(_variationLabel, true, false);
@@ -123,7 +123,7 @@ void ChaseWizard::initPage3_2SingleColour()
 	_vBoxPage3_2.pack_start(_variation, true, false);
 }
 
-void ChaseWizard::initPage3_3ShiftColours()
+void DesignWizard::initPage3_3ShiftColours()
 {
 	_vBoxPage3_3.pack_start(_colorsWidgetP3_3, true, false);
 	Gtk::RadioButtonGroup group;
@@ -137,7 +137,7 @@ void ChaseWizard::initPage3_3ShiftColours()
 	_vBoxPage3_3.pack_start(_shiftRandomRB, true, false);
 }
 
-void ChaseWizard::initPage3_4VUMeter()
+void DesignWizard::initPage3_4VUMeter()
 {
 	_vBoxPage3_4.pack_start(_colorsWidgetP3_4, true, false);
 	Gtk::RadioButtonGroup group;
@@ -151,7 +151,7 @@ void ChaseWizard::initPage3_4VUMeter()
 	_vBoxPage3_4.pack_start(_vuOutwardRunRB, true, false);
 }
 
-void ChaseWizard::fillFixturesList()
+void DesignWizard::fillFixturesList()
 {
 	_fixturesListModel->clear();
 
@@ -168,7 +168,7 @@ void ChaseWizard::fillFixturesList()
 	}
 }
 
-Folder& ChaseWizard::getFolder() const
+Folder& DesignWizard::getFolder() const
 {
 	Folder* folder = dynamic_cast<Folder*>(_management->GetObjectFromPathIfExists(_destinationPath));
 	if(folder)
@@ -177,7 +177,7 @@ Folder& ChaseWizard::getFolder() const
 		return _management->RootFolder();
 }
 
-void ChaseWizard::onNextClicked()
+void DesignWizard::onNextClicked()
 {
 	switch(_currentPage)
 	{
