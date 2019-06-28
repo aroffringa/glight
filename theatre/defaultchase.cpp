@@ -35,12 +35,53 @@ void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCol
 			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(blue);
 		}
+		else if(ff->Type() == FunctionType::Amber)
+		{
+			unsigned amber = std::min(red, green/2);
+			if(amber != 0)
+			{
+				Controllable& c = management.GetFixtureControl(f);
+				pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(amber);
+			}
+		}
+		else if(ff->Type() == FunctionType::White)
+		{
+			unsigned white = std::min(red, std::min(green, blue));
+			if(white != 0)
+			{
+				Controllable& c = management.GetFixtureControl(f);
+				pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(white);
+			}
+		}
 		else if(ff->Type() == FunctionType::Master && master != 0)
 		{
 			Controllable& c = management.GetFixtureControl(f);
 			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(master);
 		}
 	}
+}
+
+PresetCollection& DefaultChase::MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors)
+{
+	PresetCollection& pc = management.AddPresetCollection();
+	destination.Add(pc);
+	pc.SetName("Colourpreset");
+	for(size_t fixtureIndex=0; fixtureIndex!=fixtures.size(); ++fixtureIndex)
+	{
+		size_t colorIndex = fixtureIndex % colors.size();
+		unsigned
+			red = colors[colorIndex].Red()*((1<<24)-1)/255,
+			green = colors[colorIndex].Green()*((1<<24)-1)/255,
+			blue = colors[colorIndex].Blue()*((1<<24)-1)/255,
+			master = 0;
+		if(red != 0 || green != 0 || blue != 0)
+			master = (1<<24)-1;
+		
+		Fixture* f = fixtures[fixtureIndex];
+		addColorPresets(management, *f, pc, red, green, blue, master);
+	}
+	management.AddPreset(pc, 0);
+	return pc;
 }
 
 Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
@@ -174,7 +215,7 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 	return chase;
 }
 
-Chase& DefaultChase::MakeColourShift(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors, ShiftType shiftType)
+Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors, ShiftType shiftType)
 {
 	Chase& chase = management.AddChase();
 	chase.SetName("Colourshift");

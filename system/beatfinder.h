@@ -64,7 +64,6 @@ private:
 			{
 				try {
 					_player.open();
-					std::cout << "Alsa thread finished.\n";
 				}
 				catch(std::exception& e) {
 					std::cout << "Could not open alsa device: beat finder is not working.\n";
