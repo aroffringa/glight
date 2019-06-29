@@ -236,7 +236,7 @@ void Management::RemoveFolder(Folder& folder)
 void Management::RemoveControllable(Controllable& controllable)
 {
 	removeControllable(_controllables.begin() +
-		                     FolderObject::FindIndex(_controllables, &controllable));
+		FolderObject::FindIndex(_controllables, &controllable));
 }
 
 void Management::removeControllable(std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr)

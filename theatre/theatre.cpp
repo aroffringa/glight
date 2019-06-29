@@ -1,6 +1,7 @@
 #include "theatre.h"
 
 #include "fixture.h"
+#include "folder.h"
 
 #include <cmath>
 #include <sstream>
@@ -91,6 +92,7 @@ void Theatre::RemoveFixture(Fixture& fixture)
 	if(!IsUsed(*t))
 	{
 		size_t ftIndex = FolderObject::FindIndex(_fixtureTypes, t);
+		_fixtureTypes[ftIndex]->Parent().Remove(*_fixtureTypes[ftIndex]);
 		_fixtureTypes.erase(_fixtureTypes.begin() + ftIndex);
 	}
 }
