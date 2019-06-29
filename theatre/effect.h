@@ -19,6 +19,7 @@ public:
 		DelayType,
 		FadeType,
 		InvertType,
+		MusicActivationType,
 		PulseType,
 		ThresholdType
 	};
