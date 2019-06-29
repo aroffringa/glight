@@ -3,6 +3,7 @@
 #include "effects/audioleveleffect.h"
 #include "effects/delayeffect.h"
 #include "effects/fadeeffect.h"
+#include "effects/inverteffect.h"
 #include "effects/pulseeffect.h"
 #include "effects/thresholdeffect.h"
 
@@ -16,6 +17,7 @@ std::unique_ptr<Effect> Effect::Make(Effect::Type type)
 		case AudioLevelType: return up(new AudioLevelEffect());
 		case DelayType: return up(new DelayEffect());
 		case FadeType: return up(new FadeEffect());
+		case InvertType: return up(new InvertEffect());
 		case PulseType: return up(new PulseEffect());
 		case ThresholdType: return up(new ThresholdEffect());
 	}
@@ -28,7 +30,8 @@ std::string Effect::TypeToName(Effect::Type type)
 	{
 		case AudioLevelType: return "Audiolevel";
 		case DelayType: return "Delay";
-		case FadeType: return  "Fade";
+		case FadeType: return "Fade";
+		case InvertType: return "Invert";
 		case PulseType: return "Pulse";
 		case ThresholdType: return "Threshold";
 	}
@@ -43,6 +46,8 @@ Effect::Type Effect::NameToType(const std::string& name)
 		return DelayType;
 	else if(name == "Fade")
 		return FadeType;
+	else if(name == "Invert")
+		return InvertType;
 	else if(name == "Pulse")
 		return PulseType;
 	else if(name == "Threshold")
@@ -57,6 +62,7 @@ std::vector<Effect::Type> Effect::GetTypes()
 		AudioLevelType,
 		DelayType,
 		FadeType,
+		InvertType,
 		PulseType,
 		ThresholdType
 	};

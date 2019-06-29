@@ -47,7 +47,7 @@ void PropertiesBox::fillProperties()
 			} break;
 		case Property::ControlValue: {
 			std::string entryText =
-				std::to_string(100.0*_propertySet->GetControlValue(property)/ControlValue::MaxUInt());
+				std::to_string(round(1000.0*_propertySet->GetControlValue(property)/ControlValue::MaxUInt())/10.0);
 				
 			row._widgets.emplace_back(new Gtk::Label(property.Description()));
 			_grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
