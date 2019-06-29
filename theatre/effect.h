@@ -18,6 +18,7 @@ public:
 		AudioLevelType,
 		DelayType,
 		FadeType,
+		MusicActivationType,
 		PulseType,
 		ThresholdType
 	};
