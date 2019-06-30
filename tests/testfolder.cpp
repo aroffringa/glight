@@ -17,6 +17,27 @@ BOOST_AUTO_TEST_CASE( AddItem )
 	BOOST_CHECK_EQUAL( a->Children().size() , 1 );
 	BOOST_CHECK_EQUAL( b->Children().size() , 0 );
 	BOOST_CHECK_EQUAL( b->Parent().Name() , a->Name() );
+
+	// Check if duplicate names in one folder generate an exception
+	std::unique_ptr<Folder> b2(new Folder("b"));
+	BOOST_CHECK_THROW( a->Add(*b2), std::exception );
+}
+
+BOOST_AUTO_TEST_CASE( Move )
+{
+	std::unique_ptr<Folder> a(new Folder("a"));
+	std::unique_ptr<Folder> b(new Folder("b"));
+	std::unique_ptr<Folder> c(new Folder("c"));
+	a->Add(*b);
+	Folder::Move(*b, *c);
+	BOOST_CHECK_EQUAL( a->Children().size(), 0 );
+	BOOST_CHECK_EQUAL( b->Children().size(), 0 );
+	BOOST_CHECK_EQUAL( c->Children().size(), 1 );
+	BOOST_CHECK_EQUAL( c->GetChild("b").Name(), "b" );
+	Folder::Move(*b, *a);
+	BOOST_CHECK_EQUAL( a->Children().size(), 1 );
+	BOOST_CHECK_EQUAL( a->GetChild("b").Name(), "b" );
+	Folder::Move(*b, *a);
 }
 
 BOOST_AUTO_TEST_CASE( FullPath )
@@ -115,6 +136,26 @@ BOOST_AUTO_TEST_CASE( FollowRelPath )
 	BOOST_CHECK_EQUAL( a->FollowRelPath("b/c") , c.get() );
 	
 	BOOST_CHECK_EQUAL( b->FollowRelPath("c") , c.get() );
+}
+
+BOOST_AUTO_TEST_CASE( GetAvailableName )
+{
+	std::unique_ptr<Folder> a(new Folder("a"));
+	BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj1");
+	BOOST_CHECK_EQUAL(a->GetAvailableName(""), "1");
+	
+	std::unique_ptr<Folder> b(new Folder("obj1"));
+	a->Add(*b);
+	BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj2");
+	BOOST_CHECK_EQUAL(a->GetAvailableName(""), "1");
+	
+	std::unique_ptr<Folder> c(new Folder("obj3"));
+	a->Add(*c);
+	BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj2");
+	
+	std::unique_ptr<Folder> d(new Folder("obj2"));
+	a->Add(*d);
+	BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj4");
 }
 
 BOOST_AUTO_TEST_CASE( FolderManagement )

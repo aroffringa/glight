@@ -111,9 +111,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked()
 		
 		_newChase = &_management->AddChase();
 		_management->AddPreset(*_newChase, 0);
-		std::stringstream s;
-		s << "#" << _management->Controllables().size();
-		_newChase->SetName(s.str());
+		_newChase->SetName(folder.GetAvailableName("Chase"));
 		folder.Add(*_newChase);
 
 		Sequence& sequence = _newChase->Sequence();

@@ -65,7 +65,7 @@ PresetCollection& DefaultChase::MakeColorPreset(class Management& management, cl
 {
 	PresetCollection& pc = management.AddPresetCollection();
 	destination.Add(pc);
-	pc.SetName("Colourpreset");
+	pc.SetName(destination.GetAvailableName("Colourpreset"));
 	for(size_t fixtureIndex=0; fixtureIndex!=fixtures.size(); ++fixtureIndex)
 	{
 		size_t colorIndex = fixtureIndex % colors.size();
@@ -87,7 +87,7 @@ PresetCollection& DefaultChase::MakeColorPreset(class Management& management, cl
 Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
 {
 	Chase& chase = management.AddChase();
-	chase.SetName("Runchase");
+	chase.SetName(destination.GetAvailableName("Runchase"));
 	destination.Add(chase);
 	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
@@ -115,7 +115,7 @@ Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destinatio
 		
 		PresetCollection& pc = management.AddPresetCollection();
 		destination.Add(pc);
-		pc.SetName("Runchase" + std::to_string(frameIndex+1));
+		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
 		// If there are less colours given than fixtures, the sequence is repeated
 		// several times. This loop is for that purpose.
 		for(size_t patternIndex = 0; patternIndex < (fixtures.size() + colors.size() - 1) / colors.size(); ++patternIndex)
@@ -178,7 +178,7 @@ Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destinatio
 Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& destination, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors, double variation)
 {
 	Chase& chase = management.AddChase();
-	chase.SetName("Colorseq");
+	chase.SetName(destination.GetAvailableName("Colorvar"));
 	destination.Add(chase);
 	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
@@ -189,7 +189,7 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 	{
 		PresetCollection& pc = management.AddPresetCollection();
 		destination.Add(pc);
-		pc.SetName("Colorseq" + std::to_string(chaseIndex+1));
+		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
 		unsigned
 			red = colors[chaseIndex].Red()*((1<<24)-1)/255,
 			green = colors[chaseIndex].Green()*((1<<24)-1)/255,
@@ -218,7 +218,7 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors, ShiftType shiftType)
 {
 	Chase& chase = management.AddChase();
-	chase.SetName("Colourshift");
+	chase.SetName(destination.GetAvailableName("Colourshift"));
 	destination.Add(chase);
 	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
@@ -260,7 +260,7 @@ Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination,
 		
 		PresetCollection& pc = management.AddPresetCollection();
 		destination.Add(pc);
-		pc.SetName("Colourshift" + std::to_string(frameIndex+1));
+		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
 		
 		for(size_t fixIndex=0; fixIndex!=fixtures.size(); ++fixIndex)
 		{
@@ -307,7 +307,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel), destination);
 	for(size_t inp=0; inp!=newAudioLevel.NInputs(); ++inp)
 		management.AddPreset(newAudioLevel, inp);
-	newAudioLevel.SetName("VUMeter");
+	newAudioLevel.SetName(destination.GetAvailableName("VUMeter"));
 	size_t nLevels;
 	if(direction == VUInward || direction == VUOutward)
 		nLevels = (fixtures.size()+1) / 2;
@@ -321,7 +321,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 		Effect& newEffect = management.AddEffect(std::move(threshold), destination);
 		for(size_t inp=0; inp!=newEffect.NInputs(); ++inp)
 			management.AddPreset(newEffect, inp);
-		newEffect.SetName("VUM" + std::to_string(level+1) + "_Thr");
+		newEffect.SetName(destination.GetAvailableName(newAudioLevel.Name() + "_Thr"));
 		
 		size_t nFixInLevel = 1;
 		if((direction == VUInward && (level != nLevels-1 || fixtures.size()%2==0) ) ||
@@ -329,7 +329,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 			nFixInLevel = 2;
 		
 		PresetCollection& pc = management.AddPresetCollection();
-		pc.SetName("VUM" + std::to_string(level+1));
+		pc.SetName(destination.GetAvailableName(newAudioLevel.Name() + "_Set"));
 		destination.Add(pc);
 		for(size_t fixInLevel=0; fixInLevel!=nFixInLevel; ++fixInLevel)
 		{

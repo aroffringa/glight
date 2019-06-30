@@ -32,10 +32,15 @@ public:
 	
 	static void Move(FolderObject& object, Folder& destination)
 	{
-		object._parent->Remove(object);
-		
-		destination._objects.emplace_back(&object);
-		object._parent = &destination;
+		if(&destination != &object.Parent())
+		{
+			if(destination.GetChildIfExists(object.Name()))
+				throw std::runtime_error("Can't move object: the destination folder already contains an object with the same name");
+			object._parent->Remove(object);
+			
+			destination._objects.emplace_back(&object);
+			object._parent = &destination;
+		}
 	}
 	
 	static std::string ParentPath(const std::string& path)
@@ -114,6 +119,8 @@ public:
 	 */
 	void Add(FolderObject& object)
 	{
+		if(GetChildIfExists(object.Name()))
+			throw std::runtime_error("Trying to add object " + object.Name() + " to folder " + Name() + ", but an object with that name already exists in this folder");
 		_objects.emplace_back(&object);
 		_objects.back()->SetParent(*this);
 	}
@@ -175,6 +182,16 @@ public:
 		return FindNamedObjectIfExists(_objects, name);
 	}
 	
+	const FolderObject& GetChild(const std::string& name) const
+	{
+		return FindNamedObject(_objects, name);
+	}
+	
+	const FolderObject* GetChildIfExists(const std::string& name) const
+	{
+		return FindNamedObjectIfExists(_objects, name);
+	}
+	
 	FolderObject* FollowRelPath(const std::string& path)
 	{
 		Folder* parentFolder = FollowDown(ParentPath(path));
@@ -184,7 +201,7 @@ public:
 			return nullptr;
 	}
 	
-	FolderObject* FollowRelPath(std::string&& path)
+	FolderObject* FollowRelPath(std::string&& path) 
 	{
 		Folder* parentFolder = FollowDown(ParentPath(path));
 		if(parentFolder)
@@ -193,8 +210,26 @@ public:
 			return nullptr;
 	}
 
+	std::string GetAvailableName(std::string&& prefix) const
+	{
+		bool nameAvailable;
+		size_t nameNumber = 0;
+		do {
+			nameAvailable = true;
+			++nameNumber;
+			for(const FolderObject* object : _objects)
+			{
+				if(object->Name() == prefix + std::to_string(nameNumber))
+				{
+					nameAvailable = false;
+					break;
+				}
+			}
+		} while(!nameAvailable);
+		return std::move(prefix) + std::to_string(nameNumber);
+	}
 private:
-	Folder* followDown(const std::string& path, size_t strPos)
+	Folder* followDown(const std::string& path, size_t strPos) const
 	{
 		auto sep = std::find(path.begin()+strPos, path.end(), '/');
 		std::string subpath;
@@ -213,7 +248,7 @@ private:
 		}
 	}
 	
-	Folder* followDown(std::string&& path, size_t strPos)
+	Folder* followDown(std::string&& path, size_t strPos) const
 	{
 		auto sep = std::find(path.begin()+strPos, path.end(), '/');
 		std::string subpath;

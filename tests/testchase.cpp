@@ -25,11 +25,14 @@ BOOST_AUTO_TEST_CASE( remove_indirect )
 	PresetValue& pv = management.AddPreset(fc, 0);
 	pv.SetValue(ControlValue::Max());
 	PresetCollection& pcA = management.AddPresetCollection();
+	pcA.SetName("pcA");
 	root.Add(pcA);
 	PresetCollection& pcB = management.AddPresetCollection();
+	pcB.SetName("pcB");
 	root.Add(pcB);
 	pcB.SetFromCurrentSituation(management);
 	Chase& chase = management.AddChase();
+	chase.SetName("chase");
 	Sequence& sequence = chase.Sequence();
 	root.Add(chase);
 	sequence.Add(pcA, 0);
