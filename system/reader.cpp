@@ -169,9 +169,13 @@ void Reader::parseControlItem(xmlNode *node)
 
 void Reader::parseFixtureType(xmlNode *node)
 {
-	FixtureType &type =
-		_theatre.AddFixtureType((enum FixtureType::FixtureClass) getIntAttribute(node, "fixture-class"));
-	parseFolderAttr(node, type);
+	enum FixtureType::FixtureClass cl = (enum FixtureType::FixtureClass) getIntAttribute(node, "fixture-class");
+	FixtureType* type = dynamic_cast<FixtureType*>(_management.RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
+	if(!type)
+	{
+		type = &_management.Theatre().AddFixtureType(cl); // TODO we shouldn't use a type by its name, types should be editable etc
+		parseFolderAttr(node, *type);
+	}
 }
 
 void Reader::parseFixture(xmlNode *node)

@@ -140,9 +140,13 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 {
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	Position position = _management->Theatre().GetFreePosition();
-	FixtureType &type = _management->Theatre().AddFixtureType(cl);
-	_management->RootFolder().Add(type);
-	Fixture &fixture = _management->Theatre().AddFixture(type);
+	FixtureType* type = dynamic_cast<FixtureType*>(_management->RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
+	if(!type)
+	{
+		type = &_management->Theatre().AddFixtureType(cl); // TODO we shouldn't use a type by its name, types should be editable etc
+		_management->RootFolder().Add(*type);
+	}
+	Fixture &fixture = _management->Theatre().AddFixture(*type);
 	fixture.Position() = position;
 	
 	const std::vector<std::unique_ptr<FixtureFunction>>& functions = fixture.Functions();

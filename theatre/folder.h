@@ -210,6 +210,24 @@ public:
 			return nullptr;
 	}
 
+	std::string GetAvailableName(std::string&& prefix) const
+	{
+		bool nameAvailable;
+		size_t nameNumber = 0;
+		do {
+			nameAvailable = true;
+			++nameNumber;
+			for(const FolderObject* object : _objects)
+			{
+				if(object->Name() == prefix + std::to_string(nameNumber))
+				{
+					nameAvailable = false;
+					break;
+				}
+			}
+		} while(!nameAvailable);
+		return std::move(prefix) + std::to_string(nameNumber);
+	}
 private:
 	Folder* followDown(const std::string& path, size_t strPos) const
 	{

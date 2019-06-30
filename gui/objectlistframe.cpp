@@ -93,9 +93,7 @@ void ObjectListFrame::onNewPresetButtonClicked()
 	PresetCollection& presetCollection = _management->AddPresetCollection();
 	parent.Add(presetCollection);
 	presetCollection.SetFromCurrentSituation(*_management);
-	std::stringstream s;
-	s << "%" << _management->Controllables().size();
-	presetCollection.SetName(s.str());
+	presetCollection.SetName(parent.GetAvailableName("Preset"));
 	_management->AddPreset(presetCollection, 0);
 	lock.unlock();
 
@@ -119,9 +117,7 @@ void ObjectListFrame::onNewTimeSequenceButtonClicked()
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	TimeSequence& tSequence = _management->AddTimeSequence();
 	parent.Add(tSequence);
-	std::stringstream s;
-	s << "T" << _management->Controllables().size();
-	tSequence.SetName(s.str());
+	tSequence.SetName(parent.GetAvailableName("Seq"));
 	_management->AddPreset(tSequence, 0);
 	lock.unlock();
 
@@ -157,8 +153,8 @@ bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton* event)
 void ObjectListFrame::onNewEffectMenuClicked(enum Effect::Type effectType)
 {
 	std::unique_ptr<Effect> effect(Effect::Make(effectType));
-	effect->SetName(Effect::TypeToName(effectType) + std::to_string(_management->Controllables().size()+1));
 	Folder& parent = _list.SelectedFolder();
+	effect->SetName(parent.GetAvailableName(Effect::TypeToName(effectType)));
 	Effect* added = &_management->AddEffect(std::move(effect), parent);
 	for(size_t i=0; i!=added->NInputs(); ++i)
 		_management->AddPreset(*added, i);
@@ -172,9 +168,7 @@ void ObjectListFrame::onNewFolderButtonClicked()
 	Folder& parent = _list.SelectedFolder();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	Folder& folder = _management->AddFolder(parent);
-	std::stringstream s;
-	s << "Folder" << _management->Folders().size();
-	folder.SetName(s.str());
+	folder.SetName(parent.GetAvailableName("Folder"));
 	lock.unlock();
 
 	_parentWindow.EmitUpdate();

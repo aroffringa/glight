@@ -138,6 +138,26 @@ BOOST_AUTO_TEST_CASE( FollowRelPath )
 	BOOST_CHECK_EQUAL( b->FollowRelPath("c") , c.get() );
 }
 
+BOOST_AUTO_TEST_CASE( GetAvailableName )
+{
+	std::unique_ptr<Folder> a(new Folder("a"));
+	BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj1");
+	BOOST_CHECK_EQUAL(a->GetAvailableName(""), "1");
+	
+	std::unique_ptr<Folder> b(new Folder("obj1"));
+	a->Add(*b);
+	BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj2");
+	BOOST_CHECK_EQUAL(a->GetAvailableName(""), "1");
+	
+	std::unique_ptr<Folder> c(new Folder("obj3"));
+	a->Add(*c);
+	BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj2");
+	
+	std::unique_ptr<Folder> d(new Folder("obj2"));
+	a->Add(*d);
+	BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj4");
+}
+
 BOOST_AUTO_TEST_CASE( FolderManagement )
 {
 	Management management;
