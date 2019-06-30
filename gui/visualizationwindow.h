@@ -44,8 +44,13 @@ private:
 	Management* _dryManagement;
 	bool _isInitialized, _isTimerRunning;
 	sigc::connection _timeoutConnection;
+	enum DragType {
+		NotDragging,
+		DragFixture,
+		DragRectangle
+	} _dragType;
 	class Fixture* _draggingFixture;
-	Position _draggingStart;
+	Position _draggingStart, _draggingTo;
 
 	void initialize();
 	void drawAll(const Cairo::RefPtr< Cairo::Context>& cairo);
@@ -64,7 +69,7 @@ private:
 	{
 		double sc = scale(management, width, height);
 		if(sc == 0.0)
-			return 0.0;
+			return 1.0;
 		else
 			return 1.0 / sc;
 	}
