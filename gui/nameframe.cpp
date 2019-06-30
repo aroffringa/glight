@@ -7,6 +7,7 @@
 #include "../theatre/management.h"
 
 #include <gtkmm/stock.h>
+#include <gtkmm/messagedialog.h>
 
 NameFrame::NameFrame(Management& management, ShowWindow& showWindow) :
 	_management(&management),
@@ -56,11 +57,28 @@ void NameFrame::onButtonClicked()
 {
 	if(_namedObject != nullptr)
 	{
-		std::unique_lock<std::mutex> lock(_management->Mutex());
-		_namedObject->SetName(_entry.get_text());
-		lock.unlock();
+		const std::string newName = _entry.get_text();
+		
+		if(newName != _namedObject->Name())
+		{
+			FolderObject* folderObject = dynamic_cast<FolderObject*>(_namedObject);
+			if(folderObject && !folderObject->IsRoot() && folderObject->Parent().GetChildIfExists(newName))
+			{
+				Gtk::MessageDialog dialog(
+					"The folder containing this object already has an object named " + newName,
+					false,
+					Gtk::MESSAGE_ERROR,
+					Gtk::BUTTONS_OK);
+				dialog.run();
+			}
+			else {
+				std::unique_lock<std::mutex> lock(_management->Mutex());
+				_namedObject->SetName(newName);
+				lock.unlock();
 
-		_showWindow.EmitUpdate();
-		_signalNameChange();
+				_showWindow.EmitUpdate();
+				_signalNameChange();
+			}
+		}
 	}
 }
