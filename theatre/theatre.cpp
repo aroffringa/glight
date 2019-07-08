@@ -58,6 +58,16 @@ FixtureType& Theatre::AddFixtureType(enum FixtureType::FixtureClass fixtureClass
 	return *_fixtureTypes.back();
 }
 
+bool Theatre::Contains(Fixture& fixture) const
+{
+	for(const std::unique_ptr<Fixture>& f : _fixtures)
+	{
+		if(f.get() == &fixture)
+			return true;
+	}
+	return false;
+}
+
 Fixture& Theatre::GetFixture(const std::string &name) const
 {
 	return FolderObject::FindNamedObject(_fixtures, name);

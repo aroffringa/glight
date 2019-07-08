@@ -13,7 +13,11 @@ VisualizationWindow::VisualizationWindow(Management* management) :
 	_dryManagement(nullptr),
 	_isInitialized(false), _isTimerRunning(false),
 	_dragType(NotDragging),
-	_selectedFixtures()
+	_selectedFixtures(),
+	_miAlignHorizontally("Align horizontally"),
+	_miAlignVertically("Align horizontally"),
+	_miAlignLinearly("Align linearly"),
+	_miDistributeEvenly("Distribute evenly")
 {
 	set_title("Glight - visualization");
 	set_default_size(600, 200);
@@ -42,6 +46,18 @@ void VisualizationWindow::initialize()
 		_timeoutConnection = Glib::signal_timeout().connect( sigc::mem_fun(*this, &VisualizationWindow::onTimeout), 40);
 		_isTimerRunning = true;
 	}
+}
+
+void VisualizationWindow::onTheatreChanged()
+{
+	for(size_t i = _selectedFixtures.size(); i != 0; --i)
+	{
+		if(!_management->Theatre().Contains(*_selectedFixtures[i-1]))
+		{
+			_selectedFixtures.erase(_selectedFixtures.begin() + i-1);
+		}
+	}
+	Update();
 }
 
 bool VisualizationWindow::onExpose(const Cairo::RefPtr<Cairo::Context>& context)
@@ -188,6 +204,9 @@ bool VisualizationWindow::onButtonRelease(GdkEventButton* event)
 		}
 		_dragType = NotDragging;
 		queue_draw();
+	}
+	else if(event->button == 2 && !_dryManagement)
+	{
 	}
 	return true;
 }

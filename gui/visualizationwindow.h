@@ -4,6 +4,7 @@
 #include "../theatre/position.h"
 
 #include <gtkmm/drawingarea.h>
+#include <gtkmm/menu.h>
 #include <gtkmm/window.h>
 
 #include <gdkmm/pixbuf.h>
@@ -39,7 +40,6 @@ public:
 	}
 private:
 	Gtk::DrawingArea _drawingArea;
-
 	Management* _management;
 	Management* _dryManagement;
 	bool _isInitialized, _isTimerRunning;
@@ -52,9 +52,13 @@ private:
 	std::vector<class Fixture*> _selectedFixtures;
 	Position _draggingStart, _draggingTo;
 
+	Gtk::Menu _popupMenu;
+	Gtk::MenuItem _miAlignHorizontally, _miAlignVertically, _miAlignLinearly, _miDistributeEvenly;
+	
 	void initialize();
 	void drawAll(const Cairo::RefPtr< Cairo::Context>& cairo);
 	void drawManagement(const Cairo::RefPtr< Cairo::Context>& cairo, class Management& management, size_t yOffset, size_t height);
+	void onTheatreChanged();
 	bool onButtonPress(GdkEventButton* event);
 	bool onButtonRelease(GdkEventButton* event);
 	bool onMotion(GdkEventMotion* event);

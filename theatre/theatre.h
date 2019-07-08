@@ -24,6 +24,8 @@ class Theatre {
 		class Fixture &AddFixture(FixtureType &type);
 		class FixtureType &AddFixtureType(enum FixtureType::FixtureClass fixtureClass);
 
+		bool Contains(Fixture& fixture) const;
+		
 		const std::vector<std::unique_ptr<class Fixture>>& Fixtures() const { return _fixtures; }
 		const std::vector<std::unique_ptr<class FixtureType>>& FixtureTypes() const { return _fixtureTypes; }
 		
