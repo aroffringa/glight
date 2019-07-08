@@ -37,8 +37,14 @@ public:
 	Position operator/(double rhs) const
 	{ return Position(_x/rhs, _y/rhs); }
 	
+	Position operator+(const std::pair<double, double>& add) const
+	{ return Position(_x + add.first, _y + add.second); }
+	
 	std::pair<double, double> operator-(const Position& rhs) const
 	{ return std::make_pair(_x - rhs._x, _y - rhs._y); }
+	
+	Position operator-(const std::pair<double, double>& add) const
+	{ return Position(_x - add.first, _y - add.second); }
 	
 	bool InsideRectangle(const Position& topleft, const Position& bottomright) const
 	{
