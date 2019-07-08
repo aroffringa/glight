@@ -49,7 +49,7 @@ private:
 		DragFixture,
 		DragRectangle
 	} _dragType;
-	class Fixture* _draggingFixture;
+	std::vector<class Fixture*> _selectedFixtures;
 	Position _draggingStart, _draggingTo;
 
 	void initialize();
@@ -74,6 +74,7 @@ private:
 			return 1.0 / sc;
 	}
 	class Fixture* fixtureAt(Management& management, const Position& position);
+	void selectFixtures(const Position& a, const Position& b);
 };
 
 #endif
