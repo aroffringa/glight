@@ -94,7 +94,7 @@ private:
 			bool selectionChanged = (_selectedInput != NO_INPUT_SELECTED);
 			_selectedObject = controllable;
 			fillCombo();
-			if(controllable->NInputs() == 1)
+			if(controllable && controllable->NInputs() == 1)
 			{
 				RecursionLock::Token token(_recursionLock);
 				_inputCombo.set_active(0);
