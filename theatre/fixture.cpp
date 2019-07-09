@@ -137,6 +137,57 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 			_functions.emplace_back(m);
 			break;
 		}
+		case FixtureType::BT_VINTAGE_5CH:
+		{
+			FixtureFunction *w, *m, *r, *g, *b;
+			w = new FixtureFunction(_theatre, FunctionType::White, "W");
+			m = new FixtureFunction(_theatre, FunctionType::Master, "M");
+			r = new FixtureFunction(_theatre, FunctionType::Red, "R");
+			g = new FixtureFunction(_theatre, FunctionType::Green, "G");
+			b = new FixtureFunction(_theatre, FunctionType::Blue, "B");
+			_functions.emplace_back(w);
+			_functions.emplace_back(m);
+			_functions.emplace_back(r);
+			_functions.emplace_back(g);
+			_functions.emplace_back(b);
+			break;
+		}
+		case FixtureType::BT_VINTAGE_6CH:
+		{
+			FixtureFunction *w, *m, *s, *r, *g, *b;
+			w = new FixtureFunction(_theatre, FunctionType::White, "W");
+			m = new FixtureFunction(_theatre, FunctionType::Master, "M");
+			s = new FixtureFunction(_theatre, FunctionType::Strobe, "S");
+			r = new FixtureFunction(_theatre, FunctionType::Red, "R");
+			g = new FixtureFunction(_theatre, FunctionType::Green, "G");
+			b = new FixtureFunction(_theatre, FunctionType::Blue, "B");
+			_functions.emplace_back(w);
+			_functions.emplace_back(m);
+			_functions.emplace_back(s);
+			_functions.emplace_back(r);
+			_functions.emplace_back(g);
+			_functions.emplace_back(b);
+			break;
+		}
+		case FixtureType::BT_VINTAGE_7CH:
+		{
+			FixtureFunction *w, *m, *s, *r, *g, *b, *c;
+			w = new FixtureFunction(_theatre, FunctionType::White, "W");
+			m = new FixtureFunction(_theatre, FunctionType::Master, "M");
+			s = new FixtureFunction(_theatre, FunctionType::Strobe, "S");
+			r = new FixtureFunction(_theatre, FunctionType::Red, "R");
+			g = new FixtureFunction(_theatre, FunctionType::Green, "G");
+			b = new FixtureFunction(_theatre, FunctionType::Blue, "B");
+			c = new FixtureFunction(_theatre, FunctionType::ColorMacro, "C");
+			_functions.emplace_back(w);
+			_functions.emplace_back(m);
+			_functions.emplace_back(s);
+			_functions.emplace_back(r);
+			_functions.emplace_back(g);
+			_functions.emplace_back(b);
+			_functions.emplace_back(c);
+			break;
+		}
 	}
 	
 	for(size_t ci=0; ci!=_functions.size(); ++ci)
