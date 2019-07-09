@@ -50,7 +50,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_configurationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_configurationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 
-	_visualizationWindow.reset(new VisualizationWindow(_management.get()));
+	_visualizationWindow.reset(new VisualizationWindow(_management.get(), this));
 	
 	createMenu();
 	

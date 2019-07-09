@@ -16,17 +16,18 @@
 
 #include <sigc++/signal.h>
 
+#include "eventtransmitter.h"
 #include "guistate.h"
 
 /**
 	@author Andre Offringa
 */
-class ShowWindow : public Gtk::Window {
+class ShowWindow : public Gtk::Window, public EventTransmitter {
 public:
 	ShowWindow(std::unique_ptr<class DmxDevice> dmxDevice);
 	~ShowWindow();
 	
-	void EmitUpdate();
+	void EmitUpdate() final override;
 	
 	GUIState& State() { return _state; }
 	

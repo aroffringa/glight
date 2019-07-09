@@ -1,3 +1,4 @@
+#include "eventtransmitter.h"
 #include "visualizationwindow.h"
 
 #include "../theatre/management.h"
@@ -8,12 +9,17 @@
 
 #include <glibmm/main.h>
 
-VisualizationWindow::VisualizationWindow(Management* management) :
+VisualizationWindow::VisualizationWindow(Management* management, EventTransmitter* eventTransmitter) :
 	_management(management),
 	_dryManagement(nullptr),
+	_eventTransmitter(eventTransmitter),
 	_isInitialized(false), _isTimerRunning(false),
 	_dragType(NotDragging),
-	_selectedFixtures()
+	_selectedFixtures(),
+	_miAlignHorizontally("Align horizontally"),
+	_miAlignVertically("Align vertically"),
+	_miDistributeEvenly("Distribute evenly"),
+	_miRemove("Remove")
 {
 	set_title("Glight - visualization");
 	set_default_size(600, 200);
@@ -25,11 +31,31 @@ VisualizationWindow::VisualizationWindow(Management* management) :
 	_drawingArea.signal_motion_notify_event().connect(sigc::mem_fun(*this, &VisualizationWindow::onMotion));
 	add(_drawingArea);
 	_drawingArea.show();
+	inializeContextMenu();
 }
 
 VisualizationWindow::~VisualizationWindow()
 {
 	_timeoutConnection.disconnect();
+}
+
+void VisualizationWindow::inializeContextMenu()
+{
+	_miAlignHorizontally.signal_activate().connect([&]{ onAlignHorizontally(); });
+	_popupMenu.add(_miAlignHorizontally);
+	
+	_miAlignVertically.signal_activate().connect([&]{ onAlignVertically(); });
+	_popupMenu.add(_miAlignVertically);
+	
+	_miDistributeEvenly.signal_activate().connect([&]{ onDistributeEvenly(); });
+	_popupMenu.add(_miDistributeEvenly);
+	
+	_popupMenu.add(_miSeparator1);
+	
+	_miRemove.signal_activate().connect([&]{ onRemoveFixtures(); });
+	_popupMenu.add(_miRemove);
+	
+	_popupMenu.show_all_children();
 }
 
 void VisualizationWindow::initialize()
@@ -42,6 +68,16 @@ void VisualizationWindow::initialize()
 		_timeoutConnection = Glib::signal_timeout().connect( sigc::mem_fun(*this, &VisualizationWindow::onTimeout), 40);
 		_isTimerRunning = true;
 	}
+}
+
+void VisualizationWindow::onTheatreChanged()
+{
+	for(size_t i = _selectedFixtures.size(); i != 0; --i)
+	{
+		if(!_management->Theatre().Contains(*_selectedFixtures[i-1]))
+			_selectedFixtures.erase(_selectedFixtures.begin() + i-1);
+	}
+	Update();
 }
 
 bool VisualizationWindow::onExpose(const Cairo::RefPtr<Cairo::Context>& context)
@@ -148,28 +184,47 @@ Fixture* VisualizationWindow::fixtureAt(Management& management, const Position& 
 
 bool VisualizationWindow::onButtonPress(GdkEventButton* event)
 {
-	if(event->button == 1 && !_dryManagement)
+	if(!_dryManagement && (event->button==1 || event->button==3))
 	{
 		double sc = invScale(*_management, _drawingArea.get_width(), _drawingArea.get_height());
-		_draggingStart = Position(event->x, event->y) * sc;
-		Fixture* selectedFixture = fixtureAt(*_management, _draggingStart);
+		Position pos = Position(event->x, event->y) * sc;
+		Fixture* selectedFixture = fixtureAt(*_management, pos);
 		if(selectedFixture)
 		{
-			// Was a fixture clicked that was already selected? Then move all selected fixtures.
-			// If not, select the clicked fixture and move that:
+			// Was a fixture clicked that was already selected? Then keep all selected.
+			// If not, select the clicked fixture:
 			if(std::find(_selectedFixtures.begin(), _selectedFixtures.end(), selectedFixture)
 				== _selectedFixtures.end())
 			{
 				_selectedFixtures.assign(1, selectedFixture);
 			}
-			_dragType = DragFixture;
 		}
 		else {
-			_dragType = DragRectangle;
-			_draggingTo = _draggingStart;
 			_selectedFixtures.clear();
 		}
-		queue_draw();
+		
+		if(event->button == 1)
+		{
+			_draggingStart = pos;
+			if(!_selectedFixtures.empty())
+			{
+				_dragType = DragFixture;
+			}
+			else {
+				_dragType = DragRectangle;
+				_draggingTo = pos;
+			}
+			queue_draw();
+		}
+		else if(event->button == 3)
+		{
+			queue_draw();
+			_miAlignHorizontally.set_sensitive(_selectedFixtures.size() >= 2);
+			_miAlignVertically.set_sensitive(_selectedFixtures.size() >= 2);
+			_miDistributeEvenly.set_sensitive(_selectedFixtures.size() >= 2);
+			_miRemove.set_sensitive(_selectedFixtures.size() >= 1);
+			_popupMenu.popup(event->button, event->time);
+		}
 	}
 	return true;
 }
@@ -233,4 +288,93 @@ void VisualizationWindow::selectFixtures(const Position& a, const Position& b)
 				_selectedFixtures.emplace_back(fixture.get());
 		}
 	}
+}
+
+void VisualizationWindow::onAlignHorizontally()
+{
+	if(_selectedFixtures.size() >= 2)
+	{
+		double y = 0.0;
+		
+		for(const Fixture* fixture :_selectedFixtures)
+			y += fixture->Position().Y();
+		
+		y /= _selectedFixtures.size();
+		
+		for(Fixture* fixture :_selectedFixtures)
+			fixture->Position().Y() = y;
+	}
+}
+
+void VisualizationWindow::onAlignVertically()
+{
+	if(_selectedFixtures.size() >= 2)
+	{
+		double x = 0.0;
+		
+		for(const Fixture* fixture :_selectedFixtures)
+			x += fixture->Position().X();
+		
+		x /= _selectedFixtures.size();
+		
+		for(Fixture* fixture :_selectedFixtures)
+			fixture->Position().X() = x;
+	}
+}
+
+void VisualizationWindow::onDistributeEvenly()
+{
+	if(_selectedFixtures.size() >= 2)
+	{
+		double left = _selectedFixtures[0]->Position().X();
+		double right = _selectedFixtures[0]->Position().X();
+		double top = _selectedFixtures[0]->Position().Y();
+		double bottom = _selectedFixtures[0]->Position().Y();
+		
+		for(size_t i=1; i!=_selectedFixtures.size(); ++i)
+		{
+			const Fixture* fixture = _selectedFixtures[i];
+			left = std::min(fixture->Position().X(), left);
+			right = std::max(fixture->Position().X(), right);
+			top = std::min(fixture->Position().Y(), top);
+			bottom = std::max(fixture->Position().Y(), bottom);
+		}
+		
+		std::vector<Fixture*> list = _selectedFixtures;
+		if(left == right)
+		{
+			std::sort(list.begin(), list.end(), [](const Fixture* a, const Fixture* b)
+				{ return a->Position().Y() < b->Position().Y(); } );
+			for(size_t i=0; i!=list.size(); ++i)
+			{
+				double y = double(i) / double(list.size()-1) * (bottom - top) + top;
+				list[i]->Position().Y() = y;
+			}
+		}
+		else {
+			std::sort(list.begin(), list.end(), [](const Fixture* a, const Fixture* b)
+				{ return a->Position().X() < b->Position().X(); } );
+			left = list.front()->Position().X();
+			right = list.back()->Position().X();
+			top = list.front()->Position().Y();
+			bottom = list.back()->Position().Y();
+			for(size_t i=0; i!=list.size(); ++i)
+			{
+				double r = double(i) / double(list.size()-1);
+				double x = r * (right - left) + left;
+				double y = r * (bottom - top) + top;
+				list[i]->Position() = Position(x, y);
+			}
+		}
+	}
+}
+
+void VisualizationWindow::onRemoveFixtures()
+{
+	for(Fixture* fixture : _selectedFixtures)
+	{
+		_management->RemoveFixture(*fixture);
+	}
+	_selectedFixtures.clear();
+	_eventTransmitter->EmitUpdate();
 }
