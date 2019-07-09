@@ -108,14 +108,20 @@ void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& c
 	cairo->scale(sc, sc);
 	for(const std::unique_ptr<Fixture>& f : fixtures)
 	{
-		Color c = f->GetColor(snapshot);
+		size_t shapeCount = f->Type().ShapeCount();
+		for(size_t i=0; i!=shapeCount; ++i)
+		{
+			size_t shapeIndex = shapeCount - i - 1;
+			Color c = f->GetColor(snapshot, shapeIndex);
 
-		cairo->set_source_rgb((double) c.Red()/224.0+0.125, (double) c.Green()/224.0+0.125, (double) c.Blue()/224.0+0.125);
+			cairo->set_source_rgb((double) c.Red()/224.0+0.125, (double) c.Green()/224.0+0.125, (double) c.Blue()/224.0+0.125);
 
-		double x = f->Position().X() + 0.5;
-		double y = f->Position().Y() + 0.5;
-		cairo->arc(x, y + yOffset/sc, 0.4, 0.0, 2.0 * M_PI);
-		cairo->fill();
+			double radius = shapeCount==1 ? 0.4 : 0.33 + 0.07 * double(shapeIndex) / (shapeCount - 1);
+			double x = f->Position().X() + 0.5;
+			double y = f->Position().Y() + 0.5;
+			cairo->arc(x, y + yOffset/sc, radius, 0.0, 2.0 * M_PI);
+			cairo->fill();
+		}
 	}
 	cairo->set_source_rgb(0.2, 0.2, 1.0);
 	cairo->set_line_width(4.0/sc);

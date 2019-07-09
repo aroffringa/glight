@@ -47,7 +47,7 @@ public:
 		_functions.emplace_back(new FixtureFunction(_theatre, type));
 		return *_functions.back();
 	}
-	inline Color GetColor(const class ValueSnapshot &snapshot) const;
+	inline Color GetColor(const class ValueSnapshot &snapshot, size_t shapeIndex) const;
 	
 	class Position& Position() { return _position; }
 	const class Position& Position() const { return _position; }
@@ -61,9 +61,9 @@ private:
 
 #include "fixturetype.h"
 
-Color Fixture::GetColor(const class ValueSnapshot &snapshot) const
+Color Fixture::GetColor(const class ValueSnapshot &snapshot, size_t shapeIndex) const
 {
-	return _type.GetColor(*this, snapshot);
+	return _type.GetColor(*this, snapshot, shapeIndex);
 }
 
 #endif

@@ -12,11 +12,6 @@ class Color
 		unsigned char Green() const { return _green; }
 		unsigned char Blue() const { return _blue; }
 		
-		Color operator*(unsigned char rhs) const
-		{
-			return Color(_red*rhs/255, _green*rhs/255, _blue*rhs/255);
-		}
-
 		static Color Gray(unsigned char intensity) { return Color(intensity, intensity, intensity); }
 		
 		static Color Black() { return Color(0, 0, 0); }
@@ -30,6 +25,7 @@ class Color
 		static Color GreenYellow() { return Color(128, 255, 0); }
 		static Color BlueC() { return Color(0, 0, 255); }
 		static Color LBlue() { return Color(0, 255, 255); }
+		static Color Cyan() { return Color(0, 255, 255); }
 		static Color BlueYellow() { return Color(192, 192, 255); }
 		static Color Yellow() { return Color(255, 255, 0); }
 		static Color YellowPurple() { return Color(255, 128, 255); }
@@ -313,8 +309,54 @@ class Color
 				}
 			}
 		}
+		
+		static Color BTMacroColor(unsigned value)
+		{
+			if(value < 68)
+			{
+				if(value < 28)
+				{
+					if(value < 8)
+						return Black();
+					else
+						return RedC();
+				} else {
+					if(value < 48)
+						return Orange();
+					else
+						return Yellow();
+				}
+			}
+			else {
+				if(value < 108)
+				{
+					if(value < 88)
+						return GreenC();
+					else if(value < 98)
+						return Cyan();
+					else
+						return BlueC();
+				}
+				else {
+					if(value < 118)
+						return Purple();
+					else
+						return White(); // color fade
+				}
+			}
+		}
 	private:
 		unsigned char _red, _green, _blue;	
 };
+
+inline Color operator*(const Color& lhs, unsigned char rhs)
+{
+	return Color(lhs.Red()*rhs/255, lhs.Green()*rhs/255, lhs.Blue()*rhs/255);
+}
+
+inline Color operator*(unsigned char lhs, const Color& rhs)
+{
+	return Color(rhs.Red()*lhs/255, rhs.Green()*lhs/255, rhs.Blue()*lhs/255);
+}
 
 #endif // COLOR_H

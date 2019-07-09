@@ -23,7 +23,10 @@ class FixtureType : public FolderObject {
 			UVLight3Ch,
 			H2ODMXPro,
 			RGB_ADJ_6CH,
-			RGB_ADJ_7CH
+			RGB_ADJ_7CH,
+			BT_VINTAGE_5CH,
+			BT_VINTAGE_6CH,
+			BT_VINTAGE_7CH
 		};
 
 		FixtureType(FixtureClass fixtureClass) : FolderObject(ClassName(fixtureClass)), _class(fixtureClass)
@@ -58,6 +61,12 @@ class FixtureType : public FolderObject {
 					return "RGB ADJ (6ch)";
 				case RGB_ADJ_7CH:
 					return "RGB ADJ (7ch)";
+				case BT_VINTAGE_5CH:
+					return "Briteq Vintage (5ch)";
+				case BT_VINTAGE_6CH:
+					return "Briteq Vintage (6ch)";
+				case BT_VINTAGE_7CH:
+					return "Briteq Vintage (7ch)";
 			}
 			return "Unknown fixture class";
 		}
@@ -74,14 +83,39 @@ class FixtureType : public FolderObject {
 				UVLight3Ch,
 				H2ODMXPro,
 				RGB_ADJ_6CH,
-				RGB_ADJ_7CH
+				RGB_ADJ_7CH,
+				BT_VINTAGE_5CH,
+				BT_VINTAGE_6CH,
+				BT_VINTAGE_7CH
 			};
 			return list;
 		}
 		
-		Color GetColor(const class Fixture &fixture, const ValueSnapshot &snapshot) const;
+		Color GetColor(const class Fixture &fixture, const ValueSnapshot &snapshot, size_t shapeIndex) const;
 
 		enum FixtureClass FixtureClass() const { return _class; }
+		
+		size_t ShapeCount() const {
+			switch(_class)
+			{
+				case Light1Ch:
+				case RGBLight3Ch:
+				case RGBLight4Ch:
+				case RGBALight4Ch:
+				case RGBALight5Ch:
+				case RGBWLight4Ch:
+				case UVLight3Ch:
+				case H2ODMXPro:
+				case RGB_ADJ_6CH:
+				case RGB_ADJ_7CH:
+					return 1;
+				case BT_VINTAGE_5CH:
+				case BT_VINTAGE_6CH:
+				case BT_VINTAGE_7CH:
+					return 2;
+			}
+			return 0;
+		}
 		
 	private:
 		static Color rgbAdj6chColor(const class Fixture &fixture, const ValueSnapshot &snapshot);
@@ -107,14 +141,11 @@ inline Color FixtureType::rgbAdj6chColor(const class Fixture &fixture, const Val
 	}
 }
 
-inline Color FixtureType::GetColor(const Fixture &fixture, const ValueSnapshot &snapshot) const
+inline Color FixtureType::GetColor(const Fixture &fixture, const ValueSnapshot &snapshot, size_t shapeIndex) const
 {
 	switch(_class)
 	{
 		case Light1Ch:
-		//case MovingLight:
-		//case SmokeMachine:
-		//case FollowSpot:
 			return Color::Gray(fixture.Functions()[0]->GetValue(snapshot));
 		case RGBLight3Ch:
 			return Color(
@@ -180,6 +211,38 @@ inline Color FixtureType::GetColor(const Fixture &fixture, const ValueSnapshot &
 			Color c = rgbAdj6chColor(fixture, snapshot);
 			unsigned char master = fixture.Functions()[6]->GetValue(snapshot);
 			return c * master;
+		}
+		case BT_VINTAGE_5CH:
+		case BT_VINTAGE_6CH:
+		{
+			if(shapeIndex == 0)
+				return Color(255, 171, 85) * fixture.Functions()[0]->GetValue(snapshot);
+			else {
+				unsigned char master = fixture.Functions()[1]->GetValue(snapshot);
+				size_t strobe = _class == BT_VINTAGE_5CH ? 0 : 1;
+				return master * Color(
+					fixture.Functions()[2+strobe]->GetValue(snapshot),
+					fixture.Functions()[3+strobe]->GetValue(snapshot),
+					fixture.Functions()[4+strobe]->GetValue(snapshot)
+				);
+			}
+		}
+		case BT_VINTAGE_7CH:
+		{
+			if(shapeIndex == 0)
+				return Color(255, 171, 85) * fixture.Functions()[0]->GetValue(snapshot);
+			else {
+				unsigned char master = fixture.Functions()[1]->GetValue(snapshot);
+				unsigned char colorEffect = fixture.Functions()[6]->GetValue(snapshot);
+				if(colorEffect < 8)
+					return master * Color(
+						fixture.Functions()[3]->GetValue(snapshot),
+						fixture.Functions()[4]->GetValue(snapshot),
+						fixture.Functions()[5]->GetValue(snapshot)
+					);
+				else
+					return Color::BTMacroColor(fixture.Functions()[6]->GetValue(snapshot));
+			}
 		}
 	}
 	throw std::runtime_error("Unknown fixture class");
