@@ -18,19 +18,19 @@
 /**
 	@author Andre Offringa
 */
-class ControlWindow  : public Gtk::Window {
+class FaderWindow  : public Gtk::Window {
 	public:
 		/**
 		 * Construct a control window with a new, empty fader setup.
 		 */
-		ControlWindow(class ShowWindow* showWindow, class Management& management, size_t keyRowIndex);
+		FaderWindow(class ShowWindow* showWindow, class Management& management, size_t keyRowIndex);
 		
 		/**
 		 * Construct a control window and load an existing fader setup.
 		 */
-		ControlWindow(class ShowWindow* showWindow, class Management& management, size_t keyRowIndex, class FaderSetupState* state);
+		FaderWindow(class ShowWindow* showWindow, class Management& management, size_t keyRowIndex, class FaderSetupState* state);
 		
-		~ControlWindow();
+		~FaderWindow();
 
 		void Update();
 		bool HandleKeyDown(char key);

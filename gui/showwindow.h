@@ -64,7 +64,7 @@ private:
 	void onMICancelDryModeClicked();
 	void onMIDesignWizardClicked();
 	
-	void onControlWindowHidden(class ControlWindow* window);
+	void onControlWindowHidden(class FaderWindow* window);
 	
 	void changeManagement(class Management* newManagement, bool moveControlSliders);
 	
@@ -72,7 +72,7 @@ private:
 
 	Gtk::VBox _box;
 
-	std::vector<std::unique_ptr<class ControlWindow>> _controlWindows;
+	std::vector<std::unique_ptr<class FaderWindow>> _faderWindows;
 	std::unique_ptr<class ConfigurationWindow> _configurationWindow;
 	std::unique_ptr<class VisualizationWindow> _visualizationWindow;
 	std::unique_ptr<class DesignWizard> _designWizard;

@@ -5,8 +5,8 @@
 #include <gtkmm/messagedialog.h>
 
 #include "configurationwindow.h"
-#include "controlwindow.h"
 #include "designwizard.h"
+#include "faderwindow.h"
 #include "objectlistframe.h"
 #include "sceneframe.h"
 #include "visualizationwindow.h"
@@ -78,15 +78,15 @@ ShowWindow::~ShowWindow()
 	_visualizationWindow.reset();
 	_configurationWindow.reset();
 
-	_controlWindows.clear();
+	_faderWindows.clear();
 
 	_management.reset();
 }
 
 void ShowWindow::EmitUpdate()
 {
-	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
-		cw->Update();
+	for(std::unique_ptr<FaderWindow>& fw : _faderWindows)
+		fw->Update();
 	_sceneFrame->Update();
 	_signalUpdateControllables();
 }
@@ -105,10 +105,10 @@ void ShowWindow::addControlWindow(FaderSetupState* stateOrNull)
 		}
 	}
 	if(stateOrNull == nullptr)
-		_controlWindows.emplace_back(new ControlWindow(this, *_management, nextControlKeyRow()));
+		_faderWindows.emplace_back(new FaderWindow(this, *_management, nextControlKeyRow()));
 	else
-		_controlWindows.emplace_back(new ControlWindow(this, *_management, nextControlKeyRow(), stateOrNull));
-	ControlWindow *newWindow = _controlWindows.back().get();
+		_faderWindows.emplace_back(new FaderWindow(this, *_management, nextControlKeyRow(), stateOrNull));
+	FaderWindow *newWindow = _faderWindows.back().get();
 	newWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	newWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 	newWindow->signal_hide().connect(sigc::bind(sigc::mem_fun(*this, &ShowWindow::onControlWindowHidden), newWindow));
@@ -138,7 +138,7 @@ bool ShowWindow::onKeyDown(GdkEventKey *event)
 	if(_sceneFrame->HandleKeyDown(event->keyval))
 		return true;
 	bool handled = false;
-	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
+	for(std::unique_ptr<FaderWindow>& cw : _faderWindows)
 		if(!handled)
 			handled = cw->HandleKeyDown(event->keyval);
 	return handled;
@@ -147,7 +147,7 @@ bool ShowWindow::onKeyDown(GdkEventKey *event)
 bool ShowWindow::onKeyUp(GdkEventKey *event)
 {
 	bool handled = false;
-	for(std::unique_ptr<ControlWindow>& cw : _controlWindows)
+	for(std::unique_ptr<FaderWindow>& cw : _faderWindows)
 		if(!handled)
 			handled = cw->HandleKeyUp(event->keyval);
 	return handled;
@@ -235,7 +235,7 @@ void ShowWindow::onMIOpenClicked()
 	{
 		std::unique_lock<std::mutex> lock(_management->Mutex());
 		_management->Clear();
-		_controlWindows.clear();
+		_faderWindows.clear();
 		_state.Clear();
 		Reader reader(*_management);
 		reader.SetGUIState(_state);
@@ -361,19 +361,19 @@ void ShowWindow::changeManagement(Management* newManagement, bool moveControlSli
 {
 	_state.ChangeManagement(*newManagement);
 	_signalChangeManagement(*newManagement);
-	for(std::unique_ptr<ControlWindow>& cw :_controlWindows)
+	for(std::unique_ptr<FaderWindow>& cw :_faderWindows)
 		cw->ChangeManagement(*newManagement, moveControlSliders);
 	_sceneFrame->ChangeManagement(*newManagement);
 	EmitUpdate();
 }
 
-void ShowWindow::onControlWindowHidden(ControlWindow* window)
+void ShowWindow::onControlWindowHidden(FaderWindow* window)
 {
-	for(std::vector<std::unique_ptr<ControlWindow>>::iterator i=_controlWindows.begin(); i!=_controlWindows.end(); ++i)
+	for(std::vector<std::unique_ptr<FaderWindow>>::iterator i=_faderWindows.begin(); i!=_faderWindows.end(); ++i)
 	{
 		if(i->get() == window)
 		{
-			_controlWindows.erase(i);
+			_faderWindows.erase(i);
 			break;
 		}
 	}
@@ -384,7 +384,7 @@ size_t ShowWindow::nextControlKeyRow() const
 	size_t index = 0;
 	while(index < std::numeric_limits<size_t>::max()) {
 		bool found = false;
-		for(const std::unique_ptr<ControlWindow>& cw : _controlWindows)
+		for(const std::unique_ptr<FaderWindow>& cw : _faderWindows)
 		{
 			if(index == cw->KeyRowIndex())
 			{

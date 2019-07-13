@@ -1,4 +1,4 @@
-#include "controlwidget.h"
+#include "faderwidget.h"
 
 #include "dialogs/inputselectdialog.h"
 

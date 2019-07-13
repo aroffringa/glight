@@ -1,5 +1,5 @@
-#include "controlwindow.h"
-#include "controlwidget.h"
+#include "faderwindow.h"
+#include "faderwidget.h"
 #include "showwindow.h"
 
 #include "../theatre/management.h"
@@ -11,16 +11,16 @@
 
 #include <glibmm/main.h>
 
-const char ControlWindow::_keyRowsUpper[3][10] = {
+const char FaderWindow::_keyRowsUpper[3][10] = {
 	{ 'Z','X','C','V','B','N','M','<','>','?' },
 	{ 'A','S','D','F','G','H','J','K','L',':' },
 	{ 'Q','W','E','R','T','Y','U','I','O','P' } };
-const char ControlWindow::_keyRowsLower[3][10] = {
+const char FaderWindow::_keyRowsLower[3][10] = {
 	{ 'z','x','c','v','b','n','m',',','.','/' },
 	{ 'a','s','d','f','g','h','j','k','l',';' },
 	{ 'q','w','e','r','t','y','u','i','o','p' } };
 
-ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &management, size_t keyRowIndex)
+FaderWindow::FaderWindow(class ShowWindow* showWindow, class Management &management, size_t keyRowIndex)
   : _management(&management),
 	_keyRowIndex(keyRowIndex),
 	_faderSetupLabel("Fader setup: "),
@@ -51,7 +51,7 @@ ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &man
 	loadState();
 }
 
-ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &management, size_t keyRowIndex, FaderSetupState* state)
+FaderWindow::FaderWindow(class ShowWindow* showWindow, class Management &management, size_t keyRowIndex, FaderSetupState* state)
   : _management(&management),
 	_keyRowIndex(keyRowIndex),
 	_faderSetupLabel("Fader setup: "),
@@ -74,22 +74,22 @@ ControlWindow::ControlWindow(class ShowWindow* showWindow, class Management &man
 	loadState();
 }
 
-ControlWindow::~ControlWindow()
+FaderWindow::~FaderWindow()
 {
 	_faderSetupChangeConnection.disconnect();
 	_state->isActive = false;
 	_showWindow->State().EmitFaderSetupChangeSignal();
 }
 
-void ControlWindow::initializeWidgets()
+void FaderWindow::initializeWidgets()
 {
 	set_title("Glight - controls");
 	
-	_faderSetupChangeConnection = _showWindow->State().FaderSetupSignalChange().connect(sigc::mem_fun(*this, &ControlWindow::updateFaderSetupList));
+	_faderSetupChangeConnection = _showWindow->State().FaderSetupSignalChange().connect(sigc::mem_fun(*this, &FaderWindow::updateFaderSetupList));
 	
-	signal_configure_event().connect(sigc::mem_fun(*this, &ControlWindow::onResize), false);
+	signal_configure_event().connect(sigc::mem_fun(*this, &FaderWindow::onResize), false);
 	
-	_timeoutConnection = Glib::signal_timeout().connect( sigc::mem_fun(*this, &ControlWindow::onTimeout), 40);
+	_timeoutConnection = Glib::signal_timeout().connect( sigc::mem_fun(*this, &FaderWindow::onTimeout), 40);
 	
 	add(_vBox);
 	
@@ -101,15 +101,15 @@ void ControlWindow::initializeWidgets()
 	_faderSetup.set_model(_faderSetupList);
 	_faderSetup.pack_start(_faderSetupColumns._name);
 	updateFaderSetupList();
-	_faderSetup.signal_changed().connect(sigc::mem_fun(*this, &ControlWindow::onFaderSetupChanged));
+	_faderSetup.signal_changed().connect(sigc::mem_fun(*this, &FaderWindow::onFaderSetupChanged));
 	
 	_hBoxUpper.pack_start(_faderSetup, true, true);
 	
-	_nameButton.signal_clicked().connect(sigc::mem_fun(*this, &ControlWindow::onNameButtonClicked));
+	_nameButton.signal_clicked().connect(sigc::mem_fun(*this, &FaderWindow::onNameButtonClicked));
 	_nameButton.set_image_from_icon_name("user-bookmarks");
 	_hBoxUpper.pack_start(_nameButton, false, false, 5);
 
-	_newFaderSetupButton.signal_clicked().connect(sigc::mem_fun(*this, &ControlWindow::onNewFaderSetupButtonClicked));
+	_newFaderSetupButton.signal_clicked().connect(sigc::mem_fun(*this, &FaderWindow::onNewFaderSetupButtonClicked));
 	_hBoxUpper.pack_start(_newFaderSetupButton, false, false, 5);
 
 	_vBox.pack_start(_hBox2, true, true);
@@ -117,32 +117,32 @@ void ControlWindow::initializeWidgets()
 	_controlGrid.set_column_spacing(3);
 	_hBox2.pack_start(_controlGrid, true, true);
 	
-	_soloCheckButton.signal_toggled().connect(sigc::mem_fun(*this, &ControlWindow::onSoloButtonToggled));
+	_soloCheckButton.signal_toggled().connect(sigc::mem_fun(*this, &FaderWindow::onSoloButtonToggled));
 	_buttonBox.pack_start(_soloCheckButton, false, false);
 	
 	_buttonBox.pack_start(_fadeUpSpeed, false, false);
-	_fadeUpSpeed.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWindow::onChangeUpSpeed));
+	_fadeUpSpeed.signal_value_changed().connect(sigc::mem_fun(*this, &FaderWindow::onChangeUpSpeed));
 	
 	_buttonBox.pack_start(_fadeDownSpeed, false, false);
-	_fadeDownSpeed.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWindow::onChangeDownSpeed));
+	_fadeDownSpeed.signal_value_changed().connect(sigc::mem_fun(*this, &FaderWindow::onChangeDownSpeed));
 
-	_addButton.signal_clicked().connect(sigc::mem_fun(*this, &ControlWindow::onAddButtonClicked));
+	_addButton.signal_clicked().connect(sigc::mem_fun(*this, &FaderWindow::onAddButtonClicked));
 	_buttonBox.pack_start(_addButton, false, false);
 
-	_assignButton.signal_clicked().connect(sigc::mem_fun(*this, &ControlWindow::onAssignButtonClicked));
+	_assignButton.signal_clicked().connect(sigc::mem_fun(*this, &FaderWindow::onAssignButtonClicked));
 	_buttonBox.pack_start(_assignButton, false, false);
 
-	_assignChasesButton.signal_clicked().connect(sigc::mem_fun(*this, &ControlWindow::onAssignChasesButtonClicked));
+	_assignChasesButton.signal_clicked().connect(sigc::mem_fun(*this, &FaderWindow::onAssignChasesButtonClicked));
 	_buttonBox.pack_start(_assignChasesButton, false, false);
 
-	_removeButton.signal_clicked().connect(sigc::mem_fun(*this, &ControlWindow::onRemoveButtonClicked));
+	_removeButton.signal_clicked().connect(sigc::mem_fun(*this, &FaderWindow::onRemoveButtonClicked));
 	_buttonBox.pack_start(_removeButton, false, false);
 
 	show_all_children();
 	set_default_size(0, 300);
 }
 
-bool ControlWindow::onResize(GdkEventConfigure *event)
+bool FaderWindow::onResize(GdkEventConfigure *event)
 {
 	if(_delayUpdates.IsFirst())
 	{
@@ -152,7 +152,7 @@ bool ControlWindow::onResize(GdkEventConfigure *event)
 	return false;
 }
 
-void ControlWindow::Update()
+void FaderWindow::Update()
 {
 	for(std::unique_ptr<ControlWidget>& cWidget : _controls)
 	{
@@ -160,7 +160,7 @@ void ControlWindow::Update()
 	}
 }
 
-void ControlWindow::addControl()
+void FaderWindow::addControl()
 {
 	if(_delayUpdates.IsFirst())
 	{
@@ -169,9 +169,11 @@ void ControlWindow::addControl()
 	bool hasKey = _controls.size()<10 && _keyRowIndex<3;
 	char key = hasKey ? _keyRowsLower[_keyRowIndex][_controls.size()] : ' ';
 	std::unique_ptr<ControlWidget> control(new ControlWidget(*_management, *_showWindow, key));
+	control->SetFadeDownSpeed(mapSliderToSpeed(int(_fadeDownSpeed.get_value())));
+	control->SetFadeUpSpeed(mapSliderToSpeed(int(_fadeUpSpeed.get_value())));
 	size_t controlIndex = _controls.size();
-	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlValueChanged), control.get()));
-	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &ControlWindow::onControlAssigned), controlIndex));
+	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &FaderWindow::onControlValueChanged), control.get()));
+	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &FaderWindow::onControlAssigned), controlIndex));
 	
 	_controlGrid.attach(*control, _controls.size()*2+1, 0, 2, 1);
 	control->NameLabel().set_hexpand(true);
@@ -182,7 +184,7 @@ void ControlWindow::addControl()
 	_controls.emplace_back(std::move(control));
 }
 
-void ControlWindow::onRemoveButtonClicked()
+void FaderWindow::onRemoveButtonClicked()
 {
 	if(_controls.size() > 1)
 	{
@@ -191,7 +193,7 @@ void ControlWindow::onRemoveButtonClicked()
 	}
 }
 
-void ControlWindow::onAssignButtonClicked()
+void FaderWindow::onAssignButtonClicked()
 {
 	size_t controlIndex = 0;
 	for(std::unique_ptr<ControlWidget>& c : _controls)
@@ -213,7 +215,7 @@ void ControlWindow::onAssignButtonClicked()
 	}
 }
 
-void ControlWindow::onAssignChasesButtonClicked()
+void FaderWindow::onAssignChasesButtonClicked()
 {
 	size_t controlIndex = 0;
 	if(!_controls.empty())
@@ -233,7 +235,7 @@ void ControlWindow::onAssignChasesButtonClicked()
 	}
 }
 
-void ControlWindow::onSoloButtonToggled()
+void FaderWindow::onSoloButtonToggled()
 { 
 	if(_delayUpdates.IsFirst())
 	{
@@ -241,7 +243,7 @@ void ControlWindow::onSoloButtonToggled()
 	}
 }
 
-void ControlWindow::onControlValueChanged(double newValue, ControlWidget* widget)
+void FaderWindow::onControlValueChanged(double newValue, ControlWidget* widget)
 {
 	if(_soloCheckButton.get_active())
 	{
@@ -263,13 +265,13 @@ void ControlWindow::onControlValueChanged(double newValue, ControlWidget* widget
 	}
 }
 
-void ControlWindow::onControlAssigned(double newValue, size_t widgetIndex)
+void FaderWindow::onControlAssigned(double newValue, size_t widgetIndex)
 {
 	if(_delayUpdates.IsFirst())
 		_state->faders[widgetIndex].SetPresetValue(_controls[widgetIndex]->Preset());
 }
 
-bool ControlWindow::HandleKeyDown(char key)
+bool FaderWindow::HandleKeyDown(char key)
 {
 	if(_keyRowIndex >= 3) return false;
 	
@@ -294,7 +296,7 @@ bool ControlWindow::HandleKeyDown(char key)
 	return false;
 }
 
-bool ControlWindow::HandleKeyUp(char key)
+bool FaderWindow::HandleKeyUp(char key)
 {
 	if(_keyRowIndex >= 3) return false;
 	
@@ -311,7 +313,7 @@ bool ControlWindow::HandleKeyUp(char key)
 	return false;
 }
 
-bool ControlWindow::IsAssigned(PresetValue* presetValue)
+bool FaderWindow::IsAssigned(PresetValue* presetValue)
 {
 	for(std::unique_ptr<ControlWidget>& c : _controls)
 	{
@@ -321,7 +323,7 @@ bool ControlWindow::IsAssigned(PresetValue* presetValue)
 	return false;
 }
 
-void ControlWindow::onNameButtonClicked()
+void FaderWindow::onNameButtonClicked()
 {
 	Gtk::MessageDialog dialog(*this, "Name fader setup",
 		false, Gtk::MESSAGE_QUESTION,
@@ -339,7 +341,7 @@ void ControlWindow::onNameButtonClicked()
 	}
 }
 
-void ControlWindow::onNewFaderSetupButtonClicked()
+void FaderWindow::onNewFaderSetupButtonClicked()
 {
 	RecursionLock::Token token(_delayUpdates);
 	_state->isActive = false;
@@ -358,7 +360,7 @@ void ControlWindow::onNewFaderSetupButtonClicked()
 	updateFaderSetupList();
 }
 
-void ControlWindow::updateFaderSetupList()
+void FaderWindow::updateFaderSetupList()
 {
 	RecursionLock::Token token(_delayUpdates);
 	GUIState& state = _showWindow->State();
@@ -379,7 +381,7 @@ void ControlWindow::updateFaderSetupList()
 	}
 }
 
-void ControlWindow::onFaderSetupChanged()
+void FaderWindow::onFaderSetupChanged()
 {
 	if(_delayUpdates.IsFirst())
 	{
@@ -398,7 +400,7 @@ void ControlWindow::onFaderSetupChanged()
 	}
 }
 
-void ControlWindow::loadState()
+void FaderWindow::loadState()
 {
 	_soloCheckButton.set_active(_state->isSolo);
 	
@@ -412,7 +414,7 @@ void ControlWindow::loadState()
 		_controls[i]->Assign(_state->faders[i].GetPresetValue(), true);
 }
 
-void ControlWindow::updateValues()
+void FaderWindow::updateValues()
 {
 	boost::posix_time::ptime currentTime(boost::posix_time::microsec_clock::local_time());
 	double timePassed = (double) (currentTime - _lastUpdateTime).total_microseconds() * 1e-6;
@@ -423,7 +425,7 @@ void ControlWindow::updateValues()
 	}
 }
 
-double ControlWindow::mapSliderToSpeed(int sliderVal)
+double FaderWindow::mapSliderToSpeed(int sliderVal)
 {
 	switch(sliderVal)
 	{
@@ -442,7 +444,7 @@ double ControlWindow::mapSliderToSpeed(int sliderVal)
 	}
 }
 
-void ControlWindow::onChangeDownSpeed()
+void FaderWindow::onChangeDownSpeed()
 {
 	double speed = mapSliderToSpeed(int(_fadeDownSpeed.get_value()));
 
@@ -450,7 +452,7 @@ void ControlWindow::onChangeDownSpeed()
 		cw->SetFadeDownSpeed(speed);
 }
 
-void ControlWindow::onChangeUpSpeed()
+void FaderWindow::onChangeUpSpeed()
 {
 	double speed = mapSliderToSpeed(int(_fadeUpSpeed.get_value()));
 	
@@ -458,7 +460,7 @@ void ControlWindow::onChangeUpSpeed()
 		cw->SetFadeUpSpeed(speed);
 }
 
-void ControlWindow::ChangeManagement(class Management& management, bool moveSliders)
+void FaderWindow::ChangeManagement(class Management& management, bool moveSliders)
 {
 	_management = &management;
 	for(std::unique_ptr<ControlWidget>& cw : _controls)
