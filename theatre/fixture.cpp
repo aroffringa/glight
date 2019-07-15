@@ -192,7 +192,7 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 	
 	for(size_t ci=0; ci!=_functions.size(); ++ci)
 	{
-		_functions[ci]->SetChannel(DmxChannel(ch + ci, 0));
+		_functions[ci]->SetChannel(DmxChannel((ch + ci) % 512, 0));
 	}
 }
 
