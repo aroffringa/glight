@@ -26,25 +26,38 @@ void Theatre::Clear()
 Fixture& Theatre::AddFixture(FixtureType &type)
 {
 	// Find free name
-	std::string name;
+	std::string name = "A";
 	bool found = false;
-	for(size_t i=0; i!=26; ++i)
+	while(!found)
 	{
-		name = std::string(1, (char) ('A' + i));
 		if(!FolderObject::Contains(_fixtures, name))
 		{
 			found = true;
 			break;
 		}
-	}
-	size_t number = 1;
-	while(!found)
-	{
-		std::stringstream s;
-		s << type.Name() << number;
-		name = s.str();
-		if(!FolderObject::Contains(_fixtures, name))
-			found = true;
+		bool ready = false;
+		do
+		{
+			for(size_t i=0; i!=name.size(); ++i)
+			{
+				char& c = name[name.size() - i - 1];
+				if(c != 'Z')
+				{
+					++c;
+					ready = true;
+					break;
+				}
+				else {
+					c = 'A';
+				}
+			}
+			if(!ready)
+			{
+				// No name available with current string length, increase length
+				name.assign(name.size()+1, 'A');
+				ready = true;
+			}
+		} while(!ready);
 	}
 	_fixtures.emplace_back(new Fixture(*this, type, name));
 	Fixture& f = *_fixtures.back();
