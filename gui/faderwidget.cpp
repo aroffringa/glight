@@ -8,7 +8,7 @@
 
 #define MAX_SCALE_VALUE_DEF (1<<24)
 
-ControlWidget::ControlWidget(class Management &management, ShowWindow& showWindow, char key) :
+FaderWidget::FaderWidget(class Management &management, ShowWindow& showWindow, char key) :
   _scale(0, MAX_SCALE_VALUE_DEF, MAX_SCALE_VALUE_DEF/100),
 	_flashButton(std::string(1, key)),
 	_nameLabel("<..>"),
@@ -25,20 +25,20 @@ ControlWidget::ControlWidget(class Management &management, ShowWindow& showWindo
 	_scale.set_draw_value(false);
 	_scale.set_vexpand(true);
 	_scale.signal_value_changed().
-		connect(sigc::mem_fun(*this, &ControlWidget::onScaleChange));
+		connect(sigc::mem_fun(*this, &FaderWidget::onScaleChange));
 	pack_start(_scale, true, true, 0);
 	_scale.show();
 
 	_flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
-	_flashButton.signal_button_press_event().connect(sigc::mem_fun(*this, &ControlWidget::onFlashButtonPressed), false);
+	_flashButton.signal_button_press_event().connect(sigc::mem_fun(*this, &FaderWidget::onFlashButtonPressed), false);
 	_flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
-	_flashButton.signal_button_release_event().connect(sigc::mem_fun(*this, &ControlWidget::onFlashButtonReleased), false);
+	_flashButton.signal_button_release_event().connect(sigc::mem_fun(*this, &FaderWidget::onFlashButtonReleased), false);
 	pack_start(_flashButton, false, false, 0);
 	_flashButton.show();
 
 	_onCheckButton.set_halign(Gtk::ALIGN_CENTER);
 	_onCheckButton.signal_clicked().
-		connect(sigc::mem_fun(*this, &ControlWidget::onOnButtonClicked));
+		connect(sigc::mem_fun(*this, &FaderWidget::onOnButtonClicked));
 	pack_start(_onCheckButton, false, false, 0);
 	_onCheckButton.show();
 
@@ -47,20 +47,20 @@ ControlWidget::ControlWidget(class Management &management, ShowWindow& showWindo
 	_eventBox.show();
 
 	_eventBox.signal_button_press_event().
-		connect(sigc::mem_fun(*this, &ControlWidget::onNameLabelClicked));
+		connect(sigc::mem_fun(*this, &FaderWidget::onNameLabelClicked));
 	_eventBox.add(_nameLabel);
 	_nameLabel.show();
 }
 
-ControlWidget::~ControlWidget()
+FaderWidget::~FaderWidget()
 { }
 
-double ControlWidget::MAX_SCALE_VALUE()
+double FaderWidget::MAX_SCALE_VALUE()
 {
 	return MAX_SCALE_VALUE_DEF;
 }
 
-void ControlWidget::onOnButtonClicked()
+void FaderWidget::onOnButtonClicked()
 {
 	if(!_holdUpdates)
 	{
@@ -76,19 +76,19 @@ void ControlWidget::onOnButtonClicked()
 	}
 }
 
-bool ControlWidget::onFlashButtonPressed(GdkEventButton* event)
+bool FaderWidget::onFlashButtonPressed(GdkEventButton* event)
 {
 	_scale.set_value(MAX_SCALE_VALUE_DEF-1);
 	return false;
 }
 
-bool ControlWidget::onFlashButtonReleased(GdkEventButton* event)
+bool FaderWidget::onFlashButtonReleased(GdkEventButton* event)
 {
 	_scale.set_value(0);
 	return false;
 }
 
-void ControlWidget::onScaleChange()
+void FaderWidget::onScaleChange()
 {
 	if(!_holdUpdates)
 	{
@@ -101,7 +101,7 @@ void ControlWidget::onScaleChange()
 	}
 }
 
-bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
+bool FaderWidget::onNameLabelClicked(GdkEventButton* event)
 {
 	InputSelectDialog dialog(*_management, _showWindow);
 	if(dialog.run() == Gtk::RESPONSE_OK)
@@ -111,7 +111,7 @@ bool ControlWidget::onNameLabelClicked(GdkEventButton* event)
 	return true;
 }
 
-void ControlWidget::writeValue()
+void FaderWidget::writeValue()
 {
 	_targetValue = _scale.get_value();
 	double fadeSpeed =
@@ -126,7 +126,7 @@ void ControlWidget::writeValue()
 	}
 }
 
-void ControlWidget::Assign(PresetValue* item, bool moveFader)
+void FaderWidget::Assign(PresetValue* item, bool moveFader)
 {
 	if(item != _preset)
 	{
@@ -158,7 +158,7 @@ void ControlWidget::Assign(PresetValue* item, bool moveFader)
 	}
 }
 
-void ControlWidget::Update()
+void FaderWidget::Update()
 {
 	if(_preset != nullptr)
 	{
@@ -176,22 +176,22 @@ void ControlWidget::Update()
 	}
 }
 
-void ControlWidget::Toggle()
+void FaderWidget::Toggle()
 {
 	_onCheckButton.set_active(!_onCheckButton.get_active());
 }
 
-void ControlWidget::FullOn()
+void FaderWidget::FullOn()
 {
 	_scale.set_value(MAX_SCALE_VALUE_DEF-1);
 }
 
-void ControlWidget::FullOff()
+void FaderWidget::FullOff()
 {
 	_scale.set_value(0);
 }
 
-void ControlWidget::UpdateValue(double timePassed)
+void FaderWidget::UpdateValue(double timePassed)
 {
 	if(_targetValue != _fadingValue)
 	{
@@ -225,7 +225,7 @@ void ControlWidget::UpdateValue(double timePassed)
 	}
 }
 
-void ControlWidget::ChangeManagement(class Management& management, bool moveSliders)
+void FaderWidget::ChangeManagement(class Management& management, bool moveSliders)
 {
 	if(_preset == nullptr)
 	{

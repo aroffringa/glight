@@ -39,7 +39,7 @@ public:
 private:
 	void onControlWindowButtonClicked()
 	{
-		addControlWindow();
+		addFaderWindow();
 	}
 	void onConfigurationWindowButtonClicked();
 	void onVisualizationWindowButtonClicked();
@@ -48,7 +48,7 @@ private:
 		* If stateOrNull is nullptr, the first inactive state is selected, or
 		* if no states are inactive, a new state is created.
 		*/
-	void addControlWindow(FaderSetupState* stateOrNull = nullptr);
+	void addFaderWindow(FaderSetupState* stateOrNull = nullptr);
 
 	bool onKeyDown(GdkEventKey *event);
 	bool onKeyUp(GdkEventKey *event);

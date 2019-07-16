@@ -44,7 +44,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 
 	_management->Run();
 
-	addControlWindow();
+	addFaderWindow();
 
 	_configurationWindow.reset(new ConfigurationWindow(this));
 	_configurationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
@@ -91,7 +91,7 @@ void ShowWindow::EmitUpdate()
 	_signalUpdateControllables();
 }
 
-void ShowWindow::addControlWindow(FaderSetupState* stateOrNull)
+void ShowWindow::addFaderWindow(FaderSetupState* stateOrNull)
 {
 	if(stateOrNull == nullptr)
 	{
@@ -104,11 +104,12 @@ void ShowWindow::addControlWindow(FaderSetupState* stateOrNull)
 			}
 		}
 	}
-	if(stateOrNull == nullptr)
-		_faderWindows.emplace_back(new FaderWindow(this, *_management, nextControlKeyRow()));
-	else
-		_faderWindows.emplace_back(new FaderWindow(this, *_management, nextControlKeyRow(), stateOrNull));
+	_faderWindows.emplace_back(new FaderWindow(this, *_management, nextControlKeyRow()));
 	FaderWindow *newWindow = _faderWindows.back().get();
+	if(stateOrNull == nullptr)
+		newWindow->LoadNew();
+	else
+		newWindow->LoadState(stateOrNull);
 	newWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	newWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 	newWindow->signal_hide().connect(sigc::bind(sigc::mem_fun(*this, &ShowWindow::onControlWindowHidden), newWindow));
@@ -253,7 +254,7 @@ void ShowWindow::onMIOpenClicked()
 		if(_state.Empty())
 		{
 			std::cout << "File did not contain GUI state info: will start with default faders.\n";
-			addControlWindow();
+			addFaderWindow();
 		}
 		else {
 			for(const std::unique_ptr<FaderSetupState>& state : _state.FaderSetups())
@@ -263,7 +264,7 @@ void ShowWindow::onMIOpenClicked()
 					// Currently it is not displayed, so to avoid the control window doing the
 					// wrong thing, isActive is set to false and will be set to true by the control window.
 					state->isActive = false;
-					addControlWindow(state.get());
+					addFaderWindow(state.get());
 				}
 			}
 		}
