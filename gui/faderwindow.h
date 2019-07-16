@@ -54,7 +54,17 @@ class FaderWindow  : public Gtk::Window {
 		void initializeMenu();
 		
 		void onAddFaderClicked() { addControl(); }
+		void onAdd5FadersClicked()
+		{
+			for(size_t i=0; i!=5; ++i)
+				addControl();
+		}
 		void onRemoveFaderClicked();
+		void onRemove5FadersClicked()
+		{
+			for(size_t i=0; i!=5; ++i)
+				onRemoveFaderClicked();
+		}
 		bool onMenuButtonClicked(GdkEventButton* event);
 		void onAssignClicked();
 		void onAssignChasesClicked();
@@ -99,7 +109,7 @@ class FaderWindow  : public Gtk::Window {
 		Gtk::SeparatorMenuItem _miSep1;
 		Gtk::MenuItem _miAssign, _miAssignChases, _miClear;
 		Gtk::SeparatorMenuItem _miSep2;
-		Gtk::MenuItem _miAddFader, _miRemoveFader;
+		Gtk::MenuItem _miAddFader, _miAdd5Faders, _miRemoveFader, _miRemove5Faders;
 		
 		std::vector<std::unique_ptr<class FaderWidget>> _controls;
 		class ShowWindow* _showWindow;

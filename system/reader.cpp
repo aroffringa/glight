@@ -109,8 +109,10 @@ void Reader::parseFolders(xmlNode *node)
 				if(hasAttribute(curNode, "parent"))
 				{
 					size_t parent = getIntAttribute(curNode, "parent");
-					Folder& folder = _management.AddFolder(*_management.Folders()[parent]);
-					folder.SetName(getStringAttribute(curNode, "name"));
+					_management.AddFolder(
+						*_management.Folders()[parent],
+						getStringAttribute(curNode, "name")
+					);
 				}
 				else {
 					_management.RootFolder().SetName(getStringAttribute(curNode, "name"));

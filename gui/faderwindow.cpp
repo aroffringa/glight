@@ -34,7 +34,9 @@ FaderWindow::FaderWindow(class ShowWindow* showWindow, class Management &managem
 	_miAssignChases("Assign to chases"),
 	_miClear("Clear"),
 	_miAddFader("Add fader"),
+	_miAdd5Faders("Add 5 faders"),
 	_miRemoveFader("Remove fader"),
+	_miRemove5Faders("Remove 5 faders"),
 	_showWindow(showWindow),
 	_state(nullptr),
 	_lastUpdateTime(boost::posix_time::microsec_clock::local_time())
@@ -159,8 +161,14 @@ void FaderWindow::initializeMenu()
 	_miAddFader.signal_activate().connect([&](){ onAddFaderClicked(); });
 	_popupMenu.append(_miAddFader);
 
+	_miAdd5Faders.signal_activate().connect([&](){ onAdd5FadersClicked(); });
+	_popupMenu.append(_miAdd5Faders);
+
 	_miRemoveFader.signal_activate().connect([&](){ onRemoveFaderClicked(); });
 	_popupMenu.append(_miRemoveFader);
+
+	_miRemove5Faders.signal_activate().connect([&](){ onRemove5FadersClicked(); });
+	_popupMenu.append(_miRemove5Faders);
 
 	_popupMenu.show_all_children();
 }
