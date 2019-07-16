@@ -188,9 +188,9 @@ PresetCollection& Management::AddPresetCollection()
 	return static_cast<PresetCollection&>(*_controllables.back());
 }
 
-Folder& Management::AddFolder(Folder& parent)
+Folder& Management::AddFolder(Folder& parent, const std::string& name)
 {
-	_folders.emplace_back(new Folder());
+	_folders.emplace_back(new Folder(name));
 	parent.Add(*_folders.back());
 	return *_folders.back();
 }
