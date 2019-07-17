@@ -5,6 +5,7 @@
 
 #include "../theatre/defaultchase.h"
 #include "../theatre/fixture.h"
+#include "../theatre/fixturecontrol.h"
 #include "../theatre/folder.h"
 #include "../theatre/management.h"
 #include "../theatre/theatre.h"
@@ -191,6 +192,9 @@ Folder& DesignWizard::getFolder() const
 
 void DesignWizard::onNextClicked()
 {
+	std::vector<Controllable*> controllables(_selectedFixtures.size());
+	for(size_t i=0; i!=_selectedFixtures.size(); ++i)
+		controllables[i] = &_management->GetFixtureControl(*_selectedFixtures[i]);
 	switch(_currentPage)
 	{
 		case Page1_SelFixtures: {
@@ -304,7 +308,7 @@ void DesignWizard::onNextClicked()
 		} break;
 		
 		case Page3_5_ColorPreset: {
-			DefaultChase::MakeColorPreset(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_5.GetColors());
+			DefaultChase::MakeColorPreset(*_management, getFolder(), controllables, _colorsWidgetP3_5.GetColors());
 			_showWindow->EmitUpdate();
 			hide();
 		} break;

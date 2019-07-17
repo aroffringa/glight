@@ -47,14 +47,14 @@ void DefaultChase::addColorPresets(Management& management, Controllable& control
 	}
 }
 
-PresetCollection& DefaultChase::MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors)
+PresetCollection& DefaultChase::MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors)
 {
 	PresetCollection& pc = management.AddPresetCollection();
 	destination.Add(pc);
 	pc.SetName(destination.GetAvailableName("Colourpreset"));
-	for(size_t fixtureIndex=0; fixtureIndex!=fixtures.size(); ++fixtureIndex)
+	for(size_t cIndex=0; cIndex!=controllables.size(); ++cIndex)
 	{
-		size_t colorIndex = fixtureIndex % colors.size();
+		size_t colorIndex = cIndex % colors.size();
 		unsigned
 			red = colors[colorIndex].Red()*((1<<24)-1)/255,
 			green = colors[colorIndex].Green()*((1<<24)-1)/255,
@@ -63,8 +63,7 @@ PresetCollection& DefaultChase::MakeColorPreset(class Management& management, cl
 		if(red != 0 || green != 0 || blue != 0)
 			master = (1<<24)-1;
 		
-		Fixture* f = fixtures[fixtureIndex];
-		addColorPresets(management, management.GetFixtureControl(*f), pc, red, green, blue, master);
+		addColorPresets(management, *controllables[cIndex], pc, red, green, blue, master);
 	}
 	management.AddPreset(pc, 0);
 	return pc;

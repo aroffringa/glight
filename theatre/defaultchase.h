@@ -12,7 +12,7 @@ public:
 	
 	enum VUMeterDirection { VUIncreasing, VUDecreasing, VUInward, VUOutward };
 	
-	static class PresetCollection& MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Fixture*>& fixtures, const std::vector<class Color>& colors);
+	static class PresetCollection& MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors);
 	
 	static class Chase& MakeRunningLight(class Management& management, class Folder& destination, const std::vector<class Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType);
 	
