@@ -167,8 +167,7 @@ void ObjectListFrame::onNewFolderButtonClicked()
 {
 	Folder& parent = _list.SelectedFolder();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
-	Folder& folder = _management->AddFolder(parent);
-	folder.SetName(parent.GetAvailableName("Folder"));
+	Folder& folder = _management->AddFolder(parent, parent.GetAvailableName("Folder"));
 	lock.unlock();
 
 	_parentWindow.EmitUpdate();

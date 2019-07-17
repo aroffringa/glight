@@ -24,8 +24,7 @@ BOOST_AUTO_TEST_CASE( ReadAndWrite )
 	Management management;
 	Folder& root = management.RootFolder();
 	root.SetName("The root folder");
-	Folder& subFolder = management.AddFolder(root);
-	subFolder.SetName("A subfolder");
+	Folder& subFolder = management.AddFolder(root, "A subfolder");
 	
 	FixtureType& ft = management.Theatre().AddFixtureType(FixtureType::RGBWLight4Ch);
 	root.Add(ft);
@@ -69,8 +68,7 @@ BOOST_AUTO_TEST_CASE( ReadAndWrite )
 	timeSequence.AddStep(b, 0);
 	management.AddPreset(timeSequence, 0);
 	
-	Folder& effectFolder = management.AddFolder(root);
-	effectFolder.SetName("Effect folder");
+	Folder& effectFolder = management.AddFolder(root, "Effect folder");
 	std::unique_ptr<AudioLevelEffect> effectPtr(new AudioLevelEffect());
 	Effect& effect = management.AddEffect(std::move(effectPtr));
 	effect.SetName("An audio effect");

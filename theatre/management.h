@@ -51,7 +51,7 @@ class Management {
 		void RemoveControllable(class Controllable &controllable);
 		bool Contains(class Controllable &controllable) const;
 		
-		class Folder& AddFolder(class Folder& parent);
+		class Folder& AddFolder(class Folder& parent, const std::string& name);
 		class Folder& GetFolder(const std::string& path);
 		void RemoveFolder(class Folder& folder);
 

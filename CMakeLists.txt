@@ -32,11 +32,11 @@ set(GUIFILES
   gui/audiowidget.cpp
   gui/chasepropertieswindow.cpp
   gui/configurationwindow.cpp
-  gui/controlwidget.cpp
-  gui/controlwindow.cpp
   gui/createchasedialog.cpp
   gui/designwizard.cpp
   gui/effectpropertieswindow.cpp
+  gui/faderwidget.cpp
+  gui/faderwindow.cpp
   gui/guistate.cpp
   gui/nameframe.cpp
   gui/objectlistframe.cpp

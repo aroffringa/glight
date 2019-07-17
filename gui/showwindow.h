@@ -39,7 +39,7 @@ public:
 private:
 	void onControlWindowButtonClicked()
 	{
-		addControlWindow();
+		addFaderWindow();
 	}
 	void onConfigurationWindowButtonClicked();
 	void onVisualizationWindowButtonClicked();
@@ -48,7 +48,7 @@ private:
 		* If stateOrNull is nullptr, the first inactive state is selected, or
 		* if no states are inactive, a new state is created.
 		*/
-	void addControlWindow(FaderSetupState* stateOrNull = nullptr);
+	void addFaderWindow(FaderSetupState* stateOrNull = nullptr);
 
 	bool onKeyDown(GdkEventKey *event);
 	bool onKeyUp(GdkEventKey *event);
@@ -64,7 +64,7 @@ private:
 	void onMICancelDryModeClicked();
 	void onMIDesignWizardClicked();
 	
-	void onControlWindowHidden(class ControlWindow* window);
+	void onControlWindowHidden(class FaderWindow* window);
 	
 	void changeManagement(class Management* newManagement, bool moveControlSliders);
 	
@@ -72,7 +72,7 @@ private:
 
 	Gtk::VBox _box;
 
-	std::vector<std::unique_ptr<class ControlWindow>> _controlWindows;
+	std::vector<std::unique_ptr<class FaderWindow>> _faderWindows;
 	std::unique_ptr<class ConfigurationWindow> _configurationWindow;
 	std::unique_ptr<class VisualizationWindow> _visualizationWindow;
 	std::unique_ptr<class DesignWizard> _designWizard;

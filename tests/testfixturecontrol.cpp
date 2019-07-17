@@ -24,6 +24,33 @@ BOOST_AUTO_TEST_CASE( Add )
 	BOOST_CHECK(control.InputType(1) != control.InputType(2));
 }
 
+BOOST_AUTO_TEST_CASE( AddMany )
+{
+	Management management;
+	FixtureType& fixtureType = management.Theatre().AddFixtureType(FixtureType::RGBLight3Ch);
+	Fixture* fixture = &management.Theatre().AddFixture(fixtureType);
+	BOOST_CHECK_EQUAL(fixture->Name(), "A");
+	for(size_t i=0; i!=30; ++i)
+	{
+		fixture = &management.Theatre().AddFixture(fixtureType);
+		management.AddFixtureControl(*fixture);
+	}
+	fixture = &management.Theatre().AddFixture(fixtureType);
+	BOOST_CHECK_EQUAL(fixture->Name(), "AF");
+	BOOST_CHECK_EQUAL(management.Theatre().Fixtures().size(), 32);
+	for(size_t i=0; i!=26*(26+1)-32; ++i)
+	{
+		fixture = &management.Theatre().AddFixture(fixtureType);
+		management.AddFixtureControl(*fixture);
+	}
+	BOOST_CHECK_EQUAL(fixture->Name(), "ZZ");
+	BOOST_CHECK_EQUAL(management.Theatre().Fixtures().size(), 26*(26+1));
+	fixture = &management.Theatre().AddFixture(fixtureType);
+	management.AddFixtureControl(*fixture);
+	BOOST_CHECK_EQUAL(fixture->Name(), "AAA");
+	BOOST_CHECK_EQUAL(management.Theatre().Fixtures().size(), 26*27+1);
+}
+
 BOOST_AUTO_TEST_CASE( SetValue )
 {
 	Management management;

@@ -241,7 +241,7 @@ inline Color FixtureType::GetColor(const Fixture &fixture, const ValueSnapshot &
 						fixture.Functions()[5]->GetValue(snapshot)
 					);
 				else
-					return Color::BTMacroColor(fixture.Functions()[6]->GetValue(snapshot));
+					return master * Color::BTMacroColor(fixture.Functions()[6]->GetValue(snapshot));
 			}
 		}
 	}
