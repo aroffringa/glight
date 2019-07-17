@@ -27,6 +27,33 @@ public:
 	virtual FunctionType InputType(size_t index) const final override
 	{ return _fixture->Functions()[index]->Type(); }
 	
+	virtual Color InputColor(size_t index) const final override
+	{
+		switch(InputType(index))
+		{
+			case FunctionType::Master:
+			case FunctionType::White:
+			case FunctionType::ColorMacro:
+			case FunctionType::Strobe: 
+			case FunctionType::Pulse: 
+			case FunctionType::Rotation: 
+			case FunctionType::Pan: 
+			case FunctionType::Tilt:
+				return Color::White();
+			case FunctionType::Red:
+				return Color::RedC();
+			case FunctionType::Green:
+				return Color::GreenC();
+			case FunctionType::Blue:
+				return Color::BlueC();
+			case FunctionType::Amber:
+				return Color::Amber();
+			case FunctionType::UV:
+				return Color::UV();
+		}
+		return Color::Black();
+	}
+	
 	size_t NOutputs() const final override
 	{ return 0; }
 	

@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "color.h"
 #include "controlvalue.h"
 #include "folderobject.h"
 #include "fixturefunction.h"
@@ -21,6 +22,25 @@ public:
 	virtual ControlValue& InputValue(size_t index) = 0;
 	
 	virtual FunctionType InputType(size_t index) const = 0;
+	
+	virtual Color InputColor(size_t index) const
+	{
+		if(NOutputs() == 0)
+			return Color::Black();
+		else {
+			// Return the average colour that it connects to
+			unsigned r = 0, g = 0, b = 0;
+			for(size_t o=0; o!=NOutputs(); ++o)
+			{
+				auto output = Output(o);
+				Color c = output.first->InputColor(output.second);
+				r += c.Red();
+				g += c.Green();
+				b += c.Blue();
+			}
+			return Color(r/NOutputs(), g/NOutputs(), b/NOutputs());
+		}
+	}
 	
 	void MixInput(size_t index, const ControlValue& value)
 	{

@@ -19,6 +19,9 @@ BOOST_AUTO_TEST_CASE( Add )
 	BOOST_CHECK_EQUAL(&management.GetFixtureControl(fixture), &control);
 	BOOST_CHECK_EQUAL(&control.Fixture(), &fixture);
 	BOOST_CHECK_EQUAL(control.NInputs(), 3);
+	BOOST_CHECK(control.InputColor(0) == Color(255, 0, 0));
+	BOOST_CHECK(control.InputColor(1) == Color(0, 255, 0));
+	BOOST_CHECK(control.InputColor(2) == Color(0, 0, 255));
 	BOOST_CHECK_EQUAL(control.NOutputs(), 0);
 	BOOST_CHECK(control.InputType(0) != control.InputType(1));
 	BOOST_CHECK(control.InputType(1) != control.InputType(2));

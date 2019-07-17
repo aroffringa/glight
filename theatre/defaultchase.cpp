@@ -15,48 +15,34 @@
 #include <algorithm>
 #include <random>
 
-void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master)
+void DefaultChase::addColorPresets(Management& management, Controllable& control, PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master)
 {
-	for(size_t i=0; i!=f.Functions().size(); ++i)
+	for(size_t i=0; i!=control.NInputs(); ++i)
 	{
-		const std::unique_ptr<FixtureFunction>& ff = f.Functions()[i];
-		if(ff->Type() == FunctionType::Red && red != 0)
+		Color c = control.InputColor(i);
+		if(control.InputType(i) == FunctionType::Master && master != 0)
+			pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(master);
+		else if(c == Color::White())
 		{
-			Controllable& c = management.GetFixtureControl(f);
-			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(red);
+			unsigned white = std::min(red, std::min(green, blue));
+			if(white != 0)
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(white);
 		}
-		else if(ff->Type() == FunctionType::Green && green != 0)
-		{
-			Controllable& c = management.GetFixtureControl(f);
-			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(green);
-		}
-		else if(ff->Type() == FunctionType::Blue && blue != 0)
-		{
-			Controllable& c = management.GetFixtureControl(f);
-			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(blue);
-		}
-		else if(ff->Type() == FunctionType::Amber)
+		else if(c == Color::Amber())
 		{
 			unsigned amber = std::min(red, green/2);
 			if(amber != 0)
 			{
-				Controllable& c = management.GetFixtureControl(f);
-				pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(amber);
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(amber);
 			}
 		}
-		else if(ff->Type() == FunctionType::White)
-		{
-			unsigned white = std::min(red, std::min(green, blue));
-			if(white != 0)
-			{
-				Controllable& c = management.GetFixtureControl(f);
-				pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(white);
-			}
-		}
-		else if(ff->Type() == FunctionType::Master && master != 0)
-		{
-			Controllable& c = management.GetFixtureControl(f);
-			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(master);
+		else {
+			if(c.Red() != 0 && red != 0)
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(red);
+			if(c.Green() != 0 && green != 0)
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(green);
+			if(c.Blue() != 0 && blue != 0)
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(blue);
 		}
 	}
 }
@@ -78,7 +64,7 @@ PresetCollection& DefaultChase::MakeColorPreset(class Management& management, cl
 			master = (1<<24)-1;
 		
 		Fixture* f = fixtures[fixtureIndex];
-		addColorPresets(management, *f, pc, red, green, blue, master);
+		addColorPresets(management, management.GetFixtureControl(*f), pc, red, green, blue, master);
 	}
 	management.AddPreset(pc, 0);
 	return pc;
@@ -160,7 +146,7 @@ Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destinatio
 						master = (1<<24)-1;
 					
 					Fixture* f = fixtures[fixIndex];
-					addColorPresets(management, *f, pc, red, green, blue, master);
+					addColorPresets(management, management.GetFixtureControl(*f), pc, red, green, blue, master);
 				}
 			}
 		}
@@ -207,7 +193,7 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 				rv = std::max<double>(0.0, std::min<double>(double(red) + redVar, (1<<24)-1)),
 				gv = std::max<double>(0.0, std::min<double>(double(green) + greenVar, (1<<24)-1)),
 				bv = std::max<double>(0.0, std::min<double>(double(blue) + blueVar, (1<<24)-1));
-			addColorPresets(management, *f, pc, rv, gv, bv, master);
+			addColorPresets(management, management.GetFixtureControl(*f), pc, rv, gv, bv, master);
 		}
 		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
@@ -286,7 +272,7 @@ Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination,
 			if(red != 0 || green != 0 || blue != 0)
 				master = (1<<24)-1;
 			Fixture* f = fixtures[fixIndex];
-			addColorPresets(management, *f, pc, red, green, blue, master);
+			addColorPresets(management, management.GetFixtureControl(*f), pc, red, green, blue, master);
 		}
 		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
@@ -357,7 +343,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 				master = 0;
 			if(red != 0 || green != 0 || blue != 0)
 				master = (1<<24)-1;
-			addColorPresets(management, *fixtures[fixIndex], pc, red, green, blue, master);
+			addColorPresets(management, management.GetFixtureControl(*fixtures[fixIndex]), pc, red, green, blue, master);
 		}
 		management.AddPreset(pc, 0);
 		newEffect.AddConnection(pc, 0);

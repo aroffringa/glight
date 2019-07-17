@@ -23,7 +23,7 @@ public:
 	static class Controllable& MakeVUMeter(class Management& management, class Folder& destination, const std::vector<class Fixture*>& fixtures, const std::vector<class Color>& colors, VUMeterDirection direction);
 	
 private:
-	static void addColorPresets(class Management& management, class Fixture& f, class PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master);
+	static void addColorPresets(class Management& management, class Controllable& controllable, class PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master);
 };
 
 #endif
