@@ -266,13 +266,13 @@ void DesignWizard::onNextClicked()
 				runType = DefaultChase::OutwardRun;
 			else //if(_randomRunRB.get_active())
 				runType = DefaultChase::RandomRun;
-			DefaultChase::MakeRunningLight(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_1.GetColors(), runType);
+			DefaultChase::MakeRunningLight(*_management, getFolder(), controllables, _colorsWidgetP3_1.GetColors(), runType);
 			_showWindow->EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_2_SingleColor:
-		DefaultChase::MakeColorVariation(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_2.GetColors(), _variation.get_value());
+		DefaultChase::MakeColorVariation(*_management, getFolder(), controllables, _colorsWidgetP3_2.GetColors(), _variation.get_value());
 		_showWindow->EmitUpdate();
 		hide();
 		break;
@@ -287,7 +287,7 @@ void DesignWizard::onNextClicked()
 				shiftType = DefaultChase::BackAndForthShift;
 			else
 				shiftType = DefaultChase::RandomShift;
-			DefaultChase::MakeColorShift(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_3.GetColors(), shiftType);
+			DefaultChase::MakeColorShift(*_management, getFolder(), controllables, _colorsWidgetP3_3.GetColors(), shiftType);
 			_showWindow->EmitUpdate();
 			hide();
 		} break;
@@ -302,7 +302,7 @@ void DesignWizard::onNextClicked()
 				direction = DefaultChase::VUInward;
 			else //if(_vuOutwardRunRB.get_active())
 				direction = DefaultChase::VUOutward;
-			DefaultChase::MakeVUMeter(*_management, getFolder(), _selectedFixtures, _colorsWidgetP3_4.GetColors(), direction);
+			DefaultChase::MakeVUMeter(*_management, getFolder(), controllables, _colorsWidgetP3_4.GetColors(), direction);
 			_showWindow->EmitUpdate();
 			hide();
 		} break;
