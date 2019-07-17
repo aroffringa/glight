@@ -165,8 +165,7 @@ BOOST_AUTO_TEST_CASE( FolderManagement )
 	BOOST_CHECK(root.Children().empty());
 	root.SetName("a");
 	BOOST_CHECK_EQUAL(&management.GetObjectFromPath("a"), &root);
-	Folder& folderB = management.AddFolder(root);
-	folderB.SetName("b");
+	Folder& folderB = management.AddFolder(root, "b");
 	BOOST_CHECK_EQUAL(&management.GetObjectFromPath("a/b"), &folderB);
 }
 
