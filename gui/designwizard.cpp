@@ -93,7 +93,32 @@ void DesignWizard::initPage1()
 	_vBoxPage1a.pack_start(_fixturesScrolledWindow);
 	
 	_notebook.append_page(_vBoxPage1b, "Any controllables");
+	
+	_objectBrowser.SignalSelectionChange().connect([&](){ onControllableSelected(); });
+	_objectBrowser.SignalObjectActivated().connect(
+		[&](FolderObject& object){ addControllable(object); });
 	_vBoxPage1b.pack_start(_objectBrowser);
+	
+	_addControllableButton.set_image_from_icon_name("go-down");
+	_addControllableButton.set_sensitive(false);
+	_addControllableButton.signal_clicked().connect(sigc::mem_fun(*this, &DesignWizard::onAddControllable));
+	_controllableButtonBox.pack_start(_addControllableButton, false, false, 4);
+	
+	_removeControllableButton.set_image_from_icon_name("go-up");
+	_removeControllableButton.signal_clicked().connect(sigc::mem_fun(*this, &DesignWizard::onRemoveControllable));
+	_controllableButtonBox.pack_start(_removeControllableButton, false, false, 4);
+	
+	_controllableButtonBox.set_halign(Gtk::ALIGN_CENTER);
+	_vBoxPage1b.pack_start(_controllableButtonBox, false, false);
+	
+	_controllablesListModel = Gtk::ListStore::create(_controllablesListColumns);
+	_controllablesListView.set_model(_controllablesListModel);
+	_controllablesListView.append_column("Controllable", _fixturesListColumns._title);
+	_controllablesListView.append_column("Path", _fixturesListColumns._type);
+	_controllablesListView.set_rubber_banding(true);
+	_controllablesListView.get_selection()->set_mode(Gtk::SelectionMode::SELECTION_MULTIPLE);
+	_controllablesScrolledWindow.add(_controllablesListView);
+	_vBoxPage1b.pack_end(_controllablesScrolledWindow, true, true);
 }
 
 void DesignWizard::initPage2()
@@ -199,19 +224,27 @@ Folder& DesignWizard::getFolder() const
 
 void DesignWizard::onNextClicked()
 {
-	std::vector<Controllable*> controllables(_selectedFixtures.size());
-	for(size_t i=0; i!=_selectedFixtures.size(); ++i)
-		controllables[i] = &_management->GetFixtureControl(*_selectedFixtures[i]);
 	switch(_currentPage)
 	{
 		case Page1_SelFixtures: {
-		_selectedFixtures.clear();
-		Glib::RefPtr<Gtk::TreeSelection> selection =
-			_fixturesListView.get_selection();
-		auto selected = selection->get_selected_rows();
-		for(auto& row : selected)
+		_selectedControllables.clear();
+		if(_notebook.get_current_page()==0)
 		{
-			_selectedFixtures.emplace_back((*_fixturesListModel->get_iter(row))[_fixturesListColumns._fixture]);
+			Glib::RefPtr<Gtk::TreeSelection> selection =
+				_fixturesListView.get_selection();
+			auto selected = selection->get_selected_rows();
+			for(auto& row : selected)
+			{
+				Fixture* fixture =
+					(*_fixturesListModel->get_iter(row))[_fixturesListColumns._fixture];
+				_selectedControllables.emplace_back(&_management->GetFixtureControl(*fixture));
+			}
+		}
+		else {
+			for(auto& iter : _controllablesListModel->children())
+			{
+				_selectedControllables.emplace_back((*iter)[_controllablesListColumns._controllable]);
+			}
 		}
 		_mainBox.remove(_vBoxPage1);
 		_mainBox.pack_start(_vBoxPage2, true, true);
@@ -223,17 +256,17 @@ void DesignWizard::onNextClicked()
 		_mainBox.remove(_vBoxPage2);
 		if(_colorPresetBtn.get_active())
 		{
-			_colorsWidgetP3_5.SetColors(std::vector<Color>(_selectedFixtures.size(), Color::White()));
-			_colorsWidgetP3_5.SetMinCount(_selectedFixtures.size());
-			_colorsWidgetP3_5.SetMaxCount(_selectedFixtures.size());
+			_colorsWidgetP3_5.SetColors(std::vector<Color>(_selectedControllables.size(), Color::White()));
+			_colorsWidgetP3_5.SetMinCount(_selectedControllables.size());
+			_colorsWidgetP3_5.SetMaxCount(_selectedControllables.size());
 			_mainBox.pack_start(_vBoxPage3_5, true, true);
 			_vBoxPage3_5.show_all();
 			_currentPage = Page3_5_ColorPreset;
 		}
 		else if(_runningLightBtn.get_active())
 		{
-			_colorsWidgetP3_1.SetColors(std::vector<Color>(_selectedFixtures.size(), Color::White()));
-			_colorsWidgetP3_1.SetMaxCount(_selectedFixtures.size());
+			_colorsWidgetP3_1.SetColors(std::vector<Color>(_selectedControllables.size(), Color::White()));
+			_colorsWidgetP3_1.SetMaxCount(_selectedControllables.size());
 			_mainBox.pack_start(_vBoxPage3_1, true, true);
 			_vBoxPage3_1.show_all();
 			_currentPage = Page3_1_RunningLight;
@@ -244,15 +277,15 @@ void DesignWizard::onNextClicked()
 			_currentPage = Page3_2_SingleColor;
 		}
 		else if(_shiftColorsBtn.get_active()) {
-			_colorsWidgetP3_3.SetMinCount(_selectedFixtures.size());
-			_colorsWidgetP3_3.SetMaxCount(_selectedFixtures.size());
+			_colorsWidgetP3_3.SetMinCount(_selectedControllables.size());
+			_colorsWidgetP3_3.SetMaxCount(_selectedControllables.size());
 			_mainBox.pack_start(_vBoxPage3_3, true, true);
 			_vBoxPage3_3.show_all();
 			_currentPage = Page3_3_ShiftingColors;
 		}
 		else {
-			_colorsWidgetP3_4.SetMinCount(_selectedFixtures.size());
-			_colorsWidgetP3_4.SetMaxCount(_selectedFixtures.size());
+			_colorsWidgetP3_4.SetMinCount(_selectedControllables.size());
+			_colorsWidgetP3_4.SetMaxCount(_selectedControllables.size());
 			_mainBox.pack_start(_vBoxPage3_4, true, true);
 			_vBoxPage3_4.show_all();
 			_currentPage = Page3_4_VUMeter;
@@ -273,13 +306,13 @@ void DesignWizard::onNextClicked()
 				runType = DefaultChase::OutwardRun;
 			else //if(_randomRunRB.get_active())
 				runType = DefaultChase::RandomRun;
-			DefaultChase::MakeRunningLight(*_management, getFolder(), controllables, _colorsWidgetP3_1.GetColors(), runType);
+			DefaultChase::MakeRunningLight(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_1.GetColors(), runType);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_2_SingleColor:
-		DefaultChase::MakeColorVariation(*_management, getFolder(), controllables, _colorsWidgetP3_2.GetColors(), _variation.get_value());
+		DefaultChase::MakeColorVariation(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_2.GetColors(), _variation.get_value());
 		_eventHub.EmitUpdate();
 		hide();
 		break;
@@ -294,7 +327,7 @@ void DesignWizard::onNextClicked()
 				shiftType = DefaultChase::BackAndForthShift;
 			else
 				shiftType = DefaultChase::RandomShift;
-			DefaultChase::MakeColorShift(*_management, getFolder(), controllables, _colorsWidgetP3_3.GetColors(), shiftType);
+			DefaultChase::MakeColorShift(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_3.GetColors(), shiftType);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
@@ -309,15 +342,56 @@ void DesignWizard::onNextClicked()
 				direction = DefaultChase::VUInward;
 			else //if(_vuOutwardRunRB.get_active())
 				direction = DefaultChase::VUOutward;
-			DefaultChase::MakeVUMeter(*_management, getFolder(), controllables, _colorsWidgetP3_4.GetColors(), direction);
+			DefaultChase::MakeVUMeter(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_4.GetColors(), direction);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_5_ColorPreset: {
-			DefaultChase::MakeColorPreset(*_management, getFolder(), controllables, _colorsWidgetP3_5.GetColors());
+			DefaultChase::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors());
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
 	}
+}
+
+void DesignWizard::addControllable(FolderObject& object)
+{
+	Controllable* controllable =
+		dynamic_cast<Controllable*>(&object);
+	if(controllable)
+	{
+		Gtk::TreeModel::iterator iter = _controllablesListModel->append();
+		Gtk::TreeModel::Row row = *iter;
+		if(iter)
+		{
+			row[_controllablesListColumns._controllable] = controllable;
+			row[_controllablesListColumns._title] = controllable->Name();
+			row[_controllablesListColumns._path] = controllable->Parent().FullPath();
+		}
+	}
+}
+
+void DesignWizard::onAddControllable()
+{
+	FolderObject* object = _objectBrowser.SelectedObject();
+	if(object)
+		addControllable(*object);
+}
+
+void DesignWizard::onRemoveControllable()
+{
+	std::vector<Gtk::TreeModel::Path> iter =
+		_controllablesListView.get_selection()->get_selected_rows();
+
+	for(std::vector<Gtk::TreeModel::Path>::reverse_iterator elementIter = iter.rbegin() ;
+			elementIter != iter.rend(); ++elementIter)
+		_controllablesListModel->erase(_controllablesListModel->get_iter(*elementIter));
+}
+
+void DesignWizard::onControllableSelected()
+{
+	Controllable* object =
+		dynamic_cast<Controllable*>(_objectBrowser.SelectedObject());
+	_addControllableButton.set_sensitive(object != nullptr);
 }

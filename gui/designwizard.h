@@ -56,6 +56,12 @@ private:
 	void initPage3_5ColorPreset();
 	class Folder& getFolder() const;
 	
+	// 1b
+	void onAddControllable();
+	void addControllable(FolderObject& object);
+	void onRemoveControllable();
+	void onControllableSelected();
+	
 	class EventTransmitter& _eventHub;
 	class Management* _management;
 	std::string _destinationPath;
@@ -66,9 +72,12 @@ private:
 	// 1a
 	Gtk::Label _selectLabel;
 	Gtk::TreeView _fixturesListView;
-	std::vector<class Fixture*> _selectedFixtures;
+	std::vector<class Controllable*> _selectedControllables;
 	// 1b
 	ObjectBrowser _objectBrowser;
+	Gtk::HBox _controllableButtonBox;
+	Gtk::Button _addControllableButton, _removeControllableButton;
+	Gtk::TreeView _controllablesListView;
 	
 	Gtk::RadioButton
 		_colorPresetBtn,
@@ -120,6 +129,17 @@ private:
 		Gtk::TreeModelColumn<class Fixture*> _fixture;
 	} _fixturesListColumns;
 	Gtk::ScrolledWindow _fixturesScrolledWindow;
+	
+	Glib::RefPtr<Gtk::ListStore> _controllablesListModel;
+	struct ControllablesListColumns : public Gtk::TreeModelColumnRecord
+	{
+		ControllablesListColumns()
+			{ add(_title); add(_path); add(_controllable); }
+	
+		Gtk::TreeModelColumn<Glib::ustring> _title, _path;
+		Gtk::TreeModelColumn<class Controllable*> _controllable;
+	} _controllablesListColumns;
+	Gtk::ScrolledWindow _controllablesScrolledWindow;
 };
 
 #endif // CHASE_WIZARD_H

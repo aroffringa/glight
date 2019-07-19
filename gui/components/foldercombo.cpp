@@ -1,6 +1,6 @@
 #include "foldercombo.h"
 
-#include "../showwindow.h"
+#include "../eventtransmitter.h"
 
 #include "../../theatre/chase.h"
 #include "../../theatre/effect.h"
