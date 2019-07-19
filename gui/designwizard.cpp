@@ -1,5 +1,5 @@
 #include "designwizard.h"
-#include "showwindow.h"
+#include "eventtransmitter.h"
 
 #include "components/colorselectwidget.h"
 
@@ -12,11 +12,12 @@
 
 #include <memory>
 
-DesignWizard::DesignWizard(ShowWindow* showWindow, const std::string& destinationPath) :
-	_showWindow(showWindow),
-	_management(&showWindow->GetManagement()),
+DesignWizard::DesignWizard(Management& management, EventTransmitter& hub, const std::string& destinationPath) :
+	_eventHub(hub),
+	_management(&management),
 	_destinationPath(destinationPath),
 	_selectLabel("Select fixtures:"),
+	_objectBrowser(management, hub),
 	
 	_colorPresetBtn("Colour preset"),
 	_runningLightBtn("Running light"),
@@ -47,8 +48,8 @@ DesignWizard::DesignWizard(ShowWindow* showWindow, const std::string& destinatio
 	_nextButton("Next"),
 	_currentPage(Page1_SelFixtures)
 {
-	showWindow->SignalChangeManagement().connect(sigc::mem_fun(*this, &DesignWizard::onManagementChange));
-	showWindow->SignalUpdateControllables().connect(sigc::mem_fun(*this, &DesignWizard::fillFixturesList));
+	_eventHub.SignalChangeManagement().connect(sigc::mem_fun(*this, &DesignWizard::onManagementChange));
+	_eventHub.SignalUpdateControllables().connect(sigc::mem_fun(*this, &DesignWizard::fillFixturesList));
 	
 	initPage1();
 	initPage2();
@@ -75,7 +76,10 @@ DesignWizard::~DesignWizard()
 
 void DesignWizard::initPage1()
 {
-	_vBoxPage1.pack_start(_selectLabel);
+	_vBoxPage1.pack_start(_notebook);
+	
+	_notebook.append_page(_vBoxPage1a, "Fixtures");
+	_vBoxPage1a.pack_start(_selectLabel);
 	
 	_fixturesListModel = Gtk::ListStore::create(_fixturesListColumns);
 	_fixturesListView.set_model(_fixturesListModel);
@@ -86,7 +90,10 @@ void DesignWizard::initPage1()
 	fillFixturesList();
 	_fixturesScrolledWindow.add(_fixturesListView);
 	_fixturesScrolledWindow.set_size_request(300, 400);
-	_vBoxPage1.pack_start(_fixturesScrolledWindow);
+	_vBoxPage1a.pack_start(_fixturesScrolledWindow);
+	
+	_notebook.append_page(_vBoxPage1b, "Any controllables");
+	_vBoxPage1b.pack_start(_objectBrowser);
 }
 
 void DesignWizard::initPage2()
@@ -267,13 +274,13 @@ void DesignWizard::onNextClicked()
 			else //if(_randomRunRB.get_active())
 				runType = DefaultChase::RandomRun;
 			DefaultChase::MakeRunningLight(*_management, getFolder(), controllables, _colorsWidgetP3_1.GetColors(), runType);
-			_showWindow->EmitUpdate();
+			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_2_SingleColor:
 		DefaultChase::MakeColorVariation(*_management, getFolder(), controllables, _colorsWidgetP3_2.GetColors(), _variation.get_value());
-		_showWindow->EmitUpdate();
+		_eventHub.EmitUpdate();
 		hide();
 		break;
 		
@@ -288,7 +295,7 @@ void DesignWizard::onNextClicked()
 			else
 				shiftType = DefaultChase::RandomShift;
 			DefaultChase::MakeColorShift(*_management, getFolder(), controllables, _colorsWidgetP3_3.GetColors(), shiftType);
-			_showWindow->EmitUpdate();
+			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
@@ -303,13 +310,13 @@ void DesignWizard::onNextClicked()
 			else //if(_vuOutwardRunRB.get_active())
 				direction = DefaultChase::VUOutward;
 			DefaultChase::MakeVUMeter(*_management, getFolder(), controllables, _colorsWidgetP3_4.GetColors(), direction);
-			_showWindow->EmitUpdate();
+			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_5_ColorPreset: {
 			DefaultChase::MakeColorPreset(*_management, getFolder(), controllables, _colorsWidgetP3_5.GetColors());
-			_showWindow->EmitUpdate();
+			_eventHub.EmitUpdate();
 			hide();
 		} break;
 	}

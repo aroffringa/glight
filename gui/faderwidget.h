@@ -14,7 +14,7 @@
 */
 class FaderWidget : public Gtk::VBox {
 public:
-	FaderWidget(class Management& management, class ShowWindow& showWindow, char key);
+	FaderWidget(class Management& management, class EventTransmitter& eventHub, char key);
 	~FaderWidget();
 
 	void Update();
@@ -59,7 +59,7 @@ private:
 	Gtk::Label _nameLabel;
 
 	class Management* _management;
-	class ShowWindow& _showWindow;
+	class EventTransmitter& _eventHub;
 	class PresetValue* _preset;
 	double _fadeUpSpeed, _fadeDownSpeed;
 	unsigned _fadingValue, _targetValue;

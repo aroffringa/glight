@@ -404,7 +404,7 @@ void ShowWindow::onMIDesignWizardClicked()
 {
 	std::string path = _objectListFrame->SelectedFolder().FullPath();
 	if(!_designWizard || !_designWizard->is_visible())
-		_designWizard.reset(new DesignWizard(this, path));
+		_designWizard.reset(new DesignWizard(*_management, *this, path));
 	_designWizard->SetDestinationPath(path);
 	_designWizard->present();
 }

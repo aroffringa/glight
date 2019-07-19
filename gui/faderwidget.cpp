@@ -8,12 +8,12 @@
 
 #define MAX_SCALE_VALUE_DEF (1<<24)
 
-FaderWidget::FaderWidget(class Management &management, ShowWindow& showWindow, char key) :
+FaderWidget::FaderWidget(class Management &management, EventTransmitter& eventHub, char key) :
   _scale(0, MAX_SCALE_VALUE_DEF, MAX_SCALE_VALUE_DEF/100),
 	_flashButton(std::string(1, key)),
 	_nameLabel("<..>"),
 	_management(&management),
-	_showWindow(showWindow),
+	_eventHub(eventHub),
 	_preset(nullptr),
 	_fadeUpSpeed(0.0),
 	_fadeDownSpeed(0.0),
@@ -103,7 +103,7 @@ void FaderWidget::onScaleChange()
 
 bool FaderWidget::onNameLabelClicked(GdkEventButton* event)
 {
-	InputSelectDialog dialog(*_management, _showWindow);
+	InputSelectDialog dialog(*_management, _eventHub);
 	if(dialog.run() == Gtk::RESPONSE_OK)
 	{
 		Assign(dialog.SelectedInputPreset(), true);

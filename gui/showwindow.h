@@ -31,8 +31,10 @@ public:
 	
 	GUIState& State() { return _state; }
 	
-	sigc::signal<void(Management&)>& SignalChangeManagement() { return _signalChangeManagement; }
-	sigc::signal<void()>& SignalUpdateControllables() { return _signalUpdateControllables; }
+	sigc::signal<void(Management&)>& SignalChangeManagement() final override
+	{ return _signalChangeManagement; }
+	sigc::signal<void()>& SignalUpdateControllables() final override
+	{ return _signalUpdateControllables; }
 	
 	Management& GetManagement() const { return *_management; }
 	

@@ -9,7 +9,7 @@
 class FolderCombo : public Gtk::ComboBox
 {
 public:
-	FolderCombo(class Management& management, class ShowWindow& parentWindow);
+	FolderCombo(class Management& management, class EventTransmitter& eventHub);
 	
 	class Folder& Selection();
 	
@@ -19,7 +19,7 @@ public:
 	
 private:
 	class Management* _management;
-	class ShowWindow& _parentWindow;
+	class EventTransmitter& _eventHub;
 	
 	Glib::RefPtr<Gtk::ListStore> _listModel;
 	struct ListColumns : public Gtk::TreeModelColumnRecord

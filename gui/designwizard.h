@@ -2,11 +2,13 @@
 #define CHASE_WIZARD_H
 
 #include "components/colorsequencewidget.h"
+#include "components/objectbrowser.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/notebook.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/scrolledwindow.h>
@@ -19,7 +21,7 @@
 class DesignWizard : public Gtk::Window
 {
 public:
-	DesignWizard(class ShowWindow*, const std::string& destinationPath);
+	DesignWizard(class Management& management, class EventTransmitter& hub, const std::string& destinationPath);
 	~DesignWizard();
 	
 	void SetDestinationPath(const std::string& destinationPath)
@@ -54,15 +56,19 @@ private:
 	void initPage3_5ColorPreset();
 	class Folder& getFolder() const;
 	
-	class ShowWindow* _showWindow;
+	class EventTransmitter& _eventHub;
 	class Management* _management;
 	std::string _destinationPath;
 	
 	Gtk::VBox _mainBox;
-	Gtk::VBox _vBoxPage1, _vBoxPage2, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3, _vBoxPage3_4, _vBoxPage3_5;
+	Gtk::VBox _vBoxPage1, _vBoxPage1a, _vBoxPage1b, _vBoxPage2, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3, _vBoxPage3_4, _vBoxPage3_5;
+	Gtk::Notebook _notebook;
+	// 1a
 	Gtk::Label _selectLabel;
 	Gtk::TreeView _fixturesListView;
 	std::vector<class Fixture*> _selectedFixtures;
+	// 1b
+	ObjectBrowser _objectBrowser;
 	
 	Gtk::RadioButton
 		_colorPresetBtn,
