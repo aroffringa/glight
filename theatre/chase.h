@@ -77,23 +77,28 @@ public:
 		double stepPhase = std::fmod(currentPhase, currentDuration);
 		if(stepPhase < _trigger.DelayInMs())
 		{
-			// A transition is not ongoing, so it is not necessary to shift to the
+			// No transition is ongoing, so it is not necessary to shift to the
 			// relative position inside the transition.
-			double newDuration = (triggerTime + transitionTime) * _sequence.Size();
-			double newPhase = std::fmod(currentTime, newDuration);
-			// make: currentPhase == newPhase + _phaseOffset
-			_phaseOffset = currentPhase - newPhase;
+			unsigned step = (unsigned) fmod(currentPhase / currentDuration, _sequence.Size());
+			// Find an offset such that
+			// (time + _phaseOffset) % duration = step*duration + stepPhase*old/new
+			// phaseOffset = (step*stepDuration + stepPhase*old/new - time) % duration
+			double newStepDuration = (triggerTime + transitionTime);
+			double newDuration = newStepDuration * _sequence.Size();
+			_phaseOffset = fmod(
+				step*newStepDuration + stepPhase*triggerTime/_trigger.DelayInMs() - currentTime, newDuration);
 		}
 		else {
 			// Transition ongoing: shift to the relative position inside the transition
-			double transitionPhase = (stepPhase - _trigger.DelayInMs()) / _transition.LengthInMs();
-			double transitionOffset = transitionPhase * transitionTime;
-			unsigned step = (unsigned) fmod((currentTime + _phaseOffset) / currentDuration, _sequence.Size());
-			double correctedPhase =
-				transitionOffset + _trigger.DelayInMs() + currentDuration * step;
+			double currentTransitionPhase = (stepPhase - _trigger.DelayInMs()) / _transition.LengthInMs();
+			double newTransitionPhase = fmod(currentTime, triggerTime + transitionTime);
+			double transitionOffset =
+				(currentTransitionPhase * transitionTime - newTransitionPhase);
+				
 			double newDuration = (triggerTime + transitionTime) * _sequence.Size();
 			double newPhase = std::fmod(currentTime, newDuration);
-			_phaseOffset = correctedPhase - newPhase;
+			double stepOffset = currentPhase - newPhase;
+			_phaseOffset = stepOffset + transitionOffset;
 		}
 		_trigger.SetDelayInMs(triggerTime);
 		_transition.SetLengthInMs(transitionTime);
