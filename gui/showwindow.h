@@ -38,6 +38,8 @@ public:
 	
 	Management& GetManagement() const { return *_management; }
 	
+	void OpenFile(const std::string& filename);
+	
 private:
 	void onControlWindowButtonClicked()
 	{

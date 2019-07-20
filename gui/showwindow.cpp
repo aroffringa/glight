@@ -218,6 +218,44 @@ void ShowWindow::onMINewClicked()
 	EmitUpdate();
 }
 
+void ShowWindow::OpenFile(const std::string& filename)
+{
+	std::unique_lock<std::mutex> lock(_management->Mutex());
+	_management->Clear();
+	_faderWindows.clear();
+	_state.Clear();
+	Reader reader(*_management);
+	reader.SetGUIState(_state);
+	reader.Read(filename);
+
+	if(_management->Show().Scenes().size() != 0)
+		_sceneFrame->SetSelectedScene(*_management->Show().Scenes()[0]);
+	else
+		_sceneFrame->SetNoSelectedScene();
+	
+	lock.unlock();
+
+	EmitUpdate();
+	
+	if(_state.Empty())
+	{
+		std::cout << "File did not contain GUI state info: will start with default faders.\n";
+		addFaderWindow();
+	}
+	else {
+		for(const std::unique_ptr<FaderSetupState>& state : _state.FaderSetups())
+		{
+			if(state->isActive)
+			{
+				// Currently it is not displayed, so to avoid the control window doing the
+				// wrong thing, isActive is set to false and will be set to true by the control window.
+				state->isActive = false;
+				addFaderWindow(state.get());
+			}
+		}
+	}
+}
+
 void ShowWindow::onMIOpenClicked()
 {
 	Gtk::FileChooserDialog dialog(*this, "Open glight show", Gtk::FILE_CHOOSER_ACTION_OPEN);
@@ -233,42 +271,7 @@ void ShowWindow::onMIOpenClicked()
 	
 	int result = dialog.run();
 	if(result == Gtk::RESPONSE_OK)
-	{
-		std::unique_lock<std::mutex> lock(_management->Mutex());
-		_management->Clear();
-		_faderWindows.clear();
-		_state.Clear();
-		Reader reader(*_management);
-		reader.SetGUIState(_state);
-		reader.Read(dialog.get_filename());
-
-		if(_management->Show().Scenes().size() != 0)
-			_sceneFrame->SetSelectedScene(*_management->Show().Scenes()[0]);
-		else
-			_sceneFrame->SetNoSelectedScene();
-		
-		lock.unlock();
-	
-		EmitUpdate();
-		
-		if(_state.Empty())
-		{
-			std::cout << "File did not contain GUI state info: will start with default faders.\n";
-			addFaderWindow();
-		}
-		else {
-			for(const std::unique_ptr<FaderSetupState>& state : _state.FaderSetups())
-			{
-				if(state->isActive)
-				{
-					// Currently it is not displayed, so to avoid the control window doing the
-					// wrong thing, isActive is set to false and will be set to true by the control window.
-					state->isActive = false;
-					addFaderWindow(state.get());
-				}
-			}
-		}
-	}
+		OpenFile(dialog.get_filename());
 }
 
 void ShowWindow::onMISaveClicked()
