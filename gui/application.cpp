@@ -34,5 +34,9 @@ void Application::Run(int argc, char *argv[])
 		device.reset(new DummyDevice());
 	}
 	ShowWindow window(std::move(device));
+	if(argc > 1)
+	{
+		window.OpenFile(argv[1]);
+	}
 	kit.run(window);
 }
