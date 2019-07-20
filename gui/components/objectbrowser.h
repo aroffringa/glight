@@ -14,9 +14,9 @@
 class ObjectBrowser : public Gtk::VBox
 {
 public:
-	ObjectBrowser(class Management& management, class ShowWindow& parentWindow) :
-		_folderCombo(management, parentWindow),
-		_list(management, parentWindow)
+	ObjectBrowser(class Management& management, class EventTransmitter& eventHub) :
+		_folderCombo(management, eventHub),
+		_list(management, eventHub)
 	{
 		_folderCombo.SignalSelectionChange().connect([&]() { onFolderChanged(); });
 		pack_start(_folderCombo, false, false, 5);

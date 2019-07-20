@@ -1,6 +1,6 @@
 #include "foldercombo.h"
 
-#include "../showwindow.h"
+#include "../eventtransmitter.h"
 
 #include "../../theatre/chase.h"
 #include "../../theatre/effect.h"
@@ -8,14 +8,14 @@
 #include "../../theatre/management.h"
 #include "../../theatre/presetcollection.h"
 
-FolderCombo::FolderCombo(Management &management, ShowWindow &parentWindow) :
+FolderCombo::FolderCombo(Management &management, EventTransmitter& eventHub) :
 	Gtk::ComboBox(false),
 	_management(&management),
-	_parentWindow(parentWindow)
+	_eventHub(eventHub)
 {
-	_parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &FolderCombo::changeManagement));
+	_eventHub.SignalChangeManagement().connect(sigc::mem_fun(*this, &FolderCombo::changeManagement));
 	
-	_parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &FolderCombo::fillList));
+	_eventHub.SignalUpdateControllables().connect(sigc::mem_fun(*this, &FolderCombo::fillList));
 	
 	_listModel =
 		Gtk::ListStore::create(_listColumns);

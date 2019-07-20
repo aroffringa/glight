@@ -11,7 +11,7 @@
 class ObjectList : public Gtk::ScrolledWindow
 {
 public:
-	ObjectList(class Management& management, class ShowWindow& parentWindow);
+	ObjectList(class Management& management, class EventTransmitter& eventHub);
 	
 	enum ObjectType {
 		AllExceptFixtures,
@@ -59,7 +59,7 @@ public:
 	
 private:
 	class Management* _management;
-	class ShowWindow& _parentWindow;
+	class EventTransmitter& _eventHub;
 	enum ObjectType _displayType;
 	bool _showTypeColumn;
 	class Folder* _openFolder;

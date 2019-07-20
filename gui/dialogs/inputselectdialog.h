@@ -11,10 +11,10 @@
 class InputSelectDialog : public Gtk::Dialog
 {
 public:
-	InputSelectDialog(class Management& management, class ShowWindow& parentWindow) :
+	InputSelectDialog(class Management& management, class EventTransmitter& eventHub) :
 		Dialog("Select input", true),
 		_management(management),
-		_inputSelector(management, parentWindow)
+		_inputSelector(management, eventHub)
 	{ 
 		set_size_request(600, 400);
 		

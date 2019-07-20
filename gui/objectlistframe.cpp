@@ -116,8 +116,8 @@ void ObjectListFrame::onNewTimeSequenceButtonClicked()
 	Folder& parent = _list.SelectedFolder();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	TimeSequence& tSequence = _management->AddTimeSequence();
-	parent.Add(tSequence);
 	tSequence.SetName(parent.GetAvailableName("Seq"));
+	parent.Add(tSequence);
 	_management->AddPreset(tSequence, 0);
 	lock.unlock();
 

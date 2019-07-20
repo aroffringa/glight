@@ -2,8 +2,7 @@
 
 #include "chase.h"
 #include "color.h"
-#include "fixture.h"
-#include "fixturecontrol.h"
+#include "controllable.h"
 #include "folder.h"
 #include "management.h"
 #include "presetcollection.h"
@@ -15,60 +14,46 @@
 #include <algorithm>
 #include <random>
 
-void DefaultChase::addColorPresets(Management& management, Fixture& f, PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master)
+void DefaultChase::addColorPresets(Management& management, Controllable& control, PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master)
 {
-	for(size_t i=0; i!=f.Functions().size(); ++i)
+	for(size_t i=0; i!=control.NInputs(); ++i)
 	{
-		const std::unique_ptr<FixtureFunction>& ff = f.Functions()[i];
-		if(ff->Type() == FunctionType::Red && red != 0)
+		Color c = control.InputColor(i);
+		if(control.InputType(i) == FunctionType::Master && master != 0)
+			pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(master);
+		else if(c == Color::White())
 		{
-			Controllable& c = management.GetFixtureControl(f);
-			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(red);
+			unsigned white = std::min(red, std::min(green, blue));
+			if(white != 0)
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(white);
 		}
-		else if(ff->Type() == FunctionType::Green && green != 0)
-		{
-			Controllable& c = management.GetFixtureControl(f);
-			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(green);
-		}
-		else if(ff->Type() == FunctionType::Blue && blue != 0)
-		{
-			Controllable& c = management.GetFixtureControl(f);
-			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(blue);
-		}
-		else if(ff->Type() == FunctionType::Amber)
+		else if(c == Color::Amber())
 		{
 			unsigned amber = std::min(red, green/2);
 			if(amber != 0)
 			{
-				Controllable& c = management.GetFixtureControl(f);
-				pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(amber);
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(amber);
 			}
 		}
-		else if(ff->Type() == FunctionType::White)
-		{
-			unsigned white = std::min(red, std::min(green, blue));
-			if(white != 0)
-			{
-				Controllable& c = management.GetFixtureControl(f);
-				pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(white);
-			}
-		}
-		else if(ff->Type() == FunctionType::Master && master != 0)
-		{
-			Controllable& c = management.GetFixtureControl(f);
-			pc.AddPresetValue(*management.GetPresetValue(c, i)).SetValue(master);
+		else {
+			if(c.Red() != 0 && red != 0)
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(red);
+			if(c.Green() != 0 && green != 0)
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(green);
+			if(c.Blue() != 0 && blue != 0)
+				pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(blue);
 		}
 	}
 }
 
-PresetCollection& DefaultChase::MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors)
+PresetCollection& DefaultChase::MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors)
 {
 	PresetCollection& pc = management.AddPresetCollection();
 	destination.Add(pc);
 	pc.SetName(destination.GetAvailableName("Colourpreset"));
-	for(size_t fixtureIndex=0; fixtureIndex!=fixtures.size(); ++fixtureIndex)
+	for(size_t cIndex=0; cIndex!=controllables.size(); ++cIndex)
 	{
-		size_t colorIndex = fixtureIndex % colors.size();
+		size_t colorIndex = cIndex % colors.size();
 		unsigned
 			red = colors[colorIndex].Red()*((1<<24)-1)/255,
 			green = colors[colorIndex].Green()*((1<<24)-1)/255,
@@ -77,14 +62,13 @@ PresetCollection& DefaultChase::MakeColorPreset(class Management& management, cl
 		if(red != 0 || green != 0 || blue != 0)
 			master = (1<<24)-1;
 		
-		Fixture* f = fixtures[fixtureIndex];
-		addColorPresets(management, *f, pc, red, green, blue, master);
+		addColorPresets(management, *controllables[cIndex], pc, red, green, blue, master);
 	}
 	management.AddPreset(pc, 0);
 	return pc;
 }
 
-Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<class Color>& colors, RunType runType)
+Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, RunType runType)
 {
 	Chase& chase = management.AddChase();
 	chase.SetName(destination.GetAvailableName("Runchase"));
@@ -118,39 +102,39 @@ Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destinatio
 		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
 		// If there are less colours given than fixtures, the sequence is repeated
 		// several times. This loop is for that purpose.
-		for(size_t patternIndex = 0; patternIndex < (fixtures.size() + colors.size() - 1) / colors.size(); ++patternIndex)
+		for(size_t patternIndex = 0; patternIndex < (controllables.size() + colors.size() - 1) / colors.size(); ++patternIndex)
 		{
 			for(size_t fixInPatIndex = 0; fixInPatIndex != nFixInPattern; ++fixInPatIndex)
 			{
-				size_t fixIndex = 0;
+				size_t cIndex = 0;
 				switch(runType)
 				{
 					case IncreasingRun:
 					case BackAndForthRun:
-						fixIndex = frameIndex + patternIndex * colors.size();
+						cIndex = frameIndex + patternIndex * colors.size();
 						break;
 					case DecreasingRun:
-						fixIndex = frames - frameIndex - 1 + patternIndex * colors.size();
+						cIndex = frames - frameIndex - 1 + patternIndex * colors.size();
 						break;
 					case RandomRun:
-						fixIndex = pos[frameIndex] + patternIndex * colors.size();
+						cIndex = pos[frameIndex] + patternIndex * colors.size();
 						break;
 					case InwardRun:
 						if(fixInPatIndex == 0)
-							fixIndex = frameIndex + patternIndex * colors.size();
+							cIndex = frameIndex + patternIndex * colors.size();
 						else
-							fixIndex = (colors.size() - frameIndex - 1) + patternIndex * colors.size();
+							cIndex = (colors.size() - frameIndex - 1) + patternIndex * colors.size();
 						break;
 					case OutwardRun:
 						if(fixInPatIndex == 0)
-							fixIndex = frames - frameIndex - 1 + patternIndex * colors.size();
+							cIndex = frames - frameIndex - 1 + patternIndex * colors.size();
 						else
-							fixIndex = frames + frameIndex + patternIndex * colors.size();
+							cIndex = frames + frameIndex + patternIndex * colors.size();
 						break;
 				}
-				if(fixIndex < fixtures.size())
+				if(cIndex < controllables.size())
 				{
-					size_t colourIndex = fixIndex % colors.size();
+					size_t colourIndex = cIndex % colors.size();
 					unsigned
 						red = colors[colourIndex].Red()*((1<<24)-1)/255,
 						green = colors[colourIndex].Green()*((1<<24)-1)/255,
@@ -159,8 +143,7 @@ Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destinatio
 					if(red != 0 || green != 0 || blue != 0)
 						master = (1<<24)-1;
 					
-					Fixture* f = fixtures[fixIndex];
-					addColorPresets(management, *f, pc, red, green, blue, master);
+					addColorPresets(management, *controllables[cIndex], pc, red, green, blue, master);
 				}
 			}
 		}
@@ -175,7 +158,7 @@ Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destinatio
 	return chase;
 }
 
-Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& destination, const std::vector<class Fixture *>& fixtures, const std::vector<class Color>& colors, double variation)
+Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, double variation)
 {
 	Chase& chase = management.AddChase();
 	chase.SetName(destination.GetAvailableName("Colorvar"));
@@ -197,7 +180,7 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 			master = 0;
 		if(red != 0 || green != 0 || blue != 0)
 			master = (1<<24)-1;
-		for(Fixture* f : fixtures)
+		for(Controllable* c : controllables)
 		{
 			double
 				redVar = round(distribution(rnd)),
@@ -207,7 +190,7 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 				rv = std::max<double>(0.0, std::min<double>(double(red) + redVar, (1<<24)-1)),
 				gv = std::max<double>(0.0, std::min<double>(double(green) + greenVar, (1<<24)-1)),
 				bv = std::max<double>(0.0, std::min<double>(double(blue) + blueVar, (1<<24)-1));
-			addColorPresets(management, *f, pc, rv, gv, bv, master);
+			addColorPresets(management, *c, pc, rv, gv, bv, master);
 		}
 		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
@@ -215,14 +198,14 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 	return chase;
 }
 
-Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors, ShiftType shiftType)
+Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<Color>& colors, ShiftType shiftType)
 {
 	Chase& chase = management.AddChase();
 	chase.SetName(destination.GetAvailableName("Colourshift"));
 	destination.Add(chase);
 	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
-	size_t frames = fixtures.size();
+	size_t frames = controllables.size();
 	std::vector<std::vector<size_t>> pos(frames);
 	std::random_device rd;
 	std::mt19937 mt(rd());
@@ -230,7 +213,7 @@ Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination,
 	{
 		if(shiftType == RandomShift)
 		{
-			pos[frameIndex].resize(fixtures.size());
+			pos[frameIndex].resize(controllables.size());
 			bool duplicate;
 			do {
 				for(size_t i=0; i!=pos[frameIndex].size(); ++i)
@@ -262,20 +245,20 @@ Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination,
 		destination.Add(pc);
 		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
 		
-		for(size_t fixIndex=0; fixIndex!=fixtures.size(); ++fixIndex)
+		for(size_t cIndex=0; cIndex!=controllables.size(); ++cIndex)
 		{
 			size_t colourIndex;
 			switch(shiftType)
 			{
 				case IncreasingShift:
 				case BackAndForthShift:
-					colourIndex = (fixIndex + frames - frameIndex) % frames;
+					colourIndex = (cIndex + frames - frameIndex) % frames;
 					break;
 				case DecreasingShift:
-					colourIndex = (fixIndex + frameIndex) % frames;
+					colourIndex = (cIndex + frameIndex) % frames;
 					break;
 				case RandomShift:
-					colourIndex = pos[frameIndex][fixIndex];
+					colourIndex = pos[frameIndex][cIndex];
 					break;
 			}
 			unsigned
@@ -285,8 +268,7 @@ Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination,
 				master = 0;
 			if(red != 0 || green != 0 || blue != 0)
 				master = (1<<24)-1;
-			Fixture* f = fixtures[fixIndex];
-			addColorPresets(management, *f, pc, red, green, blue, master);
+			addColorPresets(management, *controllables[cIndex], pc, red, green, blue, master);
 		}
 		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
@@ -299,9 +281,9 @@ Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination,
 	return chase;
 }
 
-Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destination, const std::vector<Fixture*>& fixtures, const std::vector<Color>& colors, VUMeterDirection direction)
+Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<Color>& colors, VUMeterDirection direction)
 {
-	if(colors.size() != fixtures.size())
+	if(colors.size() != controllables.size())
 		throw std::runtime_error("Number of colours did not match number of fixtures");
 	std::unique_ptr<AudioLevelEffect> audioLevel(new AudioLevelEffect());
 	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel), destination);
@@ -310,9 +292,9 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 	newAudioLevel.SetName(destination.GetAvailableName("VUMeter"));
 	size_t nLevels;
 	if(direction == VUInward || direction == VUOutward)
-		nLevels = (fixtures.size()+1) / 2;
+		nLevels = (controllables.size()+1) / 2;
 	else
-		nLevels = fixtures.size();
+		nLevels = controllables.size();
 	for(size_t level=0; level!=nLevels; ++level)
 	{
 		std::unique_ptr<ThresholdEffect> threshold(new ThresholdEffect());
@@ -324,8 +306,8 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 		newEffect.SetName(destination.GetAvailableName(newAudioLevel.Name() + "_Thr"));
 		
 		size_t nFixInLevel = 1;
-		if((direction == VUInward && (level != nLevels-1 || fixtures.size()%2==0) ) ||
-			(direction == VUOutward && (level != 0 || fixtures.size()%2==0) ) )
+		if((direction == VUInward && (level != nLevels-1 || controllables.size()%2==0) ) ||
+			(direction == VUOutward && (level != 0 || controllables.size()%2==0) ) )
 			nFixInLevel = 2;
 		
 		PresetCollection& pc = management.AddPresetCollection();
@@ -346,7 +328,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 			}
 			else {
 				if(direction == VUInward)
-					fixIndex = fixtures.size() - level - 1;
+					fixIndex = controllables.size() - level - 1;
 				else // VUOutward
 					fixIndex = nLevels + level;
 			}
@@ -357,7 +339,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 				master = 0;
 			if(red != 0 || green != 0 || blue != 0)
 				master = (1<<24)-1;
-			addColorPresets(management, *fixtures[fixIndex], pc, red, green, blue, master);
+			addColorPresets(management, *controllables[fixIndex], pc, red, green, blue, master);
 		}
 		management.AddPreset(pc, 0);
 		newEffect.AddConnection(pc, 0);

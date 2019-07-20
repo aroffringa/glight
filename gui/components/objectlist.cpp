@@ -1,6 +1,6 @@
 #include "objectlist.h"
 
-#include "../showwindow.h"
+#include "../eventtransmitter.h"
 
 #include "../../theatre/chase.h"
 #include "../../theatre/effect.h"
@@ -10,17 +10,17 @@
 #include "../../theatre/presetcollection.h"
 #include "../../theatre/timesequence.h"
 
-ObjectList::ObjectList(Management &management, ShowWindow &parentWindow) :
+ObjectList::ObjectList(Management& management, EventTransmitter& eventHub) :
 	_management(&management),
-	_parentWindow(parentWindow),
+	_eventHub(eventHub),
 	_displayType(AllExceptFixtures),
 	_showTypeColumn(false),
 	_openFolder(&management.RootFolder()),
 	_listView(*this)
 {
-	_parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &ObjectList::changeManagement));
+	_eventHub.SignalChangeManagement().connect(sigc::mem_fun(*this, &ObjectList::changeManagement));
 	
-	_parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &ObjectList::fillList));
+	_eventHub.SignalUpdateControllables().connect(sigc::mem_fun(*this, &ObjectList::fillList));
 	
 	_listModel =
     Gtk::ListStore::create(_listColumns);
@@ -269,17 +269,17 @@ void ObjectList::onMoveSelected(Folder* destination)
 {
 	FolderObject* object = SelectedObject();
 	Folder::Move(*object, *destination);
-	_parentWindow.EmitUpdate();
+	_eventHub.EmitUpdate();
 }
 
 void ObjectList::onMoveUpSelected()
 {
 	SelectedObject()->Parent().MoveUp(*SelectedObject());
-	_parentWindow.EmitUpdate();
+	_eventHub.EmitUpdate();
 }
 
 void ObjectList::onMoveDownSelected()
 {
 	SelectedObject()->Parent().MoveDown(*SelectedObject());
-	_parentWindow.EmitUpdate();
+	_eventHub.EmitUpdate();
 }
