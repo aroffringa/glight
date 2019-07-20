@@ -37,6 +37,16 @@ public:
 	
 	virtual void Mix(unsigned *channelValues, unsigned universe, const Timing& timing) final override
 	{
+		// Slowly drive the phase offset back to zero.
+		if(_phaseOffset != 0.0)
+		{
+			if(_phaseOffset > 4.0)
+				_phaseOffset -= 4.0;
+			else if(_phaseOffset < -4.0)
+				_phaseOffset += 4.0;
+			else
+				_phaseOffset = 0.0;
+		}
 		switch(_trigger.Type()) {
 		case Trigger::DelayTriggered:
 			mixDelayChase(channelValues, universe, timing);
@@ -58,6 +68,41 @@ public:
 
 	const class Sequence& Sequence() const { return _sequence; }
 	class Sequence& Sequence() { return _sequence; }
+	
+	void ShiftDelayTrigger(double triggerTime, double transitionTime, double currentTime)
+	{
+		double currentDuration = _trigger.DelayInMs() + _transition.LengthInMs();
+		double currentPhase = std::fmod(currentTime + _phaseOffset,
+			currentDuration * _sequence.Size());
+		double stepPhase = std::fmod(currentPhase, currentDuration);
+		if(stepPhase < _trigger.DelayInMs())
+		{
+			// A transition is not ongoing, so it is not necessary to shift to the
+			// relative position inside the transition.
+			double newDuration = (triggerTime + transitionTime) * _sequence.Size();
+			double newPhase = std::fmod(currentTime, newDuration);
+			// make: currentPhase == newPhase + _phaseOffset
+			_phaseOffset = currentPhase - newPhase;
+		}
+		else {
+			// Transition ongoing: shift to the relative position inside the transition
+			double transitionPhase = (stepPhase - _trigger.DelayInMs()) / _transition.LengthInMs();
+			double transitionOffset = transitionPhase * transitionTime;
+			unsigned step = (unsigned) fmod((currentTime + _phaseOffset) / currentDuration, _sequence.Size());
+			double correctedPhase =
+				transitionOffset + _trigger.DelayInMs() + currentDuration * step;
+			double newDuration = (triggerTime + transitionTime) * _sequence.Size();
+			double newPhase = std::fmod(currentTime, newDuration);
+			_phaseOffset = correctedPhase - newPhase;
+		}
+		_trigger.SetDelayInMs(triggerTime);
+		_transition.SetLengthInMs(transitionTime);
+	}
+	
+	void ResetPhaseOffset()
+	{
+		_phaseOffset = 0.0;
+	}
 
 private:
 	/**
@@ -84,10 +129,11 @@ private:
 	
 	void mixDelayChase(unsigned* channelValues, unsigned universe, const Timing& timing)
 	{
-		double timeInMs = timing.TimeInMS();
-		double chaseTime = fmod(timeInMs, _trigger.DelayInMs() + _transition.LengthInMs());
-		unsigned step = (unsigned) fmod(timeInMs / (_trigger.DelayInMs() + _transition.LengthInMs()), _sequence.Size());
-		if(chaseTime < _trigger.DelayInMs())
+		double timeInMs = timing.TimeInMS() + _phaseOffset;
+		double totalDuration = _trigger.DelayInMs() + _transition.LengthInMs();
+		double phase = fmod(timeInMs, totalDuration);
+		unsigned step = (unsigned) fmod(timeInMs / totalDuration, _sequence.Size());
+		if(phase < _trigger.DelayInMs())
 		{
 			// We are not in a transition, just mix the corresponding controllable
 			_sequence.List()[step].first->MixInput(_sequence.List()[step].second, _inputValue);
@@ -95,7 +141,7 @@ private:
 		else
 		{
 			// We are in a transition
-			double transitionTime = chaseTime - _trigger.DelayInMs();
+			double transitionTime = phase - _trigger.DelayInMs();
 			Controllable
 				&first = *_sequence.List()[step].first,
 				&second = *_sequence.List()[(step + 1) % _sequence.Size()].first;
@@ -107,6 +153,7 @@ private:
 	class Sequence _sequence;
 	class Trigger _trigger;
 	class Transition _transition;
+	double _phaseOffset;
 };
 
 #endif

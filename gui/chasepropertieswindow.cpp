@@ -10,7 +10,7 @@ ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &man
 	_frame("Properties of " + chase.Name()),
 	_delayTriggerCheckButton("Delayed trigger"),
 	_triggerSpeedLabel("Trigger speed (ms) :"),
-	_triggerSpeed(1.0, 10000.0, 100.0),
+	_triggerSpeed(0.0, 10000.0, 100.0),
 	_transitionSpeedLabel("Transition speed (ms) :"),
 	_transitionSpeed(0.0, 10000.0, 100.0),
 	_transitionTypeLabel("Type:"),
@@ -132,14 +132,32 @@ void ChasePropertiesWindow::onTriggerTypeChanged()
 
 void ChasePropertiesWindow::onTriggerSpeedChanged()
 {
-	std::lock_guard<std::mutex> lock(_management->Mutex());
-	_chase->Trigger().SetDelayInMs(_triggerSpeed.get_value());
+	double curTime = _management->GetOffsetTimeInMS();
+	if(_triggerSpeed.get_value() == 0.0 && _transitionSpeed.get_value() == 0.0)
+	{
+		_transitionSpeed.set_value(40.0);
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_chase->ShiftDelayTrigger(_triggerSpeed.get_value(), 40.0, curTime);
+	}
+	else {
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_chase->ShiftDelayTrigger(_triggerSpeed.get_value(), _transitionSpeed.get_value(), curTime);
+	}
 }
 
 void ChasePropertiesWindow::onTransitionSpeedChanged()
 {
-	std::lock_guard<std::mutex> lock(_management->Mutex());
-	_chase->Transition().SetLengthInMs(_transitionSpeed.get_value());
+	double curTime = _management->GetOffsetTimeInMS();
+	if(_triggerSpeed.get_value() == 0.0 && _transitionSpeed.get_value() == 0.0)
+	{
+		_triggerSpeed.set_value(40.0);
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_chase->ShiftDelayTrigger(40.0, _transitionSpeed.get_value(), curTime);
+	}
+	else {
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_chase->ShiftDelayTrigger(_triggerSpeed.get_value(), _transitionSpeed.get_value(), curTime);
+	}
 }
 
 void ChasePropertiesWindow::onTransitionTypeChanged()

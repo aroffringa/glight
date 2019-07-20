@@ -23,6 +23,7 @@ public:
 
 	class FolderObject& GetObject() final override;
 	class Chase& GetChase() { return *_chase; }
+	
 private:
 	void loadChaseInfo(class Chase& chase);
 	void onTriggerTypeChanged();
