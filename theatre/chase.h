@@ -12,7 +12,7 @@
 */
 class Chase : public Controllable {
 public:
-	Chase()
+	Chase() : _phaseOffset(0.0)
 	{ }
 	
 	std::unique_ptr<Chase> CopyWithoutSequence() const
@@ -40,10 +40,10 @@ public:
 		// Slowly drive the phase offset back to zero.
 		if(_phaseOffset != 0.0)
 		{
-			if(_phaseOffset > 4.0)
-				_phaseOffset -= 4.0;
-			else if(_phaseOffset < -4.0)
-				_phaseOffset += 4.0;
+			if(_phaseOffset > 8.0)
+				_phaseOffset -= 8.0;
+			else if(_phaseOffset < -8.0)
+				_phaseOffset += 8.0;
 			else
 				_phaseOffset = 0.0;
 		}
@@ -75,30 +75,25 @@ public:
 		double currentPhase = std::fmod(currentTime + _phaseOffset,
 			currentDuration * _sequence.Size());
 		double stepPhase = std::fmod(currentPhase, currentDuration);
+		unsigned step = (unsigned) fmod(currentPhase / currentDuration, _sequence.Size());
+		double newStepDuration = (triggerTime + transitionTime);
+		double newDuration = newStepDuration * _sequence.Size();
 		if(stepPhase < _trigger.DelayInMs())
 		{
-			// No transition is ongoing, so it is not necessary to shift to the
-			// relative position inside the transition.
-			unsigned step = (unsigned) fmod(currentPhase / currentDuration, _sequence.Size());
+			// No transition is ongoing
 			// Find an offset such that
 			// (time + _phaseOffset) % duration = step*duration + stepPhase*old/new
 			// phaseOffset = (step*stepDuration + stepPhase*old/new - time) % duration
-			double newStepDuration = (triggerTime + transitionTime);
-			double newDuration = newStepDuration * _sequence.Size();
-			_phaseOffset = fmod(
+			_phaseOffset = std::fmod(
 				step*newStepDuration + stepPhase*triggerTime/_trigger.DelayInMs() - currentTime, newDuration);
 		}
 		else {
 			// Transition ongoing: shift to the relative position inside the transition
-			double currentTransitionPhase = (stepPhase - _trigger.DelayInMs()) / _transition.LengthInMs();
-			double newTransitionPhase = fmod(currentTime, triggerTime + transitionTime);
-			double transitionOffset =
-				(currentTransitionPhase * transitionTime - newTransitionPhase);
-				
-			double newDuration = (triggerTime + transitionTime) * _sequence.Size();
-			double newPhase = std::fmod(currentTime, newDuration);
-			double stepOffset = currentPhase - newPhase;
-			_phaseOffset = stepOffset + transitionOffset;
+			// Find an offset such that
+			// (time + _phaseOffset) % duration = step*duration + stepPhase*old/new + trigger
+			// phaseOffset = (step*stepDuration + transPhase*old/new + trigger - time) % duration
+			_phaseOffset = std::fmod(
+				step*newStepDuration + (stepPhase-_trigger.DelayInMs())*transitionTime/_transition.LengthInMs() + triggerTime - currentTime, newDuration);
 		}
 		_trigger.SetDelayInMs(triggerTime);
 		_transition.SetLengthInMs(transitionTime);
