@@ -11,6 +11,8 @@
 class DurationInput : public Gtk::HBox
 {
 public:
+	DurationInput(double value);
+	
 	DurationInput(const std::string& label, double value);
 	
 	sigc::signal<void(double)>& SignalValueChanged() { return _signalValueChanged; }
@@ -20,6 +22,8 @@ public:
 	void SetValue(double newValue);
 	
 private:
+	void initialize(double value);
+	
 	static double valueToScale(double value);
 	void onScaleChanged();
 	void onEntryChanged();

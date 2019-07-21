@@ -1,5 +1,7 @@
 #include "propertiesbox.h"
 
+#include "durationinput.h"
+
 #include <gtkmm/stock.h>
 
 PropertiesBox::PropertiesBox() :
@@ -7,7 +9,10 @@ PropertiesBox::PropertiesBox() :
 	_applyButton(Gtk::Stock::APPLY)
 {
 	pack_start(_typeLabel);
-	pack_start(_grid);
+	
+	_grid.set_column_homogeneous(false);
+	_grid.set_column_spacing(0);
+	pack_start(_grid, true, true);
 	
 	_applyButton.set_sensitive(false);
 	_applyButton.signal_clicked().connect(sigc::mem_fun(*this, &PropertiesBox::onApplyClicked));
@@ -58,16 +63,10 @@ void PropertiesBox::fillProperties()
 			_grid.attach(*entry, 1, rowIndex, 1, 1);
 			} break;
 		case Property::Duration: {
-			std::string entryText =
-				std::to_string(_propertySet->GetDuration(property));
+			double duration = _propertySet->GetDuration(property);
 				
-			row._widgets.emplace_back(new Gtk::Label(property.Description()));
-			_grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
-			
-			Gtk::Entry* entry = new Gtk::Entry();
-			row._widgets.emplace_back(entry);
-			entry->set_text(entryText);
-			_grid.attach(*entry, 1, rowIndex, 1, 1);
+			row._widgets.emplace_back(new DurationInput(property.Description(), duration));
+			_grid.attach(*row._widgets.back(), 0, rowIndex, 2, 1);
 			} break;
 		}
 	}
@@ -91,8 +90,8 @@ void PropertiesBox::onApplyClicked()
 			_propertySet->SetControlValue(property, unsigned(std::atof(entryText.c_str())*ControlValue::MaxUInt()/100.0));
 			} break;
 		case Property::Duration: {
-			std::string entryText = static_cast<Gtk::Entry*>(rowIter->_widgets[1].get())->get_text();
-			_propertySet->SetDuration(property, std::atof(entryText.c_str()));
+			double value = static_cast<DurationInput*>(rowIter->_widgets[0].get())->Value();
+			_propertySet->SetDuration(property, value);
 			} break;
 		}
 		++rowIter;

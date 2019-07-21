@@ -10,7 +10,7 @@ class DelayEffectPS final : public PropertySet
 public:
 	DelayEffectPS()
 	{
-		addProperty(Property("delay", "Delay (ms)", Property::Duration));
+		addProperty(Property("delay", "Delay", Property::Duration));
 	}
 	
 protected:

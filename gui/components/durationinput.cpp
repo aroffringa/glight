@@ -11,6 +11,13 @@ const double DurationInput::values[NVALUES] =
 	300000.0
 };
 
+DurationInput::DurationInput(double value) :
+	_label(),
+	_scale(0, NVALUES, 1)
+{
+	initialize(value);
+}
+
 DurationInput::DurationInput(const std::string& label, double value) :
 	_label(label),
 	_scale(0, NVALUES, 1)
@@ -18,6 +25,12 @@ DurationInput::DurationInput(const std::string& label, double value) :
 	_label.set_halign(Gtk::ALIGN_END);
 	pack_start(_label, false, false);
 	
+	initialize(value);
+}
+
+void DurationInput::initialize(double value)
+{
+	_scale.set_size_request(150, 0);
 	_scale.set_value(valueToScale(value));
 	_scale.set_round_digits(0);
 	_scale.set_draw_value(false);

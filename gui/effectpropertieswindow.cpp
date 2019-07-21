@@ -56,9 +56,9 @@ EffectPropertiesWindow::EffectPropertiesWindow(class Effect& effect, Management&
 
 	_propertiesFrame.add(_propertiesBox);
 	
-	_mainHBox.pack_start(_propertiesFrame);
+	_mainHBox.pack_start(_propertiesFrame, true, true);
 	
-	_topBox.pack_start(_mainHBox);
+	_topBox.pack_start(_mainHBox, true, true);
 	
 	add(_topBox);
 	

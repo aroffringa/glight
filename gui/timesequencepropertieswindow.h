@@ -4,6 +4,7 @@
 #include "recursionlock.h"
 #include "propertieswindow.h"
 
+#include "components/durationinput.h"
 #include "components/inputselectwidget.h"
 
 #include "../theatre/timesequence.h"
@@ -42,8 +43,8 @@ private:
 	void onSustainChanged();
 	void onRepeatChanged();
 	void onTriggerTypeChanged();
-	void onTriggerSpeedChanged();
-	void onTransitionSpeedChanged();
+	void onTriggerSpeedChanged(double newValue);
+	void onTransitionSpeedChanged(double newValue);
 	void onTransitionTypeChanged();
 	void onSyncCountChanged();
 	void onBeatSpeedChanged();
@@ -83,7 +84,7 @@ private:
 	Gtk::HScale _maxRepeatCount;
 	
 	Gtk::RadioButton _delayTriggerCheckButton;
-	Gtk::HScale _triggerSpeed;
+	DurationInput _triggerDuration;
 	
 	Gtk::RadioButton _synchronizedTriggerCheckButton;
 	Gtk::HScale _synchronizationsCount;
@@ -92,7 +93,7 @@ private:
 	Gtk::HScale _beatSpeed;
 	
 	Gtk::Label _transitionSpeedLabel;
-	Gtk::HScale _transitionSpeed;
+	DurationInput _transitionDuration;
 	Gtk::HBox _transitionTypeBox;
 	Gtk::Label _transitionTypeLabel;
 	Gtk::RadioButton _transitionNoneRB, _transitionFadeRB, _transitionFadeThroughBlackRB, _transitionErraticRB;
