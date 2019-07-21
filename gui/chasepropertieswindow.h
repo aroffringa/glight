@@ -3,6 +3,8 @@
 
 #include "propertieswindow.h"
 
+#include "components/durationinput.h"
+
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/frame.h>
@@ -23,11 +25,12 @@ public:
 
 	class FolderObject& GetObject() final override;
 	class Chase& GetChase() { return *_chase; }
+	
 private:
 	void loadChaseInfo(class Chase& chase);
 	void onTriggerTypeChanged();
-	void onTriggerSpeedChanged();
-	void onTransitionSpeedChanged();
+	void onTriggerSpeedChanged(double newValue);
+	void onTransitionSpeedChanged(double newValue);
 	void onTransitionTypeChanged();
 	void onSyncCountChanged();
 	void onBeatSpeedChanged();
@@ -42,10 +45,8 @@ private:
 	Gtk::Grid _grid;
 	
 	Gtk::RadioButton _delayTriggerCheckButton;
-	Gtk::Label _triggerSpeedLabel;
-	Gtk::HScale _triggerSpeed;
-	Gtk::Label _transitionSpeedLabel;
-	Gtk::HScale _transitionSpeed;
+	DurationInput _triggerDuration;
+	DurationInput _transitionDuration;
 	Gtk::HBox _transitionTypeBox;
 	Gtk::Label _transitionTypeLabel;
 	Gtk::RadioButton _transitionNoneRB, _transitionFadeRB, _transitionFadeThroughBlackRB, _transitionErraticRB;

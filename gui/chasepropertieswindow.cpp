@@ -9,10 +9,8 @@ ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &man
 	PropertiesWindow(),
 	_frame("Properties of " + chase.Name()),
 	_delayTriggerCheckButton("Delayed trigger"),
-	_triggerSpeedLabel("Trigger speed (ms) :"),
-	_triggerSpeed(1.0, 10000.0, 100.0),
-	_transitionSpeedLabel("Transition speed (ms) :"),
-	_transitionSpeed(0.0, 10000.0, 100.0),
+	_triggerDuration("Trigger duration:", 500.0),
+	_transitionDuration("Transition duration:", 500.0),
 	_transitionTypeLabel("Type:"),
 	_transitionNoneRB("None"),
 	_transitionFadeRB("Fade"),
@@ -40,16 +38,12 @@ ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &man
 	_delayTriggerCheckButton.set_group(group);
 	_delayTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTriggerTypeChanged));
-	_grid.attach(_triggerSpeedLabel, 1, 0, 1, 1);
-	_triggerSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_grid.attach(_triggerSpeed, 2, 0, 1, 1);
-	_triggerSpeed.signal_value_changed().
+	_grid.attach(_triggerDuration, 1, 0, 2, 1);
+	_triggerDuration.SignalValueChanged().
 		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTriggerSpeedChanged));
 
-	_transitionSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_grid.attach(_transitionSpeedLabel, 1, 1, 1, 1);
-	_grid.attach(_transitionSpeed, 2, 1, 1, 1);
-	_transitionSpeed.signal_value_changed().
+	_grid.attach(_transitionDuration, 1, 1, 2, 1);
+	_transitionDuration.SignalValueChanged().
 		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionSpeedChanged));
 	
 	_transitionTypeBox.pack_start(_transitionTypeLabel);
@@ -130,16 +124,36 @@ void ChasePropertiesWindow::onTriggerTypeChanged()
 		_chase->Trigger().SetType(Trigger::BeatTriggered);
 }
 
-void ChasePropertiesWindow::onTriggerSpeedChanged()
+void ChasePropertiesWindow::onTriggerSpeedChanged(double newValue)
 {
-	std::lock_guard<std::mutex> lock(_management->Mutex());
-	_chase->Trigger().SetDelayInMs(_triggerSpeed.get_value());
+	double curTime = _management->GetOffsetTimeInMS();
+	double transitionValue = _transitionDuration.Value();
+	if(newValue == 0.0 && transitionValue == 0.0)
+	{
+		_transitionDuration.SetValue(40.0);
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_chase->ShiftDelayTrigger(newValue, 40.0, curTime);
+	}
+	else {
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_chase->ShiftDelayTrigger(newValue, transitionValue, curTime);
+	}
 }
 
-void ChasePropertiesWindow::onTransitionSpeedChanged()
+void ChasePropertiesWindow::onTransitionSpeedChanged(double newValue)
 {
-	std::lock_guard<std::mutex> lock(_management->Mutex());
-	_chase->Transition().SetLengthInMs(_transitionSpeed.get_value());
+	double curTime = _management->GetOffsetTimeInMS();
+	double triggerValue = _triggerDuration.Value();
+	if(triggerValue == 0.0 && newValue == 0.0)
+	{
+		_triggerDuration.SetValue(40.0);
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_chase->ShiftDelayTrigger(40.0, newValue, curTime);
+	}
+	else {
+		std::lock_guard<std::mutex> lock(_management->Mutex());
+		_chase->ShiftDelayTrigger(triggerValue, newValue, curTime);
+	}
 }
 
 void ChasePropertiesWindow::onTransitionTypeChanged()
@@ -179,8 +193,8 @@ void ChasePropertiesWindow::loadChaseInfo(Chase& chase)
 	double beatSpeed = chase.Trigger().DelayInBeats();
 	double syncSpeed = chase.Trigger().DelayInSyncs();
 	lock.unlock();
-	_triggerSpeed.set_value(triggerSpeed);
-	_transitionSpeed.set_value(transitionSpeed);
+	_triggerDuration.SetValue(triggerSpeed);
+	_transitionDuration.SetValue(transitionSpeed);
 	_beatSpeed.set_value(beatSpeed);
 	_synchronizationsCount.set_value(syncSpeed);
 	switch(triggerType)
