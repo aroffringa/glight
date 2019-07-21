@@ -14,8 +14,8 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	_maxRepeatCB("Max repeats:"),
 	_maxRepeatCount(1.0, 100.0, 1.0),
 	
-	_delayTriggerCheckButton("Delayed trigger, in ms:"),
-	_triggerSpeed(1.0, 10000.0, 100.0),
+	_delayTriggerCheckButton("Delayed trigger (s):"),
+	_triggerDuration(500.0),
 	
 	_synchronizedTriggerCheckButton("Synchronized, count:"),
 	_synchronizationsCount(1.0, 100.0, 1.0),
@@ -23,8 +23,8 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	_beatTriggerCheckButton("Trigger by beat, count:"),
 	_beatSpeed(0.25, 4.0, 0.25),
 	
-	_transitionSpeedLabel("Transition speed (ms) :"),
-	_transitionSpeed(0.0, 10000.0, 100.0),
+	_transitionSpeedLabel("Transition speed"),
+	_transitionDuration("Duration (s):", 500.0),
 	_transitionTypeLabel("Type:"),
 	_transitionNoneRB("None"),
 	_transitionFadeRB("Fade"),
@@ -84,8 +84,8 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	_delayTriggerCheckButton.set_group(group);
 	_delayTriggerCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
-	_grid.attach(_triggerSpeed, 1, 3, 1, 1);
-	_triggerSpeed.signal_value_changed().
+	_grid.attach(_triggerDuration, 1, 3, 1, 1);
+	_triggerDuration.SignalValueChanged().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTriggerSpeedChanged));
 	
 	_grid.attach(_synchronizedTriggerCheckButton, 0, 4, 1, 1);
@@ -108,9 +108,8 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onBeatSpeedChanged));
 	
 	_transitionSpeedLabel.set_halign(Gtk::ALIGN_END);
-	_grid.attach(_transitionSpeedLabel, 0, 6, 1, 1);
-	_grid.attach(_transitionSpeed, 1, 6, 1, 1);
-	_transitionSpeed.signal_value_changed().
+	_grid.attach(_transitionDuration, 0, 6, 2, 1);
+	_transitionDuration.SignalValueChanged().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionSpeedChanged));
 	
 	_transitionTypeBox.pack_start(_transitionTypeLabel);
@@ -293,24 +292,24 @@ void TimeSequencePropertiesWindow::onTriggerTypeChanged()
 	}
 }
 
-void TimeSequencePropertiesWindow::onTriggerSpeedChanged()
+void TimeSequencePropertiesWindow::onTriggerSpeedChanged(double newValue)
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	TimeSequence::Step* step = selectedStep();
 	if(step)
 	{
-		step->trigger.SetDelayInMs(_triggerSpeed.get_value());
+		step->trigger.SetDelayInMs(newValue);
 		fillStepsList();
 	}
 }
 
-void TimeSequencePropertiesWindow::onTransitionSpeedChanged()
+void TimeSequencePropertiesWindow::onTransitionSpeedChanged(double newValue)
 {
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	TimeSequence::Step* step = selectedStep();
 	if(step)
 	{
-		step->transition.SetLengthInMs(_transitionSpeed.get_value());
+		step->transition.SetLengthInMs(newValue);
 		fillStepsList();
 	}
 }
@@ -383,8 +382,8 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step& step)
 	double beatSpeed = step.trigger.DelayInBeats();
 	double syncSpeed = step.trigger.DelayInSyncs();
 	lock.unlock();
-	_triggerSpeed.set_value(triggerSpeed);
-	_transitionSpeed.set_value(transitionSpeed);
+	_triggerDuration.SetValue(triggerSpeed);
+	_transitionDuration.SetValue(transitionSpeed);
 	_beatSpeed.set_value(beatSpeed);
 	_synchronizationsCount.set_value(syncSpeed);
 	switch(triggerType)
@@ -421,13 +420,13 @@ void TimeSequencePropertiesWindow::setStepSensitive(bool sensitive)
 	_removeStepButton.set_sensitive(sensitive);
 	
 	_delayTriggerCheckButton.set_sensitive(sensitive);
-	_triggerSpeed.set_sensitive(sensitive);
+	_triggerDuration.set_sensitive(sensitive);
 	_synchronizedTriggerCheckButton.set_sensitive(sensitive);
 	_synchronizationsCount.set_sensitive(sensitive);
 	_beatTriggerCheckButton.set_sensitive(sensitive);
 	_beatSpeed.set_sensitive(sensitive);
 	_transitionErraticRB.set_sensitive(sensitive);
-	_transitionSpeed.set_sensitive(sensitive);
+	_transitionDuration.set_sensitive(sensitive);
 	_transitionNoneRB.set_sensitive(sensitive);
 	_transitionFadeRB.set_sensitive(sensitive);
 	_transitionFadeThroughBlackRB.set_sensitive(sensitive);
