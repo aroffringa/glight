@@ -41,6 +41,12 @@ class PresetValue {
 		
 		std::string Title() const;
 		
+		void Reconnect(class Controllable &controllable, size_t inputIndex)
+		{
+			_controllable = &controllable;
+			_inputIndex = inputIndex;
+		}
+		
 	private:
 		ControlValue _value;
 		class Controllable *_controllable;

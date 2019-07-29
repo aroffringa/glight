@@ -7,6 +7,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/buttonbox.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
@@ -20,7 +21,7 @@
 */
 class ChasePropertiesWindow : public PropertiesWindow {
 public:
-	ChasePropertiesWindow(class Chase& chase, class Management& management, class ShowWindow& parentWindow);
+	ChasePropertiesWindow(class Chase& chase, class Management& management, class EventTransmitter& eventHub);
 	~ChasePropertiesWindow();
 
 	class FolderObject& GetObject() final override;
@@ -40,8 +41,9 @@ private:
 		_management = &management;
 	}
 	void onUpdateControllables();
+	void onToTimeSequenceClicked();
 	
-	Gtk::Frame _frame;
+	Gtk::VBox _box;
 	Gtk::Grid _grid;
 	
 	Gtk::RadioButton _delayTriggerCheckButton;
@@ -61,9 +63,12 @@ private:
 	Gtk::Label _beatSpeedLabel;
 	Gtk::HScale _beatSpeed;
 	
+	Gtk::HButtonBox _buttonBox;
+	Gtk::Button _toTimeSequenceButton, _closeButton;
+	
 	Chase* _chase;
 	Management* _management;
-	ShowWindow& _parentWindow;
+	EventTransmitter& _eventHub;
 };
 
 #endif

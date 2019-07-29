@@ -46,6 +46,9 @@ public:
 	{ return std::make_pair(_sequence.List()[index].first, _sequence.List()[index].second); }
 	
 	size_t RepeatCount() const { return _repeatCount; }
+	/**
+	 * A repeat count of zero means indefinite.
+	 */
 	void SetRepeatCount(size_t count) { _repeatCount = count; }
 	
 	bool Sustain() const { return _sustain; }

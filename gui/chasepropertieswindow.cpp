@@ -1,13 +1,14 @@
 #include "chasepropertieswindow.h"
-#include "showwindow.h"
+#include "eventtransmitter.h"
 
 #include "../theatre/chase.h"
+#include "../theatre/folder.h"
 #include "../theatre/functiontype.h"
 #include "../theatre/management.h"
+#include "../theatre/timesequence.h"
 
-ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &management, ShowWindow &parentWindow) :
+ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &management, EventTransmitter &eventHub) :
 	PropertiesWindow(),
-	_frame("Properties of " + chase.Name()),
 	_delayTriggerCheckButton("Delayed trigger"),
 	_triggerDuration("Trigger duration:", 500.0),
 	_transitionDuration("Transition duration:", 500.0),
@@ -24,14 +25,18 @@ ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &man
 	_beatTriggerCheckButton("Trigger by beat"),
 	_beatSpeedLabel("Beats per trigger :"),
 	_beatSpeed(0.25, 4.0, 0.25),
+	
+	_toTimeSequenceButton("Convert to time sequence"),
+	_closeButton("Close"),
+	
 	_chase(&chase),
 	_management(&management),
-	_parentWindow(parentWindow)
+	_eventHub(eventHub)
 {
-	parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onChangeManagement));
-	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onUpdateControllables));
+	_eventHub.SignalChangeManagement().connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onChangeManagement));
+	_eventHub.SignalUpdateControllables().connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onUpdateControllables));
 	
-	set_title("glight - " + chase.Name());
+	set_title(chase.Name() + " — glight");
 	
 	Gtk::RadioButtonGroup group;
 	_grid.attach(_delayTriggerCheckButton, 0, 0, 1, 3);
@@ -97,8 +102,18 @@ ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &man
 		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onBeatSpeedChanged));
 	
 	_grid.set_hexpand(true);
-	_frame.add(_grid);
-	add(_frame);
+	_box.pack_start(_grid);
+	
+	_toTimeSequenceButton.signal_clicked().connect([&](){ onToTimeSequenceClicked(); });
+	_buttonBox.pack_start(_toTimeSequenceButton, true, false, 5);
+	
+	_closeButton.set_image_from_icon_name("window-close");
+	_closeButton.signal_clicked().connect([&](){ hide(); });
+	_buttonBox.pack_end(_closeButton, true, false, 5);
+	
+	_box.pack_end(_buttonBox, true, true, 2);
+	
+	add(_box);
 	show_all_children();
 	
 	loadChaseInfo(chase);
@@ -232,4 +247,31 @@ void ChasePropertiesWindow::onUpdateControllables()
 		loadChaseInfo(*_chase);
 	else 
 		hide();
+}
+
+void ChasePropertiesWindow::onToTimeSequenceClicked()
+{
+	TimeSequence& tSequence = _management->AddTimeSequence();
+	tSequence.SetRepeatCount(0);
+	size_t index = 0;
+	for(const std::pair<Controllable*, size_t>& item : _chase->Sequence().List())
+	{
+		tSequence.AddStep(*item.first, item.second);
+		TimeSequence::Step& step = tSequence.GetStep(index);
+		if(_chase->Trigger().Type() == Trigger::DelayTriggered)
+			step.transition = _chase->Transition();
+		else
+			step.transition.SetLengthInMs(0);
+		step.trigger = _chase->Trigger();
+		++index;
+	}
+	Folder& folder = _chase->Parent();
+	std::string name = _chase->Name();
+	PresetValue* preset = _management->GetPresetValue(*_chase, 0);
+	preset->Reconnect(tSequence, 0);
+	_management->RemoveControllable(*_chase);
+	tSequence.SetName(name);
+	folder.Add(tSequence);
+	//_management->AddPreset(tSequence, 0);
+	_eventHub.EmitUpdate();
 }
