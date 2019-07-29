@@ -79,13 +79,26 @@ Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name) :
 			_functions.emplace_back(w);
 		}
 		break;
+		case FixtureType::RGBUVLight4Ch:
+		{
+			FixtureFunction *r, *g, *b, *w;
+			r = new FixtureFunction(_theatre, FunctionType::Red, "R");
+			g = new FixtureFunction(_theatre, FunctionType::Green, "G");
+			b = new FixtureFunction(_theatre, FunctionType::Blue, "B");
+			w = new FixtureFunction(_theatre, FunctionType::UV, "UV");
+			_functions.emplace_back(r);
+			_functions.emplace_back(g);
+			_functions.emplace_back(b);
+			_functions.emplace_back(w);
+		}
+		break;
 		case FixtureType::UVLight3Ch:
 		{
-			FixtureFunction *m, *s, *p;
-			m = new FixtureFunction(_theatre, FunctionType::Master, "M");
+			FixtureFunction *uv, *s, *p;
+			uv = new FixtureFunction(_theatre, FunctionType::UV, "UV");
 			s = new FixtureFunction(_theatre, FunctionType::Strobe, "S");
 			p = new FixtureFunction(_theatre, FunctionType::Pulse, "P");
-			_functions.emplace_back(m);
+			_functions.emplace_back(uv);
 			_functions.emplace_back(s);
 			_functions.emplace_back(p);
 		}

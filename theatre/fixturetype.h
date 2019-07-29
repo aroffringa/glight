@@ -20,6 +20,7 @@ class FixtureType : public FolderObject {
 			RGBALight4Ch,
 			RGBALight5Ch,
 			RGBWLight4Ch,
+			RGBUVLight4Ch,
 			UVLight3Ch,
 			H2ODMXPro,
 			RGB_ADJ_6CH,
@@ -53,6 +54,8 @@ class FixtureType : public FolderObject {
 					return "RGBA light (5ch)";
 				case RGBWLight4Ch:
 					return "RGBW light (4ch)";
+				case RGBUVLight4Ch:
+					return "RGBUV light (4ch)";
 				case UVLight3Ch:
 					return "UV light (3ch)";
 				case H2ODMXPro:
@@ -80,6 +83,7 @@ class FixtureType : public FolderObject {
 				RGBALight4Ch,
 				RGBALight5Ch,
 				RGBWLight4Ch,
+				RGBUVLight4Ch,
 				UVLight3Ch,
 				H2ODMXPro,
 				RGB_ADJ_6CH,
@@ -104,6 +108,7 @@ class FixtureType : public FolderObject {
 				case RGBALight4Ch:
 				case RGBALight5Ch:
 				case RGBWLight4Ch:
+				case RGBUVLight4Ch:
 				case UVLight3Ch:
 				case H2ODMXPro:
 				case RGB_ADJ_6CH:
@@ -189,6 +194,16 @@ inline Color FixtureType::GetColor(const Fixture &fixture, const ValueSnapshot &
 				(fixture.Functions()[0]->GetValue(snapshot) + w/2)*2/3,
 				(fixture.Functions()[1]->GetValue(snapshot) + w/2)*2/3,
 				(fixture.Functions()[2]->GetValue(snapshot) + w/2)*2/3
+			);
+			break;
+		}
+		case RGBUVLight4Ch:
+		{
+			unsigned char uv = fixture.Functions()[3]->GetValue(snapshot);
+			return Color(
+				(fixture.Functions()[0]->GetValue(snapshot) + uv/3)/2,
+				(fixture.Functions()[1]->GetValue(snapshot))/2,
+				(fixture.Functions()[2]->GetValue(snapshot) + uv)/2
 			);
 			break;
 		}
