@@ -10,8 +10,8 @@ class FadeEffectPS final : public PropertySet
 public:
 	FadeEffectPS()
 	{
-		addProperty(Property("upspeed", "Up fading speed", Property::Duration));
-		addProperty(Property("downspeed", "Down fading speed", Property::Duration));
+		addProperty(Property("upduration", "Up fading duration", Property::Duration));
+		addProperty(Property("downduration", "Down fading duration", Property::Duration));
 		addProperty(Property("sustaintime", "Sustain time", Property::Duration));
 	}
 	
@@ -20,8 +20,8 @@ protected:
 	{
 		FadeEffect& fadefx = static_cast<FadeEffect&>(object);
 		switch(index) {
-			case 0: fadefx.SetFadeUpSpeed(value); break;
-			case 1: fadefx.SetFadeDownSpeed(value); break;
+			case 0: fadefx.SetFadeUpDuration(value); break;
+			case 1: fadefx.SetFadeDownDuration(value); break;
 			case 2: fadefx.SetSustain(value); break;
 		}
 	}
@@ -30,8 +30,8 @@ protected:
 	{
 		const FadeEffect& fadefx = static_cast<const FadeEffect&>(object);
 		switch(index) {
-			case 0: return fadefx.FadeUpSpeed();
-			case 1: return fadefx.FadeDownSpeed();
+			case 0: return fadefx.FadeUpDuration();
+			case 1: return fadefx.FadeDownDuration();
 			case 2: return fadefx.Sustain();
 		}
 		return 0;

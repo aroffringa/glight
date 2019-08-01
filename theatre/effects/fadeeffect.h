@@ -19,14 +19,14 @@ public:
 	
 	virtual Effect::Type GetType() const override { return FadeType; }
 	
-	double FadeUpSpeed() const { return _fadeUpSpeed; }
-	void SetFadeUpSpeed(double speed) { _fadeUpSpeed = speed; }
+	double FadeUpDuration() const { return _fadeUpSpeed==0.0 ? 0.0 : 1.0e3 / _fadeUpSpeed; }
+	void SetFadeUpDuration(double durationMS) { _fadeUpSpeed = durationMS == 0.0 ? 0.0 : 1.0e3 / durationMS; }
 	
-	double FadeDownSpeed() const { return _fadeDownSpeed; }
-	void SetFadeDownSpeed(double speed) { _fadeDownSpeed = speed; }
+	double FadeDownDuration() const { return _fadeDownSpeed==0.0 ? 0.0 : 1.0e3 / _fadeDownSpeed; }
+	void SetFadeDownDuration(double durationMS) { _fadeDownSpeed = durationMS == 0.0 ? 0.0 : 1.0e3 / durationMS; }
 	
-	double Sustain() const { return _sustain; }
-	void SetSustain(double sustain) { _sustain = sustain; }
+	double Sustain() const { return _sustain * 1e3; }
+	void SetSustain(double sustainMS) { _sustain = 1e-3 * sustainMS; }
 	
 protected:
 	virtual void mix(const ControlValue* values, unsigned*, unsigned, const Timing& timing) final override
