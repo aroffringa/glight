@@ -53,9 +53,14 @@ public:
 			_minCount = colors.size();
 		_allEqual.set_active(false);
 		_widgets.clear();
-		for(const Color& color : colors)
+		for(size_t i=0; i!=colors.size(); ++i)
 		{
+			const Color& color = colors[i];
 			_widgets.emplace_back(new ColorSelectWidget(_parent));
+			if(i == 0)
+			{
+				_widgets.back()->SignalColorChanged().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
+			}
 			_widgets.back()->SetColor(color);
 			pack_start(*_widgets.back(), true, false);
 			_widgets.back()->show();
