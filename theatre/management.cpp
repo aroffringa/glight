@@ -218,9 +218,11 @@ void Management::RemoveFolder(Folder& folder)
 {
 	if(&folder == _rootFolder)
 		throw std::runtime_error("Can not remove root folder");
-	for(FolderObject* object : folder.Children())
+	// Removing a child might remove dependent children from the same folder
+	// so we have to recheck whether the folder is empty after each removal
+	while(!folder.Children().empty())
 	{
-		RemoveObject(*object);
+		RemoveObject(*folder.Children().back());
 	}
 	folder.Parent().Remove(folder);
 	for(auto iter = _folders.begin(); iter != _folders.end(); ++iter)
