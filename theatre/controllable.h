@@ -42,6 +42,14 @@ public:
 		}
 	}
 	
+	std::string InputName(size_t index) const
+	{
+		if(NInputs() == 1)
+			return Name();
+		else
+			return Name() + " (" + AbbreviatedFunctionType(InputType(index)) + ")";
+	}
+	
 	void MixInput(size_t index, const ControlValue& value)
 	{
 		unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(), value.UInt(), ControlValue::Default);
@@ -66,14 +74,6 @@ public:
 	char VisitLevel() const { return _visitLevel; }
 	
 	void SetVisitLevel(char visitLevel) { _visitLevel = visitLevel; }
-	
-	std::string InputName(size_t index) const
-	{
-		if(NInputs() == 1)
-			return Name();
-		else
-			return Name() + " (" + AbbreviatedFunctionType(InputType(index)) + ")";
-	}
 	
 private:
 	ControlValue _inputValue;

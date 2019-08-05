@@ -83,7 +83,7 @@ public:
 	ControlValue& InputValue(size_t index) final override
 	{ return _inputValues[index]; }
 	
-	virtual FunctionType InputType(size_t) const final override
+	virtual FunctionType InputType(size_t) const override
 	{ return FunctionType::Master; }
 	
 	size_t NOutputs() const final override
@@ -101,8 +101,6 @@ public:
 	
 protected:
 	virtual void mix(const ControlValue* inputValues, unsigned* channelValues, unsigned universe, const class Timing& timing) = 0;
-	
-	virtual std::string getControlName(size_t index) const = 0;
 	
 	void setConnectedInputs(const ControlValue& value) const
 	{
