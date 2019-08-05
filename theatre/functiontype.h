@@ -17,7 +17,8 @@ enum class FunctionType
 	Pulse, 
 	Rotation, 
 	Pan, 
-	Tilt
+	Tilt,
+	Effect
 };
 
 inline char AbbreviatedFunctionType(FunctionType functionType)
@@ -37,6 +38,7 @@ inline char AbbreviatedFunctionType(FunctionType functionType)
 		case FunctionType::Rotation: return 'O';
 		case FunctionType::Pan: return '>';
 		case FunctionType::Tilt: return '/';
+		case FunctionType::Effect : return 'E';
 	}
 	return 0;
 }
@@ -58,6 +60,7 @@ inline std::string FunctionTypeDescription(FunctionType functionType)
 		case FunctionType::Rotation: return "Rotation";
 		case FunctionType::Pan: return "Pan";
 		case FunctionType::Tilt: return "Tilt";
+		case FunctionType::Effect: return "Effect";
 	}
 	return "?";
 }

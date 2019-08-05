@@ -39,6 +39,7 @@ public:
 			case FunctionType::Rotation: 
 			case FunctionType::Pan: 
 			case FunctionType::Tilt:
+			case FunctionType::Effect:
 				return Color::White();
 			case FunctionType::Red:
 				return Color::RedC();

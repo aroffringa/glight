@@ -93,9 +93,6 @@ protected:
 		}
 	}
 	
-	virtual std::string getControlName(size_t) const final override
-	{ return Name() + "_M"; }
-	
 private:
 	bool _isActive;
 	double _startTime;

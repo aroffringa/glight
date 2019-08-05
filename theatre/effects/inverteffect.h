@@ -9,7 +9,7 @@ class InvertEffect : public Effect
 {
 public:
 	InvertEffect() :
-		Effect(1),
+		Effect(2),
 		_offThreshold(ControlValue::MaxUInt()*2/100) // 2 %
 	{ }
 	
@@ -21,15 +21,20 @@ public:
 protected:
 	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const class Timing& timing) final override
 	{
-		ControlValue inverted = ControlValue::MaxUInt() - values[0].UInt();
-		if(inverted.UInt() < _offThreshold)
+		unsigned inverted = ControlValue::MaxUInt() - values[0].UInt();
+		if(inverted < _offThreshold)
 			inverted = ControlValue::Zero();
+		ControlValue value = ControlValue::Mix(values[1].UInt(), inverted, ControlValue::Multiply);
 		for(const std::pair<Controllable*,size_t>& connection : Connections())
-			connection.first->MixInput(connection.second, inverted);
+			connection.first->MixInput(connection.second, value);
 	}
 	
-	virtual std::string getControlName(size_t) const final override { return Name() + "_M"; }
-	
+	virtual FunctionType InputType(size_t inputIndex) const override
+	{
+		return inputIndex == 0 ?
+			FunctionType::Effect :
+			FunctionType::Master;
+	}
 private:
 	unsigned _offThreshold;
 };

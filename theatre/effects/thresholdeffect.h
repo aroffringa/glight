@@ -68,8 +68,6 @@ protected:
 		}
 	}
 	
-	virtual std::string getControlName(size_t) const final override { return Name() + "_M"; }
-	
 private:
 	unsigned
 		_lowerStartLimit, _lowerEndLimit,
