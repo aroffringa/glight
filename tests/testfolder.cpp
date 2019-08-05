@@ -1,5 +1,9 @@
+#include "../theatre/chase.h"
+#include "../theatre/fixturecontrol.h"
 #include "../theatre/folder.h"
 #include "../theatre/management.h"
+#include "../theatre/theatre.h"
+#include "../theatre/timesequence.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -167,6 +171,38 @@ BOOST_AUTO_TEST_CASE( FolderManagement )
 	BOOST_CHECK_EQUAL(&management.GetObjectFromPath("a"), &root);
 	Folder& folderB = management.AddFolder(root, "b");
 	BOOST_CHECK_EQUAL(&management.GetObjectFromPath("a/b"), &folderB);
+}
+
+BOOST_AUTO_TEST_CASE( RemoveFolder )
+{
+	// Test removal of a folder that contains dependencies to
+	// other dependent items
+	
+	Management management;
+	Folder& root = management.RootFolder();
+	FixtureType& fixtureType = management.Theatre().AddFixtureType(FixtureType::Light1Ch);
+	Fixture& fixture = management.Theatre().AddFixture(fixtureType);
+	FixtureControl& control = management.AddFixtureControl(fixture, root);
+	
+	Folder& folder = management.AddFolder(root, "Folder");
+	TimeSequence& ts1 = management.AddTimeSequence();
+	ts1.SetName("ts1");
+	folder.Add(ts1);
+	
+	Chase& c = management.AddChase();
+	c.SetName("c");
+	folder.Add(c);
+	c.Sequence().Add(control, 0);
+	
+	ts1.AddStep(c, 0);
+	
+	TimeSequence& ts2 = management.AddTimeSequence();
+	ts2.SetName("ts2");
+	folder.Add(ts2);
+	ts2.AddStep(c, 0);
+	
+	management.RemoveFolder(folder);
+	BOOST_CHECK_EQUAL(management.Folders().size(), 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
