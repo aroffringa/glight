@@ -16,7 +16,14 @@ class PresetValue {
 			: _value(0), _controllable(&controllable), _inputIndex(inputIndex)
 		{ }
 		
-		PresetValue(const PresetValue &source) = default;
+		/**
+		 * Copy the preset value. The delete signal is not copied.
+		 */
+		PresetValue(const PresetValue& source) :
+			_value(source._value),
+			_controllable(source._controllable),
+			_inputIndex(source._inputIndex)
+		{ }
 		
 		/**
 		 * Copy constructor that copies the source but associates it with the given controllable.
