@@ -1,10 +1,12 @@
 #include "faderwindow.h"
 #include "faderwidget.h"
-#include "showwindow.h"
 
-#include "../theatre/management.h"
-#include "../theatre/presetvalue.h"
-#include "../theatre/chase.h"
+#include "../eventtransmitter.h"
+#include "../guistate.h"
+
+#include "../../theatre/management.h"
+#include "../../theatre/presetvalue.h"
+#include "../../theatre/chase.h"
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
@@ -20,7 +22,7 @@ const char FaderWindow::_keyRowsLower[3][10] = {
 	{ 'a','s','d','f','g','h','j','k','l',';' },
 	{ 'q','w','e','r','t','y','u','i','o','p' } };
 
-FaderWindow::FaderWindow(class ShowWindow* showWindow, class Management &management, size_t keyRowIndex)
+FaderWindow::FaderWindow(EventTransmitter& eventHub, GUIState& guiState, Management& management, size_t keyRowIndex)
   : _management(&management),
 	_keyRowIndex(keyRowIndex),
 	_faderSetupLabel("Fader setup: "),
@@ -37,7 +39,8 @@ FaderWindow::FaderWindow(class ShowWindow* showWindow, class Management &managem
 	_miAdd5Faders("Add 5 faders"),
 	_miRemoveFader("Remove fader"),
 	_miRemove5Faders("Remove 5 faders"),
-	_showWindow(showWindow),
+	_eventHub(eventHub),
+	_guiState(guiState),
 	_state(nullptr),
 	_lastUpdateTime(boost::posix_time::microsec_clock::local_time())
 {
@@ -49,13 +52,13 @@ FaderWindow::~FaderWindow()
 {
 	_faderSetupChangeConnection.disconnect();
 	_state->isActive = false;
-	_showWindow->State().EmitFaderSetupChangeSignal();
+	_guiState.EmitFaderSetupChangeSignal();
 }
 
 void FaderWindow::LoadNew()
 {
-	_showWindow->State().FaderSetups().emplace_back(new FaderSetupState());
-	_state = _showWindow->State().FaderSetups().back().get();
+	_guiState.FaderSetups().emplace_back(new FaderSetupState());
+	_state = _guiState.FaderSetups().back().get();
 	_state->name = "Unnamed fader setup";
 	_state->isActive = true;
 	for(size_t i=0; i!=10; ++i)
@@ -81,7 +84,7 @@ void FaderWindow::initializeWidgets()
 {
 	set_title("Glight - controls");
 	
-	_faderSetupChangeConnection = _showWindow->State().FaderSetupSignalChange().connect(sigc::mem_fun(*this, &FaderWindow::updateFaderSetupList));
+	_faderSetupChangeConnection = _guiState.FaderSetupSignalChange().connect(sigc::mem_fun(*this, &FaderWindow::updateFaderSetupList));
 	
 	signal_configure_event().connect(sigc::mem_fun(*this, &FaderWindow::onResize), false);
 	
@@ -199,7 +202,7 @@ void FaderWindow::addControl()
 	}
 	bool hasKey = _controls.size()<10 && _keyRowIndex<3;
 	char key = hasKey ? _keyRowsLower[_keyRowIndex][_controls.size()] : ' ';
-	std::unique_ptr<FaderWidget> control(new FaderWidget(*_management, *_showWindow, key));
+	std::unique_ptr<FaderWidget> control(new FaderWidget(*_management, _eventHub, key));
 	control->SetFadeDownSpeed(mapSliderToSpeed(getFadeInSpeed()));
 	control->SetFadeUpSpeed(mapSliderToSpeed(getFadeOutSpeed()));
 	size_t controlIndex = _controls.size();
@@ -245,7 +248,7 @@ void FaderWindow::onAssignClicked()
 		for(size_t i=0; i!=n; ++i)
 		{
 			PresetValue* p = _management->PresetValues()[i].get();
-			if(!_showWindow->State().IsAssigned(p))
+			if(!_guiState.IsAssigned(p))
 			{
 				_controls[controlIndex]->Assign(p, true);
 				++controlIndex;
@@ -384,7 +387,7 @@ void FaderWindow::onNameButtonClicked()
 	if(result == Gtk::RESPONSE_OK)
 	{
 		_state->name = entry.get_text();
-		_showWindow->State().EmitFaderSetupChangeSignal();
+		_guiState.EmitFaderSetupChangeSignal();
 	}
 }
 
@@ -392,8 +395,8 @@ void FaderWindow::onNewFaderSetupButtonClicked()
 {
 	RecursionLock::Token token(_recursionLock);
 	_state->isActive = false;
-	_showWindow->State().FaderSetups().emplace_back(new FaderSetupState());
-	_state = _showWindow->State().FaderSetups().back().get();
+	_guiState.FaderSetups().emplace_back(new FaderSetupState());
+	_state = _guiState.FaderSetups().back().get();
 	_state->isActive = true;
 	_state->name = "Unnamed fader setup";
 	for(size_t i=0; i!=10; ++i)
@@ -410,9 +413,8 @@ void FaderWindow::onNewFaderSetupButtonClicked()
 void FaderWindow::updateFaderSetupList()
 {
 	RecursionLock::Token token(_recursionLock);
-	GUIState& state = _showWindow->State();
 	_faderSetupList->clear();
-	for(const std::unique_ptr<FaderSetupState>& fState : state.FaderSetups())
+	for(const std::unique_ptr<FaderSetupState>& fState : _guiState.FaderSetups())
 	{
 		bool itsMe = fState.get() == _state;
 		if(!fState->isActive || itsMe)
@@ -443,7 +445,7 @@ void FaderWindow::onFaderSetupChanged()
 		
 		token.Release();
 		
-		_showWindow->State().EmitFaderSetupChangeSignal();
+		_guiState.EmitFaderSetupChangeSignal();
 	}
 }
 

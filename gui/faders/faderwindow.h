@@ -16,7 +16,7 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "recursionlock.h"
+#include "../recursionlock.h"
 
 /**
 	@author Andre Offringa
@@ -26,7 +26,7 @@ class FaderWindow  : public Gtk::Window {
 		/**
 		 * Construct a fader window with a new, empty fader setup.
 		 */
-		FaderWindow(class ShowWindow* showWindow, class Management& management, size_t keyRowIndex);
+		FaderWindow(class EventTransmitter& showWindow, class GUIState& guiState, class Management& management, size_t keyRowIndex);
 		
 		~FaderWindow();
 		
@@ -112,7 +112,8 @@ class FaderWindow  : public Gtk::Window {
 		Gtk::MenuItem _miAddFader, _miAdd5Faders, _miRemoveFader, _miRemove5Faders;
 		
 		std::vector<std::unique_ptr<class FaderWidget>> _controls;
-		class ShowWindow* _showWindow;
+		class EventTransmitter& _eventHub;
+		class GUIState& _guiState;
 		class FaderSetupState* _state;
 		RecursionLock _recursionLock;
 		sigc::connection _faderSetupChangeConnection, _timeoutConnection;

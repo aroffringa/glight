@@ -6,10 +6,11 @@
 
 #include "configurationwindow.h"
 #include "designwizard.h"
-#include "faderwindow.h"
 #include "objectlistframe.h"
 #include "sceneframe.h"
 #include "visualizationwindow.h"
+
+#include "faders/faderwindow.h"
 
 #include "../theatre/dmxdevice.h"
 #include "../theatre/management.h"
@@ -104,7 +105,7 @@ void ShowWindow::addFaderWindow(FaderSetupState* stateOrNull)
 			}
 		}
 	}
-	_faderWindows.emplace_back(new FaderWindow(this, *_management, nextControlKeyRow()));
+	_faderWindows.emplace_back(new FaderWindow(*this, _state, *_management, nextControlKeyRow()));
 	FaderWindow *newWindow = _faderWindows.back().get();
 	if(stateOrNull == nullptr)
 		newWindow->LoadNew();

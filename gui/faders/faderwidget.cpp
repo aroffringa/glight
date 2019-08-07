@@ -1,10 +1,10 @@
 #include "faderwidget.h"
 
-#include "dialogs/inputselectdialog.h"
+#include "../dialogs/inputselectdialog.h"
 
-#include "../theatre/presetvalue.h"
-#include "../theatre/management.h"
-#include "../theatre/controllable.h"
+#include "../../theatre/presetvalue.h"
+#include "../../theatre/management.h"
+#include "../../theatre/controllable.h"
 
 #define MAX_SCALE_VALUE_DEF (1<<24)
 
