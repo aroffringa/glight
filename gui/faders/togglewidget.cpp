@@ -35,16 +35,17 @@ ToggleWidget::ToggleWidget(class Management &management, EventTransmitter& event
 	_box.pack_start(_onCheckButton, false, false, 3);
 	_onCheckButton.show();
 
-	//pack_start(_eventBox, false, false, 0);
-	_eventBox.set_events(Gdk::BUTTON_PRESS_MASK);
-	_eventBox.show();
-
-	_eventBox.signal_button_press_event().
-		connect(sigc::mem_fun(*this, &ToggleWidget::onNameLabelClicked));
+	_nameLabel.set_halign(Gtk::ALIGN_START);
+	_nameLabel.set_justify(Gtk::JUSTIFY_LEFT);
 	_eventBox.add(_nameLabel);
-	_box.pack_start(_eventBox, true, true, 0);
 	_nameLabel.show();
 	
+	_eventBox.set_events(Gdk::BUTTON_PRESS_MASK);
+	_eventBox.signal_button_press_event().
+		connect(sigc::mem_fun(*this, &ToggleWidget::onNameLabelClicked));
+	_eventBox.show();
+	_box.pack_start(_eventBox, true, true, 0);
+
 	add(_box);
 	_box.show();
 }
