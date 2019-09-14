@@ -446,11 +446,16 @@ void Writer::writeFaderState(const FaderSetupState& guiState)
 	writeAttribute("name", guiState.name);
 	writeAttribute("active", guiState.isActive);
 	writeAttribute("solo", guiState.isSolo);
+	writeAttribute("fade-in", guiState.fadeInSpeed);
+	writeAttribute("fade-out", guiState.fadeOutSpeed);
 	writeAttribute("width", guiState.width);
 	writeAttribute("height", guiState.height);
 	for(const FaderState& fader : guiState.faders)
 	{
 		startElement("fader");
+		writeAttribute("is-toggle", fader.IsToggleButton());
+		if(fader.IsToggleButton())
+			writeAttribute("new-toggle-column", fader.NewToggleButtonColumn());
 		if(fader.GetPresetValue() != nullptr)
 		{
 			writeAttribute("input-index", fader.GetPresetValue()->InputIndex());

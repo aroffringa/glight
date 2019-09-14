@@ -507,6 +507,10 @@ void Reader::parseGUIFaders(xmlNode* node, GUIState& guiState)
 	fader.name = getStringAttribute(node, "name");
 	fader.isActive = getBoolAttribute(node, "active");
 	fader.isSolo = getBoolAttribute(node, "solo");
+	if(hasAttribute(node, "fade-in"))
+		fader.fadeInSpeed = getIntAttribute(node, "fade-in");
+	if(hasAttribute(node, "fade-out"))
+		fader.fadeOutSpeed = getIntAttribute(node, "fade-out");
 	fader.width = getIntAttribute(node, "width");
 	fader.height = getIntAttribute(node, "height");
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)
@@ -536,4 +540,9 @@ void Reader::parseGUIPresetRef(xmlNode* node, FaderSetupState& fader)
 	else {
 		fader.faders.emplace_back(nullptr);
 	}
+	FaderState& state = fader.faders.back();
+	if(hasAttribute(node, "is-toggle"))
+		state.SetIsToggleButton(getBoolAttribute(node, "is-toggle"));
+	if(hasAttribute(node, "new-toggle-column"))
+		state.SetNewToggleButtonColumn(getBoolAttribute(node, "new-toggle-column"));
 }

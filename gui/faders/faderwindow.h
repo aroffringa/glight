@@ -16,7 +16,7 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "recursionlock.h"
+#include "../recursionlock.h"
 
 /**
 	@author Andre Offringa
@@ -26,14 +26,13 @@ class FaderWindow  : public Gtk::Window {
 		/**
 		 * Construct a fader window with a new, empty fader setup.
 		 */
-		FaderWindow(class ShowWindow* showWindow, class Management& management, size_t keyRowIndex);
+		FaderWindow(class EventTransmitter& showWindow, class GUIState& guiState, class Management& management, size_t keyRowIndex);
 		
 		~FaderWindow();
 		
 		void LoadNew();
 		void LoadState(class FaderSetupState* state);
 
-		void Update();
 		bool HandleKeyDown(char key);
 		bool HandleKeyUp(char key);
 		bool IsAssigned(class PresetValue* presetValue);
@@ -53,13 +52,25 @@ class FaderWindow  : public Gtk::Window {
 		void initializeWidgets();
 		void initializeMenu();
 		
-		void onAddFaderClicked() { addControl(); }
+		void onAddFaderClicked() { addControl(false, false); }
 		void onAdd5FadersClicked()
 		{
 			for(size_t i=0; i!=5; ++i)
-				addControl();
+				addControl(false, false);
 		}
-		void onRemoveFaderClicked();
+		void onAdd5ToggleControlsClicked()
+		{
+			for(size_t i=0; i!=5; ++i)
+				addControl(true, false);
+		}
+		void onAddToggleClicked() { addControl(true, false); }
+		void onAddToggleColumnClicked() { addControl(true, true); }
+		void removeFader();
+		void onRemoveFaderClicked()
+		{
+			if(!_controls.empty())
+				removeFader();
+		}
 		void onRemove5FadersClicked()
 		{
 			for(size_t i=0; i!=5; ++i)
@@ -72,7 +83,7 @@ class FaderWindow  : public Gtk::Window {
 		void onSoloToggled();
 		void onNameButtonClicked();
 		void onNewFaderSetupButtonClicked();
-		void onControlValueChanged(double newValue, class FaderWidget* widget);
+		void onControlValueChanged(double newValue, class ControlWidget* widget);
 		void onControlAssigned(size_t widgetIndex);
 		bool onResize(GdkEventConfigure *event);
 		double mapSliderToSpeed(int sliderVal);
@@ -81,7 +92,7 @@ class FaderWindow  : public Gtk::Window {
 		void onChangeDownSpeed();
 		bool onTimeout() { updateValues(); return true; }
 		
-		void addControl();
+		void addControl(bool isToggle, bool newToggleColumn);
 		
 		void onFaderSetupChanged();
 		void updateFaderSetupList();
@@ -109,10 +120,12 @@ class FaderWindow  : public Gtk::Window {
 		Gtk::SeparatorMenuItem _miSep1;
 		Gtk::MenuItem _miAssign, _miAssignChases, _miClear;
 		Gtk::SeparatorMenuItem _miSep2;
-		Gtk::MenuItem _miAddFader, _miAdd5Faders, _miRemoveFader, _miRemove5Faders;
+		Gtk::MenuItem _miAddFader, _miAdd5Faders, _miAddToggleButton, _miAdd5ToggleButtons, _miAddToggleColumn, _miRemoveFader, _miRemove5Faders;
 		
-		std::vector<std::unique_ptr<class FaderWidget>> _controls;
-		class ShowWindow* _showWindow;
+		std::vector<std::unique_ptr<class ControlWidget>> _controls;
+		std::vector<Gtk::VBox> _toggleColumns;
+		class EventTransmitter& _eventHub;
+		class GUIState& _guiState;
 		class FaderSetupState* _state;
 		RecursionLock _recursionLock;
 		sigc::connection _faderSetupChangeConnection, _timeoutConnection;

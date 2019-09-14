@@ -4,7 +4,7 @@ Glight allows a computer with DMX interface to act as a DMX controller for live 
 Glight is specifically aimed at shows or events in which the lighting is controlled live. Any DMX device can be controlled, but Glight was in particular written for controlling less advanced lighting devices, such as light spots and pars, RGB LED lights/uplighting, etc. The development of Glight is focussed on Linux, makes use of the GTK toolkit and is written in C++. The following features are provided:
 
 * Create scenes and chases and control these live; or design fully audio-annotated shows that run automatically.
-* Several audio effects, including an accurate beat finder. This enables chases to follow the beat of the music. Glight makes use of the [Aubio](https://aubio.org/) beatfinding library, which enables true "musically"-aware chases that run very stably (in contrast to the "trigger on loud sounds" feature which is found on many light controllers).
+* Several audio effects, including an accurate beat finder. This enables chases to follow the beat of the music. Glight makes use of the [Aubio](https://aubio.org/) beatfinding library, which enables true "musically"-aware chases that run very stable (in contrast to the "trigger on loud sounds" feature which is found on many light controllers).
 * High performance C++ code requires minimal system performance.
 * The interface is carefully designed, with clearly visible key-bindings to adjust sliders, for careful and precise live control of lights.
 * Faders can be grouped, fader groups can be quickly hidden and shown, and faders can be set to auto-fade (up/down separately) and solo (for cross-fading).

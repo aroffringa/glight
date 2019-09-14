@@ -35,8 +35,6 @@ set(GUIFILES
   gui/createchasedialog.cpp
   gui/designwizard.cpp
   gui/effectpropertieswindow.cpp
-  gui/faderwidget.cpp
-  gui/faderwindow.cpp
   gui/guistate.cpp
   gui/nameframe.cpp
   gui/objectlistframe.cpp
@@ -49,7 +47,11 @@ set(GUIFILES
   gui/components/foldercombo.cpp
   gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp
-  gui/dialogs/inputselectdialog.cpp)
+  gui/dialogs/inputselectdialog.cpp
+  gui/faders/controlwidget.cpp
+  gui/faders/faderwidget.cpp
+  gui/faders/faderwindow.cpp
+  gui/faders/togglewidget.cpp)
 
 set(SYSTEMFILES
   system/audioplayer.cpp
