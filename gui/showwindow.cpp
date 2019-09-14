@@ -86,8 +86,6 @@ ShowWindow::~ShowWindow()
 
 void ShowWindow::EmitUpdate()
 {
-	for(std::unique_ptr<FaderWindow>& fw : _faderWindows)
-		fw->Update();
 	_sceneFrame->Update();
 	_signalUpdateControllables();
 }

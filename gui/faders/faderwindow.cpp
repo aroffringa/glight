@@ -186,14 +186,6 @@ bool FaderWindow::onResize(GdkEventConfigure *event)
 	return false;
 }
 
-void FaderWindow::Update()
-{
-	for(std::unique_ptr<FaderWidget>& cWidget : _controls)
-	{
-		cWidget->Update();
-	}
-}
-
 void FaderWindow::addControl()
 {
 	if(_recursionLock.IsFirst())
@@ -202,7 +194,10 @@ void FaderWindow::addControl()
 	}
 	bool hasKey = _controls.size()<10 && _keyRowIndex<3;
 	char key = hasKey ? _keyRowsLower[_keyRowIndex][_controls.size()] : ' ';
-	std::unique_ptr<FaderWidget> control(new FaderWidget(*_management, _eventHub, key));
+	
+	std::unique_ptr<ControlWidget> control(new FaderWidget(*_management, _eventHub, key));
+	Gtk::Widget* nameLabel = &static_cast<FaderWidget*>(control.get())->NameLabel();
+	
 	control->SetFadeDownSpeed(mapSliderToSpeed(getFadeInSpeed()));
 	control->SetFadeUpSpeed(mapSliderToSpeed(getFadeOutSpeed()));
 	size_t controlIndex = _controls.size();
@@ -210,9 +205,9 @@ void FaderWindow::addControl()
 	control->SignalAssigned().connect(sigc::bind(sigc::mem_fun(*this, &FaderWindow::onControlAssigned), controlIndex));
 	
 	_controlGrid.attach(*control, _controls.size()*2+1, 0, 2, 1);
-	control->NameLabel().set_hexpand(true);
+	nameLabel->set_hexpand(true);
 	bool even = _controls.size()%2==0;
-	_controlGrid.attach(control->NameLabel(), _controls.size()*2, even ? 1 : 2, 4, 1);
+	_controlGrid.attach(*nameLabel, _controls.size()*2, even ? 1 : 2, 4, 1);
 	
 	control->show();
 	_controls.emplace_back(std::move(control));
@@ -239,7 +234,7 @@ bool FaderWindow::onMenuButtonClicked(GdkEventButton* event)
 
 void FaderWindow::onAssignClicked()
 {
-	for(std::unique_ptr<FaderWidget>& c : _controls)
+	for(std::unique_ptr<ControlWidget>& c : _controls)
 		c->Unassign();
 	size_t n = _management->PresetValues().size();
 	if(!_controls.empty())
@@ -261,7 +256,7 @@ void FaderWindow::onAssignClicked()
 
 void FaderWindow::onClearClicked()
 {
-	for(std::unique_ptr<FaderWidget>& c : _controls)
+	for(std::unique_ptr<ControlWidget>& c : _controls)
 		c->Unassign();
 }
 
@@ -293,7 +288,7 @@ void FaderWindow::onSoloToggled()
 	}
 }
 
-void FaderWindow::onControlValueChanged(double newValue, FaderWidget* widget)
+void FaderWindow::onControlValueChanged(double newValue, ControlWidget* widget)
 {
 	if(_miSolo.get_active())
 	{
@@ -303,10 +298,10 @@ void FaderWindow::onControlValueChanged(double newValue, FaderWidget* widget)
 		if(_recursionLock.IsFirst())
 		{
 			RecursionLock::Token token(_recursionLock);
-			double limitValue = FaderWidget::MAX_SCALE_VALUE() - newValue - FaderWidget::MAX_SCALE_VALUE()*0.01;
+			double limitValue = ControlWidget::MAX_SCALE_VALUE() - newValue - ControlWidget::MAX_SCALE_VALUE()*0.01;
 			if(limitValue < 0.0)
 				limitValue = 0.0;
-			for(std::unique_ptr<FaderWidget>& c : _controls)
+			for(std::unique_ptr<ControlWidget>& c : _controls)
 			{
 				if(c.get() != widget)
 					c->Limit(limitValue);
@@ -365,7 +360,7 @@ bool FaderWindow::HandleKeyUp(char key)
 
 bool FaderWindow::IsAssigned(PresetValue* presetValue)
 {
-	for(std::unique_ptr<FaderWidget>& c : _controls)
+	for(std::unique_ptr<ControlWidget>& c : _controls)
 	{
 		if(c->Preset() == presetValue)
 			return true;
@@ -468,7 +463,7 @@ void FaderWindow::updateValues()
 	boost::posix_time::ptime currentTime(boost::posix_time::microsec_clock::local_time());
 	double timePassed = (double) (currentTime - _lastUpdateTime).total_microseconds() * 1e-6;
 	_lastUpdateTime = std::move(currentTime);
-	for(std::unique_ptr<FaderWidget>& cw : _controls)
+	for(std::unique_ptr<ControlWidget>& cw : _controls)
 	{
 		cw->UpdateValue(timePassed);
 	}
@@ -516,7 +511,7 @@ void FaderWindow::onChangeDownSpeed()
 {
 	double speed = mapSliderToSpeed(getFadeOutSpeed());
 
-	for(std::unique_ptr<FaderWidget>& cw : _controls)
+	for(std::unique_ptr<ControlWidget>& cw : _controls)
 		cw->SetFadeDownSpeed(speed);
 }
 
@@ -524,14 +519,14 @@ void FaderWindow::onChangeUpSpeed()
 {
 	double speed = mapSliderToSpeed(getFadeInSpeed());
 	
-	for(std::unique_ptr<FaderWidget>& cw : _controls)
+	for(std::unique_ptr<ControlWidget>& cw : _controls)
 		cw->SetFadeUpSpeed(speed);
 }
 
 void FaderWindow::ChangeManagement(class Management& management, bool moveSliders)
 {
 	_management = &management;
-	for(std::unique_ptr<FaderWidget>& cw : _controls)
+	for(std::unique_ptr<ControlWidget>& cw : _controls)
 	{
 		cw->ChangeManagement(management, moveSliders);
 	}

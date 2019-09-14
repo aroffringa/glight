@@ -48,6 +48,7 @@ set(GUIFILES
   gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp
   gui/dialogs/inputselectdialog.cpp
+  gui/faders/controlwidget.cpp
   gui/faders/faderwidget.cpp
   gui/faders/faderwindow.cpp)
 

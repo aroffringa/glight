@@ -1,45 +1,43 @@
 #include "faderwidget.h"
 
+#include "../eventtransmitter.h"
+
 #include "../dialogs/inputselectdialog.h"
 
 #include "../../theatre/presetvalue.h"
 #include "../../theatre/management.h"
 #include "../../theatre/controllable.h"
 
-#define MAX_SCALE_VALUE_DEF (1<<24)
-
 FaderWidget::FaderWidget(class Management &management, EventTransmitter& eventHub, char key) :
-  _scale(0, MAX_SCALE_VALUE_DEF, MAX_SCALE_VALUE_DEF/100),
+  _scale(0, ControlValue::MaxUInt()+1, (ControlValue::MaxUInt()+1)/100),
 	_flashButton(std::string(1, key)),
 	_nameLabel("<..>"),
 	_management(&management),
 	_eventHub(eventHub),
 	_preset(nullptr),
-	_fadeUpSpeed(0.0),
-	_fadeDownSpeed(0.0),
-	_fadingValue(0),
-	_targetValue(0),
 	_holdUpdates(false)
 {
+	_eventHub.SignalUpdateControllables().connect( [&](){ onUpdate(); } );
+	
 	_scale.set_inverted(true);
 	_scale.set_draw_value(false);
 	_scale.set_vexpand(true);
 	_scale.signal_value_changed().
 		connect(sigc::mem_fun(*this, &FaderWidget::onScaleChange));
-	pack_start(_scale, true, true, 0);
+	_box.pack_start(_scale, true, true, 0);
 	_scale.show();
 
 	_flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
 	_flashButton.signal_button_press_event().connect(sigc::mem_fun(*this, &FaderWidget::onFlashButtonPressed), false);
 	_flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
 	_flashButton.signal_button_release_event().connect(sigc::mem_fun(*this, &FaderWidget::onFlashButtonReleased), false);
-	pack_start(_flashButton, false, false, 0);
+	_box.pack_start(_flashButton, false, false, 0);
 	_flashButton.show();
 
 	_onCheckButton.set_halign(Gtk::ALIGN_CENTER);
 	_onCheckButton.signal_clicked().
 		connect(sigc::mem_fun(*this, &FaderWidget::onOnButtonClicked));
-	pack_start(_onCheckButton, false, false, 0);
+	_box.pack_start(_onCheckButton, false, false, 0);
 	_onCheckButton.show();
 
 	//pack_start(_eventBox, false, false, 0);
@@ -50,15 +48,13 @@ FaderWidget::FaderWidget(class Management &management, EventTransmitter& eventHu
 		connect(sigc::mem_fun(*this, &FaderWidget::onNameLabelClicked));
 	_eventBox.add(_nameLabel);
 	_nameLabel.show();
+	
+	add(_box);
+	_box.show();
 }
 
 FaderWidget::~FaderWidget()
 { }
-
-double FaderWidget::MAX_SCALE_VALUE()
-{
-	return MAX_SCALE_VALUE_DEF;
-}
 
 void FaderWidget::onOnButtonClicked()
 {
@@ -66,19 +62,19 @@ void FaderWidget::onOnButtonClicked()
 	{
 		_holdUpdates = true;
 		if(_onCheckButton.get_active())
-			_scale.set_value(MAX_SCALE_VALUE_DEF-1);
+			_scale.set_value(ControlValue::MaxUInt());
 		else
 			_scale.set_value(0);
 		_holdUpdates = false;
 
-		writeValue();
+		writeValue(_scale.get_value());
 		_signalValueChange.emit(_scale.get_value());
 	}
 }
 
 bool FaderWidget::onFlashButtonPressed(GdkEventButton* event)
 {
-	_scale.set_value(MAX_SCALE_VALUE_DEF-1);
+	_scale.set_value(ControlValue::MaxUInt());
 	return false;
 }
 
@@ -96,7 +92,7 @@ void FaderWidget::onScaleChange()
 		_onCheckButton.set_active(_scale.get_value() != 0);
 		_holdUpdates = false;
 
-		writeValue();
+		writeValue(_scale.get_value());
 		_signalValueChange.emit(_scale.get_value());
 	}
 }
@@ -111,21 +107,6 @@ bool FaderWidget::onNameLabelClicked(GdkEventButton* event)
 	return true;
 }
 
-void FaderWidget::writeValue()
-{
-	_targetValue = _scale.get_value();
-	double fadeSpeed =
-		(_targetValue > _fadingValue) ? _fadeUpSpeed : _fadeDownSpeed;
-	if(fadeSpeed == 0.0)
-	{
-		_fadingValue = _targetValue;
-		if(_preset != nullptr)
-		{
-			_preset->Value().Set(_targetValue);
-		}
-	}
-}
-
 void FaderWidget::Assign(PresetValue* item, bool moveFader)
 {
 	if(item != _preset)
@@ -136,21 +117,21 @@ void FaderWidget::Assign(PresetValue* item, bool moveFader)
 			_nameLabel.set_text(_preset->Title());
 			if(moveFader)
 			{
-				_fadingValue = _preset->Value().UInt();
+				immediateAssign(_preset->Value().UInt());
 				_scale.set_value(_preset->Value().UInt());
 			}
 			else
-				writeValue();
+				writeValue(_scale.get_value());
 		}
 		else {
 			_nameLabel.set_text("<..>");
 			if(moveFader)
 			{
-				_fadingValue = 0;
+				immediateAssign(0);
 				_scale.set_value(0);
 			}
 			else
-				writeValue();
+				writeValue(_scale.get_value());
 		}
 		_signalAssigned();
 		if(moveFader)
@@ -158,7 +139,7 @@ void FaderWidget::Assign(PresetValue* item, bool moveFader)
 	}
 }
 
-void FaderWidget::Update()
+void FaderWidget::onUpdate()
 {
 	if(_preset != nullptr)
 	{
@@ -183,46 +164,12 @@ void FaderWidget::Toggle()
 
 void FaderWidget::FullOn()
 {
-	_scale.set_value(MAX_SCALE_VALUE_DEF-1);
+	_scale.set_value(ControlValue::MaxUInt());
 }
 
 void FaderWidget::FullOff()
 {
 	_scale.set_value(0);
-}
-
-void FaderWidget::UpdateValue(double timePassed)
-{
-	if(_targetValue != _fadingValue)
-	{
-		_targetValue = _scale.get_value();
-		double fadeSpeed =
-			(_targetValue > _fadingValue) ? _fadeUpSpeed : _fadeDownSpeed;
-		if(fadeSpeed == 0.0)
-		{
-			_fadingValue = _targetValue;
-		}
-		else {
-			unsigned stepSize = unsigned(std::min<double>(timePassed * fadeSpeed * double(MAX_SCALE_VALUE_DEF), double(MAX_SCALE_VALUE_DEF)));
-			if(_targetValue > _fadingValue)
-			{
-				if(_fadingValue + stepSize > _targetValue)
-					_fadingValue = _targetValue;
-				else
-					_fadingValue += stepSize;
-			}
-			else {
-				if(_targetValue + stepSize > _fadingValue)
-					_fadingValue = _targetValue;
-				else
-					_fadingValue -= stepSize;
-			}
-		}
-		if(_preset != nullptr)
-		{
-			_preset->Value().Set(_fadingValue);
-		}
-	}
 }
 
 void FaderWidget::ChangeManagement(class Management& management, bool moveSliders)

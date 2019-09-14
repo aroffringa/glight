@@ -33,7 +33,6 @@ class FaderWindow  : public Gtk::Window {
 		void LoadNew();
 		void LoadState(class FaderSetupState* state);
 
-		void Update();
 		bool HandleKeyDown(char key);
 		bool HandleKeyUp(char key);
 		bool IsAssigned(class PresetValue* presetValue);
@@ -72,7 +71,7 @@ class FaderWindow  : public Gtk::Window {
 		void onSoloToggled();
 		void onNameButtonClicked();
 		void onNewFaderSetupButtonClicked();
-		void onControlValueChanged(double newValue, class FaderWidget* widget);
+		void onControlValueChanged(double newValue, class ControlWidget* widget);
 		void onControlAssigned(size_t widgetIndex);
 		bool onResize(GdkEventConfigure *event);
 		double mapSliderToSpeed(int sliderVal);
@@ -111,7 +110,7 @@ class FaderWindow  : public Gtk::Window {
 		Gtk::SeparatorMenuItem _miSep2;
 		Gtk::MenuItem _miAddFader, _miAdd5Faders, _miRemoveFader, _miRemove5Faders;
 		
-		std::vector<std::unique_ptr<class FaderWidget>> _controls;
+		std::vector<std::unique_ptr<class ControlWidget>> _controls;
 		class EventTransmitter& _eventHub;
 		class GUIState& _guiState;
 		class FaderSetupState* _state;
