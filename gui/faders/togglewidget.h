@@ -24,11 +24,7 @@ public:
 		return _preset;
 	}
 	
-	virtual void Limit(double value) final override
-	{
-		if(value > 0.0)
-			_onCheckButton.set_active(false);
-	}
+	virtual void Limit(double value) final override;
 	virtual void ChangeManagement(class Management& management, bool moveSliders) final override;
 	
 private:

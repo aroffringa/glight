@@ -190,3 +190,9 @@ void ToggleWidget::ChangeManagement(class Management& management, bool moveSlide
 		}
 	}
 }
+
+void ToggleWidget::Limit(double value)
+{
+	if(value < ControlValue::MaxUInt())
+		_onCheckButton.set_active(false);
+}
