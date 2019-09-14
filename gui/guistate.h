@@ -45,11 +45,13 @@ class FaderSetupState
 public:
 	FaderSetupState() :
 		isActive(false), isSolo(false),
+		fadeInSpeed(0), fadeOutSpeed(0),
 		width(0), height(0)
 	{ }
 	std::string name;
 	bool isActive;
 	bool isSolo;
+	size_t fadeInSpeed, fadeOutSpeed;
 	size_t width, height;
 	
 	bool IsAssigned(const class PresetValue* p) const

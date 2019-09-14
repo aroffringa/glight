@@ -38,7 +38,8 @@ FaderWindow::FaderWindow(EventTransmitter& eventHub, GUIState& guiState, Managem
 	_miClear("Clear"),
 	_miAddFader("Add fader"),
 	_miAdd5Faders("Add 5 faders"),
-	_miAddToggle("Add toggle control"),
+	_miAddToggleButton("Add toggle control"),
+	_miAdd5ToggleButtons("Add 5 toggle controls"),
 	_miAddToggleColumn("Add toggle column"),
 	_miRemoveFader("Remove 1"),
 	_miRemove5Faders("Remove 5"),
@@ -170,8 +171,11 @@ void FaderWindow::initializeMenu()
 	_miAdd5Faders.signal_activate().connect([&](){ onAdd5FadersClicked(); });
 	_popupMenu.append(_miAdd5Faders);
 
-	_miAddToggle.signal_activate().connect([&](){ onAddToggleClicked(); });
-	_popupMenu.append(_miAddToggle);
+	_miAddToggleButton.signal_activate().connect([&](){ onAddToggleClicked(); });
+	_popupMenu.append(_miAddToggleButton);
+
+	_miAdd5ToggleButtons.signal_activate().connect([&](){ onAdd5ToggleControlsClicked(); });
+	_popupMenu.append(_miAdd5ToggleButtons);
 
 	_miAddToggleColumn.signal_activate().connect([&](){ onAddToggleColumnClicked(); });
 	_popupMenu.append(_miAddToggleColumn);
@@ -485,14 +489,15 @@ void FaderWindow::onFaderSetupChanged()
 void FaderWindow::loadState()
 {
 	_miSolo.set_active(_state->isSolo);
+	_miFadeInOption[_state->fadeInSpeed].set_active(true);
+	_miFadeOutOption[_state->fadeOutSpeed].set_active(true);
 	
-	while(!_controls.empty())
-		removeFader();
+	_toggleColumns.clear();
+	_controls.clear();
 	for(FaderState& state : _state->faders)
 	{
 		addControl(state.IsToggleButton(), state.NewToggleButtonColumn());
 	}
-	_controls.resize(_state->faders.size()); // remove controls if there were too many
 	
 	resize(_state->width, _state->height);
 	
@@ -551,7 +556,8 @@ std::string FaderWindow::speedLabel(int value)
 
 void FaderWindow::onChangeDownSpeed()
 {
-	double speed = mapSliderToSpeed(getFadeOutSpeed());
+	_state->fadeOutSpeed = getFadeOutSpeed();
+	double speed = mapSliderToSpeed(_state->fadeOutSpeed);
 
 	for(std::unique_ptr<ControlWidget>& cw : _controls)
 		cw->SetFadeDownSpeed(speed);
@@ -559,7 +565,8 @@ void FaderWindow::onChangeDownSpeed()
 
 void FaderWindow::onChangeUpSpeed()
 {
-	double speed = mapSliderToSpeed(getFadeInSpeed());
+	_state->fadeInSpeed = getFadeInSpeed();
+	double speed = mapSliderToSpeed(_state->fadeInSpeed);
 	
 	for(std::unique_ptr<ControlWidget>& cw : _controls)
 		cw->SetFadeUpSpeed(speed);

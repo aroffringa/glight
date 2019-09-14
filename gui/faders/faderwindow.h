@@ -58,6 +58,11 @@ class FaderWindow  : public Gtk::Window {
 			for(size_t i=0; i!=5; ++i)
 				addControl(false, false);
 		}
+		void onAdd5ToggleControlsClicked()
+		{
+			for(size_t i=0; i!=5; ++i)
+				addControl(true, false);
+		}
 		void onAddToggleClicked() { addControl(true, false); }
 		void onAddToggleColumnClicked() { addControl(true, true); }
 		void removeFader();
@@ -115,7 +120,7 @@ class FaderWindow  : public Gtk::Window {
 		Gtk::SeparatorMenuItem _miSep1;
 		Gtk::MenuItem _miAssign, _miAssignChases, _miClear;
 		Gtk::SeparatorMenuItem _miSep2;
-		Gtk::MenuItem _miAddFader, _miAdd5Faders, _miAddToggle, _miAddToggleColumn, _miRemoveFader, _miRemove5Faders;
+		Gtk::MenuItem _miAddFader, _miAdd5Faders, _miAddToggleButton, _miAdd5ToggleButtons, _miAddToggleColumn, _miRemoveFader, _miRemove5Faders;
 		
 		std::vector<std::unique_ptr<class ControlWidget>> _controls;
 		std::vector<Gtk::VBox> _toggleColumns;
