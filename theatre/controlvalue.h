@@ -48,14 +48,19 @@ class ControlValue {
 					else
 						return firstValue;
 				case Multiply:
-					firstValue >>= 9;
-					secondValue >>= 9;
-					return (firstValue * secondValue) >> 6;
+					return MultiplyValues(firstValue, secondValue);
 				case First:
 					return firstValue;
 				case Second:
 					return secondValue;
 			}
+		}
+		
+		static unsigned MultiplyValues(unsigned first, unsigned second)
+		{
+			first >>= 9;
+			second >>= 9;
+			return (first * second) >> 6;
 		}
 		
 		static MixStyle CombineMixStyles(MixStyle primaryStyle, MixStyle secondaryStyle)
