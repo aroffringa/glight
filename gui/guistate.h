@@ -12,7 +12,11 @@ class FaderState
 {
 public:
 	explicit FaderState(class PresetValue* pv);
-	FaderState() : _presetValue(nullptr) { }
+	FaderState() :
+		_presetValue(nullptr),
+		_isToggleButton(false),
+		_newToggleButtonColumn(false)
+	{ }
 	FaderState(const FaderState& source);
 	
 	FaderState& operator=(const FaderState& rhs);
@@ -20,13 +24,19 @@ public:
 	~FaderState() { _presetValueDeletedConnection.disconnect(); }
 	void SetPresetValue(class PresetValue* presetValue);
 	void SetNoPresetValue() { SetPresetValue(nullptr); }
+	void SetIsToggleButton(bool isToggle) { _isToggleButton = isToggle; }
+	void SetNewToggleButtonColumn(bool newColumn) { _newToggleButtonColumn = newColumn; }
 	
-	// This might return a nullptr to indicate an unset controls.
+	// This might return a nullptr to indicate an unset control.
 	class PresetValue* GetPresetValue() const { return _presetValue; }
+	bool IsToggleButton() const { return _isToggleButton; }
+	bool NewToggleButtonColumn() const { return _newToggleButtonColumn; }
 	
 private:
 	void onPresetValueDeleted();
 	class PresetValue* _presetValue;
+	bool _isToggleButton;
+	bool _newToggleButtonColumn;
 	sigc::connection _presetValueDeletedConnection;
 };
 

@@ -5,14 +5,16 @@
 #include "../theatre/presetvalue.h"
 
 FaderState::FaderState(class PresetValue* presetValue) :
-	_presetValue(presetValue)
+	_presetValue(presetValue), _isToggleButton(false), _newToggleButtonColumn(false)
 {
 	if(presetValue != nullptr)
 		_presetValueDeletedConnection = presetValue->SignalDelete().connect([&](){ onPresetValueDeleted(); } );
 }
 
 FaderState::FaderState(const FaderState& source) :
-	_presetValue(source._presetValue)
+	_presetValue(source._presetValue),
+	_isToggleButton(source._isToggleButton),
+	_newToggleButtonColumn(source._newToggleButtonColumn)
 {
 	if(_presetValue != nullptr)
 		_presetValueDeletedConnection = _presetValue->SignalDelete().connect([&](){ onPresetValueDeleted(); } );

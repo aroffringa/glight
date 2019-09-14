@@ -1,5 +1,6 @@
 #include "faderwindow.h"
 #include "faderwidget.h"
+#include "togglewidget.h"
 
 #include "../eventtransmitter.h"
 #include "../guistate.h"
@@ -37,8 +38,10 @@ FaderWindow::FaderWindow(EventTransmitter& eventHub, GUIState& guiState, Managem
 	_miClear("Clear"),
 	_miAddFader("Add fader"),
 	_miAdd5Faders("Add 5 faders"),
-	_miRemoveFader("Remove fader"),
-	_miRemove5Faders("Remove 5 faders"),
+	_miAddToggle("Add toggle control"),
+	_miAddToggleColumn("Add toggle column"),
+	_miRemoveFader("Remove 1"),
+	_miRemove5Faders("Remove 5"),
 	_eventHub(eventHub),
 	_guiState(guiState),
 	_state(nullptr),
@@ -167,6 +170,12 @@ void FaderWindow::initializeMenu()
 	_miAdd5Faders.signal_activate().connect([&](){ onAdd5FadersClicked(); });
 	_popupMenu.append(_miAdd5Faders);
 
+	_miAddToggle.signal_activate().connect([&](){ onAddToggleClicked(); });
+	_popupMenu.append(_miAddToggle);
+
+	_miAddToggleColumn.signal_activate().connect([&](){ onAddToggleColumnClicked(); });
+	_popupMenu.append(_miAddToggleColumn);
+
 	_miRemoveFader.signal_activate().connect([&](){ onRemoveFaderClicked(); });
 	_popupMenu.append(_miRemoveFader);
 
@@ -186,17 +195,31 @@ bool FaderWindow::onResize(GdkEventConfigure *event)
 	return false;
 }
 
-void FaderWindow::addControl()
+void FaderWindow::addControl(bool isToggle, bool newToggleColumn)
 {
+	if(_toggleColumns.empty())
+		newToggleColumn = true;
 	if(_recursionLock.IsFirst())
 	{
 		_state->faders.emplace_back();
+		FaderState& state = _state->faders.back();
+		state.SetIsToggleButton(isToggle);
+		state.SetNewToggleButtonColumn(newToggleColumn);
 	}
 	bool hasKey = _controls.size()<10 && _keyRowIndex<3;
 	char key = hasKey ? _keyRowsLower[_keyRowIndex][_controls.size()] : ' ';
 	
-	std::unique_ptr<ControlWidget> control(new FaderWidget(*_management, _eventHub, key));
-	Gtk::Widget* nameLabel = &static_cast<FaderWidget*>(control.get())->NameLabel();
+	Gtk::Widget* nameLabel;
+	std::unique_ptr<ControlWidget> control;
+	if(isToggle)
+	{
+		control.reset(new ToggleWidget(*_management, _eventHub, key));
+		nameLabel = nullptr;
+	}
+	else {
+		control.reset(new FaderWidget(*_management, _eventHub, key));
+		nameLabel = &static_cast<FaderWidget*>(control.get())->NameLabel();
+	}
 	
 	control->SetFadeDownSpeed(mapSliderToSpeed(getFadeInSpeed()));
 	control->SetFadeUpSpeed(mapSliderToSpeed(getFadeOutSpeed()));
@@ -204,22 +227,37 @@ void FaderWindow::addControl()
 	control->SignalValueChange().connect(sigc::bind(sigc::mem_fun(*this, &FaderWindow::onControlValueChanged), control.get()));
 	control->SignalAssigned().connect(sigc::bind(sigc::mem_fun(*this, &FaderWindow::onControlAssigned), controlIndex));
 	
-	_controlGrid.attach(*control, _controls.size()*2+1, 0, 2, 1);
-	nameLabel->set_hexpand(true);
-	bool even = _controls.size()%2==0;
-	_controlGrid.attach(*nameLabel, _controls.size()*2, even ? 1 : 2, 4, 1);
+	if(isToggle)
+	{
+		if(newToggleColumn)
+		{
+			_toggleColumns.emplace_back();
+			unsigned hpos = _controls.size() + _toggleColumns.size();
+			_controlGrid.attach(_toggleColumns.back(), hpos*2+1, 0, 2, 1);
+			_toggleColumns.back().show();
+		}
+		_toggleColumns.back().pack_start(*control);
+	}
+	else {
+		unsigned hpos = _controls.size() + _toggleColumns.size();
+		_controlGrid.attach(*control, hpos*2+1, 0, 2, 1);
+		
+		nameLabel->set_hexpand(true);
+		bool even = _controls.size()%2==0;
+		_controlGrid.attach(*nameLabel, hpos*2, even ? 1 : 2, 4, 1);
+	}
 	
 	control->show();
 	_controls.emplace_back(std::move(control));
 }
 
-void FaderWindow::onRemoveFaderClicked()
+void FaderWindow::removeFader()
 {
-	if(_controls.size() > 1)
-	{
-		_controls.pop_back();
-		_state->faders.pop_back();
-	}
+	FaderState& state = _state->faders.back();
+	if(state.IsToggleButton() && state.NewToggleButtonColumn())
+		_toggleColumns.pop_back();
+	_controls.pop_back();
+	_state->faders.pop_back();
 }
 
 bool FaderWindow::onMenuButtonClicked(GdkEventButton* event)
@@ -448,8 +486,12 @@ void FaderWindow::loadState()
 {
 	_miSolo.set_active(_state->isSolo);
 	
-	while(_controls.size() < _state->faders.size())
-		addControl();
+	while(!_controls.empty())
+		removeFader();
+	for(FaderState& state : _state->faders)
+	{
+		addControl(state.IsToggleButton(), state.NewToggleButtonColumn());
+	}
 	_controls.resize(_state->faders.size()); // remove controls if there were too many
 	
 	resize(_state->width, _state->height);

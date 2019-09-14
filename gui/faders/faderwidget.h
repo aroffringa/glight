@@ -9,8 +9,6 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/eventbox.h>
 
-#include <memory>
-
 /**
 	@author Andre Offringa
 */
@@ -50,14 +48,12 @@ private:
 	Gtk::EventBox _eventBox;
 	Gtk::Label _nameLabel;
 
+	sigc::connection _updateConnection;
 	class Management* _management;
 	class EventTransmitter& _eventHub;
 	class PresetValue* _preset;
 
 	bool _holdUpdates;
-	
-	sigc::signal<void, double> _signalValueChange;
-	sigc::signal<void> _signalAssigned;
 };
 
 #endif

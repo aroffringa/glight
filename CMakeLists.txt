@@ -50,7 +50,8 @@ set(GUIFILES
   gui/dialogs/inputselectdialog.cpp
   gui/faders/controlwidget.cpp
   gui/faders/faderwidget.cpp
-  gui/faders/faderwindow.cpp)
+  gui/faders/faderwindow.cpp
+  gui/faders/togglewidget.cpp)
 
 set(SYSTEMFILES
   system/audioplayer.cpp

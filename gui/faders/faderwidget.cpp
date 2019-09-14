@@ -17,7 +17,7 @@ FaderWidget::FaderWidget(class Management &management, EventTransmitter& eventHu
 	_preset(nullptr),
 	_holdUpdates(false)
 {
-	_eventHub.SignalUpdateControllables().connect( [&](){ onUpdate(); } );
+	_updateConnection = _eventHub.SignalUpdateControllables().connect( [&](){ onUpdate(); } );
 	
 	_scale.set_inverted(true);
 	_scale.set_draw_value(false);
@@ -54,7 +54,9 @@ FaderWidget::FaderWidget(class Management &management, EventTransmitter& eventHu
 }
 
 FaderWidget::~FaderWidget()
-{ }
+{
+	_updateConnection.disconnect();
+}
 
 void FaderWidget::onOnButtonClicked()
 {
@@ -68,7 +70,7 @@ void FaderWidget::onOnButtonClicked()
 		_holdUpdates = false;
 
 		writeValue(_scale.get_value());
-		_signalValueChange.emit(_scale.get_value());
+		SignalValueChange().emit(_scale.get_value());
 	}
 }
 
@@ -93,7 +95,7 @@ void FaderWidget::onScaleChange()
 		_holdUpdates = false;
 
 		writeValue(_scale.get_value());
-		_signalValueChange.emit(_scale.get_value());
+		SignalValueChange().emit(_scale.get_value());
 	}
 }
 
@@ -133,9 +135,9 @@ void FaderWidget::Assign(PresetValue* item, bool moveFader)
 			else
 				writeValue(_scale.get_value());
 		}
-		_signalAssigned();
+		SignalAssigned().emit();
 		if(moveFader)
-			_signalValueChange.emit(_scale.get_value());
+			SignalValueChange().emit(_scale.get_value());
 	}
 }
 
