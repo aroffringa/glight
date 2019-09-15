@@ -68,6 +68,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 		
 	signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+	signal_delete_event().connect(sigc::mem_fun(*this, &ShowWindow::onDelete));
 }
 
 
@@ -133,7 +134,7 @@ void ShowWindow::onVisualizationWindowButtonClicked()
 		_visualizationWindow->hide();
 }
 
-bool ShowWindow::onKeyDown(GdkEventKey *event)
+bool ShowWindow::onKeyDown(GdkEventKey* event)
 {
 	if(_sceneFrame->HandleKeyDown(event->keyval))
 		return true;
@@ -144,13 +145,28 @@ bool ShowWindow::onKeyDown(GdkEventKey *event)
 	return handled;
 }
 
-bool ShowWindow::onKeyUp(GdkEventKey *event)
+bool ShowWindow::onKeyUp(GdkEventKey* event)
 {
 	bool handled = false;
 	for(std::unique_ptr<FaderWindow>& cw : _faderWindows)
 		if(!handled)
 			handled = cw->HandleKeyUp(event->keyval);
 	return handled;
+}
+
+bool ShowWindow::onDelete(GdkEventAny*)
+{
+	if(_management->IsEmpty())
+		return false;
+	else
+	{
+		Gtk::MessageDialog dialog(*this, "Are you sure you want to close glight?",
+			false, Gtk::MESSAGE_QUESTION,
+			Gtk::BUTTONS_OK_CANCEL);
+		dialog.set_secondary_text("All lights will be stopped.");
+		int result = dialog.run();
+		return result != Gtk::RESPONSE_OK;
+	}
 }
 
 void ShowWindow::createMenu()
@@ -210,11 +226,26 @@ void ShowWindow::createMenu()
 
 void ShowWindow::onMINewClicked()
 {
-	std::unique_lock<std::mutex> lock(_management->Mutex());
-	_management->Clear();
-	lock.unlock();
+	bool confirmed = false;
+	if(_management->IsEmpty())
+		confirmed = true;
+	else
+	{
+		Gtk::MessageDialog dialog(*this, "Are you sure you want to start a new show?",
+			false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
+		dialog.set_secondary_text("All lights will be stopped.");
+		int result = dialog.run();
+		confirmed = (result == Gtk::RESPONSE_OK);
+	}
+	
+	if(confirmed)
+	{
+		std::unique_lock<std::mutex> lock(_management->Mutex());
+		_management->Clear();
+		lock.unlock();
 
-	EmitUpdate();
+		EmitUpdate();
+	}
 }
 
 void ShowWindow::OpenFile(const std::string& filename)
@@ -257,20 +288,35 @@ void ShowWindow::OpenFile(const std::string& filename)
 
 void ShowWindow::onMIOpenClicked()
 {
-	Gtk::FileChooserDialog dialog(*this, "Open glight show", Gtk::FILE_CHOOSER_ACTION_OPEN);
+	bool confirmed = false;
+	if(_management->IsEmpty())
+		confirmed = true;
+	else
+	{
+		Gtk::MessageDialog dialog(*this, "Are you sure you want to open a new show?",
+			false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
+		dialog.set_secondary_text("Lights will change to the new show.");
+		int result = dialog.run();
+		confirmed = (result == Gtk::RESPONSE_OK);
+	}
 	
-	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	dialog.add_button("Open", Gtk::RESPONSE_OK);
-	
-	Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
-	filter->set_name("Glight show");
-	filter->add_pattern("*.gshow");
-	filter->add_mime_type("text/gshow+xml");
-	dialog.add_filter(filter);
-	
-	int result = dialog.run();
-	if(result == Gtk::RESPONSE_OK)
-		OpenFile(dialog.get_filename());
+	if(confirmed)
+	{
+		Gtk::FileChooserDialog dialog(*this, "Open glight show", Gtk::FILE_CHOOSER_ACTION_OPEN);
+		
+		dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+		dialog.add_button("Open", Gtk::RESPONSE_OK);
+		
+		Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
+		filter->set_name("Glight show");
+		filter->add_pattern("*.gshow");
+		filter->add_mime_type("text/gshow+xml");
+		dialog.add_filter(filter);
+		
+		int result = dialog.run();
+		if(result == Gtk::RESPONSE_OK)
+			OpenFile(dialog.get_filename());
+	}
 }
 
 void ShowWindow::onMISaveClicked()

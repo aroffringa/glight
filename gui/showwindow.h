@@ -56,6 +56,7 @@ private:
 
 	bool onKeyDown(GdkEventKey *event);
 	bool onKeyUp(GdkEventKey *event);
+	bool onDelete(GdkEventAny *event);
 	
 	void createMenu();
 
