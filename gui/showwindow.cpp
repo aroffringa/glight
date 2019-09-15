@@ -52,6 +52,8 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_configurationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 
 	_visualizationWindow.reset(new VisualizationWindow(_management.get(), this));
+	_visualizationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
+	_visualizationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 	
 	createMenu();
 	
@@ -136,13 +138,24 @@ void ShowWindow::onVisualizationWindowButtonClicked()
 
 bool ShowWindow::onKeyDown(GdkEventKey* event)
 {
-	if(_sceneFrame->HandleKeyDown(event->keyval))
-		return true;
-	bool handled = false;
-	for(std::unique_ptr<FaderWindow>& cw : _faderWindows)
-		if(!handled)
-			handled = cw->HandleKeyDown(event->keyval);
-	return handled;
+	if(event->keyval == '1')
+		_management->IncreaseManualBeat(1);
+	else if(event->keyval == '2')
+		_management->IncreaseManualBeat(2);
+	else if(event->keyval == '3')
+		_management->IncreaseManualBeat(3);
+	else if(event->keyval == '4')
+		_management->IncreaseManualBeat(4);
+	else {
+		if(_sceneFrame->HandleKeyDown(event->keyval))
+			return true;
+		bool handled = false;
+		for(std::unique_ptr<FaderWindow>& cw : _faderWindows)
+			if(!handled)
+				handled = cw->HandleKeyDown(event->keyval);
+		return !handled;
+	}
+	return false;
 }
 
 bool ShowWindow::onKeyUp(GdkEventKey* event)

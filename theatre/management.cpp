@@ -22,6 +22,9 @@ Management::Management() :
 	_isQuitting(false),
 	_createTime(boost::posix_time::microsec_clock::local_time()),
 	_rndDistribution(0, ControlValue::MaxUInt()+1),
+	_overridenBeat(0),
+	_lastOverridenBeatTime(0.0),
+	
 	_theatre(new class Theatre()),
 	_snapshot(new ValueSnapshot()),
 	_show(new class Show(*this))
@@ -132,7 +135,16 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned* values, uns
 	double relTimeInMs = GetOffsetTimeInMS();
 	double beatValue, beatConfidence;
 	unsigned audioLevel;
-	if(_beatFinder)
+	if(relTimeInMs - _lastOverridenBeatTime < 3000.0 && _overridenBeat != 0)
+	{
+		beatConfidence = 1.0;
+		beatValue = _overridenBeat;
+		if(_beatFinder)
+			audioLevel = _beatFinder->GetAudioLevel();
+		else
+			audioLevel = 0;
+	}
+	else if(_beatFinder)
 	{
 		_beatFinder->GetBeatValue(beatValue, beatConfidence);
 		audioLevel = _beatFinder->GetAudioLevel();

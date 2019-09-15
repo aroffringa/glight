@@ -1,10 +1,11 @@
 #ifndef MANAGEMENT_H
 #define MANAGEMENT_H
 
-#include <vector>
-#include <thread>
+#include <atomic>
 #include <mutex>
 #include <random>
+#include <thread>
+#include <vector>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
@@ -112,6 +113,12 @@ class Management {
 		
 		bool HasCycle() const;
 		
+		void IncreaseManualBeat(unsigned count = 1)
+		{
+			_overridenBeat += count;
+			_lastOverridenBeatTime = GetOffsetTimeInMS();
+		}
+		
 	private:
 		struct ManagementThread {
 			Management *parent;
@@ -142,6 +149,8 @@ class Management {
 		boost::posix_time::ptime _createTime;
 		std::mt19937 _randomGenerator;
 		std::uniform_int_distribution<unsigned> _rndDistribution;
+		std::atomic<size_t> _overridenBeat;
+		std::atomic<double> _lastOverridenBeatTime;
 
 		std::unique_ptr<class Theatre> _theatre;
 		std::unique_ptr<class ValueSnapshot> _snapshot;
