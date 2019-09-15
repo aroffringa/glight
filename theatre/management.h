@@ -19,6 +19,11 @@ class Management {
 		~Management();
 		
 		void Clear();
+		
+		bool IsEmpty()
+		{
+			return _folders.size() <= 1 && _controllables.empty() && _presetValues.empty();
+		}
 
 		void AddDevice(std::unique_ptr<class DmxDevice> device);
 		
