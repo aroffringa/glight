@@ -19,7 +19,7 @@
 */
 class FixtureListWindow : public Gtk::Window {
 	public:
-		FixtureListWindow(class ShowWindow* showWindow);
+		FixtureListWindow(class EventTransmitter* eventHub, class Management& management);
 		
 	private:
 		void onChangeManagement(class Management& management)
@@ -29,7 +29,7 @@ class FixtureListWindow : public Gtk::Window {
 		}
 		void update() { fillFixturesList(); }
 		void fillFixturesList();
-		bool onNewButtonClicked(GdkEventButton* event);
+		void onNewButtonClicked();
 		void onRemoveButtonClicked();
 		void onIncChannelButtonClicked();
 		void onDecChannelButtonClicked();
@@ -38,7 +38,7 @@ class FixtureListWindow : public Gtk::Window {
 		void updateFixture(const class Fixture *fixture);
 		static std::string getChannelString(const class Fixture& fixture);
 
-		class ShowWindow* _showWindow;
+		class EventTransmitter* _eventHub;
 		class Management* _management;
 
 		Gtk::TreeView _fixturesListView;
@@ -60,8 +60,6 @@ class FixtureListWindow : public Gtk::Window {
 
 		Gtk::Button _newButton, _removeButton;
 		Gtk::Button _incChannelButton, _decChannelButton, _setChannelButton;
-		std::unique_ptr<Gtk::Menu> _popupMenu;
-		std::vector<std::unique_ptr<Gtk::MenuItem>> _popupMenuItems;
 };
 
 #endif

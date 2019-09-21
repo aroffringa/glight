@@ -95,6 +95,15 @@ class FixtureType : public FolderObject {
 			return list;
 		}
 		
+		static FixtureClass NameToClass(const std::string& name)
+		{
+			const std::vector<enum FixtureClass> list = GetClassList();
+			for(const enum FixtureClass& cl : list)
+				if(ClassName(cl) == name)
+					return cl;
+			throw std::runtime_error("Class not found: " + name);
+		}
+		
 		Color GetColor(const class Fixture &fixture, const ValueSnapshot &snapshot, size_t shapeIndex) const;
 
 		enum FixtureClass FixtureClass() const { return _class; }

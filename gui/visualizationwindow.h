@@ -55,7 +55,7 @@ private:
 
 	Gtk::Menu _popupMenu;
 	Gtk::SeparatorMenuItem _miSeparator1;
-	Gtk::MenuItem _miAlignHorizontally, _miAlignVertically, _miDistributeEvenly, _miRemove;
+	Gtk::MenuItem _miAlignHorizontally, _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove;
 	
 	void inializeContextMenu();
 	void initialize();
@@ -75,6 +75,7 @@ private:
 	void onAlignHorizontally();
 	void onAlignVertically();
 	void onDistributeEvenly();
+	void onAddFixtures();
 	void onRemoveFixtures();
 	
 	double scale(Management& management, double width, double height);

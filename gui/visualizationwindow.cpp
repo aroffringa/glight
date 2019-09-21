@@ -1,5 +1,7 @@
-#include "eventtransmitter.h"
 #include "visualizationwindow.h"
+
+#include "eventtransmitter.h"
+#include "addfixturewindow.h"
 
 #include "../theatre/management.h"
 #include "../theatre/dmxdevice.h"
@@ -8,6 +10,7 @@
 #include "../theatre/valuesnapshot.h"
 
 #include <glibmm/main.h>
+#include <gtkmm/main.h>
 
 VisualizationWindow::VisualizationWindow(Management* management, EventTransmitter* eventTransmitter) :
 	_management(management),
@@ -19,6 +22,7 @@ VisualizationWindow::VisualizationWindow(Management* management, EventTransmitte
 	_miAlignHorizontally("Align horizontally"),
 	_miAlignVertically("Align vertically"),
 	_miDistributeEvenly("Distribute evenly"),
+	_miAdd("Add..."),
 	_miRemove("Remove")
 {
 	set_title("Glight - visualization");
@@ -51,6 +55,9 @@ void VisualizationWindow::inializeContextMenu()
 	_popupMenu.add(_miDistributeEvenly);
 	
 	_popupMenu.add(_miSeparator1);
+	
+	_miAdd.signal_activate().connect([&]{ onAddFixtures(); });
+	_popupMenu.add(_miAdd);
 	
 	_miRemove.signal_activate().connect([&]{ onRemoveFixtures(); });
 	_popupMenu.add(_miRemove);
@@ -373,6 +380,13 @@ void VisualizationWindow::onDistributeEvenly()
 			}
 		}
 	}
+}
+
+void VisualizationWindow::onAddFixtures()
+{
+	AddFixtureWindow window(_eventTransmitter, *_management);
+	window.set_modal(true);
+	Gtk::Main::run(window);
 }
 
 void VisualizationWindow::onRemoveFixtures()
