@@ -64,6 +64,16 @@ public:
 		return getBool(*_object, property._setIndex);
 	}
 	
+	void SetInteger(const Property& property, int value)
+	{
+		setInteger(*_object, property._setIndex, value);
+	}
+	
+	int GetInteger(const Property& property) const
+	{
+		return getInteger(*_object, property._setIndex);
+	}
+	
 	FolderObject& Object() const {
 		return *_object;
 	}
@@ -94,6 +104,11 @@ protected:
 	virtual void setBool(FolderObject& object, size_t index, bool value) const
 	{ setterNotImplemented(); }
 	virtual bool getBool(const FolderObject& object, size_t index) const
+	{ getterNotImplemented(); return 0; }
+	
+	virtual void setInteger(FolderObject& object, size_t index, int value) const
+	{ setterNotImplemented(); }
+	virtual int getInteger(const FolderObject& object, size_t index) const
 	{ getterNotImplemented(); return 0; }
 	
 	size_t addProperty(const Property& property)

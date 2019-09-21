@@ -387,6 +387,9 @@ void Reader::parseEffect(xmlNode* node)
 				case Property::Boolean:
 					ps->SetBool(p, getBoolAttribute(curNode, "value"));
 					break;
+				case Property::Integer:
+					ps->SetInteger(p, getIntAttribute(curNode, "value"));
+					break;
 				}
 			}
 			else if(name(curNode) == "connection-ref")

@@ -369,6 +369,9 @@ void Writer::writeEffect(const class Effect& effect)
 				case Property::Boolean:
 					writeAttribute("value", ps->GetBool(p));
 					break;
+				case Property::Integer:
+					writeAttribute("value", ps->GetInteger(p));
+					break;
 			}
 			endElement();
 		}
