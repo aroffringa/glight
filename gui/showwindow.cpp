@@ -4,7 +4,7 @@
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/messagedialog.h>
 
-#include "configurationwindow.h"
+#include "fixturelistwindow.h"
 #include "designwizard.h"
 #include "objectlistframe.h"
 #include "sceneframe.h"
@@ -47,7 +47,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 
 	addFaderWindow();
 
-	_configurationWindow.reset(new ConfigurationWindow(this));
+	_configurationWindow.reset(new FixtureListWindow(this));
 	_configurationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_configurationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 

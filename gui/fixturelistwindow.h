@@ -17,9 +17,9 @@
 /**
 	@author Andre Offringa
 */
-class ConfigurationWindow : public Gtk::Window {
+class FixtureListWindow : public Gtk::Window {
 	public:
-		ConfigurationWindow(class ShowWindow* showWindow);
+		FixtureListWindow(class ShowWindow* showWindow);
 		
 	private:
 		void onChangeManagement(class Management& management)

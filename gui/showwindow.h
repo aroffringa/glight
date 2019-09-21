@@ -78,7 +78,7 @@ private:
 	Gtk::VBox _box;
 
 	std::vector<std::unique_ptr<class FaderWindow>> _faderWindows;
-	std::unique_ptr<class ConfigurationWindow> _configurationWindow;
+	std::unique_ptr<class FixtureListWindow> _configurationWindow;
 	std::unique_ptr<class VisualizationWindow> _visualizationWindow;
 	std::unique_ptr<class DesignWizard> _designWizard;
 

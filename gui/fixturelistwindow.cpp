@@ -1,4 +1,4 @@
-#include "configurationwindow.h"
+#include "fixturelistwindow.h"
 #include "showwindow.h"
 
 #include <boost/thread/locks.hpp>
@@ -12,7 +12,7 @@
 #include "../theatre/management.h"
 #include "../theatre/theatre.h"
 
-ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
+FixtureListWindow::FixtureListWindow(ShowWindow* showWindow) :
 	_showWindow(showWindow),
 	_management(&showWindow->GetManagement()),
 	_newButton("New"),
@@ -23,8 +23,8 @@ ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
 {
 	set_title("Glight - configuration");
 	
-	showWindow->SignalChangeManagement().connect(sigc::mem_fun(*this, &ConfigurationWindow::onChangeManagement));
-	showWindow->SignalUpdateControllables().connect(sigc::mem_fun(*this, &ConfigurationWindow::update));
+	showWindow->SignalChangeManagement().connect(sigc::mem_fun(*this, &FixtureListWindow::onChangeManagement));
+	showWindow->SignalUpdateControllables().connect(sigc::mem_fun(*this, &FixtureListWindow::update));
 
 	_fixturesListModel =
     Gtk::ListStore::create(_fixturesListColumns);
@@ -41,20 +41,20 @@ ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
 
 	_newButton.set_image_from_icon_name("document-new");
 	_newButton.set_events(Gdk::BUTTON_PRESS_MASK);
-	_newButton.signal_button_press_event().connect(sigc::mem_fun(*this, &ConfigurationWindow::onNewButtonClicked), false);
+	_newButton.signal_button_press_event().connect(sigc::mem_fun(*this, &FixtureListWindow::onNewButtonClicked), false);
 	_buttonBox.pack_start(_newButton);
 
 	_removeButton.set_image_from_icon_name("edit-delete");
-	_removeButton.signal_clicked().connect(sigc::mem_fun(*this, &ConfigurationWindow::onRemoveButtonClicked));
+	_removeButton.signal_clicked().connect(sigc::mem_fun(*this, &FixtureListWindow::onRemoveButtonClicked));
 	_buttonBox.pack_start(_removeButton);
 
-	_decChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &ConfigurationWindow::onDecChannelButtonClicked));
+	_decChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &FixtureListWindow::onDecChannelButtonClicked));
 	_buttonBox.pack_start(_decChannelButton);
 
-	_incChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &ConfigurationWindow::onIncChannelButtonClicked));
+	_incChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &FixtureListWindow::onIncChannelButtonClicked));
 	_buttonBox.pack_start(_incChannelButton);
 
-	_setChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &ConfigurationWindow::onSetChannelButtonClicked));
+	_setChannelButton.signal_clicked().connect(sigc::mem_fun(*this, &FixtureListWindow::onSetChannelButtonClicked));
 	_buttonBox.pack_start(_setChannelButton);
 
 	_mainBox.pack_start(_buttonBox, false, false, 0);
@@ -63,7 +63,7 @@ ConfigurationWindow::ConfigurationWindow(ShowWindow* showWindow) :
 	_mainBox.show_all();
 }
 
-void ConfigurationWindow::fillFixturesList()
+void FixtureListWindow::fillFixturesList()
 {
 	_fixturesListModel->clear();
 
@@ -81,7 +81,7 @@ void ConfigurationWindow::fillFixturesList()
 	}
 }
 
-std::string ConfigurationWindow::getChannelString(const class Fixture& fixture)
+std::string FixtureListWindow::getChannelString(const class Fixture& fixture)
 {
 	std::vector<unsigned> channels = fixture.GetChannels();
 	
@@ -98,7 +98,7 @@ std::string ConfigurationWindow::getChannelString(const class Fixture& fixture)
 	return s.str();
 }
 
-bool ConfigurationWindow::onNewButtonClicked(GdkEventButton* event)
+bool FixtureListWindow::onNewButtonClicked(GdkEventButton* event)
 {
 	if(event->button == 1)
 	{
@@ -111,7 +111,7 @@ bool ConfigurationWindow::onNewButtonClicked(GdkEventButton* event)
 		{
 			std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(FixtureType::ClassName(fc)));
 			mi->signal_activate().connect(sigc::bind<enum FixtureType::FixtureClass>( 
-			sigc::mem_fun(*this, &ConfigurationWindow::onMenuItemClicked), fc));
+			sigc::mem_fun(*this, &FixtureListWindow::onMenuItemClicked), fc));
 			_popupMenu->append(*mi);
 			_popupMenuItems.emplace_back(std::move(mi));
 		}
@@ -122,7 +122,7 @@ bool ConfigurationWindow::onNewButtonClicked(GdkEventButton* event)
 	return false;
 }
 
-void ConfigurationWindow::onRemoveButtonClicked()
+void FixtureListWindow::onRemoveButtonClicked()
 {
 	Glib::RefPtr<Gtk::TreeSelection> selection =
     _fixturesListView.get_selection();
@@ -136,7 +136,7 @@ void ConfigurationWindow::onRemoveButtonClicked()
 	_showWindow->EmitUpdate();
 }
 
-void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
+void FixtureListWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 {
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	Position position = _management->Theatre().GetFreePosition();
@@ -165,7 +165,7 @@ void ConfigurationWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl)
 	_showWindow->EmitUpdate();
 }
 
-void ConfigurationWindow::onIncChannelButtonClicked()
+void FixtureListWindow::onIncChannelButtonClicked()
 {
 	Glib::RefPtr<Gtk::TreeSelection> selection =
     _fixturesListView.get_selection();
@@ -178,7 +178,7 @@ void ConfigurationWindow::onIncChannelButtonClicked()
 	}
 }
 
-void ConfigurationWindow::onDecChannelButtonClicked()
+void FixtureListWindow::onDecChannelButtonClicked()
 {
 	Glib::RefPtr<Gtk::TreeSelection> selection =
     _fixturesListView.get_selection();
@@ -191,7 +191,7 @@ void ConfigurationWindow::onDecChannelButtonClicked()
 	}
 }
 
-void ConfigurationWindow::onSetChannelButtonClicked()
+void FixtureListWindow::onSetChannelButtonClicked()
 {
 	Glib::RefPtr<Gtk::TreeSelection> selection =
     _fixturesListView.get_selection();
@@ -222,7 +222,7 @@ void ConfigurationWindow::onSetChannelButtonClicked()
 	}
 }
 
-void ConfigurationWindow::updateFixture(const Fixture *fixture)
+void FixtureListWindow::updateFixture(const Fixture *fixture)
 {
 	Gtk::TreeModel::iterator iter = _fixturesListModel->children().begin();
 	while(iter)

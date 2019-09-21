@@ -31,10 +31,10 @@ set(GUIFILES
   gui/application.cpp  
   gui/audiowidget.cpp
   gui/chasepropertieswindow.cpp
-  gui/configurationwindow.cpp
   gui/createchasedialog.cpp
   gui/designwizard.cpp
   gui/effectpropertieswindow.cpp
+  gui/fixturelistwindow.cpp
   gui/guistate.cpp
   gui/nameframe.cpp
   gui/objectlistframe.cpp
