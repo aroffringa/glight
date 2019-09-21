@@ -68,6 +68,17 @@ void PropertiesBox::fillProperties()
 			row._widgets.emplace_back(new DurationInput(property.Description(), duration));
 			_grid.attach(*row._widgets.back(), 0, rowIndex, 2, 1);
 			} break;
+		case Property::Integer: {
+			std::string entryText = std::to_string(_propertySet->GetInteger(property));
+				
+			row._widgets.emplace_back(new Gtk::Label(property.Description()));
+			_grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
+			
+			Gtk::Entry* entry = new Gtk::Entry();
+			row._widgets.emplace_back(entry);
+			entry->set_text(entryText);
+			_grid.attach(*entry, 1, rowIndex, 1, 1);
+			} break;
 		}
 	}
 	_grid.show_all_children();
@@ -92,6 +103,10 @@ void PropertiesBox::onApplyClicked()
 		case Property::Duration: {
 			double value = static_cast<DurationInput*>(rowIter->_widgets[0].get())->Value();
 			_propertySet->SetDuration(property, value);
+			} break;
+		case Property::Integer: {
+			std::string entryText = static_cast<Gtk::Entry*>(rowIter->_widgets[1].get())->get_text();
+			_propertySet->SetInteger(property, std::atoi(entryText.c_str()));
 			} break;
 		}
 		++rowIter;

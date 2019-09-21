@@ -22,6 +22,7 @@ public:
 		InvertType,
 		MusicActivationType,
 		PulseType,
+		RandomSelectType,
 		ThresholdType
 	};
 	

@@ -7,6 +7,7 @@
 #include "effects/inverteffect.h"
 #include "effects/musicactivationeffect.h"
 #include "effects/pulseeffect.h"
+#include "effects/randomselecteffect.h"
 #include "effects/thresholdeffect.h"
 
 #include "properties/propertyset.h"
@@ -23,6 +24,7 @@ std::unique_ptr<Effect> Effect::Make(Effect::Type type)
 		case InvertType: return up(new InvertEffect());
 		case MusicActivationType: return up(new MusicActivationEffect());
 		case PulseType: return up(new PulseEffect());
+		case RandomSelectType: return up(new RandomSelectEffect());
 		case ThresholdType: return up(new ThresholdEffect());
 	}
 	return nullptr;
@@ -39,6 +41,7 @@ std::string Effect::TypeToName(Effect::Type type)
 		case InvertType: return "Invert";
 		case MusicActivationType: return  "Music activation";
 		case PulseType: return "Pulse";
+		case RandomSelectType: return "Random select";
 		case ThresholdType: return "Threshold";
 	}
 	return std::string();
@@ -60,6 +63,8 @@ Effect::Type Effect::NameToType(const std::string& name)
 		return MusicActivationType;
 	else if(name == "Pulse")
 		return PulseType;
+	else if(name == "Random select")
+		return RandomSelectType;
 	else if(name == "Threshold")
 		return ThresholdType;
 	else
@@ -76,6 +81,7 @@ std::vector<Effect::Type> Effect::GetTypes()
 		InvertType,
 		MusicActivationType,
 		PulseType,
+		RandomSelectType,
 		ThresholdType
 	};
 }

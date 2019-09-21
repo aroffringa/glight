@@ -33,6 +33,11 @@ public:
 	unsigned DrawRandomValue() const {
 		return std::uniform_int_distribution<unsigned>(0, ControlValue::MaxUInt()+1)(_rng);
 	}
+	unsigned DrawRandomValue(size_t maxValue) const {
+		return std::uniform_int_distribution<unsigned>(0, maxValue)(_rng);
+	}
+	
+	std::mt19937& RNG() const { return _rng; }
 	
 private:
 	double _timeInMs;

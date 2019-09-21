@@ -7,6 +7,7 @@
 #include "inverteffectps.h"
 #include "musicactivationeffectps.h"
 #include "pulseeffectps.h"
+#include "randomselecteffectps.h"
 #include "thresholdeffectps.h"
 
 std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
@@ -19,6 +20,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 	const InvertEffect* ifx = dynamic_cast<const InvertEffect*>(&object);
 	const MusicActivationEffect* mfx = dynamic_cast<const MusicActivationEffect*>(&object);
 	const PulseEffect* pfx = dynamic_cast<const PulseEffect*>(&object);
+	const RandomSelectEffect* rfx = dynamic_cast<const RandomSelectEffect*>(&object);
 	const ThresholdEffect* tfx = dynamic_cast<const ThresholdEffect*>(&object);
 	if(afx != nullptr)
 	{
@@ -48,6 +50,10 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 	{
 		ps.reset(new PulseEffectPS());
 	}
+	else if(rfx != nullptr)
+	{
+		ps.reset(new RandomSelectEffectPS());
+	}
 	else if(tfx != nullptr)
 	{
 		ps.reset(new ThresholdEffectPS());
@@ -65,14 +71,17 @@ void PropertySet::AssignProperty(const Property& to, const Property& from, const
 		throw std::runtime_error("Copying different types");
 	switch(from._type)
 	{
+	case Property::Boolean:
+		SetBool(to, fromSet.GetBool(from));
+		break;
 	case Property::ControlValue:
 		SetControlValue(to, fromSet.GetControlValue(from));
 		break;
 	case Property::Duration:
 		SetDuration(to, fromSet.GetDuration(from));
 		break;
-	case Property::Boolean:
-		SetBool(to, fromSet.GetBool(from));
+	case Property::Integer:
+		SetInteger(to, fromSet.GetInteger(from));
 		break;
 	}
 }
