@@ -20,7 +20,7 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter* eventHub, Management& manag
 	_grid.set_row_spacing(5);
 	_grid.set_column_spacing(2);
 	
-	_grid.attach(_typeLabel, 0, 0);
+	_grid.attach(_typeLabel, 0, 0, 1, 1);
 	
 	const std::vector<enum FixtureType::FixtureClass> &classes = FixtureType::GetClassList();
 	for(enum FixtureType::FixtureClass fc : classes)
@@ -30,13 +30,13 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter* eventHub, Management& manag
 	_typeCombo.set_active_text(FixtureType::ClassName(classes.front()));
 	_grid.attach(_typeCombo, 1, 0, 3, 1);
 	
-	_grid.attach(_countLabel, 0, 1);
+	_grid.attach(_countLabel, 0, 1, 1, 1);
 	_countEntry.set_text("1"),
-	_grid.attach(_countEntry, 1, 1);
+	_grid.attach(_countEntry, 1, 1, 1, 1);
 	_decCountButton.signal_clicked().connect([&]() { onDecCount(); });
-	_grid.attach(_decCountButton, 2, 1);
+	_grid.attach(_decCountButton, 2, 1, 1, 1);
 	_incCountButton.signal_clicked().connect([&]() { onIncCount(); });
-	_grid.attach(_incCountButton, 3, 1);
+	_grid.attach(_incCountButton, 3, 1, 1, 1);
 	
 	_cancelButton.signal_clicked().connect([&]() { onCancel(); });
 	_buttonBox.pack_start(_cancelButton);

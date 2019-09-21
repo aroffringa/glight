@@ -7,7 +7,8 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
-#include <gtkmm/dialog.h>
+#include <gtkmm/label.h>
+#include <gtkmm/window.h>
 
 /**
 	@author Andre Offringa
