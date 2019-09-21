@@ -4,7 +4,7 @@
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/messagedialog.h>
 
-#include "configurationwindow.h"
+#include "fixturelistwindow.h"
 #include "designwizard.h"
 #include "objectlistframe.h"
 #include "sceneframe.h"
@@ -32,8 +32,8 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miQuit(Gtk::Stock::QUIT),
 	_miDryMode("Dry mode"),
 	_miCancelDryMode("Cancel dry mode"),
-	   _miDesignWizard("Design wizard"),
-	_miConfigWindow("Fixtures config"),
+	_miDesignWizard("Design wizard"),
+	_miFixtureListWindow("Fixture list"),
 	_miNewControlWindow("New faders window"),
 	_miVisualizationWindow("Visualization")
 {
@@ -47,9 +47,9 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 
 	addFaderWindow();
 
-	_configurationWindow.reset(new ConfigurationWindow(this));
-	_configurationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
-	_configurationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+	_fixtureListWindow.reset(new FixtureListWindow(this, *_management));
+	_fixtureListWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
+	_fixtureListWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 
 	_visualizationWindow.reset(new VisualizationWindow(_management.get(), this));
 	_visualizationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
@@ -80,7 +80,7 @@ ShowWindow::~ShowWindow()
 	
 	_sceneFrame.reset();
 	_visualizationWindow.reset();
-	_configurationWindow.reset();
+	_fixtureListWindow.reset();
 
 	_faderWindows.clear();
 
@@ -120,11 +120,11 @@ void ShowWindow::addFaderWindow(FaderSetupState* stateOrNull)
 
 void ShowWindow::onConfigurationWindowButtonClicked()
 {
-	bool show = _miConfigWindow.get_active();
+	bool show = _miFixtureListWindow.get_active();
 	if(show)
-		_configurationWindow->show();
+		_fixtureListWindow->show();
 	else
-		_configurationWindow->hide();
+		_fixtureListWindow->hide();
 }
 
 void ShowWindow::onVisualizationWindowButtonClicked()
@@ -223,9 +223,9 @@ void ShowWindow::createMenu()
 	_miNewControlWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onControlWindowButtonClicked));
 	_menuWindow.append(_miNewControlWindow);
 
-	_miConfigWindow.set_active(false);
-	_miConfigWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onConfigurationWindowButtonClicked));
-	_menuWindow.append(_miConfigWindow);
+	   _miFixtureListWindow.set_active(false);
+	   _miFixtureListWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onConfigurationWindowButtonClicked));
+	_menuWindow.append(_miFixtureListWindow);
 
 	_miVisualizationWindow.set_active(false);
 	_miVisualizationWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onVisualizationWindowButtonClicked));

@@ -28,13 +28,14 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(${LIBXML2_INCLUDE_DIR})
 
 set(GUIFILES
+  gui/addfixturewindow.cpp  
   gui/application.cpp  
   gui/audiowidget.cpp
   gui/chasepropertieswindow.cpp
-  gui/configurationwindow.cpp
   gui/createchasedialog.cpp
   gui/designwizard.cpp
   gui/effectpropertieswindow.cpp
+  gui/fixturelistwindow.cpp
   gui/guistate.cpp
   gui/nameframe.cpp
   gui/objectlistframe.cpp

@@ -38,5 +38,5 @@ void Application::Run(int argc, char *argv[])
 	{
 		window.OpenFile(argv[1]);
 	}
-	kit.run(window);
+	Gtk::Main::run(window);
 }

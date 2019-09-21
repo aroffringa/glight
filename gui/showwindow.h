@@ -78,7 +78,7 @@ private:
 	Gtk::VBox _box;
 
 	std::vector<std::unique_ptr<class FaderWindow>> _faderWindows;
-	std::unique_ptr<class ConfigurationWindow> _configurationWindow;
+	std::unique_ptr<class FixtureListWindow> _fixtureListWindow;
 	std::unique_ptr<class VisualizationWindow> _visualizationWindow;
 	std::unique_ptr<class DesignWizard> _designWizard;
 
@@ -107,7 +107,7 @@ private:
 	Gtk::MenuItem _miCancelDryMode;
 	Gtk::SeparatorMenuItem _miDesignSep1;
 	Gtk::MenuItem _miDesignWizard;
-	Gtk::CheckMenuItem _miConfigWindow;
+	Gtk::CheckMenuItem _miFixtureListWindow;
 	Gtk::MenuItem _miNewControlWindow;
 	Gtk::CheckMenuItem _miVisualizationWindow;
 	
