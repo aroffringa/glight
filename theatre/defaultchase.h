@@ -12,6 +12,8 @@ public:
 	
 	enum VUMeterDirection { VUIncreasing, VUDecreasing, VUInward, VUOutward };
 	
+	enum IncreasingType { IncForward, IncBackward, IncForwardReturn, IncBackwardReturn };
+	
 	static class PresetCollection& MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors);
 	
 	static class Chase& MakeRunningLight(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, RunType runType);
@@ -21,6 +23,8 @@ public:
 	static class Chase& MakeColorShift(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, ShiftType shiftType);
 	
 	static class Controllable& MakeVUMeter(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, VUMeterDirection direction);
+	
+	static class Chase& MakeIncreasingChase(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, IncreasingType incType);
 	
 private:
 	static void addColorPresets(class Management& management, class Controllable& controllable, class PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master);

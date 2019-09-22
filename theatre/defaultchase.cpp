@@ -347,3 +347,71 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 	}
 	return newAudioLevel;
 }
+
+Chase& DefaultChase::MakeIncreasingChase(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, IncreasingType incType)
+{
+	if(colors.size() != controllables.size())
+		throw std::runtime_error("Number of controllables does not match number of provided colours");
+	Chase& chase = management.AddChase();
+	chase.SetName(destination.GetAvailableName("Increasing chase"));
+	destination.Add(chase);
+	management.AddPreset(chase, 0);
+	Sequence& seq = chase.Sequence();
+	
+	size_t nFix = controllables.size();
+	for(size_t frameIndex=0; frameIndex!= nFix * 2; ++frameIndex)
+	{
+		size_t startFixture = 0, endFixture = 0;
+		if(frameIndex < controllables.size()) // building up
+		{
+			switch(incType)
+			{
+				case IncForward:
+				case IncForwardReturn:
+					startFixture = 0;
+					endFixture = frameIndex;
+					break;
+				case IncBackward:
+				case IncBackwardReturn:
+					startFixture = nFix - frameIndex;
+					endFixture = nFix;
+					break;
+			}
+		}
+		else {
+			switch(incType)
+			{
+				case IncForward:
+				case IncBackwardReturn:
+					startFixture = frameIndex - nFix;
+					endFixture = nFix;
+					break;
+				case IncBackward:
+				case IncForwardReturn:
+					startFixture = 0;
+					endFixture = (nFix*2 - frameIndex);
+					break;
+			}
+		}
+		
+		PresetCollection& pc = management.AddPresetCollection();
+		destination.Add(pc);
+		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
+		
+		for(size_t i=startFixture; i!=endFixture; ++i)
+		{
+			unsigned
+				red = colors[i].Red()*((1<<24)-1)/255,
+				green = colors[i].Green()*((1<<24)-1)/255,
+				blue = colors[i].Blue()*((1<<24)-1)/255,
+				master = 0;
+			if(red != 0 || green != 0 || blue != 0)
+				master = (1<<24)-1;
+			addColorPresets(management, *controllables[i], pc, red, green, blue, master);
+		}
+		seq.Add(pc, 0);
+		management.AddPreset(pc, 0);
+	}
+	return chase;
+}
+

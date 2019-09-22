@@ -37,7 +37,8 @@ private:
 		Page3_2_SingleColor,
 		Page3_3_ShiftingColors,
 		Page3_4_VUMeter,
-		Page3_5_ColorPreset
+		Page3_5_ColorPreset,
+		Page3_6_Increasing
 	};
 	
 	void fillFixturesList();
@@ -54,6 +55,7 @@ private:
 	void initPage3_3ShiftColors();
 	void initPage3_4VUMeter();
 	void initPage3_5ColorPreset();
+	void initPage3_6Increasing();
 	class Folder& getFolder() const;
 	
 	// 1b
@@ -67,7 +69,7 @@ private:
 	std::string _destinationPath;
 	
 	Gtk::VBox _mainBox;
-	Gtk::VBox _vBoxPage1, _vBoxPage1a, _vBoxPage1b, _vBoxPage2, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3, _vBoxPage3_4, _vBoxPage3_5;
+	Gtk::VBox _vBoxPage1, _vBoxPage1a, _vBoxPage1b, _vBoxPage2, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3, _vBoxPage3_4, _vBoxPage3_5, _vBoxPage3_6;
 	Gtk::Notebook _notebook;
 	// 1a
 	Gtk::Label _selectLabel;
@@ -84,6 +86,7 @@ private:
 		_runningLightBtn,
 		_singleColorBtn,
 		_shiftColorsBtn,
+		_increaseBtn,
 		_vuMeterBtn;
 	
 	ColorSequenceWidget _colorsWidgetP3_1;
@@ -114,6 +117,13 @@ private:
 		_vuOutwardRunRB;
 		
 	ColorSequenceWidget _colorsWidgetP3_5;
+	
+	ColorSequenceWidget _colorsWidgetP3_6;
+	Gtk::RadioButton
+		_incForwardRB,
+		_incBackwardRB,
+		_incForwardReturnRB,
+		_incBackwardReturnRB;
 	
 	Gtk::ButtonBox _buttonBox;
 	Gtk::Button _nextButton;
