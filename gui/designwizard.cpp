@@ -23,6 +23,7 @@ DesignWizard::DesignWizard(Management& management, EventTransmitter& hub, const 
 	_runningLightBtn("Running light"),
 	_singleColorBtn("Random around single colour"),
 	_shiftColorsBtn("Shifting colours"),
+	_increaseBtn("Increasing colours"),
 	_vuMeterBtn("VU meter"),
 	
 	_colorsWidgetP3_1(this),
@@ -45,6 +46,11 @@ DesignWizard::DesignWizard(Management& management, EventTransmitter& hub, const 
 	_vuInwardRunRB("Inward direction"),
 	_vuOutwardRunRB("Outward direcion"),
 	_colorsWidgetP3_5(this),
+	_colorsWidgetP3_6(this),
+	_incForwardRB("Forward direction"),
+	_incBackwardRB("Backward direction"),
+	_incForwardReturnRB("Forward and return"),
+	_incBackwardReturnRB("Backward and return"),
 	_nextButton("Next"),
 	_currentPage(Page1_SelFixtures)
 {
@@ -58,6 +64,7 @@ DesignWizard::DesignWizard(Management& management, EventTransmitter& hub, const 
 	initPage3_3ShiftColors();
 	initPage3_4VUMeter();
 	initPage3_5ColorPreset();
+	initPage3_6Increasing();
 	
 	_mainBox.pack_start(_vBoxPage1, true, true);
 	_vBoxPage1.show_all();
@@ -132,6 +139,8 @@ void DesignWizard::initPage2()
 	_vBoxPage2.pack_start(_singleColorBtn);
 	_shiftColorsBtn.set_group(group);
 	_vBoxPage2.pack_start(_shiftColorsBtn);
+	_increaseBtn.set_group(group);
+	_vBoxPage2.pack_start(_increaseBtn);
 	_vuMeterBtn.set_group(group);
 	_vBoxPage2.pack_start(_vuMeterBtn);
 }
@@ -194,6 +203,20 @@ void DesignWizard::initPage3_4VUMeter()
 void DesignWizard::initPage3_5ColorPreset()
 {
 	_vBoxPage3_5.pack_start(_colorsWidgetP3_5, true, false);
+}
+
+void DesignWizard::initPage3_6Increasing()
+{
+	_vBoxPage3_6.pack_start(_colorsWidgetP3_6, true, false);
+	Gtk::RadioButtonGroup group;
+	_incForwardRB.set_group(group);
+	_vBoxPage3_6.pack_start(_incForwardRB, true, false);
+	_incBackwardRB.set_group(group);
+	_vBoxPage3_6.pack_start(_incBackwardRB, true, false);
+	_incForwardReturnRB.set_group(group);
+	_vBoxPage3_6.pack_start(_incForwardReturnRB, true, false);
+	_incBackwardReturnRB.set_group(group);
+	_vBoxPage3_6.pack_start(_incBackwardReturnRB, true, false);
 }
 
 void DesignWizard::fillFixturesList()
@@ -283,12 +306,19 @@ void DesignWizard::onNextClicked()
 			_vBoxPage3_3.show_all();
 			_currentPage = Page3_3_ShiftingColors;
 		}
-		else {
+		else if(_vuMeterBtn.get_active()) {
 			_colorsWidgetP3_4.SetMinCount(_selectedControllables.size());
 			_colorsWidgetP3_4.SetMaxCount(_selectedControllables.size());
 			_mainBox.pack_start(_vBoxPage3_4, true, true);
 			_vBoxPage3_4.show_all();
 			_currentPage = Page3_4_VUMeter;
+		}
+		else {
+			_colorsWidgetP3_6.SetMinCount(_selectedControllables.size());
+			_colorsWidgetP3_6.SetMaxCount(_selectedControllables.size());
+			_mainBox.pack_start(_vBoxPage3_6, true, true);
+			_vBoxPage3_6.show_all();
+			_currentPage = Page3_6_Increasing;
 		}
 		break;
 		
@@ -349,6 +379,21 @@ void DesignWizard::onNextClicked()
 		
 		case Page3_5_ColorPreset: {
 			DefaultChase::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors());
+			_eventHub.EmitUpdate();
+			hide();
+		} break;
+		
+		case Page3_6_Increasing: {
+			DefaultChase::IncreasingType incType;
+			if(_incForwardRB.get_active())
+				incType = DefaultChase::IncForward;
+			else if(_incBackwardRB.get_active())
+				incType = DefaultChase::IncBackward;
+			else if(_incForwardReturnRB.get_active())
+				incType = DefaultChase::IncForwardReturn;
+			else //if(_incBackwardReturnRB.get_active())
+				incType = DefaultChase::IncBackwardReturn;
+			DefaultChase::MakeIncreasingChase(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_6.GetColors(), incType);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
