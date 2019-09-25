@@ -50,10 +50,12 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_fixtureListWindow.reset(new FixtureListWindow(this, *_management));
 	_fixtureListWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_fixtureListWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+	_fixtureListWindow->signal_hide().connect([&]() { onHideFixtureList(); });
 
 	_visualizationWindow.reset(new VisualizationWindow(_management.get(), this));
 	_visualizationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_visualizationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+	_visualizationWindow->signal_hide().connect([&]() { onHideVisualizationWindow(); });
 	
 	createMenu();
 	
@@ -468,4 +470,14 @@ void ShowWindow::onMIDesignWizardClicked()
 		_designWizard.reset(new DesignWizard(*_management, *this, path));
 	_designWizard->SetDestinationPath(path);
 	_designWizard->present();
+}
+
+void ShowWindow::onHideFixtureList()
+{
+	_miFixtureListWindow.set_active(false);
+}
+
+void ShowWindow::onHideVisualizationWindow()
+{
+	_miVisualizationWindow.set_active(false);
 }

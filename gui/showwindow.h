@@ -58,6 +58,9 @@ private:
 	bool onKeyUp(GdkEventKey *event);
 	bool onDelete(GdkEventAny *event);
 	
+	void onHideFixtureList();
+	void onHideVisualizationWindow();
+	
 	void createMenu();
 
 	void onMINewClicked();
