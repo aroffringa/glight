@@ -526,6 +526,7 @@ void ShowWindow::onMIBlackOut()
 	_management->BlackOut();
 	for(std::unique_ptr<FaderWindow>& fw : _faderWindows)
 		fw->ReloadValues();
+}
 
 void ShowWindow::onHideFixtureList()
 {
