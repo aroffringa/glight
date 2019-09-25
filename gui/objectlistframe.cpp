@@ -91,9 +91,9 @@ void ObjectListFrame::onNewPresetButtonClicked()
 	Folder& parent = _list.SelectedFolder();
 	std::unique_lock<std::mutex> lock(_management->Mutex());
 	PresetCollection& presetCollection = _management->AddPresetCollection();
+	presetCollection.SetName(parent.GetAvailableName("Preset"));
 	parent.Add(presetCollection);
 	presetCollection.SetFromCurrentSituation(*_management);
-	presetCollection.SetName(parent.GetAvailableName("Preset"));
 	_management->AddPreset(presetCollection, 0);
 	lock.unlock();
 

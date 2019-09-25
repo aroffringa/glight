@@ -49,8 +49,8 @@ void DefaultChase::addColorPresets(Management& management, Controllable& control
 PresetCollection& DefaultChase::MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors)
 {
 	PresetCollection& pc = management.AddPresetCollection();
-	destination.Add(pc);
 	pc.SetName(destination.GetAvailableName("Colourpreset"));
+	destination.Add(pc);
 	for(size_t cIndex=0; cIndex!=controllables.size(); ++cIndex)
 	{
 		size_t colorIndex = cIndex % colors.size();
@@ -98,8 +98,8 @@ Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destinatio
 			nFixInPattern = 2;
 		
 		PresetCollection& pc = management.AddPresetCollection();
-		destination.Add(pc);
 		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
+		destination.Add(pc);
 		// If there are less colours given than fixtures, the sequence is repeated
 		// several times. This loop is for that purpose.
 		for(size_t patternIndex = 0; patternIndex < (controllables.size() + colors.size() - 1) / colors.size(); ++patternIndex)
@@ -171,8 +171,8 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 	for(size_t chaseIndex=0; chaseIndex!=colors.size(); ++chaseIndex)
 	{
 		PresetCollection& pc = management.AddPresetCollection();
-		destination.Add(pc);
 		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
+		destination.Add(pc);
 		unsigned
 			red = colors[chaseIndex].Red()*((1<<24)-1)/255,
 			green = colors[chaseIndex].Green()*((1<<24)-1)/255,
@@ -242,8 +242,8 @@ Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination,
 		}
 		
 		PresetCollection& pc = management.AddPresetCollection();
-		destination.Add(pc);
 		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
+		destination.Add(pc);
 		
 		for(size_t cIndex=0; cIndex!=controllables.size(); ++cIndex)
 		{
@@ -395,8 +395,8 @@ Chase& DefaultChase::MakeIncreasingChase(Management& management, Folder& destina
 		}
 		
 		PresetCollection& pc = management.AddPresetCollection();
-		destination.Add(pc);
 		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
+		destination.Add(pc);
 		
 		for(size_t i=startFixture; i!=endFixture; ++i)
 		{
