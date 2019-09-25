@@ -52,10 +52,12 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_fixtureListWindow.reset(new FixtureListWindow(this, *_management));
 	_fixtureListWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_fixtureListWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+	_fixtureListWindow->signal_hide().connect([&]() { onHideFixtureList(); });
 
 	_visualizationWindow.reset(new VisualizationWindow(_management.get(), this));
 	_visualizationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_visualizationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+	_visualizationWindow->signal_hide().connect([&]() { onHideVisualizationWindow(); });
 	
 	createMenu();
 	
@@ -524,4 +526,13 @@ void ShowWindow::onMIBlackOut()
 	_management->BlackOut();
 	for(std::unique_ptr<FaderWindow>& fw : _faderWindows)
 		fw->ReloadValues();
+
+void ShowWindow::onHideFixtureList()
+{
+	_miFixtureListWindow.set_active(false);
+}
+
+void ShowWindow::onHideVisualizationWindow()
+{
+	_miVisualizationWindow.set_active(false);
 }
