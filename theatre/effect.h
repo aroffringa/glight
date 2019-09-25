@@ -16,6 +16,7 @@ class Effect : public Controllable
 public:
 	enum Type {
 		AudioLevelType,
+		ConstantValueType,
 		DelayType,
 		FadeType,
 		FlickerType,

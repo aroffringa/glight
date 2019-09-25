@@ -1,6 +1,7 @@
 #include "propertyset.h"
 
 #include "audioleveleffectps.h"
+#include "constantvalueeffectps.h"
 #include "delayeffectps.h"
 #include "fadeeffectps.h"
 #include "flickereffectps.h"
@@ -14,6 +15,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 {
 	std::unique_ptr<PropertySet> ps;
 	const AudioLevelEffect* afx = dynamic_cast<const AudioLevelEffect*>(&object);
+	const ConstantValueEffect* cfx = dynamic_cast<const ConstantValueEffect*>(&object);
 	const DelayEffect* dfx = dynamic_cast<const DelayEffect*>(&object);
 	const FadeEffect* ffx = dynamic_cast<const FadeEffect*>(&object);
 	const FlickerEffect* flx = dynamic_cast<const FlickerEffect*>(&object);
@@ -25,6 +27,10 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 	if(afx != nullptr)
 	{
 		ps.reset(new AudioLevelEffectPS());
+	}
+	else if(cfx != nullptr)
+	{
+		ps.reset(new ConstantValueEffectPS());
 	}
 	else if(dfx != nullptr)
 	{
