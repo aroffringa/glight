@@ -21,6 +21,7 @@ public:
 	void FullOn() final override;
 	void FullOff() final override;
 	void Assign(class PresetValue* item, bool moveFader) final override;
+	void MoveSlider() final override;
 	PresetValue* Preset() const final override { return _preset; }
 	
 	void Limit(double value) final override

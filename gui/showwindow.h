@@ -65,8 +65,12 @@ private:
 	void onMISaveClicked();
 	void onMIQuitClicked();
 	
+	void updateDryModeState();
 	void onMIDryModeClicked();
 	void onMICancelDryModeClicked();
+	void onMIBlackOutAndDryMode();
+	void onMIBlackOut();
+	
 	void onMIDesignWizardClicked();
 	
 	void onControlWindowHidden(class FaderWindow* window);
@@ -105,6 +109,8 @@ private:
 	Gtk::ImageMenuItem _miNew, _miOpen, _miSave, _miQuit;
 	Gtk::CheckMenuItem _miDryMode;
 	Gtk::MenuItem _miCancelDryMode;
+	Gtk::MenuItem _miBlackOutAndDryMode;
+	Gtk::MenuItem _miBlackOut;
 	Gtk::SeparatorMenuItem _miDesignSep1;
 	Gtk::MenuItem _miDesignWizard;
 	Gtk::CheckMenuItem _miFixtureListWindow;

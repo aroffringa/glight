@@ -621,3 +621,10 @@ bool Management::topologicalSortVisit(Controllable& controllable, std::vector<Co
 	return true;
 }
 
+void Management::BlackOut()
+{
+	for(std::unique_ptr<class PresetValue>& p : _presetValues)
+	{
+		p->SetValue(ControlValue::Zero());
+	}
+}

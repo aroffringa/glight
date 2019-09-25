@@ -141,6 +141,16 @@ void FaderWidget::Assign(PresetValue* item, bool moveFader)
 	}
 }
 
+void FaderWidget::MoveSlider()
+{
+	if(_preset != nullptr)
+	{
+		immediateAssign(_preset->Value().UInt());
+		_scale.set_value(_preset->Value().UInt());
+		SignalValueChange().emit(_scale.get_value());
+	}
+}
+
 void FaderWidget::onUpdate()
 {
 	if(_preset != nullptr)

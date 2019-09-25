@@ -138,6 +138,16 @@ void ToggleWidget::Assign(PresetValue* item, bool moveFader)
 	}
 }
 
+void ToggleWidget::MoveSlider()
+{
+	if(_preset != nullptr)
+	{
+		immediateAssign(_preset->Value().UInt());
+		_onCheckButton.set_active(_preset->Value().UInt() != 0);
+		SignalValueChange().emit(_preset->Value().UInt());
+	}
+}
+
 void ToggleWidget::onUpdate()
 {
 	if(_preset != nullptr)

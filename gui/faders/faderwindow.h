@@ -32,6 +32,11 @@ class FaderWindow  : public Gtk::Window {
 		
 		void LoadNew();
 		void LoadState(class FaderSetupState* state);
+		
+		/**
+		 * Set all sliders to the preset values
+		 */
+		void ReloadValues();
 
 		bool HandleKeyDown(char key);
 		bool HandleKeyUp(char key);
