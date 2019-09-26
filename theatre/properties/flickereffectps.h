@@ -44,7 +44,7 @@ protected:
 	{
 		const FlickerEffect& fx = static_cast<const FlickerEffect&>(object);
 		switch(index) {
-			case 0: return fx.IndependentOutputs();
+			case 1: return fx.IndependentOutputs();
 		}
 		return 0;
 	}
