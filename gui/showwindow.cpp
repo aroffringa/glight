@@ -32,6 +32,8 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miQuit(Gtk::Stock::QUIT),
 	_miDryMode("Dry mode"),
 	_miCancelDryMode("Cancel dry mode"),
+	_miBlackOutAndDryMode("Black-out with dry mode"),
+	_miBlackOut("Black-out"),
 	_miDesignWizard("Design wizard"),
 	_miFixtureListWindow("Fixture list"),
 	_miNewControlWindow("New faders window"),
@@ -148,6 +150,17 @@ bool ShowWindow::onKeyDown(GdkEventKey* event)
 		_management->IncreaseManualBeat(3);
 	else if(event->keyval == '4')
 		_management->IncreaseManualBeat(4);
+	else if(event->keyval == GDK_KEY_Escape)
+	{
+		if(_miDryMode.get_active())
+		{
+			_miDryMode.set_active(false);
+			onMIDryModeClicked();
+		}
+		else {
+			onMIBlackOutAndDryMode();
+		}
+	}
 	else {
 		if(_sceneFrame->HandleKeyDown(event->keyval))
 			return true;
@@ -211,6 +224,12 @@ void ShowWindow::createMenu()
 	_miCancelDryMode.set_sensitive(false);
 	_miCancelDryMode.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMICancelDryModeClicked));
 	_menuDesign.append(_miCancelDryMode);
+	
+	_miBlackOutAndDryMode.signal_activate().connect([&]() { onMIBlackOutAndDryMode(); });
+	_menuDesign.append(_miBlackOutAndDryMode);
+	
+	_miBlackOut.signal_activate().connect([&]() { onMIBlackOut(); });
+	_menuDesign.append(_miBlackOut);
 	
 	_menuDesign.append(_miDesignSep1);
 		
@@ -366,6 +385,15 @@ void ShowWindow::onMIQuitClicked()
 	hide();
 }
 
+void ShowWindow::updateDryModeState()
+{
+	bool dryMode = _miDryMode.get_active();
+	_miCancelDryMode.set_sensitive(dryMode);
+	_miBlackOutAndDryMode.set_sensitive(!dryMode);
+	_miOpen.set_sensitive(!dryMode);
+	_miSave.set_sensitive(!dryMode);
+}
+
 void ShowWindow::onMIDryModeClicked()
 {
 	Folder& activeFolder = _objectListFrame->SelectedFolder();
@@ -387,9 +415,7 @@ void ShowWindow::onMIDryModeClicked()
 		_visualizationWindow->MakeDryModeReal();
 		_backgroundManagement.reset();
 	}
-	_miCancelDryMode.set_sensitive(enterDryMode);
-	_miOpen.set_sensitive(!enterDryMode);
-	_miSave.set_sensitive(!enterDryMode);
+	updateDryModeState();
 	FolderObject& folder = _management->GetObjectFromPath(path);
 	_objectListFrame->OpenFolder(static_cast<Folder&>(folder));
 }
@@ -412,13 +438,36 @@ void ShowWindow::onMICancelDryModeClicked()
 			_visualizationWindow->SetRealMode();
 			changeManagement(_management.get(), true);
 			_backgroundManagement.reset();
-			_miCancelDryMode.set_sensitive(false);
 			_miDryMode.set_active(false);
+			updateDryModeState();
 			
 			FolderObject& folder = _management->GetObjectFromPath(path);
 			_objectListFrame->OpenFolder(static_cast<Folder&>(folder));
 		}
 	}
+}
+
+void ShowWindow::onMIBlackOutAndDryMode()
+{
+	_miDryMode.set_active(false);
+	Folder& activeFolder = _objectListFrame->SelectedFolder();
+	std::string path = activeFolder.FullPath();
+	if(!_miDryMode.get_active() && _backgroundManagement == nullptr)
+	{
+		// Switch from real mode to dry mode
+		_backgroundManagement = std::move(_management);
+		_management = _backgroundManagement->MakeDryMode();
+		// Black out real management
+		_backgroundManagement->BlackOut();
+		_management->Run();
+		_visualizationWindow->SetDryMode(_management.get());
+		changeManagement(_management.get(), true);
+		
+		_miDryMode.set_active(true);
+	}
+	updateDryModeState();
+	FolderObject& folder = _management->GetObjectFromPath(path);
+	_objectListFrame->OpenFolder(static_cast<Folder&>(folder));
 }
 
 void ShowWindow::changeManagement(Management* newManagement, bool moveControlSliders)
@@ -470,6 +519,13 @@ void ShowWindow::onMIDesignWizardClicked()
 		_designWizard.reset(new DesignWizard(*_management, *this, path));
 	_designWizard->SetDestinationPath(path);
 	_designWizard->present();
+}
+
+void ShowWindow::onMIBlackOut()
+{
+	_management->BlackOut();
+	for(std::unique_ptr<FaderWindow>& fw : _faderWindows)
+		fw->ReloadValues();
 }
 
 void ShowWindow::onHideFixtureList()

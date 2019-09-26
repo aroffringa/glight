@@ -19,6 +19,7 @@ public:
 	virtual void FullOn() final override;
 	virtual void FullOff() final override;
 	virtual void Assign(class PresetValue* item, bool moveFader) final override;
+	virtual void MoveSlider() final override;
 	virtual class PresetValue* Preset() const final override
 	{
 		return _preset;

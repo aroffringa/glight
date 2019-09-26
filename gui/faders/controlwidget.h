@@ -22,6 +22,7 @@ public:
 	virtual void FullOn() = 0;
 	virtual void FullOff() = 0;
 	virtual void Assign(class PresetValue* item, bool moveFader) = 0;
+	virtual void MoveSlider() = 0;
 	virtual class PresetValue* Preset() const = 0;
 	virtual void Limit(double value) = 0;
 	virtual void ChangeManagement(class Management& management, bool moveSliders) = 0;

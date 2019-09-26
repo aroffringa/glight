@@ -596,3 +596,11 @@ size_t FaderWindow::getFadeOutSpeed() const
 			return i;
 	return 0;
 }
+
+void FaderWindow::ReloadValues()
+{
+	for(std::unique_ptr<ControlWidget>& cw : _controls)
+	{
+		cw->MoveSlider();
+	}
+}

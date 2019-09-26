@@ -119,6 +119,8 @@ class Management {
 			_lastOverridenBeatTime = GetOffsetTimeInMS();
 		}
 		
+		void BlackOut();
+		
 	private:
 		struct ManagementThread {
 			Management *parent;
