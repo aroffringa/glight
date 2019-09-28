@@ -4,9 +4,12 @@
 #include "components/colorsequencewidget.h"
 #include "components/objectbrowser.h"
 
+#include "../theatre/autodesign.h"
+
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>
+#include <gtkmm/frame.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/radiobutton.h>
@@ -64,12 +67,14 @@ private:
 	void onRemoveControllable();
 	void onControllableSelected();
 	
+	AutoDesign::ColorDeduction colorDeduction() const;
+	
 	class EventTransmitter& _eventHub;
 	class Management* _management;
 	std::string _destinationPath;
 	
 	Gtk::VBox _mainBox;
-	Gtk::VBox _vBoxPage1, _vBoxPage1a, _vBoxPage1b, _vBoxPage2, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3, _vBoxPage3_4, _vBoxPage3_5, _vBoxPage3_6;
+	Gtk::VBox _vBoxPage1, _vBoxPage1a, _vBoxPage1b, _vBoxPage2, _vBoxPage2Type, _vBoxPage2Deduction, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3, _vBoxPage3_4, _vBoxPage3_5, _vBoxPage3_6;
 	Gtk::Notebook _notebook;
 	// 1a
 	Gtk::Label _selectLabel;
@@ -81,6 +86,7 @@ private:
 	Gtk::Button _addControllableButton, _removeControllableButton;
 	Gtk::TreeView _controllablesListView;
 	
+	Gtk::Frame _typeFrameP2, _deductionFrameP2;
 	Gtk::RadioButton
 		_colorPresetBtn,
 		_runningLightBtn,
@@ -88,6 +94,10 @@ private:
 		_shiftColorsBtn,
 		_increaseBtn,
 		_vuMeterBtn;
+	Gtk::CheckButton
+		_deduceWhite,
+		_deduceAmber,
+		_deduceUV;
 	
 	ColorSequenceWidget _colorsWidgetP3_1;
 	Gtk::RadioButton

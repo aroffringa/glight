@@ -14,20 +14,25 @@ public:
 	
 	enum IncreasingType { IncForward, IncBackward, IncForwardReturn, IncBackwardReturn };
 	
-	static class PresetCollection& MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors);
+	struct ColorDeduction
+	{
+		bool whiteFromRGB, amberFromRGB, uvFromRGB;
+	};
 	
-	static class Chase& MakeRunningLight(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, RunType runType);
+	static class PresetCollection& MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, const ColorDeduction& deduction);
 	
-	static class Chase& MakeColorVariation(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, double variation);
+	static class Chase& MakeRunningLight(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, const ColorDeduction& deduction, RunType runType);
 	
-	static class Chase& MakeColorShift(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, ShiftType shiftType);
+	static class Chase& MakeColorVariation(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, const ColorDeduction& deduction, double variation);
 	
-	static class Controllable& MakeVUMeter(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, VUMeterDirection direction);
+	static class Chase& MakeColorShift(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, const ColorDeduction& deduction, ShiftType shiftType);
 	
-	static class Chase& MakeIncreasingChase(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, IncreasingType incType);
+	static class Controllable& MakeVUMeter(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, const ColorDeduction& deduction, VUMeterDirection direction);
+	
+	static class Chase& MakeIncreasingChase(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, const ColorDeduction& deduction, IncreasingType incType);
 	
 private:
-	static void addColorPresets(class Management& management, class Controllable& controllable, class PresetCollection& pc, const Color& color);
+	static void addColorPresets(class Management& management, class Controllable& controllable, class PresetCollection& pc, const Color& color, const ColorDeduction& deduction);
 };
 
 #endif

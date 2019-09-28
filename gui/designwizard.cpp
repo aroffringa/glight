@@ -3,7 +3,6 @@
 
 #include "components/colorselectwidget.h"
 
-#include "../theatre/autodesign.h"
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
 #include "../theatre/folder.h"
@@ -19,12 +18,17 @@ DesignWizard::DesignWizard(Management& management, EventTransmitter& hub, const 
 	_selectLabel("Select fixtures:"),
 	_objectBrowser(management, hub),
 	
+	_typeFrameP2("Type"),
+	_deductionFrameP2("Colour deduction"),
 	_colorPresetBtn("Colour preset"),
 	_runningLightBtn("Running light"),
 	_singleColorBtn("Random around single colour"),
 	_shiftColorsBtn("Shifting colours"),
 	_increaseBtn("Increasing colours"),
 	_vuMeterBtn("VU meter"),
+	_deduceWhite("White from RGB"),
+	_deduceAmber("Amber from RGB"),
+	_deduceUV("UV from RGB"),
 	
 	_colorsWidgetP3_1(this),
 	_increasingRunRB("Increasing order"),
@@ -132,17 +136,27 @@ void DesignWizard::initPage2()
 {
 	Gtk::RadioButtonGroup group;
 	_colorPresetBtn.set_group(group);
-	_vBoxPage2.pack_start(_colorPresetBtn);
+	_vBoxPage2Type.pack_start(_colorPresetBtn);
 	_runningLightBtn.set_group(group);
-	_vBoxPage2.pack_start(_runningLightBtn);
+	_vBoxPage2Type.pack_start(_runningLightBtn);
 	_singleColorBtn.set_group(group);
-	_vBoxPage2.pack_start(_singleColorBtn);
+	_vBoxPage2Type.pack_start(_singleColorBtn);
 	_shiftColorsBtn.set_group(group);
-	_vBoxPage2.pack_start(_shiftColorsBtn);
+	_vBoxPage2Type.pack_start(_shiftColorsBtn);
 	_increaseBtn.set_group(group);
-	_vBoxPage2.pack_start(_increaseBtn);
+	_vBoxPage2Type.pack_start(_increaseBtn);
 	_vuMeterBtn.set_group(group);
-	_vBoxPage2.pack_start(_vuMeterBtn);
+	_vBoxPage2Type.pack_start(_vuMeterBtn);
+	
+	_typeFrameP2.add(_vBoxPage2Type);
+	_vBoxPage2.pack_start(_typeFrameP2);
+	
+	_vBoxPage2Deduction.pack_start(_deduceWhite);
+	_vBoxPage2Deduction.pack_start(_deduceAmber);
+	_vBoxPage2Deduction.pack_start(_deduceUV);
+	
+	_deductionFrameP2.add(_vBoxPage2Deduction);
+	_vBoxPage2.pack_start(_deductionFrameP2);
 }
 
 void DesignWizard::initPage3_1RunningLight()
@@ -336,13 +350,13 @@ void DesignWizard::onNextClicked()
 				runType = AutoDesign::OutwardRun;
 			else //if(_randomRunRB.get_active())
 				runType = AutoDesign::RandomRun;
-			     AutoDesign::MakeRunningLight(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_1.GetColors(), runType);
+			AutoDesign::MakeRunningLight(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_1.GetColors(), colorDeduction(), runType);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_2_SingleColor:
-		      AutoDesign::MakeColorVariation(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_2.GetColors(), _variation.get_value());
+		AutoDesign::MakeColorVariation(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_2.GetColors(), colorDeduction(), _variation.get_value());
 		_eventHub.EmitUpdate();
 		hide();
 		break;
@@ -357,7 +371,7 @@ void DesignWizard::onNextClicked()
 				shiftType = AutoDesign::BackAndForthShift;
 			else
 				shiftType = AutoDesign::RandomShift;
-			     AutoDesign::MakeColorShift(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_3.GetColors(), shiftType);
+			AutoDesign::MakeColorShift(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_3.GetColors(), colorDeduction(), shiftType);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
@@ -372,13 +386,13 @@ void DesignWizard::onNextClicked()
 				direction = AutoDesign::VUInward;
 			else //if(_vuOutwardRunRB.get_active())
 				direction = AutoDesign::VUOutward;
-			     AutoDesign::MakeVUMeter(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_4.GetColors(), direction);
+			AutoDesign::MakeVUMeter(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_4.GetColors(), colorDeduction(), direction);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_5_ColorPreset: {
-			     AutoDesign::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors());
+			AutoDesign::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors(), colorDeduction());
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
@@ -393,7 +407,7 @@ void DesignWizard::onNextClicked()
 				incType = AutoDesign::IncForwardReturn;
 			else //if(_incBackwardReturnRB.get_active())
 				incType = AutoDesign::IncBackwardReturn;
-			     AutoDesign::MakeIncreasingChase(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_6.GetColors(), incType);
+			AutoDesign::MakeIncreasingChase(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_6.GetColors(), colorDeduction(), incType);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
@@ -439,4 +453,13 @@ void DesignWizard::onControllableSelected()
 	Controllable* object =
 		dynamic_cast<Controllable*>(_objectBrowser.SelectedObject());
 	_addControllableButton.set_sensitive(object != nullptr);
+}
+
+AutoDesign::ColorDeduction DesignWizard::colorDeduction() const
+{
+	AutoDesign::ColorDeduction deduction;
+	deduction.whiteFromRGB = _deduceWhite.get_active();
+	deduction.amberFromRGB = _deduceAmber.get_active();
+	deduction.uvFromRGB = _deduceUV.get_active();
+	return deduction;
 }
