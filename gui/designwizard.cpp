@@ -3,7 +3,7 @@
 
 #include "components/colorselectwidget.h"
 
-#include "../theatre/defaultchase.h"
+#include "../theatre/autodesign.h"
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
 #include "../theatre/folder.h"
@@ -323,77 +323,77 @@ void DesignWizard::onNextClicked()
 		break;
 		
 		case Page3_1_RunningLight: {
-			enum DefaultChase::RunType runType;
+			enum AutoDesign::RunType runType;
 			if(_increasingRunRB.get_active())
-				runType = DefaultChase::IncreasingRun;
+				runType = AutoDesign::IncreasingRun;
 			else if(_decreasingRunRB.get_active())
-				runType = DefaultChase::DecreasingRun;
+				runType = AutoDesign::DecreasingRun;
 			else if(_backAndForthRunRB.get_active())
-				runType = DefaultChase::BackAndForthRun;
+				runType = AutoDesign::BackAndForthRun;
 			else if(_inwardRunRB.get_active())
-				runType = DefaultChase::InwardRun;
+				runType = AutoDesign::InwardRun;
 			else if(_outwardRunRB.get_active())
-				runType = DefaultChase::OutwardRun;
+				runType = AutoDesign::OutwardRun;
 			else //if(_randomRunRB.get_active())
-				runType = DefaultChase::RandomRun;
-			DefaultChase::MakeRunningLight(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_1.GetColors(), runType);
+				runType = AutoDesign::RandomRun;
+			     AutoDesign::MakeRunningLight(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_1.GetColors(), runType);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_2_SingleColor:
-		DefaultChase::MakeColorVariation(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_2.GetColors(), _variation.get_value());
+		      AutoDesign::MakeColorVariation(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_2.GetColors(), _variation.get_value());
 		_eventHub.EmitUpdate();
 		hide();
 		break;
 		
 		case Page3_3_ShiftingColors: {
-			enum DefaultChase::ShiftType shiftType;
+			enum AutoDesign::ShiftType shiftType;
 			if(_shiftIncreasingRB.get_active())
-				shiftType = DefaultChase::IncreasingShift;
+				shiftType = AutoDesign::IncreasingShift;
 			else if(_shiftDecreasingRB.get_active())
-				shiftType = DefaultChase::DecreasingShift;
+				shiftType = AutoDesign::DecreasingShift;
 			else if(_shiftBackAndForthRB.get_active())
-				shiftType = DefaultChase::BackAndForthShift;
+				shiftType = AutoDesign::BackAndForthShift;
 			else
-				shiftType = DefaultChase::RandomShift;
-			DefaultChase::MakeColorShift(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_3.GetColors(), shiftType);
+				shiftType = AutoDesign::RandomShift;
+			     AutoDesign::MakeColorShift(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_3.GetColors(), shiftType);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_4_VUMeter: {
-			DefaultChase::VUMeterDirection direction;
+			     AutoDesign::VUMeterDirection direction;
 			if(_vuIncreasingRB.get_active())
-				direction = DefaultChase::VUIncreasing;
+				direction = AutoDesign::VUIncreasing;
 			else if(_vuDecreasingRB.get_active())
-				direction = DefaultChase::VUDecreasing;
+				direction = AutoDesign::VUDecreasing;
 			else if(_vuInwardRunRB.get_active())
-				direction = DefaultChase::VUInward;
+				direction = AutoDesign::VUInward;
 			else //if(_vuOutwardRunRB.get_active())
-				direction = DefaultChase::VUOutward;
-			DefaultChase::MakeVUMeter(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_4.GetColors(), direction);
+				direction = AutoDesign::VUOutward;
+			     AutoDesign::MakeVUMeter(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_4.GetColors(), direction);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_5_ColorPreset: {
-			DefaultChase::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors());
+			     AutoDesign::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors());
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
 		
 		case Page3_6_Increasing: {
-			DefaultChase::IncreasingType incType;
+			     AutoDesign::IncreasingType incType;
 			if(_incForwardRB.get_active())
-				incType = DefaultChase::IncForward;
+				incType = AutoDesign::IncForward;
 			else if(_incBackwardRB.get_active())
-				incType = DefaultChase::IncBackward;
+				incType = AutoDesign::IncBackward;
 			else if(_incForwardReturnRB.get_active())
-				incType = DefaultChase::IncForwardReturn;
+				incType = AutoDesign::IncForwardReturn;
 			else //if(_incBackwardReturnRB.get_active())
-				incType = DefaultChase::IncBackwardReturn;
-			DefaultChase::MakeIncreasingChase(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_6.GetColors(), incType);
+				incType = AutoDesign::IncBackwardReturn;
+			     AutoDesign::MakeIncreasingChase(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_6.GetColors(), incType);
 			_eventHub.EmitUpdate();
 			hide();
 		} break;

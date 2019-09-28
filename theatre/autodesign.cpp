@@ -1,4 +1,4 @@
-#include "defaultchase.h"
+#include "autodesign.h"
 
 #include "chase.h"
 #include "color.h"
@@ -14,8 +14,16 @@
 #include <algorithm>
 #include <random>
 
-void DefaultChase::addColorPresets(Management& management, Controllable& control, PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master)
+void AutoDesign::addColorPresets(Management& management, Controllable& control, PresetCollection& pc, const Color& color)
 {
+	unsigned
+		red = color.Red()*((1<<24)-1)/255,
+		green = color.Green()*((1<<24)-1)/255,
+		blue = color.Blue()*((1<<24)-1)/255,
+		master = 0;
+	if(red != 0 || green != 0 || blue != 0)
+		master = (1<<24)-1;
+	
 	for(size_t i=0; i!=control.NInputs(); ++i)
 	{
 		Color c = control.InputColor(i);
@@ -46,7 +54,7 @@ void DefaultChase::addColorPresets(Management& management, Controllable& control
 	}
 }
 
-PresetCollection& DefaultChase::MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors)
+PresetCollection& AutoDesign::MakeColorPreset(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors)
 {
 	PresetCollection& pc = management.AddPresetCollection();
 	pc.SetName(destination.GetAvailableName("Colourpreset"));
@@ -54,21 +62,13 @@ PresetCollection& DefaultChase::MakeColorPreset(class Management& management, cl
 	for(size_t cIndex=0; cIndex!=controllables.size(); ++cIndex)
 	{
 		size_t colorIndex = cIndex % colors.size();
-		unsigned
-			red = colors[colorIndex].Red()*((1<<24)-1)/255,
-			green = colors[colorIndex].Green()*((1<<24)-1)/255,
-			blue = colors[colorIndex].Blue()*((1<<24)-1)/255,
-			master = 0;
-		if(red != 0 || green != 0 || blue != 0)
-			master = (1<<24)-1;
-		
-		addColorPresets(management, *controllables[cIndex], pc, red, green, blue, master);
+		addColorPresets(management, *controllables[cIndex], pc, colors[colorIndex]);
 	}
 	management.AddPreset(pc, 0);
 	return pc;
 }
 
-Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, RunType runType)
+Chase& AutoDesign::MakeRunningLight(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, RunType runType)
 {
 	Chase& chase = management.AddChase();
 	chase.SetName(destination.GetAvailableName("Runchase"));
@@ -135,15 +135,7 @@ Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destinatio
 				if(cIndex < controllables.size())
 				{
 					size_t colourIndex = cIndex % colors.size();
-					unsigned
-						red = colors[colourIndex].Red()*((1<<24)-1)/255,
-						green = colors[colourIndex].Green()*((1<<24)-1)/255,
-						blue = colors[colourIndex].Blue()*((1<<24)-1)/255,
-						master = 0;
-					if(red != 0 || green != 0 || blue != 0)
-						master = (1<<24)-1;
-					
-					addColorPresets(management, *controllables[cIndex], pc, red, green, blue, master);
+					addColorPresets(management, *controllables[cIndex], pc, colors[colourIndex]);
 				}
 			}
 		}
@@ -158,7 +150,7 @@ Chase& DefaultChase::MakeRunningLight(Management& management, Folder& destinatio
 	return chase;
 }
 
-Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, double variation)
+Chase& AutoDesign::MakeColorVariation(class Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, double variation)
 {
 	Chase& chase = management.AddChase();
 	chase.SetName(destination.GetAvailableName("Colorvar"));
@@ -167,30 +159,25 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 	Sequence& seq = chase.Sequence();
 	std::random_device rd;
 	std::mt19937 rnd(rd());
-	std::normal_distribution<double> distribution(0.0, variation*double((1<<24)-1)/255.0);
+	std::normal_distribution<double> distribution(0.0, variation);
 	for(size_t chaseIndex=0; chaseIndex!=colors.size(); ++chaseIndex)
 	{
 		PresetCollection& pc = management.AddPresetCollection();
 		pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
 		destination.Add(pc);
-		unsigned
-			red = colors[chaseIndex].Red()*((1<<24)-1)/255,
-			green = colors[chaseIndex].Green()*((1<<24)-1)/255,
-			blue = colors[chaseIndex].Blue()*((1<<24)-1)/255,
-			master = 0;
-		if(red != 0 || green != 0 || blue != 0)
-			master = (1<<24)-1;
 		for(Controllable* c : controllables)
 		{
 			double
 				redVar = round(distribution(rnd)),
 				greenVar = round(distribution(rnd)),
 				blueVar = round(distribution(rnd));
-			unsigned
-				rv = std::max<double>(0.0, std::min<double>(double(red) + redVar, (1<<24)-1)),
-				gv = std::max<double>(0.0, std::min<double>(double(green) + greenVar, (1<<24)-1)),
-				bv = std::max<double>(0.0, std::min<double>(double(blue) + blueVar, (1<<24)-1));
-			addColorPresets(management, *c, pc, rv, gv, bv, master);
+			Color color = colors[chaseIndex];
+			Color randomizedColor(
+				std::max<double>(0.0, std::min<double>(double(color.Red()) + redVar, 255)),
+				std::max<double>(0.0, std::min<double>(double(color.Green()) + greenVar, 255)),
+				std::max<double>(0.0, std::min<double>(double(color.Blue()) + blueVar, 255))
+			);
+			addColorPresets(management, *c, pc, randomizedColor);
 		}
 		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
@@ -198,7 +185,7 @@ Chase& DefaultChase::MakeColorVariation(class Management& management, Folder& de
 	return chase;
 }
 
-Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<Color>& colors, ShiftType shiftType)
+Chase& AutoDesign::MakeColorShift(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<Color>& colors, ShiftType shiftType)
 {
 	Chase& chase = management.AddChase();
 	chase.SetName(destination.GetAvailableName("Colourshift"));
@@ -261,14 +248,7 @@ Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination,
 					colourIndex = pos[frameIndex][cIndex];
 					break;
 			}
-			unsigned
-				red = colors[colourIndex].Red()*((1<<24)-1)/255,
-				green = colors[colourIndex].Green()*((1<<24)-1)/255,
-				blue = colors[colourIndex].Blue()*((1<<24)-1)/255,
-				master = 0;
-			if(red != 0 || green != 0 || blue != 0)
-				master = (1<<24)-1;
-			addColorPresets(management, *controllables[cIndex], pc, red, green, blue, master);
+			addColorPresets(management, *controllables[cIndex], pc, colors[colourIndex]);
 		}
 		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);
@@ -281,7 +261,7 @@ Chase& DefaultChase::MakeColorShift(Management& management, Folder& destination,
 	return chase;
 }
 
-Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<Color>& colors, VUMeterDirection direction)
+Controllable& AutoDesign::MakeVUMeter(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<Color>& colors, VUMeterDirection direction)
 {
 	if(colors.size() != controllables.size())
 		throw std::runtime_error("Number of colours did not match number of fixtures");
@@ -332,14 +312,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 				else // VUOutward
 					fixIndex = nLevels + level;
 			}
-			unsigned
-				red = colors[fixIndex].Red()*((1<<24)-1)/255,
-				green = colors[fixIndex].Green()*((1<<24)-1)/255,
-				blue = colors[fixIndex].Blue()*((1<<24)-1)/255,
-				master = 0;
-			if(red != 0 || green != 0 || blue != 0)
-				master = (1<<24)-1;
-			addColorPresets(management, *controllables[fixIndex], pc, red, green, blue, master);
+			addColorPresets(management, *controllables[fixIndex], pc, colors[fixIndex]);
 		}
 		management.AddPreset(pc, 0);
 		newEffect.AddConnection(pc, 0);
@@ -348,7 +321,7 @@ Controllable& DefaultChase::MakeVUMeter(Management& management, Folder& destinat
 	return newAudioLevel;
 }
 
-Chase& DefaultChase::MakeIncreasingChase(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, IncreasingType incType)
+Chase& AutoDesign::MakeIncreasingChase(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, IncreasingType incType)
 {
 	if(colors.size() != controllables.size())
 		throw std::runtime_error("Number of controllables does not match number of provided colours");
@@ -400,14 +373,7 @@ Chase& DefaultChase::MakeIncreasingChase(Management& management, Folder& destina
 		
 		for(size_t i=startFixture; i!=endFixture; ++i)
 		{
-			unsigned
-				red = colors[i].Red()*((1<<24)-1)/255,
-				green = colors[i].Green()*((1<<24)-1)/255,
-				blue = colors[i].Blue()*((1<<24)-1)/255,
-				master = 0;
-			if(red != 0 || green != 0 || blue != 0)
-				master = (1<<24)-1;
-			addColorPresets(management, *controllables[i], pc, red, green, blue, master);
+			addColorPresets(management, *controllables[i], pc, colors[i]);
 		}
 		seq.Add(pc, 0);
 		management.AddPreset(pc, 0);

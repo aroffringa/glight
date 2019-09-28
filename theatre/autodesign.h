@@ -1,9 +1,9 @@
-#ifndef DEFAULT_CHASE_H
-#define DEFAULT_CHASE_H
+#ifndef AUTO_DESIGN_H
+#define AUTO_DESIGN_H
 
 #include <vector>
 
-class DefaultChase
+class AutoDesign
 {
 public:
 	enum RunType { IncreasingRun, DecreasingRun, BackAndForthRun, InwardRun, OutwardRun, RandomRun };
@@ -27,7 +27,7 @@ public:
 	static class Chase& MakeIncreasingChase(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, IncreasingType incType);
 	
 private:
-	static void addColorPresets(class Management& management, class Controllable& controllable, class PresetCollection& pc, unsigned red, unsigned green, unsigned blue, unsigned master);
+	static void addColorPresets(class Management& management, class Controllable& controllable, class PresetCollection& pc, const Color& color);
 };
 
 #endif
