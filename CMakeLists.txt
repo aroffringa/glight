@@ -63,7 +63,7 @@ set(SYSTEMFILES
 )
 
 set(THEATREFILES
-  theatre/defaultchase.cpp
+  theatre/autodesign.cpp
   theatre/effect.cpp
   theatre/fixture.cpp
   theatre/fixturefunction.cpp
