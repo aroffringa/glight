@@ -135,7 +135,7 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned* values, uns
 	double relTimeInMs = GetOffsetTimeInMS();
 	double beatValue, beatConfidence;
 	unsigned audioLevel;
-	if(relTimeInMs - _lastOverridenBeatTime < 3000.0 && _overridenBeat != 0)
+	if(relTimeInMs - _lastOverridenBeatTime < 8000.0 && _overridenBeat != 0)
 	{
 		beatConfidence = 1.0;
 		beatValue = _overridenBeat;
@@ -443,6 +443,9 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 	_thread(),
 	_isQuitting(false),
 	_createTime(forDryCopy._createTime),
+	_rndDistribution(0, ControlValue::MaxUInt()+1),
+	_overridenBeat(forDryCopy._overridenBeat.load()),
+	_lastOverridenBeatTime(forDryCopy._lastOverridenBeatTime.load()),
 	_theatre(new class Theatre(*forDryCopy._theatre)),
 	_beatFinder(beatFinder)
 {
