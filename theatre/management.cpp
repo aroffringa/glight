@@ -272,13 +272,19 @@ void Management::removeControllable(std::vector<std::unique_ptr<Controllable>>::
 	
 	controllable->Parent().Remove(*controllable.get());
 
-	for(std::vector<std::unique_ptr<Controllable>>::iterator i=_controllables.begin();
-		i!=_controllables.end(); ++i)
+	std::vector<std::unique_ptr<Controllable>>::iterator i = _controllables.begin();
+	while(i!=_controllables.end())
 	{
 		if((*i)->HasOutputConnection(*controllable))
 		{
 			--i;
 			removeControllable(i+1);
+			// Every time we remove something, we have to restart, because the vector might
+			// have changed because of other dependencies
+			i = _controllables.begin();
+		}
+		else {
+			++i;
 		}
 	}
 }
