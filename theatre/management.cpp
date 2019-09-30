@@ -457,6 +457,10 @@ Management::Management(const Management& forDryCopy, std::shared_ptr<class BeatF
 	
 	_rootFolder = forDryCopy._rootFolder->CopyHierarchy(_folders);
 	
+	// fixturetypes are not placed in a folder by theatre: do so now
+	for(const std::unique_ptr<FixtureType>& ft : _theatre->FixtureTypes())
+		_rootFolder->Add(*ft);
+	
 	// The controllables can have dependencies to other controllables, hence dependencies
 	// need to be resolved and copied first.
 	_controllables.resize(forDryCopy._controllables.size());

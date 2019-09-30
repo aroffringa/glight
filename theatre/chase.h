@@ -110,9 +110,9 @@ private:
 	 */
 	Chase(const Chase& chase) :
 		Controllable(chase),
-		_phaseOffset(chase._phaseOffset),
 		_trigger(chase._trigger),
-		_transition(chase._transition)
+		_transition(chase._transition),
+		_phaseOffset(chase._phaseOffset)
 	{ }
 	
 	void mixBeatChase(unsigned* channelValues, unsigned universe, const Timing& timing)
