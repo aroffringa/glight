@@ -115,8 +115,14 @@ class Management {
 		
 		void IncreaseManualBeat(unsigned count = 1)
 		{
-			_overridenBeat += count;
-			_lastOverridenBeatTime = GetOffsetTimeInMS();
+			if(count == 0)
+			{
+				_lastOverridenBeatTime = 0.0;
+			}
+			else {
+				_overridenBeat += count;
+				_lastOverridenBeatTime = GetOffsetTimeInMS();
+			}
 		}
 		
 		void BlackOut();

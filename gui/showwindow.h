@@ -54,6 +54,7 @@ private:
 		*/
 	void addFaderWindow(FaderSetupState* stateOrNull = nullptr);
 
+	void increaseManualBeat(int val);
 	bool onKeyDown(GdkEventKey *event);
 	bool onKeyUp(GdkEventKey *event);
 	bool onDelete(GdkEventAny *event);

@@ -23,7 +23,8 @@ VisualizationWindow::VisualizationWindow(Management* management, EventTransmitte
 	_miAlignVertically("Align vertically"),
 	_miDistributeEvenly("Distribute evenly"),
 	_miAdd("Add..."),
-	_miRemove("Remove")
+	_miRemove("Remove"),
+	_miFullscreen("Fullscreen")
 {
 	set_title("Glight - visualization");
 	set_default_size(600, 200);
@@ -61,6 +62,11 @@ void VisualizationWindow::inializeContextMenu()
 	
 	_miRemove.signal_activate().connect([&]{ onRemoveFixtures(); });
 	_popupMenu.add(_miRemove);
+	
+	_popupMenu.add(_miSeparator2);
+	
+	_miFullscreen.signal_activate().connect([&]{ onFullscreen(); });
+	_popupMenu.add(_miFullscreen);
 	
 	_popupMenu.show_all_children();
 }
@@ -197,9 +203,14 @@ Fixture* VisualizationWindow::fixtureAt(Management& management, const Position& 
 
 bool VisualizationWindow::onButtonPress(GdkEventButton* event)
 {
-	if(!_dryManagement && (event->button==1 || event->button==3))
+	if((!_dryManagement && event->button==1) || event->button==3)
 	{
-		double sc = invScale(*_management, _drawingArea.get_width(), _drawingArea.get_height());
+		double height = _drawingArea.get_height();
+		if(_dryManagement==nullptr)
+			height = _drawingArea.get_height();
+		else
+			height = _drawingArea.get_height()/2.0;
+		double sc = invScale(*_management, _drawingArea.get_width(), height);
 		Position pos = Position(event->x, event->y) * sc;
 		Fixture* selectedFixture = fixtureAt(*_management, pos);
 		if(selectedFixture)
@@ -397,4 +408,12 @@ void VisualizationWindow::onRemoveFixtures()
 	}
 	_selectedFixtures.clear();
 	_eventTransmitter->EmitUpdate();
+}
+
+void VisualizationWindow::onFullscreen()
+{
+	if(_miFullscreen.get_active())
+		fullscreen();
+	else
+		unfullscreen();
 }
