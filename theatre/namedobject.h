@@ -23,10 +23,24 @@ public:
 		_signalDelete();
 	}
 
-	NamedObject(const NamedObject&) = default;
-	NamedObject(NamedObject&&) = default;
-	NamedObject& operator=(const NamedObject&) = default;
-	NamedObject& operator=(NamedObject&&) = default;
+	NamedObject(const NamedObject& source) : _name(source._name), _signalDelete()
+	{ }
+	NamedObject(NamedObject&& source) : _name(source._name), _signalDelete()
+	{ }
+	NamedObject& operator=(const NamedObject& source)
+	{
+		_signalDelete();
+		_signalDelete.clear();
+		_name = source._name;
+		return *this;
+	}
+	NamedObject& operator=(NamedObject&& source)
+	{
+		_signalDelete();
+		_signalDelete.clear();
+		_name = source._name;
+		return *this;
+	}
 	
 	const std::string& Name() const { return _name; }
 	void SetName(const std::string& name) { _name = name; }
