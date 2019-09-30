@@ -110,6 +110,7 @@ private:
 	 */
 	Chase(const Chase& chase) :
 		Controllable(chase),
+		_phaseOffset(chase._phaseOffset),
 		_trigger(chase._trigger),
 		_transition(chase._transition)
 	{ }
