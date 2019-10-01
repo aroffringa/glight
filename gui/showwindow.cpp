@@ -32,6 +32,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miQuit(Gtk::Stock::QUIT),
 	_miDryMode("Dry mode"),
 	_miCancelDryMode("Cancel dry mode"),
+	_miSwapModes("Swap modes"),
 	_miBlackOutAndDryMode("Black-out with dry mode"),
 	_miBlackOut("Black-out"),
 	_miDesignWizard("Design wizard"),
@@ -225,6 +226,10 @@ void ShowWindow::createMenu()
 	_miCancelDryMode.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMICancelDryModeClicked));
 	_menuDesign.append(_miCancelDryMode);
 	
+	_miSwapModes.set_sensitive(false);
+	_miSwapModes.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMISwapModesClicked));
+	_menuDesign.append(_miSwapModes);
+	
 	_miBlackOutAndDryMode.signal_activate().connect([&]() { onMIBlackOutAndDryMode(); });
 	_menuDesign.append(_miBlackOutAndDryMode);
 	
@@ -244,8 +249,8 @@ void ShowWindow::createMenu()
 	_miNewControlWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onControlWindowButtonClicked));
 	_menuWindow.append(_miNewControlWindow);
 
-	   _miFixtureListWindow.set_active(false);
-	   _miFixtureListWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onConfigurationWindowButtonClicked));
+	_miFixtureListWindow.set_active(false);
+	_miFixtureListWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onConfigurationWindowButtonClicked));
 	_menuWindow.append(_miFixtureListWindow);
 
 	_miVisualizationWindow.set_active(false);
@@ -389,6 +394,7 @@ void ShowWindow::updateDryModeState()
 {
 	bool dryMode = _miDryMode.get_active();
 	_miCancelDryMode.set_sensitive(dryMode);
+	_miSwapModes.set_sensitive(dryMode);
 	_miBlackOutAndDryMode.set_sensitive(!dryMode);
 	_miOpen.set_sensitive(!dryMode);
 	_miSave.set_sensitive(!dryMode);
@@ -444,6 +450,25 @@ void ShowWindow::onMICancelDryModeClicked()
 			FolderObject& folder = _management->GetObjectFromPath(path);
 			_objectListFrame->OpenFolder(static_cast<Folder&>(folder));
 		}
+	}
+}
+
+void ShowWindow::onMISwapModesClicked()
+{
+	if(_miDryMode.get_active() && _backgroundManagement != nullptr)
+	{
+		Folder& activeFolder = _objectListFrame->SelectedFolder();
+		std::string path = activeFolder.FullPath();
+		
+		_management->SwapDevices(*_backgroundManagement);
+		std::swap(_backgroundManagement, _management);
+		_visualizationWindow->MakeDryModeReal();
+		_visualizationWindow->SetDryMode(_management.get());
+		changeManagement(_management.get(), true);
+		
+		updateDryModeState();
+		FolderObject& folder = _management->GetObjectFromPath(path);
+		_objectListFrame->OpenFolder(static_cast<Folder&>(folder));
 	}
 }
 
