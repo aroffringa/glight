@@ -141,22 +141,42 @@ void ShowWindow::onVisualizationWindowButtonClicked()
 		_visualizationWindow->hide();
 }
 
+void ShowWindow::increaseManualBeat(int val)
+{
+	_management->IncreaseManualBeat(val);
+	if(_backgroundManagement)
+		_backgroundManagement->IncreaseManualBeat(val);
+}
+
 bool ShowWindow::onKeyDown(GdkEventKey* event)
 {
-	if(event->keyval == '1')
-		_management->IncreaseManualBeat(1);
+	if(event->keyval == '0')
+		increaseManualBeat(0);
+	else if(event->keyval == '1')
+		increaseManualBeat(1);
 	else if(event->keyval == '2')
-		_management->IncreaseManualBeat(2);
+		increaseManualBeat(2);
 	else if(event->keyval == '3')
-		_management->IncreaseManualBeat(3);
+		increaseManualBeat(3);
 	else if(event->keyval == '4')
-		_management->IncreaseManualBeat(4);
+		increaseManualBeat(4);
 	else if(event->keyval == GDK_KEY_Escape)
 	{
 		if(_miDryMode.get_active())
 		{
-			_miDryMode.set_active(false);
+			onMISwapModesClicked();
+		}
+		else {
+			_miDryMode.set_active(true);
 			onMIDryModeClicked();
+		}
+	}
+	else if(event->keyval == GDK_KEY_BackSpace)
+	{
+		if(_miDryMode.get_active())
+		{
+			onMIBlackOut();
+			onMISwapModesClicked();
 		}
 		else {
 			onMIBlackOutAndDryMode();

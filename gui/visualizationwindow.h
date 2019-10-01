@@ -3,6 +3,7 @@
 
 #include "../theatre/position.h"
 
+#include <gtkmm/checkmenuitem.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/menu.h>
 #include <gdkmm/pixbuf.h>
@@ -54,8 +55,9 @@ private:
 	Position _draggingStart, _draggingTo;
 
 	Gtk::Menu _popupMenu;
-	Gtk::SeparatorMenuItem _miSeparator1;
+	Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
 	Gtk::MenuItem _miAlignHorizontally, _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove;
+	Gtk::CheckMenuItem _miFullscreen;
 	
 	void inializeContextMenu();
 	void initialize();
@@ -77,6 +79,7 @@ private:
 	void onDistributeEvenly();
 	void onAddFixtures();
 	void onRemoveFixtures();
+	void onFullscreen();
 	
 	double scale(Management& management, double width, double height);
 	double invScale(Management& management, double width, double height)
