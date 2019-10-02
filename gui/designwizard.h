@@ -127,6 +127,8 @@ private:
 		_vuOutwardRunRB;
 		
 	ColorSequenceWidget _colorsWidgetP3_5;
+	Gtk::CheckButton
+		_eachFixtureSeparatelyCB;
 	
 	ColorSequenceWidget _colorsWidgetP3_6;
 	Gtk::RadioButton

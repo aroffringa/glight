@@ -50,6 +50,7 @@ DesignWizard::DesignWizard(Management& management, EventTransmitter& hub, const 
 	_vuInwardRunRB("Inward direction"),
 	_vuOutwardRunRB("Outward direcion"),
 	_colorsWidgetP3_5(this),
+	_eachFixtureSeparatelyCB("Separate each fixture"),
 	_colorsWidgetP3_6(this),
 	_incForwardRB("Forward direction"),
 	_incBackwardRB("Backward direction"),
@@ -217,6 +218,7 @@ void DesignWizard::initPage3_4VUMeter()
 void DesignWizard::initPage3_5ColorPreset()
 {
 	_vBoxPage3_5.pack_start(_colorsWidgetP3_5, true, false);
+	_vBoxPage3_5.pack_start(_eachFixtureSeparatelyCB, false, false);
 }
 
 void DesignWizard::initPage3_6Increasing()
@@ -392,7 +394,10 @@ void DesignWizard::onNextClicked()
 		} break;
 		
 		case Page3_5_ColorPreset: {
-			AutoDesign::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors(), colorDeduction());
+			if(_eachFixtureSeparatelyCB.get_active())
+				AutoDesign::MakeColorPresetPerFixture(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors(), colorDeduction());
+			else
+				AutoDesign::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors(), colorDeduction());
 			_eventHub.EmitUpdate();
 			hide();
 		} break;

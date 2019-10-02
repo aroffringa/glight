@@ -85,6 +85,19 @@ PresetCollection& AutoDesign::MakeColorPreset(class Management& management, clas
 	return pc;
 }
 
+void AutoDesign::MakeColorPresetPerFixture(class Management& management, class Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, const ColorDeduction& deduction)
+{
+	for(size_t cIndex=0; cIndex!=controllables.size(); ++cIndex)
+	{
+		PresetCollection& pc = management.AddPresetCollection();
+		pc.SetName(destination.GetAvailableName("Colourpreset"));
+		destination.Add(pc);
+		size_t colorIndex = cIndex % colors.size();
+		addColorPresets(management, *controllables[cIndex], pc, colors[colorIndex], deduction);
+		management.AddPreset(pc, 0);
+	}
+}
+
 Chase& AutoDesign::MakeRunningLight(Management& management, Folder& destination, const std::vector<class Controllable*>& controllables, const std::vector<class Color>& colors, const ColorDeduction& deduction, RunType runType)
 {
 	Chase& chase = management.AddChase();
