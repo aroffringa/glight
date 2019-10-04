@@ -20,6 +20,7 @@ public:
 		DelayType,
 		FadeType,
 		FlickerType,
+		FluorescentStartType,
 		InvertType,
 		MusicActivationType,
 		PulseType,

@@ -5,6 +5,7 @@
 #include "effects/delayeffect.h"
 #include "effects/fadeeffect.h"
 #include "effects/flickereffect.h"
+#include "effects/fluorescentstarteffect.h"
 #include "effects/inverteffect.h"
 #include "effects/musicactivationeffect.h"
 #include "effects/pulseeffect.h"
@@ -23,6 +24,7 @@ std::unique_ptr<Effect> Effect::Make(Effect::Type type)
 		case DelayType: return up(new DelayEffect());
 		case FadeType: return up(new FadeEffect());
 		case FlickerType: return up(new FlickerEffect());
+		case FluorescentStartType: return up(new FluorescentStartEffect());
 		case InvertType: return up(new InvertEffect());
 		case MusicActivationType: return up(new MusicActivationEffect());
 		case PulseType: return up(new PulseEffect());
@@ -41,6 +43,7 @@ std::string Effect::TypeToName(Effect::Type type)
 		case DelayType: return "Delay";
 		case FadeType: return "Fade";
 		case FlickerType: return "Flicker";
+		case FluorescentStartType: return "Fluorescent start";
 		case InvertType: return "Invert";
 		case MusicActivationType: return  "Music activation";
 		case PulseType: return "Pulse";
@@ -62,6 +65,8 @@ Effect::Type Effect::NameToType(const std::string& name)
 		return FadeType;
 	else if(name == "Flicker")
 		return FlickerType;
+	else if(name == "Fluorescent start")
+		return FluorescentStartType;
 	else if(name == "Invert")
 		return InvertType;
 	else if(name == "Music activation")
@@ -84,6 +89,7 @@ std::vector<Effect::Type> Effect::GetTypes()
 		DelayType,
 		FadeType,
 		FlickerType,
+		FluorescentStartType,
 		InvertType,
 		MusicActivationType,
 		PulseType,
