@@ -8,6 +8,8 @@
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/scrolledwindow.h>
 
 #include <vector>
 
@@ -15,6 +17,7 @@ class ColorSequenceWidget : public Gtk::VBox
 {
 public:
 	ColorSequenceWidget(Gtk::Window* parent) :
+		_frame("Colors"),
 		_allEqual("Use one color for all"),
 		_plusButton("+"),
 		_gradientButton("Gradient"),
@@ -24,7 +27,7 @@ public:
 		_maxCount(0)
 	{
 		_allEqual.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onToggleEqual));
-		pack_start(_allEqual, true, false);
+		pack_start(_allEqual, false, false);
 		
 		_minButton.set_sensitive(false);
 		_minButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onDecreaseColors));
@@ -36,11 +39,15 @@ public:
 		
 		_plusButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onIncreaseColors));
 		_buttonBox.pack_start(_plusButton);
-		pack_start(_buttonBox, true, true);
+		pack_start(_buttonBox, false, false);
 		
 		_widgets.emplace_back(new ColorSelectWidget(_parent));
-		pack_start(*_widgets.back(), true, false);
+		_box.pack_start(*_widgets.back(), true, false);
 		_widgets.back()->SignalColorChanged().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
+		
+		_scrolledWindow.add(_box);
+		_frame.add(_scrolledWindow);
+		pack_start(_frame, true, true);
 		
 		show_all_children();
 	}
@@ -62,7 +69,7 @@ public:
 				_widgets.back()->SignalColorChanged().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
 			}
 			_widgets.back()->SetColor(color);
-			pack_start(*_widgets.back(), true, false);
+			_box.pack_start(*_widgets.back(), true, false);
 			_widgets.back()->show();
 		}
 		_minButton.set_sensitive(colors.size() > _minCount);
@@ -108,6 +115,9 @@ public:
 	}
 	
 private:
+	Gtk::Frame _frame;
+	Gtk::ScrolledWindow _scrolledWindow;
+	Gtk::VBox _box;
 	Gtk::CheckButton _allEqual;
 	std::vector<std::unique_ptr<class ColorSelectWidget>> _widgets;
 	Gtk::ButtonBox _buttonBox;
@@ -138,7 +148,7 @@ private:
 			_minButton.set_sensitive(_widgets.size() > _minCount);
 			_gradientButton.set_sensitive(_widgets.size() > 2);
 			_plusButton.set_sensitive(_maxCount == 0 || _widgets.size() < _maxCount);
-			pack_start(*_widgets.back(), true, false);
+			_box.pack_start(*_widgets.back(), true, false);
 			_widgets.back()->show();
 			queue_resize();
 		}
