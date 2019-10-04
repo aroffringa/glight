@@ -53,8 +53,7 @@ private:
 				}
 			}
 			else {
-				for(const std::pair<Controllable*,size_t>& connection : Connections())
-					connection.first->MixInput(connection.second, ControlValue::MultiplyValues(values[0].UInt(), _value[0]));
+				setConnectedInputs(ControlValue::MultiplyValues(values[0].UInt(), _value[0]));
 			}
 		}
 	}

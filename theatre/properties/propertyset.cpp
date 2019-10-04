@@ -5,6 +5,7 @@
 #include "delayeffectps.h"
 #include "fadeeffectps.h"
 #include "flickereffectps.h"
+#include "fluorescentstarteffectps.h"
 #include "inverteffectps.h"
 #include "musicactivationeffectps.h"
 #include "pulseeffectps.h"
@@ -19,6 +20,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 	const DelayEffect* dfx = dynamic_cast<const DelayEffect*>(&object);
 	const FadeEffect* ffx = dynamic_cast<const FadeEffect*>(&object);
 	const FlickerEffect* flx = dynamic_cast<const FlickerEffect*>(&object);
+	const FluorescentStartEffect* fsx = dynamic_cast<const FluorescentStartEffect*>(&object);
 	const InvertEffect* ifx = dynamic_cast<const InvertEffect*>(&object);
 	const MusicActivationEffect* mfx = dynamic_cast<const MusicActivationEffect*>(&object);
 	const PulseEffect* pfx = dynamic_cast<const PulseEffect*>(&object);
@@ -43,6 +45,10 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 	else if(flx != nullptr)
 	{
 		ps.reset(new FlickerEffectPS());
+	}
+	else if(fsx != nullptr)
+	{
+		ps.reset(new FluorescentStartEffectPS());
 	}
 	else if(ifx != nullptr)
 	{

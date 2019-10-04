@@ -36,6 +36,9 @@ public:
 	unsigned DrawRandomValue(size_t maxValue) const {
 		return std::uniform_int_distribution<unsigned>(0, maxValue)(_rng);
 	}
+	double DrawGaussianValue() const {
+		return std::normal_distribution<double>(0.0, 1.0)(_rng);
+	}
 	
 	std::mt19937& RNG() const { return _rng; }
 	
