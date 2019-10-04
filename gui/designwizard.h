@@ -32,6 +32,8 @@ public:
 		_destinationPath = destinationPath;
 	}
 	
+	void Select(const std::vector<class Fixture*>& fixtures);
+	
 private:
 	enum Page {
 		Page1_SelFixtures,
@@ -127,6 +129,8 @@ private:
 		_vuOutwardRunRB;
 		
 	ColorSequenceWidget _colorsWidgetP3_5;
+	Gtk::CheckButton
+		_eachFixtureSeparatelyCB;
 	
 	ColorSequenceWidget _colorsWidgetP3_6;
 	Gtk::RadioButton

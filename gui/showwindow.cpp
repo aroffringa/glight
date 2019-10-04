@@ -55,7 +55,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_fixtureListWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 	_fixtureListWindow->signal_hide().connect([&]() { onHideFixtureList(); });
 
-	_visualizationWindow.reset(new VisualizationWindow(_management.get(), this));
+	_visualizationWindow.reset(new VisualizationWindow(_management.get(), this, this));
 	_visualizationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_visualizationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 	_visualizationWindow->signal_hide().connect([&]() { onHideVisualizationWindow(); });
@@ -557,12 +557,16 @@ size_t ShowWindow::nextControlKeyRow() const
 	throw std::runtime_error("Error in nextControlKeyRow()");
 }
 
+std::string ShowWindow::Path()
+{
+	return _objectListFrame->SelectedFolder().FullPath();
+}
+
 void ShowWindow::onMIDesignWizardClicked()
 {
-	std::string path = _objectListFrame->SelectedFolder().FullPath();
 	if(!_designWizard || !_designWizard->is_visible())
-		_designWizard.reset(new DesignWizard(*_management, *this, path));
-	_designWizard->SetDestinationPath(path);
+		_designWizard.reset(new DesignWizard(*_management, *this, Path()));
+	_designWizard->SetDestinationPath(Path());
 	_designWizard->present();
 }
 

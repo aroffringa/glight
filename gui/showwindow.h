@@ -40,6 +40,10 @@ public:
 	
 	void OpenFile(const std::string& filename);
 	
+	std::string Path();
+	
+	std::unique_ptr<class DesignWizard>& GetDesignWizard() { return _designWizard; }
+	
 private:
 	void onControlWindowButtonClicked()
 	{

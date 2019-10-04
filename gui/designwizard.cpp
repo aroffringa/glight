@@ -50,6 +50,7 @@ DesignWizard::DesignWizard(Management& management, EventTransmitter& hub, const 
 	_vuInwardRunRB("Inward direction"),
 	_vuOutwardRunRB("Outward direcion"),
 	_colorsWidgetP3_5(this),
+	_eachFixtureSeparatelyCB("Separate each fixture"),
 	_colorsWidgetP3_6(this),
 	_incForwardRB("Forward direction"),
 	_incBackwardRB("Backward direction"),
@@ -217,6 +218,7 @@ void DesignWizard::initPage3_4VUMeter()
 void DesignWizard::initPage3_5ColorPreset()
 {
 	_vBoxPage3_5.pack_start(_colorsWidgetP3_5, true, false);
+	_vBoxPage3_5.pack_start(_eachFixtureSeparatelyCB, false, false);
 }
 
 void DesignWizard::initPage3_6Increasing()
@@ -247,6 +249,20 @@ void DesignWizard::fillFixturesList()
 		row[_fixturesListColumns._title] = fixture->Name();
 		row[_fixturesListColumns._type] = fixture->Type().Name();
 		row[_fixturesListColumns._fixture] = fixture.get();
+	}
+}
+
+void DesignWizard::Select(const std::vector<class Fixture*>& fixtures)
+{
+	_fixturesListView.get_selection()->unselect_all();
+	Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::Children children = _fixturesListModel->children();
+	for(auto& child : children)
+	{
+		Fixture* fixture = child.get_value(_fixturesListColumns._fixture);
+		auto iter = std::find(fixtures.begin(), fixtures.end(), fixture);
+		if(iter != fixtures.end())
+			_fixturesListView.get_selection()->select(child);
 	}
 }
 
@@ -392,7 +408,10 @@ void DesignWizard::onNextClicked()
 		} break;
 		
 		case Page3_5_ColorPreset: {
-			AutoDesign::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors(), colorDeduction());
+			if(_eachFixtureSeparatelyCB.get_active())
+				AutoDesign::MakeColorPresetPerFixture(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors(), colorDeduction());
+			else
+				AutoDesign::MakeColorPreset(*_management, getFolder(), _selectedControllables, _colorsWidgetP3_5.GetColors(), colorDeduction());
 			_eventHub.EmitUpdate();
 			hide();
 		} break;
