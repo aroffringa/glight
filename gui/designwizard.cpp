@@ -50,7 +50,7 @@ DesignWizard::DesignWizard(Management& management, EventTransmitter& hub, const 
 	_vuInwardRunRB("Inward direction"),
 	_vuOutwardRunRB("Outward direcion"),
 	_colorsWidgetP3_5(this),
-	_eachFixtureSeparatelyCB("Separate each fixture"),
+	_eachFixtureSeparatelyCB("One preset per fixture"),
 	_colorsWidgetP3_6(this),
 	_incForwardRB("Forward direction"),
 	_incBackwardRB("Backward direction"),
@@ -77,7 +77,7 @@ DesignWizard::DesignWizard(Management& management, EventTransmitter& hub, const 
 	_nextButton.signal_clicked().connect(sigc::mem_fun(*this, &DesignWizard::onNextClicked));
 	_buttonBox.pack_start(_nextButton);
 	_buttonBox.show_all();
-	_mainBox.pack_end(_buttonBox);
+	_mainBox.pack_end(_buttonBox, false, false);
 	
 	add(_mainBox);
 	_mainBox.show();
@@ -162,77 +162,77 @@ void DesignWizard::initPage2()
 
 void DesignWizard::initPage3_1RunningLight()
 {
-	_vBoxPage3_1.pack_start(_colorsWidgetP3_1, true, false);
+	_vBoxPage3_1.pack_start(_colorsWidgetP3_1, true, true);
 	Gtk::RadioButtonGroup group;
 	_increasingRunRB.set_group(group);
-	_vBoxPage3_1.pack_start(_increasingRunRB, true, false);
+	_vBoxPage3_1.pack_start(_increasingRunRB, false, false);
 	_decreasingRunRB.set_group(group);
-	_vBoxPage3_1.pack_start(_decreasingRunRB, true, false);
+	_vBoxPage3_1.pack_start(_decreasingRunRB, false, false);
 	_backAndForthRunRB.set_group(group);
-	_vBoxPage3_1.pack_start(_backAndForthRunRB, true, false);
+	_vBoxPage3_1.pack_start(_backAndForthRunRB, false, false);
 	_inwardRunRB.set_group(group);
-	_vBoxPage3_1.pack_start(_inwardRunRB, true, false);
+	_vBoxPage3_1.pack_start(_inwardRunRB, false, false);
 	_outwardRunRB.set_group(group);
-	_vBoxPage3_1.pack_start(_outwardRunRB, true, false);
+	_vBoxPage3_1.pack_start(_outwardRunRB, false, false);
 	_randomRunRB.set_group(group);
-	_vBoxPage3_1.pack_start(_randomRunRB, true, false);
+	_vBoxPage3_1.pack_start(_randomRunRB, false, false);
 }
 
 void DesignWizard::initPage3_2SingleColor()
 {
-	_vBoxPage3_2.pack_start(_colorsWidgetP3_2, true, false);
-	_vBoxPage3_2.pack_start(_variationLabel, true, false);
+	_vBoxPage3_2.pack_start(_colorsWidgetP3_2, true, true);
+	_vBoxPage3_2.pack_start(_variationLabel, false, false);
 	_variation.set_range(0, 100);
 	_variation.set_increments(1.0, 10.0);
-	_vBoxPage3_2.pack_start(_variation, true, false);
+	_vBoxPage3_2.pack_start(_variation, false, false);
 }
 
 void DesignWizard::initPage3_3ShiftColors()
 {
-	_vBoxPage3_3.pack_start(_colorsWidgetP3_3, true, false);
+	_vBoxPage3_3.pack_start(_colorsWidgetP3_3, true, true);
 	Gtk::RadioButtonGroup group;
 	_shiftIncreasingRB.set_group(group);
-	_vBoxPage3_3.pack_start(_shiftIncreasingRB, true, false);
+	_vBoxPage3_3.pack_start(_shiftIncreasingRB, false, false);
 	_shiftDecreasingRB.set_group(group);
-	_vBoxPage3_3.pack_start(_shiftDecreasingRB, true, false);
+	_vBoxPage3_3.pack_start(_shiftDecreasingRB, false, false);
 	_shiftBackAndForthRB.set_group(group);
-	_vBoxPage3_3.pack_start(_shiftBackAndForthRB, true, false);
+	_vBoxPage3_3.pack_start(_shiftBackAndForthRB, false, false);
 	_shiftRandomRB.set_group(group);
-	_vBoxPage3_3.pack_start(_shiftRandomRB, true, false);
+	_vBoxPage3_3.pack_start(_shiftRandomRB, false, false);
 }
 
 void DesignWizard::initPage3_4VUMeter()
 {
-	_vBoxPage3_4.pack_start(_colorsWidgetP3_4, true, false);
+	_vBoxPage3_4.pack_start(_colorsWidgetP3_4, true, true);
 	Gtk::RadioButtonGroup group;
 	_vuIncreasingRB.set_group(group);
-	_vBoxPage3_4.pack_start(_vuIncreasingRB, true, false);
+	_vBoxPage3_4.pack_start(_vuIncreasingRB, false, false);
 	_vuDecreasingRB.set_group(group);
-	_vBoxPage3_4.pack_start(_vuDecreasingRB, true, false);
+	_vBoxPage3_4.pack_start(_vuDecreasingRB, false, false);
 	_vuInwardRunRB.set_group(group);
-	_vBoxPage3_4.pack_start(_vuInwardRunRB, true, false);
+	_vBoxPage3_4.pack_start(_vuInwardRunRB, false, false);
 	_vuOutwardRunRB.set_group(group);
-	_vBoxPage3_4.pack_start(_vuOutwardRunRB, true, false);
+	_vBoxPage3_4.pack_start(_vuOutwardRunRB, false, false);
 }
 
 void DesignWizard::initPage3_5ColorPreset()
 {
-	_vBoxPage3_5.pack_start(_colorsWidgetP3_5, true, false);
+	_vBoxPage3_5.pack_start(_colorsWidgetP3_5, true, true);
 	_vBoxPage3_5.pack_start(_eachFixtureSeparatelyCB, false, false);
 }
 
 void DesignWizard::initPage3_6Increasing()
 {
-	_vBoxPage3_6.pack_start(_colorsWidgetP3_6, true, false);
+	_vBoxPage3_6.pack_start(_colorsWidgetP3_6, true, true);
 	Gtk::RadioButtonGroup group;
 	_incForwardRB.set_group(group);
-	_vBoxPage3_6.pack_start(_incForwardRB, true, false);
+	_vBoxPage3_6.pack_start(_incForwardRB, false, false);
 	_incBackwardRB.set_group(group);
-	_vBoxPage3_6.pack_start(_incBackwardRB, true, false);
+	_vBoxPage3_6.pack_start(_incBackwardRB, false, false);
 	_incForwardReturnRB.set_group(group);
-	_vBoxPage3_6.pack_start(_incForwardReturnRB, true, false);
+	_vBoxPage3_6.pack_start(_incForwardReturnRB, false, false);
 	_incBackwardReturnRB.set_group(group);
-	_vBoxPage3_6.pack_start(_incBackwardReturnRB, true, false);
+	_vBoxPage3_6.pack_start(_incBackwardReturnRB, false, false);
 }
 
 void DesignWizard::fillFixturesList()
