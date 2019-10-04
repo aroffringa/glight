@@ -252,6 +252,20 @@ void DesignWizard::fillFixturesList()
 	}
 }
 
+void DesignWizard::Select(const std::vector<class Fixture*>& fixtures)
+{
+	_fixturesListView.get_selection()->unselect_all();
+	Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::Children children = _fixturesListModel->children();
+	for(auto& child : children)
+	{
+		Fixture* fixture = child.get_value(_fixturesListColumns._fixture);
+		auto iter = std::find(fixtures.begin(), fixtures.end(), fixture);
+		if(iter != fixtures.end())
+			_fixturesListView.get_selection()->select(child);
+	}
+}
+
 Folder& DesignWizard::getFolder() const
 {
 	Folder* folder = dynamic_cast<Folder*>(_management->GetObjectFromPathIfExists(_destinationPath));

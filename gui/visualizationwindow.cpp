@@ -2,6 +2,8 @@
 
 #include "eventtransmitter.h"
 #include "addfixturewindow.h"
+#include "designwizard.h"
+#include "showwindow.h"
 
 #include "../theatre/management.h"
 #include "../theatre/dmxdevice.h"
@@ -12,10 +14,11 @@
 #include <glibmm/main.h>
 #include <gtkmm/main.h>
 
-VisualizationWindow::VisualizationWindow(Management* management, EventTransmitter* eventTransmitter) :
+VisualizationWindow::VisualizationWindow(Management* management, EventTransmitter* eventTransmitter, class ShowWindow* showWindow) :
 	_management(management),
 	_dryManagement(nullptr),
 	_eventTransmitter(eventTransmitter),
+	_showWindow(showWindow),
 	_isInitialized(false), _isTimerRunning(false),
 	_dragType(NotDragging),
 	_selectedFixtures(),
@@ -24,6 +27,7 @@ VisualizationWindow::VisualizationWindow(Management* management, EventTransmitte
 	_miDistributeEvenly("Distribute evenly"),
 	_miAdd("Add..."),
 	_miRemove("Remove"),
+	_miDesign("Design..."),
 	_miFullscreen("Fullscreen")
 {
 	set_title("Glight - visualization");
@@ -62,6 +66,9 @@ void VisualizationWindow::inializeContextMenu()
 	
 	_miRemove.signal_activate().connect([&]{ onRemoveFixtures(); });
 	_popupMenu.add(_miRemove);
+	
+	_miDesign.signal_activate().connect([&]{ onDesignFixtures(); });
+	_popupMenu.add(_miDesign);
 	
 	_popupMenu.add(_miSeparator2);
 	
@@ -146,7 +153,7 @@ void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& c
 		cairo->stroke();
 	}
 	
-	if(_dragType == DragRectangle)
+	if(_dragType == DragRectangle || _dragType == DragAddRectangle)
 	{
 		std::pair<double, double> size = _draggingTo - _draggingStart;
 		cairo->rectangle(_draggingStart.X(), _draggingStart.Y(), size.first, size.second);
@@ -205,6 +212,8 @@ bool VisualizationWindow::onButtonPress(GdkEventButton* event)
 {
 	if((!_dryManagement && event->button==1) || event->button==3)
 	{
+		bool shift =
+			(event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK)) == GDK_SHIFT_MASK;
 		double height = _drawingArea.get_height();
 		if(_dryManagement==nullptr)
 			height = _drawingArea.get_height();
@@ -213,24 +222,33 @@ bool VisualizationWindow::onButtonPress(GdkEventButton* event)
 		double sc = invScale(*_management, _drawingArea.get_width(), height);
 		Position pos = Position(event->x, event->y) * sc;
 		Fixture* selectedFixture = fixtureAt(*_management, pos);
-		if(selectedFixture)
+		if(!shift)
 		{
-			// Was a fixture clicked that was already selected? Then keep all selected.
-			// If not, select the clicked fixture:
-			if(std::find(_selectedFixtures.begin(), _selectedFixtures.end(), selectedFixture)
-				== _selectedFixtures.end())
+			if(selectedFixture)
 			{
-				_selectedFixtures.assign(1, selectedFixture);
+				// Was a fixture clicked that was already selected? Then keep all selected.
+				// If not, select the clicked fixture:
+				if(std::find(_selectedFixtures.begin(), _selectedFixtures.end(), selectedFixture)
+					== _selectedFixtures.end())
+				{
+					_selectedFixtures.assign(1, selectedFixture);
+				}
 			}
-		}
-		else {
-			_selectedFixtures.clear();
+			else {
+				_selectedFixtures.clear();
+			}
 		}
 		
 		if(event->button == 1)
 		{
 			_draggingStart = pos;
-			if(!_selectedFixtures.empty())
+			if(shift)
+			{
+				_dragType = DragAddRectangle;
+				_draggingTo = pos;
+				_selectedFixturesBeforeDrag = _selectedFixtures;
+			}
+			else if(!_selectedFixtures.empty())
 			{
 				_dragType = DragFixture;
 			}
@@ -262,10 +280,11 @@ bool VisualizationWindow::onButtonRelease(GdkEventButton* event)
 		{
 			_draggingStart = Position(event->x, event->y) * sc;
 		}
-		else if(_dragType == DragRectangle)
+		else if(_dragType == DragRectangle || _dragType == DragAddRectangle)
 		{
 		}
 		_dragType = NotDragging;
+		_selectedFixturesBeforeDrag.clear();
 		queue_draw();
 	}
 	return true;
@@ -278,15 +297,23 @@ bool VisualizationWindow::onMotion(GdkEventMotion* event)
 		double width = _drawingArea.get_width();
 		double height = _drawingArea.get_height();
 		Position pos = Position(event->x, event->y) / scale(*_management, width, height);
-		if(_dragType == DragFixture)
+		switch(_dragType)
 		{
-			for(Fixture* fixture : _selectedFixtures)
-				fixture->Position() += pos - _draggingStart;
-			_draggingStart = pos;
-		}
-		else {
-			_draggingTo = pos;
-			selectFixtures(_draggingStart, _draggingTo);
+			case NotDragging:
+				break;
+			case DragFixture:
+				for(Fixture* fixture : _selectedFixtures)
+					fixture->Position() += pos - _draggingStart;
+				_draggingStart = pos;
+				break;
+			case DragRectangle:
+				_draggingTo = pos;
+				selectFixtures(_draggingStart, _draggingTo);
+				break;
+			case DragAddRectangle:
+				_draggingTo = pos;
+				addFixtures(_draggingStart, _draggingTo);
+				break;
 		}
 		queue_draw();
 	}
@@ -311,6 +338,19 @@ void VisualizationWindow::selectFixtures(const Position& a, const Position& b)
 			if(fixture->Position().InsideRectangle(first, second))
 				_selectedFixtures.emplace_back(fixture.get());
 		}
+	}
+}
+
+void VisualizationWindow::addFixtures(const Position& a, const Position& b)
+{
+	selectFixtures(a, b);
+	for(Fixture* fixture : _selectedFixturesBeforeDrag)
+	{
+		auto iter = std::find(_selectedFixtures.begin(), _selectedFixtures.end(), fixture);
+		if(iter == _selectedFixtures.end())
+			_selectedFixtures.emplace_back(fixture);
+		else
+			_selectedFixtures.erase(iter);
 	}
 }
 
@@ -408,6 +448,15 @@ void VisualizationWindow::onRemoveFixtures()
 	}
 	_selectedFixtures.clear();
 	_eventTransmitter->EmitUpdate();
+}
+
+void VisualizationWindow::onDesignFixtures()
+{
+	std::unique_ptr<DesignWizard>& designWizard =
+		_showWindow->GetDesignWizard();
+	designWizard.reset(new DesignWizard(*_management, *_eventTransmitter, _showWindow->Path()));
+	designWizard->Select(_selectedFixtures);
+	designWizard->present();
 }
 
 void VisualizationWindow::onFullscreen()

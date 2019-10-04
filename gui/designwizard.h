@@ -32,6 +32,8 @@ public:
 		_destinationPath = destinationPath;
 	}
 	
+	void Select(const std::vector<class Fixture*>& fixtures);
+	
 private:
 	enum Page {
 		Page1_SelFixtures,

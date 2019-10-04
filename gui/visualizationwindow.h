@@ -15,7 +15,11 @@
 */
 class VisualizationWindow : public Gtk::Window {
 public:
-	VisualizationWindow(class Management* management, class EventTransmitter* eventTransmitter);
+	VisualizationWindow(
+		class Management* management,
+		class EventTransmitter* eventTransmitter,
+		class ShowWindow* showWindow
+	);
 	~VisualizationWindow();
 
 	void Update()
@@ -44,19 +48,21 @@ private:
 	Management* _management;
 	Management* _dryManagement;
 	class EventTransmitter* _eventTransmitter;
+	class ShowWindow* _showWindow;
 	bool _isInitialized, _isTimerRunning;
 	sigc::connection _timeoutConnection;
 	enum DragType {
 		NotDragging,
 		DragFixture,
-		DragRectangle
+		DragRectangle,
+		DragAddRectangle
 	} _dragType;
-	std::vector<class Fixture*> _selectedFixtures;
+	std::vector<class Fixture*> _selectedFixtures, _selectedFixturesBeforeDrag;
 	Position _draggingStart, _draggingTo;
 
 	Gtk::Menu _popupMenu;
 	Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
-	Gtk::MenuItem _miAlignHorizontally, _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove;
+	Gtk::MenuItem _miAlignHorizontally, _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miDesign;
 	Gtk::CheckMenuItem _miFullscreen;
 	
 	void inializeContextMenu();
@@ -79,6 +85,7 @@ private:
 	void onDistributeEvenly();
 	void onAddFixtures();
 	void onRemoveFixtures();
+	void onDesignFixtures();
 	void onFullscreen();
 	
 	double scale(Management& management, double width, double height);
@@ -92,6 +99,7 @@ private:
 	}
 	class Fixture* fixtureAt(Management& management, const Position& position);
 	void selectFixtures(const Position& a, const Position& b);
+	void addFixtures(const Position& a, const Position& b);
 };
 
 #endif
