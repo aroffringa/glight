@@ -222,7 +222,7 @@ Chase& AutoDesign::MakeColorShift(Management& management, Folder& destination, c
 	destination.Add(chase);
 	management.AddPreset(chase, 0);
 	Sequence& seq = chase.Sequence();
-	size_t frames = controllables.size();
+	size_t frames = colors.size();
 	std::vector<std::vector<size_t>> pos(frames);
 	std::random_device rd;
 	std::mt19937 mt(rd());
@@ -230,7 +230,7 @@ Chase& AutoDesign::MakeColorShift(Management& management, Folder& destination, c
 	{
 		if(shiftType == RandomShift)
 		{
-			pos[frameIndex].resize(controllables.size());
+			pos[frameIndex].resize(frames);
 			bool duplicate;
 			do {
 				for(size_t i=0; i!=pos[frameIndex].size(); ++i)
@@ -275,7 +275,7 @@ Chase& AutoDesign::MakeColorShift(Management& management, Folder& destination, c
 					colourIndex = (cIndex + frameIndex) % frames;
 					break;
 				case RandomShift:
-					colourIndex = pos[frameIndex][cIndex];
+					colourIndex = pos[frameIndex][cIndex % frames];
 					break;
 			}
 			addColorPresets(management, *controllables[cIndex], pc, colors[colourIndex], deduction);
