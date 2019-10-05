@@ -194,8 +194,13 @@ void FaderWidget::ChangeManagement(class Management& management, bool moveSlider
 		std::string controllablePath = _preset->Controllable().FullPath();
 		size_t input = _preset->InputIndex();
 		_management = &management;
-		Controllable& controllable = static_cast<Controllable&>(_management->GetObjectFromPath(controllablePath));
-		PresetValue* pv = _management->GetPresetValue(controllable, input);
+		Controllable* controllable =
+			dynamic_cast<Controllable*>(_management->GetObjectFromPathIfExists(controllablePath));
+		PresetValue* pv;
+		if(controllable)
+			pv = _management->GetPresetValue(*controllable, input);
+		else
+			pv = nullptr;
 		if(pv == nullptr)
 			Unassign();
 		else {

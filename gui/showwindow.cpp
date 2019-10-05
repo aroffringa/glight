@@ -35,6 +35,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miSwapModes("Swap modes"),
 	_miBlackOutAndDryMode("Black-out with dry mode"),
 	_miBlackOut("Black-out"),
+	_miProtectBlackout("Protect black-out"),
 	_miDesignWizard("Design wizard"),
 	_miFixtureListWindow("Fixture list"),
 	_miNewControlWindow("New faders window"),
@@ -175,11 +176,14 @@ bool ShowWindow::onKeyDown(GdkEventKey* event)
 	{
 		if(_miDryMode.get_active())
 		{
-			onMIBlackOut();
-			onMISwapModesClicked();
+			_miDryMode.set_active(false);
+			onMIDryModeClicked();
 		}
 		else {
-			onMIBlackOutAndDryMode();
+			if(!_miProtectBlackout.get_active())
+			{
+				onMIBlackOutAndDryMode();
+			}
 		}
 	}
 	else {
@@ -250,14 +254,22 @@ void ShowWindow::createMenu()
 	_miSwapModes.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMISwapModesClicked));
 	_menuDesign.append(_miSwapModes);
 	
+	_menuDesign.append(_miDesignSep1);
+		
+	_miProtectBlackout.signal_activate().connect([&]() { onMIProtectedBlackOut(); });
+	_miProtectBlackout.set_active(true);
+	_menuDesign.append(_miProtectBlackout);
+	
 	_miBlackOutAndDryMode.signal_activate().connect([&]() { onMIBlackOutAndDryMode(); });
+	_miBlackOutAndDryMode.set_sensitive(false);
 	_menuDesign.append(_miBlackOutAndDryMode);
 	
 	_miBlackOut.signal_activate().connect([&]() { onMIBlackOut(); });
+	_miBlackOut.set_sensitive(false);
 	_menuDesign.append(_miBlackOut);
 	
-	_menuDesign.append(_miDesignSep1);
-		
+	_menuDesign.append(_miDesignSep2);
+	
 	_miDesignWizard.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMIDesignWizardClicked));
 	_menuDesign.append(_miDesignWizard);
 	
@@ -575,6 +587,13 @@ void ShowWindow::onMIBlackOut()
 	_management->BlackOut();
 	for(std::unique_ptr<FaderWindow>& fw : _faderWindows)
 		fw->ReloadValues();
+}
+
+void ShowWindow::onMIProtectedBlackOut()
+{
+	bool protect = _miProtectBlackout.get_active();
+	_miBlackOut.set_sensitive(!protect);
+	_miBlackOutAndDryMode.set_sensitive(!protect);
 }
 
 void ShowWindow::onHideFixtureList()
