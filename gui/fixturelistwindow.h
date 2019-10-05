@@ -46,11 +46,9 @@ class FixtureListWindow : public Gtk::Window {
 		struct FixturesListColumns : public Gtk::TreeModelColumnRecord
 		{
 			FixturesListColumns()
-				{ add(_title); add(_type); add(_channels); add(_fixture); }
+				{ add(_title); add(_type); add(_channels); add(_symbol); add(_fixture); }
 		
-			Gtk::TreeModelColumn<Glib::ustring> _title;
-			Gtk::TreeModelColumn<Glib::ustring> _type;
-			Gtk::TreeModelColumn<Glib::ustring> _channels;
+			Gtk::TreeModelColumn<Glib::ustring> _title, _type, _channels, _symbol;
 			Gtk::TreeModelColumn<class Fixture *> _fixture;
 		} _fixturesListColumns;
 		Gtk::ScrolledWindow _fixturesScrolledWindow;

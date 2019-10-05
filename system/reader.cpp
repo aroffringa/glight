@@ -189,6 +189,8 @@ void Reader::parseFixture(xmlNode *node)
 	parseNameAttr(node, fixture);
 	fixture.Position().X() = getDoubleAttribute(node, "position-x");
 	fixture.Position().Y() = getDoubleAttribute(node, "position-y");
+	if(hasAttribute(node, "symbol"))
+		fixture.SetSymbol(FixtureSymbol(getStringAttribute(node, "symbol")));
 	fixture.ClearFunctions();
 
 	for (xmlNode *curNode=node->children; curNode!=NULL; curNode=curNode->next)

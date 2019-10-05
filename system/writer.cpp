@@ -179,6 +179,7 @@ void Writer::writeFixture(const Fixture &fixture)
 	writeAttribute("type", fixture.Type().Name());
 	writeAttribute("position-x", fixture.Position().X());
 	writeAttribute("position-y", fixture.Position().Y());
+	writeAttribute("symbol", fixture.Symbol().Name());
 	const std::vector<std::unique_ptr<FixtureFunction>>& functions = fixture.Functions();
 	for(const std::unique_ptr<FixtureFunction>& ff : functions)
 		writeFixtureFunction(*ff);
