@@ -37,6 +37,7 @@ FixtureListWindow::FixtureListWindow(EventTransmitter* eventHub, class Managemen
 	_fixturesListView.append_column("Fixture", _fixturesListColumns._title);
 	_fixturesListView.append_column("Type", _fixturesListColumns._type);
 	_fixturesListView.append_column("Channels", _fixturesListColumns._channels);
+	_fixturesListView.append_column("Symbol", _fixturesListColumns._symbol);
 	fillFixturesList();
 	_fixturesScrolledWindow.add(_fixturesListView);
 
@@ -80,6 +81,7 @@ void FixtureListWindow::fillFixturesList()
 		row[_fixturesListColumns._title] = fixture->Name();
 		row[_fixturesListColumns._type] = fixture->Type().Name();
 		row[_fixturesListColumns._channels] = getChannelString(*fixture);
+		row[_fixturesListColumns._symbol] = fixture->Symbol().Name();
 		row[_fixturesListColumns._fixture] = fixture.get();
 	}
 }
@@ -160,6 +162,8 @@ void FixtureListWindow::onIncChannelButtonClicked()
 	{
 		Fixture* fixture = (*selected)[_fixturesListColumns._fixture];
 		fixture->IncChannel();
+		if(!fixture->IsVisible())
+			fixture->SetSymbol(FixtureSymbol::Normal);
 		updateFixture(fixture);
 	}
 }
@@ -173,6 +177,8 @@ void FixtureListWindow::onDecChannelButtonClicked()
 	{
 		Fixture* fixture = (*selected)[_fixturesListColumns._fixture];
 		fixture->DecChannel();
+		if(!fixture->IsVisible())
+			fixture->SetSymbol(FixtureSymbol::Normal);
 		updateFixture(fixture);
 	}
 }
@@ -201,6 +207,8 @@ void FixtureListWindow::onSetChannelButtonClicked()
 			unsigned value = std::atoi(dmxChannel.c_str());
 			if(value > 0 && value <= 512)
 			{
+				if(!fixture->IsVisible())
+					fixture->SetSymbol(FixtureSymbol::Normal);
 				fixture->SetChannel(value-1);
 				updateFixture(fixture);
 			}
@@ -219,6 +227,7 @@ void FixtureListWindow::updateFixture(const Fixture *fixture)
 			row[_fixturesListColumns._title] = fixture->Name();
 			row[_fixturesListColumns._type] = fixture->Type().Name();
 			row[_fixturesListColumns._channels] = getChannelString(*fixture);
+			row[_fixturesListColumns._symbol] = fixture->Symbol().Name();
 			return;
 		}
 		++iter;

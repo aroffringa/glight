@@ -22,6 +22,7 @@ VisualizationWindow::VisualizationWindow(Management* management, EventTransmitte
 	_isInitialized(false), _isTimerRunning(false),
 	_dragType(NotDragging),
 	_selectedFixtures(),
+	_miSymbolMenu("Symbol"),
 	_miAlignHorizontally("Align horizontally"),
 	_miAlignVertically("Align vertically"),
 	_miDistributeEvenly("Distribute evenly"),
@@ -50,6 +51,18 @@ VisualizationWindow::~VisualizationWindow()
 
 void VisualizationWindow::inializeContextMenu()
 {
+	std::vector<FixtureSymbol::Symbol> symbols(FixtureSymbol::List());
+	_miSymbols.reserve(symbols.size());
+	for(FixtureSymbol::Symbol symbol : symbols)
+	{
+		_miSymbols.emplace_back(FixtureSymbol(symbol).Name());
+		_miSymbols.back().signal_activate().connect([this,symbol](){ onSetSymbol(symbol); });
+		_symbolMenu.add(_miSymbols.back());
+	}
+	
+	_miSymbolMenu.set_submenu(_symbolMenu);
+	_popupMenu.add(_miSymbolMenu);
+	
 	_miAlignHorizontally.signal_activate().connect([&]{ onAlignHorizontally(); });
 	_popupMenu.add(_miAlignHorizontally);
 	
@@ -128,29 +141,37 @@ void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& c
 	cairo->scale(sc, sc);
 	for(const std::unique_ptr<Fixture>& f : fixtures)
 	{
-		size_t shapeCount = f->Type().ShapeCount();
-		for(size_t i=0; i!=shapeCount; ++i)
+		if(f->IsVisible())
 		{
-			size_t shapeIndex = shapeCount - i - 1;
-			Color c = f->GetColor(snapshot, shapeIndex);
+			size_t shapeCount = f->Type().ShapeCount();
+			for(size_t i=0; i!=shapeCount; ++i)
+			{
+				size_t shapeIndex = shapeCount - i - 1;
+				Color c = f->GetColor(snapshot, shapeIndex);
 
-			cairo->set_source_rgb((double) c.Red()/224.0+0.125, (double) c.Green()/224.0+0.125, (double) c.Blue()/224.0+0.125);
+				cairo->set_source_rgb((double) c.Red()/224.0+0.125, (double) c.Green()/224.0+0.125, (double) c.Blue()/224.0+0.125);
 
-			double radius = shapeCount==1 ? 0.4 : 0.33 + 0.07 * double(shapeIndex) / (shapeCount - 1);
-			double x = f->Position().X() + 0.5;
-			double y = f->Position().Y() + 0.5;
-			cairo->arc(x, y + yOffset/sc, radius, 0.0, 2.0 * M_PI);
-			cairo->fill();
+				double singleRadius = radius(f->Symbol().Value());
+				double radius = shapeCount==1 ? singleRadius : 0.33 + 0.07 * double(shapeIndex) / (shapeCount - 1);
+				double x = f->Position().X() + 0.5;
+				double y = f->Position().Y() + 0.5;
+				cairo->arc(x, y + yOffset/sc, radius, 0.0, 2.0 * M_PI);
+				cairo->fill();
+			}
 		}
 	}
 	cairo->set_source_rgb(0.2, 0.2, 1.0);
 	cairo->set_line_width(4.0/sc);
 	for(const Fixture* f : _selectedFixtures)
 	{
-		double x = f->Position().X() + 0.5;
-		double y = f->Position().Y() + 0.5;
-		cairo->arc(x, y + yOffset/sc, 0.4, 0.0, 2.0 * M_PI);
-		cairo->stroke();
+		if(f->IsVisible())
+		{
+			double rad = radius(f->Symbol().Value());
+			double x = f->Position().X() + 0.5;
+			double y = f->Position().Y() + 0.5;
+			cairo->arc(x, y + yOffset/sc, rad, 0.0, 2.0 * M_PI);
+			cairo->stroke();
+		}
 	}
 	
 	if(_dragType == DragRectangle || _dragType == DragAddRectangle)
@@ -195,10 +216,11 @@ Fixture* VisualizationWindow::fixtureAt(Management& management, const Position& 
 	double closest = std::numeric_limits<double>::max();
 	for(const std::unique_ptr<Fixture>& f : fixtures)
 	{
-		if(position.InsideRectangle(f->Position(), f->Position().Add(1.0, 1.0)))
+		if(f->IsVisible() && position.InsideRectangle(f->Position(), f->Position().Add(1.0, 1.0)))
 		{
 			double distanceSq = position.SquaredDistance(f->Position().Add(0.5, 0.5));
-			if(distanceSq <= 0.16 && distanceSq < closest)
+			double radSq = radiusSq(f->Symbol().Value());
+			if(distanceSq <= radSq && distanceSq < closest)
 			{
 				fix = f.get();
 				closest = distanceSq;
@@ -265,6 +287,7 @@ bool VisualizationWindow::onButtonPress(GdkEventButton* event)
 			_miAlignVertically.set_sensitive(_selectedFixtures.size() >= 2);
 			_miDistributeEvenly.set_sensitive(_selectedFixtures.size() >= 2);
 			_miRemove.set_sensitive(_selectedFixtures.size() >= 1);
+			_miSymbolMenu.set_sensitive(_selectedFixtures.size() >= 1);
 			_popupMenu.popup(event->button, event->time);
 		}
 	}
@@ -335,7 +358,7 @@ void VisualizationWindow::selectFixtures(const Position& a, const Position& b)
 		const std::vector<std::unique_ptr<Fixture>>& fixtures = _management->Theatre().Fixtures();
 		for(const std::unique_ptr<Fixture>& fixture : fixtures)
 		{
-			if(fixture->Position().InsideRectangle(first, second))
+			if(fixture->IsVisible() && fixture->Position().InsideRectangle(first, second))
 				_selectedFixtures.emplace_back(fixture.get());
 		}
 	}
@@ -465,4 +488,15 @@ void VisualizationWindow::onFullscreen()
 		fullscreen();
 	else
 		unfullscreen();
+}
+
+void VisualizationWindow::onSetSymbol(FixtureSymbol::Symbol symbol)
+{
+	for(Fixture* fixture : _selectedFixtures)
+	{
+		fixture->SetSymbol(FixtureSymbol(symbol));
+	}
+	if(symbol == FixtureSymbol::Hidden)
+		_selectedFixtures.clear();
+	_eventTransmitter->EmitUpdate();
 }

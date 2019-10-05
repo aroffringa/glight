@@ -1,12 +1,14 @@
 #ifndef VISUALIZATIONWINDOW_H
 #define VISUALIZATIONWINDOW_H
 
+#include "../theatre/fixturesymbol.h"
 #include "../theatre/position.h"
 
 #include <gtkmm/checkmenuitem.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/menu.h>
 #include <gdkmm/pixbuf.h>
+#include <gtkmm/radiomenuitem.h>
 #include <gtkmm/separatormenuitem.h>
 #include <gtkmm/window.h>
 
@@ -62,7 +64,9 @@ private:
 
 	Gtk::Menu _popupMenu;
 	Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
-	Gtk::MenuItem _miAlignHorizontally, _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miDesign;
+	Gtk::MenuItem _miSymbolMenu, _miAlignHorizontally, _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miDesign;
+	Gtk::Menu _symbolMenu;
+	std::vector<Gtk::MenuItem> _miSymbols;
 	Gtk::CheckMenuItem _miFullscreen;
 	
 	void inializeContextMenu();
@@ -79,6 +83,21 @@ private:
 		Update();
 		return true;
 	}
+	static double radius(FixtureSymbol::Symbol symbol)
+	{
+		switch(symbol)
+		{
+			case FixtureSymbol::Hidden: return 0.0;
+			case FixtureSymbol::Small: return 0.3;
+			case FixtureSymbol::Normal: return 0.4;
+			case FixtureSymbol::Large: return 0.5;
+		}
+		return 0.4;
+	}
+	static double radiusSq(FixtureSymbol::Symbol symbol)
+	{
+		return radius(symbol)*radius(symbol);
+	}
 	
 	void onAlignHorizontally();
 	void onAlignVertically();
@@ -87,6 +106,7 @@ private:
 	void onRemoveFixtures();
 	void onDesignFixtures();
 	void onFullscreen();
+	void onSetSymbol(FixtureSymbol::Symbol symbol);
 	
 	double scale(Management& management, double width, double height);
 	double invScale(Management& management, double width, double height)

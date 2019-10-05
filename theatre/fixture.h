@@ -5,6 +5,7 @@
 
 #include "color.h"
 #include "fixturefunction.h"
+#include "fixturesymbol.h"
 #include "namedobject.h"
 #include "position.h"
 
@@ -52,10 +53,15 @@ public:
 	class Position& Position() { return _position; }
 	const class Position& Position() const { return _position; }
 	
+	FixtureSymbol Symbol() const { return _symbol; }
+	void SetSymbol(FixtureSymbol symbol) { _symbol = symbol; }
+	bool IsVisible() const { return _symbol != FixtureSymbol::Hidden; }
+	
 private:
 	class Theatre& _theatre;
 	FixtureType& _type;
 	class Position _position;
+	FixtureSymbol _symbol;
 	std::vector<std::unique_ptr<FixtureFunction>> _functions;
 };
 
