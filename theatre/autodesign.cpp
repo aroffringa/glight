@@ -296,10 +296,10 @@ Controllable& AutoDesign::MakeVUMeter(Management& management, Folder& destinatio
 	if(colors.size() != controllables.size())
 		throw std::runtime_error("Number of colours did not match number of fixtures");
 	std::unique_ptr<AudioLevelEffect> audioLevel(new AudioLevelEffect());
+	audioLevel->SetName(destination.GetAvailableName("VUMeter"));
 	Effect& newAudioLevel = management.AddEffect(std::move(audioLevel), destination);
 	for(size_t inp=0; inp!=newAudioLevel.NInputs(); ++inp)
 		management.AddPreset(newAudioLevel, inp);
-	newAudioLevel.SetName(destination.GetAvailableName("VUMeter"));
 	size_t nLevels;
 	if(direction == VUInward || direction == VUOutward)
 		nLevels = (controllables.size()+1) / 2;
@@ -310,10 +310,10 @@ Controllable& AutoDesign::MakeVUMeter(Management& management, Folder& destinatio
 		std::unique_ptr<ThresholdEffect> threshold(new ThresholdEffect());
 		threshold->SetLowerStartLimit(((1<<24)-1)*level/nLevels);
 		threshold->SetLowerEndLimit(((1<<24)-1)*(level+1)/nLevels);
+		threshold->SetName(destination.GetAvailableName(newAudioLevel.Name() + "_Thr"));
 		Effect& newEffect = management.AddEffect(std::move(threshold), destination);
 		for(size_t inp=0; inp!=newEffect.NInputs(); ++inp)
 			management.AddPreset(newEffect, inp);
-		newEffect.SetName(destination.GetAvailableName(newAudioLevel.Name() + "_Thr"));
 		
 		size_t nFixInLevel = 1;
 		if((direction == VUInward && (level != nLevels-1 || controllables.size()%2==0) ) ||
