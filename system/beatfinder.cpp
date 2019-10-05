@@ -101,19 +101,27 @@ void BeatFinder::open()
 			if (rc != (int) readAtATime)
 				std::cout << "Only " << rc << " frames were read in snd_pcm_readi().\n";
 		}
-		uint16_t localAudioLevel = 0;
+		//uint16_t localAudioLevel = 0;
+		uint32_t audioRMS = 0;
 		for(size_t i=0; i!=hop_size; ++i)
 		{
-			smpl_t s;
-			s = alsaBuffer[i*2];
-			if(unsigned(std::abs(alsaBuffer[i*2])) > localAudioLevel)
-				localAudioLevel = std::abs(alsaBuffer[i*2]);
-			s += alsaBuffer[i*2+1];
-			if(unsigned(std::abs(alsaBuffer[i*2+1])) > localAudioLevel)
-				localAudioLevel = std::abs(alsaBuffer[i*2+1]);
+			int16_t l = alsaBuffer[i*2], r = alsaBuffer[i*2+1];
+			
+			smpl_t s = smpl_t(l) + smpl_t(r);
 			fvec_set_sample(ibuf, s, i);
+			
+			//if(unsigned(std::abs(l)) > localAudioLevel)
+			//	localAudioLevel = std::abs(l);
+			//if(unsigned(std::abs(r)) > localAudioLevel)
+			//	localAudioLevel = std::abs(r);
+			
+			l = l/2; // create headroom for multiplication
+			r = r/2; // (-2^15 x 2^15 wouldn't fit in a int32_t)
+			audioRMS += uint32_t(int32_t(l) * int32_t(l)) >> 8;
+			audioRMS += uint32_t(int32_t(r) * int32_t(r)) >> 8;
 		}
-		_audioLevel = std::min<uint32_t>(localAudioLevel*2, std::numeric_limits<uint16_t>::max());
+		_audioLevel = audioRMS / (2*hop_size);
+		//_audioLevel = std::min<uint32_t>(localAudioLevel*2, std::numeric_limits<uint16_t>::max());
 		aubio_tempo_do(tempo, ibuf, tempo_out);
 		smpl_t is_beat = fvec_get_sample(tempo_out, 0);
 		if(silence_threshold != -90)
