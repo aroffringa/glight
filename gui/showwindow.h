@@ -79,6 +79,7 @@ private:
 	void onMISwapModesClicked();
 	void onMIBlackOutAndDryMode();
 	void onMIBlackOut();
+	void onMIProtectedBlackOut();
 	
 	void onMIDesignWizardClicked();
 	
@@ -121,7 +122,8 @@ private:
 	Gtk::MenuItem _miSwapModes;
 	Gtk::MenuItem _miBlackOutAndDryMode;
 	Gtk::MenuItem _miBlackOut;
-	Gtk::SeparatorMenuItem _miDesignSep1;
+	Gtk::CheckMenuItem _miProtectBlackout;
+	Gtk::SeparatorMenuItem _miDesignSep1, _miDesignSep2;
 	Gtk::MenuItem _miDesignWizard;
 	Gtk::CheckMenuItem _miFixtureListWindow;
 	Gtk::MenuItem _miNewControlWindow;
