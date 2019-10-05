@@ -51,9 +51,16 @@ void FaderSetupState::ChangeManagement(Management& management)
 		{
 			Controllable *oldControllable = &fader.GetPresetValue()->Controllable();
 			size_t inputIndex = fader.GetPresetValue()->InputIndex();
-			Controllable& newControllable = static_cast<Controllable&>(management.GetObjectFromPath(oldControllable->FullPath()));
-			PresetValue* preset = management.GetPresetValue(newControllable, inputIndex);
-			fader.SetPresetValue(preset);
+			Controllable* newControllable =
+				dynamic_cast<Controllable*>(management.GetObjectFromPathIfExists(oldControllable->FullPath()));
+			if(newControllable)
+			{
+				PresetValue* preset = management.GetPresetValue(*newControllable, inputIndex);
+				fader.SetPresetValue(preset);
+			}
+			else {
+				fader.SetNoPresetValue();
+			}
 		}
 	}
 }
