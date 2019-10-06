@@ -330,8 +330,9 @@ void DesignWizard::onNextClicked()
 			_currentPage = Page3_2_SingleColor;
 		}
 		else if(_shiftColorsBtn.get_active()) {
-			_colorsWidgetP3_3.SetMinCount(_selectedControllables.size());
+			_colorsWidgetP3_3.SetMinCount(1);
 			_colorsWidgetP3_3.SetMaxCount(_selectedControllables.size());
+			_colorsWidgetP3_3.SetColors(std::vector<Color>(_selectedControllables.size(), Color::White()));
 			_mainBox.pack_start(_vBoxPage3_3, true, true);
 			_vBoxPage3_3.show_all();
 			_currentPage = Page3_3_ShiftingColors;
