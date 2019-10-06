@@ -25,11 +25,6 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	
 	_transitionSpeedLabel("Transition speed"),
 	_transitionDuration("Duration (s):", 500.0),
-	_transitionTypeLabel("Type:"),
-	_transitionNoneRB("None"),
-	_transitionFadeRB("Fade"),
-	_transitionFadeThroughBlackRB("Through black"),
-	_transitionErraticRB("Erratic"),
 	
 	_timeSequence(&timeSequence),
 	_management(&management),
@@ -112,29 +107,8 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	_transitionDuration.SignalValueChanged().
 		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionSpeedChanged));
 	
-	_transitionTypeBox.pack_start(_transitionTypeLabel);
-		
-	Gtk::RadioButtonGroup transTypeGroup;
-	_transitionNoneRB.set_group(transTypeGroup);
-	_transitionNoneRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionTypeChanged));
-	_transitionTypeBox.pack_start(_transitionNoneRB);
-	
-	_transitionFadeRB.set_group(transTypeGroup);
-	_transitionFadeRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionTypeChanged));
-	_transitionTypeBox.pack_start(_transitionFadeRB);
-	
-	_transitionFadeThroughBlackRB.set_group(transTypeGroup);
-	_transitionFadeThroughBlackRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionTypeChanged));
-	_transitionTypeBox.pack_start(_transitionFadeThroughBlackRB);
-	
-	_transitionErraticRB.set_group(transTypeGroup);
-	_transitionErraticRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionTypeChanged));
-	_transitionTypeBox.pack_start(_transitionErraticRB);
-	
+	_transitionTypeBox.SignalChanged().
+		connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onTransitionTypeChanged));
 	_grid.attach(_transitionTypeBox, 0, 7, 2, 1);
 	
 	_grid.set_hexpand(true);
@@ -314,17 +288,8 @@ void TimeSequencePropertiesWindow::onTransitionSpeedChanged(double newValue)
 	}
 }
 
-void TimeSequencePropertiesWindow::onTransitionTypeChanged()
+void TimeSequencePropertiesWindow::onTransitionTypeChanged(enum Transition::Type type)
 {
-	enum Transition::Type type;
-	if(_transitionNoneRB.get_active())
-		type = Transition::None;
-	else if(_transitionFadeRB.get_active())
-		type = Transition::Fade;
-	else if(_transitionFadeThroughBlackRB.get_active())
-		type = Transition::FadeThroughBlack;
-	else //if(_transitionErraticRB.get_active())
-		type = Transition::Erratic;
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	TimeSequence::Step* step = selectedStep();
 	if(step)
@@ -398,21 +363,7 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step& step)
 		_beatTriggerCheckButton.set_active(true);
 		break;
 	}	
-	switch(transitionType)
-	{
-		case Transition::None:
-			_transitionNoneRB.set_active();
-			break;
-		case Transition::Fade:
-			_transitionFadeRB.set_active();
-			break;
-		case Transition::FadeThroughBlack:
-			_transitionFadeThroughBlackRB.set_active();
-			break;
-		case Transition::Erratic:
-			_transitionErraticRB.set_active();
-			break;
-	}
+	_transitionTypeBox.Set(transitionType);
 }
 
 void TimeSequencePropertiesWindow::setStepSensitive(bool sensitive)
@@ -425,12 +376,7 @@ void TimeSequencePropertiesWindow::setStepSensitive(bool sensitive)
 	_synchronizationsCount.set_sensitive(sensitive);
 	_beatTriggerCheckButton.set_sensitive(sensitive);
 	_beatSpeed.set_sensitive(sensitive);
-	_transitionErraticRB.set_sensitive(sensitive);
-	_transitionDuration.set_sensitive(sensitive);
-	_transitionNoneRB.set_sensitive(sensitive);
-	_transitionFadeRB.set_sensitive(sensitive);
-	_transitionFadeThroughBlackRB.set_sensitive(sensitive);
-	_transitionErraticRB.set_sensitive(sensitive);
+	_transitionTypeBox.set_sensitive(sensitive);
 }
 
 void TimeSequencePropertiesWindow::onUpdateControllables()
