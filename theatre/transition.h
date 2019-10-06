@@ -2,13 +2,14 @@
 #define TRANSITION_H
 
 #include "presetcollection.h"
+#include "timing.h"
 
 /**
 	@author Andre Offringa
 */
 class Transition {
 	public:
-		enum Type { None, Fade, FadeThroughBlack, Erratic };
+		enum Type { None, Fade, FadeThroughBlack, Erratic, Black, FadeFromBlack, FadeToBlack };
 
 		Transition() : _lengthInMs(250.0), _type(Fade) { }
 		~Transition() { }
@@ -63,6 +64,20 @@ class Transition {
 					else
 						second.MixInput(secondInput, value);
 				}
+				case Black:
+				break;
+				case FadeFromBlack:
+				{
+					unsigned ratioValue = (unsigned) ((transitionTime / _lengthInMs) * 256.0);
+					second.MixInput(secondInput, (value.UInt()*ratioValue) >> 8);
+				}
+				break;
+				case FadeToBlack:
+				{
+					unsigned ratioValue = 255 - (unsigned) ((transitionTime / _lengthInMs) * 256.0);
+					first.MixInput(secondInput, (value.UInt()*ratioValue) >> 8);
+				}
+				break;
 			}
 		}
 	private:

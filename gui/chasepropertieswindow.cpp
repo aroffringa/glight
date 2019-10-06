@@ -12,11 +12,6 @@ ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &man
 	_delayTriggerCheckButton("Delayed trigger"),
 	_triggerDuration("Trigger duration:", 500.0),
 	_transitionDuration("Transition duration:", 500.0),
-	_transitionTypeLabel("Type:"),
-	_transitionNoneRB("None"),
-	_transitionFadeRB("Fade"),
-	_transitionFadeThroughBlackRB("Through black"),
-	_transitionErraticRB("Erratic"),
 	
 	_synchronizedTriggerCheckButton("Synchronized"),
 	_synchronizationsLabel("Nr. of synchronizations:"),
@@ -51,29 +46,8 @@ ChasePropertiesWindow::ChasePropertiesWindow(class Chase& chase, Management &man
 	_transitionDuration.SignalValueChanged().
 		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionSpeedChanged));
 	
-	_transitionTypeBox.pack_start(_transitionTypeLabel);
-		
-	Gtk::RadioButtonGroup transTypeGroup;
-	_transitionNoneRB.set_group(transTypeGroup);
-	_transitionNoneRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
-	_transitionTypeBox.pack_start(_transitionNoneRB);
-	
-	_transitionFadeRB.set_group(transTypeGroup);
-	_transitionFadeRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
-	_transitionTypeBox.pack_start(_transitionFadeRB);
-	
-	_transitionFadeThroughBlackRB.set_group(transTypeGroup);
-	_transitionFadeThroughBlackRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
-	_transitionTypeBox.pack_start(_transitionFadeThroughBlackRB);
-	
-	_transitionErraticRB.set_group(transTypeGroup);
-	_transitionErraticRB.signal_clicked().connect(
-		sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
-	_transitionTypeBox.pack_start(_transitionErraticRB);
-	
+	_transitionTypeBox.SignalChanged().
+		connect(sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
 	_grid.attach(_transitionTypeBox, 1, 2, 2, 1);
 	_grid.attach(_transitionSep, 0, 3, 3, 1);
 	
@@ -171,17 +145,8 @@ void ChasePropertiesWindow::onTransitionSpeedChanged(double newValue)
 	}
 }
 
-void ChasePropertiesWindow::onTransitionTypeChanged()
+void ChasePropertiesWindow::onTransitionTypeChanged(enum Transition::Type type)
 {
-	enum Transition::Type type;
-	if(_transitionNoneRB.get_active())
-		type = Transition::None;
-	else if(_transitionFadeRB.get_active())
-		type = Transition::Fade;
-	else if(_transitionFadeThroughBlackRB.get_active())
-		type = Transition::FadeThroughBlack;
-	else //if(_transitionErraticRB.get_active())
-		type = Transition::Erratic;
 	std::lock_guard<std::mutex> lock(_management->Mutex());
 	_chase->Transition().SetType(type);
 }
@@ -224,21 +189,7 @@ void ChasePropertiesWindow::loadChaseInfo(Chase& chase)
 		_beatTriggerCheckButton.set_active(true);
 		break;
 	}
-	switch(transitionType)
-	{
-		case Transition::None:
-			_transitionNoneRB.set_active();
-			break;
-		case Transition::Fade:
-			_transitionFadeRB.set_active();
-			break;
-		case Transition::FadeThroughBlack:
-			_transitionFadeThroughBlackRB.set_active();
-			break;
-		case Transition::Erratic:
-			_transitionErraticRB.set_active();
-			break;
-	}
+	_transitionTypeBox.Set(transitionType);
 }
 
 void ChasePropertiesWindow::onUpdateControllables()

@@ -6,8 +6,10 @@
 
 #include "components/durationinput.h"
 #include "components/inputselectwidget.h"
+#include "components/transitiontypebox.h"
 
 #include "../theatre/timesequence.h"
+#include "../theatre/transition.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -45,7 +47,7 @@ private:
 	void onTriggerTypeChanged();
 	void onTriggerSpeedChanged(double newValue);
 	void onTransitionSpeedChanged(double newValue);
-	void onTransitionTypeChanged();
+	void onTransitionTypeChanged(enum Transition::Type type);
 	void onSyncCountChanged();
 	void onBeatSpeedChanged();
 	
@@ -94,9 +96,7 @@ private:
 	
 	Gtk::Label _transitionSpeedLabel;
 	DurationInput _transitionDuration;
-	Gtk::HBox _transitionTypeBox;
-	Gtk::Label _transitionTypeLabel;
-	Gtk::RadioButton _transitionNoneRB, _transitionFadeRB, _transitionFadeThroughBlackRB, _transitionErraticRB;
+	TransitionTypeBox _transitionTypeBox;
 	
 	RecursionLock _recursionLock;
 	
