@@ -2,6 +2,7 @@
 
 #include "effects/audioleveleffect.h"
 #include "effects/constantvalueeffect.h"
+#include "effects/curveeffect.h"
 #include "effects/delayeffect.h"
 #include "effects/fadeeffect.h"
 #include "effects/flickereffect.h"
@@ -21,6 +22,7 @@ std::unique_ptr<Effect> Effect::Make(Effect::Type type)
 	{
 		case AudioLevelType: return up(new AudioLevelEffect());
 		case ConstantValueType: return up(new ConstantValueEffect());
+		case CurveType: return up(new CurveEffect());
 		case DelayType: return up(new DelayEffect());
 		case FadeType: return up(new FadeEffect());
 		case FlickerType: return up(new FlickerEffect());
@@ -40,6 +42,7 @@ std::string Effect::TypeToName(Effect::Type type)
 	{
 		case AudioLevelType: return "Audiolevel";
 		case ConstantValueType: return "Constant value";
+		case CurveType: return "Curve";
 		case DelayType: return "Delay";
 		case FadeType: return "Fade";
 		case FlickerType: return "Flicker";
@@ -59,6 +62,8 @@ Effect::Type Effect::NameToType(const std::string& name)
 		return AudioLevelType;
 	else if(name == "Constant value")
 		return ConstantValueType;
+	else if(name == "Curve")
+		return CurveType;
 	else if(name == "Delay")
 		return DelayType;
 	else if(name == "Fade")
@@ -86,6 +91,7 @@ std::vector<Effect::Type> Effect::GetTypes()
 	return std::vector<Effect::Type>{
 		AudioLevelType,
 		ConstantValueType,
+		CurveType,
 		DelayType,
 		FadeType,
 		FlickerType,

@@ -2,6 +2,7 @@
 
 #include "audioleveleffectps.h"
 #include "constantvalueeffectps.h"
+#include "curveeffectps.h"
 #include "delayeffectps.h"
 #include "fadeeffectps.h"
 #include "flickereffectps.h"
@@ -17,6 +18,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 	std::unique_ptr<PropertySet> ps;
 	const AudioLevelEffect* afx = dynamic_cast<const AudioLevelEffect*>(&object);
 	const ConstantValueEffect* cfx = dynamic_cast<const ConstantValueEffect*>(&object);
+	const CurveEffect* cufx = dynamic_cast<const CurveEffect*>(&object);
 	const DelayEffect* dfx = dynamic_cast<const DelayEffect*>(&object);
 	const FadeEffect* ffx = dynamic_cast<const FadeEffect*>(&object);
 	const FlickerEffect* flx = dynamic_cast<const FlickerEffect*>(&object);
@@ -33,6 +35,10 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject& object)
 	else if(cfx != nullptr)
 	{
 		ps.reset(new ConstantValueEffectPS());
+	}
+	else if(cufx != nullptr)
+	{
+		ps.reset(new CurveEffectPS());
 	}
 	else if(dfx != nullptr)
 	{
@@ -85,6 +91,9 @@ void PropertySet::AssignProperty(const Property& to, const Property& from, const
 	{
 	case Property::Boolean:
 		SetBool(to, fromSet.GetBool(from));
+		break;
+	case Property::Choice:
+		SetChoice(to, fromSet.GetChoice(from));
 		break;
 	case Property::ControlValue:
 		SetControlValue(to, fromSet.GetControlValue(from));

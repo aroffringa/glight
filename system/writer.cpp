@@ -361,6 +361,9 @@ void Writer::writeEffect(const class Effect& effect)
 			writeAttribute("name", p.Name());
 			switch(p.GetType())
 			{
+				case Property::Choice:
+					writeAttribute("value", ps->GetChoice(p));
+					break;
 				case Property::ControlValue:
 					writeAttribute("value", ps->GetControlValue(p));
 					break;

@@ -18,7 +18,7 @@ public:
 		_independentOutputs(true)
 	{ };
 	
-	virtual Effect::Type GetType() const override { return FlickerType; }
+	virtual Effect::Type GetType() const override { return FluorescentStartType; }
 	
 	double AverageDuration() const { return _averageDuration; }
 	void SetAverageDuration(double avgDuration) { _averageDuration = avgDuration; }

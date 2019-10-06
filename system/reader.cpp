@@ -380,6 +380,9 @@ void Reader::parseEffect(xmlNode* node)
 				Property& p = ps->GetProperty(propName);
 				switch(p.GetType())
 				{
+				case Property::Choice:
+					ps->SetChoice(p, getStringAttribute(curNode, "value"));
+					break;
 				case Property::ControlValue:
 					ps->SetControlValue(p, getIntAttribute(curNode, "value"));
 					break;
