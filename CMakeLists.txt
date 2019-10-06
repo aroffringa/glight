@@ -15,7 +15,7 @@ find_package(Threads REQUIRED)
 find_library(AUBIO_LIBRARY NAMES aubio)
 find_path(AUBIO_INCLUDE_DIR NAMES aubio/aubio.h)
 
-set(CMAKE_CXX_FLAGS "-O3 -Wall -DNDEBUG -march=native -std=c++11")
+set(CMAKE_CXX_FLAGS "-O3 -Wall -DNDEBUG -march=native -std=c++14")
 set(CMAKE_C_FLAGS "-O3 -Wall -DNDEBUG -march=native")
 
 include_directories(${GTKMM_INCLUDE_DIRS})

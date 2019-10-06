@@ -17,6 +17,7 @@ public:
 	enum Type {
 		AudioLevelType,
 		ConstantValueType,
+		CurveType,
 		DelayType,
 		FadeType,
 		FlickerType,

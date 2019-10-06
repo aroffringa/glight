@@ -64,6 +64,16 @@ public:
 		return getBool(*_object, property._setIndex);
 	}
 	
+	void SetChoice(const Property& property, const std::string& value)
+	{
+		setChoice(*_object, property._setIndex, value);
+	}
+	
+	std::string GetChoice(const Property& property) const
+	{
+		return getChoice(*_object, property._setIndex);
+	}
+	
 	void SetInteger(const Property& property, int value)
 	{
 		setInteger(*_object, property._setIndex, value);
@@ -95,6 +105,11 @@ protected:
 	{ setterNotImplemented(); }
 	virtual unsigned getControlValue(const FolderObject& object, size_t index) const
 	{ getterNotImplemented(); return 0; }
+	
+	virtual void setChoice(FolderObject& object, size_t index, const std::string& value) const
+	{ setterNotImplemented(); }
+	virtual std::string getChoice(const FolderObject& object, size_t index) const
+	{ getterNotImplemented(); throw std::runtime_error(""); }
 	
 	virtual void setDuration(FolderObject& object, size_t index, double value) const
 	{ setterNotImplemented(); }

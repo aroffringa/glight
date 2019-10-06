@@ -3,6 +3,7 @@
 #include "durationinput.h"
 
 #include <gtkmm/stock.h>
+#include <gtkmm/radiobutton.h>
 
 PropertiesBox::PropertiesBox() :
 	_typeLabel("No object selected"),
@@ -50,6 +51,23 @@ void PropertiesBox::fillProperties()
 			row._widgets.emplace_back(std::move(button));
 			_grid.attach(*row._widgets.back(), 0, rowIndex, 2, 1);
 			} break;
+		case Property::Choice: {
+			row._widgets.emplace_back(new Gtk::VBox());
+			Gtk::VBox* box = static_cast<Gtk::VBox*>(row._widgets.back().get());
+			row._widgets.emplace_back(new Gtk::Label(property.Description()));
+			box->pack_start(*row._widgets.back(), false, false);
+			Gtk::RadioButton::Group group;
+			std::string value = _propertySet->GetChoice(property);
+			for(size_t i=0; i!=property.OptionCount(); ++i)
+			{
+				std::unique_ptr<Gtk::RadioButton> button(new Gtk::RadioButton(property.OptionDescription(i)));
+				button->set_group(group);
+				button->set_active(property.OptionName(i) == value);
+				row._widgets.emplace_back(std::move(button));
+				box->pack_start(*row._widgets.back(), false, false);
+			}
+			_grid.attach(*box, 0, rowIndex, 2, 1);
+			} break;
 		case Property::ControlValue: {
 			std::string entryText =
 				std::to_string(round(1000.0*_propertySet->GetControlValue(property)/ControlValue::MaxUInt())/10.0);
@@ -95,6 +113,16 @@ void PropertiesBox::onApplyClicked()
 		case Property::Boolean: {
 			bool value = static_cast<Gtk::CheckButton*>(rowIter->_widgets[0].get())->get_active();
 			_propertySet->SetBool(property, value);
+			} break;
+		case Property::Choice: {
+			for(size_t i=0; i!=property.OptionCount(); ++i)
+			{
+				if(static_cast<Gtk::RadioButton*>(rowIter->_widgets[2+i].get())->get_active())
+				{
+					_propertySet->SetChoice(property, property.OptionName(i));
+					break;
+				}
+			}
 			} break;
 		case Property::ControlValue: {
 			std::string entryText = static_cast<Gtk::Entry*>(rowIter->_widgets[1].get())->get_text();
