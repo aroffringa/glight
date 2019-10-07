@@ -51,12 +51,13 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 
 	addFaderWindow();
 
-	_fixtureListWindow.reset(new FixtureListWindow(this, *_management));
+	_fixtureListWindow.reset(new FixtureListWindow(this, *_management, &_fixtureSelection));
 	_fixtureListWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_fixtureListWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 	_fixtureListWindow->signal_hide().connect([&]() { onHideFixtureList(); });
 
-	_visualizationWindow.reset(new VisualizationWindow(_management.get(), this, this));
+	_visualizationWindow.reset(
+		new VisualizationWindow(_management.get(), this, &_fixtureSelection, this));
 	_visualizationWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	_visualizationWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
 	_visualizationWindow->signal_hide().connect([&]() { onHideVisualizationWindow(); });

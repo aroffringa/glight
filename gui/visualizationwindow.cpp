@@ -14,10 +14,11 @@
 #include <glibmm/main.h>
 #include <gtkmm/main.h>
 
-VisualizationWindow::VisualizationWindow(Management* management, EventTransmitter* eventTransmitter, class ShowWindow* showWindow) :
+VisualizationWindow::VisualizationWindow(Management* management, EventTransmitter* eventTransmitter, FixtureSelection* fixtureSelection, class ShowWindow* showWindow) :
 	_management(management),
 	_dryManagement(nullptr),
 	_eventTransmitter(eventTransmitter),
+	_globalSelection(fixtureSelection),
 	_showWindow(showWindow),
 	_isInitialized(false), _isTimerRunning(false),
 	_dragType(NotDragging),
@@ -34,6 +35,9 @@ VisualizationWindow::VisualizationWindow(Management* management, EventTransmitte
 	set_title("Glight - visualization");
 	set_default_size(600, 200);
 
+	_globalSelectionConnection =
+		_globalSelection->SignalChange().connect([&]() { onGlobalSelectionChanged(); });
+	
 	_drawingArea.set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::POINTER_MOTION_MASK);
 	_drawingArea.signal_draw().connect(sigc::mem_fun(*this, &VisualizationWindow::onExpose));
 	_drawingArea.signal_button_press_event().connect(sigc::mem_fun(*this, &VisualizationWindow::onButtonPress));
@@ -47,6 +51,7 @@ VisualizationWindow::VisualizationWindow(Management* management, EventTransmitte
 VisualizationWindow::~VisualizationWindow()
 {
 	_timeoutConnection.disconnect();
+	_globalSelectionConnection.disconnect();
 }
 
 void VisualizationWindow::inializeContextMenu()
@@ -306,6 +311,7 @@ bool VisualizationWindow::onButtonRelease(GdkEventButton* event)
 		else if(_dragType == DragRectangle || _dragType == DragAddRectangle)
 		{
 		}
+		_globalSelection->SetSelection(_selectedFixtures);
 		_dragType = NotDragging;
 		_selectedFixturesBeforeDrag.clear();
 		queue_draw();
@@ -499,4 +505,10 @@ void VisualizationWindow::onSetSymbol(FixtureSymbol::Symbol symbol)
 	if(symbol == FixtureSymbol::Hidden)
 		_selectedFixtures.clear();
 	_eventTransmitter->EmitUpdate();
+}
+
+void VisualizationWindow::onGlobalSelectionChanged()
+{
+	_selectedFixtures = _globalSelection->Selection();
+	queue_draw();
 }

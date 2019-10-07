@@ -2,6 +2,7 @@
 
 #include "addfixturewindow.h"
 #include "eventtransmitter.h"
+#include "fixtureselection.h"
 
 #include <boost/thread/locks.hpp>
 
@@ -15,9 +16,10 @@
 #include "../theatre/management.h"
 #include "../theatre/theatre.h"
 
-FixtureListWindow::FixtureListWindow(EventTransmitter* eventHub, class Management& management) :
+FixtureListWindow::FixtureListWindow(EventTransmitter* eventHub, class Management& management, class FixtureSelection* globalSelection) :
 	_eventHub(eventHub),
 	_management(&management),
+	_globalSelection(globalSelection),
 	_newButton("New"),
 	_removeButton("Remove"),
 	_incChannelButton("+channel"),
@@ -27,12 +29,18 @@ FixtureListWindow::FixtureListWindow(EventTransmitter* eventHub, class Managemen
 	set_title("Glight - configuration");
 	set_size_request(200, 400);
 	
-	_eventHub->SignalChangeManagement().connect(sigc::mem_fun(*this, &FixtureListWindow::onChangeManagement));
-	_eventHub->SignalUpdateControllables().connect(sigc::mem_fun(*this, &FixtureListWindow::update));
+	_changeManagementConnection =
+		_eventHub->SignalChangeManagement().connect(sigc::mem_fun(*this, &FixtureListWindow::onChangeManagement));
+	_updateControllablesConnection =
+		_eventHub->SignalUpdateControllables().connect([&]() { FixtureListWindow::update(); } );
 
+	_globalSelectionConnection =
+		_globalSelection->SignalChange().connect([&](){ onGlobalSelectionChange(); });
+	
 	_fixturesListModel =
     Gtk::ListStore::create(_fixturesListColumns);
 
+	_fixturesListView.get_selection()->signal_changed().connect([&](){ onSelectionChanged(); });
 	_fixturesListView.set_model(_fixturesListModel);
 	_fixturesListView.append_column("Fixture", _fixturesListColumns._title);
 	_fixturesListView.append_column("Type", _fixturesListColumns._type);
@@ -65,6 +73,13 @@ FixtureListWindow::FixtureListWindow(EventTransmitter* eventHub, class Managemen
 
 	add(_mainBox);
 	_mainBox.show_all();
+}
+
+FixtureListWindow::~FixtureListWindow()
+{
+	_changeManagementConnection.disconnect();
+	_updateControllablesConnection.disconnect();
+	_globalSelectionConnection.disconnect();
 }
 
 void FixtureListWindow::fillFixturesList()
@@ -233,4 +248,40 @@ void FixtureListWindow::updateFixture(const Fixture *fixture)
 		++iter;
 	}
 	throw std::runtime_error("ConfigurationWindow::updateFixture(): Could not find fixture");
+}
+
+void FixtureListWindow::onSelectionChanged()
+{
+	if(_recursionLock.IsFirst())
+	{
+		RecursionLock::Token token(_recursionLock);
+		Glib::RefPtr<Gtk::TreeSelection> selection =
+			_fixturesListView.get_selection();
+		Gtk::TreeModel::iterator selected = selection->get_selected();
+		if(selected)
+		{
+			Fixture* fixture = (*selected)[_fixturesListColumns._fixture];
+			_globalSelection->SetSelection(std::vector<Fixture*>{ fixture });
+		}
+		else {
+			_globalSelection->SetSelection(std::vector<Fixture*>());
+		}
+	}
+}
+
+void FixtureListWindow::onGlobalSelectionChange()
+{
+	if(_recursionLock.IsFirst())
+	{
+		RecursionLock::Token token(_recursionLock);
+		_fixturesListView.get_selection()->unselect_all();
+		for(auto& child : _fixturesListModel->children())
+		{
+			if(child[_fixturesListColumns._fixture] == _globalSelection->Selection().front())
+			{
+				_fixturesListView.get_selection()->select(child);
+				break;
+			}
+		}
+	}
 }
