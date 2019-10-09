@@ -20,6 +20,7 @@ public:
 	VisualizationWindow(
 		class Management* management,
 		class EventTransmitter* eventTransmitter,
+		class FixtureSelection* fixtureSelection,
 		class ShowWindow* showWindow
 	);
 	~VisualizationWindow();
@@ -50,6 +51,8 @@ private:
 	Management* _management;
 	Management* _dryManagement;
 	class EventTransmitter* _eventTransmitter;
+	class FixtureSelection* _globalSelection;
+	sigc::connection _globalSelectionConnection;
 	class ShowWindow* _showWindow;
 	bool _isInitialized, _isTimerRunning;
 	sigc::connection _timeoutConnection;
@@ -107,6 +110,7 @@ private:
 	void onDesignFixtures();
 	void onFullscreen();
 	void onSetSymbol(FixtureSymbol::Symbol symbol);
+	void onGlobalSelectionChanged();
 	
 	double scale(Management& management, double width, double height);
 	double invScale(Management& management, double width, double height)

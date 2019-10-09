@@ -1,7 +1,10 @@
 #ifndef SHOWWINDOW_H
 #define SHOWWINDOW_H
 
-#include <vector>
+
+#include "fixtureselection.h"
+#include "eventtransmitter.h"
+#include "guistate.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
@@ -16,8 +19,7 @@
 
 #include <sigc++/signal.h>
 
-#include "eventtransmitter.h"
-#include "guistate.h"
+#include <vector>
 
 /**
 	@author Andre Offringa
@@ -109,6 +111,7 @@ private:
 	std::unique_ptr<class SceneFrame> _sceneFrame;
 
 	GUIState _state;
+	FixtureSelection _fixtureSelection;
 	
 	sigc::signal<void(Management&)> _signalChangeManagement;
 	sigc::signal<void()> _signalUpdateControllables;

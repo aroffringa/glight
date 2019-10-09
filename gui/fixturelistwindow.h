@@ -12,6 +12,8 @@
 
 #include "../theatre/fixturetype.h"
 
+#include "recursionlock.h"
+
 #include <memory>
 
 /**
@@ -19,7 +21,9 @@
 */
 class FixtureListWindow : public Gtk::Window {
 	public:
-		FixtureListWindow(class EventTransmitter* eventHub, class Management& management);
+		FixtureListWindow(class EventTransmitter* eventHub, class Management& management,
+			class FixtureSelection* globalSelection);
+		~FixtureListWindow();
 		
 	private:
 		void onChangeManagement(class Management& management)
@@ -37,9 +41,18 @@ class FixtureListWindow : public Gtk::Window {
 		void onMenuItemClicked(enum FixtureType::FixtureClass cl);
 		void updateFixture(const class Fixture *fixture);
 		static std::string getChannelString(const class Fixture& fixture);
+		void onSelectionChanged();
+		void onGlobalSelectionChange();
 
 		class EventTransmitter* _eventHub;
 		class Management* _management;
+		class FixtureSelection* _globalSelection;
+		
+		sigc::connection
+			_changeManagementConnection,
+			_updateControllablesConnection,
+			_globalSelectionConnection;
+		RecursionLock _recursionLock;
 
 		Gtk::TreeView _fixturesListView;
 		Glib::RefPtr<Gtk::ListStore> _fixturesListModel;
