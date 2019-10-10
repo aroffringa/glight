@@ -44,6 +44,7 @@ set(GUIFILES
   gui/timesequencepropertieswindow.cpp
   gui/visualizationwindow.cpp
   gui/components/colorselectwidget.cpp
+  gui/components/colorsequencewidget.cpp
   gui/components/durationinput.cpp
   gui/components/foldercombo.cpp
   gui/components/objectlist.cpp
