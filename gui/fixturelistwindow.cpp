@@ -275,12 +275,15 @@ void FixtureListWindow::onGlobalSelectionChange()
 	{
 		RecursionLock::Token token(_recursionLock);
 		_fixturesListView.get_selection()->unselect_all();
-		for(auto& child : _fixturesListModel->children())
+		if(!_globalSelection->Selection().empty())
 		{
-			if(child[_fixturesListColumns._fixture] == _globalSelection->Selection().front())
+			for(auto& child : _fixturesListModel->children())
 			{
-				_fixturesListView.get_selection()->select(child);
-				break;
+				if(child[_fixturesListColumns._fixture] == _globalSelection->Selection().front())
+				{
+					_fixturesListView.get_selection()->select(child);
+					break;
+				}
 			}
 		}
 	}
