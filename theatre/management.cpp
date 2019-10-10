@@ -641,3 +641,20 @@ void Management::BlackOut()
 		p->SetValue(ControlValue::Zero());
 	}
 }
+
+void Management::Recover(Management& other)
+{
+	std::scoped_lock<std::mutex, std::mutex> lock(other._mutex, _mutex);
+	for(const std::unique_ptr<PresetValue>& p : other._presetValues)
+	{
+		std::string path = p->Controllable().FullPath();
+		FolderObject* object = GetObjectFromPathIfExists(path);
+		Controllable* control = dynamic_cast<Controllable*>(object);
+		if(control)
+		{
+			PresetValue* value = GetPresetValue(*control, p->InputIndex());
+			if(value)
+				value->SetValue(p->Value());
+		}
+	}
+}
