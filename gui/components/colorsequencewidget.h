@@ -16,7 +16,7 @@
 class ColorSequenceWidget : public Gtk::VBox
 {
 public:
-	ColorSequenceWidget(Gtk::Window* parent) :
+	ColorSequenceWidget(Gtk::Window* parent, bool showGradientButton = true) :
 		_frame("Colors"),
 		_allEqual("Use one color for all"),
 		_plusButton("+"),
@@ -33,9 +33,12 @@ public:
 		_minButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onDecreaseColors));
 		_buttonBox.pack_start(_minButton);
 		
-		_gradientButton.set_sensitive(false);
-		_gradientButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onGradient));
-		_buttonBox.pack_start(_gradientButton);
+		if(showGradientButton)
+		{
+			_gradientButton.set_sensitive(false);
+			_gradientButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onGradient));
+			_buttonBox.pack_start(_gradientButton);
+		}
 		
 		_plusButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::onIncreaseColors));
 		_buttonBox.pack_start(_plusButton);
@@ -153,25 +156,9 @@ private:
 			queue_resize();
 		}
 	}
-	void onGradient()
-	{
-		if(!_allEqual.get_active() && _widgets.size() > 2)
-		{
-			Color frontColor = _widgets.front()->GetColor();
-			Color backColor = _widgets.back()->GetColor();
-			for(size_t i=1; i+1<_widgets.size(); ++i)
-			{
-				unsigned
-					red = (backColor.Red() * i +
-						frontColor.Red() * (_widgets.size() - 1 - i)) / (_widgets.size() - 1),
-					green = (backColor.Green() * i +
-						frontColor.Green() * (_widgets.size() - 1 - i)) / (_widgets.size() - 1),
-					blue = (backColor.Blue() * i +
-						frontColor.Blue() * (_widgets.size() - 1 - i)) / (_widgets.size() - 1);
-				_widgets[i]->SetColor(Color(red, green, blue));
-			}
-		}
-	}
+	
+	void onGradient();
+	
 	void onFirstColorChange()
 	{
 		if(_allEqual.get_active())
