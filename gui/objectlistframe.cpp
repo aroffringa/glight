@@ -5,6 +5,7 @@
 #include "chasepropertieswindow.h"
 #include "createchasedialog.h"
 #include "effectpropertieswindow.h"
+#include "presetcollectionwindow.h"
 #include "showwindow.h"
 #include "timesequencepropertieswindow.h"
 
@@ -19,11 +20,11 @@
 ObjectListFrame::ObjectListFrame(Management &management, ShowWindow &parentWindow) :
 	_objectListFrame("Object programming"),
 	_list(management, parentWindow),
-	_newPresetButton("New preset"),
-	_newChaseButton("New chase"),
-	_newTimeSequenceButton("New sequence"),
-	_newEffectButton("New effect"), 
-	_newFolderButton("New folder"),
+	_newPresetButton("Preset"),
+	_newChaseButton("Chase"),
+	_newTimeSequenceButton("Sequence"),
+	_newEffectButton("Effect"), 
+	_newFolderButton("Folder"),
 	_deletePresetButton(Gtk::Stock::DELETE), 
 	_management(&management),
 	_parentWindow(parentWindow),
@@ -212,6 +213,13 @@ void ObjectListFrame::onObjectActivated(FolderObject& object)
 		window->present();
 	}
 	else {
+		PresetCollection* presetCollection = dynamic_cast<PresetCollection*>(&object);
+		if(presetCollection)
+		{
+			std::unique_ptr<PresetCollectionWindow> newWindow(new PresetCollectionWindow(*presetCollection, *_management, _parentWindow));
+			newWindow->present();
+			_windowList.Add(std::move(newWindow));
+		}
 		Chase* chase = dynamic_cast<Chase*>(&object);
 		if(chase)
 		{

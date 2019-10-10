@@ -1,6 +1,8 @@
 #ifndef CONTROLVALUE_H
 #define CONTROLVALUE_H
 
+#include <cmath>
+
 /**
 	@author Andre Offringa
 */
@@ -74,6 +76,10 @@ class ControlValue {
 		double Ratio() const
 		{
 			return (double) _value / (double) ((1<<24)-1);
+		}
+		double RoundedPercentage() const
+		{
+			return std::round(1000.0 * (double) _value / (double) ((1<<24)-1)) * 0.1;
 		}
 	private:
 		unsigned int _value;

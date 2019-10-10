@@ -28,7 +28,7 @@
 */
 class TimeSequencePropertiesWindow : public PropertiesWindow {
 public:
-	TimeSequencePropertiesWindow(TimeSequence& timeSequence, class Management& management, class ShowWindow& parentWindow);
+	TimeSequencePropertiesWindow(TimeSequence& timeSequence, class Management& management, class EventTransmitter& eventHub);
 	~TimeSequencePropertiesWindow();
 
 	class FolderObject& GetObject() final override;
@@ -102,7 +102,8 @@ private:
 	
 	TimeSequence* _timeSequence;
 	Management* _management;
-	ShowWindow& _parentWindow;
+	EventTransmitter& _eventHub;
+	sigc::connection _changeManagementConnection, _updateControllablesConnection;
 };
 
 #endif
