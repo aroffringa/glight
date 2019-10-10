@@ -39,6 +39,7 @@ set(GUIFILES
   gui/guistate.cpp
   gui/nameframe.cpp
   gui/objectlistframe.cpp
+  gui/presetcollectionwindow.cpp
   gui/sceneframe.cpp
   gui/showwindow.cpp
   gui/timesequencepropertieswindow.cpp

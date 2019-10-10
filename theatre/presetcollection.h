@@ -65,7 +65,11 @@ class PresetCollection : public Controllable {
 			_presetValues.emplace_back(new PresetValue(source, controllable));
 			return *_presetValues.back();
 		}
-		
+		void RemovePresetValue(size_t index)
+		{
+			_presetValues.erase(_presetValues.begin() + index);
+		}
+		size_t Size() const { return _presetValues.size(); }
 	private:
 		ControlValue _inputValue;
 		std::vector<std::unique_ptr<PresetValue>> _presetValues;

@@ -1,14 +1,14 @@
 
 #include "timesequencepropertieswindow.h"
-#include "showwindow.h"
+#include "eventtransmitter.h"
 
 #include "../theatre/management.h"
 
 #include <gtkmm/messagedialog.h>
 
-TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& timeSequence, Management &management, ShowWindow &parentWindow) :
+TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& timeSequence, Management &management, EventTransmitter& eventHub) :
 	PropertiesWindow(),
-	_inputSelector(management, parentWindow),
+	_inputSelector(management, eventHub),
 	
 	_sustainCB("Sustain"),
 	_maxRepeatCB("Max repeats:"),
@@ -28,10 +28,12 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 	
 	_timeSequence(&timeSequence),
 	_management(&management),
-	_parentWindow(parentWindow)
+	_eventHub(eventHub)
 {
-	parentWindow.SignalChangeManagement().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onChangeManagement));
-	parentWindow.SignalUpdateControllables().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onUpdateControllables));
+	_changeManagementConnection =
+		eventHub.SignalChangeManagement().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onChangeManagement));
+	_updateControllablesConnection =
+		eventHub.SignalUpdateControllables().connect(sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onUpdateControllables));
 	
 	set_title("glight - " + timeSequence.Name());
 	
@@ -122,6 +124,8 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(class TimeSequence& t
 
 TimeSequencePropertiesWindow::~TimeSequencePropertiesWindow()
 {
+	_changeManagementConnection.disconnect();
+	_updateControllablesConnection.disconnect();
 }
 
 void TimeSequencePropertiesWindow::load()
