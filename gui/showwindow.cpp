@@ -33,6 +33,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miDryMode("Dry mode"),
 	_miCancelDryMode("Cancel dry mode"),
 	_miSwapModes("Swap modes"),
+	_miRecover("Recover"),
 	_miBlackOutAndDryMode("Black-out with dry mode"),
 	_miBlackOut("Black-out"),
 	_miProtectBlackout("Protect black-out"),
@@ -255,6 +256,10 @@ void ShowWindow::createMenu()
 	_miSwapModes.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMISwapModesClicked));
 	_menuDesign.append(_miSwapModes);
 	
+	_miRecover.set_sensitive(false);
+	_miRecover.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onMIRecoverClicked));
+	_menuDesign.append(_miRecover);
+	
 	_menuDesign.append(_miDesignSep1);
 		
 	_miProtectBlackout.signal_activate().connect([&]() { onMIProtectedBlackOut(); });
@@ -428,6 +433,7 @@ void ShowWindow::updateDryModeState()
 	bool dryMode = _miDryMode.get_active();
 	_miCancelDryMode.set_sensitive(dryMode);
 	_miSwapModes.set_sensitive(dryMode);
+	_miRecover.set_sensitive(dryMode);
 	_miBlackOutAndDryMode.set_sensitive(!dryMode);
 	_miOpen.set_sensitive(!dryMode);
 	_miSave.set_sensitive(!dryMode);
@@ -502,6 +508,16 @@ void ShowWindow::onMISwapModesClicked()
 		updateDryModeState();
 		FolderObject& folder = _management->GetObjectFromPath(path);
 		_objectListFrame->OpenFolder(static_cast<Folder&>(folder));
+	}
+}
+
+void ShowWindow::onMIRecoverClicked()
+{
+	if(_backgroundManagement)
+	{
+		_management->Recover(*_backgroundManagement);
+		for(std::unique_ptr<FaderWindow>& fw : _faderWindows)
+			fw->ReloadValues();
 	}
 }
 

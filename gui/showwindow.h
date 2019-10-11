@@ -79,6 +79,7 @@ private:
 	void onMIDryModeClicked();
 	void onMICancelDryModeClicked();
 	void onMISwapModesClicked();
+	void onMIRecoverClicked();
 	void onMIBlackOutAndDryMode();
 	void onMIBlackOut();
 	void onMIProtectedBlackOut();
@@ -123,6 +124,7 @@ private:
 	Gtk::CheckMenuItem _miDryMode;
 	Gtk::MenuItem _miCancelDryMode;
 	Gtk::MenuItem _miSwapModes;
+	Gtk::MenuItem _miRecover;
 	Gtk::MenuItem _miBlackOutAndDryMode;
 	Gtk::MenuItem _miBlackOut;
 	Gtk::CheckMenuItem _miProtectBlackout;

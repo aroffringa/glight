@@ -127,6 +127,8 @@ class Management {
 		
 		void BlackOut();
 		
+		void Recover(Management& other);
+		
 	private:
 		struct ManagementThread {
 			Management *parent;
