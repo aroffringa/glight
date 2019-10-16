@@ -239,7 +239,7 @@ private:
 			return dynamic_cast<Folder*>(obj);
 		}
 		else {
-			FolderObject* obj = FindNamedObjectIfExists(_objects, path.substr(strPos, sep-path.begin()));
+			FolderObject* obj = FindNamedObjectIfExists(_objects, path.substr(strPos, sep-path.begin()-strPos));
 			Folder* folder = dynamic_cast<Folder*>(obj);
 			if(folder)
 				return folder->followDown(path, sep+1-path.begin());
@@ -258,7 +258,7 @@ private:
 			return dynamic_cast<Folder*>(obj);
 		}
 		else {
-			FolderObject* obj = FindNamedObjectIfExists(_objects, path.substr(strPos, sep-path.begin()));
+			FolderObject* obj = FindNamedObjectIfExists(_objects, path.substr(strPos, sep-path.begin()-strPos));
 			Folder* folder = dynamic_cast<Folder*>(obj);
 			if(folder)
 				return folder->followDown(std::move(path), sep+1-path.begin());

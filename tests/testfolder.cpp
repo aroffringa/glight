@@ -123,6 +123,23 @@ BOOST_AUTO_TEST_CASE( FollowDown )
 	BOOST_CHECK_EQUAL( a->FollowDown("b/c") , c.get() );
 	
 	BOOST_CHECK_EQUAL( b->FollowDown("c") , c.get() );
+	
+	std::unique_ptr<Folder> root(new Folder("root"));
+	std::unique_ptr<Folder> f1(new Folder("bert"));
+	std::unique_ptr<Folder> f2(new Folder("carole"));
+	std::unique_ptr<Folder> f3(new Folder("daniel"));
+	f2->Add(*f3);
+	f1->Add(*f2);
+	root->Add(*f1);
+	BOOST_CHECK_EQUAL(
+		root->FollowDown(Folder::RemoveRoot("root/bert/carole/daniel")),
+		f3.get()
+	);
+	std::string notMoved = Folder::RemoveRoot("root/bert/carole/daniel");
+	BOOST_CHECK_EQUAL(
+		root->FollowDown(notMoved),
+		f3.get()
+	);
 }
 
 
