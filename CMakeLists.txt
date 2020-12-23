@@ -15,8 +15,7 @@ find_package(Threads REQUIRED)
 find_library(AUBIO_LIBRARY NAMES aubio)
 find_path(AUBIO_INCLUDE_DIR NAMES aubio/aubio.h)
 
-set(CMAKE_CXX_FLAGS "-O3 -Wall -DNDEBUG -march=native -std=c++17")
-set(CMAKE_C_FLAGS "-O3 -Wall -DNDEBUG -march=native")
+add_compile_options(-O3 -Wall -DNDEBUG -std=c++17 -march=native)
 
 include_directories(${GTKMM_INCLUDE_DIRS})
 include_directories(${FLACPP_INCLUDE_DIRS})
@@ -119,5 +118,11 @@ if(Boost_FOUND)
 else()
   message("Boost testing framework not found.")
 endif()
-  
+
+add_custom_target(
+  coverage
+  COMMAND gcovr -r .. -e '.*/tests/.*' -e '.*/CompilerIdCXX/.*'
+  DEPENDS check
+)
+
 install(TARGETS glight RUNTIME DESTINATION bin)
