@@ -24,13 +24,18 @@ VisualizationWindow::VisualizationWindow(Management* management, EventTransmitte
 	_dragType(NotDragging),
 	_selectedFixtures(),
 	_miSymbolMenu("Symbol"),
+	_miDryModeStyle("Dry mode style"),
 	_miAlignHorizontally("Align horizontally"),
 	_miAlignVertically("Align vertically"),
 	_miDistributeEvenly("Distribute evenly"),
 	_miAdd("Add..."),
 	_miRemove("Remove"),
 	_miDesign("Design..."),
-	_miFullscreen("Fullscreen")
+	_miFullscreen("Fullscreen"),
+	_miDMSSingle("Single"),
+	_miDMSVertical("Vertical"),
+	_miDMSHorizontal("Horizontal"),
+	_miDMSShadow("Shadow")
 {
 	set_title("Glight - visualization");
 	set_default_size(600, 200);
@@ -67,6 +72,21 @@ void VisualizationWindow::inializeContextMenu()
 	
 	_miSymbolMenu.set_submenu(_symbolMenu);
 	_popupMenu.add(_miSymbolMenu);
+  
+  Gtk::RadioMenuItem::Group dryModeStyleGroup;
+  _miDMSSingle.set_group(dryModeStyleGroup);
+  _dryModeStyleMenu.add(_miDMSSingle);
+  _miDMSHorizontal.set_group(dryModeStyleGroup);
+  _dryModeStyleMenu.add(_miDMSHorizontal);
+  _miDMSVertical.set_group(dryModeStyleGroup);
+  _miDMSVertical.set_active(true);
+  _dryModeStyleMenu.add(_miDMSVertical);
+  _miDMSShadow.set_group(dryModeStyleGroup);
+  _dryModeStyleMenu.add(_miDMSShadow);
+  
+	
+	_miDryModeStyle.set_submenu(_dryModeStyleMenu);
+	_popupMenu.add(_miDryModeStyle);
 	
 	_miAlignHorizontally.signal_activate().connect([&]{ onAlignHorizontally(); });
 	_popupMenu.add(_miAlignHorizontally);
@@ -137,12 +157,12 @@ double VisualizationWindow::scale(Management& management, double width, double h
 		return std::min(width/extend.X(), height/extend.Y());
 }
 
-void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& cairo, Management& management, size_t yOffset, size_t height)
+void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& cairo, Management& management, const DrawStyle& style)
 {
 	const ValueSnapshot snapshot = management.Snapshot();
 	const std::vector<std::unique_ptr<Fixture>>& fixtures = management.Theatre().Fixtures();
 	cairo->save();
-	double sc = scale(management, _drawingArea.get_width(), height);
+	double sc = scale(management, style.width, style.height);
 	cairo->scale(sc, sc);
 	for(const std::unique_ptr<Fixture>& f : fixtures)
 	{
@@ -160,7 +180,7 @@ void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& c
 				double radius = shapeCount==1 ? singleRadius : 0.33 + 0.07 * double(shapeIndex) / (shapeCount - 1);
 				double x = f->Position().X() + 0.5;
 				double y = f->Position().Y() + 0.5;
-				cairo->arc(x, y + yOffset/sc, radius, 0.0, 2.0 * M_PI);
+				cairo->arc(x + style.xOffset/sc, y + style.yOffset/sc, radius, 0.0, 2.0 * M_PI);
 				cairo->fill();
 			}
 		}
@@ -174,7 +194,7 @@ void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& c
 			double rad = radius(f->Symbol().Value());
 			double x = f->Position().X() + 0.5;
 			double y = f->Position().Y() + 0.5;
-			cairo->arc(x, y + yOffset/sc, rad, 0.0, 2.0 * M_PI);
+			cairo->arc(x + style.xOffset/sc, y + style.yOffset/sc, rad, 0.0, 2.0 * M_PI);
 			cairo->stroke();
 		}
 	}
@@ -195,7 +215,7 @@ void VisualizationWindow::drawManagement(const Cairo::RefPtr< Cairo::Context>& c
 
 void VisualizationWindow::drawAll(const Cairo::RefPtr< Cairo::Context>& cairo)
 {
-	double
+	size_t
 		width = _drawingArea.get_width(),
 		height = _drawingArea.get_height();
 
@@ -203,13 +223,44 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr< Cairo::Context>& cairo)
 	cairo->rectangle(0, 0, width, height);
 	cairo->fill();
 	
+  DrawStyle style{
+    .xOffset = 0,
+    .yOffset = 0,
+    .width = width,
+    .height = height
+  };
 	if(_dryManagement==nullptr)
 	{
-		drawManagement(cairo, *_management, 0, height);
+		drawManagement(cairo, *_management, style);
 	}
-	else {
-		drawManagement(cairo, *_management, 0, height/2.0);
-		drawManagement(cairo, *_dryManagement, height/2.0, height/2.0);
+	else if(_miDMSHorizontal.get_active()) {
+    style.xOffset = 0;
+    style.width = width/2;
+		drawManagement(cairo, *_management, style);
+    style.xOffset = style.width;
+    style.width = width - style.width;
+		drawManagement(cairo, *_dryManagement, style);
+	}
+	else if(_miDMSVertical.get_active()) {
+    style.yOffset = 0;
+    style.height = height/2;
+		drawManagement(cairo, *_management, style);
+    style.yOffset = style.height;
+    style.height = height - style.height;
+		drawManagement(cairo, *_dryManagement, style);
+	}
+	else if(_miDMSShadow.get_active()) {
+    style.xOffset = width*1/100;
+    style.yOffset = height*1/100;
+    style.width = width*99/100;
+    style.height = height*99/100;
+		drawManagement(cairo, *_management, style);
+    style.xOffset = 0;
+    style.yOffset = 0;
+		drawManagement(cairo, *_dryManagement, style);
+	}
+	else { // Single
+		drawManagement(cairo, *_dryManagement, style);
 	}
 }
 

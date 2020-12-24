@@ -67,15 +67,22 @@ private:
 
 	Gtk::Menu _popupMenu;
 	Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
-	Gtk::MenuItem _miSymbolMenu, _miAlignHorizontally, _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miDesign;
-	Gtk::Menu _symbolMenu;
-	std::vector<Gtk::MenuItem> _miSymbols;
+	Gtk::MenuItem _miSymbolMenu, _miDryModeStyle, _miAlignHorizontally, _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miDesign;
 	Gtk::CheckMenuItem _miFullscreen;
+	Gtk::Menu _symbolMenu, _dryModeStyleMenu;
+	std::vector<Gtk::MenuItem> _miSymbols;
+  Gtk::RadioMenuItem _miDMSSingle, _miDMSVertical, _miDMSHorizontal, _miDMSShadow;
 	
 	void inializeContextMenu();
 	void initialize();
 	void drawAll(const Cairo::RefPtr< Cairo::Context>& cairo);
-	void drawManagement(const Cairo::RefPtr< Cairo::Context>& cairo, class Management& management, size_t yOffset, size_t height);
+  struct DrawStyle {
+    size_t xOffset;
+    size_t yOffset;
+    size_t width;
+    size_t height;
+  };
+	void drawManagement(const Cairo::RefPtr< Cairo::Context>& cairo, class Management& management, const DrawStyle& style);
 	void onTheatreChanged();
 	bool onButtonPress(GdkEventButton* event);
 	bool onButtonRelease(GdkEventButton* event);
