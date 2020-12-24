@@ -176,7 +176,7 @@ void SceneFrame::Update()
 		_selectedScene = _show->Scenes()[0].get();
 	_audioWidget.SetScene(*_selectedScene);
 
-	fillControllablesList();
+	//fillControllablesList();
 	fillSceneItemList();
 	updateAudio();
 	updateAudioWidgetKeys();

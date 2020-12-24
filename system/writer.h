@@ -1,6 +1,7 @@
 #ifndef WRITER_H
 #define WRITER_H
 
+#include <map>
 #include <set>
 #include <stdexcept>
 #include <string>
