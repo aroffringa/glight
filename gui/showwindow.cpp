@@ -327,9 +327,13 @@ void ShowWindow::onMINewClicked()
 	{
 		std::unique_lock<std::mutex> lock(_management->Mutex());
 		_management->Clear();
+    _state.Clear();
 		lock.unlock();
 
 		EmitUpdate();
+    
+    _faderWindows.clear();
+		addFaderWindow();
 	}
 }
 
@@ -369,6 +373,7 @@ void ShowWindow::OpenFile(const std::string& filename)
 			}
 		}
 	}
+	_state.EmitFaderSetupChangeSignal();
 }
 
 void ShowWindow::onMIOpenClicked()
