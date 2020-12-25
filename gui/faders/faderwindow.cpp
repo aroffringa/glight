@@ -86,7 +86,7 @@ void FaderWindow::LoadState(class FaderSetupState* state)
 
 void FaderWindow::initializeWidgets()
 {
-	set_title("Glight - controls");
+	set_title("Glight - faders");
 	
 	_faderSetupChangeConnection = _guiState.FaderSetupSignalChange().connect(sigc::mem_fun(*this, &FaderWindow::updateFaderSetupList));
 	
@@ -444,7 +444,7 @@ void FaderWindow::onNewFaderSetupButtonClicked()
 	
 	token.Release();
 	
-	updateFaderSetupList();
+	_guiState.EmitFaderSetupChangeSignal();
 }
 
 void FaderWindow::updateFaderSetupList()

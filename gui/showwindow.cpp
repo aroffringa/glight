@@ -39,7 +39,8 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_miProtectBlackout("Protect black-out"),
 	_miDesignWizard("Design wizard"),
 	_miFixtureListWindow("Fixture list"),
-	_miNewControlWindow("New faders window"),
+	_miFaderWindowMenu("Fader windows"),
+	_miNewFaderWindow("New"),
 	_miVisualizationWindow("Visualization")
 {
 	set_title("Glight - show");
@@ -49,8 +50,6 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	_management->StartBeatFinder();
 
 	_management->Run();
-
-	addFaderWindow();
 
 	_fixtureListWindow.reset(new FixtureListWindow(this, *_management, &_fixtureSelection));
 	_fixtureListWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
@@ -65,6 +64,9 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device) :
 	
 	createMenu();
 	
+  _state.FaderSetupSignalChange().connect([&](){ onFaderListChange(); });
+	addFaderWindow();
+
 	_objectListFrame.reset(new ObjectListFrame(*_management, *this));
 	_sceneFrame.reset(new SceneFrame(*_management, *this));
 
@@ -114,7 +116,7 @@ void ShowWindow::addFaderWindow(FaderSetupState* stateOrNull)
 			}
 		}
 	}
-	_faderWindows.emplace_back(new FaderWindow(*this, _state, *_management, nextControlKeyRow()));
+	_faderWindows.emplace_back(std::make_unique<FaderWindow>(*this, _state, *_management, nextControlKeyRow()));
 	FaderWindow *newWindow = _faderWindows.back().get();
 	if(stateOrNull == nullptr)
 		newWindow->LoadNew();
@@ -122,8 +124,9 @@ void ShowWindow::addFaderWindow(FaderSetupState* stateOrNull)
 		newWindow->LoadState(stateOrNull);
 	newWindow->signal_key_press_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyDown));
 	newWindow->signal_key_release_event().connect(sigc::mem_fun(*this, &ShowWindow::onKeyUp));
-	newWindow->signal_hide().connect(sigc::bind(sigc::mem_fun(*this, &ShowWindow::onControlWindowHidden), newWindow));
+	newWindow->signal_hide().connect(sigc::bind(sigc::mem_fun(*this, &ShowWindow::onFaderWindowHidden), newWindow));
 	newWindow->show();
+  _state.EmitFaderSetupChangeSignal();
 }
 
 void ShowWindow::onConfigurationWindowButtonClicked()
@@ -284,8 +287,13 @@ void ShowWindow::createMenu()
 	
 	_menuWindow.set_title("_Window");
 	
-	_miNewControlWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onControlWindowButtonClicked));
-	_menuWindow.append(_miNewControlWindow);
+	_miNewFaderWindow.signal_activate().connect([&](){ addFaderWindow(); });
+	_menuFaderWindows.append(_miNewFaderWindow);
+  
+  _menuFaderWindows.append(_miFaderWindowSeperator);
+  
+  _miFaderWindowMenu.set_submenu(_menuFaderWindows);
+  _menuWindow.append(_miFaderWindowMenu);
 
 	_miFixtureListWindow.set_active(false);
 	_miFixtureListWindow.signal_activate().connect(sigc::mem_fun(*this, &ShowWindow::onConfigurationWindowButtonClicked));
@@ -554,7 +562,7 @@ void ShowWindow::changeManagement(Management* newManagement, bool moveControlSli
 	EmitUpdate();
 }
 
-void ShowWindow::onControlWindowHidden(FaderWindow* window)
+void ShowWindow::onFaderWindowHidden(FaderWindow* window)
 {
 	for(std::vector<std::unique_ptr<FaderWindow>>::iterator i=_faderWindows.begin(); i!=_faderWindows.end(); ++i)
 	{
@@ -564,6 +572,42 @@ void ShowWindow::onControlWindowHidden(FaderWindow* window)
 			break;
 		}
 	}
+}
+
+void ShowWindow::onFaderListChange()
+{
+  _miFaderWindows.clear();
+  
+  for(const std::unique_ptr<FaderSetupState>& state : _state.FaderSetups())
+  {
+    _miFaderWindows.emplace_back(state->name);
+    _miFaderWindows.back().set_active(state->isActive);
+    _miFaderWindows.back().signal_toggled().connect([&](){ onFaderWindowSelected(_miFaderWindows.back(), *state); });
+    _miFaderWindows.back().show();
+    _menuFaderWindows.append(_miFaderWindows.back());
+  }
+}
+
+FaderWindow* ShowWindow::getFaderWindow(FaderSetupState& state)
+{
+  for(const std::unique_ptr<FaderWindow>& window : _faderWindows)
+  {
+    if(window->State() == &state)
+      return window.get();
+  }
+  return nullptr;
+}
+
+void ShowWindow::onFaderWindowSelected(Gtk::CheckMenuItem& menuItem, FaderSetupState& state)
+{
+  FaderWindow* window = getFaderWindow(state);
+  if(window)
+  {
+    window->hide();
+  }
+  else {
+    addFaderWindow(&state);
+  }
 }
 
 size_t ShowWindow::nextControlKeyRow() const

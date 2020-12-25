@@ -75,6 +75,9 @@ public:
 	const std::vector<std::unique_ptr<FaderSetupState>>& FaderSetups() const
 	{ return _faderSetups; }
 	
+	/**
+   * Emitted when fadersetupstates are added or removed from the list.
+   */
 	sigc::signal<void()>& FaderSetupSignalChange() { return _faderSetupSignalChange; }
 	
 	void EmitFaderSetupChangeSignal()

@@ -47,10 +47,6 @@ public:
 	std::unique_ptr<class DesignWizard>& GetDesignWizard() { return _designWizard; }
 	
 private:
-	void onControlWindowButtonClicked()
-	{
-		addFaderWindow();
-	}
 	void onConfigurationWindowButtonClicked();
 	void onVisualizationWindowButtonClicked();
 	
@@ -86,7 +82,10 @@ private:
 	
 	void onMIDesignWizardClicked();
 	
-	void onControlWindowHidden(class FaderWindow* window);
+	void onFaderWindowHidden(class FaderWindow* window);
+	void onFaderListChange();
+	void onFaderWindowSelected(Gtk::CheckMenuItem& menuItem, FaderSetupState& state);
+  FaderWindow* getFaderWindow(FaderSetupState& state);
 	
 	void changeManagement(class Management* newManagement, bool moveControlSliders);
 	
@@ -117,7 +116,7 @@ private:
 	sigc::signal<void(Management&)> _signalChangeManagement;
 	sigc::signal<void()> _signalUpdateControllables;
 	
-	Gtk::Menu _menuFile, _menuDesign, _menuWindow;
+	Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
 	
 	Gtk::MenuItem _miFile, _miDesign, _miWindow;
 	Gtk::ImageMenuItem _miNew, _miOpen, _miSave, _miQuit;
@@ -131,7 +130,9 @@ private:
 	Gtk::SeparatorMenuItem _miDesignSep1, _miDesignSep2;
 	Gtk::MenuItem _miDesignWizard;
 	Gtk::CheckMenuItem _miFixtureListWindow;
-	Gtk::MenuItem _miNewControlWindow;
+	Gtk::MenuItem _miFaderWindowMenu, _miNewFaderWindow;  
+  Gtk::SeparatorMenuItem _miFaderWindowSeperator;
+  std::vector<Gtk::CheckMenuItem> _miFaderWindows;
 	Gtk::CheckMenuItem _miVisualizationWindow;
 	
 	Gtk::MenuBar _menuBar;

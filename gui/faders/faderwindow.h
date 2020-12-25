@@ -53,6 +53,7 @@ class FaderWindow  : public Gtk::Window {
 		 */
 		void ChangeManagement(class Management& management, bool moveSliders);
 		
+    FaderSetupState* State() { return _state; }
 	private:
 		void initializeWidgets();
 		void initializeMenu();
