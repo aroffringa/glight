@@ -82,7 +82,7 @@ private:
 	void onMIRecoverClicked();
 	void onMIBlackOutAndDryMode();
 	void onMIBlackOut();
-	void onMIProtectedBlackOut();
+	void onMIProtectBlackOut();
 	
 	void onMIDesignWizardClicked();
 	

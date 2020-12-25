@@ -262,7 +262,7 @@ void ShowWindow::createMenu()
 	
 	_menuDesign.append(_miDesignSep1);
 		
-	_miProtectBlackout.signal_activate().connect([&]() { onMIProtectedBlackOut(); });
+	_miProtectBlackout.signal_activate().connect([&]() { onMIProtectBlackOut(); });
 	_miProtectBlackout.set_active(true);
 	_menuDesign.append(_miProtectBlackout);
 	
@@ -434,7 +434,7 @@ void ShowWindow::updateDryModeState()
 	_miCancelDryMode.set_sensitive(dryMode);
 	_miSwapModes.set_sensitive(dryMode);
 	_miRecover.set_sensitive(dryMode);
-	_miBlackOutAndDryMode.set_sensitive(!dryMode);
+	_miBlackOutAndDryMode.set_sensitive(!dryMode && !_miProtectBlackout.get_active());
 	_miOpen.set_sensitive(!dryMode);
 	_miSave.set_sensitive(!dryMode);
 }
@@ -606,7 +606,7 @@ void ShowWindow::onMIBlackOut()
 		fw->ReloadValues();
 }
 
-void ShowWindow::onMIProtectedBlackOut()
+void ShowWindow::onMIProtectBlackOut()
 {
 	bool protect = _miProtectBlackout.get_active();
 	_miBlackOut.set_sensitive(!protect);
