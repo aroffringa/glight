@@ -68,6 +68,7 @@ set(THEATREFILES
   theatre/effect.cpp
   theatre/fixture.cpp
   theatre/fixturefunction.cpp
+  theatre/fixturetype.cpp
   theatre/folderobject.cpp
   theatre/management.cpp
   theatre/oladevice.cpp

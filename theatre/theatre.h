@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "fixture.h"
 #include "fixturetype.h"
 #include "position.h"
 

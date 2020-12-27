@@ -118,7 +118,7 @@ void BeatFinder::open() {
     }
     _audioLevel = audioRMS / (2 * hop_size);
     //_audioLevel = std::min<uint32_t>(localAudioLevel*2,
-    //std::numeric_limits<uint16_t>::max());
+    // std::numeric_limits<uint16_t>::max());
     aubio_tempo_do(tempo, ibuf, tempo_out);
     smpl_t is_beat = fvec_get_sample(tempo_out, 0);
     if (silence_threshold != -90)

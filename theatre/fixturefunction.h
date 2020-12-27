@@ -11,8 +11,8 @@
 #include "valuesnapshot.h"
 
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class FixtureFunction : public NamedObject {
 public:
   FixtureFunction(class Theatre &theatre, FunctionType type,
