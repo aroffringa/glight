@@ -18,9 +18,18 @@ public:
 		_folderCombo(management, eventHub),
 		_list(management, eventHub)
 	{
+    _parentFolderButton.set_image_from_icon_name("go-up");
+    _parentFolderButton.signal_clicked().connect([&]() { onParentFolderClicked(); });
+		_hBox.pack_start(_parentFolderButton, false, false, 5);
+    _parentFolderButton.set_sensitive(false);
+    _parentFolderButton.show();
+    
 		_folderCombo.SignalSelectionChange().connect([&]() { onFolderChanged(); });
-		pack_start(_folderCombo, false, false, 5);
+		_hBox.pack_start(_folderCombo, true, true, 5);
 		_folderCombo.show();
+    
+		pack_start(_hBox, false, false, 5);
+    _hBox.show();
 		
 		_list.SignalSelectionChange().connect([&]() { onSelectionChanged(); });
 		_list.SignalObjectActivated().connect([&](FolderObject& object) { onObjectActivated(object); });
@@ -62,7 +71,9 @@ private:
 	}
 	void onFolderChanged()
 	{
-		_list.SetFolder(_folderCombo.Selection());
+    Folder& folder = _folderCombo.Selection();
+    _parentFolderButton.set_sensitive(!folder.IsRoot());
+		_list.SetFolder(folder);
 		_signalFolderChange.emit();
 	}
 	void onObjectActivated(FolderObject& object)
@@ -73,7 +84,15 @@ private:
 		else
 			_folderCombo.Select(*folder);
 	}
+	void onParentFolderClicked()
+  {
+    const Folder& folder = _folderCombo.Selection();
+    if(!folder.IsRoot())
+      _folderCombo.Select(folder.Parent());
+  }
 	
+	Gtk::HBox _hBox;
+	Gtk::Button _parentFolderButton;
 	FolderCombo _folderCombo;
 	ObjectList _list;
 	
