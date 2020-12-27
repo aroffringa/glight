@@ -10,66 +10,65 @@
 #include "position.h"
 
 /**
-	@author Andre Offringa
+        @author Andre Offringa
 */
 class Fixture : public NamedObject {
 public:
-	Fixture(class Theatre &theatre, class FixtureType &type, const std::string &name);
-	Fixture(const Fixture& source, class Theatre& theatre);
+  Fixture(class Theatre &theatre, class FixtureType &type,
+          const std::string &name);
+  Fixture(const Fixture &source, class Theatre &theatre);
 
-	const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const
-	{ return _functions; }
-	
-	FixtureType &Type() const { return _type; }
-	
-	std::vector<unsigned> GetChannels() const
-	{
-		std::vector<unsigned> channels;
-		for(const std::unique_ptr<FixtureFunction>& ff : _functions)
-		{
-			if(ff->IsSingleChannel())
-				channels.emplace_back(ff->FirstChannel().Channel());
-		}
-		return channels;
-	}
-	
-	void IncChannel();
+  const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const {
+    return _functions;
+  }
 
-	void DecChannel();
-	
-	void SetChannel(unsigned dmxChannel);
+  FixtureType &Type() const { return _type; }
 
-	void ClearFunctions()
-	{
-		_functions.clear();
-	}
-	FixtureFunction& AddFunction(FunctionType type)
-	{
-		_functions.emplace_back(new FixtureFunction(_theatre, type));
-		return *_functions.back();
-	}
-	inline Color GetColor(const class ValueSnapshot &snapshot, size_t shapeIndex) const;
-	
-	class Position& Position() { return _position; }
-	const class Position& Position() const { return _position; }
-	
-	FixtureSymbol Symbol() const { return _symbol; }
-	void SetSymbol(FixtureSymbol symbol) { _symbol = symbol; }
-	bool IsVisible() const { return _symbol != FixtureSymbol::Hidden; }
-	
+  std::vector<unsigned> GetChannels() const {
+    std::vector<unsigned> channels;
+    for (const std::unique_ptr<FixtureFunction> &ff : _functions) {
+      if (ff->IsSingleChannel())
+        channels.emplace_back(ff->FirstChannel().Channel());
+    }
+    return channels;
+  }
+
+  void IncChannel();
+
+  void DecChannel();
+
+  void SetChannel(unsigned dmxChannel);
+
+  void ClearFunctions() { _functions.clear(); }
+  FixtureFunction &AddFunction(FunctionType type) {
+    _functions.emplace_back(new FixtureFunction(_theatre, type));
+    return *_functions.back();
+  }
+  inline Color GetColor(const class ValueSnapshot &snapshot,
+                        size_t shapeIndex) const;
+
+  class Position &Position() {
+    return _position;
+  }
+  const class Position &Position() const { return _position; }
+
+  FixtureSymbol Symbol() const { return _symbol; }
+  void SetSymbol(FixtureSymbol symbol) { _symbol = symbol; }
+  bool IsVisible() const { return _symbol != FixtureSymbol::Hidden; }
+
 private:
-	class Theatre& _theatre;
-	FixtureType& _type;
-	class Position _position;
-	FixtureSymbol _symbol;
-	std::vector<std::unique_ptr<FixtureFunction>> _functions;
+  class Theatre &_theatre;
+  FixtureType &_type;
+  class Position _position;
+  FixtureSymbol _symbol;
+  std::vector<std::unique_ptr<FixtureFunction>> _functions;
 };
 
 #include "fixturetype.h"
 
-Color Fixture::GetColor(const class ValueSnapshot &snapshot, size_t shapeIndex) const
-{
-	return _type.GetColor(*this, snapshot, shapeIndex);
+Color Fixture::GetColor(const class ValueSnapshot &snapshot,
+                        size_t shapeIndex) const {
+  return _type.GetColor(*this, snapshot, shapeIndex);
 }
 
 #endif

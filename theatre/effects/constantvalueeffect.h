@@ -3,26 +3,26 @@
 
 #include "../effect.h"
 
-class ConstantValueEffect : public Effect
-{
+class ConstantValueEffect : public Effect {
 public:
-	ConstantValueEffect() :
-		Effect(0),
-		_value(ControlValue::MaxUInt()) // 2 %
-	{ }
-	
-	virtual Effect::Type GetType() const override { return ConstantValueType; }
-	
-	unsigned Value() const { return _value; }
-	void SetValue(unsigned value) { _value = value; }
-	
+  ConstantValueEffect()
+      : Effect(0), _value(ControlValue::MaxUInt()) // 2 %
+  {}
+
+  virtual Effect::Type GetType() const override { return ConstantValueType; }
+
+  unsigned Value() const { return _value; }
+  void SetValue(unsigned value) { _value = value; }
+
 protected:
-	virtual void mix(const ControlValue* values, unsigned* channelValues, unsigned universe, const class Timing& timing) final override
-	{
-		setConnectedInputs(ControlValue(_value));
-	}
+  virtual void mix(const ControlValue *values, unsigned *channelValues,
+                   unsigned universe,
+                   const class Timing &timing) final override {
+    setConnectedInputs(ControlValue(_value));
+  }
+
 private:
-	unsigned _value;
+  unsigned _value;
 };
 
 #endif

@@ -14,31 +14,32 @@
 #include <memory>
 #include <vector>
 
-class PropertiesBox : public Gtk::VBox
-{
+class PropertiesBox : public Gtk::VBox {
 public:
-	PropertiesBox();
-	
-	void SetPropertySet(PropertySet* propertySet)
-	{ _propertySet = propertySet; fillProperties(); }
-	
-	void Clear();
-	
+  PropertiesBox();
+
+  void SetPropertySet(PropertySet *propertySet) {
+    _propertySet = propertySet;
+    fillProperties();
+  }
+
+  void Clear();
+
 private:
-	struct PropertyRow {
-		Property* _property;
-		std::vector<std::unique_ptr<Gtk::Widget>> _widgets;
-	};
-	
-	PropertySet* _propertySet;
-	std::vector<PropertyRow> _rows;
-	Gtk::Label _typeLabel;
-	Gtk::Grid _grid;
-	Gtk::ButtonBox _propertiesButtonBox;
-	Gtk::Button _applyButton;
-	
-	void onApplyClicked();
-	void fillProperties();
+  struct PropertyRow {
+    Property *_property;
+    std::vector<std::unique_ptr<Gtk::Widget>> _widgets;
+  };
+
+  PropertySet *_propertySet;
+  std::vector<PropertyRow> _rows;
+  Gtk::Label _typeLabel;
+  Gtk::Grid _grid;
+  Gtk::ButtonBox _propertiesButtonBox;
+  Gtk::Button _applyButton;
+
+  void onApplyClicked();
+  void fillProperties();
 };
 
 #endif

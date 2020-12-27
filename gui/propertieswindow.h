@@ -3,10 +3,9 @@
 
 #include <gtkmm/window.h>
 
-class PropertiesWindow : public Gtk::Window
-{
+class PropertiesWindow : public Gtk::Window {
 public:
-	virtual class FolderObject& GetObject() = 0;
+  virtual class FolderObject &GetObject() = 0;
 };
 
 #endif

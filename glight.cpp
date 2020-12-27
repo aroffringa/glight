@@ -1,5 +1,5 @@
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 
 #include "theatre/dmxdevice.h"
 
@@ -9,12 +9,11 @@
 
 using namespace std;
 
-int main(int argc, char *argv[])
-{
-	Writer::CheckXmlVersion();
+int main(int argc, char *argv[]) {
+  Writer::CheckXmlVersion();
 
-	Application application;
-	application.Run(argc, argv);
+  Application application;
+  application.Run(argc, argv);
 
   return EXIT_SUCCESS;
 }

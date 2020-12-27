@@ -2,12 +2,12 @@
 #define APPLICATION_H
 
 /**
-	@author Andre Offringa
+        @author Andre Offringa
 */
-class Application{
+class Application {
 public:
-	Application();
-	void Run(int argc, char *argv[]);
+  Application();
+  void Run(int argc, char *argv[]);
 };
 
 #endif

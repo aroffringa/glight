@@ -2,7 +2,6 @@
 
 #include "controllable.h"
 
-std::string PresetValue::Title() const
-{
-	return _controllable->InputName(_inputIndex);
+std::string PresetValue::Title() const {
+  return _controllable->InputName(_inputIndex);
 }

@@ -8,58 +8,57 @@
 #include <string>
 
 /**
-	@author Andre Offringa
+        @author Andre Offringa
 */
 class PresetValue {
-	public:
-		PresetValue(class Controllable &controllable, size_t inputIndex)
-			: _value(0), _controllable(&controllable), _inputIndex(inputIndex)
-		{ }
-		
-		/**
-		 * Copy the preset value. The delete signal is not copied.
-		 */
-		PresetValue(const PresetValue& source) :
-			_value(source._value),
-			_controllable(source._controllable),
-			_inputIndex(source._inputIndex)
-		{ }
-		
-		/**
-		 * Copy constructor that copies the source but associates it with the given controllable.
-		 */
-		PresetValue(const PresetValue &source, class Controllable &controllable) :
-			_value(source._value), _controllable(&controllable), _inputIndex(source._inputIndex)
-		{ }
-		
-		~PresetValue() { _signalDelete(); }
+public:
+  PresetValue(class Controllable &controllable, size_t inputIndex)
+      : _value(0), _controllable(&controllable), _inputIndex(inputIndex) {}
 
-		void SetValue(const ControlValue &value) { _value = value; }
-		const ControlValue& Value() const { return _value; }
-		ControlValue& Value() { return _value; }
+  /**
+   * Copy the preset value. The delete signal is not copied.
+   */
+  PresetValue(const PresetValue &source)
+      : _value(source._value), _controllable(source._controllable),
+        _inputIndex(source._inputIndex) {}
 
-		class Controllable& Controllable() const { return *_controllable; }
-		
-		size_t InputIndex() const { return _inputIndex; }
-		
-		bool IsIgnorable() const { return _value.UInt() == 0; }
-		
-		sigc::signal<void()>& SignalDelete() { return _signalDelete; }
-		
-		std::string Title() const;
-		
-		void Reconnect(class Controllable &controllable, size_t inputIndex)
-		{
-			_controllable = &controllable;
-			_inputIndex = inputIndex;
-		}
-		
-	private:
-		ControlValue _value;
-		class Controllable *_controllable;
-		size_t _inputIndex;
-		
-		sigc::signal<void()> _signalDelete;
+  /**
+   * Copy constructor that copies the source but associates it with the given
+   * controllable.
+   */
+  PresetValue(const PresetValue &source, class Controllable &controllable)
+      : _value(source._value), _controllable(&controllable),
+        _inputIndex(source._inputIndex) {}
+
+  ~PresetValue() { _signalDelete(); }
+
+  void SetValue(const ControlValue &value) { _value = value; }
+  const ControlValue &Value() const { return _value; }
+  ControlValue &Value() { return _value; }
+
+  class Controllable &Controllable() const {
+    return *_controllable;
+  }
+
+  size_t InputIndex() const { return _inputIndex; }
+
+  bool IsIgnorable() const { return _value.UInt() == 0; }
+
+  sigc::signal<void()> &SignalDelete() { return _signalDelete; }
+
+  std::string Title() const;
+
+  void Reconnect(class Controllable &controllable, size_t inputIndex) {
+    _controllable = &controllable;
+    _inputIndex = inputIndex;
+  }
+
+private:
+  ControlValue _value;
+  class Controllable *_controllable;
+  size_t _inputIndex;
+
+  sigc::signal<void()> _signalDelete;
 };
 
 #endif

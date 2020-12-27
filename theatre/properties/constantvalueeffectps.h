@@ -5,33 +5,33 @@
 
 #include "../effects/constantvalueeffect.h"
 
-class ConstantValueEffectPS final : public PropertySet
-{
+class ConstantValueEffectPS final : public PropertySet {
 public:
-	ConstantValueEffectPS()
-	{
-		addProperty(Property("value", "Value", Property::ControlValue));
-	}
-	
+  ConstantValueEffectPS() {
+    addProperty(Property("value", "Value", Property::ControlValue));
+  }
+
 protected:
-	virtual void setControlValue(FolderObject& object, size_t index, unsigned value) const final override
-	{
-		ConstantValueEffect& cfx = static_cast<ConstantValueEffect&>(object);
-		switch(index) {
-			case 0: cfx.SetValue(value); break;
-		}
-	}
-	
-	virtual unsigned getControlValue(const FolderObject& object, size_t index) const final override
-	{
-		const ConstantValueEffect& cfx = static_cast<const ConstantValueEffect&>(object);
-		switch(index) {
-			case 0: return cfx.Value();
-		}
-		return 0;
-	}
+  virtual void setControlValue(FolderObject &object, size_t index,
+                               unsigned value) const final override {
+    ConstantValueEffect &cfx = static_cast<ConstantValueEffect &>(object);
+    switch (index) {
+    case 0:
+      cfx.SetValue(value);
+      break;
+    }
+  }
+
+  virtual unsigned getControlValue(const FolderObject &object,
+                                   size_t index) const final override {
+    const ConstantValueEffect &cfx =
+        static_cast<const ConstantValueEffect &>(object);
+    switch (index) {
+    case 0:
+      return cfx.Value();
+    }
+    return 0;
+  }
 };
 
 #endif
-
-
