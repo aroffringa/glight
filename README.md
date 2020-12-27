@@ -1,6 +1,8 @@
 # Glight
 Glight allows a computer with DMX interface to act as a DMX controller for live control of stage lighting. It basically turns your computer into a traditional lighting console, but also adds several enhanced features. It makes use of the [Open Light Architecture](https://www.openlighting.org/ola/) (OLA) for connecting to the DMX interface, and can therefore make use of a wide variety of DMX interfaces and other connections that OLA offers.
 
+Glight's website with documentation can be found here: https://glight.readthedocs.io/
+
 Glight is specifically aimed at shows or events in which the lighting is controlled live. Any DMX device can be controlled, but Glight was in particular written for controlling less advanced lighting devices, such as light spots and pars, RGB LED lights/uplighting, etc. The development of Glight is focussed on Linux, makes use of the GTK toolkit and is written in C++. The following features are provided:
 
 * Create scenes and chases and control these live; or design fully audio-annotated shows that run automatically.
@@ -34,4 +36,4 @@ Once these prerequisited are installed, glight can be compiled by running the fo
 To also install glight in the system path, `sudo make install` can be run afterwards.
 
 ## Contact
-Glight is written by André Offringa. Feedback and bugreports are welcome; please use Github for this.
+Glight is written by André Offringa. Feedback and bugreports are welcome; please use Github for this, or mail me at offringa@gmail.com.

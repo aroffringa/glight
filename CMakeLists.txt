@@ -125,4 +125,14 @@ add_custom_target(
   DEPENDS check
 )
 
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set(CPACK_GENERATOR "DEB")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "André Offringa")
+set(CPACK_PACKAGE_VERSION_MAJOR 0)
+set(CPACK_PACKAGE_VERSION_MINOR 8)
+set(CPACK_PACKAGE_VERSION_PATCH 2)
+set(CPACK_PACKAGE_DESCRIPTION "Glight is an application for making DMX light shows and live control")
+set(CPACK_DEBIAN_PACKAGE_SECTION misc)
+include(CPack)
+
 install(TARGETS glight RUNTIME DESTINATION bin)
