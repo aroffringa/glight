@@ -11,69 +11,69 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
-#include "recursionlock.h"
 #include "nameframe.h"
+#include "recursionlock.h"
 
 #include "components/objectbrowser.h"
 
 /**
-	@author Andre Offringa
+        @author Andre Offringa
 */
-class CreateChaseDialog : public Gtk::Dialog
-{
+class CreateChaseDialog : public Gtk::Dialog {
 public:
-	CreateChaseDialog(class Management& management, class ShowWindow& parentWindow);
-	
-	class Chase& CreatedChase() { return *_newChase; }
+  CreateChaseDialog(class Management &management,
+                    class ShowWindow &parentWindow);
+
+  class Chase &CreatedChase() {
+    return *_newChase;
+  }
 
 private:
-	void initListPart();
-	void initNewSequencePart();
+  void initListPart();
+  void initNewSequencePart();
 
-	void onAddObjectToChaseButtonClicked();
-	void onClearSequenceButtonClicked();
-	void onCreateChaseButtonClicked();
-	void onSelectedObjectChanged();
-	
-	void changeManagement(class Management &management)
-	{
-		_management = &management;
-	}
-	
-	
-	Gtk::VPaned _paned;
-	
-	Gtk::Frame _listFrame;
-	ObjectBrowser _list;
-	
-	Gtk::TreeView _newChaseListView;
-	Glib::RefPtr<Gtk::ListStore> _newChaseListModel;
-	struct NewSequenceListColumns : public Gtk::TreeModelColumnRecord
-	{
-		NewSequenceListColumns()
-			{ add(_title); add(_controllable); }
-	
-		Gtk::TreeModelColumn<Glib::ustring> _title;
-		Gtk::TreeModelColumn<class Controllable *> _controllable;
-	} _newChaseListColumns;
+  void onAddObjectToChaseButtonClicked();
+  void onClearSequenceButtonClicked();
+  void onCreateChaseButtonClicked();
+  void onSelectedObjectChanged();
 
-	Gtk::VBox _listVBox;
-	Gtk::HBox _newChaseBox;
+  void changeManagement(class Management &management) {
+    _management = &management;
+  }
 
-	Gtk::Frame _newChaseFrame;
+  Gtk::VPaned _paned;
 
-	Gtk::ScrolledWindow _newChaseScrolledWindow;
+  Gtk::Frame _listFrame;
+  ObjectBrowser _list;
 
-	Gtk::VButtonBox _newChaseButtonBox;
-	Gtk::Button _addObjectToChaseButton, _clearChaseButton;
-	
-	Gtk::Button *_makeChaseButton;
+  Gtk::TreeView _newChaseListView;
+  Glib::RefPtr<Gtk::ListStore> _newChaseListModel;
+  struct NewSequenceListColumns : public Gtk::TreeModelColumnRecord {
+    NewSequenceListColumns() {
+      add(_title);
+      add(_controllable);
+    }
 
-	Management* _management;
-	class ShowWindow& _parentWindow;
-	RecursionLock _delayUpdates;
-	class Chase* _newChase;
+    Gtk::TreeModelColumn<Glib::ustring> _title;
+    Gtk::TreeModelColumn<class Controllable *> _controllable;
+  } _newChaseListColumns;
+
+  Gtk::VBox _listVBox;
+  Gtk::HBox _newChaseBox;
+
+  Gtk::Frame _newChaseFrame;
+
+  Gtk::ScrolledWindow _newChaseScrolledWindow;
+
+  Gtk::VButtonBox _newChaseButtonBox;
+  Gtk::Button _addObjectToChaseButton, _clearChaseButton;
+
+  Gtk::Button *_makeChaseButton;
+
+  Management *_management;
+  class ShowWindow &_parentWindow;
+  RecursionLock _delayUpdates;
+  class Chase *_newChase;
 };
 
 #endif
-

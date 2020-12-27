@@ -10,9 +10,9 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
-#include "recursionlock.h"
 #include "nameframe.h"
 #include "propertieswindow.h"
+#include "recursionlock.h"
 #include "windowlist.h"
 
 #include "components/objectbrowser.h"
@@ -20,52 +20,52 @@
 #include "../theatre/effect.h"
 
 /**
-	@author Andre Offringa
+        @author Andre Offringa
 */
-class ObjectListFrame : public Gtk::VPaned
-{
+class ObjectListFrame : public Gtk::VPaned {
 public:
-	ObjectListFrame(class Management& management, class ShowWindow& parentWindow);
+  ObjectListFrame(class Management &management, class ShowWindow &parentWindow);
 
-	Folder& SelectedFolder() { return _list.SelectedFolder(); }
-	void OpenFolder(const Folder& folder) { _list.OpenFolder(folder); }
+  Folder &SelectedFolder() { return _list.SelectedFolder(); }
+  void OpenFolder(const Folder &folder) { _list.OpenFolder(folder); }
+
 private:
-	void initPresetsPart();
+  void initPresetsPart();
 
-	void onNewPresetButtonClicked();
-	void onNewChaseButtonClicked();
-	void onNewTimeSequenceButtonClicked();
-	bool onNewEffectButtonClicked(GdkEventButton* event);
-	void onNewFolderButtonClicked();
-	void onDeletePresetButtonClicked();
-	void onSelectedPresetChanged();
-	void onObjectActivated(class FolderObject& object);
-	void onNewEffectMenuClicked(enum Effect::Type effectType);
-	
-	void changeManagement(class Management &management)
-	{
-		_nameFrame.ChangeManagement(management);
-		_management = &management;
-	}
-	
-	Gtk::Frame _objectListFrame;
-	ObjectBrowser _list;
-	
-	Gtk::VBox _presetsVBox;
-	Gtk::HBox _presetsHBox;
+  void onNewPresetButtonClicked();
+  void onNewChaseButtonClicked();
+  void onNewTimeSequenceButtonClicked();
+  bool onNewEffectButtonClicked(GdkEventButton *event);
+  void onNewFolderButtonClicked();
+  void onDeletePresetButtonClicked();
+  void onSelectedPresetChanged();
+  void onObjectActivated(class FolderObject &object);
+  void onNewEffectMenuClicked(enum Effect::Type effectType);
 
-	Gtk::VButtonBox _presetsButtonBox;
-	Gtk::Button _newPresetButton, _newChaseButton, _newTimeSequenceButton, _newEffectButton, _newFolderButton, _deletePresetButton;
+  void changeManagement(class Management &management) {
+    _nameFrame.ChangeManagement(management);
+    _management = &management;
+  }
 
-	std::unique_ptr<Gtk::Menu> _popupEffectMenu;
-	std::vector<std::unique_ptr<Gtk::MenuItem>> _popupEffectMenuItems;
-		
-	WindowList<PropertiesWindow> _windowList;
-	
-	Management* _management;
-	class ShowWindow& _parentWindow;
-	NameFrame _nameFrame;
-	RecursionLock _delayUpdates;
+  Gtk::Frame _objectListFrame;
+  ObjectBrowser _list;
+
+  Gtk::VBox _presetsVBox;
+  Gtk::HBox _presetsHBox;
+
+  Gtk::VButtonBox _presetsButtonBox;
+  Gtk::Button _newPresetButton, _newChaseButton, _newTimeSequenceButton,
+      _newEffectButton, _newFolderButton, _deletePresetButton;
+
+  std::unique_ptr<Gtk::Menu> _popupEffectMenu;
+  std::vector<std::unique_ptr<Gtk::MenuItem>> _popupEffectMenuItems;
+
+  WindowList<PropertiesWindow> _windowList;
+
+  Management *_management;
+  class ShowWindow &_parentWindow;
+  NameFrame _nameFrame;
+  RecursionLock _delayUpdates;
 };
 
 #endif
