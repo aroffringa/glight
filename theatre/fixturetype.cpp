@@ -61,6 +61,11 @@ FixtureType::FixtureType(enum FixtureClass fixtureClass)
     _functionTypes.emplace_back(FunctionType::WarmWhite);
     _functionTypes.emplace_back(FunctionType::Strobe);
     break;
+  case FixtureType::CWWWA3Ch:
+    _functionTypes.emplace_back(FunctionType::ColdWhite);
+    _functionTypes.emplace_back(FunctionType::WarmWhite);
+    _functionTypes.emplace_back(FunctionType::Amber);
+    break;
   case FixtureType::UVLight3Ch:
     _functionTypes.emplace_back(FunctionType::UV);
     _functionTypes.emplace_back(FunctionType::Strobe);
@@ -183,20 +188,30 @@ Color FixtureType::GetColor(const Fixture &fixture,
     const unsigned char a = fixture.Functions()[3]->GetValue(snapshot);
     const unsigned char w = fixture.Functions()[4]->GetValue(snapshot);
     const unsigned char uv = fixture.Functions()[5]->GetValue(snapshot);
-    return Color((r + uv / 3 + w + a * 2 / 3) / 3,
-                 (g + w + a / 3) / 3, (b + uv + w) / 3);
+    return Color((r + uv / 3 + w + a * 2 / 3) / 3, (g + w + a / 3) / 3,
+                 (b + uv + w) / 3);
     break;
   }
   case CWWW2Ch: {
     const unsigned char cw = fixture.Functions()[0]->GetValue(snapshot);
     const unsigned char ww = fixture.Functions()[1]->GetValue(snapshot);
-    return Color((228*cw + 255*ww)/483, (228*cw + 228*ww)/483, (255*cw + 228*ww)/483);
+    return Color((228 * cw + 255 * ww) / 483, (228 * cw + 228 * ww) / 483,
+                 (255 * cw + 228 * ww) / 483);
   }
   case CWWW4Ch: {
     const unsigned char m = fixture.Functions()[0]->GetValue(snapshot);
     const unsigned char cw = fixture.Functions()[1]->GetValue(snapshot);
     const unsigned char ww = fixture.Functions()[2]->GetValue(snapshot);
-    return Color((228*cw + 255*ww)/483, (228*cw + 228*ww)/483, (255*cw + 228*ww)/483) * m;
+    return Color((228 * cw + 255 * ww) / 483, (228 * cw + 228 * ww) / 483,
+                 (255 * cw + 228 * ww) / 483) *
+           m;
+  }
+  case CWWWA3Ch: {
+    const unsigned char cw = fixture.Functions()[0]->GetValue(snapshot);
+    const unsigned char ww = fixture.Functions()[1]->GetValue(snapshot);
+    const unsigned char a = fixture.Functions()[2]->GetValue(snapshot);
+    return Color((228 * cw + 255 * ww + 170 * a) / 653, (228 * cw + 228 * ww + 85 * a) / 653,
+                 (255 * cw + 228 * ww) / 653);
   }
   case UVLight3Ch: {
     const unsigned char m = fixture.Functions()[0]->GetValue(snapshot);

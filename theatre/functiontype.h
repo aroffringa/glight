@@ -22,7 +22,7 @@ enum class FunctionType {
   WarmWhite
 };
 
-inline const char* AbbreviatedFunctionType(FunctionType functionType) {
+inline const char *AbbreviatedFunctionType(FunctionType functionType) {
   switch (functionType) {
   case FunctionType::Master:
     return "M";

@@ -13,7 +13,8 @@ public:
   ValueSnapshot(const ValueSnapshot &source) {
     for (const std::unique_ptr<ValueUniverseSnapshot> &snapshot :
          source._universeValues)
-      _universeValues.emplace_back(std::make_unique<ValueUniverseSnapshot>(*snapshot));
+      _universeValues.emplace_back(
+          std::make_unique<ValueUniverseSnapshot>(*snapshot));
   }
 
   ValueSnapshot(ValueSnapshot &&source) = default;

@@ -25,6 +25,7 @@ public:
     RGBAWUVLight6Ch,
     CWWW2Ch,
     CWWW4Ch,
+    CWWWA3Ch,
     UVLight3Ch,
     H2ODMXPro,
     RGB_ADJ_6CH,
@@ -37,7 +38,8 @@ public:
   FixtureType(FixtureClass fixtureClass);
 
   FixtureType(const FixtureType &fixtureType)
-      : FolderObject(fixtureType), _class(fixtureType._class), _functionTypes(fixtureType._functionTypes) {}
+      : FolderObject(fixtureType), _class(fixtureType._class),
+        _functionTypes(fixtureType._functionTypes) {}
 
   static const std::string ClassName(FixtureClass fixtureClass) {
     switch (fixtureClass) {
@@ -61,6 +63,8 @@ public:
       return "CW/WW light (2ch)";
     case CWWW4Ch:
       return "CW/WW light (4ch)";
+    case CWWWA3Ch:
+      return "CW/WW/A light (3ch)";
     case UVLight3Ch:
       return "UV light (3ch)";
     case H2ODMXPro:
@@ -81,11 +85,11 @@ public:
 
   static std::vector<enum FixtureClass> GetClassList() {
     return std::vector<enum FixtureClass>{
-        Light1Ch,       RGBLight3Ch,    RGBLight4Ch,   RGBALight4Ch,
-        RGBALight5Ch,   RGBWLight4Ch,   RGBUVLight4Ch, RGBAWUVLight6Ch,
-        CWWW2Ch, CWWW4Ch,
-        UVLight3Ch,     H2ODMXPro,      RGB_ADJ_6CH,   RGB_ADJ_7CH,
-        BT_VINTAGE_5CH, BT_VINTAGE_6CH, BT_VINTAGE_7CH};
+        Light1Ch,      RGBLight3Ch,  RGBLight4Ch,    RGBALight4Ch,
+        RGBALight5Ch,  RGBWLight4Ch, RGBUVLight4Ch,  RGBAWUVLight6Ch,
+        CWWW2Ch,       CWWW4Ch,      CWWWA3Ch,UVLight3Ch,     H2ODMXPro,
+        RGB_ADJ_6CH,   RGB_ADJ_7CH,  BT_VINTAGE_5CH, BT_VINTAGE_6CH,
+        BT_VINTAGE_7CH};
   }
 
   static FixtureClass NameToClass(const std::string &name) {
@@ -113,6 +117,7 @@ public:
     case RGBAWUVLight6Ch:
     case CWWW2Ch:
     case CWWW4Ch:
+    case CWWWA3Ch:
     case UVLight3Ch:
     case H2ODMXPro:
     case RGB_ADJ_6CH:

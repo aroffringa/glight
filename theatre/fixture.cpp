@@ -1,7 +1,8 @@
 #include "fixture.h"
 #include "theatre.h"
 
-Fixture::Fixture(Theatre &theatre, const FixtureType &type, const std::string &name)
+Fixture::Fixture(Theatre &theatre, const FixtureType &type,
+                 const std::string &name)
     : NamedObject(name), _theatre(theatre), _type(type) {
   size_t ch = theatre.FirstFreeChannel();
 

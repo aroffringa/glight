@@ -19,7 +19,7 @@ public:
 
   void Clear();
 
-  class Fixture &AddFixture(const FixtureType& type);
+  class Fixture &AddFixture(const FixtureType &type);
   class FixtureType &
   AddFixtureType(enum FixtureType::FixtureClass fixtureClass);
 
