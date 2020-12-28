@@ -43,6 +43,14 @@ FixtureType::FixtureType(enum FixtureClass fixtureClass)
     _functionTypes.emplace_back(FunctionType::Blue);
     _functionTypes.emplace_back(FunctionType::UV);
     break;
+  case FixtureType::RGBAWUVLight6Ch:
+    _functionTypes.emplace_back(FunctionType::Red);
+    _functionTypes.emplace_back(FunctionType::Green);
+    _functionTypes.emplace_back(FunctionType::Blue);
+    _functionTypes.emplace_back(FunctionType::Amber);
+    _functionTypes.emplace_back(FunctionType::White);
+    _functionTypes.emplace_back(FunctionType::UV);
+    break;
   case FixtureType::UVLight3Ch:
     _functionTypes.emplace_back(FunctionType::UV);
     _functionTypes.emplace_back(FunctionType::Strobe);
@@ -120,13 +128,13 @@ Color FixtureType::GetColor(const Fixture &fixture,
                  fixture.Functions()[1]->GetValue(snapshot),
                  fixture.Functions()[2]->GetValue(snapshot));
   case RGBLight4Ch: {
-    unsigned char master = fixture.Functions()[3]->GetValue(snapshot);
+    const unsigned char master = fixture.Functions()[3]->GetValue(snapshot);
     return Color((fixture.Functions()[0]->GetValue(snapshot) * master) / 255,
                  (fixture.Functions()[1]->GetValue(snapshot) * master) / 255,
                  (fixture.Functions()[2]->GetValue(snapshot) * master) / 255);
   }
   case RGBALight4Ch: {
-    unsigned char a = fixture.Functions()[3]->GetValue(snapshot);
+    const unsigned char a = fixture.Functions()[3]->GetValue(snapshot);
     return Color((fixture.Functions()[0]->GetValue(snapshot) + a * 2 / 3) * 3 /
                      5,
                  (fixture.Functions()[1]->GetValue(snapshot) + a / 3) * 3 / 5,
@@ -134,8 +142,8 @@ Color FixtureType::GetColor(const Fixture &fixture,
     break;
   }
   case RGBALight5Ch: {
-    unsigned char a = fixture.Functions()[3]->GetValue(snapshot);
-    unsigned char master = fixture.Functions()[4]->GetValue(snapshot);
+    const unsigned char a = fixture.Functions()[3]->GetValue(snapshot);
+    const unsigned char master = fixture.Functions()[4]->GetValue(snapshot);
     return Color(
         ((fixture.Functions()[0]->GetValue(snapshot) + a * 2 / 3) * 3 / 5) *
             master / 255,
@@ -145,21 +153,32 @@ Color FixtureType::GetColor(const Fixture &fixture,
     break;
   }
   case RGBWLight4Ch: {
-    unsigned char w = fixture.Functions()[3]->GetValue(snapshot);
+    const unsigned char w = fixture.Functions()[3]->GetValue(snapshot);
     return Color((fixture.Functions()[0]->GetValue(snapshot) + w / 2) * 2 / 3,
                  (fixture.Functions()[1]->GetValue(snapshot) + w / 2) * 2 / 3,
                  (fixture.Functions()[2]->GetValue(snapshot) + w / 2) * 2 / 3);
     break;
   }
   case RGBUVLight4Ch: {
-    unsigned char uv = fixture.Functions()[3]->GetValue(snapshot);
+    const unsigned char uv = fixture.Functions()[3]->GetValue(snapshot);
     return Color((fixture.Functions()[0]->GetValue(snapshot) + uv / 3) / 2,
                  (fixture.Functions()[1]->GetValue(snapshot)) / 2,
                  (fixture.Functions()[2]->GetValue(snapshot) + uv) / 2);
     break;
   }
+  case RGBAWUVLight6Ch: {
+    const unsigned char r = fixture.Functions()[0]->GetValue(snapshot);
+    const unsigned char g = fixture.Functions()[1]->GetValue(snapshot);
+    const unsigned char b = fixture.Functions()[2]->GetValue(snapshot);
+    const unsigned char a = fixture.Functions()[3]->GetValue(snapshot);
+    const unsigned char w = fixture.Functions()[4]->GetValue(snapshot);
+    const unsigned char uv = fixture.Functions()[5]->GetValue(snapshot);
+    return Color((r + uv / 3 + w / 2 + a * 2 / 3) * 2 / 5,
+                 (g + w / 2 + a / 3) * 2 / 5, (b + uv + w / 2) * 2 / 5);
+    break;
+  }
   case UVLight3Ch: {
-    unsigned char m = fixture.Functions()[0]->GetValue(snapshot);
+    const unsigned char m = fixture.Functions()[0]->GetValue(snapshot);
     return Color(m / 3, 0, m);
   }
   case H2ODMXPro: {
@@ -171,7 +190,7 @@ Color FixtureType::GetColor(const Fixture &fixture,
   }
   case RGB_ADJ_7CH: {
     Color c = rgbAdj6chColor(fixture, snapshot);
-    unsigned char master = fixture.Functions()[6]->GetValue(snapshot);
+    const unsigned char master = fixture.Functions()[6]->GetValue(snapshot);
     return c * master;
   }
   case BT_VINTAGE_5CH:
@@ -179,7 +198,7 @@ Color FixtureType::GetColor(const Fixture &fixture,
     if (shapeIndex == 0)
       return Color(255, 171, 85) * fixture.Functions()[0]->GetValue(snapshot);
     else {
-      unsigned char master = fixture.Functions()[1]->GetValue(snapshot);
+      const unsigned char master = fixture.Functions()[1]->GetValue(snapshot);
       size_t strobe = _class == BT_VINTAGE_5CH ? 0 : 1;
       return master *
              Color(fixture.Functions()[2 + strobe]->GetValue(snapshot),
@@ -191,8 +210,9 @@ Color FixtureType::GetColor(const Fixture &fixture,
     if (shapeIndex == 0)
       return Color(255, 171, 85) * fixture.Functions()[0]->GetValue(snapshot);
     else {
-      unsigned char master = fixture.Functions()[1]->GetValue(snapshot);
-      unsigned char colorEffect = fixture.Functions()[6]->GetValue(snapshot);
+      const unsigned char master = fixture.Functions()[1]->GetValue(snapshot);
+      const unsigned char colorEffect =
+          fixture.Functions()[6]->GetValue(snapshot);
       if (colorEffect < 8)
         return master * Color(fixture.Functions()[3]->GetValue(snapshot),
                               fixture.Functions()[4]->GetValue(snapshot),

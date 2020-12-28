@@ -22,6 +22,7 @@ public:
     RGBALight5Ch,
     RGBWLight4Ch,
     RGBUVLight4Ch,
+    RGBAWUVLight6Ch,
     UVLight3Ch,
     H2ODMXPro,
     RGB_ADJ_6CH,
@@ -52,6 +53,8 @@ public:
       return "RGBW light (4ch)";
     case RGBUVLight4Ch:
       return "RGBUV light (4ch)";
+    case RGBAWUVLight6Ch:
+      return "RGBAW+UV light (6ch)";
     case UVLight3Ch:
       return "UV light (3ch)";
     case H2ODMXPro:
@@ -72,10 +75,10 @@ public:
 
   static std::vector<enum FixtureClass> GetClassList() {
     std::vector<enum FixtureClass> list{
-        Light1Ch,       RGBLight3Ch,   RGBLight4Ch,   RGBALight4Ch,
-        RGBALight5Ch,   RGBWLight4Ch,  RGBUVLight4Ch, UVLight3Ch,
-        H2ODMXPro,      RGB_ADJ_6CH,   RGB_ADJ_7CH,   BT_VINTAGE_5CH,
-        BT_VINTAGE_6CH, BT_VINTAGE_7CH};
+        Light1Ch,       RGBLight3Ch,    RGBLight4Ch,   RGBALight4Ch,
+        RGBALight5Ch,   RGBWLight4Ch,   RGBUVLight4Ch, RGBAWUVLight6Ch,
+        UVLight3Ch,     H2ODMXPro,      RGB_ADJ_6CH,   RGB_ADJ_7CH,
+        BT_VINTAGE_5CH, BT_VINTAGE_6CH, BT_VINTAGE_7CH};
     return list;
   }
 
@@ -101,6 +104,7 @@ public:
     case RGBALight5Ch:
     case RGBWLight4Ch:
     case RGBUVLight4Ch:
+    case RGBAWUVLight6Ch:
     case UVLight3Ch:
     case H2ODMXPro:
     case RGB_ADJ_6CH:

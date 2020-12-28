@@ -33,7 +33,7 @@ set -e
 if [ -n "$CI" ]; then
   DRYRUN=" (dry run on CI)"
 elif [ -n "$GIT_AUTHOR_DATE" ]; then
-  DRYRUN=" (dry run in git hook)"
+  DRYRUN=""
 fi
 
 # print in bold-face
