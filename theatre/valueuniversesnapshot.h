@@ -4,7 +4,7 @@
 class ValueUniverseSnapshot {
 public:
   unsigned char GetValue(size_t channel) const { return _values[channel]; }
-  void SetValues(unsigned char *values, size_t size) {
+  void SetValues(const unsigned char *values, size_t size) {
     if (size > 512)
       size = 512;
     for (size_t i = 0; i < size; ++i)

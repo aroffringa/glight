@@ -1,12 +1,12 @@
 #include "fixture.h"
 #include "theatre.h"
 
-Fixture::Fixture(Theatre &theatre, FixtureType &type, const std::string &name)
+Fixture::Fixture(Theatre &theatre, const FixtureType &type, const std::string &name)
     : NamedObject(name), _theatre(theatre), _type(type) {
   size_t ch = theatre.FirstFreeChannel();
 
   for (const FunctionType &functionType : type.FunctionTypes()) {
-    const std::string name(1, AbbreviatedFunctionType(functionType));
+    const std::string name(AbbreviatedFunctionType(functionType));
     _functions.emplace_back(
         std::make_unique<FixtureFunction>(_theatre, functionType, name));
   }

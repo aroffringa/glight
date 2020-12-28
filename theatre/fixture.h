@@ -14,7 +14,7 @@
 */
 class Fixture : public NamedObject {
 public:
-  Fixture(class Theatre &theatre, class FixtureType &type,
+  Fixture(class Theatre &theatre, const class FixtureType &type,
           const std::string &name);
   Fixture(const Fixture &source, class Theatre &theatre);
 
@@ -22,7 +22,7 @@ public:
     return _functions;
   }
 
-  FixtureType &Type() const { return _type; }
+  const FixtureType &Type() const { return _type; }
 
   std::vector<unsigned> GetChannels() const {
     std::vector<unsigned> channels;
@@ -58,7 +58,7 @@ public:
 
 private:
   class Theatre &_theatre;
-  FixtureType &_type;
+  const FixtureType &_type;
   class Position _position;
   FixtureSymbol _symbol;
   std::vector<std::unique_ptr<FixtureFunction>> _functions;

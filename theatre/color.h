@@ -32,6 +32,8 @@ public:
   static Color Purple() { return Color(255, 0, 255); }
   static Color PurpleBlue() { return Color(128, 0, 255); }
   static Color PurpleWhite() { return Color(255, 128, 255); }
+  static Color ColdWhite() { return Color(228, 228, 255); }
+  static Color WarmWhite() { return Color(255, 228, 228); }
   static Color UV() { return Color(85, 0, 255); }
 
   static Color H20Color(unsigned value) {

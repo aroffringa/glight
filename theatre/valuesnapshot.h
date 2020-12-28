@@ -8,10 +8,12 @@ class ValueSnapshot {
 public:
   ValueSnapshot() {}
 
+  ValueSnapshot(size_t universeCount) { SetUniverseCount(universeCount); }
+
   ValueSnapshot(const ValueSnapshot &source) {
     for (const std::unique_ptr<ValueUniverseSnapshot> &snapshot :
          source._universeValues)
-      _universeValues.emplace_back(new ValueUniverseSnapshot(*snapshot));
+      _universeValues.emplace_back(std::make_unique<ValueUniverseSnapshot>(*snapshot));
   }
 
   ValueSnapshot(ValueSnapshot &&source) = default;
@@ -36,7 +38,7 @@ public:
       _universeValues.erase(--_universeValues.end());
     }
     while (count > _universeValues.size()) {
-      _universeValues.emplace_back(new ValueUniverseSnapshot());
+      _universeValues.emplace_back(std::make_unique<ValueUniverseSnapshot>());
     }
   }
 

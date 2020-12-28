@@ -108,6 +108,7 @@ if(Boost_FOUND)
     tests/testchase.cpp
     tests/testfileformat.cpp
     tests/testfixturecontrol.cpp
+    tests/testfixturetype.cpp
     tests/testfolder.cpp
     tests/testmanagement.cpp
     tests/testpresetcollection.cpp

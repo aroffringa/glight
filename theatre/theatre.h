@@ -19,7 +19,7 @@ public:
 
   void Clear();
 
-  class Fixture &AddFixture(FixtureType &type);
+  class Fixture &AddFixture(const FixtureType& type);
   class FixtureType &
   AddFixtureType(enum FixtureType::FixtureClass fixtureClass);
 
@@ -38,7 +38,7 @@ public:
 
   void RemoveFixture(Fixture &fixture);
 
-  bool IsUsed(FixtureType &fixtureType) const;
+  bool IsUsed(const FixtureType &fixtureType) const;
 
   unsigned HighestChannel() const { return _highestChannel; }
   unsigned FirstFreeChannel() const {

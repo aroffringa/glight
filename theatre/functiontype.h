@@ -17,39 +17,45 @@ enum class FunctionType {
   Rotation,
   Pan,
   Tilt,
-  Effect
+  Effect,
+  ColdWhite,
+  WarmWhite
 };
 
-inline char AbbreviatedFunctionType(FunctionType functionType) {
+inline const char* AbbreviatedFunctionType(FunctionType functionType) {
   switch (functionType) {
   case FunctionType::Master:
-    return 'M';
+    return "M";
   case FunctionType::Red:
-    return 'R';
+    return "R";
   case FunctionType::Green:
-    return 'G';
+    return "G";
   case FunctionType::Blue:
-    return 'B';
+    return "B";
   case FunctionType::White:
-    return 'W';
+    return "W";
   case FunctionType::Amber:
-    return 'A';
+    return "A";
   case FunctionType::UV:
-    return 'U';
+    return "U";
   case FunctionType::ColorMacro:
-    return 'C';
+    return "C";
   case FunctionType::Pulse:
-    return 'P';
+    return "P";
   case FunctionType::Strobe:
-    return 'S';
+    return "S";
   case FunctionType::Rotation:
-    return 'O';
+    return "O";
   case FunctionType::Pan:
-    return '>';
+    return ">";
   case FunctionType::Tilt:
-    return '/';
+    return "/";
   case FunctionType::Effect:
-    return 'E';
+    return "E";
+  case FunctionType::ColdWhite:
+    return "CW";
+  case FunctionType::WarmWhite:
+    return "WW";
   }
   return 0;
 }
@@ -84,6 +90,10 @@ inline std::string FunctionTypeDescription(FunctionType functionType) {
     return "Tilt";
   case FunctionType::Effect:
     return "Effect";
+  case FunctionType::ColdWhite:
+    return "Cold white";
+  case FunctionType::WarmWhite:
+    return "Warm white";
   }
   return "?";
 }

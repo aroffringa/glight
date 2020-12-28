@@ -22,7 +22,7 @@ void Theatre::Clear() {
   _fixtureTypes.clear();
 }
 
-Fixture &Theatre::AddFixture(FixtureType &type) {
+Fixture &Theatre::AddFixture(const FixtureType &type) {
   // Find free name
   std::string name = "A";
   bool found = false;
@@ -92,7 +92,7 @@ FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
 }
 
 void Theatre::RemoveFixture(Fixture &fixture) {
-  FixtureType *t = &fixture.Type();
+  const FixtureType *t = &fixture.Type();
 
   size_t fIndex = FolderObject::FindIndex(_fixtures, &fixture);
   _fixtures.erase(_fixtures.begin() + fIndex);
@@ -104,7 +104,7 @@ void Theatre::RemoveFixture(Fixture &fixture) {
   }
 }
 
-bool Theatre::IsUsed(FixtureType &fixtureType) const {
+bool Theatre::IsUsed(const FixtureType &fixtureType) const {
   for (const std::unique_ptr<Fixture> &f : _fixtures) {
     if (&f->Type() == &fixtureType) {
       return true;

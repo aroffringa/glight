@@ -46,6 +46,10 @@ public:
       return Color::Amber();
     case FunctionType::UV:
       return Color::UV();
+    case FunctionType::ColdWhite:
+      return Color::ColdWhite();
+    case FunctionType::WarmWhite:
+      return Color::WarmWhite();
     }
     return Color::Black();
   }
