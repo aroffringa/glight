@@ -10,8 +10,11 @@
 #include <gtkmm/stock.h>
 
 NameFrame::NameFrame(Management &management, ShowWindow &showWindow)
-    : _management(&management), _showWindow(showWindow), _namedObject(0),
-      _label("Name:"), _button(Gtk::Stock::APPLY) {
+    : _management(&management),
+      _showWindow(showWindow),
+      _namedObject(0),
+      _label("Name:"),
+      _button(Gtk::Stock::APPLY) {
   pack_start(_label, false, false, 2);
   _label.show();
 

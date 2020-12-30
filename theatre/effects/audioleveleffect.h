@@ -7,10 +7,12 @@
 #include <string>
 
 class AudioLevelEffect final : public Effect {
-public:
+ public:
   AudioLevelEffect()
-      : Effect(1), _lastValue(0), _lastTime(0),
-        _decaySpeed(((1 << 24) - 1) / 300) // fully decay in 300 ms
+      : Effect(1),
+        _lastValue(0),
+        _lastTime(0),
+        _decaySpeed(((1 << 24) - 1) / 300)  // fully decay in 300 ms
   {}
 
   virtual Effect::Type GetType() const final override { return AudioLevelType; }
@@ -19,7 +21,7 @@ public:
 
   void SetDecaySpeed(unsigned decaySpeed) { _decaySpeed = decaySpeed; }
 
-protected:
+ protected:
   virtual void mix(const ControlValue *values, unsigned *channelValues,
                    unsigned universe, const Timing &timing) final override {
     unsigned audioLevel = (unsigned(timing.AudioLevel()) << 8);
@@ -41,7 +43,7 @@ protected:
     }
   }
 
-private:
+ private:
   unsigned _lastValue;
   double _lastTime;
 

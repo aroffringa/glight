@@ -3,8 +3,13 @@
 #include "management.h"
 
 Scene::Scene(Management &management)
-    : _management(management), _mutex(management.Mutex()), _currentOffset(0.0),
-      _startOffset(0.0), _decoder(), _audioPlayer(), _hasAudio(false),
+    : _management(management),
+      _mutex(management.Mutex()),
+      _currentOffset(0.0),
+      _startOffset(0.0),
+      _decoder(),
+      _audioPlayer(),
+      _hasAudio(false),
       _isPlaying(false) {
   initPlayer();
 }

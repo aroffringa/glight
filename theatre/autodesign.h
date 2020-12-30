@@ -4,7 +4,7 @@
 #include <vector>
 
 class AutoDesign {
-public:
+ public:
   enum RunType {
     IncreasingRun,
     DecreasingRun,
@@ -34,48 +34,47 @@ public:
     bool whiteFromRGB, amberFromRGB, uvFromRGB;
   };
 
-  static class PresetCollection &
-  MakeColorPreset(class Management &management, class Folder &destination,
-                  const std::vector<class Controllable *> &controllables,
-                  const std::vector<class Color> &colors,
-                  const ColorDeduction &deduction);
+  static class PresetCollection &MakeColorPreset(
+      class Management &management, class Folder &destination,
+      const std::vector<class Controllable *> &controllables,
+      const std::vector<class Color> &colors, const ColorDeduction &deduction);
 
   static void MakeColorPresetPerFixture(
       class Management &management, class Folder &destination,
       const std::vector<class Controllable *> &controllables,
       const std::vector<class Color> &colors, const ColorDeduction &deduction);
 
-  static class Chase &
-  MakeRunningLight(class Management &management, class Folder &destination,
-                   const std::vector<class Controllable *> &controllables,
-                   const std::vector<class Color> &colors,
-                   const ColorDeduction &deduction, RunType runType);
+  static class Chase &MakeRunningLight(
+      class Management &management, class Folder &destination,
+      const std::vector<class Controllable *> &controllables,
+      const std::vector<class Color> &colors, const ColorDeduction &deduction,
+      RunType runType);
 
-  static class Chase &
-  MakeColorVariation(class Management &management, class Folder &destination,
-                     const std::vector<class Controllable *> &controllables,
-                     const std::vector<class Color> &colors,
-                     const ColorDeduction &deduction, double variation);
+  static class Chase &MakeColorVariation(
+      class Management &management, class Folder &destination,
+      const std::vector<class Controllable *> &controllables,
+      const std::vector<class Color> &colors, const ColorDeduction &deduction,
+      double variation);
 
-  static class Chase &
-  MakeColorShift(class Management &management, class Folder &destination,
-                 const std::vector<class Controllable *> &controllables,
-                 const std::vector<class Color> &colors,
-                 const ColorDeduction &deduction, ShiftType shiftType);
+  static class Chase &MakeColorShift(
+      class Management &management, class Folder &destination,
+      const std::vector<class Controllable *> &controllables,
+      const std::vector<class Color> &colors, const ColorDeduction &deduction,
+      ShiftType shiftType);
 
-  static class Controllable &
-  MakeVUMeter(class Management &management, class Folder &destination,
-              const std::vector<class Controllable *> &controllables,
-              const std::vector<class Color> &colors,
-              const ColorDeduction &deduction, VUMeterDirection direction);
+  static class Controllable &MakeVUMeter(
+      class Management &management, class Folder &destination,
+      const std::vector<class Controllable *> &controllables,
+      const std::vector<class Color> &colors, const ColorDeduction &deduction,
+      VUMeterDirection direction);
 
-  static class Chase &
-  MakeIncreasingChase(class Management &management, class Folder &destination,
-                      const std::vector<class Controllable *> &controllables,
-                      const std::vector<class Color> &colors,
-                      const ColorDeduction &deduction, IncreasingType incType);
+  static class Chase &MakeIncreasingChase(
+      class Management &management, class Folder &destination,
+      const std::vector<class Controllable *> &controllables,
+      const std::vector<class Color> &colors, const ColorDeduction &deduction,
+      IncreasingType incType);
 
-private:
+ private:
   static void addColorPresets(class Management &management,
                               class Controllable &controllable,
                               class PresetCollection &pc, const Color &color,

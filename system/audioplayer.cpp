@@ -5,8 +5,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 void AudioPlayer::open() {
-  if (_isOpen)
-    throw AlsaError("Alsa was opened twice");
+  if (_isOpen) throw AlsaError("Alsa was opened twice");
 
   snd_pcm_uframes_t buffer_size = _alsaBufferSize;
   snd_pcm_uframes_t period_size = _alsaPeriodSize;
@@ -38,8 +37,7 @@ void AudioPlayer::open() {
   // Interleaved mode
   rc = snd_pcm_hw_params_set_access(_handle, hw_params,
                                     SND_PCM_ACCESS_RW_INTERLEAVED);
-  if (rc < 0)
-    throw AlsaError(snd_strerror(rc));
+  if (rc < 0) throw AlsaError(snd_strerror(rc));
 
   // Signed 16-bit little-endian format
   unsigned samplerate = 44100;
@@ -59,8 +57,7 @@ void AudioPlayer::open() {
 
   // Write the parameters to the driver
   rc = snd_pcm_hw_params(_handle, hw_params);
-  if (rc < 0)
-    throw AlsaError(snd_strerror(rc));
+  if (rc < 0) throw AlsaError(snd_strerror(rc));
 
   snd_pcm_hw_params_free(hw_params);
 
@@ -74,8 +71,7 @@ void AudioPlayer::open() {
   // snd_pcm_sw_params_set_avail_min(_handle, sw_params, period_size);
 
   rc = snd_pcm_sw_params(_handle, sw_params);
-  if (rc < 0)
-    throw AlsaError(snd_strerror(rc));
+  if (rc < 0) throw AlsaError(snd_strerror(rc));
 
   snd_pcm_sw_params_free(sw_params);
 

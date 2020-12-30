@@ -18,23 +18,23 @@ Fixture::Fixture(Theatre &theatre, const FixtureType &type,
 }
 
 Fixture::Fixture(const Fixture &source, class Theatre &theatre)
-    : NamedObject(source), _theatre(theatre),
+    : NamedObject(source),
+      _theatre(theatre),
       _type(theatre.GetFixtureType(source._type.Name())),
-      _position(source._position), _symbol(source._symbol) {
+      _position(source._position),
+      _symbol(source._symbol) {
   for (const std::unique_ptr<FixtureFunction> &ff : source._functions)
     _functions.emplace_back(new FixtureFunction(*ff, theatre));
 }
 
 void Fixture::IncChannel() {
-  for (std::unique_ptr<FixtureFunction> &ff : _functions)
-    ff->IncChannel();
+  for (std::unique_ptr<FixtureFunction> &ff : _functions) ff->IncChannel();
 
   _theatre.NotifyDmxChange();
 }
 
 void Fixture::DecChannel() {
-  for (std::unique_ptr<FixtureFunction> &ff : _functions)
-    ff->DecChannel();
+  for (std::unique_ptr<FixtureFunction> &ff : _functions) ff->DecChannel();
 
   _theatre.NotifyDmxChange();
 }

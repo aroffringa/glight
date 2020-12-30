@@ -6,11 +6,17 @@
 #include "../theatre/sceneitem.h"
 
 #include <cairomm/context.h>
-#include <gdkmm/general.h> // set_source_pixbuf()
+#include <gdkmm/general.h>  // set_source_pixbuf()
 
 AudioWidget::AudioWidget()
-    : _centerPosition(0), _renderStartPosition(0), _buffer(0), _width(0),
-      _height(0), _isUpToDate(false), _chunkSize(800), _chunkBuffer(_chunkSize),
+    : _centerPosition(0),
+      _renderStartPosition(0),
+      _buffer(0),
+      _width(0),
+      _height(0),
+      _isUpToDate(false),
+      _chunkSize(800),
+      _chunkBuffer(_chunkSize),
       _scene(0) {
   add_events(Gdk::BUTTON_PRESS_MASK);
 
@@ -50,11 +56,9 @@ void AudioWidget::initialize() {
 
 void AudioWidget::draw(const Cairo::RefPtr<Cairo::Context> &context) {
   int renderWidth = _width;
-  if (renderWidth > (int)DataSize())
-    renderWidth = DataSize();
+  if (renderWidth > (int)DataSize()) renderWidth = DataSize();
   _renderStartPosition = _centerPosition - renderWidth / 2;
-  if (_renderStartPosition < 0)
-    _renderStartPosition = 0;
+  if (_renderStartPosition < 0) _renderStartPosition = 0;
   if (_renderStartPosition + renderWidth / 2 > (int)DataSize())
     _renderStartPosition = DataSize() - renderWidth / 2;
 
@@ -70,20 +74,13 @@ void AudioWidget::draw(const Cairo::RefPtr<Cairo::Context> &context) {
           yStd2 =
               (_audioDataStdDev[xDataPos] * _height) / 65536 + (_height / 2),
           yEnd = (_height / 2) - (_audioDataMin[xDataPos] * _height) / 65536;
-      if (yStd1 > _height / 2)
-        yStd1 = _height / 2;
-      if (yStart > yStd1)
-        yStart = yStd1;
-      if (yStd1 < 0)
-        yStd1 = 0;
-      if (yStd2 > _height)
-        yStd2 = _height;
-      if (yStd2 <= _height / 2)
-        yStd2 = _height / 2 + 1;
-      if (yEnd > _height)
-        yEnd = _height;
-      if (yEnd < yStd2)
-        yEnd = yStd2;
+      if (yStd1 > _height / 2) yStd1 = _height / 2;
+      if (yStart > yStd1) yStart = yStd1;
+      if (yStd1 < 0) yStd1 = 0;
+      if (yStd2 > _height) yStd2 = _height;
+      if (yStd2 <= _height / 2) yStd2 = _height / 2 + 1;
+      if (yEnd > _height) yEnd = _height;
+      if (yEnd < yStd2) yEnd = yStd2;
       for (int y = 0; y < yStart; ++y)
         setColor(xa + rowStride * y, 255, 255, 255);
       for (int y = yStart; y < yStd1; ++y)
@@ -109,18 +106,18 @@ void AudioWidget::draw(const Cairo::RefPtr<Cairo::Context> &context) {
         _keys.lower_bound(_renderStartPosition);
     while (i != _keys.end() && i->first < _renderStartPosition + renderWidth) {
       switch (i->second) {
-      case KeyStart:
-        verticalLine(data, rowStride, i->first - _renderStartPosition - 1, 0,
-                     128, 0);
-        verticalLine(data, rowStride, i->first - _renderStartPosition, 0, 128,
-                     0);
-        verticalLine(data, rowStride, i->first - _renderStartPosition + 1, 0,
-                     128, 0);
-        break;
-      case ItemStart:
-        verticalLine(data, rowStride, i->first - _renderStartPosition, 0, 255,
-                     0);
-        break;
+        case KeyStart:
+          verticalLine(data, rowStride, i->first - _renderStartPosition - 1, 0,
+                       128, 0);
+          verticalLine(data, rowStride, i->first - _renderStartPosition, 0, 128,
+                       0);
+          verticalLine(data, rowStride, i->first - _renderStartPosition + 1, 0,
+                       128, 0);
+          break;
+        case ItemStart:
+          verticalLine(data, rowStride, i->first - _renderStartPosition, 0, 255,
+                       0);
+          break;
       }
       ++i;
     }
@@ -136,10 +133,8 @@ void AudioWidget::bufferToScreen(const Cairo::RefPtr<Cairo::Context> &context) {
 
 bool AudioWidget::onButtonPressed(GdkEventButton *event) {
   int position = (event->x + _renderStartPosition);
-  if (position >= (int)DataSize())
-    position = DataSize() - 1;
-  if (position < 0)
-    position = 0;
+  if (position >= (int)DataSize()) position = DataSize() - 1;
+  if (position < 0) position = 0;
   _signalClicked.emit((double)position * _chunkSize / (44.100 * 4.0));
   return true;
 }

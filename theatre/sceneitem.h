@@ -2,7 +2,7 @@
 #define SCENEITEM_H
 
 class SceneItem {
-public:
+ public:
   SceneItem() : _offsetInMS(0.0), _durationInMS(0.0) {}
   virtual ~SceneItem() {}
 
@@ -17,9 +17,9 @@ public:
   virtual void Mix(unsigned *channelValues, unsigned universe,
                    const class Timing &timing) = 0;
 
-private:
+ private:
   double _offsetInMS;
   double _durationInMS;
 };
 
-#endif // SCENEITEM_H
+#endif  // SCENEITEM_H

@@ -14,11 +14,16 @@
 #include <vector>
 
 class ColorSequenceWidget : public Gtk::VBox {
-public:
+ public:
   ColorSequenceWidget(Gtk::Window *parent, bool showGradientButton = true)
-      : _frame("Colors"), _allEqual("Use one color for all"), _plusButton("+"),
-        _gradientButton("Gradient"), _minButton("-"), _parent(parent),
-        _minCount(1), _maxCount(0) {
+      : _frame("Colors"),
+        _allEqual("Use one color for all"),
+        _plusButton("+"),
+        _gradientButton("Gradient"),
+        _minButton("-"),
+        _parent(parent),
+        _minCount(1),
+        _maxCount(0) {
     _allEqual.signal_clicked().connect(
         sigc::mem_fun(*this, &ColorSequenceWidget::onToggleEqual));
     pack_start(_allEqual, false, false);
@@ -53,10 +58,8 @@ public:
   }
 
   void SetColors(const std::vector<Color> &colors) {
-    if (_maxCount < colors.size())
-      _maxCount = 0;
-    if (colors.size() < _minCount)
-      _minCount = colors.size();
+    if (_maxCount < colors.size()) _maxCount = 0;
+    if (colors.size() < _minCount) _minCount = colors.size();
     _allEqual.set_active(false);
     _widgets.clear();
     for (size_t i = 0; i != colors.size(); ++i) {
@@ -83,10 +86,8 @@ public:
   }
 
   void SetMinCount(size_t minCount) {
-    if (_maxCount < minCount)
-      SetMaxCount(minCount);
-    while (_widgets.size() < minCount)
-      onIncreaseColors();
+    if (_maxCount < minCount) SetMaxCount(minCount);
+    while (_widgets.size() < minCount) onIncreaseColors();
     _minCount = minCount;
     _minButton.set_sensitive(_widgets.size() > _minCount);
     _gradientButton.set_sensitive(_widgets.size() > 2);
@@ -94,8 +95,7 @@ public:
   }
 
   void SetMaxCount(size_t maxCount) {
-    if (_minCount > maxCount)
-      SetMinCount(maxCount);
+    if (_minCount > maxCount) SetMinCount(maxCount);
     _maxCount = maxCount;
     if (_maxCount != 0) {
       if (_widgets.size() > _maxCount) {
@@ -107,7 +107,7 @@ public:
     _plusButton.set_sensitive(_maxCount == 0 || _widgets.size() < _maxCount);
   }
 
-private:
+ private:
   Gtk::Frame _frame;
   Gtk::ScrolledWindow _scrolledWindow;
   Gtk::VBox _box;

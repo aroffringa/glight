@@ -37,10 +37,10 @@ BOOST_AUTO_TEST_CASE(remove_indirect) {
   sequence.Add(pcA, 0);
   sequence.Add(pcB, 0);
   BOOST_CHECK_EQUAL(management.Controllables().size(),
-                    4); // 1 preset, 2 collections, 1 chase
+                    4);  // 1 preset, 2 collections, 1 chase
   management.RemoveControllable(pcA);
   BOOST_CHECK_EQUAL(management.Controllables().size(),
-                    2); // 1 preset, 1 collection, 0 chases
+                    2);  // 1 preset, 1 collection, 0 chases
 }
 
 BOOST_AUTO_TEST_SUITE_END()

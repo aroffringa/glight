@@ -7,11 +7,12 @@
         @author Andre Offringa
 */
 class DmxChannel {
-public:
+ public:
   DmxChannel()
       : _universe(0), _channel(0), _defaultMixStyle(ControlValue::Default) {}
   DmxChannel(unsigned channel, unsigned universe)
-      : _universe(universe), _channel(channel),
+      : _universe(universe),
+        _channel(channel),
         _defaultMixStyle(ControlValue::Default) {}
   ~DmxChannel() {}
 
@@ -25,7 +26,7 @@ public:
     _defaultMixStyle = defaultMixStyle;
   }
 
-private:
+ private:
   unsigned _universe;
   unsigned _channel;
   ControlValue::MixStyle _defaultMixStyle;

@@ -6,19 +6,19 @@
 #include "../../theatre/effects/audioleveleffect.h"
 
 class AudioLevelEffectPS final : public PropertySet {
-public:
+ public:
   AudioLevelEffectPS() {
     addProperty(Property("decayspeed", "Decay speed", Property::ControlValue));
   }
 
-protected:
+ protected:
   virtual void setControlValue(FolderObject &object, size_t index,
                                unsigned value) const final override {
     AudioLevelEffect &tfx = static_cast<AudioLevelEffect &>(object);
     switch (index) {
-    case 0:
-      tfx.SetDecaySpeed(value);
-      break;
+      case 0:
+        tfx.SetDecaySpeed(value);
+        break;
     }
   }
 
@@ -26,8 +26,8 @@ protected:
                                    size_t index) const final override {
     const AudioLevelEffect &tfx = static_cast<const AudioLevelEffect &>(object);
     switch (index) {
-    case 0:
-      return tfx.DecaySpeed();
+      case 0:
+        return tfx.DecaySpeed();
     }
     return 0;
   }

@@ -12,7 +12,7 @@
         @author Andre Offringa
 */
 class Controllable : public FolderObject {
-public:
+ public:
   Controllable() : _visitLevel(0) {}
   Controllable(const Controllable &source)
       : FolderObject(source), _visitLevel(0) {}
@@ -63,8 +63,7 @@ public:
 
   bool HasOutputConnection(const Controllable &controllable) const {
     for (size_t i = 0; i != NOutputs(); ++i)
-      if (Output(i).first == &controllable)
-        return true;
+      if (Output(i).first == &controllable) return true;
     return false;
   }
 
@@ -73,7 +72,7 @@ public:
 
   void SetVisitLevel(char visitLevel) { _visitLevel = visitLevel; }
 
-private:
+ private:
   ControlValue _inputValue;
   char _visitLevel;
 };

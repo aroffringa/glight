@@ -6,7 +6,7 @@
 #include "../effects/fluorescentstarteffect.h"
 
 class FluorescentStartEffectPS final : public PropertySet {
-public:
+ public:
   FluorescentStartEffectPS() {
     addProperty(
         Property("averageduration", "Average duration", Property::Duration));
@@ -18,20 +18,20 @@ public:
                          Property::Boolean));
   }
 
-protected:
+ protected:
   virtual void setDuration(FolderObject &object, size_t index,
                            double value) const final override {
     FluorescentStartEffect &fx = static_cast<FluorescentStartEffect &>(object);
     switch (index) {
-    case 0:
-      fx.SetAverageDuration(value);
-      break;
-    case 1:
-      fx.SetStdDeviation(value);
-      break;
-    case 2:
-      fx.SetFlashDuration(value);
-      break;
+      case 0:
+        fx.SetAverageDuration(value);
+        break;
+      case 1:
+        fx.SetStdDeviation(value);
+        break;
+      case 2:
+        fx.SetFlashDuration(value);
+        break;
     }
   }
 
@@ -40,15 +40,15 @@ protected:
     const FluorescentStartEffect &fx =
         static_cast<const FluorescentStartEffect &>(object);
     switch (index) {
-    case 0:
-      return fx.AverageDuration();
-      break;
-    case 1:
-      return fx.StdDeviation();
-      break;
-    case 2:
-      return fx.FlashDuration();
-      break;
+      case 0:
+        return fx.AverageDuration();
+        break;
+      case 1:
+        return fx.StdDeviation();
+        break;
+      case 2:
+        return fx.FlashDuration();
+        break;
     }
     return 0;
   }
@@ -57,9 +57,9 @@ protected:
                                unsigned value) const final override {
     FluorescentStartEffect &fx = static_cast<FluorescentStartEffect &>(object);
     switch (index) {
-    case 3:
-      fx.SetGlowValue(value);
-      break;
+      case 3:
+        fx.SetGlowValue(value);
+        break;
     }
   }
 
@@ -68,8 +68,8 @@ protected:
     const FluorescentStartEffect &fx =
         static_cast<const FluorescentStartEffect &>(object);
     switch (index) {
-    case 3:
-      return fx.GlowValue();
+      case 3:
+        return fx.GlowValue();
     }
     return 0;
   }
@@ -78,9 +78,9 @@ protected:
                        bool value) const override {
     FluorescentStartEffect &fx = static_cast<FluorescentStartEffect &>(object);
     switch (index) {
-    case 4:
-      fx.SetIndependentOutputs(value);
-      break;
+      case 4:
+        fx.SetIndependentOutputs(value);
+        break;
     }
   }
 
@@ -89,8 +89,8 @@ protected:
     const FluorescentStartEffect &fx =
         static_cast<const FluorescentStartEffect &>(object);
     switch (index) {
-    case 4:
-      return fx.IndependentOutputs();
+      case 4:
+        return fx.IndependentOutputs();
     }
     return false;
   }

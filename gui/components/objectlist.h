@@ -9,7 +9,7 @@
 #include "../recursionlock.h"
 
 class ObjectList : public Gtk::ScrolledWindow {
-public:
+ public:
   ObjectList(class Management &management, class EventTransmitter &eventHub);
 
   enum ObjectType {
@@ -43,18 +43,16 @@ public:
       _openFolder = &folder;
       bool doChangeSelection =
           (_listView.get_selection()->count_selected_rows() != 0);
-      if (doChangeSelection)
-        _listView.get_selection()->unselect_all();
+      if (doChangeSelection) _listView.get_selection()->unselect_all();
       fillList();
-      if (doChangeSelection)
-        _signalSelectionChange.emit();
+      if (doChangeSelection) _signalSelectionChange.emit();
     }
   }
 
   void SetShowTypeColumn(bool showTypeColumn);
   bool ShowTypeColumn() const { return _showTypeColumn; }
 
-private:
+ private:
   class Management *_management;
   class EventTransmitter &_eventHub;
   enum ObjectType _displayType;
@@ -62,10 +60,10 @@ private:
   class Folder *_openFolder;
 
   class TreeViewWithMenu : public Gtk::TreeView {
-  public:
+   public:
     TreeViewWithMenu(ObjectList &parent) : _parent(parent) {}
 
-  private:
+   private:
     ObjectList &_parent;
     bool on_button_press_event(GdkEventButton *button_event) final override;
   } _listView;

@@ -27,7 +27,7 @@
         @author Andre Offringa
 */
 class TimeSequencePropertiesWindow : public PropertiesWindow {
-public:
+ public:
   TimeSequencePropertiesWindow(TimeSequence &timeSequence,
                                class Management &management,
                                class EventTransmitter &eventHub);
@@ -38,7 +38,7 @@ public:
     return *_timeSequence;
   }
 
-private:
+ private:
   void onInputSelectionChanged();
   void onSelectedStepChanged();
   void load();

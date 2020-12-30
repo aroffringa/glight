@@ -10,7 +10,7 @@
         @author Andre Offringa
 */
 class Show {
-public:
+ public:
   Show(class Management &management) : _management(management) {}
   ~Show() { Clear(); }
 
@@ -21,8 +21,7 @@ public:
     return _scenes.back().get();
   }
   void StartScene(double _timeInMS, Scene *scene) {
-    if (!isRunning(scene))
-      _runningScenes.push_back(scene);
+    if (!isRunning(scene)) _runningScenes.push_back(scene);
     scene->Start(_timeInMS);
   }
   void StopScene(Scene *scene) {
@@ -37,11 +36,10 @@ public:
     return _scenes;
   }
 
-private:
+ private:
   bool isRunning(Scene *scene) const {
     for (const Scene *rScene : _runningScenes)
-      if (scene == rScene)
-        return true;
+      if (scene == rScene) return true;
     return false;
   }
   void removeScene(std::vector<Scene *> &container, Scene *scene) const {

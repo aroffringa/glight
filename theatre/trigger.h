@@ -7,11 +7,13 @@
         @author Andre Offringa
 */
 class Trigger {
-public:
+ public:
   enum Type { DelayTriggered, SyncTriggered, BeatTriggered };
 
   Trigger()
-      : _type(DelayTriggered), _delayInMs(500.0), _delaySynced(1),
+      : _type(DelayTriggered),
+        _delayInMs(500.0),
+        _delaySynced(1),
         _delayInBeats(1.0) {}
 
   double DelayInMs() const { return _delayInMs; }
@@ -28,17 +30,17 @@ public:
 
   std::string ToString() const {
     switch (_type) {
-    case DelayTriggered:
-      return std::to_string(_delayInMs / 1000.0) + " s";
-    case SyncTriggered:
-      return std::to_string(_delaySynced) + " syncs";
-    case BeatTriggered:
-      return std::to_string(_delayInBeats) + " beats";
+      case DelayTriggered:
+        return std::to_string(_delayInMs / 1000.0) + " s";
+      case SyncTriggered:
+        return std::to_string(_delaySynced) + " syncs";
+      case BeatTriggered:
+        return std::to_string(_delayInBeats) + " beats";
     }
     return std::string();
   }
 
-private:
+ private:
   enum Type _type;
   double _delayInMs;
   unsigned _delaySynced;

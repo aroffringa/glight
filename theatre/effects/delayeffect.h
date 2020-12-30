@@ -5,18 +5,21 @@
 #include "../timing.h"
 
 class DelayEffect : public Effect {
-public:
+ public:
   DelayEffect()
-      : Effect(1), _previousTimestep(0),
-        _buffer(2, std::pair<double, ControlValue>(0.0, 0)), _bufferReadPos(0),
-        _bufferWritePos(0), _delayInMS(100.0) {}
+      : Effect(1),
+        _previousTimestep(0),
+        _buffer(2, std::pair<double, ControlValue>(0.0, 0)),
+        _bufferReadPos(0),
+        _bufferWritePos(0),
+        _delayInMS(100.0) {}
 
   virtual Effect::Type GetType() const override { return DelayType; }
 
   double DelayInMS() const { return _delayInMS; }
   void SetDelayInMS(double delayInMS) { _delayInMS = delayInMS; }
 
-protected:
+ protected:
   virtual void mix(const ControlValue *values, unsigned *channelValues,
                    unsigned universe, const Timing &timing) final override {
     if (_previousTimestep == timing.TimestepNumber()) {
@@ -50,7 +53,7 @@ protected:
     }
   }
 
-private:
+ private:
   unsigned _previousTimestep;
   std::vector<std::pair<double, ControlValue>> _buffer;
   size_t _bufferReadPos, _bufferWritePos;

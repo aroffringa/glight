@@ -9,11 +9,14 @@
 PresetCollectionWindow::PresetCollectionWindow(
     PresetCollection &presetCollection, Management &management,
     EventTransmitter &eventHub)
-    : PropertiesWindow(), _inputSelector(management, eventHub),
+    : PropertiesWindow(),
+      _inputSelector(management, eventHub),
 
-      _controlValueLabel("Value:"), _controlValueEntry(),
+      _controlValueLabel("Value:"),
+      _controlValueEntry(),
 
-      _presetCollection(&presetCollection), _management(&management),
+      _presetCollection(&presetCollection),
+      _management(&management),
       _eventHub(eventHub) {
   _changeManagementConnection = eventHub.SignalChangeManagement().connect(
       sigc::mem_fun(*this, &PresetCollectionWindow::onChangeManagement));
@@ -145,9 +148,10 @@ void PresetCollectionWindow::onAddPreset() {
     if (_management->HasCycle()) {
       _presetCollection->RemovePresetValue(_presetCollection->Size() - 1);
       lock.unlock();
-      Gtk::MessageDialog dialog("Can not add this object to the time sequence: "
-                                "this would create a cycle in the connections.",
-                                false, Gtk::MESSAGE_ERROR);
+      Gtk::MessageDialog dialog(
+          "Can not add this object to the time sequence: "
+          "this would create a cycle in the connections.",
+          false, Gtk::MESSAGE_ERROR);
       dialog.run();
     } else {
       preset.SetValue(ControlValue::MaxUInt());

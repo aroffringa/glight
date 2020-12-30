@@ -12,7 +12,7 @@
 #include <vector>
 
 class Effect : public Controllable {
-public:
+ public:
   enum Type {
     AudioLevelType,
     ConstantValueType,
@@ -97,11 +97,11 @@ public:
   void Mix(unsigned *channelValues, unsigned universe,
            const class Timing &timing) final override {
     mix(_inputValues.data(), channelValues, universe, timing);
-    for (ControlValue &v : _inputValues) // TODO should be done in management
+    for (ControlValue &v : _inputValues)  // TODO should be done in management
       v.Set(0);
   }
 
-protected:
+ protected:
   virtual void mix(const ControlValue *inputValues, unsigned *channelValues,
                    unsigned universe, const class Timing &timing) = 0;
 
@@ -110,7 +110,7 @@ protected:
       connection.first->MixInput(connection.second, value);
   }
 
-private:
+ private:
   friend class EffectControl;
 
   std::vector<ControlValue> _inputValues;

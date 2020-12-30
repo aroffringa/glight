@@ -7,7 +7,7 @@
         @author Andre Offringa
 */
 class Startable : public FolderObject {
-public:
+ public:
   Startable() {}
   virtual ~Startable() {}
 
@@ -20,13 +20,13 @@ public:
 
   double StartTimeInMS() const { return _startTimeInMS; }
 
-protected:
+ protected:
   virtual void onStart() = 0;
   void setStartTimeInMS(double startTimeInMS) {
     _startTimeInMS = startTimeInMS;
   }
 
-private:
+ private:
   double _startTimeInMS;
 };
 

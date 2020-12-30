@@ -22,7 +22,7 @@
         @author Andre Offringa
 */
 class FaderWindow : public Gtk::Window {
-public:
+ public:
   /**
    * Construct a fader window with a new, empty fader setup.
    */
@@ -56,29 +56,25 @@ public:
 
   FaderSetupState *State() { return _state; }
 
-private:
+ private:
   void initializeWidgets();
   void initializeMenu();
 
   void onAddFaderClicked() { addControl(false, false); }
   void onAdd5FadersClicked() {
-    for (size_t i = 0; i != 5; ++i)
-      addControl(false, false);
+    for (size_t i = 0; i != 5; ++i) addControl(false, false);
   }
   void onAdd5ToggleControlsClicked() {
-    for (size_t i = 0; i != 5; ++i)
-      addControl(true, false);
+    for (size_t i = 0; i != 5; ++i) addControl(true, false);
   }
   void onAddToggleClicked() { addControl(true, false); }
   void onAddToggleColumnClicked() { addControl(true, true); }
   void removeFader();
   void onRemoveFaderClicked() {
-    if (!_controls.empty())
-      removeFader();
+    if (!_controls.empty()) removeFader();
   }
   void onRemove5FadersClicked() {
-    for (size_t i = 0; i != 5; ++i)
-      onRemoveFaderClicked();
+    for (size_t i = 0; i != 5; ++i) onRemoveFaderClicked();
   }
   bool onMenuButtonClicked(GdkEventButton *event);
   void onAssignClicked();
@@ -143,7 +139,7 @@ private:
   boost::posix_time::ptime _lastUpdateTime;
 
   class FaderSetupColumns : public Gtk::TreeModel::ColumnRecord {
-  public:
+   public:
     FaderSetupColumns() {
       add(_obj);
       add(_name);

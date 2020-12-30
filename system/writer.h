@@ -13,7 +13,7 @@
 #include "../theatre/management.h"
 
 class WriterException : public std::runtime_error {
-public:
+ public:
   WriterException(const std::string &msg) : std::runtime_error(msg) {}
 };
 
@@ -21,7 +21,7 @@ public:
         @author Andre Offringa
 */
 class Writer {
-public:
+ public:
   Writer(class Management &management);
   ~Writer() {}
 
@@ -30,7 +30,7 @@ public:
   void Write(const Glib::ustring &filename);
   static void CheckXmlVersion();
 
-private:
+ private:
   void writeGlightShow();
   void writeFolders();
 

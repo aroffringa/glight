@@ -6,20 +6,20 @@
 #include "../effects/randomselecteffect.h"
 
 class RandomSelectEffectPS final : public PropertySet {
-public:
+ public:
   RandomSelectEffectPS() {
     addProperty(Property("delay", "Delay for reselection", Property::Duration));
     addProperty(Property("count", "Number of outputs", Property::Integer));
   }
 
-protected:
+ protected:
   virtual void setDuration(FolderObject &object, size_t index,
                            double value) const final override {
     RandomSelectEffect &rfx = static_cast<RandomSelectEffect &>(object);
     switch (index) {
-    case 0:
-      rfx.SetDelay(value);
-      break;
+      case 0:
+        rfx.SetDelay(value);
+        break;
     }
   }
 
@@ -28,8 +28,8 @@ protected:
     const RandomSelectEffect &rfx =
         static_cast<const RandomSelectEffect &>(object);
     switch (index) {
-    case 0:
-      return rfx.Delay();
+      case 0:
+        return rfx.Delay();
     }
     return 0;
   }
@@ -38,9 +38,9 @@ protected:
                           int value) const final override {
     RandomSelectEffect &rfx = static_cast<RandomSelectEffect &>(object);
     switch (index) {
-    case 1:
-      rfx.SetCount(value);
-      break;
+      case 1:
+        rfx.SetCount(value);
+        break;
     }
   }
 
@@ -49,8 +49,8 @@ protected:
     const RandomSelectEffect &rfx =
         static_cast<const RandomSelectEffect &>(object);
     switch (index) {
-    case 1:
-      return rfx.Count();
+      case 1:
+        return rfx.Count();
     }
     return 0;
   }

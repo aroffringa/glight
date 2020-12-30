@@ -15,7 +15,7 @@
         @author Andre Offringa
 */
 class Management {
-public:
+ public:
   Management();
   ~Management();
 
@@ -39,8 +39,8 @@ public:
   const std::vector<std::unique_ptr<class Folder>> &Folders() const {
     return _folders;
   }
-  const std::vector<std::unique_ptr<class Controllable>> &
-  Controllables() const {
+  const std::vector<std::unique_ptr<class Controllable>> &Controllables()
+      const {
     return _controllables;
   }
   const std::vector<std::unique_ptr<class PresetValue>> &PresetValues() const {
@@ -129,7 +129,7 @@ public:
 
   void Recover(Management &other);
 
-private:
+ private:
   struct ManagementThread {
     Management *parent;
     void operator()();
@@ -140,9 +140,9 @@ private:
 
   void getChannelValues(unsigned timestepNumber, unsigned *values,
                         unsigned universe);
-  void
-  removeControllable(std::vector<std::unique_ptr<class Controllable>>::iterator
-                         controllablePtr);
+  void removeControllable(
+      std::vector<std::unique_ptr<class Controllable>>::iterator
+          controllablePtr);
   void removePreset(
       std::vector<std::unique_ptr<class PresetValue>>::iterator presetValuePtr);
 

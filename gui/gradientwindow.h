@@ -3,10 +3,12 @@
 #include <gtkmm/window.h>
 
 class GradientWindow : public Gtk::Window {
-public:
+ public:
   GradientWindow(size_t maxCount)
-      : _colorSequence(this, false), _cancelButton("Cancel"),
-        _okayButton("Okay"), _result(false) {
+      : _colorSequence(this, false),
+        _cancelButton("Cancel"),
+        _okayButton("Okay"),
+        _result(false) {
     set_size_request(250, 300);
     _colorSequence.SetMinCount(2);
     _colorSequence.SetMaxCount(maxCount);
@@ -30,7 +32,7 @@ public:
 
   std::vector<Color> GetColors() const { return _colorSequence.GetColors(); }
 
-private:
+ private:
   Gtk::VBox _box;
   ColorSequenceWidget _colorSequence;
   Gtk::ButtonBox _buttonBox;

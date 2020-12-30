@@ -14,11 +14,11 @@
         @author Andre Offringa
 */
 class AddFixtureWindow : public Gtk::Window {
-public:
+ public:
   AddFixtureWindow(class EventTransmitter *eventHub,
                    class Management &management);
 
-private:
+ private:
   Gtk::Grid _grid;
   Gtk::Label _typeLabel;
   Gtk::ComboBoxText _typeCombo;

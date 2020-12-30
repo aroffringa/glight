@@ -4,7 +4,7 @@
 #include <sigc++/signal.h>
 
 class EventTransmitter {
-public:
+ public:
   virtual void EmitUpdate() = 0;
 
   virtual sigc::signal<void(class Management &)> &SignalChangeManagement() = 0;

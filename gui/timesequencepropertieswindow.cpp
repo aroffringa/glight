@@ -9,12 +9,15 @@
 TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
     class TimeSequence &timeSequence, Management &management,
     EventTransmitter &eventHub)
-    : PropertiesWindow(), _inputSelector(management, eventHub),
+    : PropertiesWindow(),
+      _inputSelector(management, eventHub),
 
-      _sustainCB("Sustain"), _maxRepeatCB("Max repeats:"),
+      _sustainCB("Sustain"),
+      _maxRepeatCB("Max repeats:"),
       _maxRepeatCount(1.0, 100.0, 1.0),
 
-      _delayTriggerCheckButton("Delayed trigger (s):"), _triggerDuration(500.0),
+      _delayTriggerCheckButton("Delayed trigger (s):"),
+      _triggerDuration(500.0),
 
       _synchronizedTriggerCheckButton("Synchronized, count:"),
       _synchronizationsCount(1.0, 100.0, 1.0),
@@ -25,7 +28,8 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
       _transitionSpeedLabel("Transition speed"),
       _transitionDuration("Duration (s):", 500.0),
 
-      _timeSequence(&timeSequence), _management(&management),
+      _timeSequence(&timeSequence),
+      _management(&management),
       _eventHub(eventHub) {
   _changeManagementConnection = eventHub.SignalChangeManagement().connect(
       sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onChangeManagement));
@@ -199,9 +203,10 @@ void TimeSequencePropertiesWindow::onAddStep() {
     if (_management->HasCycle()) {
       _timeSequence->RemoveStep(_timeSequence->Size() - 1);
       lock.unlock();
-      Gtk::MessageDialog dialog("Can not add this object to the time sequence: "
-                                "this would create a cycle in the connections.",
-                                false, Gtk::MESSAGE_ERROR);
+      Gtk::MessageDialog dialog(
+          "Can not add this object to the time sequence: "
+          "this would create a cycle in the connections.",
+          false, Gtk::MESSAGE_ERROR);
       dialog.run();
     } else {
       lock.unlock();
@@ -322,15 +327,15 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step &step) {
   _beatSpeed.set_value(beatSpeed);
   _synchronizationsCount.set_value(syncSpeed);
   switch (triggerType) {
-  case Trigger::DelayTriggered:
-    _delayTriggerCheckButton.set_active(true);
-    break;
-  case Trigger::SyncTriggered:
-    _synchronizedTriggerCheckButton.set_active(true);
-    break;
-  case Trigger::BeatTriggered:
-    _beatTriggerCheckButton.set_active(true);
-    break;
+    case Trigger::DelayTriggered:
+      _delayTriggerCheckButton.set_active(true);
+      break;
+    case Trigger::SyncTriggered:
+      _synchronizedTriggerCheckButton.set_active(true);
+      break;
+    case Trigger::BeatTriggered:
+      _beatTriggerCheckButton.set_active(true);
+      break;
   }
   _transitionTypeBox.Set(transitionType);
 }

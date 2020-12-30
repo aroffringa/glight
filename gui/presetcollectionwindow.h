@@ -24,7 +24,7 @@
         @author Andre Offringa
 */
 class PresetCollectionWindow : public PropertiesWindow {
-public:
+ public:
   PresetCollectionWindow(PresetCollection &presetCollection,
                          class Management &management,
                          class EventTransmitter &eventHub);
@@ -35,7 +35,7 @@ public:
     return *_presetCollection;
   }
 
-private:
+ private:
   void onInputSelectionChanged();
   void onSelectedPresetChanged();
   void load();

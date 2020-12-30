@@ -7,7 +7,7 @@
         @author Andre Offringa
 */
 class DmxDevice {
-public:
+ public:
   DmxDevice() {}
 
   virtual ~DmxDevice() {}

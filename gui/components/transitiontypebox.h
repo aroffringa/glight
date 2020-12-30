@@ -8,11 +8,15 @@
 #include <gtkmm/radiobutton.h>
 
 class TransitionTypeBox : public Gtk::VBox {
-public:
+ public:
   TransitionTypeBox(enum Transition::Type value = Transition::Fade)
-      : _label("Type:"), _noneRB("None"), _fadeRB("Fade"),
-        _fadeThroughBlackRB("Through black"), _erraticRB("Erratic"),
-        _blackRB("Black out"), _fadeFromBlackRB("From black"),
+      : _label("Type:"),
+        _noneRB("None"),
+        _fadeRB("Fade"),
+        _fadeThroughBlackRB("Through black"),
+        _erraticRB("Erratic"),
+        _blackRB("Black out"),
+        _fadeFromBlackRB("From black"),
         _fadeToBlackRB("To black") {
     _topBox.pack_start(_label);
 
@@ -64,31 +68,31 @@ public:
 
   void Set(enum Transition::Type type) {
     switch (type) {
-    case Transition::None:
-      _noneRB.set_active();
-      break;
-    case Transition::Fade:
-      _fadeRB.set_active();
-      break;
-    case Transition::FadeThroughBlack:
-      _fadeThroughBlackRB.set_active();
-      break;
-    case Transition::Erratic:
-      _erraticRB.set_active();
-      break;
-    case Transition::Black:
-      _blackRB.set_active();
-      break;
-    case Transition::FadeFromBlack:
-      _fadeFromBlackRB.set_active();
-      break;
-    case Transition::FadeToBlack:
-      _fadeToBlackRB.set_active();
-      break;
+      case Transition::None:
+        _noneRB.set_active();
+        break;
+      case Transition::Fade:
+        _fadeRB.set_active();
+        break;
+      case Transition::FadeThroughBlack:
+        _fadeThroughBlackRB.set_active();
+        break;
+      case Transition::Erratic:
+        _erraticRB.set_active();
+        break;
+      case Transition::Black:
+        _blackRB.set_active();
+        break;
+      case Transition::FadeFromBlack:
+        _fadeFromBlackRB.set_active();
+        break;
+      case Transition::FadeToBlack:
+        _fadeToBlackRB.set_active();
+        break;
     }
   }
 
-private:
+ private:
   Gtk::Label _label;
   Gtk::HBox _topBox, _bottomBox;
   Gtk::RadioButton _noneRB, _fadeRB, _fadeThroughBlackRB, _erraticRB, _blackRB,

@@ -15,22 +15,32 @@
 #include "sceneframe.h"
 
 SceneFrame::SceneFrame(Management &management, ShowWindow &parentWindow)
-    : Gtk::Frame("Scene"), _management(&management),
-      _show(&_management->Show()), _audioWidget(), _clickIsLabel("Click is: "),
-      _clickIsSelectButton("select"), _clickIsSetStartButton("set start"),
-      _clickIsSetEndButton("set end"), _clickIsAddKeyButton("add key"),
-      _clickIsAddItemButton("add item"), _audioLabel("Audio file: -"),
-      _changeAudioButton("Change"), _startButton(Gtk::Stock::MEDIA_PLAY),
+    : Gtk::Frame("Scene"),
+      _management(&management),
+      _show(&_management->Show()),
+      _audioWidget(),
+      _clickIsLabel("Click is: "),
+      _clickIsSelectButton("select"),
+      _clickIsSetStartButton("set start"),
+      _clickIsSetEndButton("set end"),
+      _clickIsAddKeyButton("add key"),
+      _clickIsAddItemButton("add item"),
+      _audioLabel("Audio file: -"),
+      _changeAudioButton("Change"),
+      _startButton(Gtk::Stock::MEDIA_PLAY),
       _startSelectionButton("Play selection"),
-      _stopButton(Gtk::Stock::MEDIA_STOP), _key1Button("Key-1"),
+      _stopButton(Gtk::Stock::MEDIA_STOP),
+      _key1Button("Key-1"),
       _createControlItemButton(Gtk::Stock::ADD),
-      _setEndTimeButton("Set end time"), _removeButton(Gtk::Stock::REMOVE),
+      _setEndTimeButton("Set end time"),
+      _removeButton(Gtk::Stock::REMOVE),
       _createTransitionItemButton("Add transition"),
       _startScale(0, ControlValue::MaxUInt() + 1,
                   ControlValue::MaxUInt() / 100.0),
       _endScale(0, ControlValue::MaxUInt() + 1,
                 ControlValue::MaxUInt() / 100.0),
-      _nameFrame(management, parentWindow), _selectedScene(nullptr),
+      _nameFrame(management, parentWindow),
+      _selectedScene(nullptr),
       _isUpdating(false) {
   _audioWidget.SignalClicked().connect(
       sigc::mem_fun(*this, &SceneFrame::onAudioWidgetClicked));
@@ -372,37 +382,37 @@ void SceneFrame::onCreateControlItemButtonPressed() {
 void SceneFrame::onSelectedSceneItemChanged() {
   if (!_isUpdating) {
     switch (selectedSceneItemCount()) {
-    case 0:
-      _createControlItemButton.set_sensitive(false);
-      _setEndTimeButton.set_sensitive(false);
-      _removeButton.set_sensitive(false);
-      _startScale.set_sensitive(false);
-      _endScale.set_sensitive(false);
-      break;
-    case 1: {
-      _createControlItemButton.set_sensitive(true);
-      _setEndTimeButton.set_sensitive(true);
-      _removeButton.set_sensitive(true);
-      _startScale.set_sensitive(true);
-      _endScale.set_sensitive(true);
-      std::unique_lock<std::mutex> lock(_management->Mutex());
-      SceneItem *item = selectedItem();
-      ControlSceneItem *csi = dynamic_cast<ControlSceneItem *>(item);
-      if (csi != 0) {
-        unsigned s = csi->StartValue().UInt(), e = csi->EndValue().UInt();
-        lock.unlock();
-        _startScale.set_value(s);
-        _endScale.set_value(e);
-      }
-      _audioWidget.SetPosition(item->OffsetInMS());
-    } break;
-    default:
-      _createControlItemButton.set_sensitive(true);
-      _setEndTimeButton.set_sensitive(true);
-      _removeButton.set_sensitive(true);
-      _startScale.set_sensitive(true);
-      _endScale.set_sensitive(true);
-      break;
+      case 0:
+        _createControlItemButton.set_sensitive(false);
+        _setEndTimeButton.set_sensitive(false);
+        _removeButton.set_sensitive(false);
+        _startScale.set_sensitive(false);
+        _endScale.set_sensitive(false);
+        break;
+      case 1: {
+        _createControlItemButton.set_sensitive(true);
+        _setEndTimeButton.set_sensitive(true);
+        _removeButton.set_sensitive(true);
+        _startScale.set_sensitive(true);
+        _endScale.set_sensitive(true);
+        std::unique_lock<std::mutex> lock(_management->Mutex());
+        SceneItem *item = selectedItem();
+        ControlSceneItem *csi = dynamic_cast<ControlSceneItem *>(item);
+        if (csi != 0) {
+          unsigned s = csi->StartValue().UInt(), e = csi->EndValue().UInt();
+          lock.unlock();
+          _startScale.set_value(s);
+          _endScale.set_value(e);
+        }
+        _audioWidget.SetPosition(item->OffsetInMS());
+      } break;
+      default:
+        _createControlItemButton.set_sensitive(true);
+        _setEndTimeButton.set_sensitive(true);
+        _removeButton.set_sensitive(true);
+        _startScale.set_sensitive(true);
+        _endScale.set_sensitive(true);
+        break;
     }
   }
 }
@@ -454,24 +464,24 @@ void SceneFrame::onRemoveButtonPressed() {
 
 bool SceneFrame::HandleKeyDown(char key) {
   switch (key) {
-  case '=':
-    onStartButtonPressed();
-    return true;
-  case '1':
-    addKey(KeySceneItem::Section);
-    return true;
-  case '2':
-    addKey(KeySceneItem::Measure);
-    return true;
-  case '3':
-    addKey(KeySceneItem::Highlight);
-    return true;
-  case '4':
-    addKey(KeySceneItem::Beat);
-    return true;
-  case '5':
-    addKey(KeySceneItem::Key);
-    return true;
+    case '=':
+      onStartButtonPressed();
+      return true;
+    case '1':
+      addKey(KeySceneItem::Section);
+      return true;
+    case '2':
+      addKey(KeySceneItem::Measure);
+      return true;
+    case '3':
+      addKey(KeySceneItem::Highlight);
+      return true;
+    case '4':
+      addKey(KeySceneItem::Beat);
+      return true;
+    case '5':
+      addKey(KeySceneItem::Key);
+      return true;
   }
   return false;
 }

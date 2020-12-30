@@ -5,10 +5,15 @@
 #include "../timing.h"
 
 class FadeEffect : public Effect {
-public:
+ public:
   FadeEffect()
-      : Effect(1), _fadingValue(0), _fadeUpSpeed(1.0), _fadeDownSpeed(1.0),
-        _sustain(0.0), _previousTime(0.0), _sustainTimer(0.0) {}
+      : Effect(1),
+        _fadingValue(0),
+        _fadeUpSpeed(1.0),
+        _fadeDownSpeed(1.0),
+        _sustain(0.0),
+        _previousTime(0.0),
+        _sustainTimer(0.0) {}
 
   virtual Effect::Type GetType() const override { return FadeType; }
 
@@ -29,7 +34,7 @@ public:
   double Sustain() const { return _sustain * 1e3; }
   void SetSustain(double sustainMS) { _sustain = 1e-3 * sustainMS; }
 
-protected:
+ protected:
   virtual void mix(const ControlValue *values, unsigned *, unsigned,
                    const Timing &timing) final override {
     double timePassed = 0.001 * (timing.TimeInMS() - _previousTime);
@@ -74,7 +79,7 @@ protected:
     }
   }
 
-private:
+ private:
   unsigned _fadingValue;
   double _fadeUpSpeed, _fadeDownSpeed;
   double _sustain;

@@ -7,10 +7,12 @@
 #include <string>
 
 class MusicActivationEffect final : public Effect {
-public:
+ public:
   MusicActivationEffect()
-      : Effect(1), _lastBeatValue(0.0), _lastBeatTime(0.0),
-        _offDelay(2000) // two seconds
+      : Effect(1),
+        _lastBeatValue(0.0),
+        _lastBeatTime(0.0),
+        _offDelay(2000)  // two seconds
   {}
 
   virtual Effect::Type GetType() const final override {
@@ -21,7 +23,7 @@ public:
 
   void SetOffDelay(unsigned offDelay) { _offDelay = offDelay; }
 
-protected:
+ protected:
   virtual void mix(const ControlValue *values, unsigned *channelValues,
                    unsigned universe, const Timing &timing) final override {
     if (_lastBeatValue != timing.BeatValue()) {
@@ -35,7 +37,7 @@ protected:
     }
   }
 
-private:
+ private:
   double _lastBeatValue;
   double _lastBeatTime;
 

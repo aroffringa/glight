@@ -5,7 +5,7 @@
 #include "valueuniversesnapshot.h"
 
 class ValueSnapshot {
-public:
+ public:
   ValueSnapshot() {}
 
   ValueSnapshot(size_t universeCount) { SetUniverseCount(universeCount); }
@@ -51,8 +51,8 @@ public:
     return *_universeValues[index];
   }
 
-private:
+ private:
   std::vector<std::unique_ptr<ValueUniverseSnapshot>> _universeValues;
 };
 
-#endif // VALUESNAPSHOT_H
+#endif  // VALUESNAPSHOT_H

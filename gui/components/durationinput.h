@@ -9,7 +9,7 @@
 #include "../recursionlock.h"
 
 class DurationInput : public Gtk::HBox {
-public:
+ public:
   DurationInput(double value);
 
   DurationInput(const std::string &label, double value);
@@ -22,7 +22,7 @@ public:
 
   void SetValue(double newValue);
 
-private:
+ private:
   void initialize(double value);
 
   static double valueToScale(double value);

@@ -18,17 +18,28 @@ VisualizationWindow::VisualizationWindow(Management *management,
                                          EventTransmitter *eventTransmitter,
                                          FixtureSelection *fixtureSelection,
                                          class ShowWindow *showWindow)
-    : _management(management), _dryManagement(nullptr),
-      _eventTransmitter(eventTransmitter), _globalSelection(fixtureSelection),
-      _showWindow(showWindow), _isInitialized(false), _isTimerRunning(false),
-      _dragType(NotDragging), _selectedFixtures(), _miSymbolMenu("Symbol"),
+    : _management(management),
+      _dryManagement(nullptr),
+      _eventTransmitter(eventTransmitter),
+      _globalSelection(fixtureSelection),
+      _showWindow(showWindow),
+      _isInitialized(false),
+      _isTimerRunning(false),
+      _dragType(NotDragging),
+      _selectedFixtures(),
+      _miSymbolMenu("Symbol"),
       _miDryModeStyle("Dry mode style"),
       _miAlignHorizontally("Align horizontally"),
       _miAlignVertically("Align vertically"),
-      _miDistributeEvenly("Distribute evenly"), _miAdd("Add..."),
-      _miRemove("Remove"), _miDesign("Design..."), _miFullscreen("Fullscreen"),
-      _miDMSSingle("Single"), _miDMSVertical("Vertical"),
-      _miDMSHorizontal("Horizontal"), _miDMSShadow("Shadow") {
+      _miDistributeEvenly("Distribute evenly"),
+      _miAdd("Add..."),
+      _miRemove("Remove"),
+      _miDesign("Design..."),
+      _miFullscreen("Fullscreen"),
+      _miDMSSingle("Single"),
+      _miDMSVertical("Vertical"),
+      _miDMSHorizontal("Horizontal"),
+      _miDMSShadow("Shadow") {
   set_title("Glight - visualization");
   set_default_size(600, 200);
 
@@ -132,8 +143,7 @@ void VisualizationWindow::onTheatreChanged() {
 
 bool VisualizationWindow::onExpose(
     const Cairo::RefPtr<Cairo::Context> &context) {
-  if (!_isInitialized)
-    initialize();
+  if (!_isInitialized) initialize();
 
   drawAll(context);
   return true;
@@ -241,7 +251,7 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
     style.xOffset = 0;
     style.yOffset = 0;
     drawManagement(cairo, *_dryManagement, style);
-  } else { // Single
+  } else {  // Single
     drawManagement(cairo, *_dryManagement, style);
   }
 }
@@ -342,21 +352,21 @@ bool VisualizationWindow::onMotion(GdkEventMotion *event) {
     Position pos =
         Position(event->x, event->y) / scale(*_management, width, height);
     switch (_dragType) {
-    case NotDragging:
-      break;
-    case DragFixture:
-      for (Fixture *fixture : _selectedFixtures)
-        fixture->Position() += pos - _draggingStart;
-      _draggingStart = pos;
-      break;
-    case DragRectangle:
-      _draggingTo = pos;
-      selectFixtures(_draggingStart, _draggingTo);
-      break;
-    case DragAddRectangle:
-      _draggingTo = pos;
-      addFixtures(_draggingStart, _draggingTo);
-      break;
+      case NotDragging:
+        break;
+      case DragFixture:
+        for (Fixture *fixture : _selectedFixtures)
+          fixture->Position() += pos - _draggingStart;
+        _draggingStart = pos;
+        break;
+      case DragRectangle:
+        _draggingTo = pos;
+        selectFixtures(_draggingStart, _draggingTo);
+        break;
+      case DragAddRectangle:
+        _draggingTo = pos;
+        addFixtures(_draggingStart, _draggingTo);
+        break;
     }
     queue_draw();
   }
@@ -366,10 +376,8 @@ bool VisualizationWindow::onMotion(GdkEventMotion *event) {
 void VisualizationWindow::selectFixtures(const Position &a, const Position &b) {
   _selectedFixtures.clear();
   double x1 = a.X(), y1 = a.Y(), x2 = b.X(), y2 = b.Y();
-  if (x1 > x2)
-    std::swap(x1, x2);
-  if (y1 > y2)
-    std::swap(y1, y2);
+  if (x1 > x2) std::swap(x1, x2);
+  if (y1 > y2) std::swap(y1, y2);
   Position first(x1 - 0.1, y1 - 0.1);
   Position second(x2 - 0.9, y2 - 0.9);
   if (second.X() - first.X() > 0.0 && second.Y() - first.Y() > 0.0) {
@@ -404,8 +412,7 @@ void VisualizationWindow::onAlignHorizontally() {
 
     y /= _selectedFixtures.size();
 
-    for (Fixture *fixture : _selectedFixtures)
-      fixture->Position().Y() = y;
+    for (Fixture *fixture : _selectedFixtures) fixture->Position().Y() = y;
   }
 }
 
@@ -418,8 +425,7 @@ void VisualizationWindow::onAlignVertically() {
 
     x /= _selectedFixtures.size();
 
-    for (Fixture *fixture : _selectedFixtures)
-      fixture->Position().X() = x;
+    for (Fixture *fixture : _selectedFixtures) fixture->Position().X() = x;
   }
 }
 
@@ -500,8 +506,7 @@ void VisualizationWindow::onSetSymbol(FixtureSymbol::Symbol symbol) {
   for (Fixture *fixture : _selectedFixtures) {
     fixture->SetSymbol(FixtureSymbol(symbol));
   }
-  if (symbol == FixtureSymbol::Hidden)
-    _selectedFixtures.clear();
+  if (symbol == FixtureSymbol::Hidden) _selectedFixtures.clear();
   _eventTransmitter->EmitUpdate();
 }
 

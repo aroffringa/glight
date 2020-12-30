@@ -1,8 +1,7 @@
 #include "flacdecoder.h"
 
 void FlacDecoder::open() {
-  if (_isOpen)
-    throw std::runtime_error("Flac was opened twice");
+  if (_isOpen) throw std::runtime_error("Flac was opened twice");
 
   _isOpen = true;
   _hasMore = true;
@@ -18,11 +17,9 @@ void FlacDecoder::close() {
   _isOpen = false;
 }
 
-FLAC__StreamDecoderWriteStatus
-FlacDecoder::write_callback(const FLAC__Frame *frame,
-                            const FLAC__int32 *const buffer[]) {
-  if (isStopping())
-    return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+FLAC__StreamDecoderWriteStatus FlacDecoder::write_callback(
+    const FLAC__Frame *frame, const FLAC__int32 *const buffer[]) {
+  if (isStopping()) return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
 
   unsigned actWriteBuffer = activeWriteBuffer();
   unsigned char *writeBuffer = _buffer[actWriteBuffer];
@@ -34,13 +31,13 @@ FlacDecoder::write_callback(const FLAC__Frame *frame,
       writeBuffer = _buffer[actWriteBuffer];
       _writePos = 0;
     }
-    writeBuffer[_writePos] = ((FLAC__int16)buffer[0][i]); // left channel
+    writeBuffer[_writePos] = ((FLAC__int16)buffer[0][i]);  // left channel
     ++_writePos;
-    writeBuffer[_writePos] = ((FLAC__int16)buffer[0][i]) >> 8; // left channel
+    writeBuffer[_writePos] = ((FLAC__int16)buffer[0][i]) >> 8;  // left channel
     ++_writePos;
-    writeBuffer[_writePos] = ((FLAC__int16)buffer[1][i]); // right channel
+    writeBuffer[_writePos] = ((FLAC__int16)buffer[1][i]);  // right channel
     ++_writePos;
-    writeBuffer[_writePos] = ((FLAC__int16)buffer[1][i]) >> 8; // right channel
+    writeBuffer[_writePos] = ((FLAC__int16)buffer[1][i]) >> 8;  // right channel
     ++_writePos;
   }
   return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;

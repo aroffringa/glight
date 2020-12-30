@@ -6,7 +6,7 @@
 #include <vector>
 
 class FixtureSymbol {
-public:
+ public:
   enum Symbol { Hidden, Small, Normal, Large };
 
   FixtureSymbol(Symbol symbol = Normal) : _symbol(symbol) {}
@@ -22,7 +22,7 @@ public:
     return std::vector<Symbol>{Hidden, Small, Normal, Large};
   }
 
-private:
+ private:
   static Symbol nameToSymbol(const std::string &name) {
     if (name == "hidden")
       return Hidden;
@@ -37,14 +37,14 @@ private:
 
   static std::string symbolToName(Symbol symbol) {
     switch (symbol) {
-    case Hidden:
-      return "hidden";
-    case Small:
-      return "small";
-    case Normal:
-      return "normal";
-    case Large:
-      return "large";
+      case Hidden:
+        return "hidden";
+      case Small:
+        return "small";
+      case Normal:
+        return "normal";
+      case Large:
+        return "large";
     }
     return "normal";
   }

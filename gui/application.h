@@ -5,7 +5,7 @@
         @author Andre Offringa
 */
 class Application {
-public:
+ public:
   Application();
   void Run(int argc, char *argv[]);
 };

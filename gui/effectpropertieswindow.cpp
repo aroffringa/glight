@@ -17,11 +17,14 @@ EffectPropertiesWindow::EffectPropertiesWindow(class Effect &effect,
 
       _titleLabel("Effect " + effect.Name() + " (" +
                   effect.TypeToName(effect.GetType()) + ")"),
-      _connectionsFrame("Connections"), _propertiesFrame("Properties"),
+      _connectionsFrame("Connections"),
+      _propertiesFrame("Properties"),
       _addConnectionButton(Gtk::Stock::ADD),
       _removeConnectionButton(Gtk::Stock::REMOVE),
 
-      _effect(&effect), _management(&management), _parentWindow(parentWindow) {
+      _effect(&effect),
+      _management(&management),
+      _parentWindow(parentWindow) {
   set_title("glight - " + effect.Name());
   set_size_request(650, 250);
 
@@ -120,9 +123,10 @@ void EffectPropertiesWindow::onInputSelected(class PresetValue *preset) {
   if (_management->HasCycle()) {
     _effect->RemoveConnection(_effect->Connections().size() - 1);
     lock.unlock();
-    Gtk::MessageDialog dialog("Can not add this connection to this effect: "
-                              "this would create a cycle in the connections.",
-                              false, Gtk::MESSAGE_ERROR);
+    Gtk::MessageDialog dialog(
+        "Can not add this connection to this effect: "
+        "this would create a cycle in the connections.",
+        false, Gtk::MESSAGE_ERROR);
     dialog.run();
   } else {
     lock.unlock();

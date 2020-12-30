@@ -12,7 +12,7 @@
         @author Andre Offringa
 */
 class Theatre {
-public:
+ public:
   Theatre() : _highestChannel(0) {}
   ~Theatre() { Clear(); }
   Theatre(const Theatre &source);
@@ -20,8 +20,8 @@ public:
   void Clear();
 
   class Fixture &AddFixture(const FixtureType &type);
-  class FixtureType &
-  AddFixtureType(enum FixtureType::FixtureClass fixtureClass);
+  class FixtureType &AddFixtureType(
+      enum FixtureType::FixtureClass fixtureClass);
 
   bool Contains(Fixture &fixture) const;
 
@@ -50,7 +50,7 @@ public:
 
   Position Extend() const;
 
-private:
+ private:
   std::vector<std::unique_ptr<class Fixture>> _fixtures;
   std::vector<std::unique_ptr<class FixtureType>> _fixtureTypes;
   unsigned _highestChannel;

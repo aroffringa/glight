@@ -13,7 +13,7 @@
         @author Andre Offringa
 */
 class Fixture : public NamedObject {
-public:
+ public:
   Fixture(class Theatre &theatre, const class FixtureType &type,
           const std::string &name);
   Fixture(const Fixture &source, class Theatre &theatre);
@@ -56,7 +56,7 @@ public:
   void SetSymbol(FixtureSymbol symbol) { _symbol = symbol; }
   bool IsVisible() const { return _symbol != FixtureSymbol::Hidden; }
 
-private:
+ private:
   class Theatre &_theatre;
   const FixtureType &_type;
   class Position _position;

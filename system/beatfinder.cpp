@@ -9,16 +9,14 @@
 #include <aubio/tempo/tempo.h>
 
 void BeatFinder::open() {
-  if (_isOpen)
-    throw AlsaError("Alsa was opened twice");
+  if (_isOpen) throw AlsaError("Alsa was opened twice");
 
   snd_pcm_uframes_t buffer_size = _alsaBufferSize;
   snd_pcm_uframes_t period_size = _alsaPeriodSize;
 
   // Open PCM device for capture.
   int rc = snd_pcm_open(&_handle, "pulse", SND_PCM_STREAM_CAPTURE, 0);
-  if (rc < 0)
-    throw AlsaError(snd_strerror(rc));
+  if (rc < 0) throw AlsaError(snd_strerror(rc));
   _isOpen = true;
 
   // Get default hardware parameters
@@ -29,8 +27,7 @@ void BeatFinder::open() {
   // Interleaved mode
   rc = snd_pcm_hw_params_set_access(_handle, hw_params,
                                     SND_PCM_ACCESS_RW_INTERLEAVED);
-  if (rc < 0)
-    throw AlsaError(snd_strerror(rc));
+  if (rc < 0) throw AlsaError(snd_strerror(rc));
 
   // Signed 16-bit little-endian format
   unsigned samplerate = 44100;
@@ -48,8 +45,7 @@ void BeatFinder::open() {
 
   // Write the parameters to the driver
   rc = snd_pcm_hw_params(_handle, hw_params);
-  if (rc < 0)
-    throw AlsaError(snd_strerror(rc));
+  if (rc < 0) throw AlsaError(snd_strerror(rc));
 
   snd_pcm_hw_params_free(hw_params);
 
@@ -63,8 +59,7 @@ void BeatFinder::open() {
   // snd_pcm_sw_params_set_avail_min(_handle, sw_params, period_size);
 
   rc = snd_pcm_sw_params(_handle, sw_params);
-  if (rc < 0)
-    throw AlsaError(snd_strerror(rc));
+  if (rc < 0) throw AlsaError(snd_strerror(rc));
 
   snd_pcm_sw_params_free(sw_params);
 
@@ -111,8 +106,8 @@ void BeatFinder::open() {
       // if(unsigned(std::abs(r)) > localAudioLevel)
       //	localAudioLevel = std::abs(r);
 
-      l = l / 2; // create headroom for multiplication
-      r = r / 2; // (-2^15 x 2^15 wouldn't fit in a int32_t)
+      l = l / 2;  // create headroom for multiplication
+      r = r / 2;  // (-2^15 x 2^15 wouldn't fit in a int32_t)
       audioRMS += uint32_t(int32_t(l) * int32_t(l)) >> 8;
       audioRMS += uint32_t(int32_t(r) * int32_t(r)) >> 8;
     }
@@ -127,7 +122,7 @@ void BeatFinder::open() {
     if (is_beat && !is_silence) {
       smpl_t confidence = aubio_tempo_get_confidence(tempo);
       if (confidence > _minimumConfidence) {
-        Beat beat = _beat; // atomic load
+        Beat beat = _beat;  // atomic load
         beat.confidence = confidence;
         // We do a simple reset on high numbers just to make sure that the
         // 'float' precision does not run out. With 8 beats per second, this
@@ -136,12 +131,12 @@ void BeatFinder::open() {
           ++beat.value;
         else
           beat.value = 0.0;
-        _beat = beat; // atomic store
+        _beat = beat;  // atomic store
       }
     } else if (is_silence) {
-      Beat beat = _beat; // atomic load
+      Beat beat = _beat;  // atomic load
       beat.confidence = 0.0;
-      _beat = beat; // atomic load
+      _beat = beat;  // atomic load
     }
   }
   snd_pcm_drop(_handle);

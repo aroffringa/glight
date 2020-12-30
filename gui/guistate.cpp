@@ -5,7 +5,8 @@
 #include "../theatre/presetvalue.h"
 
 FaderState::FaderState(class PresetValue *presetValue)
-    : _presetValue(presetValue), _isToggleButton(false),
+    : _presetValue(presetValue),
+      _isToggleButton(false),
       _newToggleButtonColumn(false) {
   if (presetValue != nullptr)
     _presetValueDeletedConnection =

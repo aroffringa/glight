@@ -20,13 +20,13 @@
         @author Andre Offringa
 */
 class FixtureListWindow : public Gtk::Window {
-public:
+ public:
   FixtureListWindow(class EventTransmitter *eventHub,
                     class Management &management,
                     class FixtureSelection *globalSelection);
   ~FixtureListWindow();
 
-private:
+ private:
   void onChangeManagement(class Management &management) {
     _management = &management;
     fillFixturesList();

@@ -11,7 +11,7 @@
         @author Andre Offringa
 */
 class NamedObject {
-public:
+ public:
   friend class Folder;
 
   NamedObject() : _name() {}
@@ -42,19 +42,17 @@ public:
       const std::vector<std::unique_ptr<NamedObjectType>> &container,
       const std::string &name) {
     for (const std::unique_ptr<NamedObjectType> &obj : container) {
-      if (obj->_name == name)
-        return obj.get();
+      if (obj->_name == name) return obj.get();
     }
     return nullptr;
   }
 
   template <typename NamedObjectType>
-  static NamedObjectType *
-  FindNamedObjectIfExists(const std::vector<NamedObjectType *> &container,
-                          const std::string &name) {
+  static NamedObjectType *FindNamedObjectIfExists(
+      const std::vector<NamedObjectType *> &container,
+      const std::string &name) {
     for (NamedObjectType *obj : container) {
-      if (obj->_name == name)
-        return obj;
+      if (obj->_name == name) return obj;
     }
     return nullptr;
   }
@@ -72,9 +70,9 @@ public:
   }
 
   template <typename NamedObjectType>
-  static NamedObjectType &
-  FindNamedObject(const std::vector<NamedObjectType *> &container,
-                  const std::string &name) {
+  static NamedObjectType &FindNamedObject(
+      const std::vector<NamedObjectType *> &container,
+      const std::string &name) {
     NamedObjectType *obj = FindNamedObjectIfExists(container, name);
     if (obj)
       return *obj;
@@ -84,9 +82,9 @@ public:
   }
 
   template <typename ObjectType>
-  static size_t
-  FindIndex(const std::vector<std::unique_ptr<ObjectType>> &container,
-            const ObjectType *element) {
+  static size_t FindIndex(
+      const std::vector<std::unique_ptr<ObjectType>> &container,
+      const ObjectType *element) {
     for (size_t i = 0; i != container.size(); ++i) {
       if (container[i].get() == element) {
         return i;
@@ -96,30 +94,28 @@ public:
   }
 
   template <typename ObjectType>
-  static bool
-  Contains(const std::vector<std::unique_ptr<ObjectType>> &container,
-           const ObjectType *element) {
+  static bool Contains(
+      const std::vector<std::unique_ptr<ObjectType>> &container,
+      const ObjectType *element) {
     for (const std::unique_ptr<ObjectType> &obj : container) {
-      if (obj.get() == &element)
-        return true;
+      if (obj.get() == &element) return true;
     }
     return false;
   }
 
   template <typename ObjectType>
-  static bool
-  Contains(const std::vector<std::unique_ptr<ObjectType>> &container,
-           const std::string &name) {
+  static bool Contains(
+      const std::vector<std::unique_ptr<ObjectType>> &container,
+      const std::string &name) {
     for (const std::unique_ptr<ObjectType> &obj : container) {
-      if (obj->_name == name)
-        return true;
+      if (obj->_name == name) return true;
     }
     return false;
   }
 
   sigc::signal<void()> &SignalDelete() { return _signalDelete; }
 
-private:
+ private:
   std::string _name;
   sigc::signal<void()> _signalDelete;
 };

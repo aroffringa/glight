@@ -14,7 +14,7 @@
  * @author Andre Offringa
  */
 class FixtureFunction : public NamedObject {
-public:
+ public:
   FixtureFunction(class Theatre &theatre, FunctionType type,
                   const std::string &name);
 
@@ -48,7 +48,7 @@ public:
     return snapshot.GetValue(_firstChannel);
   }
 
-private:
+ private:
   class Theatre &_theatre;
   enum FunctionType _type;
   DmxChannel _firstChannel;

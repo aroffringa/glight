@@ -23,15 +23,24 @@
 #include "../system/writer.h"
 
 ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
-    : _miFile("_File", true), _miDesign("_Design", true),
-      _miWindow("_Window", true), _miNew(Gtk::Stock::NEW),
-      _miOpen(Gtk::Stock::OPEN), _miSave(Gtk::Stock::SAVE_AS),
-      _miQuit(Gtk::Stock::QUIT), _miDryMode("Dry mode"),
-      _miCancelDryMode("Cancel dry mode"), _miSwapModes("Swap modes"),
-      _miRecover("Recover"), _miBlackOutAndDryMode("Black-out with dry mode"),
-      _miBlackOut("Black-out"), _miProtectBlackout("Protect black-out"),
-      _miDesignWizard("Design wizard"), _miFixtureListWindow("Fixture list"),
-      _miFaderWindowMenu("Fader windows"), _miNewFaderWindow("New"),
+    : _miFile("_File", true),
+      _miDesign("_Design", true),
+      _miWindow("_Window", true),
+      _miNew(Gtk::Stock::NEW),
+      _miOpen(Gtk::Stock::OPEN),
+      _miSave(Gtk::Stock::SAVE_AS),
+      _miQuit(Gtk::Stock::QUIT),
+      _miDryMode("Dry mode"),
+      _miCancelDryMode("Cancel dry mode"),
+      _miSwapModes("Swap modes"),
+      _miRecover("Recover"),
+      _miBlackOutAndDryMode("Black-out with dry mode"),
+      _miBlackOut("Black-out"),
+      _miProtectBlackout("Protect black-out"),
+      _miDesignWizard("Design wizard"),
+      _miFixtureListWindow("Fixture list"),
+      _miFaderWindowMenu("Fader windows"),
+      _miNewFaderWindow("New"),
       _miVisualizationWindow("Visualization") {
   set_title("Glight - show");
 
@@ -142,8 +151,7 @@ void ShowWindow::onVisualizationWindowButtonClicked() {
 
 void ShowWindow::increaseManualBeat(int val) {
   _management->IncreaseManualBeat(val);
-  if (_backgroundManagement)
-    _backgroundManagement->IncreaseManualBeat(val);
+  if (_backgroundManagement) _backgroundManagement->IncreaseManualBeat(val);
 }
 
 bool ShowWindow::onKeyDown(GdkEventKey *event) {
@@ -174,12 +182,10 @@ bool ShowWindow::onKeyDown(GdkEventKey *event) {
       }
     }
   } else {
-    if (_sceneFrame->HandleKeyDown(event->keyval))
-      return true;
+    if (_sceneFrame->HandleKeyDown(event->keyval)) return true;
     bool handled = false;
     for (std::unique_ptr<FaderWindow> &cw : _faderWindows)
-      if (!handled)
-        handled = cw->HandleKeyDown(event->keyval);
+      if (!handled) handled = cw->HandleKeyDown(event->keyval);
     return !handled;
   }
   return false;
@@ -188,8 +194,7 @@ bool ShowWindow::onKeyDown(GdkEventKey *event) {
 bool ShowWindow::onKeyUp(GdkEventKey *event) {
   bool handled = false;
   for (std::unique_ptr<FaderWindow> &cw : _faderWindows)
-    if (!handled)
-      handled = cw->HandleKeyUp(event->keyval);
+    if (!handled) handled = cw->HandleKeyUp(event->keyval);
   return handled;
 }
 
@@ -389,8 +394,7 @@ void ShowWindow::onMIOpenClicked() {
     dialog.add_filter(filter);
 
     int result = dialog.run();
-    if (result == Gtk::RESPONSE_OK)
-      OpenFile(dialog.get_filename());
+    if (result == Gtk::RESPONSE_OK) OpenFile(dialog.get_filename());
   }
 }
 
@@ -410,8 +414,7 @@ void ShowWindow::onMISaveClicked() {
   int result = dialog.run();
   if (result == Gtk::RESPONSE_OK) {
     Glib::ustring filename(dialog.get_filename());
-    if (filename.find('.') == Glib::ustring::npos)
-      filename += ".gshow";
+    if (filename.find('.') == Glib::ustring::npos) filename += ".gshow";
 
     std::lock_guard<std::mutex> lock(_management->Mutex());
     Writer writer(*_management);
@@ -500,8 +503,7 @@ void ShowWindow::onMISwapModesClicked() {
 void ShowWindow::onMIRecoverClicked() {
   if (_backgroundManagement) {
     _management->Recover(*_backgroundManagement);
-    for (std::unique_ptr<FaderWindow> &fw : _faderWindows)
-      fw->ReloadValues();
+    for (std::unique_ptr<FaderWindow> &fw : _faderWindows) fw->ReloadValues();
   }
 }
 
@@ -562,8 +564,7 @@ void ShowWindow::onFaderListChange() {
 
 FaderWindow *ShowWindow::getFaderWindow(FaderSetupState &state) {
   for (const std::unique_ptr<FaderWindow> &window : _faderWindows) {
-    if (window->State() == &state)
-      return window.get();
+    if (window->State() == &state) return window.get();
   }
   return nullptr;
 }
@@ -589,8 +590,7 @@ size_t ShowWindow::nextControlKeyRow() const {
         break;
       }
     }
-    if (!found)
-      return index;
+    if (!found) return index;
   }
   throw std::runtime_error("Error in nextControlKeyRow()");
 }
@@ -608,8 +608,7 @@ void ShowWindow::onMIDesignWizardClicked() {
 
 void ShowWindow::onMIBlackOut() {
   _management->BlackOut();
-  for (std::unique_ptr<FaderWindow> &fw : _faderWindows)
-    fw->ReloadValues();
+  for (std::unique_ptr<FaderWindow> &fw : _faderWindows) fw->ReloadValues();
 }
 
 void ShowWindow::onMIProtectBlackOut() {
