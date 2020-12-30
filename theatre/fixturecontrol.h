@@ -5,9 +5,10 @@
 #include "fixture.h"
 
 class FixtureControl : public Controllable {
-public:
+ public:
   FixtureControl(class Fixture &fixture)
-      : Controllable(fixture.Name()), _fixture(&fixture),
+      : Controllable(fixture.Name()),
+        _fixture(&fixture),
         _values(fixture.Functions().size()) {}
 
   class Fixture &Fixture() const {
@@ -26,26 +27,30 @@ public:
 
   virtual Color InputColor(size_t index) const final override {
     switch (InputType(index)) {
-    case FunctionType::Master:
-    case FunctionType::White:
-    case FunctionType::ColorMacro:
-    case FunctionType::Strobe:
-    case FunctionType::Pulse:
-    case FunctionType::Rotation:
-    case FunctionType::Pan:
-    case FunctionType::Tilt:
-    case FunctionType::Effect:
-      return Color::White();
-    case FunctionType::Red:
-      return Color::RedC();
-    case FunctionType::Green:
-      return Color::GreenC();
-    case FunctionType::Blue:
-      return Color::BlueC();
-    case FunctionType::Amber:
-      return Color::Amber();
-    case FunctionType::UV:
-      return Color::UV();
+      case FunctionType::Master:
+      case FunctionType::White:
+      case FunctionType::ColorMacro:
+      case FunctionType::Strobe:
+      case FunctionType::Pulse:
+      case FunctionType::Rotation:
+      case FunctionType::Pan:
+      case FunctionType::Tilt:
+      case FunctionType::Effect:
+        return Color::White();
+      case FunctionType::Red:
+        return Color::RedC();
+      case FunctionType::Green:
+        return Color::GreenC();
+      case FunctionType::Blue:
+        return Color::BlueC();
+      case FunctionType::Amber:
+        return Color::Amber();
+      case FunctionType::UV:
+        return Color::UV();
+      case FunctionType::ColdWhite:
+        return Color::ColdWhite();
+      case FunctionType::WarmWhite:
+        return Color::WarmWhite();
     }
     return Color::Black();
   }
@@ -65,7 +70,7 @@ public:
     }
   }
 
-private:
+ private:
   class Fixture *_fixture;
   std::vector<ControlValue> _values;
 };

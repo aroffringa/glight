@@ -8,7 +8,7 @@
 #include <string>
 
 class CurveEffectPS final : public PropertySet {
-public:
+ public:
   CurveEffectPS() {
     addProperty(Property(
         "function", "Function",
@@ -22,27 +22,27 @@ public:
             std::pair<std::string, std::string>("squareroot", "Square root")}));
   }
 
-protected:
+ protected:
   virtual void setChoice(FolderObject &object, size_t index,
                          const std::string &value) const final override {
     CurveEffect &cfx = static_cast<CurveEffect &>(object);
     switch (index) {
-    case 0:
-      if (value == "linear")
-        cfx.SetFunction(CurveEffect::Linear);
-      else if (value == "quadratic")
-        cfx.SetFunction(CurveEffect::Quadratic);
-      else if (value == "exponential")
-        cfx.SetFunction(CurveEffect::Exponential);
-      else if (value == "logarithmic")
-        cfx.SetFunction(CurveEffect::Logarithmic);
-      else if (value == "sinusoid")
-        cfx.SetFunction(CurveEffect::Sinusoid);
-      else if (value == "warmup")
-        cfx.SetFunction(CurveEffect::WarmUp);
-      else if (value == "squareroot")
-        cfx.SetFunction(CurveEffect::SquareRoot);
-      break;
+      case 0:
+        if (value == "linear")
+          cfx.SetFunction(CurveEffect::Linear);
+        else if (value == "quadratic")
+          cfx.SetFunction(CurveEffect::Quadratic);
+        else if (value == "exponential")
+          cfx.SetFunction(CurveEffect::Exponential);
+        else if (value == "logarithmic")
+          cfx.SetFunction(CurveEffect::Logarithmic);
+        else if (value == "sinusoid")
+          cfx.SetFunction(CurveEffect::Sinusoid);
+        else if (value == "warmup")
+          cfx.SetFunction(CurveEffect::WarmUp);
+        else if (value == "squareroot")
+          cfx.SetFunction(CurveEffect::SquareRoot);
+        break;
     }
   }
 
@@ -50,24 +50,24 @@ protected:
                                 size_t index) const final override {
     const CurveEffect &cfx = static_cast<const CurveEffect &>(object);
     switch (index) {
-    case 0:
-      switch (cfx.GetFunction()) {
-      case CurveEffect::Linear:
-        return "linear";
-      case CurveEffect::Quadratic:
-        return "quadratic";
-      case CurveEffect::Exponential:
-        return "exponential";
-      case CurveEffect::Logarithmic:
-        return "logarithmic";
-      case CurveEffect::Sinusoid:
-        return "sinusoid";
-      case CurveEffect::WarmUp:
-        return "warmup";
-      case CurveEffect::SquareRoot:
-        return "squareroot";
-      }
-      break;
+      case 0:
+        switch (cfx.GetFunction()) {
+          case CurveEffect::Linear:
+            return "linear";
+          case CurveEffect::Quadratic:
+            return "quadratic";
+          case CurveEffect::Exponential:
+            return "exponential";
+          case CurveEffect::Logarithmic:
+            return "logarithmic";
+          case CurveEffect::Sinusoid:
+            return "sinusoid";
+          case CurveEffect::WarmUp:
+            return "warmup";
+          case CurveEffect::SquareRoot:
+            return "squareroot";
+        }
+        break;
     }
     return 0;
   }

@@ -2,11 +2,11 @@
 #define RECURSION_LOCK_H
 
 class RecursionLock {
-public:
+ public:
   RecursionLock() : _isTaken(false) {}
 
   class Token {
-  public:
+   public:
     Token(RecursionLock &ar) : _isTaken(&ar._isTaken) {
 #ifndef NDEBUG
       if (ar._isTaken)
@@ -25,8 +25,7 @@ public:
         throw std::runtime_error(
             "Logical error: token was released from wrong scope");
 #endif
-      if (_owned)
-        (*_isTaken) = false;
+      if (_owned) (*_isTaken) = false;
     }
 
     Token &operator=(const Token &token) = delete;
@@ -47,14 +46,14 @@ public:
       }
     }
 
-  private:
+   private:
     bool _owned;
     bool *_isTaken;
   };
 
   bool IsFirst() const { return !_isTaken; }
 
-private:
+ private:
   bool _isTaken;
 };
 

@@ -16,7 +16,7 @@
         @author Andre Offringa
 */
 class VisualizationWindow : public Gtk::Window {
-public:
+ public:
   VisualizationWindow(class Management *management,
                       class EventTransmitter *eventTransmitter,
                       class FixtureSelection *fixtureSelection,
@@ -39,7 +39,7 @@ public:
     Update();
   }
 
-private:
+ private:
   Gtk::DrawingArea _drawingArea;
   Management *_management;
   Management *_dryManagement;
@@ -90,14 +90,14 @@ private:
   }
   static double radius(FixtureSymbol::Symbol symbol) {
     switch (symbol) {
-    case FixtureSymbol::Hidden:
-      return 0.0;
-    case FixtureSymbol::Small:
-      return 0.3;
-    case FixtureSymbol::Normal:
-      return 0.4;
-    case FixtureSymbol::Large:
-      return 0.5;
+      case FixtureSymbol::Hidden:
+        return 0.0;
+      case FixtureSymbol::Small:
+        return 0.3;
+      case FixtureSymbol::Normal:
+        return 0.4;
+      case FixtureSymbol::Large:
+        return 0.5;
     }
     return 0.4;
   }

@@ -23,13 +23,13 @@
         @author Andre Offringa
 */
 class ObjectListFrame : public Gtk::VPaned {
-public:
+ public:
   ObjectListFrame(class Management &management, class ShowWindow &parentWindow);
 
   Folder &SelectedFolder() { return _list.SelectedFolder(); }
   void OpenFolder(const Folder &folder) { _list.OpenFolder(folder); }
 
-private:
+ private:
   void initPresetsPart();
 
   void onNewPresetButtonClicked();

@@ -14,10 +14,14 @@
 
 CreateChaseDialog::CreateChaseDialog(Management &management,
                                      ShowWindow &parentWindow)
-    : Dialog("Create chase", true), _listFrame("Object list"),
-      _list(management, parentWindow), _newChaseFrame("Chase objects"),
-      _addObjectToChaseButton(Gtk::Stock::ADD), _clearChaseButton("Clear"),
-      _management(&management), _parentWindow(parentWindow),
+    : Dialog("Create chase", true),
+      _listFrame("Object list"),
+      _list(management, parentWindow),
+      _newChaseFrame("Chase objects"),
+      _addObjectToChaseButton(Gtk::Stock::ADD),
+      _clearChaseButton("Clear"),
+      _management(&management),
+      _parentWindow(parentWindow),
       _newChase(nullptr) {
   _parentWindow.SignalChangeManagement().connect(
       sigc::mem_fun(*this, &CreateChaseDialog::changeManagement));

@@ -4,16 +4,23 @@
 #include <random>
 
 class Timing {
-public:
+ public:
   Timing()
-      : _timeInMs(0), _timestepNumber(0), _beatValue(0), _audioLevel(0),
-        _randomValue(0), _rng() {}
+      : _timeInMs(0),
+        _timestepNumber(0),
+        _beatValue(0),
+        _audioLevel(0),
+        _randomValue(0),
+        _rng() {}
 
   Timing(double timeInMS, unsigned timestepNumber, double beatValue,
          unsigned audioLevel, unsigned randomValue)
-      : _timeInMs(timeInMS), _timestepNumber(timestepNumber),
-        _beatValue(beatValue), _audioLevel(audioLevel),
-        _randomValue(randomValue), _rng(randomValue) {}
+      : _timeInMs(timeInMS),
+        _timestepNumber(timestepNumber),
+        _beatValue(beatValue),
+        _audioLevel(audioLevel),
+        _randomValue(randomValue),
+        _rng(randomValue) {}
 
   double TimeInMS() const { return _timeInMs; }
   double BeatValue() const { return _beatValue; }
@@ -22,8 +29,8 @@ public:
 
   unsigned TimestepRandomValue() const { return _randomValue; }
   unsigned DrawRandomValue() const {
-    return std::uniform_int_distribution<unsigned>(0, ControlValue::MaxUInt() +
-                                                          1)(_rng);
+    return std::uniform_int_distribution<unsigned>(
+        0, ControlValue::MaxUInt() + 1)(_rng);
   }
   unsigned DrawRandomValue(size_t maxValue) const {
     return std::uniform_int_distribution<unsigned>(0, maxValue)(_rng);
@@ -34,7 +41,7 @@ public:
 
   std::mt19937 &RNG() const { return _rng; }
 
-private:
+ private:
   double _timeInMs;
   unsigned _timestepNumber;
   double _beatValue;

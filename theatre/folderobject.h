@@ -7,7 +7,7 @@
         @author Andre Offringa
 */
 class FolderObject : public NamedObject {
-public:
+ public:
   friend class Folder;
 
   FolderObject() : _parent(nullptr) {}
@@ -27,7 +27,7 @@ public:
     return *_parent;
   }
 
-private:
+ private:
   void SetParent(class Folder &parent) { _parent = &parent; }
 
   friend class Folder;

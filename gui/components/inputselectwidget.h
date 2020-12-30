@@ -10,13 +10,15 @@
 #include "../../theatre/controllable.h"
 
 class InputSelectWidget : public Gtk::VBox {
-public:
+ public:
   static const size_t NO_INPUT_SELECTED = std::numeric_limits<size_t>::max();
 
   InputSelectWidget(class Management &management,
                     class EventTransmitter &eventHub)
-      : _browser(management, eventHub), _inputLabel("Input:"),
-        _selectedObject(nullptr), _selectedInput(NO_INPUT_SELECTED) {
+      : _browser(management, eventHub),
+        _inputLabel("Input:"),
+        _selectedObject(nullptr),
+        _selectedInput(NO_INPUT_SELECTED) {
     _browser.SetDisplayType(ObjectList::All);
     _browser.SignalSelectionChange().connect(
         [&]() { onBrowserSelectionChange(); });
@@ -45,7 +47,7 @@ public:
   size_t SelectedInput() const { return _selectedInput; }
   bool HasInputSelected() const { return _selectedInput != NO_INPUT_SELECTED; }
 
-private:
+ private:
   ObjectBrowser _browser;
   Gtk::HBox _inputBox;
   Gtk::Label _inputLabel;
@@ -100,8 +102,7 @@ private:
         _selectedInput = NO_INPUT_SELECTED;
       }
 
-      if (selectionChanged)
-        _signalSelectionChange.emit();
+      if (selectionChanged) _signalSelectionChange.emit();
     }
   }
 

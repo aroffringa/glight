@@ -12,7 +12,7 @@
 #include <sigc++/signal.h>
 
 class ObjectBrowser : public Gtk::VBox {
-public:
+ public:
   ObjectBrowser(class Management &management, class EventTransmitter &eventHub)
       : _folderCombo(management, eventHub), _list(management, eventHub) {
     _parentFolderButton.set_image_from_icon_name("go-up");
@@ -67,7 +67,7 @@ public:
 
   void OpenFolder(const Folder &folder) { _folderCombo.Select(folder); }
 
-private:
+ private:
   void onSelectionChanged() { _signalSelectionChange.emit(); }
   void onFolderChanged() {
     Folder &folder = _folderCombo.Selection();
@@ -84,8 +84,7 @@ private:
   }
   void onParentFolderClicked() {
     const Folder &folder = _folderCombo.Selection();
-    if (!folder.IsRoot())
-      _folderCombo.Select(folder.Parent());
+    if (!folder.IsRoot()) _folderCombo.Select(folder.Parent());
   }
 
   Gtk::HBox _hBox;

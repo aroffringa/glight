@@ -7,7 +7,7 @@
         @author Andre Offringa
 */
 class ControlValue {
-public:
+ public:
   enum MixStyle {
     Default,
     HighestValue,
@@ -33,26 +33,26 @@ public:
   static unsigned Mix(unsigned firstValue, unsigned secondValue,
                       MixStyle mixStyle) {
     switch (mixStyle) {
-    default:
-    case HighestValue:
-      if (firstValue > secondValue)
+      default:
+      case HighestValue:
+        if (firstValue > secondValue)
+          return firstValue;
+        else
+          return secondValue;
+      case Default:
+      case Sum:
+        return firstValue + secondValue;
+      case LowestValue:
+        if (firstValue > secondValue)
+          return secondValue;
+        else
+          return firstValue;
+      case Multiply:
+        return MultiplyValues(firstValue, secondValue);
+      case First:
         return firstValue;
-      else
+      case Second:
         return secondValue;
-    case Default:
-    case Sum:
-      return firstValue + secondValue;
-    case LowestValue:
-      if (firstValue > secondValue)
-        return secondValue;
-      else
-        return firstValue;
-    case Multiply:
-      return MultiplyValues(firstValue, secondValue);
-    case First:
-      return firstValue;
-    case Second:
-      return secondValue;
     }
   }
 
@@ -75,7 +75,7 @@ public:
     return std::round(1000.0 * (double)_value / (double)((1 << 24) - 1)) * 0.1;
   }
 
-private:
+ private:
   unsigned int _value;
 };
 

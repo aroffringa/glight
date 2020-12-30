@@ -6,9 +6,10 @@
 #include <string>
 
 class InvertEffect : public Effect {
-public:
+ public:
   InvertEffect()
-      : Effect(2), _offThreshold(ControlValue::MaxUInt() * 2 / 100) // 2 %
+      : Effect(2),
+        _offThreshold(ControlValue::MaxUInt() * 2 / 100)  // 2 %
   {}
 
   virtual Effect::Type GetType() const override { return InvertType; }
@@ -16,13 +17,12 @@ public:
   unsigned OffThreshold() const { return _offThreshold; }
   void SetOffThreshold(unsigned offThreshold) { _offThreshold = offThreshold; }
 
-protected:
+ protected:
   virtual void mix(const ControlValue *values, unsigned *channelValues,
                    unsigned universe,
                    const class Timing &timing) final override {
     unsigned inverted = ControlValue::MaxUInt() - values[0].UInt();
-    if (inverted < _offThreshold)
-      inverted = ControlValue::Zero();
+    if (inverted < _offThreshold) inverted = ControlValue::Zero();
     ControlValue value =
         ControlValue::Mix(values[1].UInt(), inverted, ControlValue::Multiply);
     for (const std::pair<Controllable *, size_t> &connection : Connections())
@@ -33,7 +33,7 @@ protected:
     return inputIndex == 0 ? FunctionType::Effect : FunctionType::Master;
   }
 
-private:
+ private:
   unsigned _offThreshold;
 };
 

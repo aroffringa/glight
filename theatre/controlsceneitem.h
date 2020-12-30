@@ -10,10 +10,12 @@
         @author Andre Offringa
 */
 class ControlSceneItem : public SceneItem {
-public:
+ public:
   ControlSceneItem(class Controllable &controllable, size_t input)
-      : _controllable(controllable), _input(input),
-        _startValue(ControlValue::Max()), _endValue(ControlValue::Max()) {}
+      : _controllable(controllable),
+        _input(input),
+        _startValue(ControlValue::Max()),
+        _endValue(ControlValue::Max()) {}
   ~ControlSceneItem() {}
   ControlValue &StartValue() { return _startValue; }
   const ControlValue &StartValue() const { return _startValue; }
@@ -33,7 +35,7 @@ public:
     return _controllable;
   }
 
-private:
+ private:
   class Controllable &_controllable;
   size_t _input;
   ControlValue _startValue, _endValue;

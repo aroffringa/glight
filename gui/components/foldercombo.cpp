@@ -21,8 +21,7 @@ FolderCombo::FolderCombo(Management &management, EventTransmitter &eventHub)
   set_model(_listModel);
   pack_start(_listColumns._title);
   signal_changed().connect([&]() {
-    if (_avoidRecursion.IsFirst())
-      _signalSelectionChange.emit();
+    if (_avoidRecursion.IsFirst()) _signalSelectionChange.emit();
   });
 
   fillList();
@@ -42,10 +41,9 @@ void FolderCombo::fillList() {
   Gtk::TreeModel::Row row = *iter;
   row[_listColumns._title] = _management->RootFolder().Name();
   row[_listColumns._folder] = &_management->RootFolder();
-  if (selectedObj == &_management->RootFolder())
-    set_active(iter);
+  if (selectedObj == &_management->RootFolder()) set_active(iter);
   fillListFolder(_management->RootFolder(), 1, selectedObj);
-  if (!get_active()) // in case it was removed, the selection changes
+  if (!get_active())  // in case it was removed, the selection changes
   {
     lock.unlock();
     Select(_management->RootFolder());
@@ -93,8 +91,7 @@ bool FolderCombo::selectObject(const Folder &object,
       set_active(child);
       return true;
     }
-    if (selectObject(object, child.children()))
-      return true;
+    if (selectObject(object, child.children())) return true;
   }
   return false;
 }

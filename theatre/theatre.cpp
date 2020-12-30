@@ -22,7 +22,7 @@ void Theatre::Clear() {
   _fixtureTypes.clear();
 }
 
-Fixture &Theatre::AddFixture(FixtureType &type) {
+Fixture &Theatre::AddFixture(const FixtureType &type) {
   // Find free name
   std::string name = "A";
   bool found = false;
@@ -56,16 +56,15 @@ Fixture &Theatre::AddFixture(FixtureType &type) {
   return f;
 }
 
-FixtureType &
-Theatre::AddFixtureType(enum FixtureType::FixtureClass fixtureClass) {
+FixtureType &Theatre::AddFixtureType(
+    enum FixtureType::FixtureClass fixtureClass) {
   _fixtureTypes.emplace_back(new FixtureType(fixtureClass));
   return *_fixtureTypes.back();
 }
 
 bool Theatre::Contains(Fixture &fixture) const {
   for (const std::unique_ptr<Fixture> &f : _fixtures) {
-    if (f.get() == &fixture)
-      return true;
+    if (f.get() == &fixture) return true;
   }
   return false;
 }
@@ -83,8 +82,7 @@ FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
     const std::vector<std::unique_ptr<FixtureFunction>> &functions =
         f->Functions();
     for (const std::unique_ptr<FixtureFunction> &function : functions) {
-      if (function->Name() == name)
-        return *function;
+      if (function->Name() == name) return *function;
     }
   }
   throw std::runtime_error(
@@ -92,7 +90,7 @@ FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
 }
 
 void Theatre::RemoveFixture(Fixture &fixture) {
-  FixtureType *t = &fixture.Type();
+  const FixtureType *t = &fixture.Type();
 
   size_t fIndex = FolderObject::FindIndex(_fixtures, &fixture);
   _fixtures.erase(_fixtures.begin() + fIndex);
@@ -104,7 +102,7 @@ void Theatre::RemoveFixture(Fixture &fixture) {
   }
 }
 
-bool Theatre::IsUsed(FixtureType &fixtureType) const {
+bool Theatre::IsUsed(const FixtureType &fixtureType) const {
   for (const std::unique_ptr<Fixture> &f : _fixtures) {
     if (&f->Type() == &fixtureType) {
       return true;
@@ -118,8 +116,7 @@ void Theatre::NotifyDmxChange() {
   for (const std::unique_ptr<class Fixture> &fixture : _fixtures) {
     std::vector<unsigned> channels = fixture->GetChannels();
     for (unsigned channel : channels) {
-      if (channel > highest)
-        highest = channel;
+      if (channel > highest) highest = channel;
     }
   }
   _highestChannel = highest;
@@ -136,22 +133,18 @@ Position Theatre::GetFreePosition() const {
     if (x < rowLength) {
       double index = x + fixture->Position().Y() * rowLength;
       size_t midIndex = round(index);
-      if (midIndex < n)
-        available[midIndex] = false;
+      if (midIndex < n) available[midIndex] = false;
       if (midIndex - index > 0.01) {
         size_t secIndex = index + 1;
-        if (secIndex < n)
-          available[secIndex] = false;
+        if (secIndex < n) available[secIndex] = false;
       } else if (index - midIndex > 0.01) {
         size_t secIndex = index - 1;
-        if (secIndex < n)
-          available[secIndex] = false;
+        if (secIndex < n) available[secIndex] = false;
       }
     }
   }
   for (size_t i = 0; i != n; ++i) {
-    if (available[i])
-      return Position(i % rowLength, i / rowLength);
+    if (available[i]) return Position(i % rowLength, i / rowLength);
   }
   return Position(n % rowLength, n / rowLength);
 }
@@ -161,10 +154,8 @@ Position Theatre::Extend() const {
   for (const std::unique_ptr<class Fixture> &fixture : _fixtures) {
     double right = fixture->Position().X() + 1.0,
            bottom = fixture->Position().Y() + 1.0;
-    if (right > extend.X())
-      extend.X() = right;
-    if (bottom > extend.Y())
-      extend.Y() = bottom;
+    if (right > extend.X()) extend.X() = right;
+    if (bottom > extend.Y()) extend.Y() = bottom;
   }
   return extend;
 }

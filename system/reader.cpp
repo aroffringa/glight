@@ -17,13 +17,13 @@
 #include "../gui/guistate.h"
 
 Reader::Reader(Management &management)
-    : _management(management), _theatre(management.Theatre()),
+    : _management(management),
+      _theatre(management.Theatre()),
       _guiState(nullptr) {}
 
 void Reader::Read(const Glib::ustring &filename) {
   _xmlDocument = xmlReadFile(filename.c_str(), NULL, 0);
-  if (_xmlDocument == NULL)
-    throw std::runtime_error("Failed to parse file");
+  if (_xmlDocument == NULL) throw std::runtime_error("Failed to parse file");
 
   xmlNode *rootElement = xmlDocGetRootElement(_xmlDocument);
 
@@ -51,8 +51,7 @@ void Reader::parseGlightShow(xmlNode *node) {
 
   for (xmlNode *curNode = node->children; curNode != NULL;
        curNode = curNode->next) {
-    if (curNode->type == XML_ELEMENT_NODE)
-      parseGroup(curNode);
+    if (curNode->type == XML_ELEMENT_NODE) parseGroup(curNode);
   }
 }
 
@@ -111,16 +110,14 @@ void Reader::parseFolders(xmlNode *node) {
 void Reader::parseTheatre(xmlNode *node) {
   for (xmlNode *curNode = node->children; curNode != NULL;
        curNode = curNode->next) {
-    if (curNode->type == XML_ELEMENT_NODE)
-      parseTheatreItem(curNode);
+    if (curNode->type == XML_ELEMENT_NODE) parseTheatreItem(curNode);
   }
 }
 
 void Reader::parseControl(xmlNode *node) {
   for (xmlNode *curNode = node->children; curNode != NULL;
        curNode = curNode->next) {
-    if (curNode->type == XML_ELEMENT_NODE)
-      parseControlItem(curNode);
+    if (curNode->type == XML_ELEMENT_NODE) parseControlItem(curNode);
   }
 }
 
@@ -161,8 +158,8 @@ void Reader::parseFixtureType(xmlNode *node) {
       _management.RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
   if (!type) {
     type = &_management.Theatre().AddFixtureType(
-        cl); // TODO we shouldn't use a type by its name, types should be
-             // editable etc
+        cl);  // TODO we shouldn't use a type by its name, types should be
+              // editable etc
     parseFolderAttr(node, *type);
   }
 }
@@ -233,10 +230,11 @@ void Reader::parsePresetCollection(xmlNode *node) {
         size_t inputIndex = getIntAttribute(curNode, "input-index");
         Controllable *controllable = dynamic_cast<Controllable *>(&obj);
         if (controllable == nullptr)
-          throw std::runtime_error("Expecting a controllable in "
-                                   "controllable-ref, but object named " +
-                                   obj.Name() + " in folder " + folder.Name() +
-                                   " is something different");
+          throw std::runtime_error(
+              "Expecting a controllable in "
+              "controllable-ref, but object named " +
+              obj.Name() + " in folder " + folder.Name() +
+              " is something different");
         PresetValue &value =
             collection.AddPresetValue(*controllable, inputIndex);
         value.SetValue(ControlValue(getIntAttribute(curNode, "value")));
@@ -347,21 +345,21 @@ void Reader::parseEffect(xmlNode *node) {
         std::string propName = getStringAttribute(curNode, "name");
         Property &p = ps->GetProperty(propName);
         switch (p.GetType()) {
-        case Property::Choice:
-          ps->SetChoice(p, getStringAttribute(curNode, "value"));
-          break;
-        case Property::ControlValue:
-          ps->SetControlValue(p, getIntAttribute(curNode, "value"));
-          break;
-        case Property::Duration:
-          ps->SetDuration(p, getDoubleAttribute(curNode, "value"));
-          break;
-        case Property::Boolean:
-          ps->SetBool(p, getBoolAttribute(curNode, "value"));
-          break;
-        case Property::Integer:
-          ps->SetInteger(p, getIntAttribute(curNode, "value"));
-          break;
+          case Property::Choice:
+            ps->SetChoice(p, getStringAttribute(curNode, "value"));
+            break;
+          case Property::ControlValue:
+            ps->SetControlValue(p, getIntAttribute(curNode, "value"));
+            break;
+          case Property::Duration:
+            ps->SetDuration(p, getDoubleAttribute(curNode, "value"));
+            break;
+          case Property::Boolean:
+            ps->SetBool(p, getBoolAttribute(curNode, "value"));
+            break;
+          case Property::Integer:
+            ps->SetInteger(p, getIntAttribute(curNode, "value"));
+            break;
         }
       } else if (name(curNode) == "connection-ref") {
         std::string cName = getStringAttribute(curNode, "name");
@@ -391,8 +389,7 @@ void Reader::parseTransition(xmlNode *node, class Transition &transition) {
 void Reader::parseShow(xmlNode *node) {
   for (xmlNode *curNode = node->children; curNode != NULL;
        curNode = curNode->next) {
-    if (curNode->type == XML_ELEMENT_NODE)
-      parseShowItem(curNode);
+    if (curNode->type == XML_ELEMENT_NODE) parseShowItem(curNode);
   }
 }
 
@@ -458,8 +455,7 @@ ControlSceneItem &Reader::parseControlSceneItem(xmlNode *node, Scene &scene) {
 void Reader::parseGUI(xmlNode *node, GUIState &guiState) {
   for (xmlNode *curNode = node->children; curNode != NULL;
        curNode = curNode->next) {
-    if (curNode->type == XML_ELEMENT_NODE)
-      parseGUIItem(curNode, guiState);
+    if (curNode->type == XML_ELEMENT_NODE) parseGUIItem(curNode, guiState);
   }
 }
 

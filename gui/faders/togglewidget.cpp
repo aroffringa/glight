@@ -10,8 +10,11 @@
 
 ToggleWidget::ToggleWidget(class Management &management,
                            EventTransmitter &eventHub, char key)
-    : _flashButton(std::string(1, key)), _nameLabel("<..>"),
-      _management(&management), _eventHub(eventHub), _preset(nullptr),
+    : _flashButton(std::string(1, key)),
+      _nameLabel("<..>"),
+      _management(&management),
+      _eventHub(eventHub),
+      _preset(nullptr),
       _holdUpdates(false) {
   _updateConnection =
       _eventHub.SignalUpdateControllables().connect([&]() { onUpdate(); });
@@ -88,7 +91,7 @@ void ToggleWidget::Assign(PresetValue *item, bool moveFader) {
     if (_preset != nullptr) {
       _nameLabel.set_text(_preset->Title());
       if (moveFader) {
-        immediateAssign(_preset->Value().UInt());
+        setImmediate(_preset->Value().UInt());
         _onCheckButton.set_active(_preset->Value().UInt() != 0);
       } else {
         if (_onCheckButton.get_active())
@@ -99,7 +102,7 @@ void ToggleWidget::Assign(PresetValue *item, bool moveFader) {
     } else {
       _nameLabel.set_text("<..>");
       if (moveFader) {
-        immediateAssign(0);
+        setImmediate(0);
         _onCheckButton.set_active(false);
       } else {
         if (_onCheckButton.get_active())
@@ -122,7 +125,7 @@ void ToggleWidget::Assign(PresetValue *item, bool moveFader) {
 
 void ToggleWidget::MoveSlider() {
   if (_preset != nullptr) {
-    immediateAssign(_preset->Value().UInt());
+    setImmediate(_preset->Value().UInt());
     _onCheckButton.set_active(_preset->Value().UInt() != 0);
     SignalValueChange().emit(_preset->Value().UInt());
   }
@@ -171,6 +174,5 @@ void ToggleWidget::ChangeManagement(class Management &management,
 }
 
 void ToggleWidget::Limit(double value) {
-  if (value < ControlValue::MaxUInt())
-    _onCheckButton.set_active(false);
+  if (value < ControlValue::MaxUInt()) _onCheckButton.set_active(false);
 }

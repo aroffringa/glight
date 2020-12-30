@@ -12,10 +12,16 @@
         @author Andre Offringa
 */
 class TimeSequence : public Controllable {
-public:
+ public:
   TimeSequence()
-      : _inputValue(), _activeValue(0), _stepStart(), _stepNumber(0),
-        _transitionTriggered(false), _sequence(), _steps(), _sustain(false),
+      : _inputValue(),
+        _activeValue(0),
+        _stepStart(),
+        _stepNumber(0),
+        _transitionTriggered(false),
+        _sequence(),
+        _steps(),
+        _sustain(false),
         _repeatCount(1) {}
 
   std::unique_ptr<TimeSequence> CopyWithoutSequence() const {
@@ -63,28 +69,28 @@ public:
         const Step &activeStep = _steps[_stepNumber % _steps.size()];
         if (!_transitionTriggered) {
           switch (activeStep.trigger.Type()) {
-          case Trigger::DelayTriggered: {
-            double timePassed = timing.TimeInMS() - _stepStart.TimeInMS();
-            if (timePassed >= activeStep.trigger.DelayInMs()) {
-              _transitionTriggered = true;
-              _stepStart = timing;
-            }
-          } break;
-          case Trigger::SyncTriggered: {
-            size_t syncsPassed =
-                timing.TimestepNumber() - _stepStart.TimestepNumber();
-            if (syncsPassed >= activeStep.trigger.DelayInSyncs()) {
-              _transitionTriggered = true;
-              _stepStart = timing;
-            }
-          } break;
-          case Trigger::BeatTriggered: {
-            size_t beatsPassed = timing.BeatValue() - _stepStart.BeatValue();
-            if (beatsPassed >= activeStep.trigger.DelayInBeats()) {
-              _transitionTriggered = true;
-              _stepStart = timing;
-            }
-          } break;
+            case Trigger::DelayTriggered: {
+              double timePassed = timing.TimeInMS() - _stepStart.TimeInMS();
+              if (timePassed >= activeStep.trigger.DelayInMs()) {
+                _transitionTriggered = true;
+                _stepStart = timing;
+              }
+            } break;
+            case Trigger::SyncTriggered: {
+              size_t syncsPassed =
+                  timing.TimestepNumber() - _stepStart.TimestepNumber();
+              if (syncsPassed >= activeStep.trigger.DelayInSyncs()) {
+                _transitionTriggered = true;
+                _stepStart = timing;
+              }
+            } break;
+            case Trigger::BeatTriggered: {
+              size_t beatsPassed = timing.BeatValue() - _stepStart.BeatValue();
+              if (beatsPassed >= activeStep.trigger.DelayInBeats()) {
+                _transitionTriggered = true;
+                _stepStart = timing;
+              }
+            } break;
           }
           if (!_transitionTriggered) {
             const std::pair<Controllable *, size_t> &input =
@@ -150,7 +156,7 @@ public:
 
   size_t Size() const { return _steps.size(); }
 
-private:
+ private:
   /**
    * Copy constructor for dry copy
    */
@@ -165,7 +171,8 @@ private:
         _stepNumber(timeSequence._stepNumber),
         _transitionTriggered(timeSequence._transitionTriggered),
 
-        _steps(timeSequence._steps), _sustain(timeSequence._sustain),
+        _steps(timeSequence._steps),
+        _sustain(timeSequence._sustain),
         _repeatCount(timeSequence._repeatCount) {}
 
   ControlValue _inputValue;

@@ -6,19 +6,19 @@
 #include "../effects/delayeffect.h"
 
 class DelayEffectPS final : public PropertySet {
-public:
+ public:
   DelayEffectPS() {
     addProperty(Property("delay", "Delay", Property::Duration));
   }
 
-protected:
+ protected:
   virtual void setDuration(FolderObject &object, size_t index,
                            double value) const final override {
     DelayEffect &dfx = static_cast<DelayEffect &>(object);
     switch (index) {
-    case 0:
-      dfx.SetDelayInMS(value);
-      break;
+      case 0:
+        dfx.SetDelayInMS(value);
+        break;
     }
   }
 
@@ -26,8 +26,8 @@ protected:
                              size_t index) const final override {
     const DelayEffect &dfx = static_cast<const DelayEffect &>(object);
     switch (index) {
-    case 0:
-      return dfx.DelayInMS();
+      case 0:
+        return dfx.DelayInMS();
     }
     return 0;
   }

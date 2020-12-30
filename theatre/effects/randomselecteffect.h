@@ -7,9 +7,12 @@
 #include <vector>
 
 class RandomSelectEffect : public Effect {
-public:
+ public:
   RandomSelectEffect()
-      : Effect(1), _active(false), _startTime(0.0), _delay(10000.0),
+      : Effect(1),
+        _active(false),
+        _startTime(0.0),
+        _delay(10000.0),
         _count(1){};
 
   virtual Effect::Type GetType() const override { return RandomSelectType; }
@@ -20,7 +23,7 @@ public:
   size_t Count() const { return _count; }
   void SetCount(size_t count) { _count = count; }
 
-private:
+ private:
   virtual void mix(const ControlValue *values, unsigned *channelValues,
                    unsigned universe,
                    const class Timing &timing) final override {

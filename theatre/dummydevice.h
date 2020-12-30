@@ -9,7 +9,7 @@
         @author Andre Offringa
 */
 class DummyDevice : public DmxDevice {
-public:
+ public:
   DummyDevice() : _isOpen(false) {}
 
   virtual ~DummyDevice() {}
@@ -21,8 +21,7 @@ public:
 
   virtual void GetValues(unsigned char *destination,
                          size_t size) final override {
-    for (size_t i = 0; i < size; ++i)
-      destination[i] = 0;
+    for (size_t i = 0; i < size; ++i) destination[i] = 0;
   }
 
   virtual void WaitForNextSync() final override { usleep(40000); }
@@ -31,8 +30,8 @@ public:
 
   virtual bool IsOpen() final override { return _isOpen; }
 
-private:
+ private:
   bool _isOpen;
 };
 
-#endif // DUMMYDEVICE_H
+#endif  // DUMMYDEVICE_H

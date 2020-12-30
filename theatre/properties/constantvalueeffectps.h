@@ -6,19 +6,19 @@
 #include "../effects/constantvalueeffect.h"
 
 class ConstantValueEffectPS final : public PropertySet {
-public:
+ public:
   ConstantValueEffectPS() {
     addProperty(Property("value", "Value", Property::ControlValue));
   }
 
-protected:
+ protected:
   virtual void setControlValue(FolderObject &object, size_t index,
                                unsigned value) const final override {
     ConstantValueEffect &cfx = static_cast<ConstantValueEffect &>(object);
     switch (index) {
-    case 0:
-      cfx.SetValue(value);
-      break;
+      case 0:
+        cfx.SetValue(value);
+        break;
     }
   }
 
@@ -27,8 +27,8 @@ protected:
     const ConstantValueEffect &cfx =
         static_cast<const ConstantValueEffect &>(object);
     switch (index) {
-    case 0:
-      return cfx.Value();
+      case 0:
+        return cfx.Value();
     }
     return 0;
   }

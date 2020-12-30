@@ -11,7 +11,7 @@
 #include <thread>
 
 class SyncListener {
-public:
+ public:
   virtual ~SyncListener(){};
   virtual void OnSyncUpdate(double offsetInMS) = 0;
 };
@@ -20,16 +20,20 @@ public:
         @author Andre Offringa
 */
 class AudioPlayer : private SyncListener {
-public:
+ public:
   class AlsaError : public std::runtime_error {
-  public:
+   public:
     AlsaError(const std::string &message)
         : runtime_error(std::string("Alsa error: ") + message) {}
   };
 
   AudioPlayer(class FlacDecoder &decoder)
-      : _alsaPeriodSize(256), _alsaBufferSize(2048), _alsaThread(),
-        _isStopping(false), _isOpen(false), _decoder(decoder),
+      : _alsaPeriodSize(256),
+        _alsaBufferSize(2048),
+        _alsaThread(),
+        _isStopping(false),
+        _isOpen(false),
+        _decoder(decoder),
         _startPosition(0) {
     _syncListener = this;
   }
@@ -51,9 +55,9 @@ public:
   }
   void SetSyncListener(SyncListener &listener) { _syncListener = &listener; }
 
-private:
+ private:
   struct AlsaThread {
-  public:
+   public:
     AudioPlayer &_player;
     AlsaThread(AudioPlayer &player) : _player(player) {}
     void operator()() { _player.open(); }

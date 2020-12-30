@@ -9,10 +9,11 @@
 #include "../components/inputselectwidget.h"
 
 class InputSelectDialog : public Gtk::Dialog {
-public:
+ public:
   InputSelectDialog(class Management &management,
                     class EventTransmitter &eventHub)
-      : Dialog("Select input", true), _management(management),
+      : Dialog("Select input", true),
+        _management(management),
         _inputSelector(management, eventHub) {
     set_size_request(600, 400);
 
@@ -34,7 +35,7 @@ public:
 
   class PresetValue *SelectedInputPreset() const;
 
-private:
+ private:
   void onSelectionChanged() {
     _selectButton->set_sensitive(_inputSelector.HasInputSelected());
   }

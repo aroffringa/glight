@@ -11,7 +11,7 @@
         @author Andre Offringa
 */
 class NameFrame : public Gtk::HBox {
-public:
+ public:
   NameFrame(class Management &management, class ShowWindow &showWindow);
   ~NameFrame();
 
@@ -29,7 +29,7 @@ public:
     _management = &management;
   }
 
-private:
+ private:
   void onButtonClicked();
   void update();
 

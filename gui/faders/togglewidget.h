@@ -10,7 +10,7 @@
 #include <gtkmm/label.h>
 
 class ToggleWidget : public ControlWidget {
-public:
+ public:
   ToggleWidget(class Management &management, class EventTransmitter &eventHub,
                char key);
   ~ToggleWidget();
@@ -26,7 +26,7 @@ public:
   virtual void ChangeManagement(class Management &management,
                                 bool moveSliders) final override;
 
-private:
+ private:
   Gtk::HBox _box;
   Gtk::VBox _flashButtonBox;
   Gtk::Button _flashButton;

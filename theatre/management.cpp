@@ -18,12 +18,15 @@
 #include "valuesnapshot.h"
 
 Management::Management()
-    : _thread(), _isQuitting(false),
+    : _thread(),
+      _isQuitting(false),
       _createTime(boost::posix_time::microsec_clock::local_time()),
-      _rndDistribution(0, ControlValue::MaxUInt() + 1), _overridenBeat(0),
+      _rndDistribution(0, ControlValue::MaxUInt() + 1),
+      _overridenBeat(0),
       _lastOverridenBeatTime(0.0),
 
-      _theatre(new class Theatre()), _snapshot(new ValueSnapshot()),
+      _theatre(new class Theatre()),
+      _snapshot(new ValueSnapshot()),
       _show(new class Show(*this)) {
   _folders.emplace_back(new Folder());
   _rootFolder = _folders.back().get();
@@ -31,7 +34,7 @@ Management::Management()
 }
 
 Management::~Management() {
-  if (_thread != nullptr) {
+  if (_thread) {
     _isQuitting = true;
     abortAllDevices();
     _thread->join();
@@ -89,8 +92,7 @@ void Management::ManagementThread::operator()() {
 
       for (unsigned i = 0; i < 512; ++i) {
         unsigned val = (values[i] >> 16);
-        if (val > 255)
-          val = 255;
+        if (val > 255) val = 255;
         valuesChar[i] = static_cast<unsigned char>(val);
       }
 
@@ -260,8 +262,7 @@ void Management::removeControllable(
 
 bool Management::Contains(Controllable &controllable) const {
   for (const std::unique_ptr<Controllable> &contr : _controllables) {
-    if (contr.get() == &controllable)
-      return true;
+    if (contr.get() == &controllable) return true;
   }
   return false;
 }
@@ -282,8 +283,7 @@ FixtureControl &Management::GetFixtureControl(class Fixture &fixture) {
   for (const std::unique_ptr<Controllable> &contr : _controllables) {
     FixtureControl *fc = dynamic_cast<FixtureControl *>(contr.get());
     if (fc) {
-      if (&fc->Fixture() == &fixture)
-        return *fc;
+      if (&fc->Fixture() == &fixture) return *fc;
     }
   }
   throw std::runtime_error("GetFixtureControl() : Fixture control not found");
@@ -319,8 +319,7 @@ void Management::removePreset(
 
 bool Management::Contains(PresetValue &presetValue) const {
   for (const std::unique_ptr<PresetValue> &pv : _presetValues) {
-    if (pv.get() == &presetValue)
-      return true;
+    if (pv.get() == &presetValue) return true;
   }
   return false;
 }
@@ -346,17 +345,15 @@ Effect &Management::AddEffect(std::unique_ptr<Effect> effect, Folder &folder) {
   return newEffect;
 }
 
-FolderObject *
-Management::GetObjectFromPathIfExists(const std::string &path) const {
+FolderObject *Management::GetObjectFromPathIfExists(
+    const std::string &path) const {
   auto sep = std::find(path.begin(), path.end(), '/');
   if (sep == path.end()) {
-    if (path == _rootFolder->Name())
-      return _rootFolder;
+    if (path == _rootFolder->Name()) return _rootFolder;
   } else {
     std::string left = path.substr(0, sep - path.begin());
     std::string right = path.substr(sep + 1 - path.begin());
-    if (left == _rootFolder->Name())
-      return _rootFolder->FollowRelPath(right);
+    if (left == _rootFolder->Name()) return _rootFolder->FollowRelPath(right);
   }
   return nullptr;
 }
@@ -395,7 +392,9 @@ ValueSnapshot Management::Snapshot() {
  */
 Management::Management(const Management &forDryCopy,
                        std::shared_ptr<class BeatFinder> &beatFinder)
-    : _thread(), _isQuitting(false), _createTime(forDryCopy._createTime),
+    : _thread(),
+      _isQuitting(false),
+      _createTime(forDryCopy._createTime),
       _rndDistribution(0, ControlValue::MaxUInt() + 1),
       _overridenBeat(forDryCopy._overridenBeat.load()),
       _lastOverridenBeatTime(forDryCopy._lastOverridenBeatTime.load()),
@@ -405,7 +404,7 @@ Management::Management(const Management &forDryCopy,
     _devices.emplace_back(new DummyDevice());
 
   _snapshot.reset(new ValueSnapshot(*forDryCopy._snapshot));
-  _show.reset(new class Show(*this)); // TODO For now we don't copy the show
+  _show.reset(new class Show(*this));  // TODO For now we don't copy the show
 
   _rootFolder = forDryCopy._rootFolder->CopyHierarchy(_folders);
 
@@ -418,7 +417,7 @@ Management::Management(const Management &forDryCopy,
   _controllables.resize(forDryCopy._controllables.size());
   _presetValues.resize(forDryCopy._presetValues.size());
   for (size_t i = 0; i != forDryCopy._controllables.size(); ++i) {
-    if (_controllables[i] == nullptr) // not already resolved?
+    if (_controllables[i] == nullptr)  // not already resolved?
       dryCopyControllerDependency(forDryCopy, i);
   }
   for (size_t i = 0; i != forDryCopy._presetValues.size(); ++i) {
@@ -527,25 +526,22 @@ void Management::SwapDevices(Management &source) {
   std::unique_lock<std::mutex> guard(_mutex);
 #ifndef NDEBUG
   if (source._devices.size() != _devices.size())
-    throw std::runtime_error("Something went wrong: device lists were not of "
-                             "same size in call to SwapDevices()");
+    throw std::runtime_error(
+        "Something went wrong: device lists were not of "
+        "same size in call to SwapDevices()");
 #endif
   std::swap(source._devices, _devices);
   guard.unlock();
 
-  if (sourceRunning)
-    source.Run();
-  if (thisRunning)
-    Run();
+  if (sourceRunning) source.Run();
+  if (thisRunning) Run();
 }
 
 bool Management::topologicalSort(const std::vector<Controllable *> &input,
                                  std::vector<Controllable *> &output) {
-  for (Controllable *controllable : input)
-    controllable->SetVisitLevel(0);
+  for (Controllable *controllable : input) controllable->SetVisitLevel(0);
   for (Controllable *controllable : input) {
-    if (!topologicalSortVisit(*controllable, output))
-      return false;
+    if (!topologicalSortVisit(*controllable, output)) return false;
   }
   return true;
 }
@@ -556,8 +552,7 @@ bool Management::topologicalSortVisit(Controllable &controllable,
     controllable.SetVisitLevel(1);
     for (size_t i = 0; i != controllable.NOutputs(); ++i) {
       Controllable *other = controllable.Output(i).first;
-      if (!topologicalSortVisit(*other, list))
-        return false;
+      if (!topologicalSortVisit(*other, list)) return false;
     }
     controllable.SetVisitLevel(2);
     list.emplace_back(&controllable);
@@ -580,8 +575,7 @@ void Management::Recover(Management &other) {
     Controllable *control = dynamic_cast<Controllable *>(object);
     if (control) {
       PresetValue *value = GetPresetValue(*control, p->InputIndex());
-      if (value)
-        value->SetValue(p->Value());
+      if (value) value->SetValue(p->Value());
     }
   }
 }

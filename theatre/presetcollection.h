@@ -12,7 +12,7 @@
         @author Andre Offringa
 */
 class PresetCollection : public Controllable {
-public:
+ public:
   PresetCollection() : _inputValue(0) {}
   PresetCollection(const std::string &name)
       : Controllable(name), _inputValue(0) {}
@@ -68,7 +68,7 @@ public:
   }
   size_t Size() const { return _presetValues.size(); }
 
-private:
+ private:
   ControlValue _inputValue;
   std::vector<std::unique_ptr<PresetValue>> _presetValues;
 };

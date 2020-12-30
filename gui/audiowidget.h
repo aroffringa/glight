@@ -12,7 +12,7 @@
         @author Andre Offringa
 */
 class AudioWidget : public Gtk::DrawingArea {
-public:
+ public:
   AudioWidget();
   ~AudioWidget();
 
@@ -35,7 +35,7 @@ public:
    */
   void UpdateKeys();
 
-private:
+ private:
   enum KeyType { ItemStart, KeyStart };
 
   int _centerPosition;
@@ -60,10 +60,8 @@ private:
       initialize();
       _isUpToDate = false;
     }
-    if (!_isUpToDate)
-      draw(context);
-    if (_buffer)
-      bufferToScreen(context);
+    if (!_isUpToDate) draw(context);
+    if (_buffer) bufferToScreen(context);
     return true;
   }
   bool onButtonPressed(GdkEventButton *event);
@@ -73,23 +71,20 @@ private:
   int getMax(const unsigned char *chunk, unsigned size) const {
     int max = intValue(chunk, 0);
     for (unsigned i = 2; i < size; i += 2) {
-      if (max < intValue(chunk, i))
-        max = intValue(chunk, i);
+      if (max < intValue(chunk, i)) max = intValue(chunk, i);
     }
     return max;
   }
   int getMin(const unsigned char *chunk, unsigned size) const {
     int min = intValue(chunk, 0);
     for (unsigned i = 2; i < size; i += 2) {
-      if (min > intValue(chunk, i))
-        min = intValue(chunk, i);
+      if (min > intValue(chunk, i)) min = intValue(chunk, i);
     }
     return min;
   }
   int getStdDev(const unsigned char *chunk, unsigned size) const {
     double avg = 0.0;
-    for (unsigned i = 0; i < size; i += 2)
-      avg += intValue(chunk, i);
+    for (unsigned i = 0; i < size; i += 2) avg += intValue(chunk, i);
     avg /= size;
     double val = 0.0;
     for (unsigned i = 0; i < size; i += 2) {

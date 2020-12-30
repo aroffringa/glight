@@ -15,7 +15,7 @@
 #include <vector>
 
 class PropertiesBox : public Gtk::VBox {
-public:
+ public:
   PropertiesBox();
 
   void SetPropertySet(PropertySet *propertySet) {
@@ -25,7 +25,7 @@ public:
 
   void Clear();
 
-private:
+ private:
   struct PropertyRow {
     Property *_property;
     std::vector<std::unique_ptr<Gtk::Widget>> _widgets;

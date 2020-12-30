@@ -10,9 +10,15 @@
 
 AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
                                    Management &management)
-    : _typeLabel("Type:"), _countLabel("Count:"), _countEntry(),
-      _decCountButton("-"), _incCountButton("+"), _cancelButton("Cancel"),
-      _addButton("Add"), _eventHub(*eventHub), _management(&management) {
+    : _typeLabel("Type:"),
+      _countLabel("Count:"),
+      _countEntry(),
+      _decCountButton("-"),
+      _incCountButton("+"),
+      _cancelButton("Cancel"),
+      _addButton("Add"),
+      _eventHub(*eventHub),
+      _management(&management) {
   _grid.set_row_spacing(5);
   _grid.set_column_spacing(2);
 

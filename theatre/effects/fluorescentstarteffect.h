@@ -7,11 +7,13 @@
 #include <vector>
 
 class FluorescentStartEffect : public Effect {
-public:
+ public:
   FluorescentStartEffect()
-      : Effect(1), _averageDuration(1000.0), // 1 sec
-        _stdDeviation(500.0), _flashDuration(80.0),
-        _glowValue(ControlValue::MaxUInt() / 5), // 20%
+      : Effect(1),
+        _averageDuration(1000.0),  // 1 sec
+        _stdDeviation(500.0),
+        _flashDuration(80.0),
+        _glowValue(ControlValue::MaxUInt() / 5),  // 20%
         _independentOutputs(true){};
 
   virtual Effect::Type GetType() const override { return FluorescentStartType; }
@@ -35,7 +37,7 @@ public:
     _independentOutputs = independentOutputs;
   }
 
-private:
+ private:
   virtual void mix(const ControlValue *values, unsigned *channelValues,
                    unsigned universe,
                    const class Timing &timing) final override {
@@ -53,7 +55,7 @@ private:
           if (data._state >= 6)
             data._state = std::numeric_limits<unsigned>::max();
           else {
-            if (data._state % 2 == 0) // flash?
+            if (data._state % 2 == 0)  // flash?
               data._nextStateTime = timing.TimeInMS() + _flashDuration;
             else
               data._nextStateTime = timing.DrawGaussianValue() * _stdDeviation +

@@ -15,14 +15,14 @@
         @author Andre Offringa
 */
 class Reader {
-public:
+ public:
   Reader(class Management &management);
 
   void SetGUIState(class GUIState &guiState) { _guiState = &guiState; }
 
   void Read(const Glib::ustring &filename);
 
-private:
+ private:
   std::string getStringAttribute(xmlNode *node, const char *name) const {
     xmlChar *typeCh = xmlGetProp(node, BAD_CAST name);
     if (typeCh == nullptr)

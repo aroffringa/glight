@@ -8,14 +8,17 @@
 #include <string>
 
 class Property final {
-public:
+ public:
   enum Type { Choice, ControlValue, Duration, Boolean, Integer };
   Property(const std::string &name, const std::string &description, Type type)
       : _type(type), _setIndex(0), _name(name), _description(description) {}
 
   Property(const std::string &name, const std::string &description,
            const std::vector<std::pair<std::string, std::string>> &options)
-      : _type(Choice), _setIndex(0), _name(name), _description(description),
+      : _type(Choice),
+        _setIndex(0),
+        _name(name),
+        _description(description),
         _options(options) {}
 
   Type GetType() const { return _type; }
@@ -32,7 +35,7 @@ public:
     return _options[index].second;
   }
 
-private:
+ private:
   friend class PropertySet;
 
   Type _type;

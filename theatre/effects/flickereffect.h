@@ -6,10 +6,13 @@
 #include <vector>
 
 class FlickerEffect : public Effect {
-public:
+ public:
   FlickerEffect()
-      : Effect(1), _value(1, 0), _previousTime(0.0),
-        _speed(ControlValue::MaxUInt() / 200.0), _independentOutputs(true){};
+      : Effect(1),
+        _value(1, 0),
+        _previousTime(0.0),
+        _speed(ControlValue::MaxUInt() / 200.0),
+        _independentOutputs(true){};
 
   virtual Effect::Type GetType() const override { return FlickerType; }
 
@@ -21,7 +24,7 @@ public:
     _independentOutputs = independentOutputs;
   }
 
-private:
+ private:
   virtual void mix(const ControlValue *values, unsigned *channelValues,
                    unsigned universe,
                    const class Timing &timing) final override {

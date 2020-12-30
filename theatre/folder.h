@@ -8,13 +8,13 @@
 #include "folderobject.h"
 
 class Folder : public FolderObject {
-public:
+ public:
   Folder() : FolderObject() {}
 
   Folder(const std::string &name) : FolderObject(name) {}
 
-  Folder *
-  CopyHierarchy(std::vector<std::unique_ptr<Folder>> &newFolders) const {
+  Folder *CopyHierarchy(
+      std::vector<std::unique_ptr<Folder>> &newFolders) const {
     newFolders.emplace_back(new Folder(_name));
     Folder *copy = newFolders.back().get();
     for (const FolderObject *object : _objects) {
@@ -133,8 +133,7 @@ public:
     if (srciter != _objects.end()) {
       std::vector<FolderObject *>::iterator next = srciter;
       ++next;
-      if (_objects.end() != next)
-        std::swap(*next, *srciter);
+      if (_objects.end() != next) std::swap(*next, *srciter);
     }
   }
 
@@ -202,7 +201,7 @@ public:
     return std::move(prefix) + std::to_string(nameNumber);
   }
 
-private:
+ private:
   Folder *followDown(const std::string &path, size_t strPos) const {
     auto sep = std::find(path.begin() + strPos, path.end(), '/');
     std::string subpath;

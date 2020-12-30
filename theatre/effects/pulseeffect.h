@@ -6,10 +6,16 @@
 #include "../transition.h"
 
 class PulseEffect : public Effect {
-public:
+ public:
   PulseEffect()
-      : Effect(1), _isActive(false), _startTime(0), _repeat(false),
-        _attack(300), _hold(200), _release(300), _sleep(200) {}
+      : Effect(1),
+        _isActive(false),
+        _startTime(0),
+        _repeat(false),
+        _attack(300),
+        _hold(200),
+        _release(300),
+        _sleep(200) {}
 
   virtual Effect::Type GetType() const final override { return PulseType; }
 
@@ -28,7 +34,7 @@ public:
   bool Repeat() const { return _repeat; }
   void SetRepeat(bool repeat) { _repeat = repeat; }
 
-protected:
+ protected:
   virtual void mix(const ControlValue *values, unsigned *channelValues,
                    unsigned universe, const Timing &timing) final override {
     if (values[0].UInt() == 0) {
@@ -75,7 +81,7 @@ protected:
     }
   }
 
-private:
+ private:
   bool _isActive;
   double _startTime;
 

@@ -22,7 +22,7 @@
 #include <vector>
 
 class DesignWizard : public Gtk::Window {
-public:
+ public:
   DesignWizard(class Management &management, class EventTransmitter &hub,
                const std::string &destinationPath);
   ~DesignWizard();
@@ -33,7 +33,7 @@ public:
 
   void Select(const std::vector<class Fixture *> &fixtures);
 
-private:
+ private:
   enum Page {
     Page1_SelFixtures,
     Page2_SelType,
@@ -147,4 +147,4 @@ private:
   Gtk::ScrolledWindow _controllablesScrolledWindow;
 };
 
-#endif // CHASE_WIZARD_H
+#endif  // CHASE_WIZARD_H
