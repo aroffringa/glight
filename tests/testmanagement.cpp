@@ -1,3 +1,4 @@
+#include "../theatre/dummydevice.h"
 #include "../theatre/management.h"
 #include "../theatre/presetcollection.h"
 #include "../theatre/timesequence.h"
@@ -9,6 +10,14 @@
 #include <memory>
 
 BOOST_AUTO_TEST_SUITE(management)
+
+BOOST_AUTO_TEST_CASE(Destruct) {
+  Management management;
+  management.AddDevice(std::make_unique<DummyDevice>());
+  management.Run();
+  BOOST_CHECK_THROW(management.Run(), std::exception);
+  management.StartBeatFinder();
+}
 
 BOOST_AUTO_TEST_CASE(HasCycles) {
   Management management;

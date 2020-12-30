@@ -210,7 +210,8 @@ Color FixtureType::GetColor(const Fixture &fixture,
     const unsigned char cw = fixture.Functions()[0]->GetValue(snapshot);
     const unsigned char ww = fixture.Functions()[1]->GetValue(snapshot);
     const unsigned char a = fixture.Functions()[2]->GetValue(snapshot);
-    return Color((228 * cw + 255 * ww + 170 * a) / 653, (228 * cw + 228 * ww + 85 * a) / 653,
+    return Color((228 * cw + 255 * ww + 170 * a) / 653,
+                 (228 * cw + 228 * ww + 85 * a) / 653,
                  (255 * cw + 228 * ww) / 653);
   }
   case UVLight3Ch: {

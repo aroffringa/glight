@@ -31,7 +31,7 @@ Management::Management()
 }
 
 Management::~Management() {
-  if (_thread != nullptr) {
+  if (_thread) {
     _isQuitting = true;
     abortAllDevices();
     _thread->join();
