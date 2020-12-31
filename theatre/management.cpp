@@ -310,8 +310,8 @@ void Management::RemovePreset(PresetValue &presetValue) {
            _presetValues.begin();
        i != _presetValues.end(); ++i) {
     if (i->get() == &presetValue) {
-      --i;
-      removePreset(i + 1);
+      removePreset(i);
+      return;
     }
   }
 }

@@ -24,7 +24,7 @@ class Controllable : public FolderObject {
 
   virtual size_t NInputs() const = 0;
 
-  virtual ControlValue& InputValue(size_t index) = 0;
+  virtual ControlValue &InputValue(size_t index) = 0;
 
   virtual FunctionType InputType(size_t index) const = 0;
 
