@@ -12,8 +12,11 @@ FaderWidget::FaderWidget(class Management &management,
                          EventTransmitter &eventHub, char key)
     : _scale(0, ControlValue::MaxUInt() + 1,
              (ControlValue::MaxUInt() + 1) / 100),
-      _flashButton(std::string(1, key)), _nameLabel("<..>"),
-      _management(&management), _eventHub(eventHub), _preset(nullptr),
+      _flashButton(std::string(1, key)),
+      _nameLabel("<..>"),
+      _management(&management),
+      _eventHub(eventHub),
+      _preset(nullptr),
       _holdUpdates(false) {
   _updateConnection =
       _eventHub.SignalUpdateControllables().connect([&]() { onUpdate(); });
@@ -105,27 +108,26 @@ void FaderWidget::Assign(PresetValue *item, bool moveFader) {
     if (_preset != nullptr) {
       _nameLabel.set_text(_preset->Title());
       if (moveFader) {
-        immediateAssign(_preset->Value().UInt());
+        setImmediate(_preset->Value().UInt());
         _scale.set_value(_preset->Value().UInt());
       } else
         writeValue(_scale.get_value());
     } else {
       _nameLabel.set_text("<..>");
       if (moveFader) {
-        immediateAssign(0);
+        setImmediate(0);
         _scale.set_value(0);
       } else
         writeValue(_scale.get_value());
     }
     SignalAssigned().emit();
-    if (moveFader)
-      SignalValueChange().emit(_scale.get_value());
+    if (moveFader) SignalValueChange().emit(_scale.get_value());
   }
 }
 
 void FaderWidget::MoveSlider() {
   if (_preset != nullptr) {
-    immediateAssign(_preset->Value().UInt());
+    setImmediate(_preset->Value().UInt());
     _scale.set_value(_preset->Value().UInt());
     SignalValueChange().emit(_scale.get_value());
   }

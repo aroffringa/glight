@@ -20,7 +20,7 @@
         @author Andre Offringa
 */
 class CreateChaseDialog : public Gtk::Dialog {
-public:
+ public:
   CreateChaseDialog(class Management &management,
                     class ShowWindow &parentWindow);
 
@@ -28,7 +28,7 @@ public:
     return *_newChase;
   }
 
-private:
+ private:
   void initListPart();
   void initNewSequencePart();
 

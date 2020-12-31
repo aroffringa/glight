@@ -15,13 +15,13 @@
         @author Andre Offringa
 */
 class EffectPropertiesWindow : public PropertiesWindow {
-public:
+ public:
   EffectPropertiesWindow(class Effect &effect, class Management &management,
                          class ShowWindow &parentWindow);
 
   FolderObject &GetObject() final override;
 
-private:
+ private:
   void fillProperties();
   void fillConnectionsList();
 

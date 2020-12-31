@@ -13,7 +13,7 @@
         @author Andre Offringa
 */
 class FaderWidget : public ControlWidget {
-public:
+ public:
   FaderWidget(class Management &management, class EventTransmitter &eventHub,
               char key);
   ~FaderWidget();
@@ -26,8 +26,7 @@ public:
   PresetValue *Preset() const final override { return _preset; }
 
   void Limit(double value) final override {
-    if (_scale.get_value() > value)
-      _scale.set_value(value);
+    if (_scale.get_value() > value) _scale.set_value(value);
   }
 
   void ChangeManagement(class Management &management,
@@ -35,7 +34,7 @@ public:
 
   Gtk::Widget &NameLabel() { return _eventBox; }
 
-private:
+ private:
   void onUpdate();
   void onScaleChange();
   void onOnButtonClicked();

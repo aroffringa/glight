@@ -3,8 +3,12 @@
 #include <gtkmm/colorchooserdialog.h>
 
 ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent)
-    : _parent(parent), _label("Color:"), _button("Change..."), _colorR(1.0),
-      _colorG(1.0), _colorB(1.0) {
+    : _parent(parent),
+      _label("Color:"),
+      _button("Change..."),
+      _colorR(1.0),
+      _colorG(1.0),
+      _colorB(1.0) {
   pack_start(_label);
   _button.signal_clicked().connect(
       sigc::mem_fun(*this, &ColorSelectWidget::onColorClicked));
@@ -20,7 +24,7 @@ void ColorSelectWidget::onColorClicked() {
   color.set_red(_colorR);
   color.set_green(_colorG);
   color.set_blue(_colorB);
-  color.set_alpha(1.0); // opaque
+  color.set_alpha(1.0);  // opaque
 
   Gtk::ColorChooserDialog dialog("Select color for fixture");
   dialog.set_transient_for(*_parent);

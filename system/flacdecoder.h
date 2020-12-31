@@ -14,17 +14,23 @@
         @author Andre Offringa
 */
 class FlacDecoder : private FLAC::Decoder::File {
-public:
+ public:
   class FlacError : public std::runtime_error {
-  public:
+   public:
     FlacError(const std::string &message)
         : runtime_error(std::string("Alsa error: ") + message) {}
   };
 
   FlacDecoder(const std::string &filename)
-      : _isOpen(false), _filename(filename), _writePos(0),
-        _activeWriteBuffer(0), _readPos(0), _activeReadBuffer(0),
-        _decodeThread(), _isStopping(false), _bufferSize(1024 * 1024) {
+      : _isOpen(false),
+        _filename(filename),
+        _writePos(0),
+        _activeWriteBuffer(0),
+        _readPos(0),
+        _activeReadBuffer(0),
+        _decodeThread(),
+        _isStopping(false),
+        _bufferSize(1024 * 1024) {
     _buffer[0] = new unsigned char[_bufferSize];
     _buffer[1] = new unsigned char[_bufferSize];
     FLAC__StreamDecoderInitStatus init_status = init(_filename);
@@ -54,9 +60,9 @@ public:
   void GetSamples(unsigned char *buffer, size_t &count);
   bool HasMore() { return hasMore(); }
 
-private:
+ private:
   struct DecodeThread {
-  public:
+   public:
     FlacDecoder &_decoder;
     DecodeThread(FlacDecoder &decoder) : _decoder(decoder) {}
     void operator()() {
@@ -135,8 +141,8 @@ private:
     std::lock_guard<std::mutex> lock(_mutex);
     return _activeReadBuffer;
   }
-  virtual FLAC__StreamDecoderWriteStatus
-  write_callback(const FLAC__Frame *frame, const FLAC__int32 *const buffer[]);
+  virtual FLAC__StreamDecoderWriteStatus write_callback(
+      const FLAC__Frame *frame, const FLAC__int32 *const buffer[]);
   virtual void error_callback(FLAC__StreamDecoderErrorStatus status);
   virtual void metadata_callback(const ::FLAC__StreamMetadata *metadata);
 };

@@ -11,9 +11,12 @@
 #include "../../theatre/timesequence.h"
 
 ObjectList::ObjectList(Management &management, EventTransmitter &eventHub)
-    : _management(&management), _eventHub(eventHub),
-      _displayType(AllExceptFixtures), _showTypeColumn(false),
-      _openFolder(&management.RootFolder()), _listView(*this) {
+    : _management(&management),
+      _eventHub(eventHub),
+      _displayType(AllExceptFixtures),
+      _showTypeColumn(false),
+      _openFolder(&management.RootFolder()),
+      _listView(*this) {
   _eventHub.SignalChangeManagement().connect(
       sigc::mem_fun(*this, &ObjectList::changeManagement));
 
@@ -25,14 +28,12 @@ ObjectList::ObjectList(Management &management, EventTransmitter &eventHub)
   _listView.set_model(_listModel);
   _listView.append_column("Object", _listColumns._title);
   _listView.get_selection()->signal_changed().connect([&]() {
-    if (_avoidRecursion.IsFirst())
-      _signalSelectionChange.emit();
+    if (_avoidRecursion.IsFirst()) _signalSelectionChange.emit();
   });
   _listView.signal_row_activated().connect(
       [&](const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *) {
         Gtk::TreeModel::iterator iter = _listModel->get_iter(path);
-        if (iter)
-          _signalObjectActivated.emit(*(*iter)[_listColumns._object]);
+        if (iter) _signalObjectActivated.emit(*(*iter)[_listColumns._object]);
       });
 
   fillList();
@@ -61,25 +62,25 @@ void ObjectList::fillList() {
   Gtk::TreeViewColumn *objectColumn =
       _showTypeColumn ? _listView.get_column(1) : _listView.get_column(0);
   switch (_displayType) {
-  case AllExceptFixtures:
-  case All:
-    objectColumn->set_title("objects");
-    break;
-  case OnlyPresetCollections:
-    objectColumn->set_title("preset collections");
-    break;
-  case OnlyChases:
-    objectColumn->set_title("chases");
-    break;
-  case OnlyEffects:
-    objectColumn->set_title("effects");
-    break;
+    case AllExceptFixtures:
+    case All:
+      objectColumn->set_title("objects");
+      break;
+    case OnlyPresetCollections:
+      objectColumn->set_title("preset collections");
+      break;
+    case OnlyChases:
+      objectColumn->set_title("chases");
+      break;
+    case OnlyEffects:
+      objectColumn->set_title("effects");
+      break;
   }
   std::unique_lock<std::mutex> lock(_management->Mutex());
   fillListFolder(*_openFolder, selectedObj);
   lock.unlock();
   if (selectedObj &&
-      !SelectedObject()) // if the selected object is no longer in the list
+      !SelectedObject())  // if the selected object is no longer in the list
     _signalSelectionChange.emit();
 }
 

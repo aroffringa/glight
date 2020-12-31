@@ -9,7 +9,7 @@
 #include "../../theatre/color.h"
 
 class ColorSelectWidget : public Gtk::HBox {
-public:
+ public:
   ColorSelectWidget(Gtk::Window *parent);
 
   const Color GetColor() const {
@@ -25,7 +25,7 @@ public:
   }
   sigc::signal<void()> &SignalColorChanged() { return _signalColorChanged; }
 
-private:
+ private:
   Gtk::Window *_parent;
   Gtk::Label _label;
   Gtk::DrawingArea _area;

@@ -19,11 +19,16 @@
 
 ObjectListFrame::ObjectListFrame(Management &management,
                                  ShowWindow &parentWindow)
-    : _objectListFrame("Object programming"), _list(management, parentWindow),
-      _newPresetButton("Preset"), _newChaseButton("Chase"),
-      _newTimeSequenceButton("Sequence"), _newEffectButton("Effect"),
-      _newFolderButton("Folder"), _deletePresetButton(Gtk::Stock::DELETE),
-      _management(&management), _parentWindow(parentWindow),
+    : _objectListFrame("Object programming"),
+      _list(management, parentWindow),
+      _newPresetButton("Preset"),
+      _newChaseButton("Chase"),
+      _newTimeSequenceButton("Sequence"),
+      _newEffectButton("Effect"),
+      _newFolderButton("Folder"),
+      _deletePresetButton(Gtk::Stock::DELETE),
+      _management(&management),
+      _parentWindow(parentWindow),
       _nameFrame(management, parentWindow) {
   _parentWindow.SignalChangeManagement().connect(
       sigc::mem_fun(*this, &ObjectListFrame::changeManagement));

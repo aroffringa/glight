@@ -11,7 +11,7 @@
         @author Andre Offringa
 */
 class PresetValue {
-public:
+ public:
   PresetValue(class Controllable &controllable, size_t inputIndex)
       : _value(0), _controllable(&controllable), _inputIndex(inputIndex) {}
 
@@ -19,7 +19,8 @@ public:
    * Copy the preset value. The delete signal is not copied.
    */
   PresetValue(const PresetValue &source)
-      : _value(source._value), _controllable(source._controllable),
+      : _value(source._value),
+        _controllable(source._controllable),
         _inputIndex(source._inputIndex) {}
 
   /**
@@ -27,7 +28,8 @@ public:
    * controllable.
    */
   PresetValue(const PresetValue &source, class Controllable &controllable)
-      : _value(source._value), _controllable(&controllable),
+      : _value(source._value),
+        _controllable(&controllable),
         _inputIndex(source._inputIndex) {}
 
   ~PresetValue() { _signalDelete(); }
@@ -53,7 +55,7 @@ public:
     _inputIndex = inputIndex;
   }
 
-private:
+ private:
   ControlValue _value;
   class Controllable *_controllable;
   size_t _inputIndex;

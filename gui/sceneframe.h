@@ -22,7 +22,7 @@
         @author Andre Offringa
 */
 class SceneFrame : public Gtk::Frame {
-public:
+ public:
   SceneFrame(class Management &management, class ShowWindow &parentWindow);
   ~SceneFrame();
 
@@ -40,7 +40,7 @@ public:
   }
   void ChangeManagement(class Management &management);
 
-private:
+ private:
   class Management *_management;
   class Show *_show;
 

@@ -4,7 +4,7 @@
 #include <utility>
 
 class Position {
-public:
+ public:
   Position() : _x(0.0), _y(0.0) {}
 
   Position(double x, double y) : _x(x), _y(y) {}
@@ -54,7 +54,7 @@ public:
     return dx * dx + dy * dy;
   }
 
-private:
+ private:
   std::pair<double, double> p() const { return std::make_pair(_x, _y); }
 
   double _x, _y;

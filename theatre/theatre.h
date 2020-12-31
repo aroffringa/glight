@@ -12,16 +12,16 @@
         @author Andre Offringa
 */
 class Theatre {
-public:
+ public:
   Theatre() : _highestChannel(0) {}
   ~Theatre() { Clear(); }
   Theatre(const Theatre &source);
 
   void Clear();
 
-  class Fixture &AddFixture(FixtureType &type);
-  class FixtureType &
-  AddFixtureType(enum FixtureType::FixtureClass fixtureClass);
+  class Fixture &AddFixture(const FixtureType &type);
+  class FixtureType &AddFixtureType(
+      enum FixtureType::FixtureClass fixtureClass);
 
   bool Contains(Fixture &fixture) const;
 
@@ -38,7 +38,7 @@ public:
 
   void RemoveFixture(Fixture &fixture);
 
-  bool IsUsed(FixtureType &fixtureType) const;
+  bool IsUsed(const FixtureType &fixtureType) const;
 
   unsigned HighestChannel() const { return _highestChannel; }
   unsigned FirstFreeChannel() const {
@@ -50,7 +50,7 @@ public:
 
   Position Extend() const;
 
-private:
+ private:
   std::vector<std::unique_ptr<class Fixture>> _fixtures;
   std::vector<std::unique_ptr<class FixtureType>> _fixtureTypes;
   unsigned _highestChannel;

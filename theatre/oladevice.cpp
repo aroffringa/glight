@@ -14,7 +14,7 @@ void OLADevice::Abort() {}
 void OLADevice::Open() {
   // turn on OLA logging
   ola::InitLogging(ola::OLA_LOG_WARN, ola::OLA_LOG_STDERR);
-  _buffer.Blackout(); // Set all channels to 0
+  _buffer.Blackout();  // Set all channels to 0
 
   _client.reset(new ola::client::StreamingClient(
       (ola::client::StreamingClient::Options())));

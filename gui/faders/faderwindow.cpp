@@ -25,16 +25,27 @@ const char FaderWindow::_keyRowsLower[3][10] = {
 
 FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
                          Management &management, size_t keyRowIndex)
-    : _management(&management), _keyRowIndex(keyRowIndex),
-      _faderSetupLabel("Fader setup: "), _nameButton("Name"),
-      _newFaderSetupButton(Gtk::Stock::NEW), _menuButton("Menu"),
-      _miSolo("Solo"), _miFadeIn("Fade in"), _miFadeOut("Fade out"),
-      _miAssign("Assign"), _miAssignChases("Assign to chases"),
-      _miClear("Clear"), _miAddFader("Add fader"),
-      _miAdd5Faders("Add 5 faders"), _miAddToggleButton("Add toggle control"),
+    : _management(&management),
+      _keyRowIndex(keyRowIndex),
+      _faderSetupLabel("Fader setup: "),
+      _nameButton("Name"),
+      _newFaderSetupButton(Gtk::Stock::NEW),
+      _menuButton("Menu"),
+      _miSolo("Solo"),
+      _miFadeIn("Fade in"),
+      _miFadeOut("Fade out"),
+      _miAssign("Assign"),
+      _miAssignChases("Assign to chases"),
+      _miClear("Clear"),
+      _miAddFader("Add fader"),
+      _miAdd5Faders("Add 5 faders"),
+      _miAddToggleButton("Add toggle control"),
       _miAdd5ToggleButtons("Add 5 toggle controls"),
-      _miAddToggleColumn("Add toggle column"), _miRemoveFader("Remove 1"),
-      _miRemove5Faders("Remove 5"), _eventHub(eventHub), _guiState(guiState),
+      _miAddToggleColumn("Add toggle column"),
+      _miRemoveFader("Remove 1"),
+      _miRemove5Faders("Remove 5"),
+      _eventHub(eventHub),
+      _guiState(guiState),
       _state(nullptr),
       _lastUpdateTime(boost::posix_time::microsec_clock::local_time()) {
   initializeWidgets();
@@ -52,8 +63,7 @@ void FaderWindow::LoadNew() {
   _state = _guiState.FaderSetups().back().get();
   _state->name = "Unnamed fader setup";
   _state->isActive = true;
-  for (size_t i = 0; i != 10; ++i)
-    _state->faders.emplace_back();
+  for (size_t i = 0; i != 10; ++i) _state->faders.emplace_back();
 
   _state->width = std::max(100, get_width());
   _state->height = std::max(300, get_height());
@@ -192,8 +202,7 @@ bool FaderWindow::onResize(GdkEventConfigure *event) {
 }
 
 void FaderWindow::addControl(bool isToggle, bool newToggleColumn) {
-  if (_toggleColumns.empty())
-    newToggleColumn = true;
+  if (_toggleColumns.empty()) newToggleColumn = true;
   if (_recursionLock.IsFirst()) {
     _state->faders.emplace_back();
     FaderState &state = _state->faders.back();
@@ -260,8 +269,7 @@ bool FaderWindow::onMenuButtonClicked(GdkEventButton *event) {
 }
 
 void FaderWindow::onAssignClicked() {
-  for (std::unique_ptr<ControlWidget> &c : _controls)
-    c->Unassign();
+  for (std::unique_ptr<ControlWidget> &c : _controls) c->Unassign();
   size_t n = _management->PresetValues().size();
   if (!_controls.empty()) {
     size_t controlIndex = 0;
@@ -270,16 +278,14 @@ void FaderWindow::onAssignClicked() {
       if (!_guiState.IsAssigned(p)) {
         _controls[controlIndex]->Assign(p, true);
         ++controlIndex;
-        if (controlIndex == _controls.size())
-          break;
+        if (controlIndex == _controls.size()) break;
       }
     }
   }
 }
 
 void FaderWindow::onClearClicked() {
-  for (std::unique_ptr<ControlWidget> &c : _controls)
-    c->Unassign();
+  for (std::unique_ptr<ControlWidget> &c : _controls) c->Unassign();
 }
 
 void FaderWindow::onAssignChasesClicked() {
@@ -291,8 +297,7 @@ void FaderWindow::onAssignChasesClicked() {
       if (c != nullptr) {
         _controls[controlIndex]->Assign(p, true);
         ++controlIndex;
-        if (controlIndex == _controls.size())
-          break;
+        if (controlIndex == _controls.size()) break;
       }
     }
   }
@@ -314,11 +319,9 @@ void FaderWindow::onControlValueChanged(double newValue,
       RecursionLock::Token token(_recursionLock);
       double limitValue = ControlWidget::MAX_SCALE_VALUE() - newValue -
                           ControlWidget::MAX_SCALE_VALUE() * 0.01;
-      if (limitValue < 0.0)
-        limitValue = 0.0;
+      if (limitValue < 0.0) limitValue = 0.0;
       for (std::unique_ptr<ControlWidget> &c : _controls) {
-        if (c.get() != widget)
-          c->Limit(limitValue);
+        if (c.get() != widget) c->Limit(limitValue);
       }
     }
   }
@@ -331,8 +334,7 @@ void FaderWindow::onControlAssigned(size_t widgetIndex) {
 }
 
 bool FaderWindow::HandleKeyDown(char key) {
-  if (_keyRowIndex >= 3)
-    return false;
+  if (_keyRowIndex >= 3) return false;
 
   for (unsigned i = 0; i < 10; ++i) {
     if (_keyRowsUpper[_keyRowIndex][i] == key) {
@@ -351,8 +353,7 @@ bool FaderWindow::HandleKeyDown(char key) {
 }
 
 bool FaderWindow::HandleKeyUp(char key) {
-  if (_keyRowIndex >= 3)
-    return false;
+  if (_keyRowIndex >= 3) return false;
 
   for (unsigned i = 0; i < 10; ++i) {
     if (_keyRowsUpper[_keyRowIndex][i] == key) {
@@ -367,8 +368,7 @@ bool FaderWindow::HandleKeyUp(char key) {
 
 bool FaderWindow::IsAssigned(PresetValue *presetValue) {
   for (std::unique_ptr<ControlWidget> &c : _controls) {
-    if (c->Preset() == presetValue)
-      return true;
+    if (c->Preset() == presetValue) return true;
   }
   return false;
 }
@@ -394,8 +394,7 @@ void FaderWindow::onNewFaderSetupButtonClicked() {
   _state = _guiState.FaderSetups().back().get();
   _state->isActive = true;
   _state->name = "Unnamed fader setup";
-  for (size_t i = 0; i != 10; ++i)
-    _state->faders.emplace_back();
+  for (size_t i = 0; i != 10; ++i) _state->faders.emplace_back();
   _state->height = 300;
   _state->width = 100;
   loadState();
@@ -469,57 +468,57 @@ void FaderWindow::updateValues() {
 
 double FaderWindow::mapSliderToSpeed(int sliderVal) {
   switch (sliderVal) {
-  default:
-  case 0:
-    return 0.0;
-  case 1:
-    return 10.0;
-  case 2:
-    return 5.0;
-  case 3:
-    return 3.5;
-  case 4:
-    return 2.0;
-  case 5:
-    return 1.0;
-  case 6:
-    return 0.5;
-  case 7:
-    return 0.33;
-  case 8:
-    return 0.25;
-  case 9:
-    return 0.16;
-  case 10:
-    return 0.1;
+    default:
+    case 0:
+      return 0.0;
+    case 1:
+      return 10.0;
+    case 2:
+      return 5.0;
+    case 3:
+      return 3.5;
+    case 4:
+      return 2.0;
+    case 5:
+      return 1.0;
+    case 6:
+      return 0.5;
+    case 7:
+      return 0.33;
+    case 8:
+      return 0.25;
+    case 9:
+      return 0.16;
+    case 10:
+      return 0.1;
   }
 }
 
 std::string FaderWindow::speedLabel(int value) {
   switch (value) {
-  default:
-  case 0:
-    return "Direct";
-  case 1:
-    return "0.1 (Fastest)";
-  case 2:
-    return "0.2s";
-  case 3:
-    return "0.3s";
-  case 4:
-    return "0.5s";
-  case 5:
-    return "1s";
-  case 6:
-    return "2s";
-  case 7:
-    return "3s";
-  case 8:
-    return "4s";
-  case 9:
-    return "6s";
-  case 10:
-    return "10s (Slowest)";
+    default:
+    case 0:
+      return "Direct";
+    case 1:
+      return "0.1 (Fastest)";
+    case 2:
+      return "0.2s";
+    case 3:
+      return "0.3s";
+    case 4:
+      return "0.5s";
+    case 5:
+      return "1s";
+    case 6:
+      return "2s";
+    case 7:
+      return "3s";
+    case 8:
+      return "4s";
+    case 9:
+      return "6s";
+    case 10:
+      return "10s (Slowest)";
   }
 }
 
@@ -549,15 +548,13 @@ void FaderWindow::ChangeManagement(class Management &management,
 
 size_t FaderWindow::getFadeInSpeed() const {
   for (size_t i = 0; i != 11; ++i)
-    if (_miFadeInOption[i].get_active())
-      return i;
+    if (_miFadeInOption[i].get_active()) return i;
   return 0;
 }
 
 size_t FaderWindow::getFadeOutSpeed() const {
   for (size_t i = 0; i != 11; ++i)
-    if (_miFadeOutOption[i].get_active())
-      return i;
+    if (_miFadeOutOption[i].get_active()) return i;
   return 0;
 }
 

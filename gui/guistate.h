@@ -9,10 +9,11 @@
 #include <sigc++/signal.h>
 
 class FaderState {
-public:
+ public:
   explicit FaderState(class PresetValue *pv);
   FaderState()
-      : _presetValue(nullptr), _isToggleButton(false),
+      : _presetValue(nullptr),
+        _isToggleButton(false),
         _newToggleButtonColumn(false) {}
   FaderState(const FaderState &source);
 
@@ -33,7 +34,7 @@ public:
   bool IsToggleButton() const { return _isToggleButton; }
   bool NewToggleButtonColumn() const { return _newToggleButtonColumn; }
 
-private:
+ private:
   void onPresetValueDeleted();
   class PresetValue *_presetValue;
   bool _isToggleButton;
@@ -42,10 +43,14 @@ private:
 };
 
 class FaderSetupState {
-public:
+ public:
   FaderSetupState()
-      : isActive(false), isSolo(false), fadeInSpeed(0), fadeOutSpeed(0),
-        width(0), height(0) {}
+      : isActive(false),
+        isSolo(false),
+        fadeInSpeed(0),
+        fadeOutSpeed(0),
+        width(0),
+        height(0) {}
   std::string name;
   bool isActive;
   bool isSolo;
@@ -54,8 +59,7 @@ public:
 
   bool IsAssigned(const class PresetValue *p) const {
     for (const class FaderState &fader : faders)
-      if (p == fader.GetPresetValue())
-        return true;
+      if (p == fader.GetPresetValue()) return true;
     return false;
   }
 
@@ -65,7 +69,7 @@ public:
 };
 
 class GUIState {
-public:
+ public:
   std::vector<std::unique_ptr<FaderSetupState>> &FaderSetups() {
     return _faderSetups;
   }
@@ -88,8 +92,7 @@ public:
 
   bool IsAssigned(const class PresetValue *p) const {
     for (const std::unique_ptr<FaderSetupState> &fader : _faderSetups) {
-      if (fader->IsAssigned(p))
-        return true;
+      if (fader->IsAssigned(p)) return true;
     }
     return false;
   }
@@ -99,7 +102,7 @@ public:
       fader->ChangeManagement(management);
   }
 
-private:
+ private:
   sigc::signal<void()> _faderSetupSignalChange;
   std::vector<std::unique_ptr<FaderSetupState>> _faderSetups;
 };

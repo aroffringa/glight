@@ -8,7 +8,7 @@
         @author Andre Offringa
 */
 class Sequence {
-public:
+ public:
   Sequence() = default;
 
   size_t Size() const { return _list.size(); }
@@ -25,12 +25,11 @@ public:
 
   bool IsUsing(class Controllable &object) const {
     for (const std::pair<class Controllable *, size_t> &input : _list)
-      if (input.first == &object)
-        return true;
+      if (input.first == &object) return true;
     return false;
   }
 
-private:
+ private:
   std::vector<std::pair<class Controllable *, size_t>> _list;
 };
 

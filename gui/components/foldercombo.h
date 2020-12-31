@@ -7,7 +7,7 @@
 #include "../recursionlock.h"
 
 class FolderCombo : public Gtk::ComboBox {
-public:
+ public:
   FolderCombo(class Management &management, class EventTransmitter &eventHub);
 
   class Folder &Selection();
@@ -18,7 +18,7 @@ public:
 
   void Select(const Folder &object);
 
-private:
+ private:
   class Management *_management;
   class EventTransmitter &_eventHub;
 

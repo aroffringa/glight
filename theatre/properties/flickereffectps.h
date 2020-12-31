@@ -6,21 +6,21 @@
 #include "../effects/flickereffect.h"
 
 class FlickerEffectPS final : public PropertySet {
-public:
+ public:
   FlickerEffectPS() {
     addProperty(Property("speed", "Speed", Property::ControlValue));
     addProperty(Property("independentoutputs", "Independent outputs",
                          Property::Boolean));
   }
 
-protected:
+ protected:
   virtual void setControlValue(FolderObject &object, size_t index,
                                unsigned value) const final override {
     FlickerEffect &fx = static_cast<FlickerEffect &>(object);
     switch (index) {
-    case 0:
-      fx.SetSpeed(value);
-      break;
+      case 0:
+        fx.SetSpeed(value);
+        break;
     }
   }
 
@@ -28,8 +28,8 @@ protected:
                                    size_t index) const final override {
     const FlickerEffect &fx = static_cast<const FlickerEffect &>(object);
     switch (index) {
-    case 0:
-      return fx.Speed();
+      case 0:
+        return fx.Speed();
     }
     return 0;
   }
@@ -38,9 +38,9 @@ protected:
                        bool value) const override {
     FlickerEffect &fx = static_cast<FlickerEffect &>(object);
     switch (index) {
-    case 1:
-      fx.SetIndependentOutputs(value);
-      break;
+      case 1:
+        fx.SetIndependentOutputs(value);
+        break;
     }
   }
 
@@ -48,8 +48,8 @@ protected:
                        size_t index) const final override {
     const FlickerEffect &fx = static_cast<const FlickerEffect &>(object);
     switch (index) {
-    case 1:
-      return fx.IndependentOutputs();
+      case 1:
+        return fx.IndependentOutputs();
     }
     return 0;
   }

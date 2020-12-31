@@ -11,7 +11,7 @@
         @author Andre Offringa
 */
 class Chase : public Controllable {
-public:
+ public:
   Chase() : _phaseOffset(0.0) {}
 
   std::unique_ptr<Chase> CopyWithoutSequence() const {
@@ -44,15 +44,15 @@ public:
         _phaseOffset = 0.0;
     }
     switch (_trigger.Type()) {
-    case Trigger::DelayTriggered:
-      mixDelayChase(channelValues, universe, timing);
-      break;
-    case Trigger::SyncTriggered:
-      mixSyncedChase(channelValues, universe, timing);
-      break;
-    case Trigger::BeatTriggered:
-      mixBeatChase(channelValues, universe, timing);
-      break;
+      case Trigger::DelayTriggered:
+        mixDelayChase(channelValues, universe, timing);
+        break;
+      case Trigger::SyncTriggered:
+        mixSyncedChase(channelValues, universe, timing);
+        break;
+      case Trigger::BeatTriggered:
+        mixBeatChase(channelValues, universe, timing);
+        break;
     }
   }
 
@@ -108,13 +108,15 @@ public:
 
   void ResetPhaseOffset() { _phaseOffset = 0.0; }
 
-private:
+ private:
   /**
    * Copy constructor for dry copy
    */
   Chase(const Chase &chase)
-      : Controllable(chase), _trigger(chase._trigger),
-        _transition(chase._transition), _phaseOffset(chase._phaseOffset) {}
+      : Controllable(chase),
+        _trigger(chase._trigger),
+        _transition(chase._transition),
+        _phaseOffset(chase._phaseOffset) {}
 
   void mixBeatChase(unsigned *channelValues, unsigned universe,
                     const Timing &timing) {

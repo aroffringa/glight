@@ -6,20 +6,20 @@
 #include "../effects/inverteffect.h"
 
 class InvertEffectPS final : public PropertySet {
-public:
+ public:
   InvertEffectPS() {
     addProperty(
         Property("offthreshold", "Off threshold", Property::ControlValue));
   }
 
-protected:
+ protected:
   virtual void setControlValue(FolderObject &object, size_t index,
                                unsigned value) const final override {
     InvertEffect &fx = static_cast<InvertEffect &>(object);
     switch (index) {
-    case 0:
-      fx.SetOffThreshold(value);
-      break;
+      case 0:
+        fx.SetOffThreshold(value);
+        break;
     }
   }
 
@@ -27,8 +27,8 @@ protected:
                                    size_t index) const final override {
     const InvertEffect &fx = static_cast<const InvertEffect &>(object);
     switch (index) {
-    case 0:
-      return fx.OffThreshold();
+      case 0:
+        return fx.OffThreshold();
     }
     return 0;
   }

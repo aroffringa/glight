@@ -24,7 +24,7 @@
         @author Andre Offringa
 */
 class ShowWindow : public Gtk::Window, public EventTransmitter {
-public:
+ public:
   ShowWindow(std::unique_ptr<class DmxDevice> dmxDevice);
   ~ShowWindow();
 
@@ -49,7 +49,7 @@ public:
     return _designWizard;
   }
 
-private:
+ private:
   void onConfigurationWindowButtonClicked();
   void onVisualizationWindowButtonClicked();
 

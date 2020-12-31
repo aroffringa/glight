@@ -18,60 +18,60 @@
 std::unique_ptr<Effect> Effect::Make(Effect::Type type) {
   using up = std::unique_ptr<Effect>;
   switch (type) {
-  case AudioLevelType:
-    return up(new AudioLevelEffect());
-  case ConstantValueType:
-    return up(new ConstantValueEffect());
-  case CurveType:
-    return up(new CurveEffect());
-  case DelayType:
-    return up(new DelayEffect());
-  case FadeType:
-    return up(new FadeEffect());
-  case FlickerType:
-    return up(new FlickerEffect());
-  case FluorescentStartType:
-    return up(new FluorescentStartEffect());
-  case InvertType:
-    return up(new InvertEffect());
-  case MusicActivationType:
-    return up(new MusicActivationEffect());
-  case PulseType:
-    return up(new PulseEffect());
-  case RandomSelectType:
-    return up(new RandomSelectEffect());
-  case ThresholdType:
-    return up(new ThresholdEffect());
+    case AudioLevelType:
+      return up(new AudioLevelEffect());
+    case ConstantValueType:
+      return up(new ConstantValueEffect());
+    case CurveType:
+      return up(new CurveEffect());
+    case DelayType:
+      return up(new DelayEffect());
+    case FadeType:
+      return up(new FadeEffect());
+    case FlickerType:
+      return up(new FlickerEffect());
+    case FluorescentStartType:
+      return up(new FluorescentStartEffect());
+    case InvertType:
+      return up(new InvertEffect());
+    case MusicActivationType:
+      return up(new MusicActivationEffect());
+    case PulseType:
+      return up(new PulseEffect());
+    case RandomSelectType:
+      return up(new RandomSelectEffect());
+    case ThresholdType:
+      return up(new ThresholdEffect());
   }
   return nullptr;
 }
 
 std::string Effect::TypeToName(Effect::Type type) {
   switch (type) {
-  case AudioLevelType:
-    return "Audiolevel";
-  case ConstantValueType:
-    return "Constant value";
-  case CurveType:
-    return "Curve";
-  case DelayType:
-    return "Delay";
-  case FadeType:
-    return "Fade";
-  case FlickerType:
-    return "Flicker";
-  case FluorescentStartType:
-    return "Fluorescent start";
-  case InvertType:
-    return "Invert";
-  case MusicActivationType:
-    return "Music activation";
-  case PulseType:
-    return "Pulse";
-  case RandomSelectType:
-    return "Random select";
-  case ThresholdType:
-    return "Threshold";
+    case AudioLevelType:
+      return "Audiolevel";
+    case ConstantValueType:
+      return "Constant value";
+    case CurveType:
+      return "Curve";
+    case DelayType:
+      return "Delay";
+    case FadeType:
+      return "Fade";
+    case FlickerType:
+      return "Flicker";
+    case FluorescentStartType:
+      return "Fluorescent start";
+    case InvertType:
+      return "Invert";
+    case MusicActivationType:
+      return "Music activation";
+    case PulseType:
+      return "Pulse";
+    case RandomSelectType:
+      return "Random select";
+    case ThresholdType:
+      return "Threshold";
   }
   return std::string();
 }

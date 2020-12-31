@@ -6,7 +6,7 @@
 #include <vector>
 
 class FixtureSelection {
-public:
+ public:
   sigc::signal<void> &SignalChange() { return _signalChange; }
 
   const std::vector<class Fixture *> &Selection() const { return _selection; }
@@ -20,7 +20,7 @@ public:
     _signalChange.emit();
   }
 
-private:
+ private:
   sigc::signal<void> _signalChange;
   std::vector<class Fixture *> _selection;
 };

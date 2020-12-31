@@ -19,10 +19,14 @@
 FixtureListWindow::FixtureListWindow(EventTransmitter *eventHub,
                                      class Management &management,
                                      class FixtureSelection *globalSelection)
-    : _eventHub(eventHub), _management(&management),
-      _globalSelection(globalSelection), _newButton("New"),
-      _removeButton("Remove"), _incChannelButton("+channel"),
-      _decChannelButton("-channel"), _setChannelButton("Set...") {
+    : _eventHub(eventHub),
+      _management(&management),
+      _globalSelection(globalSelection),
+      _newButton("New"),
+      _removeButton("Remove"),
+      _incChannelButton("+channel"),
+      _decChannelButton("-channel"),
+      _setChannelButton("Set...") {
   set_title("Glight - configuration");
   set_size_request(200, 400);
 
@@ -108,11 +112,9 @@ std::string FixtureListWindow::getChannelString(const class Fixture &fixture) {
   std::ostringstream s;
   // Note that DMX channels start counting at one on fixtures, but internally
   // are represented zero-indexed. Hence, add one.
-  if (i != channels.end())
-    s << (*i + 1);
+  if (i != channels.end()) s << (*i + 1);
   ++i;
-  for (; i != channels.end(); ++i)
-    s << "," << (*i + 1);
+  for (; i != channels.end(); ++i) s << "," << (*i + 1);
 
   return s.str();
 }
@@ -142,8 +144,8 @@ void FixtureListWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl) {
       _management->RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
   if (!type) {
     type = &_management->Theatre().AddFixtureType(
-        cl); // TODO we shouldn't use a type by its name, types should be
-             // editable etc
+        cl);  // TODO we shouldn't use a type by its name, types should be
+              // editable etc
     _management->RootFolder().Add(*type);
   }
   Fixture &fixture = _management->Theatre().AddFixture(*type);
@@ -173,8 +175,7 @@ void FixtureListWindow::onIncChannelButtonClicked() {
   if (selected) {
     Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
     fixture->IncChannel();
-    if (!fixture->IsVisible())
-      fixture->SetSymbol(FixtureSymbol::Normal);
+    if (!fixture->IsVisible()) fixture->SetSymbol(FixtureSymbol::Normal);
     updateFixture(fixture);
   }
 }
@@ -186,8 +187,7 @@ void FixtureListWindow::onDecChannelButtonClicked() {
   if (selected) {
     Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
     fixture->DecChannel();
-    if (!fixture->IsVisible())
-      fixture->SetSymbol(FixtureSymbol::Normal);
+    if (!fixture->IsVisible()) fixture->SetSymbol(FixtureSymbol::Normal);
     updateFixture(fixture);
   }
 }
@@ -212,8 +212,7 @@ void FixtureListWindow::onSetChannelButtonClicked() {
       std::string dmxChannel = entry.get_text();
       unsigned value = std::atoi(dmxChannel.c_str());
       if (value > 0 && value <= 512) {
-        if (!fixture->IsVisible())
-          fixture->SetSymbol(FixtureSymbol::Normal);
+        if (!fixture->IsVisible()) fixture->SetSymbol(FixtureSymbol::Normal);
         fixture->SetChannel(value - 1);
         updateFixture(fixture);
       }

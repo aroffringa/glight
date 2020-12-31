@@ -98,10 +98,9 @@ void Writer::writeGlightShow() {
     writeFixtureType(*ft);
 
   const std::vector<std::unique_ptr<Fixture>> &fixtures = theatre.Fixtures();
-  for (const std::unique_ptr<Fixture> &f : fixtures)
-    writeFixture(*f);
+  for (const std::unique_ptr<Fixture> &f : fixtures) writeFixture(*f);
 
-  endElement(); // theatre
+  endElement();  // theatre
 
   startElement("control");
 
@@ -115,26 +114,24 @@ void Writer::writeGlightShow() {
   for (const std::unique_ptr<PresetValue> &pv : presetValues)
     writePresetValue(*pv);
 
-  endElement(); // control
+  endElement();  // control
 
   startElement("show");
 
   Show &show = _management.Show();
 
   const std::vector<std::unique_ptr<Scene>> &scenes = show.Scenes();
-  for (const std::unique_ptr<Scene> &scene : scenes)
-    writeScene(*scene);
+  for (const std::unique_ptr<Scene> &scene : scenes) writeScene(*scene);
 
-  endElement(); // show
+  endElement();  // show
 
   startElement("gui");
 
-  if (_guiState != nullptr)
-    writeGUIState(*_guiState);
+  if (_guiState != nullptr) writeGUIState(*_guiState);
 
-  endElement(); // gui
+  endElement();  // gui
 
-  endElement(); // glight-show
+  endElement();  // glight-show
 }
 
 void Writer::writeFolders() {
@@ -232,8 +229,7 @@ void Writer::writePresetCollection(
 
   startElement("preset-collection");
   writeFolderAttributes(presetCollection);
-  for (const std::unique_ptr<PresetValue> &pv : values)
-    writePresetValue(*pv);
+  for (const std::unique_ptr<PresetValue> &pv : values) writePresetValue(*pv);
   endElement();
 }
 
@@ -335,21 +331,21 @@ void Writer::writeEffect(const class Effect &effect) {
       startElement("property");
       writeAttribute("name", p.Name());
       switch (p.GetType()) {
-      case Property::Choice:
-        writeAttribute("value", ps->GetChoice(p));
-        break;
-      case Property::ControlValue:
-        writeAttribute("value", ps->GetControlValue(p));
-        break;
-      case Property::Duration:
-        writeAttribute("value", ps->GetDuration(p));
-        break;
-      case Property::Boolean:
-        writeAttribute("value", ps->GetBool(p));
-        break;
-      case Property::Integer:
-        writeAttribute("value", ps->GetInteger(p));
-        break;
+        case Property::Choice:
+          writeAttribute("value", ps->GetChoice(p));
+          break;
+        case Property::ControlValue:
+          writeAttribute("value", ps->GetControlValue(p));
+          break;
+        case Property::Duration:
+          writeAttribute("value", ps->GetDuration(p));
+          break;
+        case Property::Boolean:
+          writeAttribute("value", ps->GetBool(p));
+          break;
+        case Property::Integer:
+          writeAttribute("value", ps->GetInteger(p));
+          break;
       }
       endElement();
     }
@@ -438,7 +434,7 @@ void Writer::writeFaderState(const FaderSetupState &guiState) {
           _folderIds[&fader.GetPresetValue()->Controllable().Parent()]);
       writeAttribute("name", fader.GetPresetValue()->Controllable().Name());
     }
-    endElement(); // preset
+    endElement();  // preset
   }
-  endElement(); // faders
+  endElement();  // faders
 }

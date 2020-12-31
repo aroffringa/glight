@@ -68,20 +68,20 @@ void PropertySet::AssignProperty(const Property &to, const Property &from,
   if (from._type != to._type)
     throw std::runtime_error("Copying different types");
   switch (from._type) {
-  case Property::Boolean:
-    SetBool(to, fromSet.GetBool(from));
-    break;
-  case Property::Choice:
-    SetChoice(to, fromSet.GetChoice(from));
-    break;
-  case Property::ControlValue:
-    SetControlValue(to, fromSet.GetControlValue(from));
-    break;
-  case Property::Duration:
-    SetDuration(to, fromSet.GetDuration(from));
-    break;
-  case Property::Integer:
-    SetInteger(to, fromSet.GetInteger(from));
-    break;
+    case Property::Boolean:
+      SetBool(to, fromSet.GetBool(from));
+      break;
+    case Property::Choice:
+      SetChoice(to, fromSet.GetChoice(from));
+      break;
+    case Property::ControlValue:
+      SetControlValue(to, fromSet.GetControlValue(from));
+      break;
+    case Property::Duration:
+      SetDuration(to, fromSet.GetDuration(from));
+      break;
+    case Property::Integer:
+      SetInteger(to, fromSet.GetInteger(from));
+      break;
   }
 }

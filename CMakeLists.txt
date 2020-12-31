@@ -108,6 +108,7 @@ if(Boost_FOUND)
     tests/testchase.cpp
     tests/testfileformat.cpp
     tests/testfixturecontrol.cpp
+    tests/testfixturetype.cpp
     tests/testfolder.cpp
     tests/testmanagement.cpp
     tests/testpresetcollection.cpp
@@ -125,6 +126,11 @@ add_custom_target(
   COMMAND gcovr -r .. -e '.*/tests/.*' -e '.*/CompilerIdCXX/.*'
   DEPENDS check
 )
+add_custom_target(
+  format
+  COMMAND ${CMAKE_SOURCE_DIR}/scripts/run-clang-format.sh
+)
+add_dependencies(glight format)
 
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_GENERATOR "DEB")

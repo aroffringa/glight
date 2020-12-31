@@ -6,8 +6,9 @@
 #include <memory>
 #include <vector>
 
-template <typename T> class WindowList {
-public:
+template <typename T>
+class WindowList {
+ public:
   void Add(std::unique_ptr<T> window) {
     window->signal_hide().connect([&]() { onHideWindow(window.get()); });
     _list.emplace_back(std::move(window));
@@ -17,13 +18,12 @@ public:
 
   T *GetOpenWindow(class FolderObject &object) const {
     for (auto &window : _list) {
-      if (&window->GetObject() == &object)
-        return window.get();
+      if (&window->GetObject() == &object) return window.get();
     }
     return nullptr;
   }
 
-private:
+ private:
   void onHideWindow(T *window) {
     for (auto iter = _list.begin(); iter != _list.end(); ++iter) {
       if (iter->get() == window) {

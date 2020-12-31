@@ -6,7 +6,7 @@
 #include "../effects/pulseeffect.h"
 
 class PulseEffectPS final : public PropertySet {
-public:
+ public:
   PulseEffectPS() {
     addProperty(Property("repeat", "Repeat", Property::Boolean));
     addProperty(Property("attack", "Attack", Property::Duration));
@@ -15,23 +15,23 @@ public:
     addProperty(Property("sleep", "Sleep", Property::Duration));
   }
 
-protected:
+ protected:
   void setDuration(FolderObject &object, size_t index,
                    double value) const final override {
     PulseEffect &pfx = static_cast<PulseEffect &>(object);
     switch (index) {
-    case 1:
-      pfx.SetAttack(value);
-      break;
-    case 2:
-      pfx.SetHold(value);
-      break;
-    case 3:
-      pfx.SetRelease(value);
-      break;
-    case 4:
-      pfx.SetSleep(value);
-      break;
+      case 1:
+        pfx.SetAttack(value);
+        break;
+      case 2:
+        pfx.SetHold(value);
+        break;
+      case 3:
+        pfx.SetRelease(value);
+        break;
+      case 4:
+        pfx.SetSleep(value);
+        break;
     }
   }
 
@@ -39,14 +39,14 @@ protected:
                      size_t index) const final override {
     const PulseEffect &pfx = static_cast<const PulseEffect &>(object);
     switch (index) {
-    case 1:
-      return pfx.Attack();
-    case 2:
-      return pfx.Hold();
-    case 3:
-      return pfx.Release();
-    case 4:
-      return pfx.Sleep();
+      case 1:
+        return pfx.Attack();
+      case 2:
+        return pfx.Hold();
+      case 3:
+        return pfx.Release();
+      case 4:
+        return pfx.Sleep();
     }
     return 0;
   }

@@ -20,8 +20,7 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
   unsigned red = color.Red() * ((1 << 24) - 1) / 255,
            green = color.Green() * ((1 << 24) - 1) / 255,
            blue = color.Blue() * ((1 << 24) - 1) / 255, master = 0;
-  if (red != 0 || green != 0 || blue != 0)
-    master = (1 << 24) - 1;
+  if (red != 0 || green != 0 || blue != 0) master = (1 << 24) - 1;
 
   for (size_t i = 0; i != control.NInputs(); ++i) {
     Color c = control.InputColor(i);
@@ -113,8 +112,7 @@ Chase &AutoDesign::MakeRunningLight(
   std::vector<size_t> pos;
   if (runType == RandomRun) {
     pos.resize(frames);
-    for (size_t i = 0; i != frames; ++i)
-      pos[i] = i;
+    for (size_t i = 0; i != frames; ++i) pos[i] = i;
     std::random_device rd;
     std::mt19937 mt(rd());
     std::shuffle(pos.begin(), pos.end(), mt);
@@ -139,29 +137,29 @@ Chase &AutoDesign::MakeRunningLight(
            ++fixInPatIndex) {
         size_t cIndex = 0;
         switch (runType) {
-        case IncreasingRun:
-        case BackAndForthRun:
-          cIndex = frameIndex + patternIndex * colors.size();
-          break;
-        case DecreasingRun:
-          cIndex = frames - frameIndex - 1 + patternIndex * colors.size();
-          break;
-        case RandomRun:
-          cIndex = pos[frameIndex] + patternIndex * colors.size();
-          break;
-        case InwardRun:
-          if (fixInPatIndex == 0)
+          case IncreasingRun:
+          case BackAndForthRun:
             cIndex = frameIndex + patternIndex * colors.size();
-          else
-            cIndex =
-                (colors.size() - frameIndex - 1) + patternIndex * colors.size();
-          break;
-        case OutwardRun:
-          if (fixInPatIndex == 0)
+            break;
+          case DecreasingRun:
             cIndex = frames - frameIndex - 1 + patternIndex * colors.size();
-          else
-            cIndex = frames + frameIndex + patternIndex * colors.size();
-          break;
+            break;
+          case RandomRun:
+            cIndex = pos[frameIndex] + patternIndex * colors.size();
+            break;
+          case InwardRun:
+            if (fixInPatIndex == 0)
+              cIndex = frameIndex + patternIndex * colors.size();
+            else
+              cIndex = (colors.size() - frameIndex - 1) +
+                       patternIndex * colors.size();
+            break;
+          case OutwardRun:
+            if (fixInPatIndex == 0)
+              cIndex = frames - frameIndex - 1 + patternIndex * colors.size();
+            else
+              cIndex = frames + frameIndex + patternIndex * colors.size();
+            break;
         }
         if (cIndex < controllables.size()) {
           size_t colourIndex = cIndex % colors.size();
@@ -267,16 +265,16 @@ Chase &AutoDesign::MakeColorShift(
     for (size_t cIndex = 0; cIndex != controllables.size(); ++cIndex) {
       size_t colourIndex;
       switch (shiftType) {
-      case IncreasingShift:
-      case BackAndForthShift:
-        colourIndex = (cIndex + frames - frameIndex) % frames;
-        break;
-      case DecreasingShift:
-        colourIndex = (cIndex + frameIndex) % frames;
-        break;
-      case RandomShift:
-        colourIndex = pos[frameIndex][cIndex % frames];
-        break;
+        case IncreasingShift:
+        case BackAndForthShift:
+          colourIndex = (cIndex + frames - frameIndex) % frames;
+          break;
+        case DecreasingShift:
+          colourIndex = (cIndex + frameIndex) % frames;
+          break;
+        case RandomShift:
+          colourIndex = pos[frameIndex][cIndex % frames];
+          break;
       }
       addColorPresets(management, *controllables[cIndex], pc,
                       colors[colourIndex], deduction);
@@ -291,12 +289,11 @@ Chase &AutoDesign::MakeColorShift(
   return chase;
 }
 
-Controllable &
-AutoDesign::MakeVUMeter(Management &management, Folder &destination,
-                        const std::vector<class Controllable *> &controllables,
-                        const std::vector<Color> &colors,
-                        const ColorDeduction &deduction,
-                        VUMeterDirection direction) {
+Controllable &AutoDesign::MakeVUMeter(
+    Management &management, Folder &destination,
+    const std::vector<class Controllable *> &controllables,
+    const std::vector<Color> &colors, const ColorDeduction &deduction,
+    VUMeterDirection direction) {
   if (colors.size() != controllables.size())
     throw std::runtime_error(
         "Number of colours did not match number of fixtures");
@@ -335,19 +332,19 @@ AutoDesign::MakeVUMeter(Management &management, Folder &destination,
       size_t fixIndex;
       if (fixInLevel == 0) {
         switch (direction) {
-        case VUIncreasing:
-        case VUInward:
-          fixIndex = level;
-          break;
-        case VUOutward:
-        case VUDecreasing:
-          fixIndex = nLevels - level - 1;
-          break;
+          case VUIncreasing:
+          case VUInward:
+            fixIndex = level;
+            break;
+          case VUOutward:
+          case VUDecreasing:
+            fixIndex = nLevels - level - 1;
+            break;
         }
       } else {
         if (direction == VUInward)
           fixIndex = controllables.size() - level - 1;
-        else // VUOutward
+        else  // VUOutward
           fixIndex = nLevels + level;
       }
       addColorPresets(management, *controllables[fixIndex], pc,
@@ -377,32 +374,32 @@ Chase &AutoDesign::MakeIncreasingChase(
   size_t nFix = controllables.size();
   for (size_t frameIndex = 0; frameIndex != nFix * 2; ++frameIndex) {
     size_t startFixture = 0, endFixture = 0;
-    if (frameIndex < controllables.size()) // building up
+    if (frameIndex < controllables.size())  // building up
     {
       switch (incType) {
-      case IncForward:
-      case IncForwardReturn:
-        startFixture = 0;
-        endFixture = frameIndex;
-        break;
-      case IncBackward:
-      case IncBackwardReturn:
-        startFixture = nFix - frameIndex;
-        endFixture = nFix;
-        break;
+        case IncForward:
+        case IncForwardReturn:
+          startFixture = 0;
+          endFixture = frameIndex;
+          break;
+        case IncBackward:
+        case IncBackwardReturn:
+          startFixture = nFix - frameIndex;
+          endFixture = nFix;
+          break;
       }
     } else {
       switch (incType) {
-      case IncForward:
-      case IncBackwardReturn:
-        startFixture = frameIndex - nFix;
-        endFixture = nFix;
-        break;
-      case IncBackward:
-      case IncForwardReturn:
-        startFixture = 0;
-        endFixture = (nFix * 2 - frameIndex);
-        break;
+        case IncForward:
+        case IncBackwardReturn:
+          startFixture = frameIndex - nFix;
+          endFixture = nFix;
+          break;
+        case IncBackward:
+        case IncForwardReturn:
+          startFixture = 0;
+          endFixture = (nFix * 2 - frameIndex);
+          break;
       }
     }
 

@@ -11,7 +11,7 @@
 #include <vector>
 
 class PropertySet {
-public:
+ public:
   using iterator = std::vector<Property>::iterator;
   using const_iterator = std::vector<Property>::const_iterator;
 
@@ -33,8 +33,7 @@ public:
   }
 
   void SetControlValue(const Property &property, unsigned value) const {
-    if (value > ControlValue::MaxUInt())
-      value = ControlValue::MaxUInt();
+    if (value > ControlValue::MaxUInt()) value = ControlValue::MaxUInt();
     setControlValue(*_object, property._setIndex, value);
   }
 
@@ -78,8 +77,7 @@ public:
 
   Property &GetProperty(const std::string &name) {
     for (Property &p : _properties) {
-      if (p.Name() == name)
-        return p;
+      if (p.Name() == name) return p;
     }
     throw std::runtime_error("Property not found: " + name);
   }
@@ -87,7 +85,7 @@ public:
   void AssignProperty(const Property &to, const Property &from,
                       const PropertySet &fromSet);
 
-protected:
+ protected:
   virtual void setControlValue(FolderObject &object, size_t index,
                                unsigned value) const {
     setterNotImplemented();
@@ -144,14 +142,16 @@ protected:
     return _properties.back()._setIndex;
   }
 
-private:
+ private:
   void setterNotImplemented() const {
-    throw std::runtime_error("A method of the property set was called for "
-                             "which the set method was not implemented");
+    throw std::runtime_error(
+        "A method of the property set was called for "
+        "which the set method was not implemented");
   }
   void getterNotImplemented() const {
-    throw std::runtime_error("A method of the property set was called for "
-                             "which the get method was not implemented");
+    throw std::runtime_error(
+        "A method of the property set was called for "
+        "which the get method was not implemented");
   }
   FolderObject *_object;
   std::vector<Property> _properties;

@@ -9,7 +9,7 @@
 #include <memory>
 
 class OLADevice : public DmxDevice {
-public:
+ public:
   OLADevice();
 
   void Open() final override;
@@ -19,7 +19,7 @@ public:
   void Abort() final override;
   bool IsOpen() final override { return true; }
 
-private:
+ private:
   ola::DmxBuffer _buffer;
   std::unique_ptr<ola::client::StreamingClient> _client;
   unsigned int _universe;

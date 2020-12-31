@@ -10,7 +10,8 @@
 ChasePropertiesWindow::ChasePropertiesWindow(class Chase &chase,
                                              Management &management,
                                              EventTransmitter &eventHub)
-    : PropertiesWindow(), _delayTriggerCheckButton("Delayed trigger"),
+    : PropertiesWindow(),
+      _delayTriggerCheckButton("Delayed trigger"),
       _triggerDuration("Trigger duration:", 500.0),
       _transitionDuration("Transition duration:", 500.0),
 
@@ -19,11 +20,15 @@ ChasePropertiesWindow::ChasePropertiesWindow(class Chase &chase,
       _synchronizationsCount(1.0, 100.0, 1.0),
 
       _beatTriggerCheckButton("Trigger by beat"),
-      _beatSpeedLabel("Beats per trigger :"), _beatSpeed(0.25, 4.0, 0.25),
+      _beatSpeedLabel("Beats per trigger :"),
+      _beatSpeed(0.25, 4.0, 0.25),
 
-      _toTimeSequenceButton("Convert to time sequence"), _closeButton("Close"),
+      _toTimeSequenceButton("Convert to time sequence"),
+      _closeButton("Close"),
 
-      _chase(&chase), _management(&management), _eventHub(eventHub) {
+      _chase(&chase),
+      _management(&management),
+      _eventHub(eventHub) {
   _eventHub.SignalChangeManagement().connect(
       sigc::mem_fun(*this, &ChasePropertiesWindow::onChangeManagement));
   _eventHub.SignalUpdateControllables().connect(
@@ -162,15 +167,15 @@ void ChasePropertiesWindow::loadChaseInfo(Chase &chase) {
   _beatSpeed.set_value(beatSpeed);
   _synchronizationsCount.set_value(syncSpeed);
   switch (triggerType) {
-  case Trigger::DelayTriggered:
-    _delayTriggerCheckButton.set_active(true);
-    break;
-  case Trigger::SyncTriggered:
-    _synchronizedTriggerCheckButton.set_active(true);
-    break;
-  case Trigger::BeatTriggered:
-    _beatTriggerCheckButton.set_active(true);
-    break;
+    case Trigger::DelayTriggered:
+      _delayTriggerCheckButton.set_active(true);
+      break;
+    case Trigger::SyncTriggered:
+      _synchronizedTriggerCheckButton.set_active(true);
+      break;
+    case Trigger::BeatTriggered:
+      _beatTriggerCheckButton.set_active(true);
+      break;
   }
   _transitionTypeBox.Set(transitionType);
 }

@@ -21,7 +21,7 @@
         @author Andre Offringa
 */
 class ChasePropertiesWindow : public PropertiesWindow {
-public:
+ public:
   ChasePropertiesWindow(class Chase &chase, class Management &management,
                         class EventTransmitter &eventHub);
   ~ChasePropertiesWindow();
@@ -31,7 +31,7 @@ public:
     return *_chase;
   }
 
-private:
+ private:
   void loadChaseInfo(class Chase &chase);
   void onTriggerTypeChanged();
   void onTriggerSpeedChanged(double newValue);

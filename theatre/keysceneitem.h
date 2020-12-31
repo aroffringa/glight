@@ -9,7 +9,7 @@
         @author Andre Offringa
 */
 class KeySceneItem : public SceneItem {
-public:
+ public:
   enum Level { Key, Beat, Highlight, Measure, Section };
 
   KeySceneItem() : _level(Key) {}
@@ -21,23 +21,23 @@ public:
 
   virtual std::string Description() const {
     switch (_level) {
-    case Key:
-    default:
-      return "key";
-    case Beat:
-      return "beat";
-    case Highlight:
-      return "highlight";
-    case Measure:
-      return "-measure-";
-    case Section:
-      return "-=SECTION=-";
+      case Key:
+      default:
+        return "key";
+      case Beat:
+        return "beat";
+      case Highlight:
+        return "highlight";
+      case Measure:
+        return "-measure-";
+      case Section:
+        return "-=SECTION=-";
     }
   }
   virtual void Mix(unsigned *channelValues, unsigned universe,
                    const class Timing &timing) {}
 
-private:
+ private:
   enum Level _level;
 };
 

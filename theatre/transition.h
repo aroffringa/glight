@@ -8,7 +8,7 @@
         @author Andre Offringa
 */
 class Transition {
-public:
+ public:
   enum Type {
     None,
     Fade,
@@ -35,52 +35,53 @@ public:
            size_t secondInput, double transitionTime, const ControlValue &value,
            const Timing &timing) const {
     switch (_type) {
-    case None:
-      if (transitionTime * 2.0 <= _lengthInMs)
-        first.MixInput(firstInput, value);
-      else
-        second.MixInput(secondInput, value);
-      break;
-    case Fade: {
-      unsigned secondRatioValue =
-          (unsigned)((transitionTime / _lengthInMs) * 256.0);
-      unsigned firstRatioValue = 255 - secondRatioValue;
-      first.MixInput(firstInput, (value.UInt() * firstRatioValue) >> 8);
-      second.MixInput(secondInput, (value.UInt() * secondRatioValue) >> 8);
-    } break;
-    case FadeThroughBlack: {
-      unsigned ratio = (unsigned)((transitionTime / _lengthInMs) * 512.0);
-      if (ratio < 256) {
-        ControlValue firstValue((value.UInt() * (255 - ratio)) >> 8);
-        first.MixInput(firstInput, firstValue);
-      } else {
-        ControlValue secondValue((value.UInt() * (ratio - 256)) >> 8);
-        second.MixInput(secondInput, secondValue);
+      case None:
+        if (transitionTime * 2.0 <= _lengthInMs)
+          first.MixInput(firstInput, value);
+        else
+          second.MixInput(secondInput, value);
+        break;
+      case Fade: {
+        unsigned secondRatioValue =
+            (unsigned)((transitionTime / _lengthInMs) * 256.0);
+        unsigned firstRatioValue = 255 - secondRatioValue;
+        first.MixInput(firstInput, (value.UInt() * firstRatioValue) >> 8);
+        second.MixInput(secondInput, (value.UInt() * secondRatioValue) >> 8);
+      } break;
+      case FadeThroughBlack: {
+        unsigned ratio = (unsigned)((transitionTime / _lengthInMs) * 512.0);
+        if (ratio < 256) {
+          ControlValue firstValue((value.UInt() * (255 - ratio)) >> 8);
+          first.MixInput(firstInput, firstValue);
+        } else {
+          ControlValue secondValue((value.UInt() * (ratio - 256)) >> 8);
+          second.MixInput(secondInput, secondValue);
+        }
+      } break;
+      case Erratic: {
+        unsigned ratio = (unsigned)((transitionTime / _lengthInMs) *
+                                    ControlValue::MaxUInt());
+        if (ratio < timing.DrawRandomValue())
+          first.MixInput(firstInput, value);
+        else
+          second.MixInput(secondInput, value);
       }
-    } break;
-    case Erratic: {
-      unsigned ratio =
-          (unsigned)((transitionTime / _lengthInMs) * ControlValue::MaxUInt());
-      if (ratio < timing.DrawRandomValue())
-        first.MixInput(firstInput, value);
-      else
-        second.MixInput(secondInput, value);
-    }
-    case Black:
-      break;
-    case FadeFromBlack: {
-      unsigned ratioValue = (unsigned)((transitionTime / _lengthInMs) * 256.0);
-      second.MixInput(secondInput, (value.UInt() * ratioValue) >> 8);
-    } break;
-    case FadeToBlack: {
-      unsigned ratioValue =
-          255 - (unsigned)((transitionTime / _lengthInMs) * 256.0);
-      first.MixInput(secondInput, (value.UInt() * ratioValue) >> 8);
-    } break;
+      case Black:
+        break;
+      case FadeFromBlack: {
+        unsigned ratioValue =
+            (unsigned)((transitionTime / _lengthInMs) * 256.0);
+        second.MixInput(secondInput, (value.UInt() * ratioValue) >> 8);
+      } break;
+      case FadeToBlack: {
+        unsigned ratioValue =
+            255 - (unsigned)((transitionTime / _lengthInMs) * 256.0);
+        first.MixInput(secondInput, (value.UInt() * ratioValue) >> 8);
+      } break;
     }
   }
 
-private:
+ private:
   double _lengthInMs;
   enum Type _type;
 };

@@ -14,16 +14,21 @@
         @author Andre Offringa
 */
 class BeatFinder {
-public:
+ public:
   class AlsaError : public std::runtime_error {
-  public:
+   public:
     AlsaError(const std::string &message)
         : runtime_error(std::string("Alsa error: ") + message) {}
   };
 
   BeatFinder()
-      : _alsaPeriodSize(256), _alsaBufferSize(2048), _alsaThread(),
-        _isStopping(false), _isOpen(false), _beat(Beat()), _audioLevel(0),
+      : _alsaPeriodSize(256),
+        _alsaBufferSize(2048),
+        _alsaThread(),
+        _isStopping(false),
+        _isOpen(false),
+        _beat(Beat()),
+        _audioLevel(0),
         _minimumConfidence(0.05) {}
 
   virtual ~BeatFinder() { close(); }
@@ -41,9 +46,9 @@ public:
 
   uint16_t GetAudioLevel() const { return _audioLevel; }
 
-private:
+ private:
   struct AlsaThread {
-  public:
+   public:
     BeatFinder &_player;
     AlsaThread(BeatFinder &player) : _player(player) {}
     void operator()() {

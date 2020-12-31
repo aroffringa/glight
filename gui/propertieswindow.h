@@ -4,7 +4,7 @@
 #include <gtkmm/window.h>
 
 class PropertiesWindow : public Gtk::Window {
-public:
+ public:
   virtual class FolderObject &GetObject() = 0;
 };
 

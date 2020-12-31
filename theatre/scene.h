@@ -15,7 +15,7 @@
         @author Andre Offringa
 */
 class Scene : public Startable, private SyncListener {
-public:
+ public:
   Scene(class Management &management);
 
   ~Scene();
@@ -77,8 +77,7 @@ public:
       _isPlaying = false;
       initPlayer();
     } else {
-      if (_audioPlayer == 0)
-        initPlayer();
+      if (_audioPlayer == 0) initPlayer();
     }
   }
   bool HasAudio() const { return _hasAudio; }
@@ -95,7 +94,7 @@ public:
   }
   bool IsPlaying() const { return _isPlaying; }
 
-protected:
+ protected:
   void initPlayer() {
     if (_hasAudio) {
       try {
@@ -121,12 +120,10 @@ protected:
     Stop();
     setStartTimeInMS(StartTimeInMS() - _startOffset);
     _isPlaying = true;
-    if (_hasAudio)
-      _audioPlayer->Play();
+    if (_hasAudio) _audioPlayer->Play();
   }
   void skipTo(double offsetInMS) {
-    if (_currentOffset > offsetInMS)
-      resetCurrentOffset();
+    if (_currentOffset > offsetInMS) resetCurrentOffset();
     // "Start" all items that have started since the last tick
     while (_nextStartedItem != _items.end() &&
            _nextStartedItem->first <= offsetInMS) {
@@ -145,8 +142,8 @@ protected:
     }
     _currentOffset = offsetInMS;
   }
-  std::multimap<double, std::unique_ptr<SceneItem>>::iterator
-  find(SceneItem *item) {
+  std::multimap<double, std::unique_ptr<SceneItem>>::iterator find(
+      SceneItem *item) {
     for (std::multimap<double, std::unique_ptr<SceneItem>>::iterator i =
              _items.begin();
          i != _items.end(); ++i) {
@@ -157,7 +154,7 @@ protected:
     return _items.end();
   }
 
-private:
+ private:
   class Management &_management;
   std::mutex &_mutex;
   std::vector<SceneItem *> _startedItems;
