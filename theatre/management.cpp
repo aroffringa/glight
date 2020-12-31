@@ -157,7 +157,7 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
   for (const std::unique_ptr<class PresetValue> &pv : _presetValues)
     pv->Controllable().MixInput(pv->InputIndex(), pv->Value());
 
-  // Solve dependency graph of effects
+  // Solve dependency graph of controllables
   std::vector<Controllable *> unorderedList, orderedList;
   for (const std::unique_ptr<Controllable> &c : _controllables)
     unorderedList.emplace_back(c.get());
@@ -165,7 +165,11 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
     throw std::runtime_error("Cycle in dependencies");
 
   for (auto c = orderedList.rbegin(); c != orderedList.rend(); ++c) {
-    (*c)->Mix(values, universe, timing);
+    Controllable *controllable = *c;
+    controllable->Mix(timing);
+    if (FixtureControl *fc = dynamic_cast<FixtureControl *>(controllable)) {
+      fc->MixChannels(values, universe);
+    }
   }
 }
 

@@ -61,12 +61,13 @@ class FixtureControl : public Controllable {
     return std::pair<Controllable *, size_t>(nullptr, 0);
   }
 
-  void Mix(unsigned *channelValues, unsigned universe,
-           const class Timing &) final override {
+  void Mix(const class Timing &) final override {}
+
+  void MixChannels(unsigned *channelValues, unsigned universe) {
     for (size_t i = 0; i != _fixture->Functions().size(); ++i) {
       const std::unique_ptr<FixtureFunction> &ff = _fixture->Functions()[i];
-      ff->Mix(_values[i].UInt(), ControlValue::Default, channelValues,
-              universe);
+      ff->MixChannels(_values[i].UInt(), ControlValue::Default, channelValues,
+                      universe);
     }
   }
 

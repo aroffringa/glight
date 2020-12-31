@@ -35,8 +35,8 @@ class PulseEffect : public Effect {
   void SetRepeat(bool repeat) { _repeat = repeat; }
 
  protected:
-  virtual void mix(const ControlValue *values, unsigned *channelValues,
-                   unsigned universe, const Timing &timing) final override {
+  virtual void mix(const ControlValue *values,
+                   const Timing &timing) final override {
     if (values[0].UInt() == 0) {
       _isActive = false;
     } else {

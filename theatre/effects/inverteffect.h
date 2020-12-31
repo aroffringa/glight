@@ -18,8 +18,7 @@ class InvertEffect : public Effect {
   void SetOffThreshold(unsigned offThreshold) { _offThreshold = offThreshold; }
 
  protected:
-  virtual void mix(const ControlValue *values, unsigned *channelValues,
-                   unsigned universe,
+  virtual void mix(const ControlValue *values,
                    const class Timing &timing) final override {
     unsigned inverted = ControlValue::MaxUInt() - values[0].UInt();
     if (inverted < _offThreshold) inverted = ControlValue::Zero();

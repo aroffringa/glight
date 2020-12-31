@@ -9,22 +9,30 @@
 #include "folderobject.h"
 
 /**
-        @author Andre Offringa
-*/
+ * A Controllable has a number of inputs and optionally some outputs
+ * that this controllable controls.
+ * @author Andre Offringa
+ */
 class Controllable : public FolderObject {
  public:
   Controllable() : _visitLevel(0) {}
+
   Controllable(const Controllable &source)
       : FolderObject(source), _visitLevel(0) {}
+
   Controllable(const std::string &name) : FolderObject(name), _visitLevel(0) {}
 
   virtual size_t NInputs() const = 0;
 
-  virtual ControlValue &InputValue(size_t index) = 0;
+  virtual ControlValue& InputValue(size_t index) = 0;
 
   virtual FunctionType InputType(size_t index) const = 0;
 
-  virtual Color InputColor(size_t index) const {
+  virtual size_t NOutputs() const = 0;
+
+  virtual std::pair<Controllable *, size_t> Output(size_t index) const = 0;
+
+  virtual Color InputColor([[maybe_unused]] size_t index) const {
     if (NOutputs() == 0)
       return Color::Black();
     else {
@@ -41,6 +49,13 @@ class Controllable : public FolderObject {
     }
   }
 
+  /**
+   * Combine all inputs and outputs controlled by this controllable.
+   * Before this function is called, all input values that this
+   * controllable depends on have been set.
+   */
+  virtual void Mix(const class Timing &timing) = 0;
+
   std::string InputName(size_t index) const {
     if (NInputs() == 1)
       return Name();
@@ -53,13 +68,6 @@ class Controllable : public FolderObject {
                                         ControlValue::Default);
     InputValue(index) = ControlValue(mixVal);
   }
-
-  virtual size_t NOutputs() const = 0;
-
-  virtual std::pair<Controllable *, size_t> Output(size_t index) const = 0;
-
-  virtual void Mix(unsigned *channelValues, unsigned universe,
-                   const class Timing &timing) = 0;
 
   bool HasOutputConnection(const Controllable &controllable) const {
     for (size_t i = 0; i != NOutputs(); ++i)

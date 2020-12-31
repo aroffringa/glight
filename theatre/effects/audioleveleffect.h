@@ -22,8 +22,8 @@ class AudioLevelEffect final : public Effect {
   void SetDecaySpeed(unsigned decaySpeed) { _decaySpeed = decaySpeed; }
 
  protected:
-  virtual void mix(const ControlValue *values, unsigned *channelValues,
-                   unsigned universe, const Timing &timing) final override {
+  virtual void mix(const ControlValue *values,
+                   const Timing &timing) final override {
     unsigned audioLevel = (unsigned(timing.AudioLevel()) << 8);
     double timePassed = timing.TimeInMS() - _lastTime;
     _lastTime = timing.TimeInMS();

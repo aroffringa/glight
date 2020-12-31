@@ -20,8 +20,8 @@ class DelayEffect : public Effect {
   void SetDelayInMS(double delayInMS) { _delayInMS = delayInMS; }
 
  protected:
-  virtual void mix(const ControlValue *values, unsigned *channelValues,
-                   unsigned universe, const Timing &timing) final override {
+  virtual void mix(const ControlValue *values,
+                   const Timing &timing) final override {
     if (_previousTimestep == timing.TimestepNumber()) {
       unsigned prevWritePos =
           (_bufferWritePos + _buffer.size() - 1) % _buffer.size();

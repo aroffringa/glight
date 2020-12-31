@@ -16,8 +16,7 @@ class ConstantValueEffect : public Effect {
   void SetValue(unsigned value) { _value = value; }
 
  protected:
-  virtual void mix(const ControlValue *values, unsigned *channelValues,
-                   unsigned universe,
+  virtual void mix(const ControlValue *values,
                    const class Timing &timing) final override {
     setConnectedInputs(ControlValue(_value));
   }

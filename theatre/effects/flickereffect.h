@@ -25,8 +25,7 @@ class FlickerEffect : public Effect {
   }
 
  private:
-  virtual void mix(const ControlValue *values, unsigned *channelValues,
-                   unsigned universe,
+  virtual void mix(const ControlValue *values,
                    const class Timing &timing) final override {
     if (values[0]) {
       size_t count = _independentOutputs ? Connections().size() : 1;

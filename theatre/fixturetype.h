@@ -14,6 +14,8 @@
  */
 class FixtureType : public FolderObject {
  public:
+  // These currently have a fixed position, because they are written
+  // as integers into save files... TODO write as name into the file.
   enum FixtureClass {
     Light1Ch,
     RGBLight3Ch,
@@ -22,17 +24,17 @@ class FixtureType : public FolderObject {
     RGBALight5Ch,
     RGBWLight4Ch,
     RGBUVLight4Ch,
-    RGBAWUVLight6Ch,
-    CWWW2Ch,
-    CWWW4Ch,
-    CWWWA3Ch,
     UVLight3Ch,
     H2ODMXPro,
     RGB_ADJ_6CH,
     RGB_ADJ_7CH,
     BT_VINTAGE_5CH,
     BT_VINTAGE_6CH,
-    BT_VINTAGE_7CH
+    BT_VINTAGE_7CH,
+    RGBAWUVLight6Ch,
+    CWWW2Ch,
+    CWWW4Ch,
+    CWWWA3Ch
   };
 
   FixtureType(FixtureClass fixtureClass);

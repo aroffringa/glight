@@ -44,8 +44,9 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   std::vector<unsigned> values(512, 0);
   Timing timing(0.0, 0, 0, 0, 0);
   // Mix controls in order of dependencies
-  presetCollection.Mix(values.data(), 0, timing);
-  fixtureControl.Mix(values.data(), 0, timing);
+  presetCollection.Mix(timing);
+  fixtureControl.Mix(timing);
+  fixtureControl.MixChannels(values.data(), 0);
   for (size_t i = 0; i != 512; ++i) {
     if (i == 100) {
       // it's not accurately Max, because of truncations.

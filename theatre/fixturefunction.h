@@ -25,8 +25,8 @@ class FixtureFunction : public NamedObject {
   FixtureFunction(const FixtureFunction &source) = delete;
   FixtureFunction &operator=(const FixtureFunction &source) = delete;
 
-  void Mix(unsigned value, MixStyle mixStyle, unsigned *channels,
-           unsigned universe) {
+  void MixChannels(unsigned value, MixStyle mixStyle, unsigned *channels,
+                   unsigned universe) {
     if (IsSingleChannel() && _firstChannel.Universe() == universe) {
       MixStyle combiMixStyle = ControlValue::CombineMixStyles(
           mixStyle, _firstChannel.DefaultMixStyle());

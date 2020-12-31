@@ -8,8 +8,8 @@
 #include <string>
 
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class PresetValue {
  public:
   PresetValue(class Controllable &controllable, size_t inputIndex)

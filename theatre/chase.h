@@ -32,8 +32,7 @@ class Chase : public Controllable {
     return _sequence.List()[index];
   }
 
-  virtual void Mix(unsigned *channelValues, unsigned universe,
-                   const Timing &timing) final override {
+  virtual void Mix(const Timing &timing) final override {
     // Slowly drive the phase offset back to zero.
     if (_phaseOffset != 0.0) {
       if (_phaseOffset > 8.0)
@@ -45,13 +44,13 @@ class Chase : public Controllable {
     }
     switch (_trigger.Type()) {
       case Trigger::DelayTriggered:
-        mixDelayChase(channelValues, universe, timing);
+        mixDelayChase(timing);
         break;
       case Trigger::SyncTriggered:
-        mixSyncedChase(channelValues, universe, timing);
+        mixSyncedChase(timing);
         break;
       case Trigger::BeatTriggered:
-        mixBeatChase(channelValues, universe, timing);
+        mixBeatChase(timing);
         break;
     }
   }
@@ -118,8 +117,7 @@ class Chase : public Controllable {
         _transition(chase._transition),
         _phaseOffset(chase._phaseOffset) {}
 
-  void mixBeatChase(unsigned *channelValues, unsigned universe,
-                    const Timing &timing) {
+  void mixBeatChase(const Timing &timing) {
     double timeInMs = timing.BeatValue();
     unsigned step =
         (unsigned)fmod(timeInMs / _trigger.DelayInBeats(), _sequence.Size());
@@ -127,16 +125,14 @@ class Chase : public Controllable {
                                            _inputValue);
   }
 
-  void mixSyncedChase(unsigned *channelValues, unsigned universe,
-                      const Timing &timing) {
+  void mixSyncedChase(const Timing &timing) {
     unsigned step =
         (timing.TimestepNumber() / _trigger.DelayInSyncs()) % _sequence.Size();
     _sequence.List()[step].first->MixInput(_sequence.List()[step].second,
                                            _inputValue);
   }
 
-  void mixDelayChase(unsigned *channelValues, unsigned universe,
-                     const Timing &timing) {
+  void mixDelayChase(const Timing &timing) {
     double timeInMs = timing.TimeInMS() + _phaseOffset;
     double totalDuration = _trigger.DelayInMs() + _transition.LengthInMs();
     double phase = fmod(timeInMs, totalDuration);

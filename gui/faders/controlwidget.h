@@ -14,15 +14,37 @@ class ControlWidget : public Gtk::Bin {
  public:
   ControlWidget() : _fadingValue(0), _targetValue(0) {}
 
+  /**
+   * Toggle this fader. When the fader is off, it should
+   * turn fully on, and when it is not off, it is turned
+   * off. This is for example
+   * used by the parent window when a key is pressed
+   * to turn on the fader.
+   */
   virtual void Toggle() = 0;
+
+  /**
+   * Turn this fader fully on. This is for example
+   * used by the parent window when a key is pressed
+   * to turn on the fader.
+   */
   virtual void FullOn() = 0;
+
+  /**
+   * Turn this fader off.
+   */
   virtual void FullOff() = 0;
+
   /**
    * Link this control to the given preset. If moveFader is true,
    * the control will change its state to reflact the value of the
    * preset.
    */
   virtual void Assign(class PresetValue *item, bool moveFader) = 0;
+
+  /**
+   * Resyncs the fader with the preset value.
+   */
   virtual void MoveSlider() = 0;
   virtual class PresetValue *Preset() const = 0;
   virtual void Limit(double value) = 0;
