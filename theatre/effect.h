@@ -94,16 +94,15 @@ class Effect : public Controllable {
     return _connections[index];
   }
 
-  void Mix(unsigned *channelValues, unsigned universe,
-           const class Timing &timing) final override {
-    mix(_inputValues.data(), channelValues, universe, timing);
+  void Mix(const class Timing &timing) final override {
+    mix(_inputValues.data(), timing);
     for (ControlValue &v : _inputValues)  // TODO should be done in management
       v.Set(0);
   }
 
  protected:
-  virtual void mix(const ControlValue *inputValues, unsigned *channelValues,
-                   unsigned universe, const class Timing &timing) = 0;
+  virtual void mix(const ControlValue *inputValues,
+                   const class Timing &timing) = 0;
 
   void setConnectedInputs(const ControlValue &value) const {
     for (const std::pair<Controllable *, size_t> &connection : Connections())

@@ -28,8 +28,7 @@ class CurveEffect : public Effect {
   void SetFunction(enum Function f) { _function = f; }
 
  protected:
-  virtual void mix(const ControlValue *values, unsigned *channelValues,
-                   unsigned universe,
+  virtual void mix(const ControlValue *values,
                    const class Timing &timing) final override {
     unsigned value = values[0].UInt();
     switch (_function) {

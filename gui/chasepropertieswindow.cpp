@@ -204,8 +204,8 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   }
   Folder &folder = _chase->Parent();
   std::string name = _chase->Name();
-  PresetValue *preset = _management->GetPresetValue(*_chase, 0);
-  preset->Reconnect(tSequence, 0);
+  SourceValue *source = _management->GetSourceValue(*_chase, 0);
+  source->Preset().Reconnect(tSequence, 0);
   _management->RemoveControllable(*_chase);
   tSequence.SetName(name);
   folder.Add(tSequence);

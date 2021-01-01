@@ -222,8 +222,8 @@ void FaderWindow::addControl(bool isToggle, bool newToggleColumn) {
     nameLabel = &static_cast<FaderWidget *>(control.get())->NameLabel();
   }
 
-  control->SetFadeDownSpeed(mapSliderToSpeed(getFadeInSpeed()));
-  control->SetFadeUpSpeed(mapSliderToSpeed(getFadeOutSpeed()));
+  control->SetFadeDownSpeed(mapSliderToSpeed(getFadeOutSpeed()));
+  control->SetFadeUpSpeed(mapSliderToSpeed(getFadeInSpeed()));
   size_t controlIndex = _controls.size();
   control->SignalValueChange().connect(
       sigc::bind(sigc::mem_fun(*this, &FaderWindow::onControlValueChanged),
@@ -270,13 +270,13 @@ bool FaderWindow::onMenuButtonClicked(GdkEventButton *event) {
 
 void FaderWindow::onAssignClicked() {
   for (std::unique_ptr<ControlWidget> &c : _controls) c->Unassign();
-  size_t n = _management->PresetValues().size();
+  size_t n = _management->SourceValues().size();
   if (!_controls.empty()) {
     size_t controlIndex = 0;
     for (size_t i = 0; i != n; ++i) {
-      PresetValue *p = _management->PresetValues()[i].get();
-      if (!_guiState.IsAssigned(p)) {
-        _controls[controlIndex]->Assign(p, true);
+      SourceValue *sv = _management->SourceValues()[i].get();
+      if (!_guiState.IsAssigned(sv)) {
+        _controls[controlIndex]->Assign(sv, true);
         ++controlIndex;
         if (controlIndex == _controls.size()) break;
       }
@@ -291,11 +291,11 @@ void FaderWindow::onClearClicked() {
 void FaderWindow::onAssignChasesClicked() {
   if (!_controls.empty()) {
     size_t controlIndex = 0;
-    for (size_t i = 0; i != _management->PresetValues().size(); ++i) {
-      PresetValue *p = _management->PresetValues()[i].get();
-      Chase *c = dynamic_cast<Chase *>(&p->Controllable());
+    for (size_t i = 0; i != _management->SourceValues().size(); ++i) {
+      SourceValue *sv = _management->SourceValues()[i].get();
+      Chase *c = dynamic_cast<Chase *>(&sv->Controllable());
       if (c != nullptr) {
-        _controls[controlIndex]->Assign(p, true);
+        _controls[controlIndex]->Assign(sv, true);
         ++controlIndex;
         if (controlIndex == _controls.size()) break;
       }
@@ -329,8 +329,8 @@ void FaderWindow::onControlValueChanged(double newValue,
 
 void FaderWindow::onControlAssigned(size_t widgetIndex) {
   if (_recursionLock.IsFirst())
-    _state->faders[widgetIndex].SetPresetValue(
-        _controls[widgetIndex]->Preset());
+    _state->faders[widgetIndex].SetSourceValue(
+        _controls[widgetIndex]->GetSourceValue());
 }
 
 bool FaderWindow::HandleKeyDown(char key) {
@@ -366,9 +366,9 @@ bool FaderWindow::HandleKeyUp(char key) {
   return false;
 }
 
-bool FaderWindow::IsAssigned(PresetValue *presetValue) {
+bool FaderWindow::IsAssigned(SourceValue *sourceValue) {
   for (std::unique_ptr<ControlWidget> &c : _controls) {
-    if (c->Preset() == presetValue) return true;
+    if (c->GetSourceValue() == sourceValue) return true;
   }
   return false;
 }
@@ -452,18 +452,18 @@ void FaderWindow::loadState() {
   resize(_state->width, _state->height);
 
   for (size_t i = 0; i != _state->faders.size(); ++i)
-    _controls[i]->Assign(_state->faders[i].GetPresetValue(), true);
+    _controls[i]->Assign(_state->faders[i].GetSourceValue(), true);
 }
 
 void FaderWindow::updateValues() {
-  boost::posix_time::ptime currentTime(
+  /*boost::posix_time::ptime currentTime(
       boost::posix_time::microsec_clock::local_time());
   double timePassed =
       (double)(currentTime - _lastUpdateTime).total_microseconds() * 1e-6;
   _lastUpdateTime = std::move(currentTime);
-  for (std::unique_ptr<ControlWidget> &cw : _controls) {
+   for (std::unique_ptr<ControlWidget> &cw : _controls) {
     cw->UpdateValue(timePassed);
-  }
+  }*/
 }
 
 double FaderWindow::mapSliderToSpeed(int sliderVal) {

@@ -104,7 +104,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
     std::unique_lock<std::mutex> lock(_management->Mutex());
 
     _newChase = &_management->AddChase();
-    _management->AddPreset(*_newChase, 0);
+    _management->AddSourceValue(*_newChase, 0);
     _newChase->SetName(folder.GetAvailableName("Chase"));
     folder.Add(*_newChase);
 

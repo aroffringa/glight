@@ -10,9 +10,9 @@
 
 class FaderState {
  public:
-  explicit FaderState(class PresetValue *pv);
+  explicit FaderState(class SourceValue *pv);
   FaderState()
-      : _presetValue(nullptr),
+      : _sourceValue(nullptr),
         _isToggleButton(false),
         _newToggleButtonColumn(false) {}
   FaderState(const FaderState &source);
@@ -20,23 +20,23 @@ class FaderState {
   FaderState &operator=(const FaderState &rhs);
 
   ~FaderState() { _presetValueDeletedConnection.disconnect(); }
-  void SetPresetValue(class PresetValue *presetValue);
-  void SetNoPresetValue() { SetPresetValue(nullptr); }
+  void SetSourceValue(class SourceValue *presetValue);
+  void SetNoSourceValue() { SetSourceValue(nullptr); }
   void SetIsToggleButton(bool isToggle) { _isToggleButton = isToggle; }
   void SetNewToggleButtonColumn(bool newColumn) {
     _newToggleButtonColumn = newColumn;
   }
 
   // This might return a nullptr to indicate an unset control.
-  class PresetValue *GetPresetValue() const {
-    return _presetValue;
+  class SourceValue *GetSourceValue() const {
+    return _sourceValue;
   }
   bool IsToggleButton() const { return _isToggleButton; }
   bool NewToggleButtonColumn() const { return _newToggleButtonColumn; }
 
  private:
   void onPresetValueDeleted();
-  class PresetValue *_presetValue;
+  class SourceValue *_sourceValue;
   bool _isToggleButton;
   bool _newToggleButtonColumn;
   sigc::connection _presetValueDeletedConnection;
@@ -57,9 +57,9 @@ class FaderSetupState {
   size_t fadeInSpeed, fadeOutSpeed;
   size_t width, height;
 
-  bool IsAssigned(const class PresetValue *p) const {
+  bool IsAssigned(const class SourceValue *p) const {
     for (const class FaderState &fader : faders)
-      if (p == fader.GetPresetValue()) return true;
+      if (p == fader.GetSourceValue()) return true;
     return false;
   }
 
@@ -90,9 +90,9 @@ class GUIState {
 
   bool Empty() const { return _faderSetups.empty(); }
 
-  bool IsAssigned(const class PresetValue *p) const {
+  bool IsAssigned(const class SourceValue *s) const {
     for (const std::unique_ptr<FaderSetupState> &fader : _faderSetups) {
-      if (fader->IsAssigned(p)) return true;
+      if (fader->IsAssigned(s)) return true;
     }
     return false;
   }

@@ -52,8 +52,7 @@ class TimeSequence : public Controllable {
   bool Sustain() const { return _sustain; }
   void SetSustain(bool sustain) { _sustain = sustain; }
 
-  virtual void Mix(unsigned *channelValues, unsigned universe,
-                   const Timing &timing) final override {
+  virtual void Mix(const Timing &timing) final override {
     if (_inputValue || (_sustain && _activeValue)) {
       if (!_activeValue) {
         // Start the sequence

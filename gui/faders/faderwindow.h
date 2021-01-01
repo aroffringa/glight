@@ -41,7 +41,7 @@ class FaderWindow : public Gtk::Window {
 
   bool HandleKeyDown(char key);
   bool HandleKeyUp(char key);
-  bool IsAssigned(class PresetValue *presetValue);
+  bool IsAssigned(class SourceValue *presetValue);
   size_t KeyRowIndex() const { return _keyRowIndex; }
 
   /**

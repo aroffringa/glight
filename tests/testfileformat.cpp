@@ -31,10 +31,10 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   Fixture &f = management.Theatre().AddFixture(ft);
   FixtureControl &fc = management.AddFixtureControl(f, subFolder);
   fc.SetName("Control for RGBW fixture");
-  management.AddPreset(fc, 0);
-  management.AddPreset(fc, 1);
-  management.AddPreset(fc, 2).SetValue(ControlValue::MaxUInt());
-  management.AddPreset(fc, 3);
+  management.AddSourceValue(fc, 0);
+  management.AddSourceValue(fc, 1);
+  management.AddSourceValue(fc, 2).Preset().SetValue(ControlValue::MaxUInt());
+  management.AddSourceValue(fc, 3);
   BOOST_CHECK_EQUAL(
       &management.GetFixtureControl(*management.Theatre().Fixtures()[0]),
       &management.GetObjectFromPath(
@@ -45,28 +45,28 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   subFolder.Add(a);
   a.AddPresetValue(fc, 0).SetValue(ControlValue::MaxUInt() / 2);
   a.AddPresetValue(fc, 3).SetValue(ControlValue::MaxUInt());
-  management.AddPreset(a, 0).SetValue(42);
+  management.AddSourceValue(a, 0).Preset().SetValue(42);
 
   PresetCollection &b = management.AddPresetCollection();
   b.SetName("Second preset collection");
   subFolder.Add(b);
   b.AddPresetValue(fc, 0).SetValue(12);
   b.AddPresetValue(fc, 3).SetValue(13);
-  management.AddPreset(b, 0);
+  management.AddSourceValue(b, 0);
 
   Chase &chase = management.AddChase();
   chase.SetName("A chase");
   subFolder.Add(chase);
   chase.Sequence().Add(a, 0);
   chase.Sequence().Add(b, 0);
-  management.AddPreset(chase, 0);
+  management.AddSourceValue(chase, 0);
 
   TimeSequence &timeSequence = management.AddTimeSequence();
   timeSequence.SetName("A time sequence");
   subFolder.Add(timeSequence);
   timeSequence.AddStep(chase, 0);
   timeSequence.AddStep(b, 0);
-  management.AddPreset(timeSequence, 0);
+  management.AddSourceValue(timeSequence, 0);
 
   Folder &effectFolder = management.AddFolder(root, "Effect folder");
   std::unique_ptr<AudioLevelEffect> effectPtr(new AudioLevelEffect());
@@ -112,14 +112,17 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
           "The root folder/A subfolder/Control for RGBW fixture"));
 
   BOOST_CHECK_EQUAL(
-      management.GetPresetValue(readFixtureControl, 0)->Value().UInt(), 0);
+      management.GetSourceValue(readFixtureControl, 0)->Preset().Value().UInt(),
+      0);
   BOOST_CHECK_EQUAL(
-      management.GetPresetValue(readFixtureControl, 1)->Value().UInt(), 0);
+      management.GetSourceValue(readFixtureControl, 1)->Preset().Value().UInt(),
+      0);
   BOOST_CHECK_EQUAL(
-      management.GetPresetValue(readFixtureControl, 2)->Value().UInt(),
+      management.GetSourceValue(readFixtureControl, 2)->Preset().Value().UInt(),
       ControlValue::MaxUInt());
   BOOST_CHECK_EQUAL(
-      management.GetPresetValue(readFixtureControl, 3)->Value().UInt(), 0);
+      management.GetSourceValue(readFixtureControl, 3)->Preset().Value().UInt(),
+      0);
 
   PresetCollection &readCollection =
       static_cast<PresetCollection &>(management.GetObjectFromPath(
@@ -137,14 +140,15 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   BOOST_CHECK_EQUAL(&readCollection.PresetValues()[1]->Controllable(),
                     &readFixtureControl);
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[1]->InputIndex(), 3);
-  BOOST_CHECK_NE(management.GetPresetValue(readCollection, 0), nullptr);
+  BOOST_CHECK_NE(management.GetSourceValue(readCollection, 0), nullptr);
   BOOST_CHECK_EQUAL(
-      &management.GetPresetValue(readCollection, 0)->Controllable(),
+      &management.GetSourceValue(readCollection, 0)->Controllable(),
       &readCollection);
-  BOOST_CHECK_EQUAL(management.GetPresetValue(readCollection, 0)->InputIndex(),
-                    0);
   BOOST_CHECK_EQUAL(
-      management.GetPresetValue(readCollection, 0)->Value().UInt(), 42);
+      management.GetSourceValue(readCollection, 0)->Preset().InputIndex(), 0);
+  BOOST_CHECK_EQUAL(
+      management.GetSourceValue(readCollection, 0)->Preset().Value().UInt(),
+      42);
 
   Chase &readChase = static_cast<Chase &>(
       management.GetObjectFromPath("The root folder/A subfolder/A chase"));

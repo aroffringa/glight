@@ -7,6 +7,7 @@
 #include "../../theatre/controlvalue.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetvalue.h"
+#include "../../theatre/sourcevalue.h"
 
 ToggleWidget::ToggleWidget(class Management &management,
                            EventTransmitter &eventHub, char key)
@@ -14,7 +15,7 @@ ToggleWidget::ToggleWidget(class Management &management,
       _nameLabel("<..>"),
       _management(&management),
       _eventHub(eventHub),
-      _preset(nullptr),
+      _sourceValue(nullptr),
       _holdUpdates(false) {
   _updateConnection =
       _eventHub.SignalUpdateControllables().connect([&]() { onUpdate(); });
@@ -62,7 +63,7 @@ void ToggleWidget::onOnButtonClicked() {
     else
       value = 0;
 
-    writeValue(value);
+    setValue(value);
     SignalValueChange().emit(value);
   }
 }
@@ -85,30 +86,28 @@ bool ToggleWidget::onNameLabelClicked(GdkEventButton *event) {
   return true;
 }
 
-void ToggleWidget::Assign(PresetValue *item, bool moveFader) {
-  if (item != _preset) {
-    _preset = item;
-    if (_preset != nullptr) {
-      _nameLabel.set_text(_preset->Title());
+void ToggleWidget::Assign(SourceValue *item, bool moveFader) {
+  if (item != _sourceValue) {
+    _sourceValue = item;
+    if (_sourceValue != nullptr) {
+      _nameLabel.set_text(_sourceValue->Preset().Title());
       if (moveFader) {
-        setImmediate(_preset->Value().UInt());
-        _onCheckButton.set_active(_preset->Value().UInt() != 0);
+        _onCheckButton.set_active(_sourceValue->Preset().Value().UInt() != 0);
       } else {
         if (_onCheckButton.get_active())
-          writeValue(ControlValue::MaxUInt());
+          setValue(ControlValue::MaxUInt());
         else
-          writeValue(0);
+          setValue(0);
       }
     } else {
       _nameLabel.set_text("<..>");
       if (moveFader) {
-        setImmediate(0);
         _onCheckButton.set_active(false);
       } else {
         if (_onCheckButton.get_active())
-          writeValue(ControlValue::MaxUInt());
+          setValue(ControlValue::MaxUInt());
         else
-          writeValue(0);
+          setValue(0);
       }
     }
     SignalAssigned().emit();
@@ -124,24 +123,23 @@ void ToggleWidget::Assign(PresetValue *item, bool moveFader) {
 }
 
 void ToggleWidget::MoveSlider() {
-  if (_preset != nullptr) {
-    setImmediate(_preset->Value().UInt());
-    _onCheckButton.set_active(_preset->Value().UInt() != 0);
-    SignalValueChange().emit(_preset->Value().UInt());
+  if (_sourceValue != nullptr) {
+    _onCheckButton.set_active(_sourceValue->Preset().Value().UInt() != 0);
+    SignalValueChange().emit(_sourceValue->Preset().Value().UInt());
   }
 }
 
 void ToggleWidget::onUpdate() {
-  if (_preset != nullptr) {
+  if (_sourceValue != nullptr) {
     // The preset might be removed, if so update label
-    if (!_management->Contains(*_preset)) {
+    if (!_management->Contains(*_sourceValue)) {
       _nameLabel.set_text("<..>");
-      _preset = nullptr;
+      _sourceValue = nullptr;
       _onCheckButton.set_active(false);
     }
     // Only if not removed: if preset is renamed, update
     else {
-      _nameLabel.set_text(_preset->Title());
+      _nameLabel.set_text(_sourceValue->Preset().Title());
     }
   }
 }
@@ -156,19 +154,19 @@ void ToggleWidget::FullOff() { _onCheckButton.set_active(false); }
 
 void ToggleWidget::ChangeManagement(class Management &management,
                                     bool moveSliders) {
-  if (_preset == nullptr) {
+  if (_sourceValue == nullptr) {
     _management = &management;
   } else {
-    std::string controllablePath = _preset->Controllable().FullPath();
-    size_t input = _preset->InputIndex();
+    std::string controllablePath = _sourceValue->Controllable().FullPath();
+    size_t input = _sourceValue->Preset().InputIndex();
     _management = &management;
     Controllable &controllable = static_cast<Controllable &>(
         _management->GetObjectFromPath(controllablePath));
-    PresetValue *pv = _management->GetPresetValue(controllable, input);
-    if (pv == nullptr)
+    SourceValue *sv = _management->GetSourceValue(controllable, input);
+    if (sv == nullptr)
       Unassign();
     else {
-      Assign(pv, moveSliders);
+      Assign(sv, moveSliders);
     }
   }
 }

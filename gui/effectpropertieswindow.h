@@ -28,7 +28,7 @@ class EffectPropertiesWindow : public PropertiesWindow {
   void onAddConnectionClicked();
   void onRemoveConnectionClicked();
   void onSelectedConnectionChanged();
-  void onInputSelected(class PresetValue *preset);
+  void onInputSelected(class SourceValue *preset);
   void onChangeManagement(class Management &management) {
     _management = &management;
   }

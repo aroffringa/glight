@@ -328,8 +328,8 @@ void Reader::parsePresetValue(xmlNode *node) {
   Controllable &controllable =
       static_cast<Controllable &>(folder->GetChild(name));
   size_t inputIndex = getIntAttribute(node, "input-index");
-  PresetValue &value = _management.AddPreset(controllable, inputIndex);
-  value.SetValue(ControlValue(getIntAttribute(node, "value")));
+  SourceValue &value = _management.AddSourceValue(controllable, inputIndex);
+  value.Preset().SetValue(ControlValue(getIntAttribute(node, "value")));
 }
 
 void Reader::parseEffect(xmlNode *node) {
@@ -499,7 +499,7 @@ void Reader::parseGUIPresetRef(xmlNode *node, FaderSetupState &fader) {
     Folder *folder = _management.Folders()[folderId].get();
     Controllable &controllable =
         static_cast<Controllable &>(folder->GetChild(name));
-    fader.faders.emplace_back(_management.GetPresetValue(controllable, input));
+    fader.faders.emplace_back(_management.GetSourceValue(controllable, input));
   } else {
     fader.faders.emplace_back(nullptr);
   }

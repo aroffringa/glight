@@ -5,7 +5,7 @@
 
 #include "../theatre/effect.h"
 #include "../theatre/management.h"
-#include "../theatre/presetvalue.h"
+#include "../theatre/sourcevalue.h"
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
@@ -117,9 +117,10 @@ void EffectPropertiesWindow::onRemoveConnectionClicked() {
   fillConnectionsList();
 }
 
-void EffectPropertiesWindow::onInputSelected(class PresetValue *preset) {
+void EffectPropertiesWindow::onInputSelected(class SourceValue *sourceValue) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  _effect->AddConnection(preset->Controllable(), preset->InputIndex());
+  _effect->AddConnection(sourceValue->Controllable(),
+                         sourceValue->Preset().InputIndex());
   if (_management->HasCycle()) {
     _effect->RemoveConnection(_effect->Connections().size() - 1);
     lock.unlock();

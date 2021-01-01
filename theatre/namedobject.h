@@ -116,7 +116,7 @@ class NamedObject {
   sigc::signal<void()> &SignalDelete() { return _signalDelete; }
 
  private:
-  std::string _name;
+  [[no_unique_address]] std::string _name;
   sigc::signal<void()> _signalDelete;
 };
 

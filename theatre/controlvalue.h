@@ -4,8 +4,8 @@
 #include <cmath>
 
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class ControlValue {
  public:
   enum MixStyle {

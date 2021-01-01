@@ -18,9 +18,11 @@ class ToggleWidget : public ControlWidget {
   virtual void Toggle() final override;
   virtual void FullOn() final override;
   virtual void FullOff() final override;
-  virtual void Assign(class PresetValue *item, bool moveFader) final override;
+  virtual void Assign(class SourceValue *item, bool moveFader) final override;
   virtual void MoveSlider() final override;
-  virtual class PresetValue *Preset() const final override { return _preset; }
+  virtual class SourceValue *GetSourceValue() const final override {
+    return _sourceValue;
+  }
 
   virtual void Limit(double value) final override;
   virtual void ChangeManagement(class Management &management,
@@ -37,7 +39,7 @@ class ToggleWidget : public ControlWidget {
   sigc::connection _updateConnection;
   class Management *_management;
   class EventTransmitter &_eventHub;
-  class PresetValue *_preset;
+  class SourceValue *_sourceValue;
 
   bool _holdUpdates;
 

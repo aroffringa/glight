@@ -25,20 +25,20 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
   for (size_t i = 0; i != control.NInputs(); ++i) {
     Color c = control.InputColor(i);
     if (control.InputType(i) == FunctionType::Master && master != 0)
-      pc.AddPresetValue(*management.GetPresetValue(control, i))
+      pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
           .SetValue(master);
     else if (c == Color::White()) {
       if (deduction.whiteFromRGB) {
         unsigned white = std::min(red, std::min(green, blue));
         if (white != 0)
-          pc.AddPresetValue(*management.GetPresetValue(control, i))
+          pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
               .SetValue(white);
       }
     } else if (c == Color::Amber()) {
       if (deduction.amberFromRGB) {
         unsigned amber = std::min(red / 2, green) * 2;
         if (amber != 0) {
-          pc.AddPresetValue(*management.GetPresetValue(control, i))
+          pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
               .SetValue(amber);
         }
       }
@@ -46,18 +46,19 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
       if (deduction.uvFromRGB) {
         unsigned uv = std::min(blue / 3, red) * 3;
         if (uv != 0) {
-          pc.AddPresetValue(*management.GetPresetValue(control, i))
+          pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
               .SetValue(uv);
         }
       }
     } else {
       if (c.Red() != 0 && red != 0)
-        pc.AddPresetValue(*management.GetPresetValue(control, i)).SetValue(red);
+        pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
+            .SetValue(red);
       if (c.Green() != 0 && green != 0)
-        pc.AddPresetValue(*management.GetPresetValue(control, i))
+        pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
             .SetValue(green);
       if (c.Blue() != 0 && blue != 0)
-        pc.AddPresetValue(*management.GetPresetValue(control, i))
+        pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
             .SetValue(blue);
     }
   }
@@ -75,7 +76,7 @@ PresetCollection &AutoDesign::MakeColorPreset(
     addColorPresets(management, *controllables[cIndex], pc, colors[colorIndex],
                     deduction);
   }
-  management.AddPreset(pc, 0);
+  management.AddSourceValue(pc, 0);
   return pc;
 }
 
@@ -90,7 +91,7 @@ void AutoDesign::MakeColorPresetPerFixture(
     size_t colorIndex = cIndex % colors.size();
     addColorPresets(management, *controllables[cIndex], pc, colors[colorIndex],
                     deduction);
-    management.AddPreset(pc, 0);
+    management.AddSourceValue(pc, 0);
   }
 }
 
@@ -102,7 +103,7 @@ Chase &AutoDesign::MakeRunningLight(
   Chase &chase = management.AddChase();
   chase.SetName(destination.GetAvailableName("Runchase"));
   destination.Add(chase);
-  management.AddPreset(chase, 0);
+  management.AddSourceValue(chase, 0);
   Sequence &seq = chase.Sequence();
   size_t frames;
   if (runType == InwardRun || runType == OutwardRun)
@@ -169,7 +170,7 @@ Chase &AutoDesign::MakeRunningLight(
       }
     }
     seq.Add(pc, 0);
-    management.AddPreset(pc, 0);
+    management.AddSourceValue(pc, 0);
   }
   if (runType == BackAndForthRun) {
     for (size_t i = 2; i < colors.size(); ++i)
@@ -186,7 +187,7 @@ Chase &AutoDesign::MakeColorVariation(
   Chase &chase = management.AddChase();
   chase.SetName(destination.GetAvailableName("Colorvar"));
   destination.Add(chase);
-  management.AddPreset(chase, 0);
+  management.AddSourceValue(chase, 0);
   Sequence &seq = chase.Sequence();
   std::random_device rd;
   std::mt19937 rnd(rd());
@@ -210,7 +211,7 @@ Chase &AutoDesign::MakeColorVariation(
       addColorPresets(management, *c, pc, randomizedColor, deduction);
     }
     seq.Add(pc, 0);
-    management.AddPreset(pc, 0);
+    management.AddSourceValue(pc, 0);
   }
   return chase;
 }
@@ -223,7 +224,7 @@ Chase &AutoDesign::MakeColorShift(
   Chase &chase = management.AddChase();
   chase.SetName(destination.GetAvailableName("Colourshift"));
   destination.Add(chase);
-  management.AddPreset(chase, 0);
+  management.AddSourceValue(chase, 0);
   Sequence &seq = chase.Sequence();
   size_t frames = colors.size();
   std::vector<std::vector<size_t>> pos(frames);
@@ -280,7 +281,7 @@ Chase &AutoDesign::MakeColorShift(
                       colors[colourIndex], deduction);
     }
     seq.Add(pc, 0);
-    management.AddPreset(pc, 0);
+    management.AddSourceValue(pc, 0);
   }
   if (shiftType == BackAndForthShift) {
     for (size_t i = 2; i < frames; ++i)
@@ -302,7 +303,7 @@ Controllable &AutoDesign::MakeVUMeter(
   Effect &newAudioLevel =
       management.AddEffect(std::move(audioLevel), destination);
   for (size_t inp = 0; inp != newAudioLevel.NInputs(); ++inp)
-    management.AddPreset(newAudioLevel, inp);
+    management.AddSourceValue(newAudioLevel, inp);
   size_t nLevels;
   if (direction == VUInward || direction == VUOutward)
     nLevels = (controllables.size() + 1) / 2;
@@ -316,7 +317,7 @@ Controllable &AutoDesign::MakeVUMeter(
         destination.GetAvailableName(newAudioLevel.Name() + "_Thr"));
     Effect &newEffect = management.AddEffect(std::move(threshold), destination);
     for (size_t inp = 0; inp != newEffect.NInputs(); ++inp)
-      management.AddPreset(newEffect, inp);
+      management.AddSourceValue(newEffect, inp);
 
     size_t nFixInLevel = 1;
     if ((direction == VUInward &&
@@ -350,7 +351,7 @@ Controllable &AutoDesign::MakeVUMeter(
       addColorPresets(management, *controllables[fixIndex], pc,
                       colors[fixIndex], deduction);
     }
-    management.AddPreset(pc, 0);
+    management.AddSourceValue(pc, 0);
     newEffect.AddConnection(pc, 0);
     newAudioLevel.AddConnection(newEffect, 0);
   }
@@ -368,7 +369,7 @@ Chase &AutoDesign::MakeIncreasingChase(
   Chase &chase = management.AddChase();
   chase.SetName(destination.GetAvailableName("Increasing chase"));
   destination.Add(chase);
-  management.AddPreset(chase, 0);
+  management.AddSourceValue(chase, 0);
   Sequence &seq = chase.Sequence();
 
   size_t nFix = controllables.size();
@@ -411,7 +412,7 @@ Chase &AutoDesign::MakeIncreasingChase(
       addColorPresets(management, *controllables[i], pc, colors[i], deduction);
     }
     seq.Add(pc, 0);
-    management.AddPreset(pc, 0);
+    management.AddSourceValue(pc, 0);
   }
   return chase;
 }
