@@ -12,7 +12,7 @@
  */
 class ControlWidget : public Gtk::Bin {
  public:
-  ControlWidget() : _fadingValue(0), _targetValue(0) {}
+  ControlWidget() {}
 
   /**
    * Toggle this fader. When the fader is off, it should
@@ -36,17 +36,17 @@ class ControlWidget : public Gtk::Bin {
   virtual void FullOff() = 0;
 
   /**
-   * Link this control to the given preset. If moveFader is true,
+   * Link this control to the given source. If moveFader is true,
    * the control will change its state to reflact the value of the
-   * preset.
+   * source's value.
    */
-  virtual void Assign(class PresetValue *item, bool moveFader) = 0;
+  virtual void Assign(class SourceValue *item, bool moveFader) = 0;
 
   /**
    * Resyncs the fader with the preset value.
    */
   virtual void MoveSlider() = 0;
-  virtual class PresetValue *Preset() const = 0;
+  virtual class SourceValue *GetSourceValue() const = 0;
   virtual void Limit(double value) = 0;
   virtual void ChangeManagement(class Management &management,
                                 bool moveSliders) = 0;
@@ -62,20 +62,22 @@ class ControlWidget : public Gtk::Bin {
 
   static double MAX_SCALE_VALUE();
 
-  void writeValue(unsigned target);
-  void UpdateValue(double timePassed);
-
  protected:
   double _fadeUpSpeed, _fadeDownSpeed;
 
-  void setImmediate(unsigned value) {
-    _fadingValue = value;
-    _targetValue = value;
-  }
+  /**
+   * Set the value after a fader change. This function
+   * begins a fade if the corresponding fade up/down speed
+   * are set.
+   */
+  void setValue(unsigned target);
+
+  /**
+   * Sets the value, skipping any requested fade.
+   */
+  void setImmediateValue(unsigned target);
 
  private:
-  unsigned _fadingValue, _targetValue;
-
   sigc::signal<void, double> _signalValueChange;
   sigc::signal<void> _signalAssigned;
 };

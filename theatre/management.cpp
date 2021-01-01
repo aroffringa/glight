@@ -13,6 +13,7 @@
 #include "presetvalue.h"
 #include "sequence.h"
 #include "show.h"
+#include "sourcevalue.h"
 #include "theatre.h"
 #include "timesequence.h"
 #include "valuesnapshot.h"
@@ -51,7 +52,7 @@ void Management::Clear() {
   _show->Clear();
 
   _controllables.clear();
-  _presetValues.clear();
+  _sourceValues.clear();
   _folders.clear();
   _folders.emplace_back(new Folder());
   _rootFolder = _folders.back().get();
@@ -138,24 +139,30 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
     beatConfidence = 0.0;
     audioLevel = 0;
   }
-  unsigned randomValue = _rndDistribution(_randomGenerator);
+  const unsigned randomValue = _rndDistribution(_randomGenerator);
   Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel,
                 randomValue);
+  const double timePassed = (relTimeInMs - _previousTime) * 1e-3;
+  _previousTime = relTimeInMs;
+  for (std::unique_ptr<SourceValue> &sv : _sourceValues) {
+    sv->ApplyFade(timePassed);
+  }
 
   std::lock_guard<std::mutex> lock(_mutex);
 
   _show->Mix(values, universe, timing);
 
   // Reset all inputs
-  for (const std::unique_ptr<class PresetValue> &pv : _presetValues) {
-    for (size_t inputIndex = 0; inputIndex != pv->Controllable().NInputs();
+  for (const std::unique_ptr<class SourceValue> &sv : _sourceValues) {
+    for (size_t inputIndex = 0; inputIndex != sv->Controllable().NInputs();
          ++inputIndex) {
-      pv->Controllable().InputValue(inputIndex) = 0;
+      sv->Controllable().InputValue(inputIndex) = 0;
     }
   }
 
-  for (const std::unique_ptr<class PresetValue> &pv : _presetValues)
-    pv->Controllable().MixInput(pv->InputIndex(), pv->Value());
+  for (const std::unique_ptr<class SourceValue> &sv : _sourceValues)
+    sv->Controllable().MixInput(sv->Preset().InputIndex(),
+                                sv->Preset().Value());
 
   // Solve dependency graph of controllables
   std::vector<Controllable *> unorderedList, orderedList;
@@ -237,15 +244,12 @@ void Management::removeControllable(
 
   _controllables.erase(controllablePtr);
 
-  for (std::vector<std::unique_ptr<PresetValue>>::iterator i =
-           _presetValues.begin();
-       i != _presetValues.end(); ++i) {
-    PresetValue *p = i->get();
-    if (&p->Controllable() == controllable.get()) {
-      --i;
-      removePreset(i + 1);
-    }
-  }
+  auto result =
+      std::remove_if(_sourceValues.begin(), _sourceValues.end(),
+                     [&controllable](std::unique_ptr<SourceValue> &pv) {
+                       return &pv->Controllable() == controllable.get();
+                     });
+  _sourceValues.erase(result, _sourceValues.end());
 
   controllable->Parent().Remove(*controllable.get());
 
@@ -253,8 +257,7 @@ void Management::removeControllable(
       _controllables.begin();
   while (i != _controllables.end()) {
     if ((*i)->HasOutputConnection(*controllable)) {
-      --i;
-      removeControllable(i + 1);
+      removeControllable(i);
       // Every time we remove something, we have to restart, because the vector
       // might have changed because of other dependencies
       i = _controllables.begin();
@@ -299,31 +302,27 @@ void Management::RemoveFixture(Fixture &fixture) {
   RemoveControllable(control);
 }
 
-PresetValue &Management::AddPreset(Controllable &controllable,
-                                   size_t inputIndex) {
-  _presetValues.emplace_back(new PresetValue(controllable, inputIndex));
-  return *_presetValues.back();
+SourceValue &Management::AddSourceValue(Controllable &controllable,
+                                        size_t inputIndex) {
+  _sourceValues.emplace_back(
+      std::make_unique<SourceValue>(controllable, inputIndex));
+  return *_sourceValues.back();
 }
 
-void Management::RemovePreset(PresetValue &presetValue) {
-  for (std::vector<std::unique_ptr<PresetValue>>::iterator i =
-           _presetValues.begin();
-       i != _presetValues.end(); ++i) {
-    if (i->get() == &presetValue) {
-      removePreset(i);
+void Management::RemoveSourceValue(SourceValue &sourceValue) {
+  for (std::vector<std::unique_ptr<SourceValue>>::iterator i =
+           _sourceValues.begin();
+       i != _sourceValues.end(); ++i) {
+    if (i->get() == &sourceValue) {
+      _sourceValues.erase(i);
       return;
     }
   }
 }
 
-void Management::removePreset(
-    std::vector<std::unique_ptr<PresetValue>>::iterator presetValuePtr) {
-  _presetValues.erase(presetValuePtr);
-}
-
-bool Management::Contains(PresetValue &presetValue) const {
-  for (const std::unique_ptr<PresetValue> &pv : _presetValues) {
-    if (pv.get() == &presetValue) return true;
+bool Management::Contains(SourceValue &sourceValue) const {
+  for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
+    if (sv.get() == &sourceValue) return true;
   }
   return false;
 }
@@ -374,16 +373,17 @@ size_t Management::ControllableIndex(const Controllable *controllable) const {
   return FolderObject::FindIndex(_controllables, controllable);
 }
 
-PresetValue *Management::GetPresetValue(Controllable &controllable,
+SourceValue *Management::GetSourceValue(Controllable &controllable,
                                         size_t inputIndex) const {
-  for (const std::unique_ptr<PresetValue> &pv : _presetValues)
-    if (&pv->Controllable() == &controllable && pv->InputIndex() == inputIndex)
-      return pv.get();
+  for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
+    if (&sv->Controllable() == &controllable &&
+        sv->Preset().InputIndex() == inputIndex)
+      return sv.get();
   return nullptr;
 }
 
-size_t Management::PresetValueIndex(const PresetValue *presetValue) const {
-  return FolderObject::FindIndex(_presetValues, presetValue);
+size_t Management::SourceValueIndex(const SourceValue *sourceValue) const {
+  return NamedObject::FindIndex(_sourceValues, sourceValue);
 }
 
 ValueSnapshot Management::Snapshot() {
@@ -419,17 +419,17 @@ Management::Management(const Management &forDryCopy,
   // The controllables can have dependencies to other controllables, hence
   // dependencies need to be resolved and copied first.
   _controllables.resize(forDryCopy._controllables.size());
-  _presetValues.resize(forDryCopy._presetValues.size());
+  _sourceValues.resize(forDryCopy._sourceValues.size());
   for (size_t i = 0; i != forDryCopy._controllables.size(); ++i) {
     if (_controllables[i] == nullptr)  // not already resolved?
       dryCopyControllerDependency(forDryCopy, i);
   }
-  for (size_t i = 0; i != forDryCopy._presetValues.size(); ++i) {
-    if (_presetValues[i] == nullptr) {
+  for (size_t i = 0; i != forDryCopy._sourceValues.size(); ++i) {
+    if (_sourceValues[i] == nullptr) {
       size_t cIndex = forDryCopy.ControllableIndex(
-          &forDryCopy._presetValues[i]->Controllable());
-      _presetValues[i].reset(new PresetValue(*forDryCopy._presetValues[i],
-                                             *_controllables[cIndex]));
+          &forDryCopy._sourceValues[i]->Controllable());
+      _sourceValues[i] = std::make_unique<SourceValue>(
+          *forDryCopy._sourceValues[i], *_controllables[cIndex]);
     }
   }
 }
@@ -566,20 +566,20 @@ bool Management::topologicalSortVisit(Controllable &controllable,
 }
 
 void Management::BlackOut() {
-  for (std::unique_ptr<class PresetValue> &p : _presetValues) {
-    p->SetValue(ControlValue::Zero());
+  for (std::unique_ptr<class SourceValue> &sv : _sourceValues) {
+    sv->Preset().SetValue(ControlValue::Zero());
   }
 }
 
 void Management::Recover(Management &other) {
   std::scoped_lock<std::mutex, std::mutex> lock(other._mutex, _mutex);
-  for (const std::unique_ptr<PresetValue> &p : other._presetValues) {
-    std::string path = p->Controllable().FullPath();
+  for (const std::unique_ptr<SourceValue> &sv : other._sourceValues) {
+    std::string path = sv->Controllable().FullPath();
     FolderObject *object = GetObjectFromPathIfExists(path);
     Controllable *control = dynamic_cast<Controllable *>(object);
     if (control) {
-      PresetValue *value = GetPresetValue(*control, p->InputIndex());
-      if (value) value->SetValue(p->Value());
+      SourceValue *value = GetSourceValue(*control, sv->Preset().InputIndex());
+      if (value) value->Preset().SetValue(sv->Preset().Value());
     }
   }
 }

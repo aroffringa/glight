@@ -85,11 +85,11 @@ BOOST_AUTO_TEST_CASE(Remove) {
       fixture.Functions();
   BOOST_CHECK_EQUAL(functions.size(), 3);
   for (size_t i = 0; i != functions.size(); ++i)
-    management.AddPreset(control, i);
+    management.AddSourceValue(control, i);
   management.RemoveFixture(fixture);
   BOOST_CHECK_EQUAL(management.Theatre().Fixtures().size(), 0);
   BOOST_CHECK_EQUAL(management.Controllables().size(), 0);
-  BOOST_CHECK_EQUAL(management.PresetValues().size(), 0);
+  BOOST_CHECK_EQUAL(management.SourceValues().size(), 0);
   BOOST_CHECK_EQUAL(management.RootFolder().Children().size(), 0);
 }
 

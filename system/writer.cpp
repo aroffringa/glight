@@ -109,10 +109,10 @@ void Writer::writeGlightShow() {
   for (const std::unique_ptr<Controllable> &c : controllables)
     writeControllable(*c);
 
-  const std::vector<std::unique_ptr<PresetValue>> &presetValues =
-      _management.PresetValues();
-  for (const std::unique_ptr<PresetValue> &pv : presetValues)
-    writePresetValue(*pv);
+  const std::vector<std::unique_ptr<SourceValue>> &sourceValues =
+      _management.SourceValues();
+  for (const std::unique_ptr<SourceValue> &sv : sourceValues)
+    writePresetValue(sv->Preset());
 
   endElement();  // control
 
@@ -427,12 +427,13 @@ void Writer::writeFaderState(const FaderSetupState &guiState) {
     writeAttribute("is-toggle", fader.IsToggleButton());
     if (fader.IsToggleButton())
       writeAttribute("new-toggle-column", fader.NewToggleButtonColumn());
-    if (fader.GetPresetValue() != nullptr) {
-      writeAttribute("input-index", fader.GetPresetValue()->InputIndex());
+    if (fader.GetSourceValue() != nullptr) {
+      writeAttribute("input-index",
+                     fader.GetSourceValue()->Preset().InputIndex());
       writeAttribute(
           "folder",
-          _folderIds[&fader.GetPresetValue()->Controllable().Parent()]);
-      writeAttribute("name", fader.GetPresetValue()->Controllable().Name());
+          _folderIds[&fader.GetSourceValue()->Controllable().Parent()]);
+      writeAttribute("name", fader.GetSourceValue()->Controllable().Name());
     }
     endElement();  // preset
   }

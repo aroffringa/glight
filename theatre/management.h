@@ -11,9 +11,15 @@
 
 #include "valuesnapshot.h"
 
+class Controllable;
+class DmxDevice;
+class Folder;
+class PresetValue;
+class SourceValue;
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class Management {
  public:
   Management();
@@ -23,7 +29,7 @@ class Management {
 
   bool IsEmpty() {
     return _folders.size() <= 1 && _controllables.empty() &&
-           _presetValues.empty();
+           _sourceValues.empty();
   }
 
   void AddDevice(std::unique_ptr<class DmxDevice> device);
@@ -43,8 +49,8 @@ class Management {
       const {
     return _controllables;
   }
-  const std::vector<std::unique_ptr<class PresetValue>> &PresetValues() const {
-    return _presetValues;
+  const std::vector<std::unique_ptr<class SourceValue>> &SourceValues() const {
+    return _sourceValues;
   }
   const std::vector<std::unique_ptr<class DmxDevice>> &Devices() const {
     return _devices;
@@ -67,10 +73,11 @@ class Management {
 
   void RemoveFixture(class Fixture &fixture);
 
-  class PresetValue &AddPreset(Controllable &controllable, size_t inputIndex);
+  class SourceValue &AddSourceValue(Controllable &controllable,
+                                    size_t inputIndex);
 
-  void RemovePreset(class PresetValue &presetValue);
-  bool Contains(class PresetValue &controllable) const;
+  void RemoveSourceValue(class SourceValue &sourceValue);
+  bool Contains(class SourceValue &sourceValue) const;
 
   class Chase &AddChase();
 
@@ -85,9 +92,9 @@ class Management {
   class FolderObject *GetObjectFromPathIfExists(const std::string &path) const;
   size_t ControllableIndex(const Controllable *controllable) const;
 
-  class PresetValue *GetPresetValue(Controllable &controllable,
+  class SourceValue *GetSourceValue(Controllable &controllable,
                                     size_t inputIndex) const;
-  size_t PresetValueIndex(const class PresetValue *presetValue) const;
+  size_t SourceValueIndex(const class SourceValue *sourceValue) const;
   class ValueSnapshot Snapshot();
 
   double GetOffsetTimeInMS() const {
@@ -143,8 +150,6 @@ class Management {
   void removeControllable(
       std::vector<std::unique_ptr<class Controllable>>::iterator
           controllablePtr);
-  void removePreset(
-      std::vector<std::unique_ptr<class PresetValue>>::iterator presetValuePtr);
 
   void dryCopyControllerDependency(const Management &forDryCopy, size_t index);
   void dryCopyEffectDependency(const Management &forDryCopy, size_t index);
@@ -168,17 +173,18 @@ class Management {
   std::uniform_int_distribution<unsigned> _rndDistribution;
   std::atomic<size_t> _overridenBeat;
   std::atomic<double> _lastOverridenBeatTime;
+  std::atomic<double> _previousTime;
 
   std::unique_ptr<class Theatre> _theatre;
   std::unique_ptr<class ValueSnapshot> _snapshot;
   std::shared_ptr<class BeatFinder> _beatFinder;
   std::unique_ptr<class Show> _show;
 
-  class Folder *_rootFolder;
-  std::vector<std::unique_ptr<class Folder>> _folders;
-  std::vector<std::unique_ptr<class Controllable>> _controllables;
-  std::vector<std::unique_ptr<class PresetValue>> _presetValues;
-  std::vector<std::unique_ptr<class DmxDevice>> _devices;
+  Folder *_rootFolder;
+  std::vector<std::unique_ptr<Folder>> _folders;
+  std::vector<std::unique_ptr<Controllable>> _controllables;
+  std::vector<std::unique_ptr<SourceValue>> _sourceValues;
+  std::vector<std::unique_ptr<DmxDevice>> _devices;
 };
 
 #endif

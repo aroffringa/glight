@@ -9,9 +9,11 @@
 #include <gtkmm/label.h>
 #include <gtkmm/scale.h>
 
+class SourceValue;
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class FaderWidget : public ControlWidget {
  public:
   FaderWidget(class Management &management, class EventTransmitter &eventHub,
@@ -21,9 +23,9 @@ class FaderWidget : public ControlWidget {
   void Toggle() final override;
   void FullOn() final override;
   void FullOff() final override;
-  void Assign(class PresetValue *item, bool moveFader) final override;
+  void Assign(SourceValue *item, bool moveFader) final override;
   void MoveSlider() final override;
-  PresetValue *Preset() const final override { return _preset; }
+  SourceValue *GetSourceValue() const final override { return _sourceValue; }
 
   void Limit(double value) final override {
     if (_scale.get_value() > value) _scale.set_value(value);
@@ -52,7 +54,7 @@ class FaderWidget : public ControlWidget {
   sigc::connection _updateConnection;
   class Management *_management;
   class EventTransmitter &_eventHub;
-  class PresetValue *_preset;
+  class SourceValue *_sourceValue;
 
   bool _holdUpdates;
 };

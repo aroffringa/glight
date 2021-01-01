@@ -16,8 +16,8 @@ BOOST_AUTO_TEST_CASE(Add) {
       management.Theatre().AddFixtureType(FixtureType::Light1Ch);
   Fixture &fixture = management.Theatre().AddFixture(fixtureType);
   FixtureControl &control = management.AddFixtureControl(fixture);
-  PresetValue &value = management.AddPreset(control, 0);
-  value.SetValue(ControlValue::Max());
+  SourceValue &value = management.AddSourceValue(control, 0);
+  value.Preset().SetValue(ControlValue::Max());
   PresetCollection &presetCollection = management.AddPresetCollection();
   presetCollection.SetFromCurrentSituation(management);
   BOOST_CHECK_EQUAL(presetCollection.PresetValues().size(), 1);
@@ -32,8 +32,8 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   Fixture &fixture = management.Theatre().AddFixture(fixtureType);
   fixture.SetChannel(100);
   FixtureControl &fixtureControl = management.AddFixtureControl(fixture);
-  PresetValue &value = management.AddPreset(fixtureControl, 0);
-  value.SetValue(ControlValue::Max());
+  SourceValue &value = management.AddSourceValue(fixtureControl, 0);
+  value.Preset().SetValue(ControlValue::Max());
   PresetCollection &presetCollection = management.AddPresetCollection();
   presetCollection.SetFromCurrentSituation(management);
 

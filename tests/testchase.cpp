@@ -21,8 +21,8 @@ BOOST_AUTO_TEST_CASE(remove_indirect) {
   FixtureType &ft = management.Theatre().AddFixtureType(FixtureType::Light1Ch);
   Fixture &f = management.Theatre().AddFixture(ft);
   FixtureControl &fc = management.AddFixtureControl(f);
-  PresetValue &pv = management.AddPreset(fc, 0);
-  pv.SetValue(ControlValue::Max());
+  SourceValue &sv = management.AddSourceValue(fc, 0);
+  sv.Preset().SetValue(ControlValue::Max());
   PresetCollection &pcA = management.AddPresetCollection();
   pcA.SetName("pcA");
   root.Add(pcA);

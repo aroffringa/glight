@@ -33,7 +33,7 @@ class InputSelectDialog : public Gtk::Dialog {
                           _inputSelector.SelectedInput());
   }
 
-  class PresetValue *SelectedInputPreset() const;
+  class SourceValue *SelectedInputPreset() const;
 
  private:
   void onSelectionChanged() {

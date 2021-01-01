@@ -28,19 +28,19 @@ BOOST_AUTO_TEST_CASE(RemoveObject) {
   BOOST_CHECK(management.RootFolder().Children().empty());
   Folder &folder = management.AddFolder(management.RootFolder(), "folder");
   Effect &effect = management.AddEffect(std::move(effectPtr), folder);
-  management.AddPreset(effect, 0);
+  management.AddSourceValue(effect, 0);
   class Chase &chase = management.AddChase();
   chase.SetName("chase");
   folder.Add(chase);
-  management.AddPreset(chase, 0);
+  management.AddSourceValue(chase, 0);
   BOOST_CHECK_EQUAL(management.RootFolder().Children().size(), 1);
   BOOST_CHECK_EQUAL(folder.Children().size(), 2);
-  BOOST_CHECK(!management.PresetValues().empty());
+  BOOST_CHECK(!management.SourceValues().empty());
 
   management.RemoveObject(folder);
 
   BOOST_CHECK(management.RootFolder().Children().empty());
-  BOOST_CHECK(management.PresetValues().empty());
+  BOOST_CHECK(management.SourceValues().empty());
 }
 
 BOOST_AUTO_TEST_CASE(HasCycles) {

@@ -97,7 +97,7 @@ void ObjectListFrame::onNewPresetButtonClicked() {
   presetCollection.SetName(parent.GetAvailableName("Preset"));
   parent.Add(presetCollection);
   presetCollection.SetFromCurrentSituation(*_management);
-  _management->AddPreset(presetCollection, 0);
+  _management->AddSourceValue(presetCollection, 0);
   lock.unlock();
 
   _parentWindow.EmitUpdate();
@@ -118,7 +118,7 @@ void ObjectListFrame::onNewTimeSequenceButtonClicked() {
   TimeSequence &tSequence = _management->AddTimeSequence();
   tSequence.SetName(parent.GetAvailableName("Seq"));
   parent.Add(tSequence);
-  _management->AddPreset(tSequence, 0);
+  _management->AddSourceValue(tSequence, 0);
   lock.unlock();
 
   _parentWindow.EmitUpdate();
@@ -154,7 +154,7 @@ void ObjectListFrame::onNewEffectMenuClicked(enum Effect::Type effectType) {
   effect->SetName(parent.GetAvailableName(Effect::TypeToName(effectType)));
   Effect *added = &_management->AddEffect(std::move(effect), parent);
   for (size_t i = 0; i != added->NInputs(); ++i)
-    _management->AddPreset(*added, i);
+    _management->AddSourceValue(*added, i);
   _parentWindow.EmitUpdate();
   _list.SelectObject(*added);
   onObjectActivated(*added);

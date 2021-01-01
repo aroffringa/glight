@@ -160,7 +160,7 @@ void FixtureListWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl) {
   for (size_t i = 0; i != functions.size(); ++i) {
     // std::stringstream funcName;
     // funcName << fixture.Name() << number;
-    _management->AddPreset(control, i);
+    _management->AddSourceValue(control, i);
     ++number;
   }
   lock.unlock();

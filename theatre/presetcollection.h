@@ -7,10 +7,11 @@
 #include "controllable.h"
 #include "dmxchannel.h"
 #include "presetvalue.h"
+#include "sourcevalue.h"
 
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class PresetCollection : public Controllable {
  public:
   PresetCollection() : _inputValue(0) {}
@@ -76,11 +77,11 @@ class PresetCollection : public Controllable {
 
 void PresetCollection::SetFromCurrentSituation(const Management &management) {
   Clear();
-  const std::vector<std::unique_ptr<PresetValue>> &values =
-      management.PresetValues();
-  for (const std::unique_ptr<PresetValue> &pv : values) {
-    if (!pv->IsIgnorable() && (&pv->Controllable()) != this)
-      _presetValues.emplace_back(new PresetValue(*pv));
+  const std::vector<std::unique_ptr<SourceValue>> &values =
+      management.SourceValues();
+  for (const std::unique_ptr<SourceValue> &sv : values) {
+    if (!sv->IsIgnorable() && (&sv->Controllable()) != this)
+      _presetValues.emplace_back(new PresetValue(sv->Preset()));
   }
 }
 
