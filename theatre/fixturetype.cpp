@@ -273,3 +273,23 @@ Color FixtureType::GetColor(const Fixture &fixture,
   }
   throw std::runtime_error("Unknown fixture class");
 }
+
+int FixtureType::GetRotationSpeed(const Fixture &fixture,
+                                  const ValueSnapshot &snapshot) const {
+  switch (_class) {
+    default:
+      return 0;
+    case H2ODMXPro: {
+      const int rotation = fixture.Functions()[1]->GetValue(snapshot);
+      const int maxSpeed = (1 << 24) / 100;  // 1 times per second
+      if (rotation <= 9 || (rotation >= 121 && rotation <= 134) ||
+          rotation >= 246)
+        return 0;
+      else if (rotation <= 120) {
+        return (121 - rotation) * maxSpeed / 111;
+      } else {
+        return -(rotation - 134) * maxSpeed / 111;
+      }
+    }
+  }
+}
