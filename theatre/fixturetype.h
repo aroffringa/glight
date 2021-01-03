@@ -108,6 +108,14 @@ class FixtureType : public FolderObject {
   Color GetColor(const class Fixture &fixture, const ValueSnapshot &snapshot,
                  size_t shapeIndex) const;
 
+  /**
+   * Returns the rotation speed of the fixture.
+   * 0 is no rotation, +/- 2^24 is 100 times per second (the max).
+   * Positive is clockwise rotation.
+   */
+  int GetRotationSpeed(const class Fixture &fixture,
+                       const ValueSnapshot &snapshot) const;
+
   enum FixtureClass FixtureClass() const { return _class; }
 
   bool Is16Bit([[maybe_unused]] size_t functionIndex) const {

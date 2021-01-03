@@ -168,26 +168,47 @@ void VisualizationWindow::drawManagement(
   cairo->save();
   double sc = scale(management, style.width, style.height);
   cairo->scale(sc, sc);
-  for (const std::unique_ptr<Fixture> &f : fixtures) {
-    if (f->IsVisible()) {
-      size_t shapeCount = f->Type().ShapeCount();
+
+  _fixtureStates.resize(fixtures.size());
+  for (size_t fixtureIndex = 0; fixtureIndex != fixtures.size();
+       ++fixtureIndex) {
+    const Fixture &fixture = *fixtures[fixtureIndex];
+    FixtureState &state = _fixtureStates[fixtureIndex];
+    if (fixture.IsVisible()) {
+      size_t shapeCount = fixture.Type().ShapeCount();
       for (size_t i = 0; i != shapeCount; ++i) {
         size_t shapeIndex = shapeCount - i - 1;
-        Color c = f->GetColor(snapshot, shapeIndex);
+        Color c = fixture.GetColor(snapshot, shapeIndex);
 
         cairo->set_source_rgb((double)c.Red() / 224.0 + 0.125,
                               (double)c.Green() / 224.0 + 0.125,
                               (double)c.Blue() / 224.0 + 0.125);
 
-        double singleRadius = radius(f->Symbol().Value());
+        double singleRadius = radius(fixture.Symbol().Value());
         double radius = shapeCount == 1 ? singleRadius
                                         : 0.33 + 0.07 * double(shapeIndex) /
                                                      (shapeCount - 1);
-        double x = f->Position().X() + 0.5;
-        double y = f->Position().Y() + 0.5;
+        double x = fixture.Position().X() + 0.5;
+        double y = fixture.Position().Y() + 0.5;
         cairo->arc(x + style.xOffset / sc, y + style.yOffset / sc, radius, 0.0,
                    2.0 * M_PI);
         cairo->fill();
+
+        int rotation = fixture.GetRotationSpeed(snapshot);
+        if (rotation != 0) {
+          double rotationDisp =
+              M_PI * double(rotation) * style.timeSince / (10.0 * (1 << 24));
+          state.rotation = std::fmod(rotationDisp + state.rotation, M_PI);
+          double s = std::sin(state.rotation);
+          double c = std::cos(state.rotation);
+          cairo->set_line_width(radius * 0.2);
+          cairo->set_source_rgb(0, 0, 0);
+          cairo->move_to(x + c * radius, y + s * radius);
+          cairo->line_to(x - c * radius, y - s * radius);
+          cairo->move_to(x + s * radius, y - c * radius);
+          cairo->line_to(x - s * radius, y + c * radius);
+          cairo->stroke();
+        }
       }
     }
   }
@@ -225,7 +246,15 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
   cairo->rectangle(0, 0, width, height);
   cairo->fill();
 
-  DrawStyle style{.xOffset = 0, .yOffset = 0, .width = width, .height = height};
+  const double time = _management->GetOffsetTimeInMS();
+  static double previousTime = time;
+
+  DrawStyle style{.xOffset = 0,
+                  .yOffset = 0,
+                  .width = width,
+                  .height = height,
+                  .timeSince = time - previousTime};
+  previousTime = time;
   if (_dryManagement == nullptr) {
     drawManagement(cairo, *_management, style);
   } else if (_miDMSHorizontal.get_active()) {

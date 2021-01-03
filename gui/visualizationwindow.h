@@ -57,6 +57,10 @@ class VisualizationWindow : public Gtk::Window {
   } _dragType;
   std::vector<class Fixture *> _selectedFixtures, _selectedFixturesBeforeDrag;
   Position _draggingStart, _draggingTo;
+  struct FixtureState {
+    double rotation = 0.0;
+  };
+  std::vector<FixtureState> _fixtureStates;
 
   Gtk::Menu _popupMenu;
   Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
@@ -76,6 +80,7 @@ class VisualizationWindow : public Gtk::Window {
     size_t yOffset;
     size_t width;
     size_t height;
+    double timeSince;
   };
   void drawManagement(const Cairo::RefPtr<Cairo::Context> &cairo,
                       class Management &management, const DrawStyle &style);
