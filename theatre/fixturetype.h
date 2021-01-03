@@ -34,7 +34,8 @@ class FixtureType : public FolderObject {
     RGBAWUVLight6Ch,
     CWWW2Ch,
     CWWW4Ch,
-    CWWWA3Ch
+    CWWWA3Ch,
+    RGBLight6Ch_16bit
   };
 
   FixtureType(FixtureClass fixtureClass);
@@ -82,17 +83,19 @@ class FixtureType : public FolderObject {
         return "Briteq Vintage (6ch)";
       case BT_VINTAGE_7CH:
         return "Briteq Vintage (7ch)";
+      case RGBLight6Ch_16bit:
+        return "RGB light (6ch, 16 bit)";
     }
     return "Unknown fixture class";
   }
 
   static std::vector<enum FixtureClass> GetClassList() {
     return std::vector<enum FixtureClass>{
-        Light1Ch,       RGBLight3Ch,   RGBLight4Ch,   RGBALight4Ch,
-        RGBALight5Ch,   RGBWLight4Ch,  RGBUVLight4Ch, RGBAWUVLight6Ch,
-        CWWW2Ch,        CWWW4Ch,       CWWWA3Ch,      UVLight3Ch,
-        H2ODMXPro,      RGB_ADJ_6CH,   RGB_ADJ_7CH,   BT_VINTAGE_5CH,
-        BT_VINTAGE_6CH, BT_VINTAGE_7CH};
+        Light1Ch,       RGBLight3Ch,    RGBLight4Ch,      RGBALight4Ch,
+        RGBALight5Ch,   RGBWLight4Ch,   RGBUVLight4Ch,    RGBAWUVLight6Ch,
+        CWWW2Ch,        CWWW4Ch,        CWWWA3Ch,         UVLight3Ch,
+        H2ODMXPro,      RGB_ADJ_6CH,    RGB_ADJ_7CH,      BT_VINTAGE_5CH,
+        BT_VINTAGE_6CH, BT_VINTAGE_7CH, RGBLight6Ch_16bit};
   }
 
   static FixtureClass NameToClass(const std::string &name) {
@@ -107,6 +110,14 @@ class FixtureType : public FolderObject {
 
   enum FixtureClass FixtureClass() const { return _class; }
 
+  bool Is16Bit([[maybe_unused]] size_t functionIndex) const {
+    switch (_class) {
+      case RGBLight6Ch_16bit:
+        return true;
+      default:
+        return false;
+    }
+  }
   size_t ShapeCount() const {
     switch (_class) {
       case Light1Ch:
@@ -124,6 +135,7 @@ class FixtureType : public FolderObject {
       case H2ODMXPro:
       case RGB_ADJ_6CH:
       case RGB_ADJ_7CH:
+      case RGBLight6Ch_16bit:
         return 1;
       case BT_VINTAGE_5CH:
       case BT_VINTAGE_6CH:

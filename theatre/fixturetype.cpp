@@ -117,6 +117,11 @@ FixtureType::FixtureType(enum FixtureClass fixtureClass)
       _functionTypes.emplace_back(FunctionType::Blue);
       _functionTypes.emplace_back(FunctionType::ColorMacro);
       break;
+    case FixtureType::RGBLight6Ch_16bit:
+      _functionTypes.emplace_back(FunctionType::Red);
+      _functionTypes.emplace_back(FunctionType::Green);
+      _functionTypes.emplace_back(FunctionType::Blue);
+      break;
   }
 }
 
@@ -261,6 +266,10 @@ Color FixtureType::GetColor(const Fixture &fixture,
                               fixture.Functions()[6]->GetValue(snapshot));
       }
     }
+    case RGBLight6Ch_16bit:
+      return Color(fixture.Functions()[0]->GetValue(snapshot),
+                   fixture.Functions()[1]->GetValue(snapshot),
+                   fixture.Functions()[2]->GetValue(snapshot));
   }
   throw std::runtime_error("Unknown fixture class");
 }

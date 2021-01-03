@@ -4,8 +4,8 @@
 #include "controlvalue.h"
 
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class DmxChannel {
  public:
   DmxChannel()

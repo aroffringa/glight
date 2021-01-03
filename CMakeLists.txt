@@ -108,6 +108,7 @@ if(Boost_FOUND)
     tests/testchase.cpp
     tests/testfileformat.cpp
     tests/testfixturecontrol.cpp
+    tests/testfixturefunction.cpp
     tests/testfixturetype.cpp
     tests/testfolder.cpp
     tests/testmanagement.cpp
@@ -123,7 +124,7 @@ endif()
 
 add_custom_target(
   coverage
-  COMMAND gcovr -r .. -e '.*/tests/.*' -e '.*/CompilerIdCXX/.*'
+  COMMAND gcovr -r .. -e '.*/gui/.*' -e '.*/tests/.*' -e '.*/CompilerIdCXX/.*'
   DEPENDS check
 )
 add_custom_target(
