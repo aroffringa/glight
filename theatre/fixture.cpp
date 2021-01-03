@@ -5,15 +5,14 @@ Fixture::Fixture(Theatre &theatre, const FixtureType &type,
                  const std::string &name)
     : NamedObject(name), _theatre(theatre), _type(type) {
   size_t ch = theatre.FirstFreeChannel();
-
-  for (const FunctionType &functionType : type.FunctionTypes()) {
+  for (size_t ci = 0; ci != type.FunctionTypes().size(); ++ci) {
+    const FunctionType functionType = type.FunctionTypes()[ci];
     const std::string name(AbbreviatedFunctionType(functionType));
     _functions.emplace_back(
         std::make_unique<FixtureFunction>(_theatre, functionType, name));
-  }
-
-  for (size_t ci = 0; ci != _functions.size(); ++ci) {
-    _functions[ci]->SetChannel(DmxChannel((ch + ci) % 512, 0));
+    const bool is16bit = type.Is16Bit(ci);
+    _functions[ci]->SetChannel(DmxChannel(ch % 512, 0), is16bit);
+    ch += is16bit ? 2 : 1;
   }
 }
 

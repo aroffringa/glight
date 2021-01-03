@@ -27,8 +27,9 @@ class Fixture : public NamedObject {
   std::vector<unsigned> GetChannels() const {
     std::vector<unsigned> channels;
     for (const std::unique_ptr<FixtureFunction> &ff : _functions) {
-      if (ff->IsSingleChannel())
-        channels.emplace_back(ff->FirstChannel().Channel());
+      channels.emplace_back(ff->FirstChannel().Channel());
+      if (!ff->IsSingleChannel())
+        channels.emplace_back(ff->FirstChannel().Channel() + 1);
     }
     return channels;
   }

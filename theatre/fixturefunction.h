@@ -27,19 +27,28 @@ class FixtureFunction : public NamedObject {
 
   void MixChannels(unsigned value, MixStyle mixStyle, unsigned *channels,
                    unsigned universe) {
-    if (IsSingleChannel() && _firstChannel.Universe() == universe) {
-      MixStyle combiMixStyle = ControlValue::CombineMixStyles(
-          mixStyle, _firstChannel.DefaultMixStyle());
-
+    if (_firstChannel.Universe() != universe)
+      throw std::runtime_error("Can't handle multiple universes");
+    MixStyle combiMixStyle = ControlValue::CombineMixStyles(
+        mixStyle, _firstChannel.DefaultMixStyle());
+    if (IsSingleChannel()) {
       channels[_firstChannel.Channel()] = ControlValue::Mix(
           channels[_firstChannel.Channel()], value, combiMixStyle);
-    } else
-      throw std::runtime_error(
-          "Can't handle 16-bit values or multiple universes");
+    } else {  // 16 bit
+      const unsigned currentValue =
+          (channels[_firstChannel.Channel()]) +
+          (channels[_firstChannel.Channel() + 1] >> 8);
+      const unsigned mixedValue =
+          ControlValue::Mix(currentValue, value, combiMixStyle);
+      // Set to the first 8 of 24 bits.
+      channels[_firstChannel.Channel()] = (mixedValue & (~0xFFFF));
+      // Set to bits 9-24.
+      channels[_firstChannel.Channel() + 1] = (mixedValue & 0xFFFF) << 8;
+    }
   }
 
-  void SetChannel(const DmxChannel &channel);
-  bool IsSingleChannel() const { return _additionalChannels.size() == 0; }
+  void SetChannel(const DmxChannel &channel, bool is16Bit = false);
+  bool IsSingleChannel() const { return !_is16Bit; }
   const DmxChannel &FirstChannel() const { return _firstChannel; }
   void IncChannel();
   void DecChannel();
@@ -52,7 +61,7 @@ class FixtureFunction : public NamedObject {
   class Theatre &_theatre;
   enum FunctionType _type;
   DmxChannel _firstChannel;
-  std::vector<DmxChannel> _additionalChannels;
+  bool _is16Bit;
 };
 
 #endif
