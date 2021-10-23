@@ -25,10 +25,8 @@ void Theatre::Clear() {
 Fixture &Theatre::AddFixture(const FixtureType &type) {
   // Find free name
   std::string name = "A";
-  bool found = false;
-  while (!found) {
+  while (true) {
     if (!FolderObject::Contains(_fixtures, name)) {
-      found = true;
       break;
     }
     bool ready = false;
