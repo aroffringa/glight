@@ -122,21 +122,22 @@ void Management::abortAllDevices() {
 void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
                                   unsigned universe) {
   double relTimeInMs = GetOffsetTimeInMS();
-  double beatValue, beatConfidence;
+  double beatValue;
   unsigned audioLevel;
   if (relTimeInMs - _lastOverridenBeatTime < 8000.0 && _overridenBeat != 0) {
-    beatConfidence = 1.0;
+    // beatConfidence = 1.0;
     beatValue = _overridenBeat;
     if (_beatFinder)
       audioLevel = _beatFinder->GetAudioLevel();
     else
       audioLevel = 0;
   } else if (_beatFinder) {
+    double beatConfidence;
     _beatFinder->GetBeatValue(beatValue, beatConfidence);
     audioLevel = _beatFinder->GetAudioLevel();
   } else {
     beatValue = 0.0;
-    beatConfidence = 0.0;
+    // beatConfidence = 0.0;
     audioLevel = 0;
   }
   const unsigned randomValue = _rndDistribution(_randomGenerator);

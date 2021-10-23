@@ -311,7 +311,7 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
     bool shift =
         (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK)) ==
         GDK_SHIFT_MASK;
-    double height = _drawingArea.get_height();
+    double height;
     if (_dryManagement == nullptr)
       height = _drawingArea.get_height();
     else
