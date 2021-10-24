@@ -9,6 +9,17 @@
 #include "functiontype.h"
 #include "valuesnapshot.h"
 
+class Fixture;
+
+struct FixtureTypeFunction {
+  FixtureTypeFunction(size_t dmxOffset_, FunctionType type_, bool is16Bit_)
+      : dmxOffset(dmxOffset_), type(type_), is16Bit(is16Bit_) {}
+
+  size_t dmxOffset;
+  FunctionType type;
+  bool is16Bit;
+};
+
 /**
  *  @author Andre Offringa
  */
@@ -43,7 +54,7 @@ class FixtureType : public FolderObject {
   FixtureType(const FixtureType &fixtureType)
       : FolderObject(fixtureType),
         _class(fixtureType._class),
-        _functionTypes(fixtureType._functionTypes) {}
+        _functions(fixtureType._functions) {}
 
   static const std::string ClassName(FixtureClass fixtureClass) {
     switch (fixtureClass) {
@@ -105,7 +116,7 @@ class FixtureType : public FolderObject {
     throw std::runtime_error("Class not found: " + name);
   }
 
-  Color GetColor(const class Fixture &fixture, const ValueSnapshot &snapshot,
+  Color GetColor(const Fixture &fixture, const ValueSnapshot &snapshot,
                  size_t shapeIndex) const;
 
   /**
@@ -113,7 +124,7 @@ class FixtureType : public FolderObject {
    * 0 is no rotation, +/- 2^24 is 100 times per second (the max).
    * Positive is clockwise rotation.
    */
-  int GetRotationSpeed(const class Fixture &fixture,
+  int GetRotationSpeed(const Fixture &fixture,
                        const ValueSnapshot &snapshot) const;
 
   enum FixtureClass FixtureClass() const { return _class; }
@@ -153,16 +164,16 @@ class FixtureType : public FolderObject {
     return 0;
   }
 
-  const std::vector<FunctionType> FunctionTypes() const {
-    return _functionTypes;
+  const std::vector<FixtureTypeFunction> &Functions() const {
+    return _functions;
   }
 
  private:
-  static Color rgbAdj6chColor(const class Fixture &fixture,
+  static Color rgbAdj6chColor(const Fixture &fixture,
                               const ValueSnapshot &snapshot);
 
   enum FixtureClass _class;
-  std::vector<FunctionType> _functionTypes;
+  std::vector<FixtureTypeFunction> _functions;
 };
 
 #endif

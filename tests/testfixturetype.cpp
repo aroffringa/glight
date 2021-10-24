@@ -29,17 +29,17 @@ BOOST_AUTO_TEST_CASE(Construct) {
   for (enum FixtureType::FixtureClass cl : list) {
     FixtureType type(cl);
     BOOST_CHECK_EQUAL(type.FixtureClass(), cl);
-    BOOST_CHECK(!type.FunctionTypes().empty());
+    BOOST_CHECK(!type.Functions().empty());
   }
 }
 
 BOOST_AUTO_TEST_CASE(Copy) {
   FixtureType typeA(FixtureType::RGBLight3Ch);
   FixtureType typeB(typeA);
-  BOOST_REQUIRE_EQUAL(typeB.FunctionTypes().size(), 3);
-  BOOST_CHECK(typeB.FunctionTypes()[0] == FunctionType::Red);
-  BOOST_CHECK(typeB.FunctionTypes()[1] == FunctionType::Green);
-  BOOST_CHECK(typeB.FunctionTypes()[2] == FunctionType::Blue);
+  BOOST_REQUIRE_EQUAL(typeB.Functions().size(), 3);
+  BOOST_CHECK(typeB.Functions()[0].type == FunctionType::Red);
+  BOOST_CHECK(typeB.Functions()[1].type == FunctionType::Green);
+  BOOST_CHECK(typeB.Functions()[2].type == FunctionType::Blue);
 }
 
 BOOST_AUTO_TEST_CASE(ShapeCount) {
