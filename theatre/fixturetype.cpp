@@ -76,6 +76,15 @@ FixtureType::FixtureType(enum FixtureClass fixtureClass)
       _functions.emplace_back(1, FunctionType::Rotation, false);
       _functions.emplace_back(2, FunctionType::ColorMacro, false);
       break;
+    case FixtureType::AyraTDCSunrise:
+      _functions.emplace_back(0, FunctionType::Master, false);
+      _functions.emplace_back(1, FunctionType::Red, false);
+      _functions.emplace_back(2, FunctionType::Green, false);
+      _functions.emplace_back(3, FunctionType::Blue, false);
+      _functions.emplace_back(4, FunctionType::Strobe, false);
+      _functions.emplace_back(5, FunctionType::Rotation, false);
+      _functions.emplace_back(6, FunctionType::ColorMacro, false);
+      break;
     case FixtureType::RGB_ADJ_6CH:
       _functions.emplace_back(0, FunctionType::Red, false);
       _functions.emplace_back(1, FunctionType::Green, false);
@@ -229,6 +238,12 @@ Color FixtureType::GetColor(const Fixture &fixture,
       return Color::H20Color(fixture.Functions()[2]->GetValue(snapshot)) *
              fixture.Functions()[0]->GetValue(snapshot);
     }
+    case AyraTDCSunrise: {
+      return Color(fixture.Functions()[1]->GetValue(snapshot),
+                   fixture.Functions()[2]->GetValue(snapshot),
+                   fixture.Functions()[3]->GetValue(snapshot)) *
+             fixture.Functions()[0]->GetValue(snapshot);
+    }
     case RGB_ADJ_6CH: {
       return rgbAdj6chColor(fixture, snapshot);
     }
@@ -289,6 +304,17 @@ int FixtureType::GetRotationSpeed(const Fixture &fixture,
         return (121 - rotation) * maxSpeed / 111;
       } else {
         return -(rotation - 134) * maxSpeed / 111;
+      }
+    }
+    case AyraTDCSunrise: {
+      const int rotation = fixture.Functions()[5]->GetValue(snapshot);
+      const int maxSpeed = (1 << 24) / 100;  // 1 times per second
+      if (rotation <= 5)
+        return 0;
+      else if (rotation <= 127) {
+        return 0;  // this should be static positioning
+      } else {
+        return (rotation - 127) * maxSpeed / 128;
       }
     }
   }
