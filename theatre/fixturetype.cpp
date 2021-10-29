@@ -43,6 +43,13 @@ FixtureType::FixtureType(enum FixtureClass fixtureClass)
       _functions.emplace_back(2, FunctionType::Blue, false);
       _functions.emplace_back(3, FunctionType::UV, false);
       break;
+    case FixtureType::RGBAWLight5Ch:
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::Amber, false);
+      _functions.emplace_back(4, FunctionType::White, false);
+      break;
     case FixtureType::RGBAWUVLight6Ch:
       _functions.emplace_back(0, FunctionType::Red, false);
       _functions.emplace_back(1, FunctionType::Green, false);
@@ -195,6 +202,16 @@ Color FixtureType::GetColor(const Fixture &fixture,
       return Color((fixture.Functions()[0]->GetValue(snapshot) + uv / 3) / 2,
                    (fixture.Functions()[1]->GetValue(snapshot)) / 2,
                    (fixture.Functions()[2]->GetValue(snapshot) + uv) / 2);
+      break;
+    }
+    case RGBAWLight5Ch: {
+      const unsigned char r = fixture.Functions()[0]->GetValue(snapshot);
+      const unsigned char g = fixture.Functions()[1]->GetValue(snapshot);
+      const unsigned char b = fixture.Functions()[2]->GetValue(snapshot);
+      const unsigned char a = fixture.Functions()[3]->GetValue(snapshot);
+      const unsigned char w = fixture.Functions()[4]->GetValue(snapshot);
+      return Color((r + w + a * 2 / 3) * 3 / 8, (g + w + a / 3) * 3 / 8,
+                   ((b + w) * 3 / 8));
       break;
     }
     case RGBAWUVLight6Ch: {
