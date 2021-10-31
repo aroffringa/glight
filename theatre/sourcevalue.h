@@ -15,7 +15,9 @@ class SourceValue {
    * controllable.
    */
   SourceValue(const SourceValue &source, class Controllable &controllable)
-      : _value(source._value, controllable), _fadeSpeed(0.0) {}
+      : _value(source._value, controllable),
+        _fadeSpeed(0.0),
+        _targetValue(source._targetValue) {}
 
   PresetValue &Preset() { return _value; }
 
