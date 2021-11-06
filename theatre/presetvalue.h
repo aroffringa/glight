@@ -7,7 +7,11 @@
 
 #include <string>
 
+class Controllable;
+
 /**
+ * A preset value links a controllable's input to a
+ * value to which this input is set.
  * @author Andre Offringa
  */
 class PresetValue {

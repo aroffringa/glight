@@ -3,6 +3,8 @@
 
 #include "presetvalue.h"
 
+class Controllable;
+
 class SourceValue {
  public:
   SourceValue(class Controllable &controllable, size_t inputIndex)

@@ -567,8 +567,8 @@ bool Management::topologicalSortVisit(Controllable &controllable,
 }
 
 void Management::BlackOut() {
-  for (std::unique_ptr<class SourceValue> &sv : _sourceValues) {
-    sv->Preset().SetValue(ControlValue::Zero());
+  for (std::unique_ptr<SourceValue> &sv : _sourceValues) {
+    sv->Set(0, 0.0);
   }
 }
 
