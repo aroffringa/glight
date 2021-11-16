@@ -1,9 +1,5 @@
 #include "showwindow.h"
 
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
-
 #include "designwizard.h"
 #include "fixturelistwindow.h"
 #include "objectlistframe.h"
@@ -21,6 +17,13 @@
 
 #include "../system/reader.h"
 #include "../system/writer.h"
+
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/icontheme.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
+
+#include <filesystem>
 
 ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
     : _miFile("_File", true),
@@ -43,6 +46,12 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
       _miNewFaderWindow("New"),
       _miVisualizationWindow("Visualization") {
   set_title("Glight - show");
+  set_default_icon_name("glight");
+
+  Glib::RefPtr<Gtk::IconTheme> iconTheme = Gtk::IconTheme::get_default();
+  std::filesystem::path iconPath =
+      std::filesystem::path(GLIGHT_INSTALL_PATH) / "share/icons";
+  iconTheme->prepend_search_path(iconPath.string());
 
   _management.reset(new Management());
   _management->AddDevice(std::move(device));

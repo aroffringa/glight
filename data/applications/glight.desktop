@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Glight
+GenericName=DMX control software
+Comment=Control software for DMX fixtures
+Comment[nl]=Lichtbesturing voor DMX apparaten
+Icon=glight
+Exec=glight
+Terminal=false
+Categories=AudioVideo;Electronics
