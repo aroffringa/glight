@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(glight)
 
@@ -16,6 +16,7 @@ find_library(AUBIO_LIBRARY NAMES aubio)
 find_path(AUBIO_INCLUDE_DIR NAMES aubio/aubio.h)
 
 add_compile_options(-O3 -Wall -DNDEBUG -std=c++17 -march=native)
+add_definitions(-DGLIGHT_INSTALL_PATH="${CMAKE_INSTALL_PREFIX}")
 
 include_directories(${GTKMM_INCLUDE_DIRS})
 include_directories(${FLACPP_INCLUDE_DIRS})
@@ -144,3 +145,4 @@ set(CPACK_DEBIAN_PACKAGE_SECTION misc)
 include(CPack)
 
 install(TARGETS glight RUNTIME DESTINATION bin)
+install(DIRECTORY data/icons data/applications DESTINATION share )
