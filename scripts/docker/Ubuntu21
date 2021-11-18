@@ -1,0 +1,24 @@
+FROM ubuntu:21.10
+
+RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
+    apt-get install -y \
+    cmake \
+    g++ \
+    libasound2-dev \
+    libaubio-dev \
+    libboost-filesystem-dev \
+    libboost-test-dev \
+    libflac++-dev \
+    libgtkmm-3.0-dev \
+    libola-dev \
+    libxml2-dev
+
+ADD . /src
+WORKDIR /src
+
+RUN \
+  mkdir /build && \
+  cd /build && \
+  cmake ../src && \
+  make install -j`nproc` && \
+  make check -j`nproc`
