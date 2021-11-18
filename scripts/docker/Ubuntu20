@@ -13,11 +13,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     libola-dev \
     libxml2-dev
 
-#    build-essential \
-#    pkg-config \
-#    libboost-date-time-dev libboost-test-dev \
-#    libboost-system-dev libboost-filesystem-dev \
-    
 ADD . /src
 WORKDIR /src
 
