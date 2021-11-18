@@ -1,1 +1,1 @@
-sudo docker build -f Ubuntu20 ../..
+sudo docker build -f Ubuntu21 ../..
