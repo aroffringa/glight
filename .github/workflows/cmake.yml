@@ -21,8 +21,8 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install dependencies
-      run: export DEBIAN_FRONTEND=noninteractive && apt-get update && \
-        apt-get install -y \
+      run: export DEBIAN_FRONTEND=noninteractive && sudo apt-get update && \
+        sudo apt-get install -y \
         cmake \
         g++ \
         libasound2-dev \
