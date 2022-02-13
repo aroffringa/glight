@@ -21,7 +21,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Update apt repository
-      run: export sudo apt-get update
+      run: sudo apt-get update
     - name: Install dependencies
       run: sudo apt-get install -y \
            cmake \
