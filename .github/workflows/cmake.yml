@@ -20,20 +20,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Update apt repository
-      run: sudo apt-get update
     - name: Install dependencies
-      run: sudo apt-get install -y \
-           cmake \
-           g++ \
-           libasound2-dev \
-           libaubio-dev \
-           libboost-filesystem-dev \
-           libboost-test-dev \
-           libflac++-dev \
-           libgtkmm-3.0-dev \
-           libola-dev \
-           libxml2-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ libasound2-dev libaubio-dev libboost-filesystem-dev libboost-test-dev libflac++-dev libgtkmm-3.0-dev libola-dev libxml2-dev
     
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
