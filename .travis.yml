@@ -1,9 +1,0 @@
-language: generic
-
-sudo: required
-
-services:
-  - docker
-
-before_install:
-- docker build -f .travis/Dockerfile .
