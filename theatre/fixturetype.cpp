@@ -5,127 +5,143 @@ FixtureType::FixtureType(enum FixtureClass fixtureClass)
     : FolderObject(ClassName(fixtureClass)), _class(fixtureClass) {
   switch (fixtureClass) {
     case FixtureType::Light1Ch:
-      _functionTypes.emplace_back(FunctionType::Master);
+      _functions.emplace_back(0, FunctionType::Master, false);
       break;
     case FixtureType::RGBLight3Ch:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
       break;
     case FixtureType::RGBLight4Ch:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
-      _functionTypes.emplace_back(FunctionType::Master);
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::Master, false);
       break;
     case FixtureType::RGBALight4Ch:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
-      _functionTypes.emplace_back(FunctionType::Amber);
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::Amber, false);
       break;
     case FixtureType::RGBALight5Ch:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
-      _functionTypes.emplace_back(FunctionType::Amber);
-      _functionTypes.emplace_back(FunctionType::Master);
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::Amber, false);
+      _functions.emplace_back(4, FunctionType::Master, false);
       break;
     case FixtureType::RGBWLight4Ch:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
-      _functionTypes.emplace_back(FunctionType::White);
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::White, false);
       break;
     case FixtureType::RGBUVLight4Ch:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
-      _functionTypes.emplace_back(FunctionType::UV);
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::UV, false);
+      break;
+    case FixtureType::RGBAWLight5Ch:
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::Amber, false);
+      _functions.emplace_back(4, FunctionType::White, false);
       break;
     case FixtureType::RGBAWUVLight6Ch:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
-      _functionTypes.emplace_back(FunctionType::Amber);
-      _functionTypes.emplace_back(FunctionType::White);
-      _functionTypes.emplace_back(FunctionType::UV);
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::Amber, false);
+      _functions.emplace_back(4, FunctionType::White, false);
+      _functions.emplace_back(5, FunctionType::UV, false);
       break;
     case FixtureType::CWWW2Ch:
-      _functionTypes.emplace_back(FunctionType::ColdWhite);
-      _functionTypes.emplace_back(FunctionType::WarmWhite);
+      _functions.emplace_back(0, FunctionType::ColdWhite, false);
+      _functions.emplace_back(1, FunctionType::WarmWhite, false);
       break;
     case FixtureType::CWWW4Ch:
-      _functionTypes.emplace_back(FunctionType::Master);
-      _functionTypes.emplace_back(FunctionType::ColdWhite);
-      _functionTypes.emplace_back(FunctionType::WarmWhite);
-      _functionTypes.emplace_back(FunctionType::Strobe);
+      _functions.emplace_back(0, FunctionType::Master, false);
+      _functions.emplace_back(1, FunctionType::ColdWhite, false);
+      _functions.emplace_back(2, FunctionType::WarmWhite, false);
+      _functions.emplace_back(3, FunctionType::Strobe, false);
       break;
     case FixtureType::CWWWA3Ch:
-      _functionTypes.emplace_back(FunctionType::ColdWhite);
-      _functionTypes.emplace_back(FunctionType::WarmWhite);
-      _functionTypes.emplace_back(FunctionType::Amber);
+      _functions.emplace_back(0, FunctionType::ColdWhite, false);
+      _functions.emplace_back(1, FunctionType::WarmWhite, false);
+      _functions.emplace_back(2, FunctionType::Amber, false);
       break;
     case FixtureType::UVLight3Ch:
-      _functionTypes.emplace_back(FunctionType::UV);
-      _functionTypes.emplace_back(FunctionType::Strobe);
-      _functionTypes.emplace_back(FunctionType::Pulse);
+      _functions.emplace_back(0, FunctionType::UV, false);
+      _functions.emplace_back(1, FunctionType::Strobe, false);
+      _functions.emplace_back(2, FunctionType::Pulse, false);
       break;
     case FixtureType::H2ODMXPro:
-      _functionTypes.emplace_back(FunctionType::Master);
-      _functionTypes.emplace_back(FunctionType::Rotation);
-      _functionTypes.emplace_back(FunctionType::ColorMacro);
+      _functions.emplace_back(0, FunctionType::Master, false);
+      _functions.emplace_back(1, FunctionType::Rotation, false);
+      _functions.emplace_back(2, FunctionType::ColorMacro, false);
+      break;
+    case FixtureType::AyraTDCSunrise:
+      _functions.emplace_back(0, FunctionType::Master, false);
+      _functions.emplace_back(1, FunctionType::Red, false);
+      _functions.emplace_back(2, FunctionType::Green, false);
+      _functions.emplace_back(3, FunctionType::Blue, false);
+      _functions.emplace_back(4, FunctionType::Strobe, false);
+      _functions.emplace_back(5, FunctionType::Rotation, false);
+      _functions.emplace_back(6, FunctionType::ColorMacro, false);
       break;
     case FixtureType::RGB_ADJ_6CH:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
-      _functionTypes.emplace_back(FunctionType::ColorMacro);
-      _functionTypes.emplace_back(FunctionType::Strobe);
-      _functionTypes.emplace_back(FunctionType::Pulse);
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::ColorMacro, false);
+      _functions.emplace_back(4, FunctionType::Strobe, false);
+      _functions.emplace_back(5, FunctionType::Pulse, false);
       break;
     case FixtureType::RGB_ADJ_7CH:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
-      _functionTypes.emplace_back(FunctionType::ColorMacro);
-      _functionTypes.emplace_back(FunctionType::Strobe);
-      _functionTypes.emplace_back(FunctionType::Pulse);
-      _functionTypes.emplace_back(FunctionType::Master);
+      _functions.emplace_back(0, FunctionType::Red, false);
+      _functions.emplace_back(1, FunctionType::Green, false);
+      _functions.emplace_back(2, FunctionType::Blue, false);
+      _functions.emplace_back(3, FunctionType::ColorMacro, false);
+      _functions.emplace_back(4, FunctionType::Strobe, false);
+      _functions.emplace_back(5, FunctionType::Pulse, false);
+      _functions.emplace_back(6, FunctionType::Master, false);
       break;
     case FixtureType::BT_VINTAGE_5CH:
-      _functionTypes.emplace_back(FunctionType::White);
-      _functionTypes.emplace_back(FunctionType::Master);
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
+      _functions.emplace_back(0, FunctionType::White, false);
+      _functions.emplace_back(1, FunctionType::Master, false);
+      _functions.emplace_back(2, FunctionType::Red, false);
+      _functions.emplace_back(3, FunctionType::Green, false);
+      _functions.emplace_back(4, FunctionType::Blue, false);
       break;
     case FixtureType::BT_VINTAGE_6CH:
-      _functionTypes.emplace_back(FunctionType::White);
-      _functionTypes.emplace_back(FunctionType::Master);
-      _functionTypes.emplace_back(FunctionType::Strobe);
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
+      _functions.emplace_back(0, FunctionType::White, false);
+      _functions.emplace_back(1, FunctionType::Master, false);
+      _functions.emplace_back(2, FunctionType::Strobe, false);
+      _functions.emplace_back(3, FunctionType::Red, false);
+      _functions.emplace_back(4, FunctionType::Green, false);
+      _functions.emplace_back(5, FunctionType::Blue, false);
       break;
     case FixtureType::BT_VINTAGE_7CH:
-      _functionTypes.emplace_back(FunctionType::White);
-      _functionTypes.emplace_back(FunctionType::Master);
-      _functionTypes.emplace_back(FunctionType::Strobe);
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
-      _functionTypes.emplace_back(FunctionType::ColorMacro);
+      _functions.emplace_back(0, FunctionType::White, false);
+      _functions.emplace_back(1, FunctionType::Master, false);
+      _functions.emplace_back(2, FunctionType::Strobe, false);
+      _functions.emplace_back(3, FunctionType::Red, false);
+      _functions.emplace_back(4, FunctionType::Green, false);
+      _functions.emplace_back(5, FunctionType::Blue, false);
+      _functions.emplace_back(6, FunctionType::ColorMacro, false);
       break;
     case FixtureType::RGBLight6Ch_16bit:
-      _functionTypes.emplace_back(FunctionType::Red);
-      _functionTypes.emplace_back(FunctionType::Green);
-      _functionTypes.emplace_back(FunctionType::Blue);
+      _functions.emplace_back(0, FunctionType::Red, true);
+      _functions.emplace_back(1, FunctionType::Green, true);
+      _functions.emplace_back(2, FunctionType::Blue, true);
       break;
   }
 }
 
-Color FixtureType::rgbAdj6chColor(const class Fixture &fixture,
+Color FixtureType::rgbAdj6chColor(const Fixture &fixture,
                                   const ValueSnapshot &snapshot) {
   unsigned macro = fixture.Functions()[3]->GetValue(snapshot);
   if (macro < 8) {
@@ -188,6 +204,16 @@ Color FixtureType::GetColor(const Fixture &fixture,
                    (fixture.Functions()[2]->GetValue(snapshot) + uv) / 2);
       break;
     }
+    case RGBAWLight5Ch: {
+      const unsigned char r = fixture.Functions()[0]->GetValue(snapshot);
+      const unsigned char g = fixture.Functions()[1]->GetValue(snapshot);
+      const unsigned char b = fixture.Functions()[2]->GetValue(snapshot);
+      const unsigned char a = fixture.Functions()[3]->GetValue(snapshot);
+      const unsigned char w = fixture.Functions()[4]->GetValue(snapshot);
+      return Color((r + w + a * 2 / 3) * 3 / 8, (g + w + a / 3) * 3 / 8,
+                   ((b + w) * 3 / 8));
+      break;
+    }
     case RGBAWUVLight6Ch: {
       const unsigned char r = fixture.Functions()[0]->GetValue(snapshot);
       const unsigned char g = fixture.Functions()[1]->GetValue(snapshot);
@@ -227,6 +253,12 @@ Color FixtureType::GetColor(const Fixture &fixture,
     }
     case H2ODMXPro: {
       return Color::H20Color(fixture.Functions()[2]->GetValue(snapshot)) *
+             fixture.Functions()[0]->GetValue(snapshot);
+    }
+    case AyraTDCSunrise: {
+      return Color(fixture.Functions()[1]->GetValue(snapshot),
+                   fixture.Functions()[2]->GetValue(snapshot),
+                   fixture.Functions()[3]->GetValue(snapshot)) *
              fixture.Functions()[0]->GetValue(snapshot);
     }
     case RGB_ADJ_6CH: {
@@ -289,6 +321,17 @@ int FixtureType::GetRotationSpeed(const Fixture &fixture,
         return (121 - rotation) * maxSpeed / 111;
       } else {
         return -(rotation - 134) * maxSpeed / 111;
+      }
+    }
+    case AyraTDCSunrise: {
+      const int rotation = fixture.Functions()[5]->GetValue(snapshot);
+      const int maxSpeed = (1 << 24) / 100;  // 1 times per second
+      if (rotation <= 5)
+        return 0;
+      else if (rotation <= 127) {
+        return 0;  // this should be static positioning
+      } else {
+        return (rotation - 127) * maxSpeed / 128;
       }
     }
   }

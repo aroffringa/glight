@@ -9,6 +9,17 @@
 #include "functiontype.h"
 #include "valuesnapshot.h"
 
+class Fixture;
+
+struct FixtureTypeFunction {
+  FixtureTypeFunction(size_t dmxOffset_, FunctionType type_, bool is16Bit_)
+      : dmxOffset(dmxOffset_), type(type_), is16Bit(is16Bit_) {}
+
+  size_t dmxOffset;
+  FunctionType type;
+  bool is16Bit;
+};
+
 /**
  *  @author Andre Offringa
  */
@@ -24,18 +35,20 @@ class FixtureType : public FolderObject {
     RGBALight5Ch,
     RGBWLight4Ch,
     RGBUVLight4Ch,
+    RGBAWLight5Ch,
+    RGBAWUVLight6Ch,
     UVLight3Ch,
     H2ODMXPro,
+    AyraTDCSunrise,
     RGB_ADJ_6CH,
     RGB_ADJ_7CH,
     BT_VINTAGE_5CH,
     BT_VINTAGE_6CH,
     BT_VINTAGE_7CH,
-    RGBAWUVLight6Ch,
     CWWW2Ch,
     CWWW4Ch,
     CWWWA3Ch,
-    RGBLight6Ch_16bit
+    RGBLight6Ch_16bit,
   };
 
   FixtureType(FixtureClass fixtureClass);
@@ -43,7 +56,7 @@ class FixtureType : public FolderObject {
   FixtureType(const FixtureType &fixtureType)
       : FolderObject(fixtureType),
         _class(fixtureType._class),
-        _functionTypes(fixtureType._functionTypes) {}
+        _functions(fixtureType._functions) {}
 
   static const std::string ClassName(FixtureClass fixtureClass) {
     switch (fixtureClass) {
@@ -61,6 +74,8 @@ class FixtureType : public FolderObject {
         return "RGBW light (4ch)";
       case RGBUVLight4Ch:
         return "RGBUV light (4ch)";
+      case RGBAWLight5Ch:
+        return "RGBAW light (5ch)";
       case RGBAWUVLight6Ch:
         return "RGBAW+UV light (6ch)";
       case CWWW2Ch:
@@ -73,6 +88,8 @@ class FixtureType : public FolderObject {
         return "UV light (3ch)";
       case H2ODMXPro:
         return "H2O DMX Pro";
+      case AyraTDCSunrise:
+        return "Ayra TDC Sunrise";
       case RGB_ADJ_6CH:
         return "RGB ADJ (6ch)";
       case RGB_ADJ_7CH:
@@ -91,11 +108,12 @@ class FixtureType : public FolderObject {
 
   static std::vector<enum FixtureClass> GetClassList() {
     return std::vector<enum FixtureClass>{
-        Light1Ch,       RGBLight3Ch,    RGBLight4Ch,      RGBALight4Ch,
-        RGBALight5Ch,   RGBWLight4Ch,   RGBUVLight4Ch,    RGBAWUVLight6Ch,
-        CWWW2Ch,        CWWW4Ch,        CWWWA3Ch,         UVLight3Ch,
-        H2ODMXPro,      RGB_ADJ_6CH,    RGB_ADJ_7CH,      BT_VINTAGE_5CH,
-        BT_VINTAGE_6CH, BT_VINTAGE_7CH, RGBLight6Ch_16bit};
+        Light1Ch,         RGBLight3Ch,    RGBLight4Ch,    RGBALight4Ch,
+        RGBALight5Ch,     RGBWLight4Ch,   RGBUVLight4Ch,  RGBAWLight5Ch,
+        RGBAWUVLight6Ch,  CWWW2Ch,        CWWW4Ch,        CWWWA3Ch,
+        UVLight3Ch,       H2ODMXPro,      AyraTDCSunrise, RGB_ADJ_6CH,
+        RGB_ADJ_7CH,      BT_VINTAGE_5CH, BT_VINTAGE_6CH, BT_VINTAGE_7CH,
+        RGBLight6Ch_16bit};
   }
 
   static FixtureClass NameToClass(const std::string &name) {
@@ -105,7 +123,7 @@ class FixtureType : public FolderObject {
     throw std::runtime_error("Class not found: " + name);
   }
 
-  Color GetColor(const class Fixture &fixture, const ValueSnapshot &snapshot,
+  Color GetColor(const Fixture &fixture, const ValueSnapshot &snapshot,
                  size_t shapeIndex) const;
 
   /**
@@ -113,7 +131,7 @@ class FixtureType : public FolderObject {
    * 0 is no rotation, +/- 2^24 is 100 times per second (the max).
    * Positive is clockwise rotation.
    */
-  int GetRotationSpeed(const class Fixture &fixture,
+  int GetRotationSpeed(const Fixture &fixture,
                        const ValueSnapshot &snapshot) const;
 
   enum FixtureClass FixtureClass() const { return _class; }
@@ -135,12 +153,14 @@ class FixtureType : public FolderObject {
       case RGBALight5Ch:
       case RGBWLight4Ch:
       case RGBUVLight4Ch:
+      case RGBAWLight5Ch:
       case RGBAWUVLight6Ch:
       case CWWW2Ch:
       case CWWW4Ch:
       case CWWWA3Ch:
       case UVLight3Ch:
       case H2ODMXPro:
+      case AyraTDCSunrise:
       case RGB_ADJ_6CH:
       case RGB_ADJ_7CH:
       case RGBLight6Ch_16bit:
@@ -153,16 +173,16 @@ class FixtureType : public FolderObject {
     return 0;
   }
 
-  const std::vector<FunctionType> FunctionTypes() const {
-    return _functionTypes;
+  const std::vector<FixtureTypeFunction> &Functions() const {
+    return _functions;
   }
 
  private:
-  static Color rgbAdj6chColor(const class Fixture &fixture,
+  static Color rgbAdj6chColor(const Fixture &fixture,
                               const ValueSnapshot &snapshot);
 
   enum FixtureClass _class;
-  std::vector<FunctionType> _functionTypes;
+  std::vector<FixtureTypeFunction> _functions;
 };
 
 #endif
