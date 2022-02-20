@@ -2,6 +2,7 @@ FROM ubuntu:21.10
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     apt-get install -y \
+    clang-format \
     cmake \
     g++ \
     libasound2-dev \
