@@ -1,4 +1,4 @@
-#include "components/colorsequencewidget.h"
+#include "../components/colorsequencewidget.h"
 
 #include <gtkmm/window.h>
 

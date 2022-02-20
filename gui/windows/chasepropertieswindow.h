@@ -3,8 +3,8 @@
 
 #include "propertieswindow.h"
 
-#include "components/durationinput.h"
-#include "components/transitiontypebox.h"
+#include "../components/durationinput.h"
+#include "../components/transitiontypebox.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -18,8 +18,8 @@
 #include <gtkmm/window.h>
 
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class ChasePropertiesWindow : public PropertiesWindow {
  public:
   ChasePropertiesWindow(class Chase &chase, class Management &management,

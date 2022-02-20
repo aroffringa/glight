@@ -1,8 +1,8 @@
-
 #include "timesequencepropertieswindow.h"
-#include "eventtransmitter.h"
 
-#include "../theatre/management.h"
+#include "../eventtransmitter.h"
+
+#include "../../theatre/management.h"
 
 #include <gtkmm/messagedialog.h>
 

@@ -2,12 +2,13 @@
 #define PRESET_COLLECTION_WINDOW_H
 
 #include "propertieswindow.h"
-#include "recursionlock.h"
 
-#include "components/inputselectwidget.h"
+#include "../recursionlock.h"
 
-#include "../theatre/presetcollection.h"
-#include "../theatre/transition.h"
+#include "../components/inputselectwidget.h"
+
+#include "../../theatre/presetcollection.h"
+#include "../../theatre/transition.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>

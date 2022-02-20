@@ -1,6 +1,6 @@
 #include "nameframe.h"
 
-#include "showwindow.h"
+#include "windows/showwindow.h"
 
 #include "../theatre/folder.h"
 #include "../theatre/folderobject.h"

@@ -1,11 +1,12 @@
 #include "chasepropertieswindow.h"
-#include "eventtransmitter.h"
 
-#include "../theatre/chase.h"
-#include "../theatre/folder.h"
-#include "../theatre/functiontype.h"
-#include "../theatre/management.h"
-#include "../theatre/timesequence.h"
+#include "../eventtransmitter.h"
+
+#include "../../theatre/chase.h"
+#include "../../theatre/folder.h"
+#include "../../theatre/functiontype.h"
+#include "../../theatre/management.h"
+#include "../../theatre/timesequence.h"
 
 ChasePropertiesWindow::ChasePropertiesWindow(class Chase &chase,
                                              Management &management,

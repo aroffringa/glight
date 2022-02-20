@@ -1,9 +1,9 @@
 #ifndef SHOWWINDOW_H
 #define SHOWWINDOW_H
 
-#include "eventtransmitter.h"
-#include "fixtureselection.h"
-#include "guistate.h"
+#include "../eventtransmitter.h"
+#include "../fixtureselection.h"
+#include "../guistate.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>

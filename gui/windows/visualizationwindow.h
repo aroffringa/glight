@@ -1,8 +1,8 @@
 #ifndef VISUALIZATIONWINDOW_H
 #define VISUALIZATIONWINDOW_H
 
-#include "../theatre/fixturesymbol.h"
-#include "../theatre/position.h"
+#include "../../theatre/fixturesymbol.h"
+#include "../../theatre/position.h"
 
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/checkmenuitem.h>

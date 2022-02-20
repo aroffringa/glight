@@ -11,11 +11,11 @@
 #include <gtkmm/treeview.h>
 
 #include "nameframe.h"
-#include "propertieswindow.h"
 #include "recursionlock.h"
 #include "windowlist.h"
 
 #include "components/objectbrowser.h"
+#include "windows/propertieswindow.h"
 
 #include "../theatre/effect.h"
 

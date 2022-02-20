@@ -2,14 +2,15 @@
 #define TIME_SEQUENCE_PROPERTIES_WINDOW_H
 
 #include "propertieswindow.h"
-#include "recursionlock.h"
 
-#include "components/durationinput.h"
-#include "components/inputselectwidget.h"
-#include "components/transitiontypebox.h"
+#include "../components/durationinput.h"
+#include "../components/inputselectwidget.h"
+#include "../components/transitiontypebox.h"
 
-#include "../theatre/timesequence.h"
-#include "../theatre/transition.h"
+#include "../recursionlock.h"
+
+#include "../../theatre/timesequence.h"
+#include "../../theatre/transition.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -24,8 +25,8 @@
 #include <gtkmm/window.h>
 
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class TimeSequencePropertiesWindow : public PropertiesWindow {
  public:
   TimeSequencePropertiesWindow(TimeSequence &timeSequence,

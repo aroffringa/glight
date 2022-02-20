@@ -3,7 +3,7 @@
 
 #include <gtkmm/stock.h>
 
-#include "showwindow.h"
+#include "windows/showwindow.h"
 
 #include "../theatre/chase.h"
 #include "../theatre/folder.h"

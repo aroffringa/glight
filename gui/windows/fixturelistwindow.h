@@ -10,9 +10,9 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
-#include "../theatre/fixturetype.h"
+#include "../../theatre/fixturetype.h"
 
-#include "recursionlock.h"
+#include "../recursionlock.h"
 
 #include <memory>
 

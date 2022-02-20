@@ -4,9 +4,8 @@
 
 #include <gtkmm/main.h>
 
-#include "showwindow.h"
+#include "windows/showwindow.h"
 
-//#include "../libtheatre/ftdidevice.h"
 #include "../theatre/dummydevice.h"
 #include "../theatre/oladevice.h"
 

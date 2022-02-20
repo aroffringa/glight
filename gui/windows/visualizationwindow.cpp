@@ -1,15 +1,16 @@
 #include "visualizationwindow.h"
 
 #include "addfixturewindow.h"
-#include "designwizard.h"
-#include "eventtransmitter.h"
 #include "showwindow.h"
 
-#include "../theatre/dmxdevice.h"
-#include "../theatre/fixture.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
-#include "../theatre/valuesnapshot.h"
+#include "../designwizard.h"
+#include "../eventtransmitter.h"
+
+#include "../../theatre/dmxdevice.h"
+#include "../../theatre/fixture.h"
+#include "../../theatre/management.h"
+#include "../../theatre/theatre.h"
+#include "../../theatre/valuesnapshot.h"
 
 #include <glibmm/main.h>
 #include <gtkmm/main.h>

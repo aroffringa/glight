@@ -1,12 +1,12 @@
 #include "addfixturewindow.h"
 
-#include "eventtransmitter.h"
+#include "../eventtransmitter.h"
 
-#include "../theatre/fixturecontrol.h"
-#include "../theatre/fixturetype.h"
-#include "../theatre/folder.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
+#include "../../theatre/fixturecontrol.h"
+#include "../../theatre/fixturetype.h"
+#include "../../theatre/folder.h"
+#include "../../theatre/management.h"
+#include "../../theatre/theatre.h"
 
 AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
                                    Management &management)
