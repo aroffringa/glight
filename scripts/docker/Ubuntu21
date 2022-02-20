@@ -17,6 +17,7 @@ ADD . /src
 WORKDIR /src
 
 RUN \
+  CI=True scripts/run-clang-format.sh && \
   mkdir /build && \
   cd /build && \
   cmake ../src && \
