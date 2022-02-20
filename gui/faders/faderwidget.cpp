@@ -11,7 +11,7 @@
 
 FaderWidget::FaderWidget(class Management &management,
                          EventTransmitter &eventHub, char key)
-    : _scale(0, ControlValue::MaxUInt() + 1,
+    : _scale(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
              (ControlValue::MaxUInt() + 1) / 100),
       _flashButton(std::string(1, key)),
       _nameLabel("<..>"),
