@@ -16,8 +16,10 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
 ADD . /src
 WORKDIR /src
 
+ENV CI=True
+
 RUN \
-  CI=True scripts/run-clang-format.sh && \
+  scripts/run-clang-format.sh && \
   mkdir /build && \
   cd /build && \
   cmake ../src && \

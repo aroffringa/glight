@@ -128,11 +128,6 @@ add_custom_target(
   COMMAND gcovr -r .. -e '.*/gui/.*' -e '.*/tests/.*' -e '.*/CompilerIdCXX/.*'
   DEPENDS check
 )
-add_custom_target(
-  format
-  COMMAND ${CMAKE_SOURCE_DIR}/scripts/run-clang-format.sh
-)
-add_dependencies(glight format)
 
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_GENERATOR "DEB")
