@@ -1,22 +1,23 @@
 #include "showwindow.h"
 
-#include "designwizard.h"
 #include "fixturelistwindow.h"
-#include "objectlistframe.h"
-#include "sceneframe.h"
 #include "visualizationwindow.h"
 
-#include "faders/faderwindow.h"
+#include "../designwizard.h"
+#include "../objectlistframe.h"
+#include "../sceneframe.h"
 
-#include "../theatre/dmxdevice.h"
-#include "../theatre/fixture.h"
-#include "../theatre/management.h"
-#include "../theatre/presetcollection.h"
-#include "../theatre/show.h"
-#include "../theatre/theatre.h"
+#include "../faders/faderwindow.h"
 
-#include "../system/reader.h"
-#include "../system/writer.h"
+#include "../../theatre/dmxdevice.h"
+#include "../../theatre/fixture.h"
+#include "../../theatre/management.h"
+#include "../../theatre/presetcollection.h"
+#include "../../theatre/show.h"
+#include "../../theatre/theatre.h"
+
+#include "../../system/reader.h"
+#include "../../system/writer.h"
 
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/icontheme.h>

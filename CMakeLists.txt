@@ -28,22 +28,14 @@ include_directories(${Boost_INCLUDE_DIR})
 include_directories(${LIBXML2_INCLUDE_DIR})
 
 set(GUIFILES
-  gui/addfixturewindow.cpp  
   gui/application.cpp  
-  gui/audiowidget.cpp
-  gui/chasepropertieswindow.cpp
   gui/createchasedialog.cpp
   gui/designwizard.cpp
-  gui/effectpropertieswindow.cpp
-  gui/fixturelistwindow.cpp
   gui/guistate.cpp
   gui/nameframe.cpp
   gui/objectlistframe.cpp
-  gui/presetcollectionwindow.cpp
   gui/sceneframe.cpp
-  gui/showwindow.cpp
-  gui/timesequencepropertieswindow.cpp
-  gui/visualizationwindow.cpp
+  gui/components/audiowidget.cpp
   gui/components/colorselectwidget.cpp
   gui/components/colorsequencewidget.cpp
   gui/components/durationinput.cpp
@@ -54,7 +46,15 @@ set(GUIFILES
   gui/faders/controlwidget.cpp
   gui/faders/faderwidget.cpp
   gui/faders/faderwindow.cpp
-  gui/faders/togglewidget.cpp)
+  gui/faders/togglewidget.cpp
+  gui/windows/addfixturewindow.cpp  
+  gui/windows/chasepropertieswindow.cpp
+  gui/windows/effectpropertieswindow.cpp
+  gui/windows/fixturelistwindow.cpp
+  gui/windows/presetcollectionwindow.cpp
+  gui/windows/showwindow.cpp
+  gui/windows/timesequencepropertieswindow.cpp
+  gui/windows/visualizationwindow.cpp)
 
 set(SYSTEMFILES
   system/audioplayer.cpp

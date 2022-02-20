@@ -1,8 +1,8 @@
 #include "presetcollectionwindow.h"
 
-#include "eventtransmitter.h"
+#include "../eventtransmitter.h"
 
-#include "../theatre/management.h"
+#include "../../theatre/management.h"
 
 #include <gtkmm/messagedialog.h>
 

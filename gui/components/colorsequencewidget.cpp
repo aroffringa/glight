@@ -1,6 +1,6 @@
 #include "colorsequencewidget.h"
 
-#include "../gradientwindow.h"
+#include "../windows/gradientwindow.h"
 
 #include <glibmm/main.h>
 #include <gtkmm/main.h>

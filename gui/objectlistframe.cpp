@@ -2,12 +2,13 @@
 
 #include <gtkmm/stock.h>
 
-#include "chasepropertieswindow.h"
 #include "createchasedialog.h"
-#include "effectpropertieswindow.h"
-#include "presetcollectionwindow.h"
-#include "showwindow.h"
-#include "timesequencepropertieswindow.h"
+
+#include "windows/chasepropertieswindow.h"
+#include "windows/effectpropertieswindow.h"
+#include "windows/presetcollectionwindow.h"
+#include "windows/showwindow.h"
+#include "windows/timesequencepropertieswindow.h"
 
 #include "../theatre/chase.h"
 #include "../theatre/folder.h"

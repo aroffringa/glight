@@ -1,11 +1,11 @@
 #include "effectpropertieswindow.h"
 #include "showwindow.h"
 
-#include "dialogs/inputselectdialog.h"
+#include "../dialogs/inputselectdialog.h"
 
-#include "../theatre/effect.h"
-#include "../theatre/management.h"
-#include "../theatre/sourcevalue.h"
+#include "../../theatre/effect.h"
+#include "../../theatre/management.h"
+#include "../../theatre/sourcevalue.h"
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>

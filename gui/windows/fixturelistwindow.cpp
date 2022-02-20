@@ -1,8 +1,9 @@
 #include "fixturelistwindow.h"
 
 #include "addfixturewindow.h"
-#include "eventtransmitter.h"
-#include "fixtureselection.h"
+
+#include "../eventtransmitter.h"
+#include "../fixtureselection.h"
 
 #include <boost/thread/locks.hpp>
 
@@ -10,11 +11,11 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
-#include "../theatre/fixture.h"
-#include "../theatre/fixturecontrol.h"
-#include "../theatre/folder.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
+#include "../../theatre/fixture.h"
+#include "../../theatre/fixturecontrol.h"
+#include "../../theatre/folder.h"
+#include "../../theatre/management.h"
+#include "../../theatre/theatre.h"
 
 FixtureListWindow::FixtureListWindow(EventTransmitter *eventHub,
                                      class Management &management,

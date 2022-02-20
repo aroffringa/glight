@@ -3,7 +3,7 @@
 
 #include "propertieswindow.h"
 
-#include "components/propertiesbox.h"
+#include "../components/propertiesbox.h"
 
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
