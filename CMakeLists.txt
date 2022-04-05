@@ -51,7 +51,6 @@ set(GUIFILES
   gui/windows/chasepropertieswindow.cpp
   gui/windows/effectpropertieswindow.cpp
   gui/windows/fixturelistwindow.cpp
-  gui/windows/fixturetypewindow.cpp
   gui/windows/presetcollectionwindow.cpp
   gui/windows/showwindow.cpp
   gui/windows/timesequencepropertieswindow.cpp
