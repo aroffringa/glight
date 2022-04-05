@@ -26,8 +26,7 @@ class Management;
  */
 class FixtureListWindow : public Gtk::Window {
  public:
-  FixtureListWindow(EventTransmitter *eventHub,
-                    Management &management,
+  FixtureListWindow(EventTransmitter *eventHub, Management &management,
                     FixtureSelection *globalSelection);
   ~FixtureListWindow();
 

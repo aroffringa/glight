@@ -127,8 +127,8 @@ class FixtureType : public FolderObject {
                  size_t shapeIndex) const;
 
   /**
-   * Determine the rotation speed of the fixture corresponding with the snapshot.
-   * 0 is no rotation, +/- 2^24 is 100 times per second (the max).
+   * Determine the rotation speed of the fixture corresponding with the
+   * snapshot. 0 is no rotation, +/- 2^24 is 100 times per second (the max).
    * Positive is clockwise rotation.
    */
   int GetRotationSpeed(const Fixture &fixture,
