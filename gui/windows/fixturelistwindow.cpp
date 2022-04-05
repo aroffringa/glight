@@ -5,8 +5,6 @@
 #include "../eventtransmitter.h"
 #include "../fixtureselection.h"
 
-#include <boost/thread/locks.hpp>
-
 #include <gtkmm/main.h>
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
@@ -28,7 +26,7 @@ FixtureListWindow::FixtureListWindow(EventTransmitter *eventHub,
       _incChannelButton("+channel"),
       _decChannelButton("-channel"),
       _setChannelButton("Set...") {
-  set_title("Glight - configuration");
+  set_title("Glight - fixtures");
   set_size_request(200, 400);
 
   _changeManagementConnection = _eventHub->SignalChangeManagement().connect(
