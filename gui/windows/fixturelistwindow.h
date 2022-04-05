@@ -1,5 +1,5 @@
-#ifndef CONFIGURATIONWINDOW_H
-#define CONFIGURATIONWINDOW_H
+#ifndef FIXTURE_LIST_WINDOW_H
+#define FIXTURE_LIST_WINDOW_H
 
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
@@ -16,18 +16,23 @@
 
 #include <memory>
 
+class EventTransmitter;
+class Fixture;
+class FixtureSelection;
+class Management;
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class FixtureListWindow : public Gtk::Window {
  public:
-  FixtureListWindow(class EventTransmitter *eventHub,
-                    class Management &management,
-                    class FixtureSelection *globalSelection);
+  FixtureListWindow(EventTransmitter *eventHub,
+                    Management &management,
+                    FixtureSelection *globalSelection);
   ~FixtureListWindow();
 
  private:
-  void onChangeManagement(class Management &management) {
+  void onChangeManagement(Management &management) {
     _management = &management;
     fillFixturesList();
   }
@@ -44,9 +49,9 @@ class FixtureListWindow : public Gtk::Window {
   void onSelectionChanged();
   void onGlobalSelectionChange();
 
-  class EventTransmitter *_eventHub;
-  class Management *_management;
-  class FixtureSelection *_globalSelection;
+  EventTransmitter *_eventHub;
+  Management *_management;
+  FixtureSelection *_globalSelection;
 
   sigc::connection _changeManagementConnection, _updateControllablesConnection,
       _globalSelectionConnection;
@@ -64,7 +69,7 @@ class FixtureListWindow : public Gtk::Window {
     }
 
     Gtk::TreeModelColumn<Glib::ustring> _title, _type, _channels, _symbol;
-    Gtk::TreeModelColumn<class Fixture *> _fixture;
+    Gtk::TreeModelColumn<Fixture *> _fixture;
   } _fixturesListColumns;
   Gtk::ScrolledWindow _fixturesScrolledWindow;
 
