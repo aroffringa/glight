@@ -38,7 +38,7 @@ class ObjectListFrame : public Gtk::VPaned {
   bool onNewEffectButtonClicked(GdkEventButton *event);
   void onNewFolderButtonClicked();
   void onDeletePresetButtonClicked();
-  void onSelectedPresetChanged();
+  void onSelectedObjectChanged();
   void onObjectActivated(class FolderObject &object);
   void onNewEffectMenuClicked(enum Effect::Type effectType);
 

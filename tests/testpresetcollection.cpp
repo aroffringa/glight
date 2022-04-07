@@ -13,8 +13,8 @@ BOOST_AUTO_TEST_SUITE(preset_collection)
 BOOST_AUTO_TEST_CASE(Add) {
   Management management;
   FixtureType &fixtureType =
-      management.Theatre().AddFixtureType(FixtureType::Light1Ch);
-  Fixture &fixture = management.Theatre().AddFixture(fixtureType);
+      management.GetTheatre().AddFixtureType(FixtureType::Light1Ch);
+  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
   FixtureControl &control = management.AddFixtureControl(fixture);
   SourceValue &value = management.AddSourceValue(control, 0);
   value.Preset().SetValue(ControlValue::Max());
@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE(Add) {
 BOOST_AUTO_TEST_CASE(SetValue) {
   Management management;
   FixtureType &fixtureType =
-      management.Theatre().AddFixtureType(FixtureType::Light1Ch);
-  Fixture &fixture = management.Theatre().AddFixture(fixtureType);
+      management.GetTheatre().AddFixtureType(FixtureType::Light1Ch);
+  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
   fixture.SetChannel(100);
   FixtureControl &fixtureControl = management.AddFixtureControl(fixture);
   SourceValue &value = management.AddSourceValue(fixtureControl, 0);

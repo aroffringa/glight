@@ -1,8 +1,11 @@
 #include "../theatre/chase.h"
 #include "../theatre/dummydevice.h"
+#include "../theatre/fixturecontrol.h"
 #include "../theatre/folder.h"
 #include "../theatre/management.h"
 #include "../theatre/presetcollection.h"
+#include "../theatre/sourcevalue.h"
+#include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
 #include "../theatre/effects/fadeeffect.h"
@@ -29,7 +32,7 @@ BOOST_AUTO_TEST_CASE(RemoveObject) {
   Folder &folder = management.AddFolder(management.RootFolder(), "folder");
   Effect &effect = management.AddEffect(std::move(effectPtr), folder);
   management.AddSourceValue(effect, 0);
-  class Chase &chase = management.AddChase();
+  Chase &chase = management.AddChase();
   chase.SetName("chase");
   folder.Add(chase);
   management.AddSourceValue(chase, 0);
@@ -41,6 +44,40 @@ BOOST_AUTO_TEST_CASE(RemoveObject) {
 
   BOOST_CHECK(management.RootFolder().Children().empty());
   BOOST_CHECK(management.SourceValues().empty());
+}
+
+BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
+  Management management;
+  FixtureType &typeA =
+      management.GetTheatre().AddFixtureType(FixtureType::Light1Ch);
+  management.RootFolder().Add(typeA);
+  FixtureType &typeB =
+      management.GetTheatre().AddFixtureType(FixtureType::RGBLight3Ch);
+  management.RootFolder().Add(typeB);
+  FixtureType &typeC =
+      management.GetTheatre().AddFixtureType(FixtureType::RGBALight4Ch);
+  management.RootFolder().Add(typeC);
+  management.RemoveFixtureType(typeB);
+  management.RemoveFixtureType(typeC);
+  management.RemoveFixtureType(typeA);
+  BOOST_CHECK(management.GetTheatre().FixtureTypes().empty());
+}
+
+BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
+  Management management;
+  FixtureType &fixtureType =
+      management.GetTheatre().AddFixtureType(FixtureType::Light1Ch);
+  management.RootFolder().Add(fixtureType);
+  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
+  FixtureControl &control =
+      management.AddFixtureControl(fixture, management.RootFolder());
+  SourceValue &value = management.AddSourceValue(control, 0);
+  value.Preset().SetValue(ControlValue::Max());
+
+  management.RemoveFixtureType(fixtureType);
+  BOOST_CHECK(management.GetTheatre().FixtureTypes().empty());
+  BOOST_CHECK(management.GetTheatre().Fixtures().empty());
+  BOOST_CHECK(management.Controllables().empty());
 }
 
 BOOST_AUTO_TEST_CASE(HasCycles) {

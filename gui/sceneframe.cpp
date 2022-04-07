@@ -17,7 +17,7 @@
 SceneFrame::SceneFrame(Management &management, ShowWindow &parentWindow)
     : Gtk::Frame("Scene"),
       _management(&management),
-      _show(&_management->Show()),
+      _show(&_management->GetShow()),
       _audioWidget(),
       _clickIsLabel("Click is: "),
       _clickIsSelectButton("select"),
@@ -164,8 +164,8 @@ SceneFrame::SceneFrame(Management &management, ShowWindow &parentWindow)
 SceneFrame::~SceneFrame() { _timeoutConnection.disconnect(); }
 
 void SceneFrame::Update() {
-  if (&_management->Show() != _show) {
-    _show = &_management->Show();
+  if (&_management->GetShow() != _show) {
+    _show = &_management->GetShow();
     _selectedScene = nullptr;
   }
   // For testing

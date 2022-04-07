@@ -1,6 +1,7 @@
 #include "showwindow.h"
 
 #include "fixturelistwindow.h"
+#include "fixturetypeswindow.h"
 #include "visualizationwindow.h"
 
 #include "../designwizard.h"
@@ -42,7 +43,8 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
       _miBlackOut("Black-out"),
       _miProtectBlackout("Protect black-out"),
       _miDesignWizard("Design wizard"),
-      _miFixtureListWindow("Fixture list"),
+      _miFixtureListWindow("Fixtures"),
+      _miFixtureTypesWindow("Fixture types"),
       _miFaderWindowMenu("Fader windows"),
       _miNewFaderWindow("New"),
       _miVisualizationWindow("Visualization") {
@@ -67,6 +69,13 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
   _fixtureListWindow->signal_key_release_event().connect(
       sigc::mem_fun(*this, &ShowWindow::onKeyUp));
   _fixtureListWindow->signal_hide().connect([&]() { onHideFixtureList(); });
+
+  _fixtureTypesWindow.reset(new FixtureTypesWindow(this, *_management));
+  _fixtureTypesWindow->signal_key_press_event().connect(
+      sigc::mem_fun(*this, &ShowWindow::onKeyDown));
+  _fixtureTypesWindow->signal_key_release_event().connect(
+      sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+  _fixtureTypesWindow->signal_hide().connect([&]() { onHideFixtureTypes(); });
 
   _visualizationWindow.reset(new VisualizationWindow(_management.get(), this,
                                                      &_fixtureSelection, this));
@@ -106,6 +115,7 @@ ShowWindow::~ShowWindow() {
   _sceneFrame.reset();
   _visualizationWindow.reset();
   _fixtureListWindow.reset();
+  _fixtureTypesWindow.reset();
 
   _faderWindows.clear();
 
@@ -143,16 +153,24 @@ void ShowWindow::addFaderWindow(FaderSetupState *stateOrNull) {
   _state.EmitFaderSetupChangeSignal();
 }
 
-void ShowWindow::onConfigurationWindowButtonClicked() {
-  bool show = _miFixtureListWindow.get_active();
+void ShowWindow::onFixtureListButtonClicked() {
+  const bool show = _miFixtureListWindow.get_active();
   if (show)
     _fixtureListWindow->show();
   else
     _fixtureListWindow->hide();
 }
 
+void ShowWindow::onFixtureTypesButtonClicked() {
+  const bool show = _miFixtureTypesWindow.get_active();
+  if (show)
+    _fixtureTypesWindow->show();
+  else
+    _fixtureTypesWindow->hide();
+}
+
 void ShowWindow::onVisualizationWindowButtonClicked() {
-  bool show = _miVisualizationWindow.get_active();
+  const bool show = _miVisualizationWindow.get_active();
   if (show)
     _visualizationWindow->show();
   else
@@ -301,8 +319,13 @@ void ShowWindow::createMenu() {
 
   _miFixtureListWindow.set_active(false);
   _miFixtureListWindow.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onConfigurationWindowButtonClicked));
+      sigc::mem_fun(*this, &ShowWindow::onFixtureListButtonClicked));
   _menuWindow.append(_miFixtureListWindow);
+
+  _miFixtureTypesWindow.set_active(false);
+  _miFixtureTypesWindow.signal_activate().connect(
+      sigc::mem_fun(*this, &ShowWindow::onFixtureTypesButtonClicked));
+  _menuWindow.append(_miFixtureTypesWindow);
 
   _miVisualizationWindow.set_active(false);
   _miVisualizationWindow.signal_activate().connect(
@@ -350,8 +373,8 @@ void ShowWindow::OpenFile(const std::string &filename) {
   reader.SetGUIState(_state);
   reader.Read(filename);
 
-  if (_management->Show().Scenes().size() != 0)
-    _sceneFrame->SetSelectedScene(*_management->Show().Scenes()[0]);
+  if (_management->GetShow().Scenes().size() != 0)
+    _sceneFrame->SetSelectedScene(*_management->GetShow().Scenes()[0]);
   else
     _sceneFrame->SetNoSelectedScene();
 
@@ -628,6 +651,10 @@ void ShowWindow::onMIProtectBlackOut() {
 }
 
 void ShowWindow::onHideFixtureList() { _miFixtureListWindow.set_active(false); }
+
+void ShowWindow::onHideFixtureTypes() {
+  _miFixtureTypesWindow.set_active(false);
+}
 
 void ShowWindow::onHideVisualizationWindow() {
   _miVisualizationWindow.set_active(false);

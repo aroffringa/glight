@@ -20,9 +20,18 @@
 
 #include <vector>
 
+class DesignWizard;
+class FaderWindow;
+class FixtureListWindow;
+class FixtureTypesWindow;
+class Management;
+class ObjectListFrame;
+class SceneFrame;
+class VisualizationWindow;
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class ShowWindow : public Gtk::Window, public EventTransmitter {
  public:
   ShowWindow(std::unique_ptr<class DmxDevice> dmxDevice);
@@ -50,7 +59,8 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   }
 
  private:
-  void onConfigurationWindowButtonClicked();
+  void onFixtureListButtonClicked();
+  void onFixtureTypesButtonClicked();
   void onVisualizationWindowButtonClicked();
 
   /**
@@ -65,6 +75,7 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   bool onDelete(GdkEventAny *event);
 
   void onHideFixtureList();
+  void onHideFixtureTypes();
   void onHideVisualizationWindow();
 
   void createMenu();
@@ -85,35 +96,34 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
 
   void onMIDesignWizardClicked();
 
-  void onFaderWindowHidden(class FaderWindow *window);
+  void onFaderWindowHidden(FaderWindow *window);
   void onFaderListChange();
   void onFaderWindowSelected(Gtk::CheckMenuItem &menuItem,
                              FaderSetupState &state);
   FaderWindow *getFaderWindow(FaderSetupState &state);
 
-  void changeManagement(class Management *newManagement,
-                        bool moveControlSliders);
+  void changeManagement(Management *newManagement, bool moveControlSliders);
 
   size_t nextControlKeyRow() const;
 
   Gtk::VBox _box;
 
-  std::vector<std::unique_ptr<class FaderWindow>> _faderWindows;
-  std::unique_ptr<class FixtureListWindow> _fixtureListWindow;
-  std::unique_ptr<class VisualizationWindow> _visualizationWindow;
-  std::unique_ptr<class DesignWizard> _designWizard;
+  std::vector<std::unique_ptr<FaderWindow>> _faderWindows;
+  std::unique_ptr<FixtureListWindow> _fixtureListWindow;
+  std::unique_ptr<FixtureTypesWindow> _fixtureTypesWindow;
+  std::unique_ptr<VisualizationWindow> _visualizationWindow;
+  std::unique_ptr<DesignWizard> _designWizard;
 
-  std::unique_ptr<class Management> _management;
+  std::unique_ptr<Management> _management;
   /**
    * When running in dry mode, the running management is moved here
    * and kept running, while all actions from then on affect the
    * dry mode management that is not connected to a device.
    */
-  std::unique_ptr<class Management> _backgroundManagement;
-  class PresetCollection *_preset;
+  std::unique_ptr<Management> _backgroundManagement;
 
-  std::unique_ptr<class ObjectListFrame> _objectListFrame;
-  std::unique_ptr<class SceneFrame> _sceneFrame;
+  std::unique_ptr<ObjectListFrame> _objectListFrame;
+  std::unique_ptr<SceneFrame> _sceneFrame;
 
   GUIState _state;
   FixtureSelection _fixtureSelection;
@@ -135,7 +145,9 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   Gtk::SeparatorMenuItem _miDesignSep1, _miDesignSep2;
   Gtk::MenuItem _miDesignWizard;
   Gtk::CheckMenuItem _miFixtureListWindow;
-  Gtk::MenuItem _miFaderWindowMenu, _miNewFaderWindow;
+  Gtk::CheckMenuItem _miFixtureTypesWindow;
+  Gtk::MenuItem _miFaderWindowMenu;
+  Gtk::MenuItem _miNewFaderWindow;
   Gtk::SeparatorMenuItem _miFaderWindowSeperator;
   std::vector<Gtk::CheckMenuItem> _miFaderWindows;
   Gtk::CheckMenuItem _miVisualizationWindow;

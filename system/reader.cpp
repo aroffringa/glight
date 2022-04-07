@@ -18,7 +18,7 @@
 
 Reader::Reader(Management &management)
     : _management(management),
-      _theatre(management.Theatre()),
+      _theatre(management.GetTheatre()),
       _guiState(nullptr) {}
 
 void Reader::Read(const Glib::ustring &filename) {
@@ -157,7 +157,7 @@ void Reader::parseFixtureType(xmlNode *node) {
   FixtureType *type = dynamic_cast<FixtureType *>(
       _management.RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
   if (!type) {
-    type = &_management.Theatre().AddFixtureType(
+    type = &_management.GetTheatre().AddFixtureType(
         cl);  // TODO we shouldn't use a type by its name, types should be
               // editable etc
     parseFolderAttr(node, *type);
@@ -403,7 +403,7 @@ void Reader::parseShowItem(xmlNode *node) {
 }
 
 void Reader::parseScene(xmlNode *node) {
-  Scene *scene = _management.Show().AddScene();
+  Scene *scene = _management.GetShow().AddScene();
   parseFolderAttr(node, *scene);
   scene->SetAudioFile(getStringAttribute(node, "audio-file"));
 

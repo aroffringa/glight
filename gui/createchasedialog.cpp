@@ -47,7 +47,7 @@ CreateChaseDialog::CreateChaseDialog(Management &management,
 void CreateChaseDialog::initListPart() {
   _list.SignalSelectionChange().connect(
       sigc::mem_fun(this, &CreateChaseDialog::onSelectedObjectChanged));
-  _list.SetDisplayType(ObjectList::OnlyPresetCollections);
+  _list.SetDisplayType(ObjectListType::OnlyPresetCollections);
 
   _listVBox.pack_start(_list);
   _listFrame.add(_listVBox);

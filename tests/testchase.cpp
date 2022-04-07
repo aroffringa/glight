@@ -18,8 +18,9 @@ BOOST_AUTO_TEST_CASE(remove_indirect) {
   Management management;
   management.AddDevice(std::unique_ptr<DmxDevice>(new DummyDevice()));
   Folder &root = management.RootFolder();
-  FixtureType &ft = management.Theatre().AddFixtureType(FixtureType::Light1Ch);
-  Fixture &f = management.Theatre().AddFixture(ft);
+  FixtureType &ft =
+      management.GetTheatre().AddFixtureType(FixtureType::Light1Ch);
+  Fixture &f = management.GetTheatre().AddFixture(ft);
   FixtureControl &fc = management.AddFixtureControl(f);
   SourceValue &sv = management.AddSourceValue(fc, 0);
   sv.Preset().SetValue(ControlValue::Max());
