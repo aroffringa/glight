@@ -77,10 +77,10 @@ void ObjectListFrame::initPresetsPart() {
   _presetsHBox.pack_start(_presetsButtonBox, false, false);
 
   _list.SignalSelectionChange().connect(
-      sigc::mem_fun(this, &ObjectListFrame::onSelectedPresetChanged));
+      sigc::mem_fun(this, &ObjectListFrame::onSelectedObjectChanged));
   _list.SignalObjectActivated().connect(
       sigc::mem_fun(this, &ObjectListFrame::onObjectActivated));
-  _list.SetDisplayType(ObjectList::AllExceptFixtures);
+  _list.SetDisplayType(ObjectListType::AllExceptFixtures);
   _list.SetShowTypeColumn(true);
   _presetsHBox.pack_start(_list);
 
@@ -183,7 +183,7 @@ void ObjectListFrame::onDeletePresetButtonClicked() {
   }
 }
 
-void ObjectListFrame::onSelectedPresetChanged() {
+void ObjectListFrame::onSelectedObjectChanged() {
   if (_delayUpdates.IsFirst()) {
     FolderObject *selectedObj = _list.SelectedObject();
     if (selectedObj) {

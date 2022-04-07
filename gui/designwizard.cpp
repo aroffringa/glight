@@ -240,7 +240,7 @@ void DesignWizard::fillFixturesList() {
 
   std::lock_guard<std::mutex> lock(_management->Mutex());
   const std::vector<std::unique_ptr<Fixture>> &fixtures =
-      _management->Theatre().Fixtures();
+      _management->GetTheatre().Fixtures();
   for (const std::unique_ptr<Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = _fixturesListModel->append();
     Gtk::TreeModel::Row row = *iter;

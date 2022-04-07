@@ -136,7 +136,7 @@ void VisualizationWindow::initialize() {
 
 void VisualizationWindow::onTheatreChanged() {
   for (size_t i = _selectedFixtures.size(); i != 0; --i) {
-    if (!_management->Theatre().Contains(*_selectedFixtures[i - 1]))
+    if (!_management->GetTheatre().Contains(*_selectedFixtures[i - 1]))
       _selectedFixtures.erase(_selectedFixtures.begin() + i - 1);
   }
   Update();
@@ -152,7 +152,7 @@ bool VisualizationWindow::onExpose(
 
 double VisualizationWindow::scale(Management &management, double width,
                                   double height) {
-  const Theatre &theatre = management.Theatre();
+  const Theatre &theatre = management.GetTheatre();
   Position extend = theatre.Extend();
   if (extend.X() == 0.0 || extend.Y() == 0.0)
     return 1.0;
@@ -165,7 +165,7 @@ void VisualizationWindow::drawManagement(
     const DrawStyle &style) {
   const ValueSnapshot snapshot = management.Snapshot();
   const std::vector<std::unique_ptr<Fixture>> &fixtures =
-      management.Theatre().Fixtures();
+      management.GetTheatre().Fixtures();
   cairo->save();
   double sc = scale(management, style.width, style.height);
   cairo->scale(sc, sc);
@@ -289,7 +289,7 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
 Fixture *VisualizationWindow::fixtureAt(Management &management,
                                         const Position &position) {
   const std::vector<std::unique_ptr<Fixture>> &fixtures =
-      management.Theatre().Fixtures();
+      management.GetTheatre().Fixtures();
 
   Fixture *fix = nullptr;
   double closest = std::numeric_limits<double>::max();
@@ -412,7 +412,7 @@ void VisualizationWindow::selectFixtures(const Position &a, const Position &b) {
   Position second(x2 - 0.9, y2 - 0.9);
   if (second.X() - first.X() > 0.0 && second.Y() - first.Y() > 0.0) {
     const std::vector<std::unique_ptr<Fixture>> &fixtures =
-        _management->Theatre().Fixtures();
+        _management->GetTheatre().Fixtures();
     for (const std::unique_ptr<Fixture> &fixture : fixtures) {
       if (fixture->IsVisible() &&
           fixture->Position().InsideRectangle(first, second))

@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(ShapeCount) {
 Color testColor(enum FixtureType::FixtureClass cl,
                 const std::vector<unsigned char> &values) {
   Management management;
-  const FixtureType &fixtureType = management.Theatre().AddFixtureType(cl);
-  Fixture &rgbFixture = management.Theatre().AddFixture(fixtureType);
+  const FixtureType &fixtureType = management.GetTheatre().AddFixtureType(cl);
+  Fixture &rgbFixture = management.GetTheatre().AddFixture(fixtureType);
   const ValueSnapshot snapShot(1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   uni.SetValues(values.data(), values.size());

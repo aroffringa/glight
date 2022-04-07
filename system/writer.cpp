@@ -90,7 +90,7 @@ void Writer::writeGlightShow() {
 
   startElement("theatre");
 
-  Theatre &theatre = _management.Theatre();
+  Theatre &theatre = _management.GetTheatre();
 
   const std::vector<std::unique_ptr<FixtureType>> &fixtureTypes =
       theatre.FixtureTypes();
@@ -118,7 +118,7 @@ void Writer::writeGlightShow() {
 
   startElement("show");
 
-  Show &show = _management.Show();
+  Show &show = _management.GetShow();
 
   const std::vector<std::unique_ptr<Scene>> &scenes = show.Scenes();
   for (const std::unique_ptr<Scene> &scene : scenes) writeScene(*scene);

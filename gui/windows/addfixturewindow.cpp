@@ -50,9 +50,10 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
 }
 
 void AddFixtureWindow::onAdd() {
-  std::string className = _typeCombo.get_active_text();
-  enum FixtureType::FixtureClass fClass = FixtureType::NameToClass(className);
-  int count = std::atoi(_countEntry.get_text().c_str());
+  const std::string className = _typeCombo.get_active_text();
+  const enum FixtureType::FixtureClass fClass =
+      FixtureType::NameToClass(className);
+  const int count = std::atoi(_countEntry.get_text().c_str());
   if (count > 0) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
 
@@ -60,13 +61,13 @@ void AddFixtureWindow::onAdd() {
         _management->RootFolder().GetChildIfExists(className));
     if (!type) {
       // TODO we shouldn't use a type by its name, types should be editable etc
-      type = &_management->Theatre().AddFixtureType(fClass);
+      type = &_management->GetTheatre().AddFixtureType(fClass);
       _management->RootFolder().Add(*type);
     }
 
     for (size_t fixIter = 0; fixIter != size_t(count); ++fixIter) {
-      Position position = _management->Theatre().GetFreePosition();
-      Fixture &fixture = _management->Theatre().AddFixture(*type);
+      const Position position = _management->GetTheatre().GetFreePosition();
+      Fixture &fixture = _management->GetTheatre().AddFixture(*type);
       fixture.Position() = position;
 
       const std::vector<std::unique_ptr<FixtureFunction>> &functions =
@@ -76,8 +77,6 @@ void AddFixtureWindow::onAdd() {
       FixtureControl &control = _management->AddFixtureControl(
           fixture, _management->RootFolder() /* TODO */);
       for (size_t i = 0; i != functions.size(); ++i) {
-        // std::stringstream funcName;
-        // funcName << fixture.Name() << number;
         _management->AddSourceValue(control, i);
         ++number;
       }

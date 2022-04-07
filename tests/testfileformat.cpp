@@ -26,9 +26,9 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   Folder &subFolder = management.AddFolder(root, "A subfolder");
 
   FixtureType &ft =
-      management.Theatre().AddFixtureType(FixtureType::RGBWLight4Ch);
+      management.GetTheatre().AddFixtureType(FixtureType::RGBWLight4Ch);
   root.Add(ft);
-  Fixture &f = management.Theatre().AddFixture(ft);
+  Fixture &f = management.GetTheatre().AddFixture(ft);
   FixtureControl &fc = management.AddFixtureControl(f, subFolder);
   fc.SetName("Control for RGBW fixture");
   management.AddSourceValue(fc, 0);
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   management.AddSourceValue(fc, 2).Preset().SetValue(ControlValue::MaxUInt());
   management.AddSourceValue(fc, 3);
   BOOST_CHECK_EQUAL(
-      &management.GetFixtureControl(*management.Theatre().Fixtures()[0]),
+      &management.GetFixtureControl(*management.GetTheatre().Fixtures()[0]),
       &management.GetObjectFromPath(
           "The root folder/A subfolder/Control for RGBW fixture"));
 
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
 
   management.Clear();
   BOOST_CHECK_EQUAL(management.Controllables().size(), 0);
-  BOOST_CHECK_EQUAL(management.Theatre().Fixtures().size(), 0);
+  BOOST_CHECK_EQUAL(management.GetTheatre().Fixtures().size(), 0);
 
   //
   // Read and check if the result is correct
@@ -98,9 +98,9 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   BOOST_CHECK_EQUAL(management.RootFolder().Name(), "The root folder");
   BOOST_CHECK_EQUAL(management.RootFolder().Children()[0]->Name(),
                     "A subfolder");
-  BOOST_CHECK_EQUAL(management.Theatre().Fixtures().size(), 1);
+  BOOST_CHECK_EQUAL(management.GetTheatre().Fixtures().size(), 1);
 
-  Fixture &readFixture = *management.Theatre().Fixtures()[0];
+  Fixture &readFixture = *management.GetTheatre().Fixtures()[0];
   FixtureControl &readFixtureControl =
       management.GetFixtureControl(readFixture);
   BOOST_CHECK_EQUAL(readFixtureControl.Name(), "Control for RGBW fixture");

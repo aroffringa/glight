@@ -90,14 +90,31 @@ FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
 void Theatre::RemoveFixture(Fixture &fixture) {
   const FixtureType *t = &fixture.Type();
 
-  size_t fIndex = FolderObject::FindIndex(_fixtures, &fixture);
+  const size_t fIndex = FolderObject::FindIndex(_fixtures, &fixture);
   _fixtures.erase(_fixtures.begin() + fIndex);
 
   if (!IsUsed(*t)) {
-    size_t ftIndex = FolderObject::FindIndex(_fixtureTypes, t);
+    const size_t ftIndex = FolderObject::FindIndex(_fixtureTypes, t);
     _fixtureTypes[ftIndex]->Parent().Remove(*_fixtureTypes[ftIndex]);
     _fixtureTypes.erase(_fixtureTypes.begin() + ftIndex);
   }
+}
+
+void Theatre::RemoveFixtureType(const FixtureType &fixtureType) {
+  size_t i = 0;
+  while (i != _fixtures.size()) {
+    // Go backward through the list, as they might be removed
+    const size_t fIndex = _fixtures.size() - 1 - i;
+    Fixture &f = *_fixtures[fIndex];
+    if (&f.Type() == &fixtureType) {
+      _fixtures.erase(_fixtures.begin() + fIndex);
+    } else {
+      ++i;
+    }
+  }
+  const size_t ftIndex = FolderObject::FindIndex(_fixtureTypes, &fixtureType);
+  _fixtureTypes[ftIndex]->Parent().Remove(*_fixtureTypes[ftIndex]);
+  _fixtureTypes.erase(_fixtureTypes.begin() + ftIndex);
 }
 
 bool Theatre::IsUsed(const FixtureType &fixtureType) const {

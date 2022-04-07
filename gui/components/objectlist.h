@@ -8,20 +8,20 @@
 
 #include "../recursionlock.h"
 
+enum class ObjectListType {
+  AllExceptFixtures,
+  All,
+  OnlyPresetCollections,
+  OnlyChases,
+  OnlyEffects
+};
+
 class ObjectList : public Gtk::ScrolledWindow {
  public:
   ObjectList(class Management &management, class EventTransmitter &eventHub);
 
-  enum ObjectType {
-    AllExceptFixtures,
-    All,
-    OnlyPresetCollections,
-    OnlyChases,
-    OnlyEffects
-  };
-
-  ObjectType DisplayType() const { return _displayType; }
-  void SetDisplayType(ObjectType displayType) {
+  ObjectListType DisplayType() const { return _displayType; }
+  void SetDisplayType(ObjectListType displayType) {
     _displayType = displayType;
     fillList();
   }
@@ -55,7 +55,7 @@ class ObjectList : public Gtk::ScrolledWindow {
  private:
   class Management *_management;
   class EventTransmitter &_eventHub;
-  enum ObjectType _displayType;
+  enum ObjectListType _displayType;
   bool _showTypeColumn;
   class Folder *_openFolder;
 

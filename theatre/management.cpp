@@ -303,6 +303,28 @@ void Management::RemoveFixture(Fixture &fixture) {
   RemoveControllable(control);
 }
 
+void Management::RemoveFixtureType(FixtureType &fixtureType) {
+  const std::vector<std::unique_ptr<Fixture>> &fixtures = _theatre->Fixtures();
+  bool isUsed = false;
+  size_t i = 0;
+  while (i != fixtures.size()) {
+    // Go backward through the list, as fixtures might be removed
+    const size_t fIndex = fixtures.size() - 1 - i;
+    Fixture &f = *fixtures[fIndex];
+    if (&f.Type() == &fixtureType) {
+      RemoveFixture(*fixtures[fIndex]);
+      isUsed = true;
+    } else {
+      ++i;
+    }
+  }
+  // When the fixture type was used, removing the last fixture of that type
+  // will remove the type. Otherwise, remove it manually.
+  if (!isUsed) {
+    _theatre->RemoveFixtureType(fixtureType);
+  }
+}
+
 SourceValue &Management::AddSourceValue(Controllable &controllable,
                                         size_t inputIndex) {
   _sourceValues.emplace_back(

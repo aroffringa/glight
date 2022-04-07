@@ -13,7 +13,7 @@
 ObjectList::ObjectList(Management &management, EventTransmitter &eventHub)
     : _management(&management),
       _eventHub(eventHub),
-      _displayType(AllExceptFixtures),
+      _displayType(ObjectListType::AllExceptFixtures),
       _showTypeColumn(false),
       _openFolder(&management.RootFolder()),
       _listView(*this) {
@@ -62,17 +62,17 @@ void ObjectList::fillList() {
   Gtk::TreeViewColumn *objectColumn =
       _showTypeColumn ? _listView.get_column(1) : _listView.get_column(0);
   switch (_displayType) {
-    case AllExceptFixtures:
-    case All:
+    case ObjectListType::AllExceptFixtures:
+    case ObjectListType::All:
       objectColumn->set_title("objects");
       break;
-    case OnlyPresetCollections:
+    case ObjectListType::OnlyPresetCollections:
       objectColumn->set_title("preset collections");
       break;
-    case OnlyChases:
+    case ObjectListType::OnlyChases:
       objectColumn->set_title("chases");
       break;
-    case OnlyEffects:
+    case ObjectListType::OnlyEffects:
       objectColumn->set_title("effects");
       break;
   }
@@ -86,13 +86,15 @@ void ObjectList::fillList() {
 
 void ObjectList::fillListFolder(const Folder &folder,
                                 const FolderObject *selectedObj) {
-  bool almostAll = _displayType == AllExceptFixtures || _displayType == All;
-  bool showFolders = _displayType == OnlyPresetCollections || almostAll;
+  bool almostAll = _displayType == ObjectListType::AllExceptFixtures ||
+                   _displayType == ObjectListType::All;
+  bool showFolders =
+      _displayType == ObjectListType::OnlyPresetCollections || almostAll;
   bool showPresetCollections =
-      _displayType == OnlyPresetCollections || almostAll;
-  bool showChases = _displayType == OnlyChases || almostAll;
-  bool showEffects = _displayType == OnlyEffects || almostAll;
-  bool showFixtures = _displayType == All;
+      _displayType == ObjectListType::OnlyPresetCollections || almostAll;
+  bool showChases = _displayType == ObjectListType::OnlyChases || almostAll;
+  bool showEffects = _displayType == ObjectListType::OnlyEffects || almostAll;
+  bool showFixtures = _displayType == ObjectListType::All;
 
   for (FolderObject *obj : folder.Children()) {
     Folder *childFolder = showFolders ? dynamic_cast<Folder *>(obj) : nullptr;
@@ -117,8 +119,6 @@ void ObjectList::fillListFolder(const Folder &folder,
         childRow[_listColumns._type] = "F";
       else if (presetCollection)
         childRow[_listColumns._type] = "P";
-      else if (dynamic_cast<FixtureControl *>(obj))
-        childRow[_listColumns._type] = "F";
       else if (effect)
         childRow[_listColumns._type] = "E";
       else if (fixtureControl)

@@ -11,11 +11,22 @@
 
 #include "valuesnapshot.h"
 
+class BeatFinder;
+class Chase;
 class Controllable;
 class DmxDevice;
+class Effect;
+class Fixture;
+class FixtureControl;
+class FixtureType;
 class Folder;
+class FolderObject;
+class PresetCollection;
 class PresetValue;
+class Show;
 class SourceValue;
+class Theatre;
+class TimeSequence;
 
 /**
  * @author Andre Offringa
@@ -32,79 +43,73 @@ class Management {
            _sourceValues.empty();
   }
 
-  void AddDevice(std::unique_ptr<class DmxDevice> device);
+  void AddDevice(std::unique_ptr<DmxDevice> device);
 
   void Run();
 
   void StartBeatFinder();
 
-  class Theatre &Theatre() const {
-    return *_theatre;
-  }
+  Theatre &GetTheatre() const { return *_theatre; }
 
-  const std::vector<std::unique_ptr<class Folder>> &Folders() const {
+  const std::vector<std::unique_ptr<Folder>> &Folders() const {
     return _folders;
   }
-  const std::vector<std::unique_ptr<class Controllable>> &Controllables()
-      const {
+  const std::vector<std::unique_ptr<Controllable>> &Controllables() const {
     return _controllables;
   }
-  const std::vector<std::unique_ptr<class SourceValue>> &SourceValues() const {
+  const std::vector<std::unique_ptr<SourceValue>> &SourceValues() const {
     return _sourceValues;
   }
-  const std::vector<std::unique_ptr<class DmxDevice>> &Devices() const {
+  const std::vector<std::unique_ptr<DmxDevice>> &Devices() const {
     return _devices;
   }
 
-  void RemoveObject(class FolderObject &object);
+  void RemoveObject(FolderObject &object);
 
-  class PresetCollection &AddPresetCollection();
-  void RemoveControllable(class Controllable &controllable);
-  bool Contains(class Controllable &controllable) const;
+  PresetCollection &AddPresetCollection();
+  void RemoveControllable(Controllable &controllable);
+  bool Contains(Controllable &controllable) const;
 
-  class Folder &AddFolder(class Folder &parent, const std::string &name);
-  class Folder &GetFolder(const std::string &path);
-  void RemoveFolder(class Folder &folder);
+  Folder &AddFolder(Folder &parent, const std::string &name);
+  Folder &GetFolder(const std::string &path);
+  void RemoveFolder(Folder &folder);
 
-  class FixtureControl &AddFixtureControl(class Fixture &fixture);
-  class FixtureControl &AddFixtureControl(class Fixture &fixture,
-                                          Folder &parent);
-  class FixtureControl &GetFixtureControl(class Fixture &fixture);
+  FixtureControl &AddFixtureControl(Fixture &fixture);
+  FixtureControl &AddFixtureControl(Fixture &fixture, Folder &parent);
+  FixtureControl &GetFixtureControl(Fixture &fixture);
 
-  void RemoveFixture(class Fixture &fixture);
+  void RemoveFixture(Fixture &fixture);
+  void RemoveFixtureType(FixtureType &fixture);
 
-  class SourceValue &AddSourceValue(Controllable &controllable,
-                                    size_t inputIndex);
+  SourceValue &AddSourceValue(Controllable &controllable, size_t inputIndex);
 
-  void RemoveSourceValue(class SourceValue &sourceValue);
-  bool Contains(class SourceValue &sourceValue) const;
+  void RemoveSourceValue(SourceValue &sourceValue);
+  bool Contains(SourceValue &sourceValue) const;
 
-  class Chase &AddChase();
+  Chase &AddChase();
 
-  class TimeSequence &AddTimeSequence();
+  TimeSequence &AddTimeSequence();
 
-  class Effect &AddEffect(std::unique_ptr<class Effect> effect);
-  class Effect &AddEffect(std::unique_ptr<class Effect> effect, Folder &folder);
+  Effect &AddEffect(std::unique_ptr<Effect> effect);
+  Effect &AddEffect(std::unique_ptr<Effect> effect, Folder &folder);
 
   std::mutex &Mutex() { return _mutex; }
 
-  class FolderObject &GetObjectFromPath(const std::string &path) const;
-  class FolderObject *GetObjectFromPathIfExists(const std::string &path) const;
+  FolderObject &GetObjectFromPath(const std::string &path) const;
+  FolderObject *GetObjectFromPathIfExists(const std::string &path) const;
   size_t ControllableIndex(const Controllable *controllable) const;
 
-  class SourceValue *GetSourceValue(Controllable &controllable,
-                                    size_t inputIndex) const;
-  size_t SourceValueIndex(const class SourceValue *sourceValue) const;
-  class ValueSnapshot Snapshot();
+  SourceValue *GetSourceValue(Controllable &controllable,
+                              size_t inputIndex) const;
+  size_t SourceValueIndex(const SourceValue *sourceValue) const;
+  ValueSnapshot Snapshot();
 
   double GetOffsetTimeInMS() const {
     boost::posix_time::ptime currentTime(
         boost::posix_time::microsec_clock::local_time());
     return (double)(currentTime - _createTime).total_microseconds() / 1000.0;
   }
-  class Show &Show() const {
-    return *_show;
-  }
+  Show &GetShow() const { return *_show; }
 
   std::unique_ptr<Management> MakeDryMode();
 
@@ -116,10 +121,8 @@ class Management {
    */
   void SwapDevices(Management &source);
 
-  const class Folder &RootFolder() const { return *_rootFolder; }
-  class Folder &RootFolder() {
-    return *_rootFolder;
-  }
+  const Folder &RootFolder() const { return *_rootFolder; }
+  Folder &RootFolder() { return *_rootFolder; }
 
   bool HasCycle() const;
 
@@ -143,13 +146,12 @@ class Management {
   };
 
   Management(const Management &forDryCopy,
-             std::shared_ptr<class BeatFinder> &beatFinder);
+             std::shared_ptr<BeatFinder> &beatFinder);
 
   void getChannelValues(unsigned timestepNumber, unsigned *values,
                         unsigned universe);
   void removeControllable(
-      std::vector<std::unique_ptr<class Controllable>>::iterator
-          controllablePtr);
+      std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr);
 
   void dryCopyControllerDependency(const Management &forDryCopy, size_t index);
   void dryCopyEffectDependency(const Management &forDryCopy, size_t index);
@@ -175,10 +177,10 @@ class Management {
   std::atomic<double> _lastOverridenBeatTime;
   std::atomic<double> _previousTime;
 
-  std::unique_ptr<class Theatre> _theatre;
-  std::unique_ptr<class ValueSnapshot> _snapshot;
-  std::shared_ptr<class BeatFinder> _beatFinder;
-  std::unique_ptr<class Show> _show;
+  std::unique_ptr<Theatre> _theatre;
+  std::unique_ptr<ValueSnapshot> _snapshot;
+  std::shared_ptr<BeatFinder> _beatFinder;
+  std::unique_ptr<Show> _show;
 
   Folder *_rootFolder;
   std::vector<std::unique_ptr<Folder>> _folders;

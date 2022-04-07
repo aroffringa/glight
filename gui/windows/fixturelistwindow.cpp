@@ -92,7 +92,7 @@ void FixtureListWindow::fillFixturesList() {
 
   std::lock_guard<std::mutex> lock(_management->Mutex());
   const std::vector<std::unique_ptr<Fixture>> &fixtures =
-      _management->Theatre().Fixtures();
+      _management->GetTheatre().Fixtures();
   for (const std::unique_ptr<Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = _fixturesListModel->append();
     Gtk::TreeModel::Row row = *iter;
@@ -138,16 +138,16 @@ void FixtureListWindow::onRemoveButtonClicked() {
 
 void FixtureListWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  Position position = _management->Theatre().GetFreePosition();
+  Position position = _management->GetTheatre().GetFreePosition();
   FixtureType *type = dynamic_cast<FixtureType *>(
       _management->RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
   if (!type) {
-    type = &_management->Theatre().AddFixtureType(
+    type = &_management->GetTheatre().AddFixtureType(
         cl);  // TODO we shouldn't use a type by its name, types should be
               // editable etc
     _management->RootFolder().Add(*type);
   }
-  Fixture &fixture = _management->Theatre().AddFixture(*type);
+  Fixture &fixture = _management->GetTheatre().AddFixture(*type);
   fixture.Position() = position;
 
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =

@@ -19,7 +19,7 @@ class InputSelectWidget : public Gtk::VBox {
         _inputLabel("Input:"),
         _selectedObject(nullptr),
         _selectedInput(NO_INPUT_SELECTED) {
-    _browser.SetDisplayType(ObjectList::All);
+    _browser.SetDisplayType(ObjectListType::All);
     _browser.SignalSelectionChange().connect(
         [&]() { onBrowserSelectionChange(); });
     pack_start(_browser, true, true);

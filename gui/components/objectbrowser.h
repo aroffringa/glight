@@ -36,8 +36,8 @@ class ObjectBrowser : public Gtk::VBox {
     _list.show();
   }
 
-  ObjectList::ObjectType DisplayType() const { return _list.DisplayType(); }
-  void SetDisplayType(ObjectList::ObjectType displayType) {
+  ObjectListType DisplayType() const { return _list.DisplayType(); }
+  void SetDisplayType(ObjectListType displayType) {
     _list.SetDisplayType(displayType);
   }
 
