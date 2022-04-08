@@ -47,6 +47,8 @@ class FixtureControl : public Controllable {
         return Color::Amber();
       case FunctionType::UV:
         return Color::UV();
+      case FunctionType::Lime:
+        return Color::Lime();
       case FunctionType::ColdWhite:
         return Color::ColdWhite();
       case FunctionType::WarmWhite:

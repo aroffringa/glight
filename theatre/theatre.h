@@ -20,8 +20,7 @@ class Theatre {
   void Clear();
 
   class Fixture &AddFixture(const FixtureType &type);
-  class FixtureType &AddFixtureType(
-      enum FixtureType::FixtureClass fixtureClass);
+  class FixtureType &AddFixtureType(FixtureClass fixtureClass);
 
   bool Contains(Fixture &fixture) const;
 

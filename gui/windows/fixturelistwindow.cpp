@@ -136,7 +136,7 @@ void FixtureListWindow::onRemoveButtonClicked() {
   _eventHub->EmitUpdate();
 }
 
-void FixtureListWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl) {
+void FixtureListWindow::onMenuItemClicked(FixtureClass cl) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
   Position position = _management->GetTheatre().GetFreePosition();
   FixtureType *type = dynamic_cast<FixtureType *>(

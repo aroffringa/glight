@@ -152,8 +152,7 @@ void Reader::parseControlItem(xmlNode *node) {
 }
 
 void Reader::parseFixtureType(xmlNode *node) {
-  enum FixtureType::FixtureClass cl =
-      (enum FixtureType::FixtureClass)getIntAttribute(node, "fixture-class");
+  const FixtureClass cl = (FixtureClass)getIntAttribute(node, "fixture-class");
   FixtureType *type = dynamic_cast<FixtureType *>(
       _management.RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
   if (!type) {

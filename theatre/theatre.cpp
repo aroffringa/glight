@@ -54,9 +54,8 @@ Fixture &Theatre::AddFixture(const FixtureType &type) {
   return f;
 }
 
-FixtureType &Theatre::AddFixtureType(
-    enum FixtureType::FixtureClass fixtureClass) {
-  _fixtureTypes.emplace_back(new FixtureType(fixtureClass));
+FixtureType &Theatre::AddFixtureType(FixtureClass fixtureClass) {
+  _fixtureTypes.emplace_back(std::make_unique<FixtureType>(fixtureClass));
   return *_fixtureTypes.back();
 }
 

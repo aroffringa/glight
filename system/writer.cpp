@@ -189,7 +189,7 @@ void Writer::writeDmxChannel(const DmxChannel &dmxChannel) {
 void Writer::writeFixtureType(const FixtureType &fixtureType) {
   startElement("fixture-type");
   writeFolderAttributes(fixtureType);
-  writeAttribute("fixture-class", fixtureType.FixtureClass());
+  writeAttribute("fixture-class", int(fixtureType.GetFixtureClass()));
   endElement();
 }
 

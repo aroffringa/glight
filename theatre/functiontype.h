@@ -11,6 +11,7 @@ enum class FunctionType {
   White,
   Amber,
   UV,
+  Lime,
   ColorMacro,
   Strobe,
   Pulse,
@@ -38,6 +39,8 @@ inline const char *AbbreviatedFunctionType(FunctionType functionType) {
       return "A";
     case FunctionType::UV:
       return "U";
+    case FunctionType::Lime:
+      return "L";
     case FunctionType::ColorMacro:
       return "C";
     case FunctionType::Pulse:
@@ -76,6 +79,8 @@ inline std::string FunctionTypeDescription(FunctionType functionType) {
       return "Amber";
     case FunctionType::UV:
       return "UV";
+    case FunctionType::Lime:
+      return "Lime";
     case FunctionType::ColorMacro:
       return "Color";
     case FunctionType::Pulse:

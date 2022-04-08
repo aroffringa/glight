@@ -24,9 +24,8 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
 
   _grid.attach(_typeLabel, 0, 0, 1, 1);
 
-  const std::vector<enum FixtureType::FixtureClass> &classes =
-      FixtureType::GetClassList();
-  for (enum FixtureType::FixtureClass fc : classes) {
+  const std::vector<FixtureClass> &classes = FixtureType::GetClassList();
+  for (FixtureClass fc : classes) {
     _typeCombo.append(FixtureType::ClassName(fc));
   }
   _typeCombo.set_active_text(FixtureType::ClassName(classes.front()));
@@ -51,8 +50,7 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
 
 void AddFixtureWindow::onAdd() {
   const std::string className = _typeCombo.get_active_text();
-  const enum FixtureType::FixtureClass fClass =
-      FixtureType::NameToClass(className);
+  const FixtureClass fClass = FixtureType::NameToClass(className);
   const int count = std::atoi(_countEntry.get_text().c_str());
   if (count > 0) {
     std::unique_lock<std::mutex> lock(_management->Mutex());

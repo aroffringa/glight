@@ -3,6 +3,8 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/grid.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
@@ -39,6 +41,9 @@ class FixtureTypesWindow : public Gtk::Window {
   void onNewButtonClicked();
   void onRemoveButtonClicked();
   void onSelectionChanged();
+  void onAddFunction();
+  void onRemoveFunction();
+  void onSelectedFunctionChanged();
   FixtureType *getSelected();
 
   EventTransmitter *event_hub_;
@@ -50,22 +55,49 @@ class FixtureTypesWindow : public Gtk::Window {
 
   Gtk::TreeView list_view_;
   Glib::RefPtr<Gtk::ListStore> list_model_;
-  struct FixtureTypesListColumns : public Gtk::TreeModelColumnRecord {
-    FixtureTypesListColumns() {
+  struct TypesListColumns : public Gtk::TreeModelColumnRecord {
+    TypesListColumns() {
       add(name_);
       add(functions_);
+      add(in_use_);
       add(fixture_type_);
     }
 
-    Gtk::TreeModelColumn<Glib::ustring> name_, functions_;
+    Gtk::TreeModelColumn<Glib::ustring> name_;
+    Gtk::TreeModelColumn<Glib::ustring> functions_;
+    Gtk::TreeModelColumn<bool> in_use_;
     Gtk::TreeModelColumn<FixtureType *> fixture_type_;
   } list_columns_;
   Gtk::ScrolledWindow scrolled_window_;
 
-  Gtk::VBox main_box_;
-  Gtk::HButtonBox button_box_;
+  Gtk::Grid main_grid_;
 
-  Gtk::Button new_button_, remove_button_;
+  Gtk::VBox left_box_;
+  Gtk::Button new_button_;
+  Gtk::Button remove_button_;
+
+  Gtk::Grid right_grid_;
+  Gtk::Label class_label_;
+  Gtk::ComboBoxText class_combo_;
+  Gtk::Label functions_label_;
+  Gtk::TreeView functions_view_;
+  Glib::RefPtr<Gtk::ListStore> functions_model_;
+  struct FunctionsColumns : public Gtk::TreeModelColumnRecord {
+    FunctionsColumns() {
+      add(dmx_offset_);
+      add(is_16_bit_);
+      add(function_type_);
+    }
+
+    Gtk::TreeModelColumn<size_t> dmx_offset_;
+    Gtk::TreeModelColumn<bool> is_16_bit_;
+    Gtk::TreeModelColumn<Glib::ustring> function_type_;
+  } functions_columns_;
+  Gtk::HBox functions_button_box_;
+  Gtk::Button add_function_button_;
+  Gtk::Button remove_function_button_;
+
+  Gtk::HButtonBox button_box_;
 };
 
 #endif

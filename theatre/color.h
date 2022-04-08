@@ -18,6 +18,7 @@ class Color {
   static Color WhiteOrange() { return Color(255, 192, 128); }
   static Color RedC() { return Color(255, 0, 0); }
   static Color Amber() { return Orange(); }
+  static Color Lime() { return GreenYellow(); }
   static Color Orange() { return Color(255, 128, 0); }
   static Color OrangeGreen() { return Color(170, 255, 0); }
   static Color GreenC() { return Color(0, 255, 0); }
