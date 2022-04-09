@@ -40,6 +40,7 @@ class FixtureTypesWindow : public Gtk::Window {
   void fillList();
   void onNewButtonClicked();
   void onRemoveButtonClicked();
+  void onSaveButtonClicked();
   void onSelectionChanged();
   void onAddFunction();
   void onRemoveFunction();
@@ -73,8 +74,6 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::Grid main_grid_;
 
   Gtk::VBox left_box_;
-  Gtk::Button new_button_;
-  Gtk::Button remove_button_;
 
   Gtk::Grid right_grid_;
   Gtk::Label class_label_;
@@ -98,6 +97,9 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::Button remove_function_button_;
 
   Gtk::HButtonBox button_box_;
+  Gtk::Button new_button_;
+  Gtk::Button remove_button_;
+  Gtk::Button save_button_;
 };
 
 #endif

@@ -17,12 +17,13 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
                                        Management &management)
     : event_hub_(eventHub),
       management_(&management),
-      new_button_("New"),
-      remove_button_("Remove"),
       class_label_("Class:"),
       functions_label_("Functions:"),
       add_function_button_("+"),
-      remove_function_button_("-") {
+      remove_function_button_("-"),
+      new_button_("New"),
+      remove_button_("Remove"),
+      save_button_("Save") {
   set_title("Glight - fixture types");
   set_size_request(200, 400);
 
@@ -91,6 +92,10 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
       sigc::mem_fun(*this, &FixtureTypesWindow::onRemoveButtonClicked));
   button_box_.pack_start(remove_button_);
 
+  save_button_.signal_clicked().connect(
+      sigc::mem_fun(*this, &FixtureTypesWindow::onSaveButtonClicked));
+  button_box_.pack_start(save_button_);
+
   main_grid_.attach(button_box_, 0, 1, 2, 1);
   button_box_.set_hexpand(true);
   button_box_.set_vexpand(false);
@@ -130,6 +135,19 @@ void FixtureTypesWindow::onRemoveButtonClicked() {
   }
 }
 
+void FixtureTypesWindow::onSaveButtonClicked() {
+  FixtureType *type = getSelected();
+  if (type) {
+    if (management_->GetTheatre().IsUsed(*type)) {
+      Gtk::MessageDialog dialog(*this,
+                                "A used type can not be changed: first remove "
+                                "all fixtures of this type");
+      dialog.run();
+    } else {
+    }
+  }
+}
+
 FixtureType *FixtureTypesWindow::getSelected() {
   Glib::RefPtr<Gtk::TreeSelection> selection = list_view_.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
@@ -142,7 +160,10 @@ FixtureType *FixtureTypesWindow::getSelected() {
 void FixtureTypesWindow::onSelectionChanged() {
   if (recursion_lock_.IsFirst()) {
     RecursionLock::Token token(recursion_lock_);
-    FixtureType *type = getSelected();
+    const FixtureType *type = getSelected();
+    remove_button_.set_sensitive(type != nullptr);
+    save_button_.set_sensitive(type != nullptr);
+    right_grid_.set_sensitive(type != nullptr);
     if (type) {
       class_combo_.set_active_text(
           FixtureType::ClassName(type->GetFixtureClass()));
