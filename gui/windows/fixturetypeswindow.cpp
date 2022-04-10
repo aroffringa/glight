@@ -17,6 +17,7 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
                                        Management &management)
     : event_hub_(eventHub),
       management_(&management),
+      name_label_("Name:"),
       class_label_("Class:"),
       functions_label_("Functions:"),
       add_function_button_("+"),
@@ -36,12 +37,12 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   // Left part
   list_model_ = Gtk::ListStore::create(list_columns_);
 
-  list_view_.get_selection()->signal_changed().connect(
-      [&]() { onSelectionChanged(); });
   list_view_.set_model(list_model_);
   list_view_.append_column("Name", list_columns_.name_);
   list_view_.append_column("Used", list_columns_.in_use_);
   list_view_.append_column("Functions", list_columns_.functions_);
+  list_view_.get_selection()->signal_changed().connect(
+      [&]() { onSelectionChanged(); });
   fillList();
   scrolled_window_.add(list_view_);
 
@@ -53,29 +54,32 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   left_box_.set_vexpand(true);
 
   // Right part
-  right_grid_.attach(class_label_, 0, 0);
+  right_grid_.attach(name_label_, 0, 0);
+  right_grid_.attach(name_entry_, 1, 0);
+  
+  right_grid_.attach(class_label_, 0, 1);
   const std::vector<FixtureClass> classes = FixtureType::GetClassList();
   for (FixtureClass c : classes) class_combo_.append(FixtureType::ClassName(c));
-  right_grid_.attach(class_combo_, 1, 0);
-  right_grid_.attach(functions_label_, 0, 1, 2, 1);
+  right_grid_.attach(class_combo_, 1, 1);
+  right_grid_.attach(functions_label_, 0, 2, 2, 1);
 
   functions_model_ = Gtk::ListStore::create(functions_columns_);
 
-  functions_view_.get_selection()->signal_changed().connect(
-      [&]() { onSelectedFunctionChanged(); });
   functions_view_.set_model(functions_model_);
   functions_view_.append_column("DMX", functions_columns_.dmx_offset_);
   functions_view_.append_column("16 bit?", functions_columns_.is_16_bit_);
-  functions_view_.append_column("Type", functions_columns_.function_type_);
+  functions_view_.append_column("Type", functions_columns_.function_type_str_);
   functions_view_.set_vexpand(true);
-  right_grid_.attach(functions_view_, 0, 2, 2, 1);
+  functions_view_.get_selection()->signal_changed().connect(
+      [&]() { onSelectedFunctionChanged(); });
+  right_grid_.attach(functions_view_, 0, 3, 2, 1);
 
   add_function_button_.signal_clicked().connect([&]() { onAddFunction(); });
   functions_button_box_.pack_start(add_function_button_);
   remove_function_button_.signal_clicked().connect(
       [&]() { onRemoveFunction(); });
   functions_button_box_.pack_end(remove_function_button_);
-  right_grid_.attach(functions_button_box_, 1, 3, 1, 1);
+  right_grid_.attach(functions_button_box_, 1, 4, 1, 1);
 
   main_grid_.attach(right_grid_, 1, 0, 1, 1);
   right_grid_.set_hexpand(true);
@@ -125,7 +129,21 @@ void FixtureTypesWindow::fillList() {
   }
 }
 
-void FixtureTypesWindow::onNewButtonClicked() {}
+void FixtureTypesWindow::onNewButtonClicked() {
+  if (!list_model_->children().empty()) {
+    Gtk::TreeModel::Row row = *list_model_->children().rbegin();
+    // If the last row is already a new, unsaved type, ignore the request
+    if(row[list_columns_.fixture_type_] == nullptr)
+      return;
+  }
+  Gtk::TreeModel::iterator iter = list_model_->append();
+  Gtk::TreeModel::Row row = *iter;
+  row[list_columns_.fixture_type_] = nullptr;
+  row[list_columns_.name_] = {};
+  row[list_columns_.functions_] = {};
+  row[list_columns_.in_use_] = false;
+  list_view_.get_selection()->select(iter);
+}
 
 void FixtureTypesWindow::onRemoveButtonClicked() {
   FixtureType *type = getSelected();
@@ -143,14 +161,35 @@ void FixtureTypesWindow::onSaveButtonClicked() {
                                 "A used type can not be changed: first remove "
                                 "all fixtures of this type");
       dialog.run();
-    } else {
     }
   }
+  else {
+    const FixtureClass fc = FixtureType::NameToClass(class_combo_.get_active_text());
+    type = &management_->GetTheatre().AddFixtureType(fc);
+    management_->RootFolder().Add(*type);
+  }
+  type->SetName(name_entry_.get_text());
+  type->SetFixtureClass(FixtureType::NameToClass(class_combo_.get_active_text()));
+  type->SetFunctions(getFunctions());
+  event_hub_->EmitUpdate();
+}
+
+std::vector<FixtureTypeFunction> FixtureTypesWindow::getFunctions() const
+{
+  std::vector<FixtureTypeFunction> functions;
+  for(const Gtk::TreeRow& child : functions_model_->children())
+  {
+    const size_t dmx_offset = child[functions_columns_.dmx_offset_];
+    const FunctionType type = child[functions_columns_.function_type_];
+    const bool is_16_bit = child[functions_columns_.is_16_bit_];
+    functions.emplace_back(dmx_offset, type, is_16_bit);
+  }
+  return functions;
 }
 
 FixtureType *FixtureTypesWindow::getSelected() {
   Glib::RefPtr<Gtk::TreeSelection> selection = list_view_.get_selection();
-  Gtk::TreeModel::iterator selected = selection->get_selected();
+  const Gtk::TreeModel::const_iterator selected = selection->get_selected();
   if (selected)
     return (*selected)[list_columns_.fixture_type_];
   else
@@ -160,24 +199,31 @@ FixtureType *FixtureTypesWindow::getSelected() {
 void FixtureTypesWindow::onSelectionChanged() {
   if (recursion_lock_.IsFirst()) {
     RecursionLock::Token token(recursion_lock_);
-    const FixtureType *type = getSelected();
-    remove_button_.set_sensitive(type != nullptr);
-    save_button_.set_sensitive(type != nullptr);
-    right_grid_.set_sensitive(type != nullptr);
+    Glib::RefPtr<Gtk::TreeSelection> selection = list_view_.get_selection();
+    const Gtk::TreeModel::const_iterator selected = selection->get_selected();
+    const bool has_selection = selected;
+    const FixtureType *type = has_selection ? static_cast<FixtureType *>((*selected)[list_columns_.fixture_type_]) : nullptr;
+    remove_button_.set_sensitive(has_selection);
+    save_button_.set_sensitive(has_selection);
+    right_grid_.set_sensitive(has_selection);
+    functions_model_->clear();
     if (type) {
       class_combo_.set_active_text(
           FixtureType::ClassName(type->GetFixtureClass()));
       const std::vector<FixtureTypeFunction> &functions = type->Functions();
-      functions_model_->clear();
       for (size_t i = 0; i != functions.size(); ++i) {
         Gtk::TreeModel::iterator iter = functions_model_->append();
         Gtk::TreeModel::Row row = *iter;
         const FixtureTypeFunction &f = functions[i];
         row[functions_columns_.dmx_offset_] = f.dmxOffset;
         row[functions_columns_.is_16_bit_] = f.is16Bit;
-        row[functions_columns_.function_type_] =
+        row[functions_columns_.function_type_] = f.type;
+        row[functions_columns_.function_type_str_] =
             FunctionTypeDescription(f.type);
       }
+    }
+    else {
+      class_combo_.set_active_text(FixtureType::ClassName(FixtureClass::Light1Ch));
     }
   }
 }
@@ -186,7 +232,6 @@ void FixtureTypesWindow::onAddFunction() {
   size_t dmx_offset = 0;
   if (!functions_model_->children().empty()) {
     Gtk::TreeModel::Row row = *functions_model_->children().rbegin();
-    ;
     if (row[functions_columns_.is_16_bit_])
       dmx_offset = row[functions_columns_.dmx_offset_] + 2;
     else
@@ -197,7 +242,8 @@ void FixtureTypesWindow::onAddFunction() {
   Gtk::TreeModel::Row row = *iter;
   row[functions_columns_.dmx_offset_] = dmx_offset;
   row[functions_columns_.is_16_bit_] = false;
-  row[functions_columns_.function_type_] =
+  row[functions_columns_.function_type_] = FunctionType::White;
+  row[functions_columns_.function_type_str_] =
       FunctionTypeDescription(FunctionType::White);
 }
 

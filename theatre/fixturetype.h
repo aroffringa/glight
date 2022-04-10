@@ -138,6 +138,8 @@ class FixtureType : public FolderObject {
 
   enum FixtureClass GetFixtureClass() const { return _class; }
 
+  void SetFixtureClass(enum FixtureClass new_class) { _class = new_class; }
+
   bool Is16Bit([[maybe_unused]] size_t functionIndex) const {
     switch (_class) {
       case FixtureClass::RGBLight6Ch_16bit:
@@ -178,6 +180,13 @@ class FixtureType : public FolderObject {
 
   const std::vector<FixtureTypeFunction> &Functions() const {
     return _functions;
+  }
+
+  void SetFunctions(const std::vector<FixtureTypeFunction>& functions) {
+    _functions = functions;
+  }
+  void SetFunctions(std::vector<FixtureTypeFunction>&& functions) {
+    _functions = std::move(functions);
   }
 
  private:

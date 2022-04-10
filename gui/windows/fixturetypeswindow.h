@@ -4,6 +4,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/menu.h>
@@ -46,6 +47,7 @@ class FixtureTypesWindow : public Gtk::Window {
   void onRemoveFunction();
   void onSelectedFunctionChanged();
   FixtureType *getSelected();
+  std::vector<FixtureTypeFunction> getFunctions() const;
 
   EventTransmitter *event_hub_;
   Management *management_;
@@ -76,6 +78,8 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::VBox left_box_;
 
   Gtk::Grid right_grid_;
+  Gtk::Label name_label_;
+  Gtk::Entry name_entry_;
   Gtk::Label class_label_;
   Gtk::ComboBoxText class_combo_;
   Gtk::Label functions_label_;
@@ -86,11 +90,13 @@ class FixtureTypesWindow : public Gtk::Window {
       add(dmx_offset_);
       add(is_16_bit_);
       add(function_type_);
+      add(function_type_str_);
     }
 
     Gtk::TreeModelColumn<size_t> dmx_offset_;
     Gtk::TreeModelColumn<bool> is_16_bit_;
-    Gtk::TreeModelColumn<Glib::ustring> function_type_;
+    Gtk::TreeModelColumn<FunctionType> function_type_;
+    Gtk::TreeModelColumn<Glib::ustring> function_type_str_;
   } functions_columns_;
   Gtk::HBox functions_button_box_;
   Gtk::Button add_function_button_;
