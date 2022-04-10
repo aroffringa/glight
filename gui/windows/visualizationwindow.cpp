@@ -197,17 +197,21 @@ void VisualizationWindow::drawManagement(
 
         int rotation = fixture.GetRotationSpeed(snapshot);
         if (rotation != 0) {
-          double rotationDisp =
+          const double rotationDisp =
               M_PI * double(rotation) * style.timeSince / (10.0 * (1 << 24));
           state.rotation = std::fmod(rotationDisp + state.rotation, M_PI);
-          double s = std::sin(state.rotation);
-          double c = std::cos(state.rotation);
+          const double s = std::sin(state.rotation);
+          const double c = std::cos(state.rotation);
           cairo->set_line_width(radius * 0.2);
           cairo->set_source_rgb(0, 0, 0);
-          cairo->move_to(x + c * radius, y + s * radius);
-          cairo->line_to(x - c * radius, y - s * radius);
-          cairo->move_to(x + s * radius, y - c * radius);
-          cairo->line_to(x - s * radius, y + c * radius);
+          cairo->move_to(x + c * radius + style.xOffset / sc,
+                         y + s * radius + style.yOffset / sc);
+          cairo->line_to(x - c * radius + style.xOffset / sc,
+                         y - s * radius + style.yOffset / sc);
+          cairo->move_to(x + s * radius + style.xOffset / sc,
+                         y - c * radius + style.yOffset / sc);
+          cairo->line_to(x - s * radius + style.xOffset / sc,
+                         y + c * radius + style.yOffset / sc);
           cairo->stroke();
         }
       }
