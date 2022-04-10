@@ -182,10 +182,10 @@ class FixtureType : public FolderObject {
     return _functions;
   }
 
-  void SetFunctions(const std::vector<FixtureTypeFunction>& functions) {
+  void SetFunctions(const std::vector<FixtureTypeFunction> &functions) {
     _functions = functions;
   }
-  void SetFunctions(std::vector<FixtureTypeFunction>&& functions) {
+  void SetFunctions(std::vector<FixtureTypeFunction> &&functions) {
     _functions = std::move(functions);
   }
 
