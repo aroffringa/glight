@@ -3,7 +3,10 @@
 FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     : Gtk::Frame("Functions"),
       add_function_button_("+"),
-      remove_function_button_("-") {
+      remove_function_button_("-"),
+      dmx_offset_label_("DMX offset:"),
+      is_16_bit_button_("16 bit"),
+      function_type_label_("Function type:") {
   functions_model_ = Gtk::ListStore::create(functions_columns_);
 
   functions_view_.set_model(functions_model_);
@@ -23,6 +26,52 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
   grid_.attach(functions_button_box_, 0, 1, 2, 1);
   grid_.set_hexpand(true);
   grid_.set_vexpand(true);
+
+  grid_.attach(dmx_offset_label_, 0, 2);
+  dmx_offset_entry_.signal_changed().connect([&]() {
+    Gtk::TreeModel::iterator selected =
+        functions_view_.get_selection()->get_selected();
+    if (selected) {
+      const int val = std::atoi(dmx_offset_entry_.get_text().c_str());
+      (*selected)[functions_columns_.dmx_offset_] = std::clamp(val, 0, 511);
+    }
+  });
+  grid_.attach(dmx_offset_entry_, 1, 2);
+  is_16_bit_button_.signal_clicked().connect([&]() {
+    Gtk::TreeModel::iterator selected =
+        functions_view_.get_selection()->get_selected();
+    if (selected) {
+      (*selected)[functions_columns_.is_16_bit_] =
+          is_16_bit_button_.get_active();
+    }
+  });
+  grid_.attach(is_16_bit_button_, 1, 3);
+  grid_.attach(function_type_label_, 0, 4);
+
+  function_type_model_ = Gtk::ListStore::create(function_type_columns_);
+  const std::vector<FunctionType> types = GetFunctionTypes();
+  for (FunctionType t : types) {
+    Gtk::TreeModel::iterator iter = function_type_model_->append();
+    (*iter)[function_type_columns_.function_type_] = t;
+    (*iter)[function_type_columns_.function_type_str_] =
+        FunctionTypeDescription(t);
+  }
+  function_type_combo_.set_model(function_type_model_);
+  function_type_combo_.pack_start(function_type_columns_.function_type_str_);
+  function_type_combo_.signal_changed().connect([&]() {
+    Gtk::TreeModel::iterator selected =
+        functions_view_.get_selection()->get_selected();
+    if (selected) {
+      Gtk::TreeModel::const_iterator iter = function_type_combo_.get_active();
+      if (iter) {
+        (*selected)[functions_columns_.function_type_] =
+            FunctionType((*iter)[function_type_columns_.function_type_]);
+        (*selected)[functions_columns_.function_type_str_] =
+            Glib::ustring((*iter)[function_type_columns_.function_type_str_]);
+      }
+    }
+  });
+  grid_.attach(function_type_combo_, 1, 4);
 
   add(grid_);
 }
@@ -81,4 +130,22 @@ void FixtureTypeFunctionsFrame::onRemove() {
   }
 }
 
-void FixtureTypeFunctionsFrame::onSelectionChanged() {}
+void FixtureTypeFunctionsFrame::onSelectionChanged() {
+  Gtk::TreeModel::iterator selected =
+      functions_view_.get_selection()->get_selected();
+  dmx_offset_entry_.set_sensitive(selected);
+  is_16_bit_button_.set_sensitive(selected);
+  function_type_combo_.set_sensitive(selected);
+  if (selected) {
+    dmx_offset_entry_.set_text(
+        std::to_string((*selected)[functions_columns_.dmx_offset_]));
+    is_16_bit_button_.set_active((*selected)[functions_columns_.is_16_bit_]);
+    const int ft_index = static_cast<int>(
+        FunctionType((*selected)[functions_columns_.function_type_]));
+    function_type_combo_.set_active(ft_index);
+  } else {
+    dmx_offset_entry_.set_text("");
+    is_16_bit_button_.set_active(false);
+    function_type_combo_.set_active(-1);
+  }
+}

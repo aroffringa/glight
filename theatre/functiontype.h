@@ -23,6 +23,15 @@ enum class FunctionType {
   WarmWhite
 };
 
+inline std::vector<FunctionType> GetFunctionTypes() {
+  using FT = FunctionType;
+  return std::vector<FunctionType>{
+      FT::Master,    FT::Red,      FT::Green, FT::Blue,       FT::White,
+      FT::Amber,     FT::UV,       FT::Lime,  FT::ColorMacro, FT::Strobe,
+      FT::Pulse,     FT::Rotation, FT::Pan,   FT::Tilt,       FT::Effect,
+      FT::ColdWhite, FT::WarmWhite};
+}
+
 inline const char *AbbreviatedFunctionType(FunctionType functionType) {
   switch (functionType) {
     case FunctionType::Master:
