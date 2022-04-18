@@ -74,6 +74,8 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
   grid_.attach(function_type_combo_, 1, 4);
 
   add(grid_);
+
+  onSelectionChanged();
 }
 
 std::vector<FixtureTypeFunction> FixtureTypeFunctionsFrame::GetFunctions()
@@ -133,8 +135,10 @@ void FixtureTypeFunctionsFrame::onRemove() {
 void FixtureTypeFunctionsFrame::onSelectionChanged() {
   Gtk::TreeModel::iterator selected =
       functions_view_.get_selection()->get_selected();
+  dmx_offset_label_.set_sensitive(selected);
   dmx_offset_entry_.set_sensitive(selected);
   is_16_bit_button_.set_sensitive(selected);
+  function_type_label_.set_sensitive(selected);
   function_type_combo_.set_sensitive(selected);
   if (selected) {
     dmx_offset_entry_.set_text(

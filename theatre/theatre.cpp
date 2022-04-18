@@ -59,6 +59,11 @@ FixtureType &Theatre::AddFixtureType(FixtureClass fixtureClass) {
   return *_fixtureTypes.back();
 }
 
+FixtureType &Theatre::AddFixtureType(const FixtureType &fixture_type) {
+  _fixtureTypes.emplace_back(std::make_unique<FixtureType>(fixture_type));
+  return *_fixtureTypes.back();
+}
+
 bool Theatre::Contains(Fixture &fixture) const {
   for (const std::unique_ptr<Fixture> &f : _fixtures) {
     if (f.get() == &fixture) return true;

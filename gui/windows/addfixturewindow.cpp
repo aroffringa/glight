@@ -24,11 +24,16 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
 
   _grid.attach(_typeLabel, 0, 0, 1, 1);
 
-  const std::vector<FixtureClass> &classes = FixtureType::GetClassList();
-  for (FixtureClass fc : classes) {
-    _typeCombo.append(FixtureType::ClassName(fc));
+  stock_list_ = FixtureType::GetStockTypes();
+  type_model_ = Gtk::ListStore::create(type_columns_);
+  for (const std::pair<const std::string, FixtureType> &item : stock_list_) {
+    Gtk::TreeModel::iterator iter = type_model_->append();
+    (*iter)[type_columns_.type_str_] = item.first;
+    (*iter)[type_columns_.type_] = &item.second;
   }
-  _typeCombo.set_active_text(FixtureType::ClassName(classes.front()));
+  _typeCombo.set_model(type_model_);
+  _typeCombo.pack_start(type_columns_.type_str_);
+  _typeCombo.set_active(0);
   _grid.attach(_typeCombo, 1, 0, 3, 1);
 
   _grid.attach(_countLabel, 0, 1, 1, 1);
@@ -49,23 +54,22 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
 }
 
 void AddFixtureWindow::onAdd() {
-  const std::string className = _typeCombo.get_active_text();
-  const FixtureClass fClass = FixtureType::NameToClass(className);
+  Gtk::TreeModel::const_iterator iter = _typeCombo.get_active();
   const int count = std::atoi(_countEntry.get_text().c_str());
-  if (count > 0) {
+  if (iter && count > 0) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
 
-    FixtureType *type = dynamic_cast<FixtureType *>(
-        _management->RootFolder().GetChildIfExists(className));
-    if (!type) {
-      // TODO we shouldn't use a type by its name, types should be editable etc
-      type = &_management->GetTheatre().AddFixtureType(fClass);
-      _management->RootFolder().Add(*type);
+    const FixtureType *type = (*iter)[type_columns_.type_];
+    FixtureType *project_type = dynamic_cast<FixtureType *>(
+        _management->RootFolder().GetChildIfExists(type->Name()));
+    if (!project_type) {
+      project_type = &_management->GetTheatre().AddFixtureType(*type);
+      _management->RootFolder().Add(*project_type);
     }
 
     for (size_t fixIter = 0; fixIter != size_t(count); ++fixIter) {
       const Position position = _management->GetTheatre().GetFreePosition();
-      Fixture &fixture = _management->GetTheatre().AddFixture(*type);
+      Fixture &fixture = _management->GetTheatre().AddFixture(*project_type);
       fixture.Position() = position;
 
       const std::vector<std::unique_ptr<FixtureFunction>> &functions =

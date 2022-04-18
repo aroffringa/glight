@@ -8,9 +8,12 @@
 #include "fixturetype.h"
 #include "position.h"
 
+class Fixture;
+class FixtureType;
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class Theatre {
  public:
   Theatre() : _highestChannel(0) {}
@@ -19,21 +22,22 @@ class Theatre {
 
   void Clear();
 
-  class Fixture &AddFixture(const FixtureType &type);
-  class FixtureType &AddFixtureType(FixtureClass fixtureClass);
+  Fixture &AddFixture(const FixtureType &type);
+  FixtureType &AddFixtureType(FixtureClass fixtureClass);
+  FixtureType &AddFixtureType(const FixtureType &type);
 
   bool Contains(Fixture &fixture) const;
 
-  const std::vector<std::unique_ptr<class Fixture>> &Fixtures() const {
+  const std::vector<std::unique_ptr<Fixture>> &Fixtures() const {
     return _fixtures;
   }
-  const std::vector<std::unique_ptr<class FixtureType>> &FixtureTypes() const {
+  const std::vector<std::unique_ptr<FixtureType>> &FixtureTypes() const {
     return _fixtureTypes;
   }
 
-  class Fixture &GetFixture(const std::string &name) const;
-  class FixtureType &GetFixtureType(const std::string &name) const;
-  class FixtureFunction &GetFixtureFunction(const std::string &name) const;
+  Fixture &GetFixture(const std::string &name) const;
+  FixtureType &GetFixtureType(const std::string &name) const;
+  FixtureFunction &GetFixtureFunction(const std::string &name) const;
 
   void RemoveFixture(Fixture &fixture);
   void RemoveFixtureType(const FixtureType &fixtureType);
@@ -51,8 +55,8 @@ class Theatre {
   Position Extend() const;
 
  private:
-  std::vector<std::unique_ptr<class Fixture>> _fixtures;
-  std::vector<std::unique_ptr<class FixtureType>> _fixtureTypes;
+  std::vector<std::unique_ptr<Fixture>> _fixtures;
+  std::vector<std::unique_ptr<FixtureType>> _fixtureTypes;
   unsigned _highestChannel;
 };
 

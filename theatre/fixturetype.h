@@ -1,6 +1,7 @@
-#ifndef FIXTURETYPE_H
-#define FIXTURETYPE_H
+#ifndef FIXTURE_TYPE_H_
+#define FIXTURE_TYPE_H_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -106,7 +107,7 @@ class FixtureType : public FolderObject {
     return "Unknown fixture class";
   }
 
-  static std::vector<enum FixtureClass> GetClassList() {
+  static std::vector<FixtureClass> GetClassList() {
     using FC = FixtureClass;
     return std::vector<enum FixtureClass>{
         FC::Light1Ch,       FC::RGBLight3Ch,    FC::RGBLight4Ch,
@@ -116,6 +117,15 @@ class FixtureType : public FolderObject {
         FC::UVLight3Ch,     FC::H2ODMXPro,      FC::AyraTDCSunrise,
         FC::RGB_ADJ_6CH,    FC::RGB_ADJ_7CH,    FC::BT_VINTAGE_5CH,
         FC::BT_VINTAGE_6CH, FC::BT_VINTAGE_7CH, FC::RGBLight6Ch_16bit};
+  }
+
+  static std::map<std::string, FixtureType> GetStockTypes() {
+    const std::vector<FixtureClass> list = GetClassList();
+    std::map<std::string, FixtureType> stockTypes;
+    for (FixtureClass fc : list) {
+      stockTypes.emplace(ClassName(fc), FixtureType(fc));
+    }
+    return stockTypes;
   }
 
   static FixtureClass NameToClass(const std::string &name) {

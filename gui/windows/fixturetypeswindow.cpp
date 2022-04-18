@@ -80,11 +80,11 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
 
   remove_button_.set_image_from_icon_name("edit-delete");
   remove_button_.signal_clicked().connect(
-      sigc::mem_fun(*this, &FixtureTypesWindow::onRemoveButtonClicked));
+      sigc::mem_fun(*this, &FixtureTypesWindow::onRemoveClicked));
   button_box_.pack_start(remove_button_);
 
   save_button_.signal_clicked().connect(
-      sigc::mem_fun(*this, &FixtureTypesWindow::onSaveButtonClicked));
+      sigc::mem_fun(*this, &FixtureTypesWindow::onSaveClicked));
   button_box_.pack_start(save_button_);
 
   main_grid_.attach(button_box_, 0, 1, 1, 1);
@@ -93,6 +93,8 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
 
   add(main_grid_);
   main_grid_.show_all();
+
+  onSelectionChanged();
 }
 
 FixtureTypesWindow::~FixtureTypesWindow() {
@@ -131,15 +133,19 @@ void FixtureTypesWindow::onNewButtonClicked() {
   list_view_.get_selection()->select(iter);
 }
 
-void FixtureTypesWindow::onRemoveButtonClicked() {
+void FixtureTypesWindow::onRemoveClicked() {
   FixtureType *type = getSelected();
   if (type) {
     management_->RemoveFixtureType(*type);
     event_hub_->EmitUpdate();
+  } else {
+    const Gtk::TreeModel::const_iterator selected =
+        list_view_.get_selection()->get_selected();
+    if (selected) list_model_->erase(selected);
   }
 }
 
-void FixtureTypesWindow::onSaveButtonClicked() {
+void FixtureTypesWindow::onSaveClicked() {
   FixtureType *type = getSelected();
   if (type) {
     if (management_->GetTheatre().IsUsed(*type)) {

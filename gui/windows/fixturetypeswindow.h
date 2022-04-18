@@ -43,8 +43,8 @@ class FixtureTypesWindow : public Gtk::Window {
   void update() { fillList(); }
   void fillList();
   void onNewButtonClicked();
-  void onRemoveButtonClicked();
-  void onSaveButtonClicked();
+  void onRemoveClicked();
+  void onSaveClicked();
   void onSelectionChanged();
   FixtureType *getSelected();
 
