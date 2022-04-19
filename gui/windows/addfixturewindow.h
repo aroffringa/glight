@@ -9,6 +9,7 @@
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/radiobutton.h>
 #include <gtkmm/window.h>
 
 class EventTransmitter;
@@ -23,6 +24,9 @@ class AddFixtureWindow : public Gtk::Window {
   AddFixtureWindow(EventTransmitter *eventHub, Management &management);
 
  private:
+  void fillStock();
+  void fillFromProject();
+
   struct TypeColumns : public Gtk::TreeModelColumnRecord {
     TypeColumns() {
       add(type_);
@@ -33,6 +37,9 @@ class AddFixtureWindow : public Gtk::Window {
   } type_columns_;
 
   Gtk::Grid _grid;
+  Gtk::HBox stock_or_project_box_;
+  Gtk::RadioButton stock_button_;
+  Gtk::RadioButton project_button_;
   Gtk::Label _typeLabel;
   Glib::RefPtr<Gtk::ListStore> type_model_;
   Gtk::ComboBox _typeCombo;
@@ -47,7 +54,9 @@ class AddFixtureWindow : public Gtk::Window {
   EventTransmitter &_eventHub;
   Management *_management;
 
-  std::map<std::string, FixtureType> stock_list_;
+  const std::map<std::string, FixtureType> stock_list_;
+
+  void onStockProjectToggled();
 
   void onIncCount();
   void onDecCount();
