@@ -299,8 +299,10 @@ Fixture *VisualizationWindow::fixtureAt(Management &management,
   double closest = std::numeric_limits<double>::max();
   for (const std::unique_ptr<Fixture> &f : fixtures) {
     if (f->IsVisible() &&
-        position.InsideRectangle(f->GetPosition(), f->GetPosition().Add(1.0, 1.0))) {
-      double distanceSq = position.SquaredDistance(f->GetPosition().Add(0.5, 0.5));
+        position.InsideRectangle(f->GetPosition(),
+                                 f->GetPosition().Add(1.0, 1.0))) {
+      double distanceSq =
+          position.SquaredDistance(f->GetPosition().Add(0.5, 0.5));
       double radSq = radiusSq(f->Symbol().Value());
       if (distanceSq <= radSq && distanceSq < closest) {
         fix = f.get();

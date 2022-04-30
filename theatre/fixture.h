@@ -19,8 +19,7 @@ class ValueSnapshot;
  */
 class Fixture : public NamedObject {
  public:
-  Fixture(Theatre &theatre, const FixtureType &type,
-          const std::string &name);
+  Fixture(Theatre &theatre, const FixtureType &type, const std::string &name);
   Fixture(const Fixture &source, Theatre &theatre);
 
   const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const {
@@ -50,14 +49,11 @@ class Fixture : public NamedObject {
     _functions.emplace_back(new FixtureFunction(_theatre, type));
     return *_functions.back();
   }
-  inline Color GetColor(const ValueSnapshot &snapshot,
-                        size_t shapeIndex) const;
+  inline Color GetColor(const ValueSnapshot &snapshot, size_t shapeIndex) const;
 
   inline int GetRotationSpeed(const ValueSnapshot &snapshot) const;
 
-  Position &GetPosition() {
-    return _position;
-  }
+  Position &GetPosition() { return _position; }
   const Position &GetPosition() const { return _position; }
 
   FixtureSymbol Symbol() const { return _symbol; }
