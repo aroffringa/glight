@@ -148,9 +148,9 @@ Position Theatre::GetFreePosition() const {
   std::fill_n(available.get(), n, true);
 
   for (const std::unique_ptr<class Fixture> &fixture : _fixtures) {
-    double x = fixture->Position().X();
+    double x = fixture->GetPosition().X();
     if (x < rowLength) {
-      double index = x + fixture->Position().Y() * rowLength;
+      double index = x + fixture->GetPosition().Y() * rowLength;
       size_t midIndex = round(index);
       if (midIndex < n) available[midIndex] = false;
       if (midIndex - index > 0.01) {
@@ -171,8 +171,8 @@ Position Theatre::GetFreePosition() const {
 Position Theatre::Extend() const {
   Position extend;
   for (const std::unique_ptr<class Fixture> &fixture : _fixtures) {
-    double right = fixture->Position().X() + 1.0,
-           bottom = fixture->Position().Y() + 1.0;
+    double right = fixture->GetPosition().X() + 1.0,
+           bottom = fixture->GetPosition().Y() + 1.0;
     if (right > extend.X()) extend.X() = right;
     if (bottom > extend.Y()) extend.Y() = bottom;
   }

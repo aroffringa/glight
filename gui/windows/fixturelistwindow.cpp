@@ -148,7 +148,7 @@ void FixtureListWindow::onMenuItemClicked(FixtureClass cl) {
     _management->RootFolder().Add(*type);
   }
   Fixture &fixture = _management->GetTheatre().AddFixture(*type);
-  fixture.Position() = position;
+  fixture.GetPosition() = position;
 
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =
       fixture.Functions();

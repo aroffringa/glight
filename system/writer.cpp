@@ -160,8 +160,8 @@ void Writer::writeFixture(const Fixture &fixture) {
   startElement("fixture");
   writeNameAttributes(fixture);
   writeAttribute("type", fixture.Type().Name());
-  writeAttribute("position-x", fixture.Position().X());
-  writeAttribute("position-y", fixture.Position().Y());
+  writeAttribute("position-x", fixture.GetPosition().X());
+  writeAttribute("position-y", fixture.GetPosition().Y());
   writeAttribute("symbol", fixture.Symbol().Name());
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =
       fixture.Functions();

@@ -116,7 +116,7 @@ void AddFixtureWindow::onAdd() {
     for (size_t fixIter = 0; fixIter != size_t(count); ++fixIter) {
       const Position position = _management->GetTheatre().GetFreePosition();
       Fixture &fixture = _management->GetTheatre().AddFixture(*project_type);
-      fixture.Position() = position;
+      fixture.GetPosition() = position;
 
       const std::vector<std::unique_ptr<FixtureFunction>> &functions =
           fixture.Functions();

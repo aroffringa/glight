@@ -16,8 +16,7 @@ class FixtureType;
  */
 class Theatre {
  public:
-  Theatre() : _highestChannel(0) {}
-  ~Theatre() { Clear(); }
+  Theatre() = default;
   Theatre(const Theatre &source);
 
   void Clear();
@@ -57,7 +56,7 @@ class Theatre {
  private:
   std::vector<std::unique_ptr<Fixture>> _fixtures;
   std::vector<std::unique_ptr<FixtureType>> _fixtureTypes;
-  unsigned _highestChannel;
+  unsigned _highestChannel = 0;
 };
 
 #endif

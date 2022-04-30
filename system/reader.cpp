@@ -167,8 +167,8 @@ void Reader::parseFixture(xmlNode *node) {
   FixtureType &type = _theatre.GetFixtureType(getStringAttribute(node, "type"));
   Fixture &fixture = _theatre.AddFixture(type);
   parseNameAttr(node, fixture);
-  fixture.Position().X() = getDoubleAttribute(node, "position-x");
-  fixture.Position().Y() = getDoubleAttribute(node, "position-y");
+  fixture.GetPosition().X() = getDoubleAttribute(node, "position-x");
+  fixture.GetPosition().Y() = getDoubleAttribute(node, "position-y");
   if (hasAttribute(node, "symbol"))
     fixture.SetSymbol(FixtureSymbol(getStringAttribute(node, "symbol")));
   fixture.ClearFunctions();

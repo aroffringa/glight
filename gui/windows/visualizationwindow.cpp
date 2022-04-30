@@ -189,8 +189,8 @@ void VisualizationWindow::drawManagement(
         double radius = shapeCount == 1 ? singleRadius
                                         : 0.33 + 0.07 * double(shapeIndex) /
                                                      (shapeCount - 1);
-        double x = fixture.Position().X() + 0.5;
-        double y = fixture.Position().Y() + 0.5;
+        double x = fixture.GetPosition().X() + 0.5;
+        double y = fixture.GetPosition().Y() + 0.5;
         cairo->arc(x + style.xOffset / sc, y + style.yOffset / sc, radius, 0.0,
                    2.0 * M_PI);
         cairo->fill();
@@ -222,8 +222,8 @@ void VisualizationWindow::drawManagement(
   for (const Fixture *f : _selectedFixtures) {
     if (f->IsVisible()) {
       double rad = radius(f->Symbol().Value());
-      double x = f->Position().X() + 0.5;
-      double y = f->Position().Y() + 0.5;
+      double x = f->GetPosition().X() + 0.5;
+      double y = f->GetPosition().Y() + 0.5;
       cairo->arc(x + style.xOffset / sc, y + style.yOffset / sc, rad, 0.0,
                  2.0 * M_PI);
       cairo->stroke();
@@ -299,8 +299,8 @@ Fixture *VisualizationWindow::fixtureAt(Management &management,
   double closest = std::numeric_limits<double>::max();
   for (const std::unique_ptr<Fixture> &f : fixtures) {
     if (f->IsVisible() &&
-        position.InsideRectangle(f->Position(), f->Position().Add(1.0, 1.0))) {
-      double distanceSq = position.SquaredDistance(f->Position().Add(0.5, 0.5));
+        position.InsideRectangle(f->GetPosition(), f->GetPosition().Add(1.0, 1.0))) {
+      double distanceSq = position.SquaredDistance(f->GetPosition().Add(0.5, 0.5));
       double radSq = radiusSq(f->Symbol().Value());
       if (distanceSq <= radSq && distanceSq < closest) {
         fix = f.get();
@@ -390,7 +390,7 @@ bool VisualizationWindow::onMotion(GdkEventMotion *event) {
         break;
       case DragFixture:
         for (Fixture *fixture : _selectedFixtures)
-          fixture->Position() += pos - _draggingStart;
+          fixture->GetPosition() += pos - _draggingStart;
         _draggingStart = pos;
         break;
       case DragRectangle:
@@ -419,7 +419,7 @@ void VisualizationWindow::selectFixtures(const Position &a, const Position &b) {
         _management->GetTheatre().Fixtures();
     for (const std::unique_ptr<Fixture> &fixture : fixtures) {
       if (fixture->IsVisible() &&
-          fixture->Position().InsideRectangle(first, second))
+          fixture->GetPosition().InsideRectangle(first, second))
         _selectedFixtures.emplace_back(fixture.get());
     }
   }
@@ -442,11 +442,11 @@ void VisualizationWindow::onAlignHorizontally() {
     double y = 0.0;
 
     for (const Fixture *fixture : _selectedFixtures)
-      y += fixture->Position().Y();
+      y += fixture->GetPosition().Y();
 
     y /= _selectedFixtures.size();
 
-    for (Fixture *fixture : _selectedFixtures) fixture->Position().Y() = y;
+    for (Fixture *fixture : _selectedFixtures) fixture->GetPosition().Y() = y;
   }
 }
 
@@ -455,53 +455,53 @@ void VisualizationWindow::onAlignVertically() {
     double x = 0.0;
 
     for (const Fixture *fixture : _selectedFixtures)
-      x += fixture->Position().X();
+      x += fixture->GetPosition().X();
 
     x /= _selectedFixtures.size();
 
-    for (Fixture *fixture : _selectedFixtures) fixture->Position().X() = x;
+    for (Fixture *fixture : _selectedFixtures) fixture->GetPosition().X() = x;
   }
 }
 
 void VisualizationWindow::onDistributeEvenly() {
   if (_selectedFixtures.size() >= 2) {
-    double left = _selectedFixtures[0]->Position().X();
-    double right = _selectedFixtures[0]->Position().X();
-    double top = _selectedFixtures[0]->Position().Y();
-    double bottom = _selectedFixtures[0]->Position().Y();
+    double left = _selectedFixtures[0]->GetPosition().X();
+    double right = _selectedFixtures[0]->GetPosition().X();
+    double top = _selectedFixtures[0]->GetPosition().Y();
+    double bottom = _selectedFixtures[0]->GetPosition().Y();
 
     for (size_t i = 1; i != _selectedFixtures.size(); ++i) {
       const Fixture *fixture = _selectedFixtures[i];
-      left = std::min(fixture->Position().X(), left);
-      right = std::max(fixture->Position().X(), right);
-      top = std::min(fixture->Position().Y(), top);
-      bottom = std::max(fixture->Position().Y(), bottom);
+      left = std::min(fixture->GetPosition().X(), left);
+      right = std::max(fixture->GetPosition().X(), right);
+      top = std::min(fixture->GetPosition().Y(), top);
+      bottom = std::max(fixture->GetPosition().Y(), bottom);
     }
 
     std::vector<Fixture *> list = _selectedFixtures;
     if (left == right) {
       std::sort(list.begin(), list.end(),
                 [](const Fixture *a, const Fixture *b) {
-                  return a->Position().Y() < b->Position().Y();
+                  return a->GetPosition().Y() < b->GetPosition().Y();
                 });
       for (size_t i = 0; i != list.size(); ++i) {
         double y = double(i) / double(list.size() - 1) * (bottom - top) + top;
-        list[i]->Position().Y() = y;
+        list[i]->GetPosition().Y() = y;
       }
     } else {
       std::sort(list.begin(), list.end(),
                 [](const Fixture *a, const Fixture *b) {
-                  return a->Position().X() < b->Position().X();
+                  return a->GetPosition().X() < b->GetPosition().X();
                 });
-      left = list.front()->Position().X();
-      right = list.back()->Position().X();
-      top = list.front()->Position().Y();
-      bottom = list.back()->Position().Y();
+      left = list.front()->GetPosition().X();
+      right = list.back()->GetPosition().X();
+      top = list.front()->GetPosition().Y();
+      bottom = list.back()->GetPosition().Y();
       for (size_t i = 0; i != list.size(); ++i) {
         double r = double(i) / double(list.size() - 1);
         double x = r * (right - left) + left;
         double y = r * (bottom - top) + top;
-        list[i]->Position() = Position(x, y);
+        list[i]->GetPosition() = Position(x, y);
       }
     }
   }

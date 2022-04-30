@@ -1,5 +1,5 @@
-#ifndef FIXTURE_H
-#define FIXTURE_H
+#ifndef FIXTURE_H_
+#define FIXTURE_H_
 
 #include <set>
 
@@ -9,14 +9,19 @@
 #include "namedobject.h"
 #include "position.h"
 
+class FixtureType;
+class Position;
+class Theatre;
+class ValueSnapshot;
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class Fixture : public NamedObject {
  public:
-  Fixture(class Theatre &theatre, const class FixtureType &type,
+  Fixture(Theatre &theatre, const FixtureType &type,
           const std::string &name);
-  Fixture(const Fixture &source, class Theatre &theatre);
+  Fixture(const Fixture &source, Theatre &theatre);
 
   const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const {
     return _functions;
@@ -45,36 +50,36 @@ class Fixture : public NamedObject {
     _functions.emplace_back(new FixtureFunction(_theatre, type));
     return *_functions.back();
   }
-  inline Color GetColor(const class ValueSnapshot &snapshot,
+  inline Color GetColor(const ValueSnapshot &snapshot,
                         size_t shapeIndex) const;
 
-  inline int GetRotationSpeed(const class ValueSnapshot &snapshot) const;
+  inline int GetRotationSpeed(const ValueSnapshot &snapshot) const;
 
-  class Position &Position() {
+  Position &GetPosition() {
     return _position;
   }
-  const class Position &Position() const { return _position; }
+  const Position &GetPosition() const { return _position; }
 
   FixtureSymbol Symbol() const { return _symbol; }
   void SetSymbol(FixtureSymbol symbol) { _symbol = symbol; }
   bool IsVisible() const { return _symbol != FixtureSymbol::Hidden; }
 
  private:
-  class Theatre &_theatre;
+  Theatre &_theatre;
   const FixtureType &_type;
-  class Position _position;
+  Position _position;
   FixtureSymbol _symbol;
   std::vector<std::unique_ptr<FixtureFunction>> _functions;
 };
 
 #include "fixturetype.h"
 
-Color Fixture::GetColor(const class ValueSnapshot &snapshot,
+Color Fixture::GetColor(const ValueSnapshot &snapshot,
                         size_t shapeIndex) const {
   return _type.GetColor(*this, snapshot, shapeIndex);
 }
 
-int Fixture::GetRotationSpeed(const class ValueSnapshot &snapshot) const {
+int Fixture::GetRotationSpeed(const ValueSnapshot &snapshot) const {
   return _type.GetRotationSpeed(*this, snapshot);
 }
 #endif
