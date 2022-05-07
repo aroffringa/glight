@@ -42,7 +42,7 @@ class FixtureListWindow : public Gtk::Window {
   void onIncChannelButtonClicked();
   void onDecChannelButtonClicked();
   void onSetChannelButtonClicked();
-  //void onMenuItemClicked(StockFixture cl);
+  // void onMenuItemClicked(StockFixture cl);
   void updateFixture(const Fixture *fixture);
   static std::string getChannelString(const Fixture &fixture);
   void onSelectionChanged();

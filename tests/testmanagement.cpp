@@ -49,13 +49,13 @@ BOOST_AUTO_TEST_CASE(RemoveObject) {
 BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
   Management management;
   FixtureType &typeA =
-      management.GetTheatre().AddFixtureType(FixtureClass::Light1Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
   management.RootFolder().Add(typeA);
   FixtureType &typeB =
-      management.GetTheatre().AddFixtureType(FixtureClass::RGBLight3Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::RGBLight3Ch);
   management.RootFolder().Add(typeB);
   FixtureType &typeC =
-      management.GetTheatre().AddFixtureType(FixtureClass::RGBALight4Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::RGBALight4Ch);
   management.RootFolder().Add(typeC);
   management.RemoveFixtureType(typeB);
   management.RemoveFixtureType(typeC);
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
 BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
   Management management;
   FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(FixtureClass::Light1Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
   management.RootFolder().Add(fixtureType);
   Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
   FixtureControl &control =

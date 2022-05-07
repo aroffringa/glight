@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   Folder &subFolder = management.AddFolder(root, "A subfolder");
 
   FixtureType &ft =
-      management.GetTheatre().AddFixtureType(FixtureClass::RGBWLight4Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::RGBWLight4Ch);
   root.Add(ft);
   Fixture &f = management.GetTheatre().AddFixture(ft);
   FixtureControl &fc = management.AddFixtureControl(f, subFolder);

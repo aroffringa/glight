@@ -85,7 +85,8 @@ std::vector<FixtureTypeFunction> FixtureTypeFunctionsFrame::GetFunctions()
     const size_t dmx_offset = child[functions_columns_.dmx_offset_];
     const FunctionType type = child[functions_columns_.function_type_];
     const bool is_16_bit = child[functions_columns_.is_16_bit_];
-    functions.emplace_back(dmx_offset, type, is_16_bit);
+    const size_t shape = 0;
+    functions.emplace_back(dmx_offset, type, is_16_bit, shape);
   }
   return functions;
 }

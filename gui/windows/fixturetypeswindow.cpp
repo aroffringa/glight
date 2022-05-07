@@ -193,8 +193,7 @@ void FixtureTypesWindow::onSelectionChanged() {
           FixtureType::ClassName(type->GetFixtureClass()));
       functions_frame_.SetFunctions(type->Functions());
     } else {
-      class_combo_.set_active_text(
-          FixtureType::ClassName(StockFixture::Light1Ch));
+      class_combo_.set_active_text(FixtureType::ClassName(FixtureClass::Par));
       functions_frame_.SetFunctions({});
     }
   }

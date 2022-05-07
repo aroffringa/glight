@@ -10,23 +10,33 @@
 BOOST_AUTO_TEST_SUITE(fixture_type)
 
 BOOST_AUTO_TEST_CASE(ClassList) {
-  const std::vector<StockFixture> list = FixtureType::GetClassList();
+  const std::vector<FixtureClass> list = FixtureType::GetClassList();
   BOOST_REQUIRE(!list.empty());
 
-  for (StockFixture cl : list) {
+  for (FixtureClass cl : list) {
     BOOST_CHECK(FixtureType::NameToClass(FixtureType::ClassName(cl)) == cl);
   }
   BOOST_CHECK_NO_THROW(
-      FixtureType::ClassName((StockFixture)std::numeric_limits<int>::max()));
+      FixtureType::ClassName((FixtureClass)std::numeric_limits<int>::max()));
   BOOST_CHECK_THROW(FixtureType::NameToClass("This is not a class! ~!@"),
                     std::runtime_error);
 }
 
+BOOST_AUTO_TEST_CASE(StockList) {
+  const std::vector<StockFixture> list = FixtureType::GetStockList();
+  BOOST_REQUIRE(!list.empty());
+
+  for (StockFixture cl : list) {
+    BOOST_CHECK(!FixtureType::StockName(cl).empty());
+  }
+  BOOST_CHECK_NO_THROW(
+      FixtureType::StockName((StockFixture)std::numeric_limits<int>::max()));
+}
+
 BOOST_AUTO_TEST_CASE(Construct) {
-  const std::vector<StockFixture> list = FixtureType::GetClassList();
+  const std::vector<StockFixture> list = FixtureType::GetStockList();
   for (StockFixture cl : list) {
     FixtureType type(cl);
-    BOOST_CHECK(type.GetFixtureClass() == cl);
     BOOST_CHECK(!type.Functions().empty());
   }
 }

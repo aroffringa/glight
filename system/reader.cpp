@@ -154,7 +154,7 @@ void Reader::parseControlItem(xmlNode *node) {
 void Reader::parseFixtureType(xmlNode *node) {
   const std::string class_name = getStringAttribute(node, "fixture-class");
   FixtureType ft;
-  FixtureType& new_type = _management.GetTheatre().AddFixtureType(ft);
+  FixtureType &new_type = _management.GetTheatre().AddFixtureType(ft);
   parseNameAttr(node, new_type);
   FixtureType *type = dynamic_cast<FixtureType *>(
       _management.RootFolder().GetChildIfExists(new_type.Name()));

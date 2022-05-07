@@ -13,12 +13,14 @@
 class Fixture;
 
 struct FixtureTypeFunction {
-  FixtureTypeFunction(size_t dmxOffset_, FunctionType type_, bool is16Bit_)
-      : dmxOffset(dmxOffset_), type(type_), is16Bit(is16Bit_) {}
+  FixtureTypeFunction(size_t dmxOffset_, FunctionType type_, bool is16Bit_,
+                      unsigned shape_)
+      : dmxOffset(dmxOffset_), type(type_), is16Bit(is16Bit_), shape(shape_) {}
 
   size_t dmxOffset;
   FunctionType type;
   bool is16Bit;
+  unsigned shape;
 };
 
 // These currently have a fixed position, because they are written
@@ -53,7 +55,8 @@ enum class FixtureClass {
    */
   Par,
   /**
-   * Par with two controlable lights, of which one forms a ring around the other.
+   * Par with two controlable lights, of which one forms a ring around the
+   * other.
    */
   RingedPar
 };
@@ -64,7 +67,7 @@ enum class FixtureClass {
 class FixtureType : public FolderObject {
  public:
   FixtureType() = default;
-  
+
   FixtureType(StockFixture stock_fixture);
 
   FixtureType(const FixtureType &fixtureType) = default;
@@ -126,7 +129,7 @@ class FixtureType : public FolderObject {
     }
     return {};
   }
-  
+
   static std::vector<StockFixture> GetStockList() {
     using SF = StockFixture;
     return std::vector<SF>{
@@ -141,8 +144,7 @@ class FixtureType : public FolderObject {
 
   static std::vector<FixtureClass> GetClassList() {
     using FC = FixtureClass;
-    return std::vector<FC>{
-        FC::Par,       FC::RingedPar};
+    return std::vector<FC>{FC::Par, FC::RingedPar};
   }
 
   static std::map<std::string, FixtureType> GetStockTypes() {
@@ -179,7 +181,7 @@ class FixtureType : public FolderObject {
   bool Is16Bit(size_t functionIndex) const {
     return _functions[functionIndex].is16Bit;
   }
-  
+
   size_t ShapeCount() const {
     switch (_class) {
       case FixtureClass::Par:
@@ -196,17 +198,22 @@ class FixtureType : public FolderObject {
 
   void SetFunctions(const std::vector<FixtureTypeFunction> &functions) {
     _functions = functions;
+    UpdateFunctions();
   }
   void SetFunctions(std::vector<FixtureTypeFunction> &&functions) {
     _functions = std::move(functions);
+    UpdateFunctions();
   }
 
  private:
+  void UpdateFunctions();
+
   static Color rgbAdj6chColor(const Fixture &fixture,
                               const ValueSnapshot &snapshot);
 
   FixtureClass _class = FixtureClass::Par;
   std::vector<FixtureTypeFunction> _functions;
+  unsigned scaling_value_;
 };
 
 #endif

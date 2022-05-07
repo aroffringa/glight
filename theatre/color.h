@@ -3,39 +3,39 @@
 
 class Color {
  public:
-  Color(unsigned char red, unsigned char green, unsigned char blue)
+  constexpr Color(unsigned char red, unsigned char green, unsigned char blue)
       : _red(red), _green(green), _blue(blue) {}
-  unsigned char Red() const { return _red; }
-  unsigned char Green() const { return _green; }
-  unsigned char Blue() const { return _blue; }
+  constexpr unsigned char Red() const { return _red; }
+  constexpr unsigned char Green() const { return _green; }
+  constexpr unsigned char Blue() const { return _blue; }
 
-  static Color Gray(unsigned char intensity) {
+  constexpr static Color Gray(unsigned char intensity) {
     return Color(intensity, intensity, intensity);
   }
 
-  static Color Black() { return Color(0, 0, 0); }
-  static Color White() { return Color(255, 255, 255); }
-  static Color WhiteOrange() { return Color(255, 192, 128); }
-  static Color RedC() { return Color(255, 0, 0); }
-  static Color Amber() { return Orange(); }
-  static Color Lime() { return GreenYellow(); }
-  static Color Orange() { return Color(255, 128, 0); }
-  static Color OrangeGreen() { return Color(170, 255, 0); }
-  static Color GreenC() { return Color(0, 255, 0); }
-  static Color GreenBlue() { return Color(0, 255, 255); }
-  static Color GreenYellow() { return Color(128, 255, 0); }
-  static Color BlueC() { return Color(0, 0, 255); }
-  static Color LBlue() { return Color(0, 255, 255); }
-  static Color Cyan() { return Color(0, 255, 255); }
-  static Color BlueYellow() { return Color(192, 192, 255); }
-  static Color Yellow() { return Color(255, 255, 0); }
-  static Color YellowPurple() { return Color(255, 128, 255); }
-  static Color Purple() { return Color(255, 0, 255); }
-  static Color PurpleBlue() { return Color(128, 0, 255); }
-  static Color PurpleWhite() { return Color(255, 128, 255); }
-  static Color ColdWhite() { return Color(228, 228, 255); }
-  static Color WarmWhite() { return Color(255, 228, 228); }
-  static Color UV() { return Color(85, 0, 255); }
+  constexpr static Color Black() { return Color(0, 0, 0); }
+  constexpr static Color White() { return Color(255, 255, 255); }
+  constexpr static Color WhiteOrange() { return Color(255, 192, 128); }
+  constexpr static Color RedC() { return Color(255, 0, 0); }
+  constexpr static Color Amber() { return Orange(); }
+  constexpr static Color Lime() { return GreenYellow(); }
+  constexpr static Color Orange() { return Color(255, 128, 0); }
+  constexpr static Color OrangeGreen() { return Color(170, 255, 0); }
+  constexpr static Color GreenC() { return Color(0, 255, 0); }
+  constexpr static Color GreenBlue() { return Color(0, 255, 255); }
+  constexpr static Color GreenYellow() { return Color(128, 255, 0); }
+  constexpr static Color BlueC() { return Color(0, 0, 255); }
+  constexpr static Color LBlue() { return Color(0, 255, 255); }
+  constexpr static Color Cyan() { return Color(0, 255, 255); }
+  constexpr static Color BlueYellow() { return Color(192, 192, 255); }
+  constexpr static Color Yellow() { return Color(255, 255, 0); }
+  constexpr static Color YellowPurple() { return Color(255, 128, 255); }
+  constexpr static Color Purple() { return Color(255, 0, 255); }
+  constexpr static Color PurpleBlue() { return Color(128, 0, 255); }
+  constexpr static Color PurpleWhite() { return Color(255, 128, 255); }
+  constexpr static Color ColdWhite() { return Color(228, 228, 255); }
+  constexpr static Color WarmWhite() { return Color(255, 228, 228); }
+  constexpr static Color UV() { return Color(85, 0, 255); }
 
   static Color H20Color(unsigned value) {
     if (value <= 10)

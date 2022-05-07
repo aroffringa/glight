@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "color.h"
+
 enum class FunctionType {
   Master,
   Red,
@@ -110,6 +112,39 @@ inline std::string FunctionTypeDescription(FunctionType functionType) {
       return "Warm white";
   }
   return "?";
+}
+
+inline constexpr Color GetFunctionColor(FunctionType type) {
+  switch (type) {
+    case FunctionType::Master:
+    case FunctionType::ColorMacro:
+    case FunctionType::Strobe:
+    case FunctionType::Pulse:
+    case FunctionType::Rotation:
+    case FunctionType::Pan:
+    case FunctionType::Tilt:
+    case FunctionType::Effect:
+      return Color::Black();
+    case FunctionType::Red:
+      return Color::RedC();
+    case FunctionType::Green:
+      return Color::GreenC();
+    case FunctionType::Blue:
+      return Color::BlueC();
+    case FunctionType::White:
+      return Color::White();
+    case FunctionType::Amber:
+      return Color::Amber();
+    case FunctionType::UV:
+      return Color::UV();
+    case FunctionType::Lime:
+      return Color::Lime();
+    case FunctionType::ColdWhite:
+      return Color::ColdWhite();
+    case FunctionType::WarmWhite:
+      return Color::WarmWhite();
+  }
+  return Color::Black();
 }
 
 #endif
