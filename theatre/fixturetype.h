@@ -23,7 +23,7 @@ struct FixtureTypeFunction {
 
 // These currently have a fixed position, because they are written
 // as integers into save files... TODO write as name into the file.
-enum class FixtureClass {
+enum class StockFixture {
   Light1Ch,
   RGBLight3Ch,
   RGBLight4Ch,
@@ -47,90 +47,116 @@ enum class FixtureClass {
   RGBLight6Ch_16bit
 };
 
+enum class FixtureClass {
+  /**
+   * Single light like a par or spot with one or multiple colours.
+   */
+  Par,
+  /**
+   * Par with two controlable lights, of which one forms a ring around the other.
+   */
+  RingedPar
+};
+
 /**
  *  @author Andre Offringa
  */
 class FixtureType : public FolderObject {
  public:
-  FixtureType(FixtureClass fixtureClass);
+  FixtureType() = default;
+  
+  FixtureType(StockFixture stock_fixture);
 
-  FixtureType(const FixtureType &fixtureType)
-      : FolderObject(fixtureType),
-        _class(fixtureType._class),
-        _functions(fixtureType._functions) {}
+  FixtureType(const FixtureType &fixtureType) = default;
 
-  static const std::string ClassName(FixtureClass fixtureClass) {
+  static const std::string StockName(StockFixture fixtureClass) {
     switch (fixtureClass) {
-      case FixtureClass::Light1Ch:
+      case StockFixture::Light1Ch:
         return "Light (1ch)";
-      case FixtureClass::RGBLight3Ch:
+      case StockFixture::RGBLight3Ch:
         return "RGB light (3ch)";
-      case FixtureClass::RGBLight4Ch:
+      case StockFixture::RGBLight4Ch:
         return "RGB light (4ch)";
-      case FixtureClass::RGBALight4Ch:
+      case StockFixture::RGBALight4Ch:
         return "RGBA light (4ch)";
-      case FixtureClass::RGBALight5Ch:
+      case StockFixture::RGBALight5Ch:
         return "RGBA light (5ch)";
-      case FixtureClass::RGBWLight4Ch:
+      case StockFixture::RGBWLight4Ch:
         return "RGBW light (4ch)";
-      case FixtureClass::RGBUVLight4Ch:
+      case StockFixture::RGBUVLight4Ch:
         return "RGBUV light (4ch)";
-      case FixtureClass::RGBAWLight5Ch:
+      case StockFixture::RGBAWLight5Ch:
         return "RGBAW light (5ch)";
-      case FixtureClass::RGBAWUVLight6Ch:
+      case StockFixture::RGBAWUVLight6Ch:
         return "RGBAW+UV light (6ch)";
-      case FixtureClass::CWWW2Ch:
+      case StockFixture::CWWW2Ch:
         return "CW/WW light (2ch)";
-      case FixtureClass::CWWW4Ch:
+      case StockFixture::CWWW4Ch:
         return "CW/WW light (4ch)";
-      case FixtureClass::CWWWA3Ch:
+      case StockFixture::CWWWA3Ch:
         return "CW/WW/A light (3ch)";
-      case FixtureClass::UVLight3Ch:
+      case StockFixture::UVLight3Ch:
         return "UV light (3ch)";
-      case FixtureClass::H2ODMXPro:
+      case StockFixture::H2ODMXPro:
         return "H2O DMX Pro";
-      case FixtureClass::AyraTDCSunrise:
+      case StockFixture::AyraTDCSunrise:
         return "Ayra TDC Sunrise";
-      case FixtureClass::RGB_ADJ_6CH:
+      case StockFixture::RGB_ADJ_6CH:
         return "RGB ADJ (6ch)";
-      case FixtureClass::RGB_ADJ_7CH:
+      case StockFixture::RGB_ADJ_7CH:
         return "RGB ADJ (7ch)";
-      case FixtureClass::BT_VINTAGE_5CH:
+      case StockFixture::BT_VINTAGE_5CH:
         return "Briteq Vintage (5ch)";
-      case FixtureClass::BT_VINTAGE_6CH:
+      case StockFixture::BT_VINTAGE_6CH:
         return "Briteq Vintage (6ch)";
-      case FixtureClass::BT_VINTAGE_7CH:
+      case StockFixture::BT_VINTAGE_7CH:
         return "Briteq Vintage (7ch)";
-      case FixtureClass::RGBLight6Ch_16bit:
+      case StockFixture::RGBLight6Ch_16bit:
         return "RGB light (6ch, 16 bit)";
     }
     return "Unknown fixture class";
   }
 
+  static const std::string ClassName(FixtureClass fixtureClass) {
+    switch (fixtureClass) {
+      case FixtureClass::Par:
+        return "Par / spot";
+      case FixtureClass::RingedPar:
+        return "Ringed par";
+    }
+    return {};
+  }
+  
+  static std::vector<StockFixture> GetStockList() {
+    using SF = StockFixture;
+    return std::vector<SF>{
+        SF::Light1Ch,       SF::RGBLight3Ch,    SF::RGBLight4Ch,
+        SF::RGBALight4Ch,   SF::RGBALight5Ch,   SF::RGBWLight4Ch,
+        SF::RGBUVLight4Ch,  SF::RGBAWLight5Ch,  SF::RGBAWUVLight6Ch,
+        SF::CWWW2Ch,        SF::CWWW4Ch,        SF::CWWWA3Ch,
+        SF::UVLight3Ch,     SF::H2ODMXPro,      SF::AyraTDCSunrise,
+        SF::RGB_ADJ_6CH,    SF::RGB_ADJ_7CH,    SF::BT_VINTAGE_5CH,
+        SF::BT_VINTAGE_6CH, SF::BT_VINTAGE_7CH, SF::RGBLight6Ch_16bit};
+  }
+
   static std::vector<FixtureClass> GetClassList() {
     using FC = FixtureClass;
-    return std::vector<enum FixtureClass>{
-        FC::Light1Ch,       FC::RGBLight3Ch,    FC::RGBLight4Ch,
-        FC::RGBALight4Ch,   FC::RGBALight5Ch,   FC::RGBWLight4Ch,
-        FC::RGBUVLight4Ch,  FC::RGBAWLight5Ch,  FC::RGBAWUVLight6Ch,
-        FC::CWWW2Ch,        FC::CWWW4Ch,        FC::CWWWA3Ch,
-        FC::UVLight3Ch,     FC::H2ODMXPro,      FC::AyraTDCSunrise,
-        FC::RGB_ADJ_6CH,    FC::RGB_ADJ_7CH,    FC::BT_VINTAGE_5CH,
-        FC::BT_VINTAGE_6CH, FC::BT_VINTAGE_7CH, FC::RGBLight6Ch_16bit};
+    return std::vector<FC>{
+        FC::Par,       FC::RingedPar};
   }
 
   static std::map<std::string, FixtureType> GetStockTypes() {
-    const std::vector<FixtureClass> list = GetClassList();
+    const std::vector<StockFixture> list = GetStockList();
     std::map<std::string, FixtureType> stockTypes;
-    for (FixtureClass fc : list) {
-      stockTypes.emplace(ClassName(fc), FixtureType(fc));
+    for (StockFixture fc : list) {
+      stockTypes.emplace(StockName(fc), FixtureType(fc));
     }
     return stockTypes;
   }
 
   static FixtureClass NameToClass(const std::string &name) {
-    const std::vector<enum FixtureClass> list = GetClassList();
-    for (const enum FixtureClass &cl : list)
+    const std::vector<FixtureClass> list = GetClassList();
+    for (const FixtureClass &cl : list)
       if (ClassName(cl) == name) return cl;
     throw std::runtime_error("Class not found: " + name);
   }
@@ -146,43 +172,19 @@ class FixtureType : public FolderObject {
   int GetRotationSpeed(const Fixture &fixture,
                        const ValueSnapshot &snapshot) const;
 
-  enum FixtureClass GetFixtureClass() const { return _class; }
+  FixtureClass GetFixtureClass() const { return _class; }
 
-  void SetFixtureClass(enum FixtureClass new_class) { _class = new_class; }
+  void SetFixtureClass(FixtureClass new_class) { _class = new_class; }
 
-  bool Is16Bit([[maybe_unused]] size_t functionIndex) const {
-    switch (_class) {
-      case FixtureClass::RGBLight6Ch_16bit:
-        return true;
-      default:
-        return false;
-    }
+  bool Is16Bit(size_t functionIndex) const {
+    return _functions[functionIndex].is16Bit;
   }
+  
   size_t ShapeCount() const {
-    using FC = FixtureClass;
     switch (_class) {
-      case FC::Light1Ch:
-      case FC::RGBLight3Ch:
-      case FC::RGBLight4Ch:
-      case FC::RGBALight4Ch:
-      case FC::RGBALight5Ch:
-      case FC::RGBWLight4Ch:
-      case FC::RGBUVLight4Ch:
-      case FC::RGBAWLight5Ch:
-      case FC::RGBAWUVLight6Ch:
-      case FC::CWWW2Ch:
-      case FC::CWWW4Ch:
-      case FC::CWWWA3Ch:
-      case FC::UVLight3Ch:
-      case FC::H2ODMXPro:
-      case FC::AyraTDCSunrise:
-      case FC::RGB_ADJ_6CH:
-      case FC::RGB_ADJ_7CH:
-      case FC::RGBLight6Ch_16bit:
+      case FixtureClass::Par:
         return 1;
-      case FC::BT_VINTAGE_5CH:
-      case FC::BT_VINTAGE_6CH:
-      case FC::BT_VINTAGE_7CH:
+      case FixtureClass::RingedPar:
         return 2;
     }
     return 0;
@@ -203,7 +205,7 @@ class FixtureType : public FolderObject {
   static Color rgbAdj6chColor(const Fixture &fixture,
                               const ValueSnapshot &snapshot);
 
-  enum FixtureClass _class;
+  FixtureClass _class = FixtureClass::Par;
   std::vector<FixtureTypeFunction> _functions;
 };
 

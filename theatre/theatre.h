@@ -22,7 +22,7 @@ class Theatre {
   void Clear();
 
   Fixture &AddFixture(const FixtureType &type);
-  FixtureType &AddFixtureType(FixtureClass fixtureClass);
+  FixtureType &AddFixtureType(StockFixture fixtureClass);
   FixtureType &AddFixtureType(const FixtureType &type);
 
   bool Contains(Fixture &fixture) const;

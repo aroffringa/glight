@@ -10,21 +10,21 @@
 BOOST_AUTO_TEST_SUITE(fixture_type)
 
 BOOST_AUTO_TEST_CASE(ClassList) {
-  const std::vector<FixtureClass> list = FixtureType::GetClassList();
+  const std::vector<StockFixture> list = FixtureType::GetClassList();
   BOOST_REQUIRE(!list.empty());
 
-  for (FixtureClass cl : list) {
+  for (StockFixture cl : list) {
     BOOST_CHECK(FixtureType::NameToClass(FixtureType::ClassName(cl)) == cl);
   }
   BOOST_CHECK_NO_THROW(
-      FixtureType::ClassName((FixtureClass)std::numeric_limits<int>::max()));
+      FixtureType::ClassName((StockFixture)std::numeric_limits<int>::max()));
   BOOST_CHECK_THROW(FixtureType::NameToClass("This is not a class! ~!@"),
                     std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(Construct) {
-  const std::vector<FixtureClass> list = FixtureType::GetClassList();
-  for (FixtureClass cl : list) {
+  const std::vector<StockFixture> list = FixtureType::GetClassList();
+  for (StockFixture cl : list) {
     FixtureType type(cl);
     BOOST_CHECK(type.GetFixtureClass() == cl);
     BOOST_CHECK(!type.Functions().empty());
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(Construct) {
 }
 
 BOOST_AUTO_TEST_CASE(Copy) {
-  FixtureType typeA(FixtureClass::RGBLight3Ch);
+  FixtureType typeA(StockFixture::RGBLight3Ch);
   FixtureType typeB(typeA);
   BOOST_REQUIRE_EQUAL(typeB.Functions().size(), 3);
   BOOST_CHECK(typeB.Functions()[0].type == FunctionType::Red);
@@ -41,13 +41,13 @@ BOOST_AUTO_TEST_CASE(Copy) {
 }
 
 BOOST_AUTO_TEST_CASE(ShapeCount) {
-  FixtureType typeA(FixtureClass::RGBLight3Ch);
+  FixtureType typeA(StockFixture::RGBLight3Ch);
   BOOST_CHECK_EQUAL(typeA.ShapeCount(), 1);
-  FixtureType typeB(FixtureClass::BT_VINTAGE_5CH);
+  FixtureType typeB(StockFixture::BT_VINTAGE_5CH);
   BOOST_CHECK_EQUAL(typeB.ShapeCount(), 2);
 }
 
-Color testColor(FixtureClass cl, const std::vector<unsigned char> &values) {
+Color testColor(StockFixture cl, const std::vector<unsigned char> &values) {
   Management management;
   const FixtureType &fixtureType = management.GetTheatre().AddFixtureType(cl);
   Fixture &rgbFixture = management.GetTheatre().AddFixture(fixtureType);
@@ -58,7 +58,7 @@ Color testColor(FixtureClass cl, const std::vector<unsigned char> &values) {
 }
 
 BOOST_AUTO_TEST_CASE(GetColor_RGB) {
-  const Color color = testColor(FixtureClass::RGBLight3Ch, {17, 128, 255});
+  const Color color = testColor(StockFixture::RGBLight3Ch, {17, 128, 255});
   BOOST_TEST(color.Red() == 17);
   BOOST_TEST(color.Green() == 128);
   BOOST_TEST(color.Blue() == 255);
@@ -66,37 +66,37 @@ BOOST_AUTO_TEST_CASE(GetColor_RGB) {
 
 BOOST_AUTO_TEST_CASE(GetColor_RGBAWUV) {
   const Color colorRed =
-      testColor(FixtureClass::RGBAWUVLight6Ch, {255, 0, 0, 0, 0, 0});
+      testColor(StockFixture::RGBAWUVLight6Ch, {255, 0, 0, 0, 0, 0});
   BOOST_TEST(colorRed.Red() >= 64);
   BOOST_TEST(colorRed.Green() == 0);
   BOOST_TEST(colorRed.Blue() == 0);
 
   const Color colorGreen =
-      testColor(FixtureClass::RGBAWUVLight6Ch, {0, 255, 0, 0, 0, 0});
+      testColor(StockFixture::RGBAWUVLight6Ch, {0, 255, 0, 0, 0, 0});
   BOOST_TEST(colorGreen.Red() == 0);
   BOOST_TEST(colorGreen.Green() >= 64);
   BOOST_TEST(colorGreen.Blue() == 0);
 
   const Color colorBlue =
-      testColor(FixtureClass::RGBAWUVLight6Ch, {0, 0, 255, 0, 0, 0});
+      testColor(StockFixture::RGBAWUVLight6Ch, {0, 0, 255, 0, 0, 0});
   BOOST_TEST(colorBlue.Red() == 0);
   BOOST_TEST(colorBlue.Green() == 0);
   BOOST_TEST(colorBlue.Blue() >= 64);
 
   const Color colorAmber =
-      testColor(FixtureClass::RGBAWUVLight6Ch, {0, 0, 0, 255, 0, 0});
+      testColor(StockFixture::RGBAWUVLight6Ch, {0, 0, 0, 255, 0, 0});
   BOOST_TEST(colorAmber.Red() >= 32);
   BOOST_TEST(colorAmber.Green() >= 24);
   BOOST_TEST(colorAmber.Blue() == 0);
 
   const Color colorWhite =
-      testColor(FixtureClass::RGBAWUVLight6Ch, {0, 0, 0, 0, 255, 0});
+      testColor(StockFixture::RGBAWUVLight6Ch, {0, 0, 0, 0, 255, 0});
   BOOST_TEST(colorWhite.Red() >= 64);
   BOOST_TEST(colorWhite.Green() >= 64);
   BOOST_TEST(colorWhite.Blue() >= 64);
 
   const Color colorUV =
-      testColor(FixtureClass::RGBAWUVLight6Ch, {0, 0, 0, 0, 0, 255});
+      testColor(StockFixture::RGBAWUVLight6Ch, {0, 0, 0, 0, 0, 255});
   BOOST_TEST(colorUV.Red() >= 24);
   BOOST_TEST(colorUV.Green() == 0);
   BOOST_TEST(colorUV.Blue() >= 48);

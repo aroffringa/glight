@@ -54,7 +54,7 @@ Fixture &Theatre::AddFixture(const FixtureType &type) {
   return f;
 }
 
-FixtureType &Theatre::AddFixtureType(FixtureClass fixtureClass) {
+FixtureType &Theatre::AddFixtureType(StockFixture fixtureClass) {
   _fixtureTypes.emplace_back(std::make_unique<FixtureType>(fixtureClass));
   return *_fixtureTypes.back();
 }

@@ -152,14 +152,14 @@ void Reader::parseControlItem(xmlNode *node) {
 }
 
 void Reader::parseFixtureType(xmlNode *node) {
-  const FixtureClass cl = (FixtureClass)getIntAttribute(node, "fixture-class");
+  const std::string class_name = getStringAttribute(node, "fixture-class");
+  FixtureType ft;
+  FixtureType& new_type = _management.GetTheatre().AddFixtureType(ft);
+  parseNameAttr(node, new_type);
   FixtureType *type = dynamic_cast<FixtureType *>(
-      _management.RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
-  if (!type) {
-    type = &_management.GetTheatre().AddFixtureType(
-        cl);  // TODO we shouldn't use a type by its name, types should be
-              // editable etc
-    parseFolderAttr(node, *type);
+      _management.RootFolder().GetChildIfExists(new_type.Name()));
+  if (type) {
+    throw std::runtime_error("Error in file: fixture type listed twice");
   }
 }
 

@@ -155,9 +155,8 @@ void FixtureTypesWindow::onSaveClicked() {
       dialog.run();
     }
   } else {
-    const FixtureClass fc =
-        FixtureType::NameToClass(class_combo_.get_active_text());
-    type = &management_->GetTheatre().AddFixtureType(fc);
+    FixtureType ft;
+    type = &management_->GetTheatre().AddFixtureType(ft);
     management_->RootFolder().Add(*type);
   }
   type->SetName(name_entry_.get_text());
@@ -195,7 +194,7 @@ void FixtureTypesWindow::onSelectionChanged() {
       functions_frame_.SetFunctions(type->Functions());
     } else {
       class_combo_.set_active_text(
-          FixtureType::ClassName(FixtureClass::Light1Ch));
+          FixtureType::ClassName(StockFixture::Light1Ch));
       functions_frame_.SetFunctions({});
     }
   }
