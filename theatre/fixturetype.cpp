@@ -178,17 +178,23 @@ Color FixtureType::GetColor(const Fixture &fixture,
   unsigned red = 0;
   unsigned green = 0;
   unsigned blue = 0;
+  unsigned master = 255;
   for (size_t i = 0; i != _functions.size(); ++i) {
     if (_functions[i].shape == shapeIndex) {
       const unsigned channel_value = fixture.Functions()[i]->GetValue(snapshot);
-      const Color c = GetFunctionColor(_functions[i].type) * channel_value;
-      red += c.Red();
-      green += c.Green();
-      blue += c.Blue();
+      if(_functions[i].type == FunctionType::Master) {
+        master = channel_value;
+      }
+      else {
+        const Color c = GetFunctionColor(_functions[i].type) * channel_value;
+        red += c.Red();
+        green += c.Green();
+        blue += c.Blue();
+      }
     }
   }
-  return Color(red * 255 / scaling_value_, green * 255 / scaling_value_,
-               blue * 255 / scaling_value_);
+  return Color(red * master / scaling_value_, green * master / scaling_value_,
+               blue * master / scaling_value_);
 }
 
 int FixtureType::GetRotationSpeed(const Fixture &fixture,
