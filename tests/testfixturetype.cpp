@@ -45,9 +45,9 @@ BOOST_AUTO_TEST_CASE(Copy) {
   FixtureType typeA(StockFixture::RGBLight3Ch);
   FixtureType typeB(typeA);
   BOOST_REQUIRE_EQUAL(typeB.Functions().size(), 3);
-  BOOST_CHECK(typeB.Functions()[0].type == FunctionType::Red);
-  BOOST_CHECK(typeB.Functions()[1].type == FunctionType::Green);
-  BOOST_CHECK(typeB.Functions()[2].type == FunctionType::Blue);
+  BOOST_CHECK(typeB.Functions()[0].Type() == FunctionType::Red);
+  BOOST_CHECK(typeB.Functions()[1].Type() == FunctionType::Green);
+  BOOST_CHECK(typeB.Functions()[2].Type() == FunctionType::Blue);
 }
 
 BOOST_AUTO_TEST_CASE(ShapeCount) {

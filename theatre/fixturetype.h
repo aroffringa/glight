@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "color.h"
@@ -12,15 +13,44 @@
 
 class Fixture;
 
-struct FixtureTypeFunction {
-  FixtureTypeFunction(size_t dmxOffset_, FunctionType type_, bool is16Bit_,
-                      unsigned shape_)
-      : dmxOffset(dmxOffset_), type(type_), is16Bit(is16Bit_), shape(shape_) {}
+struct RotationParameters {
+  struct Range {
+    unsigned input_min;
+    unsigned input_max;
+    unsigned speed_min;
+    unsigned speed_max;
+  };
+  std::vector<Range> ranges;
+};
 
-  size_t dmxOffset;
-  FunctionType type;
-  bool is16Bit;
-  unsigned shape;
+class FixtureTypeFunction {
+ public:
+  FixtureTypeFunction(size_t dmx_offset, FunctionType type, bool is_16_bit,
+                      unsigned shape)
+      : dmx_offset_(dmx_offset),
+        type_(type),
+        is_16_bit_(is_16_bit),
+        shape_(shape) {}
+
+  size_t DmxOffset() const { return dmx_offset_; }
+  FunctionType Type() const { return type_; }
+  void SetType(FunctionType type) {
+    type_ = type;
+    if (type_ == FunctionType::Rotation)
+      parameters.rotation_parameters = RotationParameters();
+  }
+  bool Is16Bit() const { return is_16_bit_; }
+  unsigned Shape() const { return shape_; }
+
+ private:
+  size_t dmx_offset_;
+  FunctionType type_;
+  bool is_16_bit_;
+  unsigned shape_;
+  union {
+    std::monostate m;
+    RotationParameters rotation_parameters;
+  } parameters = {std::monostate()};
 };
 
 // These currently have a fixed position, because they are written
@@ -179,7 +209,7 @@ class FixtureType : public FolderObject {
   void SetFixtureClass(FixtureClass new_class) { _class = new_class; }
 
   bool Is16Bit(size_t functionIndex) const {
-    return _functions[functionIndex].is16Bit;
+    return _functions[functionIndex].Is16Bit();
   }
 
   size_t ShapeCount() const {

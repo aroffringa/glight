@@ -314,7 +314,7 @@ class Color {
   }
 
  private:
-  unsigned char _red, _green, _blue;
+  const unsigned char _red, _green, _blue;
 };
 
 inline Color operator*(const Color &lhs, unsigned char rhs) {

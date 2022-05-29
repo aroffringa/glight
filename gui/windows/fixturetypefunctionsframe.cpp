@@ -98,11 +98,11 @@ void FixtureTypeFunctionsFrame::SetFunctions(
     Gtk::TreeModel::iterator iter = functions_model_->append();
     Gtk::TreeModel::Row row = *iter;
     const FixtureTypeFunction &f = functions[i];
-    row[functions_columns_.dmx_offset_] = f.dmxOffset;
-    row[functions_columns_.is_16_bit_] = f.is16Bit;
-    row[functions_columns_.function_type_] = f.type;
+    row[functions_columns_.dmx_offset_] = f.DmxOffset();
+    row[functions_columns_.is_16_bit_] = f.Is16Bit();
+    row[functions_columns_.function_type_] = f.Type();
     row[functions_columns_.function_type_str_] =
-        FunctionTypeDescription(f.type);
+        FunctionTypeDescription(f.Type());
   }
 }
 

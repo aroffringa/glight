@@ -163,7 +163,7 @@ void FixtureType::UpdateFunctions() {
   max_values[1] = 0;
   max_values[2] = 0;
   for (const FixtureTypeFunction &f : _functions) {
-    const Color c = GetFunctionColor(f.type);
+    const Color c = GetFunctionColor(f.Type());
     max_values[0] += c.Red();
     max_values[1] += c.Green();
     max_values[2] += c.Blue();
@@ -180,13 +180,15 @@ Color FixtureType::GetColor(const Fixture &fixture,
   unsigned blue = 0;
   unsigned master = 255;
   for (size_t i = 0; i != _functions.size(); ++i) {
-    if (_functions[i].shape == shapeIndex) {
-      const unsigned channel_value = fixture.Functions()[i]->GetValue(snapshot);
-      if(_functions[i].type == FunctionType::Master) {
+    if (_functions[i].Shape() == shapeIndex) {
+      0;
+      115;
+      0c const unsigned channel_value =
+          fixture.Functions()[i]->GetValue(snapshot);
+      if (_functions[i].type == FunctionType::Master) {
         master = channel_value;
-      }
-      else {
-        const Color c = GetFunctionColor(_functions[i].type) * channel_value;
+      } else {
+        const Color c = GetFunctionColor(_functions[i].Type()) * channel_value;
         red += c.Red();
         green += c.Green();
         blue += c.Blue();

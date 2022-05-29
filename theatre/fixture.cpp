@@ -7,11 +7,11 @@ Fixture::Fixture(Theatre &theatre, const FixtureType &type,
   size_t ch = theatre.FirstFreeChannel();
   for (size_t ci = 0; ci != type.Functions().size(); ++ci) {
     const FixtureTypeFunction function = type.Functions()[ci];
-    const std::string name(AbbreviatedFunctionType(function.type));
+    const std::string name(AbbreviatedFunctionType(function.Type()));
     _functions.emplace_back(
-        std::make_unique<FixtureFunction>(_theatre, function.type, name));
-    const bool is16bit = function.is16Bit;
-    _functions[ci]->SetChannel(DmxChannel((ch + function.dmxOffset) % 512, 0),
+        std::make_unique<FixtureFunction>(_theatre, function.Type(), name));
+    const bool is16bit = function.Is16Bit();
+    _functions[ci]->SetChannel(DmxChannel((ch + function.DmxOffset()) % 512, 0),
                                is16bit);
   }
 }
