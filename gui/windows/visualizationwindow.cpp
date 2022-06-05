@@ -195,7 +195,7 @@ void VisualizationWindow::drawManagement(
                    2.0 * M_PI);
         cairo->fill();
 
-        int rotation = fixture.GetRotationSpeed(snapshot);
+        int rotation = fixture.GetRotationSpeed(snapshot, shapeIndex);
         if (rotation != 0) {
           const double rotationDisp =
               M_PI * double(rotation) * style.timeSince / (10.0 * (1 << 24));

@@ -51,7 +51,8 @@ class Fixture : public NamedObject {
   }
   inline Color GetColor(const ValueSnapshot &snapshot, size_t shapeIndex) const;
 
-  inline int GetRotationSpeed(const ValueSnapshot &snapshot) const;
+  inline int GetRotationSpeed(const ValueSnapshot &snapshot,
+                              size_t shapeIndex) const;
 
   Position &GetPosition() { return _position; }
   const Position &GetPosition() const { return _position; }
@@ -75,7 +76,8 @@ Color Fixture::GetColor(const ValueSnapshot &snapshot,
   return _type.GetColor(*this, snapshot, shapeIndex);
 }
 
-int Fixture::GetRotationSpeed(const ValueSnapshot &snapshot) const {
-  return _type.GetRotationSpeed(*this, snapshot);
+int Fixture::GetRotationSpeed(const ValueSnapshot &snapshot,
+                              size_t shapeIndex) const {
+  return _type.GetRotationSpeed(*this, snapshot, shapeIndex);
 }
 #endif

@@ -3,55 +3,14 @@
 
 #include <map>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "color.h"
 #include "folderobject.h"
-#include "functiontype.h"
+#include "fixturetypefunction.h"
 #include "valuesnapshot.h"
 
 class Fixture;
-
-struct RotationParameters {
-  struct Range {
-    unsigned input_min;
-    unsigned input_max;
-    unsigned speed_min;
-    unsigned speed_max;
-  };
-  std::vector<Range> ranges;
-};
-
-class FixtureTypeFunction {
- public:
-  FixtureTypeFunction(size_t dmx_offset, FunctionType type, bool is_16_bit,
-                      unsigned shape)
-      : dmx_offset_(dmx_offset),
-        type_(type),
-        is_16_bit_(is_16_bit),
-        shape_(shape) {}
-
-  size_t DmxOffset() const { return dmx_offset_; }
-  FunctionType Type() const { return type_; }
-  void SetType(FunctionType type) {
-    type_ = type;
-    if (type_ == FunctionType::Rotation)
-      parameters.rotation_parameters = RotationParameters();
-  }
-  bool Is16Bit() const { return is_16_bit_; }
-  unsigned Shape() const { return shape_; }
-
- private:
-  size_t dmx_offset_;
-  FunctionType type_;
-  bool is_16_bit_;
-  unsigned shape_;
-  union {
-    std::monostate m;
-    RotationParameters rotation_parameters;
-  } parameters = {std::monostate()};
-};
 
 // These currently have a fixed position, because they are written
 // as integers into save files... TODO write as name into the file.
@@ -201,19 +160,19 @@ class FixtureType : public FolderObject {
    * snapshot. 0 is no rotation, +/- 2^24 is 100 times per second (the max).
    * Positive is clockwise rotation.
    */
-  int GetRotationSpeed(const Fixture &fixture,
-                       const ValueSnapshot &snapshot) const;
+  int GetRotationSpeed(const Fixture &fixture, const ValueSnapshot &snapshot,
+                       size_t shapeIndex) const;
 
-  FixtureClass GetFixtureClass() const { return _class; }
+  FixtureClass GetFixtureClass() const { return class_; }
 
-  void SetFixtureClass(FixtureClass new_class) { _class = new_class; }
+  void SetFixtureClass(FixtureClass new_class) { class_ = new_class; }
 
   bool Is16Bit(size_t functionIndex) const {
-    return _functions[functionIndex].Is16Bit();
+    return functions_[functionIndex].Is16Bit();
   }
 
   size_t ShapeCount() const {
-    switch (_class) {
+    switch (class_) {
       case FixtureClass::Par:
         return 1;
       case FixtureClass::RingedPar:
@@ -223,15 +182,15 @@ class FixtureType : public FolderObject {
   }
 
   const std::vector<FixtureTypeFunction> &Functions() const {
-    return _functions;
+    return functions_;
   }
 
   void SetFunctions(const std::vector<FixtureTypeFunction> &functions) {
-    _functions = functions;
+    functions_ = functions;
     UpdateFunctions();
   }
   void SetFunctions(std::vector<FixtureTypeFunction> &&functions) {
-    _functions = std::move(functions);
+    functions_ = std::move(functions);
     UpdateFunctions();
   }
 
@@ -241,8 +200,8 @@ class FixtureType : public FolderObject {
   static Color rgbAdj6chColor(const Fixture &fixture,
                               const ValueSnapshot &snapshot);
 
-  FixtureClass _class = FixtureClass::Par;
-  std::vector<FixtureTypeFunction> _functions;
+  FixtureClass class_ = FixtureClass::Par;
+  std::vector<FixtureTypeFunction> functions_;
   unsigned scaling_value_;
 };
 
