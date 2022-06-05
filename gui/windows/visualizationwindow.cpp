@@ -178,24 +178,25 @@ void VisualizationWindow::drawManagement(
     if (fixture.IsVisible()) {
       size_t shapeCount = fixture.Type().ShapeCount();
       for (size_t i = 0; i != shapeCount; ++i) {
-        size_t shapeIndex = shapeCount - i - 1;
-        Color c = fixture.GetColor(snapshot, shapeIndex);
+        const size_t shapeIndex = shapeCount - i - 1;
+        const Color c = fixture.GetColor(snapshot, shapeIndex);
 
         cairo->set_source_rgb((double)c.Red() / 224.0 + 0.125,
                               (double)c.Green() / 224.0 + 0.125,
                               (double)c.Blue() / 224.0 + 0.125);
 
-        double singleRadius = radius(fixture.Symbol().Value());
-        double radius = shapeCount == 1 ? singleRadius
-                                        : 0.33 + 0.07 * double(shapeIndex) /
-                                                     (shapeCount - 1);
-        double x = fixture.GetPosition().X() + 0.5;
-        double y = fixture.GetPosition().Y() + 0.5;
+        const double singleRadius = radius(fixture.Symbol().Value());
+        const double radius =
+            shapeCount == 1
+                ? singleRadius
+                : 0.33 + 0.07 * double(shapeIndex) / (shapeCount - 1);
+        const double x = fixture.GetPosition().X() + 0.5;
+        const double y = fixture.GetPosition().Y() + 0.5;
         cairo->arc(x + style.xOffset / sc, y + style.yOffset / sc, radius, 0.0,
                    2.0 * M_PI);
         cairo->fill();
 
-        int rotation = fixture.GetRotationSpeed(snapshot, shapeIndex);
+        const int rotation = fixture.GetRotationSpeed(snapshot, shapeIndex);
         if (rotation != 0) {
           const double rotationDisp =
               M_PI * double(rotation) * style.timeSince / (10.0 * (1 << 24));

@@ -112,4 +112,18 @@ BOOST_AUTO_TEST_CASE(GetColor_RGBAWUV) {
   BOOST_TEST(colorUV.Blue() >= 48);
 }
 
+BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
+  Management management;
+  const FixtureType &fixtureType =
+      management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise);
+  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
+  const ValueSnapshot snapShot(1);
+  ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
+  // Master, R, G, B, Strobe, Rotation, Macro
+  const std::vector<unsigned char> values{255, 255, 0, 0, 0, 128, 0};
+  uni.SetValues(values.data(), values.size());
+  const int speed = fixture.Type().GetRotationSpeed(fixture, snapShot, 0);
+  BOOST_CHECK_EQUAL(speed, -((1 << 24) / 100));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -80,12 +80,17 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(1, FunctionType::Strobe, false, 0);
       functions_.emplace_back(2, FunctionType::Pulse, false, 0);
       break;
-    case StockFixture::H2ODMXPro:
+    case StockFixture::H2ODMXPro: {
       functions_.emplace_back(0, FunctionType::Master, false, 0);
       functions_.emplace_back(1, FunctionType::Rotation, false, 0);
       functions_.emplace_back(2, FunctionType::ColorMacro, false, 0);
-      break;
-    case StockFixture::AyraTDCSunrise:
+      std::vector<RotationParameters::Range> &ranges =
+          functions_[1].GetRotationParameters().GetRanges();
+      constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
+      ranges.emplace_back(9, 121, 0, max_speed);
+      ranges.emplace_back(134, 256, 0, -max_speed);
+    } break;
+    case StockFixture::AyraTDCSunrise: {
       functions_.emplace_back(0, FunctionType::Master, false, 0);
       functions_.emplace_back(1, FunctionType::Red, false, 0);
       functions_.emplace_back(2, FunctionType::Green, false, 0);
@@ -93,7 +98,12 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(4, FunctionType::Strobe, false, 0);
       functions_.emplace_back(5, FunctionType::Rotation, false, 0);
       functions_.emplace_back(6, FunctionType::ColorMacro, false, 0);
-      break;
+      constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
+      std::vector<RotationParameters::Range> &ranges =
+          functions_[5].GetRotationParameters().GetRanges();
+      // [ 5 - 128 ) is static positioning
+      ranges.emplace_back(128, 256, -max_speed, max_speed);
+    } break;
     case StockFixture::RGB_ADJ_6CH:
       functions_.emplace_back(0, FunctionType::Red, false, 0);
       functions_.emplace_back(1, FunctionType::Green, false, 0);
@@ -198,35 +208,20 @@ Color FixtureType::GetColor(const Fixture &fixture,
                blue * master / scaling_value_);
 }
 
+#include <iostream>
 int FixtureType::GetRotationSpeed(const Fixture &fixture,
                                   const ValueSnapshot &snapshot,
-                                  size_t shapeIndex) const {
-  switch (class_) {
-    default:
-      return 0;
-      /*
-      case StockFixture::H2ODMXPro: {
-        const int rotation = fixture.Functions()[1]->GetValue(snapshot);
-        const int maxSpeed = (1 << 24) / 100;  // 1 times per second
-        if (rotation <= 9 || (rotation >= 121 && rotation <= 134) ||
-            rotation >= 246)
-          return 0;
-        else if (rotation <= 120) {
-          return (121 - rotation) * maxSpeed / 111;
-        } else {
-          return -(rotation - 134) * maxSpeed / 111;
-        }
-      }
-      case StockFixture::AyraTDCSunrise: {
-        const int rotation = fixture.Functions()[5]->GetValue(snapshot);
-        const int maxSpeed = (1 << 24) / 100;  // 1 times per second
-        if (rotation <= 5)
-          return 0;
-        else if (rotation <= 127) {
-          return 0;  // this should be static positioning
-        } else {
-          return (rotation - 127) * maxSpeed / 128;
-        }
-      }*/
+                                  size_t shape_index) const {
+  for (size_t i = 0; i != functions_.size(); ++i) {
+    if (functions_[i].Shape() == shape_index &&
+        functions_[i].Type() == FunctionType::Rotation) {
+      const unsigned channel_value = fixture.Functions()[i]->GetValue(snapshot);
+      std::cout << functions_[i].GetRotationParameters().GetRanges().size()
+                << " " << channel_value << " "
+                << functions_[i].GetRotationParameters().GetSpeed(channel_value)
+                << '\n';
+      return functions_[i].GetRotationParameters().GetSpeed(channel_value);
+    }
   }
+  return 0;
 }

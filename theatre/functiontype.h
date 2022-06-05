@@ -2,6 +2,7 @@
 #define FUNCTION_TYPE_H
 
 #include <string>
+#include <vector>
 
 #include "color.h"
 
