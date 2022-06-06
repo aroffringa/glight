@@ -26,8 +26,8 @@ BOOST_AUTO_TEST_CASE(StockList) {
   const std::vector<StockFixture> list = FixtureType::GetStockList();
   BOOST_REQUIRE(!list.empty());
 
-  for (StockFixture cl : list) {
-    BOOST_CHECK(!FixtureType::StockName(cl).empty());
+  for (StockFixture stock_fixture : list) {
+    BOOST_CHECK(!FixtureType::StockName(stock_fixture).empty());
   }
   BOOST_CHECK_NO_THROW(
       FixtureType::StockName((StockFixture)std::numeric_limits<int>::max()));

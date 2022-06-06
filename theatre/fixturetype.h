@@ -197,8 +197,7 @@ class FixtureType : public FolderObject {
  private:
   void UpdateFunctions();
 
-  static Color rgbAdj6chColor(const Fixture &fixture,
-                              const ValueSnapshot &snapshot);
+  static void SetRgbAdj6chMacroParameters(MacroParameters &macro);
 
   FixtureClass class_ = FixtureClass::Par;
   std::vector<FixtureTypeFunction> functions_;

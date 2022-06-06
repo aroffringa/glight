@@ -104,23 +104,27 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       // [ 5 - 128 ) is static positioning
       ranges.emplace_back(128, 256, -max_speed, max_speed);
     } break;
-    case StockFixture::RGB_ADJ_6CH:
+    case StockFixture::RGB_ADJ_6CH: {
       functions_.emplace_back(0, FunctionType::Red, false, 0);
       functions_.emplace_back(1, FunctionType::Green, false, 0);
       functions_.emplace_back(2, FunctionType::Blue, false, 0);
-      functions_.emplace_back(3, FunctionType::ColorMacro, false, 0);
+      FixtureTypeFunction &macro =
+          functions_.emplace_back(3, FunctionType::ColorMacro, false, 0);
+      SetRgbAdj6chMacroParameters(macro.GetMacroParameters());
       functions_.emplace_back(4, FunctionType::Strobe, false, 0);
       functions_.emplace_back(5, FunctionType::Pulse, false, 0);
-      break;
-    case StockFixture::RGB_ADJ_7CH:
+    } break;
+    case StockFixture::RGB_ADJ_7CH: {
       functions_.emplace_back(0, FunctionType::Red, false, 0);
       functions_.emplace_back(1, FunctionType::Green, false, 0);
       functions_.emplace_back(2, FunctionType::Blue, false, 0);
-      functions_.emplace_back(3, FunctionType::ColorMacro, false, 0);
+      FixtureTypeFunction &macro =
+          functions_.emplace_back(3, FunctionType::ColorMacro, false, 0);
+      SetRgbAdj6chMacroParameters(macro.GetMacroParameters());
       functions_.emplace_back(4, FunctionType::Strobe, false, 0);
       functions_.emplace_back(5, FunctionType::Pulse, false, 0);
       functions_.emplace_back(6, FunctionType::Master, false, 0);
-      break;
+    } break;
     case StockFixture::BT_VINTAGE_5CH:
       functions_.emplace_back(0, FunctionType::White, false, 0);
       functions_.emplace_back(1, FunctionType::Master, false, 0);
@@ -157,16 +161,51 @@ FixtureType::FixtureType(StockFixture stock_fixture)
   UpdateFunctions();
 }
 
-Color FixtureType::rgbAdj6chColor(const Fixture &fixture,
-                                  const ValueSnapshot &snapshot) {
-  unsigned macro = fixture.Functions()[3]->GetValue(snapshot);
-  if (macro < 8) {
-    return Color(fixture.Functions()[0]->GetValue(snapshot),
-                 fixture.Functions()[1]->GetValue(snapshot),
-                 fixture.Functions()[2]->GetValue(snapshot));
-  } else {
-    return Color::ADJMacroColor(macro);
-  }
+void FixtureType::SetRgbAdj6chMacroParameters(MacroParameters &macro) {
+  std::vector<MacroParameters::Range> &ranges = macro.GetRanges();
+  ranges.emplace_back(0, 8, std::optional<Color>());
+  ranges.emplace_back(8, 12, Color::RedC());
+  ranges.emplace_back(12, 18, Color::GreenC());
+  ranges.emplace_back(18, 24, Color::BlueC());
+  ranges.emplace_back(24, 30, Color::Yellow());
+  ranges.emplace_back(30, 36, Color::Purple());
+  ranges.emplace_back(36, 42, Color::LBlue());
+  ranges.emplace_back(42, 48, Color::White());
+  ranges.emplace_back(48, 54, Color::GreenYellow());
+  ranges.emplace_back(54, 60, Color::PurpleBlue());
+  ranges.emplace_back(60, 66, Color(128, 128, 0));
+  ranges.emplace_back(66, 72, Color(128, 0, 128));
+  ranges.emplace_back(72, 78, Color(0, 128, 128));
+  ranges.emplace_back(78, 84, Color(192, 128, 0));
+  ranges.emplace_back(84, 90, Color(192, 0, 128));
+  ranges.emplace_back(90, 96, Color(192, 128, 128));
+  ranges.emplace_back(96, 102, Color(0, 192, 128));
+  ranges.emplace_back(102, 108, Color(128, 192, 0));
+  ranges.emplace_back(108, 114, Color(128, 192, 128));
+  ranges.emplace_back(114, 120, Color(0, 128, 192));
+  ranges.emplace_back(120, 126, Color(128, 0, 192));
+  ranges.emplace_back(126, 132, Color(128, 128, 192));
+  ranges.emplace_back(132, 138, Color(96, 144, 0));
+  ranges.emplace_back(138, 144, Color(96, 0, 144));
+  ranges.emplace_back(144, 150, Color(96, 144, 96));
+  ranges.emplace_back(150, 156, Color(128, 144, 144));
+  ranges.emplace_back(156, 162, Color(0, 96, 144));
+  ranges.emplace_back(162, 168, Color(144, 96, 144));
+  ranges.emplace_back(168, 174, Color(0, 144, 96));
+  ranges.emplace_back(174, 180, Color(144, 0, 96));
+  ranges.emplace_back(180, 186, Color(144, 144, 96));
+  ranges.emplace_back(186, 192, Color(44, 180, 0));
+  ranges.emplace_back(192, 198, Color(44, 0, 180));
+  ranges.emplace_back(198, 204, Color(44, 180, 180));
+  ranges.emplace_back(204, 210, Color(180, 44, 0));
+  ranges.emplace_back(210, 216, Color(0, 44, 180));
+  ranges.emplace_back(216, 222, Color(180, 44, 180));
+  ranges.emplace_back(222, 228, Color(0, 180, 44));
+  ranges.emplace_back(228, 234, Color(180, 0, 44));
+  ranges.emplace_back(234, 240, Color(0, 180, 44));
+  ranges.emplace_back(240, 246, Color(20, 96, 0));
+  ranges.emplace_back(246, 252, Color(20, 0, 96));
+  ranges.emplace_back(252, 256, Color(20, 96, 96));
 }
 
 void FixtureType::UpdateFunctions() {
@@ -191,11 +230,16 @@ Color FixtureType::GetColor(const Fixture &fixture,
   unsigned green = 0;
   unsigned blue = 0;
   unsigned master = 255;
+  std::optional<Color> macro_color;
   for (size_t i = 0; i != functions_.size(); ++i) {
     if (functions_[i].Shape() == shapeIndex) {
       const unsigned channel_value = fixture.Functions()[i]->GetValue(snapshot);
-      if (functions_[i].Type() == FunctionType::Master) {
+      const FunctionType type = functions_[i].Type();
+      if (type == FunctionType::Master) {
         master = channel_value;
+      } else if (type == FunctionType::ColorMacro) {
+        macro_color =
+            functions_[i].GetMacroParameters().GetColor(channel_value);
       } else {
         const Color c = GetFunctionColor(functions_[i].Type()) * channel_value;
         red += c.Red();
@@ -204,11 +248,15 @@ Color FixtureType::GetColor(const Fixture &fixture,
       }
     }
   }
+  if (macro_color) {
+    red = macro_color->Red();
+    green = macro_color->Green();
+    blue = macro_color->Blue();
+  }
   return Color(red * master / scaling_value_, green * master / scaling_value_,
                blue * master / scaling_value_);
 }
 
-#include <iostream>
 int FixtureType::GetRotationSpeed(const Fixture &fixture,
                                   const ValueSnapshot &snapshot,
                                   size_t shape_index) const {
@@ -216,10 +264,6 @@ int FixtureType::GetRotationSpeed(const Fixture &fixture,
     if (functions_[i].Shape() == shape_index &&
         functions_[i].Type() == FunctionType::Rotation) {
       const unsigned channel_value = fixture.Functions()[i]->GetValue(snapshot);
-      std::cout << functions_[i].GetRotationParameters().GetRanges().size()
-                << " " << channel_value << " "
-                << functions_[i].GetRotationParameters().GetSpeed(channel_value)
-                << '\n';
       return functions_[i].GetRotationParameters().GetSpeed(channel_value);
     }
   }
