@@ -289,10 +289,9 @@ Color FixtureType::GetColor(const Fixture &fixture,
     green = macro_color->Green();
     blue = macro_color->Blue();
     return Color(red * master / 256, green * master / 256, blue * master / 256);
-  }
-  else {
+  } else {
     return Color(red * master / scaling_value_, green * master / scaling_value_,
-                blue * master / scaling_value_);
+                 blue * master / scaling_value_);
   }
 }
 
