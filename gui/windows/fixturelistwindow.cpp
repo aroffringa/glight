@@ -136,11 +136,11 @@ void FixtureListWindow::onRemoveButtonClicked() {
   _eventHub->EmitUpdate();
 }
 
-void FixtureListWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl) {
+/*void FixtureListWindow::onMenuItemClicked(StockFixture cl) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  Position position = _management->GetTheatre().GetFreePosition();
+  const Position position = _management->GetTheatre().GetFreePosition();
   FixtureType *type = dynamic_cast<FixtureType *>(
-      _management->RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
+      _management->RootFolder().GetChildIfExists(FixtureType::StockName(cl)));
   if (!type) {
     type = &_management->GetTheatre().AddFixtureType(
         cl);  // TODO we shouldn't use a type by its name, types should be
@@ -148,14 +148,15 @@ void FixtureListWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl) {
     _management->RootFolder().Add(*type);
   }
   Fixture &fixture = _management->GetTheatre().AddFixture(*type);
-  fixture.Position() = position;
+  fixture.GetPosition() = position;
 
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =
       fixture.Functions();
 
   int number = 1;
   FixtureControl &control = _management->AddFixtureControl(
-      fixture, _management->RootFolder() /* TODO */);
+      fixture, _management->RootFolder() // TODO
+      );
   for (size_t i = 0; i != functions.size(); ++i) {
     // std::stringstream funcName;
     // funcName << fixture.Name() << number;
@@ -165,7 +166,7 @@ void FixtureListWindow::onMenuItemClicked(enum FixtureType::FixtureClass cl) {
   lock.unlock();
 
   _eventHub->EmitUpdate();
-}
+}*/
 
 void FixtureListWindow::onIncChannelButtonClicked() {
   Glib::RefPtr<Gtk::TreeSelection> selection =

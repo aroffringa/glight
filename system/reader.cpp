@@ -152,15 +152,14 @@ void Reader::parseControlItem(xmlNode *node) {
 }
 
 void Reader::parseFixtureType(xmlNode *node) {
-  enum FixtureType::FixtureClass cl =
-      (enum FixtureType::FixtureClass)getIntAttribute(node, "fixture-class");
+  const std::string class_name = getStringAttribute(node, "fixture-class");
+  FixtureType ft;
+  FixtureType &new_type = _management.GetTheatre().AddFixtureType(ft);
+  parseNameAttr(node, new_type);
   FixtureType *type = dynamic_cast<FixtureType *>(
-      _management.RootFolder().GetChildIfExists(FixtureType::ClassName(cl)));
-  if (!type) {
-    type = &_management.GetTheatre().AddFixtureType(
-        cl);  // TODO we shouldn't use a type by its name, types should be
-              // editable etc
-    parseFolderAttr(node, *type);
+      _management.RootFolder().GetChildIfExists(new_type.Name()));
+  if (type) {
+    throw std::runtime_error("Error in file: fixture type listed twice");
   }
 }
 
@@ -168,8 +167,8 @@ void Reader::parseFixture(xmlNode *node) {
   FixtureType &type = _theatre.GetFixtureType(getStringAttribute(node, "type"));
   Fixture &fixture = _theatre.AddFixture(type);
   parseNameAttr(node, fixture);
-  fixture.Position().X() = getDoubleAttribute(node, "position-x");
-  fixture.Position().Y() = getDoubleAttribute(node, "position-y");
+  fixture.GetPosition().X() = getDoubleAttribute(node, "position-x");
+  fixture.GetPosition().Y() = getDoubleAttribute(node, "position-y");
   if (hasAttribute(node, "symbol"))
     fixture.SetSymbol(FixtureSymbol(getStringAttribute(node, "symbol")));
   fixture.ClearFunctions();

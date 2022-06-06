@@ -52,6 +52,7 @@ set(GUIFILES
   gui/windows/effectpropertieswindow.cpp
   gui/windows/fixturelistwindow.cpp
   gui/windows/fixturetypeswindow.cpp
+  gui/windows/fixturetypefunctionsframe.cpp
   gui/windows/presetcollectionwindow.cpp
   gui/windows/showwindow.cpp
   gui/windows/timesequencepropertieswindow.cpp
@@ -112,6 +113,7 @@ if(Boost_FOUND)
     tests/testfixturecontrol.cpp
     tests/testfixturefunction.cpp
     tests/testfixturetype.cpp
+    tests/testfixturetypefunction.cpp
     tests/testfolder.cpp
     tests/testmanagement.cpp
     tests/testpresetcollection.cpp
