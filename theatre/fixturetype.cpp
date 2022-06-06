@@ -82,13 +82,16 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       break;
     case StockFixture::H2ODMXPro: {
       functions_.emplace_back(0, FunctionType::Master, false, 0);
-      functions_.emplace_back(1, FunctionType::Rotation, false, 0);
-      functions_.emplace_back(2, FunctionType::ColorMacro, false, 0);
+      FixtureTypeFunction &rotation =
+          functions_.emplace_back(1, FunctionType::Rotation, false, 0);
       std::vector<RotationParameters::Range> &ranges =
-          functions_[1].GetRotationParameters().GetRanges();
+          rotation.GetRotationParameters().GetRanges();
       constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
       ranges.emplace_back(9, 121, 0, max_speed);
       ranges.emplace_back(134, 256, 0, -max_speed);
+      FixtureTypeFunction &macro =
+          functions_.emplace_back(2, FunctionType::ColorMacro, false, 0);
+      SetH2OMacroParameters(macro.GetMacroParameters());
     } break;
     case StockFixture::AyraTDCSunrise: {
       functions_.emplace_back(0, FunctionType::Master, false, 0);
@@ -96,13 +99,14 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(2, FunctionType::Green, false, 0);
       functions_.emplace_back(3, FunctionType::Blue, false, 0);
       functions_.emplace_back(4, FunctionType::Strobe, false, 0);
-      functions_.emplace_back(5, FunctionType::Rotation, false, 0);
-      functions_.emplace_back(6, FunctionType::ColorMacro, false, 0);
+      FixtureTypeFunction &rotation =
+          functions_.emplace_back(5, FunctionType::Rotation, false, 0);
       constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
       std::vector<RotationParameters::Range> &ranges =
-          functions_[5].GetRotationParameters().GetRanges();
+          rotation.GetRotationParameters().GetRanges();
       // [ 5 - 128 ) is static positioning
       ranges.emplace_back(128, 256, -max_speed, max_speed);
+      functions_.emplace_back(6, FunctionType::ColorMacro, false, 0);
     } break;
     case StockFixture::RGB_ADJ_6CH: {
       functions_.emplace_back(0, FunctionType::Red, false, 0);
@@ -142,16 +146,18 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(5, FunctionType::Blue, false, 1);
       class_ = FixtureClass::RingedPar;
       break;
-    case StockFixture::BT_VINTAGE_7CH:
+    case StockFixture::BT_VINTAGE_7CH: {
       functions_.emplace_back(0, FunctionType::White, false, 0);
       functions_.emplace_back(1, FunctionType::Master, false, 0);
       functions_.emplace_back(2, FunctionType::Strobe, false, 0);
       functions_.emplace_back(3, FunctionType::Red, false, 1);
       functions_.emplace_back(4, FunctionType::Green, false, 1);
       functions_.emplace_back(5, FunctionType::Blue, false, 1);
-      functions_.emplace_back(6, FunctionType::ColorMacro, false, 1);
+      FixtureTypeFunction &macro =
+          functions_.emplace_back(6, FunctionType::ColorMacro, false, 1);
+      SetBTMacroParameters(macro.GetMacroParameters());
       class_ = FixtureClass::RingedPar;
-      break;
+    } break;
     case StockFixture::RGBLight6Ch_16bit:
       functions_.emplace_back(0, FunctionType::Red, true, 0);
       functions_.emplace_back(2, FunctionType::Green, true, 0);
@@ -208,6 +214,36 @@ void FixtureType::SetRgbAdj6chMacroParameters(MacroParameters &macro) {
   ranges.emplace_back(252, 256, Color(20, 96, 96));
 }
 
+void FixtureType::SetH2OMacroParameters(MacroParameters &macro) {
+  std::vector<MacroParameters::Range> &ranges = macro.GetRanges();
+  ranges.emplace_back(0, 10, Color::White());
+  ranges.emplace_back(10, 21, Color::WhiteOrange());
+  ranges.emplace_back(21, 32, Color::Orange());
+  ranges.emplace_back(32, 43, Color::OrangeGreen());
+  ranges.emplace_back(43, 54, Color::GreenC());
+  ranges.emplace_back(54, 65, Color::GreenBlue());
+  ranges.emplace_back(65, 76, Color::BlueC());
+  ranges.emplace_back(76, 87, Color::BlueYellow());
+  ranges.emplace_back(87, 98, Color::Yellow());
+  ranges.emplace_back(98, 109, Color::YellowPurple());
+  ranges.emplace_back(109, 120, Color::Purple());
+  ranges.emplace_back(120, 127, Color::PurpleWhite());
+  ranges.emplace_back(128, 256, Color::White());
+}
+
+void FixtureType::SetBTMacroParameters(MacroParameters &macro) {
+  std::vector<MacroParameters::Range> &ranges = macro.GetRanges();
+  ranges.emplace_back(0, 8, std::optional<Color>());
+  ranges.emplace_back(0, 28, Color::RedC());
+  ranges.emplace_back(0, 48, Color::Orange());
+  ranges.emplace_back(0, 68, Color::Yellow());
+  ranges.emplace_back(0, 88, Color::GreenC());
+  ranges.emplace_back(0, 98, Color::Cyan());
+  ranges.emplace_back(0, 108, Color::BlueC());
+  ranges.emplace_back(0, 118, Color::Purple());
+  ranges.emplace_back(0, 256, Color::White());
+}
+
 void FixtureType::UpdateFunctions() {
   std::array<unsigned, 3> max_values;
   max_values[0] = 0;
@@ -252,9 +288,12 @@ Color FixtureType::GetColor(const Fixture &fixture,
     red = macro_color->Red();
     green = macro_color->Green();
     blue = macro_color->Blue();
+    return Color(red * master / 256, green * master / 256, blue * master / 256);
   }
-  return Color(red * master / scaling_value_, green * master / scaling_value_,
-               blue * master / scaling_value_);
+  else {
+    return Color(red * master / scaling_value_, green * master / scaling_value_,
+                blue * master / scaling_value_);
+  }
 }
 
 int FixtureType::GetRotationSpeed(const Fixture &fixture,

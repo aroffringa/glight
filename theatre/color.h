@@ -4,13 +4,13 @@
 class Color {
  public:
   constexpr Color(unsigned char red, unsigned char green, unsigned char blue)
-      : _red(red), _green(green), _blue(blue) {}
+      : red_(red), green_(green), blue_(blue) {}
   constexpr Color(const Color &) = default;
   Color &operator=(const Color &) = default;
 
-  constexpr unsigned char Red() const { return _red; }
-  constexpr unsigned char Green() const { return _green; }
-  constexpr unsigned char Blue() const { return _blue; }
+  constexpr unsigned char Red() const { return red_; }
+  constexpr unsigned char Green() const { return green_; }
+  constexpr unsigned char Blue() const { return blue_; }
 
   constexpr static Color Gray(unsigned char intensity) {
     return Color(intensity, intensity, intensity);
@@ -40,67 +40,8 @@ class Color {
   constexpr static Color WarmWhite() { return Color(255, 228, 228); }
   constexpr static Color UV() { return Color(85, 0, 255); }
 
-  static Color H20Color(unsigned value) {
-    if (value <= 10)
-      return White();
-    else if (value <= 21)
-      return WhiteOrange();
-    else if (value <= 32)
-      return Orange();
-    else if (value <= 43)
-      return OrangeGreen();
-    else if (value <= 54)
-      return GreenC();
-    else if (value <= 65)
-      return GreenBlue();
-    else if (value <= 76)
-      return BlueC();
-    else if (value <= 87)
-      return BlueYellow();
-    else if (value <= 98)
-      return Yellow();
-    else if (value <= 109)
-      return YellowPurple();
-    else if (value <= 120)
-      return Purple();
-    else if (value <= 127)
-      return PurpleWhite();
-    else
-      return White();
-  }
-
-  static Color BTMacroColor(unsigned value) {
-    if (value < 68) {
-      if (value < 28) {
-        if (value < 8)
-          return Black();
-        else
-          return RedC();
-      } else {
-        if (value < 48)
-          return Orange();
-        else
-          return Yellow();
-      }
-    } else {
-      if (value < 108) {
-        if (value < 88)
-          return GreenC();
-        else if (value < 98)
-          return Cyan();
-        else
-          return BlueC();
-      } else {
-        if (value < 118)
-          return Purple();
-        else
-          return White();  // color fade
-      }
-    }
-  }
-
  private:
-  unsigned char _red, _green, _blue;
+  unsigned char red_, green_, blue_;
 };
 
 inline Color operator*(const Color &lhs, unsigned char rhs) {
