@@ -32,7 +32,7 @@ void Writer::Write(const std::string &filename) {
 }
 
 void Writer::writeGlightShow() {
-  writer_.StartObject("glight-show");
+  writer_.StartObject();
 
   writeFolders();
 
@@ -42,27 +42,34 @@ void Writer::writeGlightShow() {
 
   const std::vector<std::unique_ptr<FixtureType>> &fixtureTypes =
       theatre.FixtureTypes();
+
+  writer_.StartArray("fixture_types");
   for (const std::unique_ptr<FixtureType> &ft : fixtureTypes)
     writeFixtureType(*ft);
+  writer_.EndArray();  // fixture_types
 
+  writer_.StartArray("fixtures");
   const std::vector<std::unique_ptr<Fixture>> &fixtures = theatre.Fixtures();
   for (const std::unique_ptr<Fixture> &f : fixtures) writeFixture(*f);
+  writer_.EndArray();  // fixtures
 
   writer_.EndObject();  // theatre
 
-  writer_.StartObject("control");
+  writer_.StartArray("controls");
 
   const std::vector<std::unique_ptr<Controllable>> &controllables =
       _management.Controllables();
   for (const std::unique_ptr<Controllable> &c : controllables)
     writeControllable(*c);
+  writer_.EndArray();  // controls
 
   const std::vector<std::unique_ptr<SourceValue>> &sourceValues =
       _management.SourceValues();
+
+  writer_.StartArray("source_values");
   for (const std::unique_ptr<SourceValue> &sv : sourceValues)
     writePresetValue(sv->Preset());
-
-  writer_.EndObject();  // control
+  writer_.EndArray();  // source_values
 
   writer_.StartObject("show");
 
@@ -79,7 +86,7 @@ void Writer::writeGlightShow() {
 
   writer_.EndObject();  // gui
 
-  writer_.EndObject();  // glight-show
+  writer_.EndObject();  // root object
 }
 
 void Writer::writeFolders() {
@@ -107,7 +114,7 @@ void Writer::writeFolderAttributes(const FolderObject &obj) {
 }
 
 void Writer::writeFixture(const Fixture &fixture) {
-  writer_.StartObject("fixture");
+  writer_.StartObject();
   writeNameAttributes(fixture);
   writer_.String("type", fixture.Type().Name());
   writer_.Number("position-x", fixture.GetPosition().X());
@@ -115,13 +122,15 @@ void Writer::writeFixture(const Fixture &fixture) {
   writer_.String("symbol", fixture.Symbol().Name());
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =
       fixture.Functions();
+  writer_.StartArray("functions");
   for (const std::unique_ptr<FixtureFunction> &ff : functions)
     writeFixtureFunction(*ff);
-  writer_.EndObject();
+  writer_.EndArray();   // functions
+  writer_.EndObject();  // fixture
 }
 
 void Writer::writeFixtureFunction(const FixtureFunction &fixtureFunction) {
-  writer_.StartObject("fixture-function");
+  writer_.StartObject();
   writer_.String("name", fixtureFunction.Name());
   writer_.String("type", FunctionTypeDescription(fixtureFunction.Type()));
   writeDmxChannel(fixtureFunction.FirstChannel());
@@ -137,7 +146,7 @@ void Writer::writeDmxChannel(const DmxChannel &dmxChannel) {
 }
 
 void Writer::writeFixtureType(const FixtureType &fixtureType) {
-  writer_.StartObject("fixture-type");
+  writer_.StartObject();
   writeFolderAttributes(fixtureType);
   writer_.String("fixture-class",
                  FixtureType::ClassName(fixtureType.GetFixtureClass()));
@@ -178,17 +187,19 @@ void Writer::writePresetCollection(
   for (const std::unique_ptr<PresetValue> &pv : values)
     requireControllable(pv->Controllable());
 
-  writer_.Name("preset-collection");
   writer_.StartObject();
+  writer_.String("type", "preset-collection");
   writeFolderAttributes(presetCollection);
+  writer_.StartArray("values");
   for (const std::unique_ptr<PresetValue> &pv : values) writePresetValue(*pv);
+  writer_.EndArray();
   writer_.EndObject();
 }
 
 void Writer::writePresetValue(const PresetValue &presetValue) {
   requireControllable(presetValue.Controllable());
 
-  writer_.StartObject("preset-value");
+  writer_.StartObject();
   writer_.String("controllable-ref", presetValue.Controllable().Name());
   writer_.Number("input-index", presetValue.InputIndex());
   writer_.Number("folder", _folderIds[&presetValue.Controllable().Parent()]);
@@ -197,7 +208,8 @@ void Writer::writePresetValue(const PresetValue &presetValue) {
 }
 
 void Writer::writeFixtureControl(const FixtureControl &control) {
-  writer_.StartObject("fixture-control");
+  writer_.StartObject();
+  writer_.String("type", "fixture-control");
   writeFolderAttributes(control);
   writer_.String("fixture-ref", control.Fixture().Name());
   writer_.EndObject();
@@ -209,7 +221,8 @@ void Writer::writeChase(const Chase &chase) {
   for (const std::pair<Controllable *, size_t> &input : list)
     requireControllable(*input.first);
 
-  writer_.StartObject("chase");
+  writer_.StartObject();
+  writer_.String("type", "chase");
   writeFolderAttributes(chase);
   writeTrigger(chase.Trigger());
   writeTransition(chase.Transition());
@@ -223,7 +236,8 @@ void Writer::writeTimeSequence(const TimeSequence &timeSequence) {
   for (const std::pair<Controllable *, size_t> &input : list)
     requireControllable(*input.first);
 
-  writer_.StartObject("time-sequence");
+  writer_.StartObject();
+  writer_.String("type", "time-sequence");
   writeFolderAttributes(timeSequence);
   writer_.Boolean("sustain", timeSequence.Sustain());
   writer_.Number("repeat-count", timeSequence.RepeatCount());
@@ -258,13 +272,15 @@ void Writer::writeTransition(const Transition &transition) {
 
 void Writer::writeSequence(const Sequence &sequence) {
   writer_.StartObject("sequence");
+  writer_.StartArray("inputs");
   for (const std::pair<Controllable *, size_t> &input : sequence.List()) {
-    writer_.StartObject("input-ref");
+    writer_.StartObject();
     writer_.Number("input-index", input.second);
     writer_.Number("folder", _folderIds[&input.first->Parent()]);
     writer_.String("name", input.first->Name());
     writer_.EndObject();
   }
+  writer_.EndArray();
   writer_.EndObject();
 }
 
@@ -273,16 +289,18 @@ void Writer::writeEffect(const class Effect &effect) {
     for (const std::pair<Controllable *, size_t> &c : effect.Connections())
       requireControllable(*c.first);
 
-    writer_.StartObject("effect");
+    writer_.StartObject();
+    writer_.String("type", "effect");
     writeFolderAttributes(effect);
-    writer_.String("type", effect.TypeToName(effect.GetType()));
+    writer_.String("effect_type", effect.TypeToName(effect.GetType()));
     std::unique_ptr<PropertySet> ps = PropertySet::Make(effect);
 
     // the number and name of the effect controls are implied from the
     // effect type, so do not require to be stored.
 
+    writer_.StartArray("properties");
     for (const Property &p : *ps) {
-      writer_.StartObject("property");
+      writer_.StartObject();
       writer_.String("name", p.Name());
       switch (p.GetType()) {
         case Property::Choice:
@@ -303,14 +321,17 @@ void Writer::writeEffect(const class Effect &effect) {
       }
       writer_.EndObject();
     }
+    writer_.EndArray();  // properties
+    writer_.StartArray("connections");
     for (const std::pair<Controllable *, size_t> &c : effect.Connections()) {
-      writer_.StartObject("connection-ref");
+      writer_.StartObject();
       writer_.Number("input-index", c.second);
       writer_.Number("folder", _folderIds[&c.first->Parent()]);
       writer_.String("name", c.first->Name());
       writer_.EndObject();
     }
-    writer_.EndObject();
+    writer_.EndArray();   // connections
+    writer_.EndObject();  // effect
     _controllablesWritten.insert(&effect);
   }
 }
