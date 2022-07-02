@@ -26,7 +26,7 @@ class AudioWidget : public Gtk::DrawingArea {
     return _centerPosition * _chunkSize / (44.100 * 4.0);
   }
   void SetScene(class Scene &scene) { _scene = &scene; }
-  void SetNoScene() { _scene = 0; }
+  void SetNoScene() { _scene = nullptr; }
   sigc::signal<void, double> SignalClicked() { return _signalClicked; }
   size_t DataSize() const { return _audioDataMax.size(); }
 

@@ -1,17 +1,38 @@
-#ifndef TRIGGER_H
-#define TRIGGER_H
+#ifndef THEATRE_TRIGGER_H_
+#define THEATRE_TRIGGER_H_
 
 #include <string>
 
+enum class TriggerType { Delay, Sync, Beat };
+
+inline std::string ToString(TriggerType trigger_style) {
+  switch (trigger_style) {
+    default:
+    case TriggerType::Delay:
+      return "delay";
+    case TriggerType::Sync:
+      return "sync";
+    case TriggerType::Beat:
+      return "beat";
+  }
+}
+
+inline TriggerType GetTriggerType(const std::string& str) {
+  if (str == "sync")
+    return TriggerType::Sync;
+  else if (str == "beat")
+    return TriggerType::Beat;
+  else
+    return TriggerType::Delay;
+}
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class Trigger {
  public:
-  enum Type { DelayTriggered, SyncTriggered, BeatTriggered };
-
   Trigger()
-      : _type(DelayTriggered),
+      : _type(TriggerType::Delay),
         _delayInMs(500.0),
         _delaySynced(1),
         _delayInBeats(1.0) {}
@@ -25,23 +46,23 @@ class Trigger {
   double DelayInBeats() const { return _delayInBeats; }
   void SetDelayInBeats(double delay) { _delayInBeats = delay; }
 
-  enum Type Type() const { return _type; }
-  void SetType(enum Type type) { _type = type; }
+  TriggerType Type() const { return _type; }
+  void SetType(TriggerType type) { _type = type; }
 
   std::string ToString() const {
     switch (_type) {
-      case DelayTriggered:
+      case TriggerType::Delay:
         return std::to_string(_delayInMs / 1000.0) + " s";
-      case SyncTriggered:
+      case TriggerType::Sync:
         return std::to_string(_delaySynced) + " syncs";
-      case BeatTriggered:
+      case TriggerType::Beat:
         return std::to_string(_delayInBeats) + " beats";
     }
     return std::string();
   }
 
  private:
-  enum Type _type;
+  TriggerType _type;
   double _delayInMs;
   unsigned _delaySynced;
   double _delayInBeats;

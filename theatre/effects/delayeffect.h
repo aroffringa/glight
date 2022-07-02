@@ -27,7 +27,7 @@ class DelayEffect : public Effect {
           (_bufferWritePos + _buffer.size() - 1) % _buffer.size();
       _buffer[prevWritePos].second.Set(
           ControlValue::Mix(_buffer[prevWritePos].second.UInt(),
-                            values[0].UInt(), ControlValue::Default));
+                            values[0].UInt(), MixStyle::Default));
     } else {
       _previousTimestep = timing.TimestepNumber();
       _buffer[_bufferWritePos].first = timing.TimeInMS();

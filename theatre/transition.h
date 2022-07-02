@@ -1,29 +1,66 @@
-#ifndef TRANSITION_H
-#define TRANSITION_H
+#ifndef THEATRE_TRANSITION_H_
+#define THEATRE_TRANSITION_H_
 
 #include "presetcollection.h"
 #include "timing.h"
 
+enum class TransitionType {
+  None,
+  Fade,
+  FadeThroughBlack,
+  Erratic,
+  Black,
+  FadeFromBlack,
+  FadeToBlack
+};
+
+inline std::string ToString(TransitionType mix_style) {
+  switch (mix_style) {
+    default:
+    case TransitionType::None:
+      return "none";
+    case TransitionType::Fade:
+      return "fade";
+    case TransitionType::FadeThroughBlack:
+      return "fade_through_black";
+    case TransitionType::Erratic:
+      return "erratic";
+    case TransitionType::Black:
+      return "black";
+    case TransitionType::FadeFromBlack:
+      return "fade_from_black";
+    case TransitionType::FadeToBlack:
+      return "fade_to_black";
+  }
+}
+
+inline TransitionType GetTransitionType(const std::string &str) {
+  if (str == "fade")
+    return TransitionType::Fade;
+  else if (str == "fade_through_black")
+    return TransitionType::FadeThroughBlack;
+  else if (str == "erratic")
+    return TransitionType::Erratic;
+  else if (str == "black")
+    return TransitionType::Black;
+  else if (str == "fade_from_black")
+    return TransitionType::FadeFromBlack;
+  else if (str == "fade_to_black")
+    return TransitionType::FadeToBlack;
+  else  // "none"
+    return TransitionType::None;
+}
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class Transition {
  public:
-  enum Type {
-    None,
-    Fade,
-    FadeThroughBlack,
-    Erratic,
-    Black,
-    FadeFromBlack,
-    FadeToBlack
-  };
-
-  Transition() : _lengthInMs(250.0), _type(Fade) {}
+  Transition() : _lengthInMs(250.0), _type(TransitionType::Fade) {}
   ~Transition() {}
 
-  enum Type Type() const { return _type; }
-  void SetType(enum Type type) { _type = type; }
+  TransitionType Type() const { return _type; }
+  void SetType(TransitionType type) { _type = type; }
 
   double LengthInMs() const { return _lengthInMs; }
   void SetLengthInMs(double length) { _lengthInMs = length; }
@@ -35,20 +72,20 @@ class Transition {
            size_t secondInput, double transitionTime, const ControlValue &value,
            const Timing &timing) const {
     switch (_type) {
-      case None:
+      case TransitionType::None:
         if (transitionTime * 2.0 <= _lengthInMs)
           first.MixInput(firstInput, value);
         else
           second.MixInput(secondInput, value);
         break;
-      case Fade: {
+      case TransitionType::Fade: {
         unsigned secondRatioValue =
             (unsigned)((transitionTime / _lengthInMs) * 256.0);
         unsigned firstRatioValue = 255 - secondRatioValue;
         first.MixInput(firstInput, (value.UInt() * firstRatioValue) >> 8);
         second.MixInput(secondInput, (value.UInt() * secondRatioValue) >> 8);
       } break;
-      case FadeThroughBlack: {
+      case TransitionType::FadeThroughBlack: {
         unsigned ratio = (unsigned)((transitionTime / _lengthInMs) * 512.0);
         if (ratio < 256) {
           ControlValue firstValue((value.UInt() * (255 - ratio)) >> 8);
@@ -58,7 +95,7 @@ class Transition {
           second.MixInput(secondInput, secondValue);
         }
       } break;
-      case Erratic: {
+      case TransitionType::Erratic: {
         unsigned ratio = (unsigned)((transitionTime / _lengthInMs) *
                                     ControlValue::MaxUInt());
         if (ratio < timing.DrawRandomValue())
@@ -66,14 +103,14 @@ class Transition {
         else
           second.MixInput(secondInput, value);
       }
-      case Black:
+      case TransitionType::Black:
         break;
-      case FadeFromBlack: {
+      case TransitionType::FadeFromBlack: {
         unsigned ratioValue =
             (unsigned)((transitionTime / _lengthInMs) * 256.0);
         second.MixInput(secondInput, (value.UInt() * ratioValue) >> 8);
       } break;
-      case FadeToBlack: {
+      case TransitionType::FadeToBlack: {
         unsigned ratioValue =
             255 - (unsigned)((transitionTime / _lengthInMs) * 256.0);
         first.MixInput(secondInput, (value.UInt() * ratioValue) >> 8);
@@ -83,7 +120,7 @@ class Transition {
 
  private:
   double _lengthInMs;
-  enum Type _type;
+  TransitionType _type;
 };
 
 #endif

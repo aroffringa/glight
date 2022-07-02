@@ -68,7 +68,7 @@ class FixtureControl : public Controllable {
   void MixChannels(unsigned *channelValues, unsigned universe) {
     for (size_t i = 0; i != _fixture->Functions().size(); ++i) {
       const std::unique_ptr<FixtureFunction> &ff = _fixture->Functions()[i];
-      ff->MixChannels(_values[i].UInt(), ControlValue::Default, channelValues,
+      ff->MixChannels(_values[i].UInt(), MixStyle::Default, channelValues,
                       universe);
     }
   }

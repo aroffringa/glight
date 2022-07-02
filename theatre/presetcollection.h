@@ -42,7 +42,7 @@ class PresetCollection : public Controllable {
     for (const std::unique_ptr<PresetValue> &pv : _presetValues) {
       unsigned rightHand = pv->Value().UInt();
       ControlValue value(
-          ControlValue::Mix(leftHand, rightHand, ControlValue::Multiply));
+          ControlValue::Mix(leftHand, rightHand, MixStyle::Multiply));
 
       pv->Controllable().MixInput(pv->InputIndex(), value);
     }

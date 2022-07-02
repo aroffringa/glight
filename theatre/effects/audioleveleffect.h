@@ -36,7 +36,7 @@ class AudioLevelEffect final : public Effect {
     _lastValue = std::max(_lastValue, audioLevel);
 
     unsigned v =
-        ControlValue::Mix(_lastValue, values[0].UInt(), ControlValue::Multiply);
+        ControlValue::Mix(_lastValue, values[0].UInt(), MixStyle::Multiply);
     ControlValue audioLevelCV(v);
     for (const std::pair<Controllable *, size_t> &connection : Connections()) {
       connection.first->MixInput(connection.second, audioLevelCV);

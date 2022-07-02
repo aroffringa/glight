@@ -1,6 +1,8 @@
 #ifndef CONTROLVALUE_H
 #define CONTROLVALUE_H
 
+#include "mixstyle.h"
+
 #include <cmath>
 
 /**
@@ -8,16 +10,6 @@
  */
 class ControlValue {
  public:
-  enum MixStyle {
-    Default,
-    HighestValue,
-    Sum,
-    LowestValue,
-    Multiply,
-    First,
-    Second
-  };
-
   ControlValue() {}
   ControlValue(unsigned value) : _value(value) {}
   ControlValue(const ControlValue &source) = default;
@@ -34,24 +26,24 @@ class ControlValue {
                       MixStyle mixStyle) {
     switch (mixStyle) {
       default:
-      case HighestValue:
+      case MixStyle::HighestValue:
         if (firstValue > secondValue)
           return firstValue;
         else
           return secondValue;
-      case Default:
-      case Sum:
+      case MixStyle::Default:
+      case MixStyle::Sum:
         return firstValue + secondValue;
-      case LowestValue:
+      case MixStyle::LowestValue:
         if (firstValue > secondValue)
           return secondValue;
         else
           return firstValue;
-      case Multiply:
+      case MixStyle::Multiply:
         return MultiplyValues(firstValue, secondValue);
-      case First:
+      case MixStyle::First:
         return firstValue;
-      case Second:
+      case MixStyle::Second:
         return secondValue;
     }
   }
@@ -64,7 +56,7 @@ class ControlValue {
 
   static MixStyle CombineMixStyles(MixStyle primaryStyle,
                                    MixStyle secondaryStyle) {
-    if (primaryStyle == Default)
+    if (primaryStyle == MixStyle::Default)
       return secondaryStyle;
     else
       return primaryStyle;
@@ -78,7 +70,5 @@ class ControlValue {
  private:
   unsigned int _value;
 };
-
-typedef ControlValue::MixStyle MixStyle;
 
 #endif

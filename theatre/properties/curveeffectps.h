@@ -69,7 +69,7 @@ class CurveEffectPS final : public PropertySet {
         }
         break;
     }
-    return 0;
+    return nullptr;
   }
 };
 

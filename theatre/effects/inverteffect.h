@@ -23,7 +23,7 @@ class InvertEffect : public Effect {
     unsigned inverted = ControlValue::MaxUInt() - values[0].UInt();
     if (inverted < _offThreshold) inverted = ControlValue::Zero();
     ControlValue value =
-        ControlValue::Mix(values[1].UInt(), inverted, ControlValue::Multiply);
+        ControlValue::Mix(values[1].UInt(), inverted, MixStyle::Multiply);
     for (const std::pair<Controllable *, size_t> &connection : Connections())
       connection.first->MixInput(connection.second, value);
   }

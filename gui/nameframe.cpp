@@ -12,7 +12,7 @@
 NameFrame::NameFrame(Management &management, ShowWindow &showWindow)
     : _management(&management),
       _showWindow(showWindow),
-      _namedObject(0),
+      _namedObject(nullptr),
       _label("Name:"),
       _button(Gtk::Stock::APPLY) {
   pack_start(_label, false, false, 2);

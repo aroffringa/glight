@@ -8,14 +8,22 @@ pkg_check_modules(FLACPP flac++ REQUIRED)
 pkg_check_modules(ALSA alsa REQUIRED)
 pkg_check_modules(LIBOLA libola REQUIRED)
 
-find_package(Boost COMPONENTS filesystem system REQUIRED)
+find_package(Boost COMPONENTS filesystem locale system REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(Threads REQUIRED)
 
 find_library(AUBIO_LIBRARY NAMES aubio)
 find_path(AUBIO_INCLUDE_DIR NAMES aubio/aubio.h)
 
-add_compile_options(-O3 -Wall -DNDEBUG -std=c++17 -march=native)
+add_compile_options(-O3 -Wall -Wzero-as-null-pointer-constant -march=native)
+if (NOT CMAKE_BUILD_TYPE EQUAL "DEBUG")
+  add_compile_options(-DNDEBUG)
+endif()
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_EXTENSIONS NO)
+
 add_definitions(-DGLIGHT_INSTALL_PATH="${CMAKE_INSTALL_PREFIX}")
 
 include_directories(${GTKMM_INCLUDE_DIRS})
@@ -62,6 +70,7 @@ set(SYSTEMFILES
   system/audioplayer.cpp
   system/beatfinder.cpp
   system/flacdecoder.cpp
+  system/jsonwriter.cpp
   system/reader.cpp
   system/writer.cpp
 )
@@ -118,6 +127,7 @@ if(Boost_FOUND)
     tests/testmanagement.cpp
     tests/testpresetcollection.cpp
     tests/testpresetvalue.cpp
+    tests/tjsonwriter.cpp
     )
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})
   add_test(runtests runtests)

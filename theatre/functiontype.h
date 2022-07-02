@@ -72,7 +72,7 @@ inline const char *AbbreviatedFunctionType(FunctionType functionType) {
     case FunctionType::WarmWhite:
       return "WW";
   }
-  return 0;
+  return nullptr;
 }
 
 inline std::string FunctionTypeDescription(FunctionType functionType) {

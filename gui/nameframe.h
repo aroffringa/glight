@@ -21,7 +21,7 @@ class NameFrame : public Gtk::HBox {
   }
   FolderObject *GetNamedObject() const { return _namedObject; }
   void SetNoNamedObject() {
-    _namedObject = 0;
+    _namedObject = nullptr;
     update();
   }
   sigc::signal<void> &SignalNameChange() { return _signalNameChange; }

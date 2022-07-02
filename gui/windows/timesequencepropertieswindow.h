@@ -52,7 +52,7 @@ class TimeSequencePropertiesWindow : public PropertiesWindow {
   void onTriggerTypeChanged();
   void onTriggerSpeedChanged(double newValue);
   void onTransitionSpeedChanged(double newValue);
-  void onTransitionTypeChanged(enum Transition::Type type);
+  void onTransitionTypeChanged(TransitionType type);
   void onSyncCountChanged();
   void onBeatSpeedChanged();
 

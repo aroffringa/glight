@@ -11,13 +11,13 @@
 AudioWidget::AudioWidget()
     : _centerPosition(0),
       _renderStartPosition(0),
-      _buffer(0),
+      _buffer(nullptr),
       _width(0),
       _height(0),
       _isUpToDate(false),
       _chunkSize(800),
       _chunkBuffer(_chunkSize),
-      _scene(0) {
+      _scene(nullptr) {
   add_events(Gdk::BUTTON_PRESS_MASK);
 
   signal_button_press_event().connect(

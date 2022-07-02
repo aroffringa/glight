@@ -43,13 +43,13 @@ class Chase : public Controllable {
         _phaseOffset = 0.0;
     }
     switch (_trigger.Type()) {
-      case Trigger::DelayTriggered:
+      case TriggerType::Delay:
         mixDelayChase(timing);
         break;
-      case Trigger::SyncTriggered:
+      case TriggerType::Sync:
         mixSyncedChase(timing);
         break;
-      case Trigger::BeatTriggered:
+      case TriggerType::Beat:
         mixBeatChase(timing);
         break;
     }

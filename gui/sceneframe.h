@@ -37,7 +37,7 @@ class SceneFrame : public Gtk::Frame {
   void SetNoSelectedScene() {
     set_sensitive(false);
     _audioWidget.SetNoScene();
-    _selectedScene = 0;
+    _selectedScene = nullptr;
   }
   void ChangeManagement(class Management &management);
 
@@ -115,7 +115,7 @@ class SceneFrame : public Gtk::Frame {
   void setSceneItemListRow(SceneItem *sceneItem, Gtk::TreeModel::Row row);
   void updateSelectedSceneItems();
   void fillControllablesList();
-  void addKey(enum KeySceneItem::Level level);
+  void addKey(KeySceneLevel level);
 
   void onChangeAudioButtonPressed();
   void onStartButtonPressed();

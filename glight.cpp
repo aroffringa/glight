@@ -10,8 +10,6 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  Writer::CheckXmlVersion();
-
   Application application;
   application.Run(argc, argv);
 

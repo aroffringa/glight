@@ -232,7 +232,7 @@ void SceneFrame::createControllablesList2() {
 void SceneFrame::fillSceneItemList() {
   _sceneItemsListModel->clear();
 
-  if (_selectedScene != 0) {
+  if (_selectedScene != nullptr) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
     const std::multimap<double, std::unique_ptr<SceneItem>> &items =
         _selectedScene->SceneItems();
@@ -254,14 +254,14 @@ void SceneFrame::setSceneItemListRow(SceneItem *sceneItem,
   std::stringstream startTimeStr;
   startTimeStr << (round(sceneItem->OffsetInMS() / 10.0) / 100.0);
   row[_sceneItemsListColumns._startTime] = startTimeStr.str();
-  if (dynamic_cast<const KeySceneItem *>(sceneItem) == 0) {
+  if (dynamic_cast<const KeySceneItem *>(sceneItem) == nullptr) {
     std::stringstream endTimeStr;
     endTimeStr << (round(sceneItem->DurationInMS() / 10.0) / 100.0);
     row[_sceneItemsListColumns._endTime] = endTimeStr.str();
 
     const ControlSceneItem *csi =
         dynamic_cast<const ControlSceneItem *>(sceneItem);
-    if (csi != 0) {
+    if (csi != nullptr) {
       std::stringstream sValStr;
       sValStr << (round(csi->StartValue().Ratio() * 1000.0) / 10.0) << "%";
       row[_sceneItemsListColumns._startValue] = sValStr.str();
@@ -326,7 +326,7 @@ void SceneFrame::onStopButtonPressed() {
   }
 }
 
-void SceneFrame::addKey(enum KeySceneItem::Level level) {
+void SceneFrame::addKey(KeySceneLevel level) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
   KeySceneItem *key = _selectedScene->AddKeySceneItem(
       _management->GetOffsetTimeInMS() - _selectedScene->StartTimeInMS());
@@ -337,7 +337,7 @@ void SceneFrame::addKey(enum KeySceneItem::Level level) {
   updateAudioWidgetKeys();
 }
 
-void SceneFrame::onKey1ButtonPressed() { addKey(KeySceneItem::Key); }
+void SceneFrame::onKey1ButtonPressed() { addKey(KeySceneLevel::Key); }
 
 void SceneFrame::onCreateControlItemButtonPressed() {
   Gtk::TreeModel::iterator activeControllable =
@@ -354,8 +354,8 @@ void SceneFrame::onCreateControlItemButtonPressed() {
              pathHandle.begin();
          pathPtr != pathHandle.end(); ++pathPtr) {
       SceneItem *selItem = (*_sceneItemsListModel->get_iter(
-                    *pathPtr))[_sceneItemsListColumns._item],
-                *nextItem = 0;
+          *pathPtr))[_sceneItemsListColumns._item];
+      SceneItem *nextItem = nullptr;
       std::vector<Gtk::TreeModel::Path>::const_iterator nextPtr = pathPtr;
       ++nextPtr;
       if (nextPtr != pathHandle.end())
@@ -365,7 +365,7 @@ void SceneFrame::onCreateControlItemButtonPressed() {
       ControlSceneItem *item = _selectedScene->AddControlSceneItem(
           selItem->OffsetInMS(),
           *(*activeControllable)[_controllablesListColumns._controllable], 0);
-      if (nextItem != 0)
+      if (nextItem != nullptr)
         item->SetDurationInMS(nextItem->OffsetInMS() - item->OffsetInMS());
       else
         item->SetDurationInMS(1000);
@@ -398,7 +398,7 @@ void SceneFrame::onSelectedSceneItemChanged() {
         std::unique_lock<std::mutex> lock(_management->Mutex());
         SceneItem *item = selectedItem();
         ControlSceneItem *csi = dynamic_cast<ControlSceneItem *>(item);
-        if (csi != 0) {
+        if (csi != nullptr) {
           unsigned s = csi->StartValue().UInt(), e = csi->EndValue().UInt();
           lock.unlock();
           _startScale.set_value(s);
@@ -468,19 +468,19 @@ bool SceneFrame::HandleKeyDown(char key) {
       onStartButtonPressed();
       return true;
     case '1':
-      addKey(KeySceneItem::Section);
+      addKey(KeySceneLevel::Section);
       return true;
     case '2':
-      addKey(KeySceneItem::Measure);
+      addKey(KeySceneLevel::Measure);
       return true;
     case '3':
-      addKey(KeySceneItem::Highlight);
+      addKey(KeySceneLevel::Highlight);
       return true;
     case '4':
-      addKey(KeySceneItem::Beat);
+      addKey(KeySceneLevel::Beat);
       return true;
     case '5':
-      addKey(KeySceneItem::Key);
+      addKey(KeySceneLevel::Key);
       return true;
   }
   return false;
@@ -500,7 +500,7 @@ void SceneFrame::onScalesChanged() {
       SceneItem *item = (*_sceneItemsListModel->get_iter(
           *pathPtr))[_sceneItemsListColumns._item];
       ControlSceneItem *csi = dynamic_cast<ControlSceneItem *>(item);
-      if (csi != 0) {
+      if (csi != nullptr) {
         csi->StartValue().Set((unsigned)_startScale.get_value());
         csi->EndValue().Set((unsigned)_endScale.get_value());
       }
@@ -588,7 +588,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS) {
 
     std::unique_lock<std::mutex> lock(_management->Mutex());
     KeySceneItem *item = _selectedScene->AddKeySceneItem(timeInMS);
-    item->SetLevel(KeySceneItem::Key);
+    item->SetLevel(KeySceneLevel::Key);
     lock.unlock();
 
     fillSceneItemList();

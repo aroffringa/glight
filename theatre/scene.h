@@ -77,7 +77,7 @@ class Scene : public Startable, private SyncListener {
       _isPlaying = false;
       initPlayer();
     } else {
-      if (_audioPlayer == 0) initPlayer();
+      if (_audioPlayer == nullptr) initPlayer();
     }
   }
   bool HasAudio() const { return _hasAudio; }

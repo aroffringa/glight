@@ -65,7 +65,7 @@ class Controllable : public FolderObject {
 
   void MixInput(size_t index, const ControlValue &value) {
     unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(), value.UInt(),
-                                        ControlValue::Default);
+                                        MixStyle::Default);
     InputValue(index) = ControlValue(mixVal);
   }
 

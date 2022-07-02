@@ -154,6 +154,7 @@ void Reader::parseControlItem(xmlNode *node) {
 void Reader::parseFixtureType(xmlNode *node) {
   const std::string class_name = getStringAttribute(node, "fixture-class");
   FixtureType ft;
+  ft.SetFixtureClass(FixtureType::NameToClass(class_name));
   FixtureType &new_type = _management.GetTheatre().AddFixtureType(ft);
   parseNameAttr(node, new_type);
   FixtureType *type = dynamic_cast<FixtureType *>(
@@ -205,7 +206,7 @@ void Reader::parseDmxChannel(xmlNode *node, class DmxChannel &dmxChannel) {
   dmxChannel.SetUniverse(getIntAttribute(node, "universe"));
   dmxChannel.SetChannel(getIntAttribute(node, "channel"));
   dmxChannel.SetDefaultMixStyle(
-      (ControlValue::MixStyle)getIntAttribute(node, "default-mix-style"));
+      (MixStyle)getIntAttribute(node, "default-mix-style"));
 }
 
 void Reader::parseFixtureControl(xmlNode *node) {
@@ -374,14 +375,14 @@ void Reader::parseEffect(xmlNode *node) {
 }
 
 void Reader::parseTrigger(xmlNode *node, class Trigger &trigger) {
-  trigger.SetType((enum Trigger::Type)getIntAttribute(node, "type"));
+  trigger.SetType((enum TriggerType)getIntAttribute(node, "type"));
   trigger.SetDelayInMs(getDoubleAttribute(node, "delay-in-ms"));
   trigger.SetDelayInBeats(getDoubleAttribute(node, "delay-in-beats"));
   trigger.SetDelayInSyncs(getDoubleAttribute(node, "delay-in-syncs"));
 }
 
 void Reader::parseTransition(xmlNode *node, class Transition &transition) {
-  transition.SetType((enum Transition::Type)getIntAttribute(node, "type"));
+  transition.SetType((TransitionType)getIntAttribute(node, "type"));
   transition.SetLengthInMs(getDoubleAttribute(node, "length-in-ms"));
 }
 
@@ -435,7 +436,7 @@ void Reader::parseSceneItem(xmlNode *node, Scene &scene) {
 KeySceneItem &Reader::parseKeySceneItem(xmlNode *node, Scene &scene) {
   KeySceneItem *item =
       scene.AddKeySceneItem(getDoubleAttribute(node, "offset"));
-  item->SetLevel((enum KeySceneItem::Level)getIntAttribute(node, "level"));
+  item->SetLevel((KeySceneLevel)getIntAttribute(node, "level"));
   return *item;
 }
 

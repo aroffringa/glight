@@ -105,11 +105,11 @@ FolderObject &ChasePropertiesWindow::GetObject() { return GetChase(); }
 void ChasePropertiesWindow::onTriggerTypeChanged() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   if (_delayTriggerCheckButton.get_active())
-    _chase->Trigger().SetType(Trigger::DelayTriggered);
+    _chase->Trigger().SetType(TriggerType::Delay);
   else if (_synchronizedTriggerCheckButton.get_active())
-    _chase->Trigger().SetType(Trigger::SyncTriggered);
+    _chase->Trigger().SetType(TriggerType::Sync);
   else
-    _chase->Trigger().SetType(Trigger::BeatTriggered);
+    _chase->Trigger().SetType(TriggerType::Beat);
 }
 
 void ChasePropertiesWindow::onTriggerSpeedChanged(double newValue) {
@@ -138,8 +138,7 @@ void ChasePropertiesWindow::onTransitionSpeedChanged(double newValue) {
   }
 }
 
-void ChasePropertiesWindow::onTransitionTypeChanged(
-    enum Transition::Type type) {
+void ChasePropertiesWindow::onTransitionTypeChanged(TransitionType type) {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   _chase->Transition().SetType(type);
 }
@@ -156,8 +155,8 @@ void ChasePropertiesWindow::onBeatSpeedChanged() {
 
 void ChasePropertiesWindow::loadChaseInfo(Chase &chase) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  enum Trigger::Type triggerType = chase.Trigger().Type();
-  enum Transition::Type transitionType = chase.Transition().Type();
+  TriggerType triggerType = chase.Trigger().Type();
+  TransitionType transitionType = chase.Transition().Type();
   double triggerSpeed = chase.Trigger().DelayInMs();
   double transitionSpeed = chase.Transition().LengthInMs();
   double beatSpeed = chase.Trigger().DelayInBeats();
@@ -168,13 +167,13 @@ void ChasePropertiesWindow::loadChaseInfo(Chase &chase) {
   _beatSpeed.set_value(beatSpeed);
   _synchronizationsCount.set_value(syncSpeed);
   switch (triggerType) {
-    case Trigger::DelayTriggered:
+    case TriggerType::Delay:
       _delayTriggerCheckButton.set_active(true);
       break;
-    case Trigger::SyncTriggered:
+    case TriggerType::Sync:
       _synchronizedTriggerCheckButton.set_active(true);
       break;
-    case Trigger::BeatTriggered:
+    case TriggerType::Beat:
       _beatTriggerCheckButton.set_active(true);
       break;
   }
@@ -196,7 +195,7 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
        _chase->Sequence().List()) {
     tSequence.AddStep(*item.first, item.second);
     TimeSequence::Step &step = tSequence.GetStep(index);
-    if (_chase->Trigger().Type() == Trigger::DelayTriggered)
+    if (_chase->Trigger().Type() == TriggerType::Delay)
       step.transition = _chase->Transition();
     else
       step.transition.SetLengthInMs(0);

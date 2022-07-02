@@ -246,11 +246,11 @@ void TimeSequencePropertiesWindow::onTriggerTypeChanged() {
   TimeSequence::Step *step = selectedStep();
   if (step) {
     if (_delayTriggerCheckButton.get_active())
-      step->trigger.SetType(Trigger::DelayTriggered);
+      step->trigger.SetType(TriggerType::Delay);
     else if (_synchronizedTriggerCheckButton.get_active())
-      step->trigger.SetType(Trigger::SyncTriggered);
+      step->trigger.SetType(TriggerType::Sync);
     else
-      step->trigger.SetType(Trigger::BeatTriggered);
+      step->trigger.SetType(TriggerType::Beat);
     fillStepsList();
   }
 }
@@ -274,7 +274,7 @@ void TimeSequencePropertiesWindow::onTransitionSpeedChanged(double newValue) {
 }
 
 void TimeSequencePropertiesWindow::onTransitionTypeChanged(
-    enum Transition::Type type) {
+    TransitionType type) {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   TimeSequence::Step *step = selectedStep();
   if (step) {
@@ -315,8 +315,8 @@ void TimeSequencePropertiesWindow::onSelectedStepChanged() {
 
 void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step &step) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  enum Trigger::Type triggerType = step.trigger.Type();
-  enum Transition::Type transitionType = step.transition.Type();
+  TriggerType triggerType = step.trigger.Type();
+  TransitionType transitionType = step.transition.Type();
   double triggerSpeed = step.trigger.DelayInMs();
   double transitionSpeed = step.transition.LengthInMs();
   double beatSpeed = step.trigger.DelayInBeats();
@@ -327,13 +327,13 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step &step) {
   _beatSpeed.set_value(beatSpeed);
   _synchronizationsCount.set_value(syncSpeed);
   switch (triggerType) {
-    case Trigger::DelayTriggered:
+    case TriggerType::Delay:
       _delayTriggerCheckButton.set_active(true);
       break;
-    case Trigger::SyncTriggered:
+    case TriggerType::Sync:
       _synchronizedTriggerCheckButton.set_active(true);
       break;
-    case Trigger::BeatTriggered:
+    case TriggerType::Beat:
       _beatTriggerCheckButton.set_active(true);
       break;
   }
