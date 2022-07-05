@@ -5,24 +5,25 @@
 #include <sstream>
 
 namespace {
-void Check(const char* input, bool expected_result, const char* output = nullptr)
-{
-  std::istringstream stream(input+1);
+void Check(const char* input, bool expected_result,
+           const char* output = nullptr) {
+  std::istringstream stream(input + 1);
   std::string output_string;
-  const bool result = json::details::ReadNumber(input[0], stream, output_string);
+  const bool result =
+      json::details::ReadNumber(input[0], stream, output_string);
   BOOST_TEST_INFO("input=\"" << input << "\"");
   BOOST_TEST(result == expected_result);
-  if(result && expected_result) {
+  if (result && expected_result) {
     BOOST_CHECK_EQUAL(output_string, output);
   }
 }
 
-void SCheck(const char* input, bool expected_result, const char* output)
-{
+void SCheck(const char* input, bool expected_result, const char* output) {
   std::istringstream stream(input);
   std::string output_string;
   const bool result = json::details::ReadString(stream, output_string);
-  BOOST_TEST_INFO("input=\"" << input << "\", output=\"" << output_string << "\"");
+  BOOST_TEST_INFO("input=\"" << input << "\", output=\"" << output_string
+                             << "\"");
   BOOST_TEST(result == expected_result);
   BOOST_CHECK_EQUAL(output_string, output);
 }
@@ -32,7 +33,7 @@ std::unique_ptr<json::Node> Parse(const char* input) {
   return json::Parse(str);
 }
 
-} // namespace
+}  // namespace
 
 BOOST_AUTO_TEST_SUITE(json_reader)
 
@@ -74,7 +75,8 @@ BOOST_AUTO_TEST_CASE(read_string) {
   SCheck("\\\" <- quotes\"", true, "\" <- quotes");
   SCheck("Line 1\\nNewline\"\n", true, "Line 1\nNewline");
   SCheck("Unicode: — André\"}", true, "Unicode: — André");
-  SCheck("Escapes:\\\"\\n\\r\\b\\\\\\/\\f\\tend.\"]", true, "Escapes:\"\n\r\b\\/\f\tend.");
+  SCheck("Escapes:\\\"\\n\\r\\b\\\\\\/\\f\\tend.\"]", true,
+         "Escapes:\"\n\r\b\\/\f\tend.");
   SCheck("This: \\x wrong escape", false, "This: ");
 }
 
@@ -88,7 +90,7 @@ BOOST_AUTO_TEST_CASE(boolean) {
   json::Boolean* b = dynamic_cast<json::Boolean*>(node.get());
   BOOST_REQUIRE(b);
   BOOST_CHECK_EQUAL(b->value, true);
-  
+
   node = Parse("false");
   b = dynamic_cast<json::Boolean*>(node.get());
   BOOST_REQUIRE(b);
@@ -107,7 +109,7 @@ BOOST_AUTO_TEST_CASE(string) {
   json::String* s = dynamic_cast<json::String*>(node.get());
   BOOST_REQUIRE(s);
   BOOST_CHECK_EQUAL(s->value, "Simple");
-  
+
   node = Parse("\"\\\"hello world\\\"\\n— André\"");
   s = dynamic_cast<json::String*>(node.get());
   BOOST_REQUIRE(s);
@@ -115,17 +117,21 @@ BOOST_AUTO_TEST_CASE(string) {
 }
 
 BOOST_AUTO_TEST_CASE(object) {
-  std::unique_ptr<json::Node> node = Parse("{ \"name\": \"André\", \"person\": true, \"age\": 40 }");
+  std::unique_ptr<json::Node> node =
+      Parse("{ \"name\": \"André\", \"person\": true, \"age\": 40 }");
   json::Object* o = dynamic_cast<json::Object*>(node.get());
   BOOST_REQUIRE(o);
   BOOST_CHECK_EQUAL(o->children.size(), 3);
-  const json::String* name = dynamic_cast<json::String*>(o->children["name"].get());
+  const json::String* name =
+      dynamic_cast<json::String*>(o->children["name"].get());
   BOOST_REQUIRE(name);
   BOOST_CHECK_EQUAL(name->value, "André");
-  const json::Boolean* person = dynamic_cast<json::Boolean*>(o->children["person"].get());
+  const json::Boolean* person =
+      dynamic_cast<json::Boolean*>(o->children["person"].get());
   BOOST_REQUIRE(person);
   BOOST_CHECK_EQUAL(person->value, true);
-  const json::Number* age = dynamic_cast<json::Number*>(o->children["age"].get());
+  const json::Number* age =
+      dynamic_cast<json::Number*>(o->children["age"].get());
   BOOST_REQUIRE(age);
   BOOST_CHECK_EQUAL(age->value, "40");
 }
@@ -138,7 +144,8 @@ BOOST_AUTO_TEST_CASE(array) {
   const json::String* andre = dynamic_cast<json::String*>(a->items[0].get());
   BOOST_REQUIRE(andre);
   BOOST_CHECK_EQUAL(andre->value, "André");
-  const json::Boolean* boolean = dynamic_cast<json::Boolean*>(a->items[1].get());
+  const json::Boolean* boolean =
+      dynamic_cast<json::Boolean*>(a->items[1].get());
   BOOST_REQUIRE(boolean);
   BOOST_CHECK_EQUAL(boolean->value, false);
   const json::Number* fourty = dynamic_cast<json::Number*>(a->items[2].get());
@@ -154,39 +161,47 @@ BOOST_AUTO_TEST_CASE(recursive) {
   json::Object* root = dynamic_cast<json::Object*>(node.get());
   BOOST_REQUIRE(root);
   BOOST_CHECK_EQUAL(root->children.size(), 2);
-  
-  json::Object* person = dynamic_cast<json::Object*>(root->children["person"].get());
+
+  json::Object* person =
+      dynamic_cast<json::Object*>(root->children["person"].get());
   BOOST_REQUIRE(person);
   BOOST_CHECK_EQUAL(person->children.size(), 2);
-  const json::String* name = dynamic_cast<json::String*>(person->children["name"].get());
+  const json::String* name =
+      dynamic_cast<json::String*>(person->children["name"].get());
   BOOST_REQUIRE(name);
   BOOST_CHECK_EQUAL(name->value, "Xam");
-  const json::Number* age = dynamic_cast<json::Number*>(person->children["age"].get());
+  const json::Number* age =
+      dynamic_cast<json::Number*>(person->children["age"].get());
   BOOST_REQUIRE(age);
   BOOST_CHECK_EQUAL(age->value, "3.5");
-  
-  json::Array* relatives = dynamic_cast<json::Array*>(root->children["relatives"].get());
+
+  json::Array* relatives =
+      dynamic_cast<json::Array*>(root->children["relatives"].get());
   BOOST_REQUIRE(relatives);
   BOOST_REQUIRE_EQUAL(relatives->items.size(), 3);
-  
+
   json::Object* andre = dynamic_cast<json::Object*>(relatives->items[0].get());
   BOOST_REQUIRE(andre);
   BOOST_REQUIRE_EQUAL(andre->children.size(), 1);
-  json::String* a_name = dynamic_cast<json::String*>(andre->children["name"].get());
+  json::String* a_name =
+      dynamic_cast<json::String*>(andre->children["name"].get());
   BOOST_REQUIRE(a_name);
   BOOST_REQUIRE_EQUAL(a_name->value, "André");
-  
+
   json::Object* lars = dynamic_cast<json::Object*>(relatives->items[1].get());
   BOOST_REQUIRE(lars);
   BOOST_REQUIRE_EQUAL(lars->children.size(), 1);
-  json::String* l_name = dynamic_cast<json::String*>(lars->children["name"].get());
+  json::String* l_name =
+      dynamic_cast<json::String*>(lars->children["name"].get());
   BOOST_REQUIRE(l_name);
   BOOST_REQUIRE_EQUAL(l_name->value, "Lars");
-  
-  json::Object* shanthi = dynamic_cast<json::Object*>(relatives->items[2].get());
+
+  json::Object* shanthi =
+      dynamic_cast<json::Object*>(relatives->items[2].get());
   BOOST_REQUIRE(shanthi);
   BOOST_REQUIRE_EQUAL(shanthi->children.size(), 1);
-  json::String* s_name = dynamic_cast<json::String*>(shanthi->children["name"].get());
+  json::String* s_name =
+      dynamic_cast<json::String*>(shanthi->children["name"].get());
   BOOST_REQUIRE(s_name);
   BOOST_REQUIRE_EQUAL(s_name->value, "Shanthi");
 }
