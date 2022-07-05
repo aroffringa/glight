@@ -70,6 +70,7 @@ set(SYSTEMFILES
   system/audioplayer.cpp
   system/beatfinder.cpp
   system/flacdecoder.cpp
+  system/jsonreader.cpp
   system/jsonwriter.cpp
   system/reader.cpp
   system/writer.cpp
@@ -127,6 +128,7 @@ if(Boost_FOUND)
     tests/testmanagement.cpp
     tests/testpresetcollection.cpp
     tests/testpresetvalue.cpp
+    tests/tjsonreader.cpp
     tests/tjsonwriter.cpp
     )
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})

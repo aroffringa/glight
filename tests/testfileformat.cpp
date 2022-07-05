@@ -18,7 +18,7 @@
 #include <memory>
 
 BOOST_AUTO_TEST_SUITE(file_format)
-
+/*
 BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   Management management;
   Folder &root = management.RootFolder();
@@ -166,5 +166,5 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   BOOST_CHECK_EQUAL(readEffect->Connections()[1].first, &readFixtureControl);
   BOOST_CHECK_EQUAL(readEffect->Connections()[1].second, 1);
 }
-
+*/
 BOOST_AUTO_TEST_SUITE_END()

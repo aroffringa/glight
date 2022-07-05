@@ -1,7 +1,6 @@
-#ifndef JSON_WRITER_H
-#define JSON_WRITER_H
+#ifndef JSON_WRITER_H_
+#define JSON_WRITER_H_
 
-#include <cassert>
 #include <iostream>
 #include <string>
 #include <string_view>
