@@ -4,11 +4,12 @@ project(glight)
 
 find_package(PkgConfig)
 pkg_check_modules(GTKMM gtkmm-3.0>=3.0.0 REQUIRED)
+pkg_check_modules(SIGCXX2 sigc++-2.0 REQUIRED)
 pkg_check_modules(FLACPP flac++ REQUIRED)
 pkg_check_modules(ALSA alsa REQUIRED)
 pkg_check_modules(LIBOLA libola REQUIRED)
 
-find_package(Boost COMPONENTS filesystem locale system REQUIRED)
+find_package(Boost COMPONENTS filesystem system REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(Threads REQUIRED)
 
@@ -27,6 +28,7 @@ set(CMAKE_CXX_EXTENSIONS NO)
 add_definitions(-DGLIGHT_INSTALL_PATH="${CMAKE_INSTALL_PREFIX}")
 
 include_directories(${GTKMM_INCLUDE_DIRS})
+include_directories(${SIGCXX2_INCLUDE_DIRS})
 include_directories(${FLACPP_INCLUDE_DIRS})
 include_directories(${ALSA_INCLUDE_DIRS})
 include_directories(${LIBOLA_INCLUDE_DIRS})
@@ -96,7 +98,7 @@ add_library(glight-object OBJECT
 
 add_executable(glight $<TARGET_OBJECTS:glight-object> glight.cpp)
 
-link_directories(${GTKMM_LIBDIR})
+target_link_directories(glight PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
 
 set(GLIGHT_LIBRARIES
   ${Boost_FILESYSTEM_LIBRARY} 
@@ -111,7 +113,7 @@ set(GLIGHT_LIBRARIES
   ${CMAKE_THREAD_LIBS_INIT})
 
 target_link_libraries(glight ${GLIGHT_LIBRARIES})
-
+  
 find_package(Boost COMPONENTS filesystem system unit_test_framework)
 if(Boost_FOUND)
 	include_directories(${Boost_INCLUDE_DIR})
@@ -131,6 +133,7 @@ if(Boost_FOUND)
     tests/tjsonreader.cpp
     tests/tjsonwriter.cpp
     )
+  target_link_directories(runtests PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})
   add_test(runtests runtests)
   add_custom_target(check COMMAND runtests -l unit_scope DEPENDS runtests)

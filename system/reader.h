@@ -21,6 +21,7 @@ class Reader {
   void SetGUIState(GUIState &guiState) { _guiState = &guiState; }
 
   void Read(const std::string &filename);
+  void Read(std::istream &stream);
 
  private:
   void parseGlightShow(const json::Object &node);

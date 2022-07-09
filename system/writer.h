@@ -10,6 +10,8 @@
 
 #include "jsonwriter.h"
 
+class GUIState;
+
 class WriterException : public std::runtime_error {
  public:
   WriterException(const std::string &msg) : std::runtime_error(msg) {}
@@ -20,11 +22,12 @@ class WriterException : public std::runtime_error {
  */
 class Writer {
  public:
-  Writer(class Management &management);
+  Writer(Management &management);
   ~Writer() {}
 
-  void SetGUIState(class GUIState &guiState) { _guiState = &guiState; }
+  void SetGUIState(GUIState &guiState) { _guiState = &guiState; }
 
+  void Write(std::ostream &stream);
   void Write(const std::string &filename);
 
  private:

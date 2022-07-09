@@ -102,6 +102,7 @@ BOOST_AUTO_TEST_CASE(number) {
   json::Number* n = dynamic_cast<json::Number*>(node.get());
   BOOST_REQUIRE(n);
   BOOST_CHECK_EQUAL(n->value, "3.1415e-0");
+  BOOST_CHECK_CLOSE_FRACTION(n->AsDouble(), 3.1415, 1e-6);
 }
 
 BOOST_AUTO_TEST_CASE(string) {
@@ -134,6 +135,10 @@ BOOST_AUTO_TEST_CASE(object) {
       dynamic_cast<json::Number*>(o->children["age"].get());
   BOOST_REQUIRE(age);
   BOOST_CHECK_EQUAL(age->value, "40");
+  BOOST_CHECK_EQUAL(age->AsInt(), 40);
+  BOOST_CHECK_EQUAL(age->AsUInt(), 40);
+  BOOST_CHECK_EQUAL(age->AsSize(), 40);
+  BOOST_CHECK_EQUAL(age->AsDouble(), 40.0);
 }
 
 BOOST_AUTO_TEST_CASE(array) {
@@ -151,6 +156,10 @@ BOOST_AUTO_TEST_CASE(array) {
   const json::Number* fourty = dynamic_cast<json::Number*>(a->items[2].get());
   BOOST_REQUIRE(fourty);
   BOOST_CHECK_EQUAL(fourty->value, "40");
+  BOOST_CHECK_EQUAL(fourty->AsInt(), 40);
+  BOOST_CHECK_EQUAL(fourty->AsUInt(), 40);
+  BOOST_CHECK_EQUAL(fourty->AsSize(), 40);
+  BOOST_CHECK_EQUAL(fourty->AsDouble(), 40.0);
 }
 
 BOOST_AUTO_TEST_CASE(recursive) {
@@ -174,6 +183,7 @@ BOOST_AUTO_TEST_CASE(recursive) {
       dynamic_cast<json::Number*>(person->children["age"].get());
   BOOST_REQUIRE(age);
   BOOST_CHECK_EQUAL(age->value, "3.5");
+  BOOST_CHECK_CLOSE_FRACTION(age->AsDouble(), 3.5, 1e-6);
 
   json::Array* relatives =
       dynamic_cast<json::Array*>(root->children["relatives"].get());

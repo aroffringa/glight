@@ -18,6 +18,10 @@ struct Node {
 
 struct Object : public Node {
   std::map<std::string, std::unique_ptr<Node>> children;
+  using iterator = DereferencingMapIterator<
+      std::map<std::string, std::unique_ptr<Node>>::iterator>;
+  using const_iterator = DereferencingMapIterator<
+      std::map<std::string, std::unique_ptr<Node>>::const_iterator>;
 
   const Node& operator[](const char* name) const {
     const auto iter = children.find(name);
@@ -27,6 +31,14 @@ struct Object : public Node {
     else
       return *iter->second;
   }
+
+  const_iterator find(const char* name) const {
+    return const_iterator(children.find(name));
+  }
+
+  const_iterator begin() { return const_iterator(children.begin()); }
+
+  const_iterator end() { return const_iterator(children.end()); }
 };
 
 struct Array : public Node {

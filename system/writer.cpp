@@ -21,14 +21,18 @@
 Writer::Writer(Management &management)
     : _management(management), _guiState(nullptr) {}
 
-void Writer::Write(const std::string &filename) {
+void Writer::Write(std::ostream &stream) {
   _controllablesWritten.clear();
   _folderIds.clear();
 
-  std::ofstream file(filename);
-  writer_ = JsonWriter(file);
+  writer_ = JsonWriter(stream);
 
   writeGlightShow();
+}
+
+void Writer::Write(const std::string &filename) {
+  std::ofstream file(filename);
+  Write(file);
 }
 
 void Writer::writeGlightShow() {
@@ -43,10 +47,10 @@ void Writer::writeGlightShow() {
   const std::vector<std::unique_ptr<FixtureType>> &fixtureTypes =
       theatre.FixtureTypes();
 
-  writer_.StartArray("fixture_types");
+  writer_.StartArray("fixture-types");
   for (const std::unique_ptr<FixtureType> &ft : fixtureTypes)
     writeFixtureType(*ft);
-  writer_.EndArray();  // fixture_types
+  writer_.EndArray();  // fixture-types
 
   writer_.StartArray("fixtures");
   const std::vector<std::unique_ptr<Fixture>> &fixtures = theatre.Fixtures();
@@ -66,7 +70,7 @@ void Writer::writeGlightShow() {
   const std::vector<std::unique_ptr<SourceValue>> &sourceValues =
       _management.SourceValues();
 
-  writer_.StartArray("source_values");
+  writer_.StartArray("source-values");
   for (const std::unique_ptr<SourceValue> &sv : sourceValues)
     writePresetValue(sv->Preset());
   writer_.EndArray();  // source_values
@@ -80,11 +84,11 @@ void Writer::writeGlightShow() {
 
   writer_.EndArray();  // scenes
 
-  writer_.StartObject("gui");
-
-  if (_guiState != nullptr) writeGUIState(*_guiState);
-
-  writer_.EndObject();  // gui
+  if (_guiState != nullptr) {
+    writer_.StartObject("gui");
+    writeGUIState(*_guiState);
+    writer_.EndObject();  // gui
+  }
 
   writer_.EndObject();  // root object
 }

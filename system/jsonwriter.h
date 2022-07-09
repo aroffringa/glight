@@ -1,7 +1,10 @@
 #ifndef JSON_WRITER_H_
 #define JSON_WRITER_H_
 
+#include <array>
+#include <charconv>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <string_view>
 
@@ -46,16 +49,17 @@ class JsonWriter {
     state_ = State::AfterItem;
   }
 
-  void Number(const char* name, double number) {
+  template <typename T>
+  void Number(const char* name, T number) {
     Name(name);
     Number(number);
   }
 
   void Number(double number) { NumberGeneric(number); }
 
-  void Number(int number) { NumberGeneric(number); }
-
-  void Number(size_t number) { NumberGeneric(number); }
+  void Number(int number) { IntegerNumber(number); }
+  void Number(unsigned number) { IntegerNumber(number); }
+  void Number(size_t number) { IntegerNumber(number); }
 
   void String(const std::string& str) {
     Next();
@@ -129,6 +133,18 @@ class JsonWriter {
   }
 
   std::ostream& Out() { return *stream_; }
+
+  template <typename T>
+  void IntegerNumber(T number) {
+    constexpr size_t max_digits =
+        std::numeric_limits<T>::digits10 + 1 + std::is_signed<T>::value;
+    std::array<char, max_digits> data;
+    const char* end =
+        std::to_chars(data.data(), data.data() + max_digits, number).ptr;
+    Next();
+    Out() << std::string_view(data.data(), end - data.data());
+    state_ = State::AfterItem;
+  }
 
   template <typename T>
   void NumberGeneric(T number) {

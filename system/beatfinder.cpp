@@ -38,7 +38,7 @@ void BeatFinder::open() {
   buffer_size = 16 * 1024;
   snd_pcm_hw_params_set_buffer_size_near(_handle, hw_params, &buffer_size);
   snd_pcm_hw_params_get_buffer_size(hw_params, &buffer_size);
-  snd_pcm_hw_params_get_period_size(hw_params, &period_size, 0);
+  snd_pcm_hw_params_get_period_size(hw_params, &period_size, nullptr);
 
   _alsaBufferSize = buffer_size;
   _alsaPeriodSize = period_size;

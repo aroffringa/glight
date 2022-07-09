@@ -213,7 +213,7 @@ void ParsePresetValue(const Object &node, Management &management) {
       dynamic_cast<Controllable &>(folder->GetChild(name));
   const size_t inputIndex = ToNum(node["input-index"]).AsSize();
   SourceValue &value = management.AddSourceValue(controllable, inputIndex);
-  value.Preset().SetValue(ControlValue(ToNum(node["value"]).AsSize()));
+  value.Preset().SetValue(ControlValue(ToNum(node["value"]).AsUInt()));
 }
 
 void ParseEffect(const Object &node, Management &management) {
@@ -259,7 +259,7 @@ void ParseEffect(const Object &node, Management &management) {
 
 void ParseControls(const Array &node, Management &management) {
   for (const Node &control : node) {
-    const std::string &t = ToStr(ToObj(node)["type"]);
+    const std::string &t = ToStr(ToObj(control)["type"]);
     if (t == "fixture-control")
       ParseFixtureControl(ToObj(control), management);
     else if (t == "preset-collection")
@@ -273,6 +273,10 @@ void ParseControls(const Array &node, Management &management) {
     else if (t == "effect")
       ParseEffect(ToObj(control), management);
   }
+}
+
+void ParseSourceValues(const Array &node, Management &management) {
+  for (const Node &control : node) ParsePresetValue(ToObj(control), management);
 }
 
 KeySceneItem &ParseKeySceneItem(const Object &node, Scene &scene) {
@@ -369,24 +373,26 @@ void ParseGUI(const Object &node, GUIState &guiState, Management &management) {
 Reader::Reader(Management &management)
     : _management(management), _guiState(nullptr) {}
 
+void Reader::Read(std::istream &stream) {
+  std::unique_ptr<Node> root = json::Parse(stream);
+  parseGlightShow(ToObj(*root));
+}
+
 void Reader::Read(const std::string &filename) {
   std::ifstream stream(filename);
   if (!stream) throw std::runtime_error("Failed to open file");
-
-  std::unique_ptr<Node> root = json::Parse(stream);
-
-  parseGlightShow(dynamic_cast<Object &>(*root));
+  Read(stream);
 }
 
 void Reader::parseGlightShow(const Object &node) {
-  ParseFolders(dynamic_cast<const Array &>(node["folders"]), _management);
+  ParseFolders(ToArr(node["folders"]), _management);
   ParseTheatre(ToObj(node["theatre"]), _management);
   ParseControls(ToArr(node["controls"]), _management);
+  ParseSourceValues(ToArr(node["source-values"]), _management);
   ParseScenes(ToArr(node["scenes"]), _management);
-  if (_guiState == nullptr) {
-    GUIState scratchState;
-    ParseGUI(ToObj(node["gui"]), scratchState, _management);
-  } else {
-    ParseGUI(ToObj(node["gui"]), *_guiState, _management);
+  if (_guiState != nullptr) {
+    const auto &gui = node.children.find("gui");
+    if (gui != node.children.end())
+      ParseGUI(ToObj(*gui->second), *_guiState, _management);
   }
 }

@@ -76,7 +76,7 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
   return nullptr;
 }
 
-FunctionType GetFunctionType(const std::string& name) {
+inline FunctionType GetFunctionType(const std::string& name) {
   const char c = name.empty() ? 0 : name[0];
   switch (c) {
     case 'A':
