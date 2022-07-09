@@ -149,7 +149,7 @@ class FixtureType : public FolderObject {
     const std::vector<FixtureClass> list = GetClassList();
     for (const FixtureClass &cl : list)
       if (ClassName(cl) == name) return cl;
-    throw std::runtime_error("Class not found: " + name);
+    throw std::runtime_error("Fixture class not found: " + name);
   }
 
   Color GetColor(const Fixture &fixture, const ValueSnapshot &snapshot,

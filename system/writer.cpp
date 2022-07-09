@@ -71,14 +71,14 @@ void Writer::writeGlightShow() {
     writePresetValue(sv->Preset());
   writer_.EndArray();  // source_values
 
-  writer_.StartObject("show");
+  writer_.StartArray("scenes");
 
   Show &show = _management.GetShow();
 
   const std::vector<std::unique_ptr<Scene>> &scenes = show.Scenes();
   for (const std::unique_ptr<Scene> &scene : scenes) writeScene(*scene);
 
-  writer_.EndObject();  // show
+  writer_.EndArray();  // scenes
 
   writer_.StartObject("gui");
 
@@ -337,23 +337,25 @@ void Writer::writeEffect(const class Effect &effect) {
 }
 
 void Writer::writeScene(const Scene &scene) {
-  writer_.StartObject("scene");
+  writer_.StartObject();
 
   writeFolderAttributes(scene);
   writer_.String("audio-file", scene.AudioFile());
 
+  writer_.StartArray("items");
   const std::multimap<double, std::unique_ptr<SceneItem>> &items =
       scene.SceneItems();
   for (const std::pair<const double, std::unique_ptr<SceneItem>> &sceneItem :
        items) {
     writeSceneItem(*sceneItem.second);
   }
+  writer_.EndArray();  // items
 
   writer_.EndObject();
 }
 
 void Writer::writeSceneItem(const SceneItem &item) {
-  writer_.StartObject("scene-item");
+  writer_.StartObject();
 
   writer_.Number("offset", item.OffsetInMS());
   writer_.Number("duration", item.DurationInMS());
@@ -384,12 +386,14 @@ void Writer::writeControlSceneItem(const ControlSceneItem &item) {
 }
 
 void Writer::writeGUIState(const GUIState &guiState) {
+  writer_.StartArray("states");
   for (const std::unique_ptr<FaderSetupState> &fState : guiState.FaderSetups())
     writeFaderState(*fState);
+  writer_.EndArray();  // states
 }
 
 void Writer::writeFaderState(const FaderSetupState &guiState) {
-  writer_.StartObject("faders");
+  writer_.StartObject();
   writer_.String("name", guiState.name);
   writer_.Boolean("active", guiState.isActive);
   writer_.Boolean("solo", guiState.isSolo);
@@ -397,7 +401,7 @@ void Writer::writeFaderState(const FaderSetupState &guiState) {
   writer_.Number("fade-out", guiState.fadeOutSpeed);
   writer_.Number("width", guiState.width);
   writer_.Number("height", guiState.height);
-  writer_.StartArray("list");
+  writer_.StartArray("faders");
   for (const FaderState &fader : guiState.faders) {
     writer_.StartObject();
     writer_.Boolean("is-toggle", fader.IsToggleButton());
@@ -412,6 +416,6 @@ void Writer::writeFaderState(const FaderSetupState &guiState) {
       writer_.String("name", fader.GetSourceValue()->Controllable().Name());
     }
   }
-  writer_.EndArray();
+  writer_.EndArray();  // faders
   writer_.EndObject();
 }

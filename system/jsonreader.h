@@ -4,8 +4,11 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
+
+#include "dereferencing_iterator.h"
 
 namespace json {
 
@@ -15,10 +18,29 @@ struct Node {
 
 struct Object : public Node {
   std::map<std::string, std::unique_ptr<Node>> children;
+
+  const Node& operator[](const char* name) const {
+    const auto iter = children.find(name);
+    if (iter == children.end())
+      throw std::runtime_error(std::string("Missing field in json file: ") +
+                               name);
+    else
+      return *iter->second;
+  }
 };
 
 struct Array : public Node {
   std::vector<std::unique_ptr<Node>> items;
+
+  using iterator =
+      DereferencingIterator<std::vector<std::unique_ptr<Node>>::iterator>;
+  using const_iterator =
+      DereferencingIterator<std::vector<std::unique_ptr<Node>>::const_iterator>;
+
+  iterator begin() { return iterator(items.begin()); }
+  const_iterator begin() const { return const_iterator(items.begin()); }
+  iterator end() { return iterator(items.end()); }
+  const_iterator end() const { return const_iterator(items.end()); }
 };
 
 struct Null : public Node {};
@@ -38,6 +60,21 @@ struct Number : public Node {
   // A number is saved as string so that parsing is delayed until
   // the type of the destination is known
   std::string value;
+
+  size_t AsSize() const { return AsType<size_t>(); }
+  int AsInt() const { return AsType<int>(); }
+  unsigned AsUInt() const { return AsType<unsigned>(); }
+  float AsFloat() const { return AsType<float>(); }
+  double AsDouble() const { return AsType<double>(); }
+
+ private:
+  template <typename T>
+  T AsType() const {
+    std::istringstream s(value);
+    T v;
+    s >> v;
+    return v;
+  }
 };
 
 namespace details {

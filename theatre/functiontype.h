@@ -1,6 +1,7 @@
-#ifndef FUNCTION_TYPE_H
-#define FUNCTION_TYPE_H
+#ifndef FUNCTION_TYPE_H_
+#define FUNCTION_TYPE_H_
 
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -35,7 +36,7 @@ inline std::vector<FunctionType> GetFunctionTypes() {
       FT::ColdWhite, FT::WarmWhite};
 }
 
-inline const char *AbbreviatedFunctionType(FunctionType functionType) {
+inline const char* AbbreviatedFunctionType(FunctionType functionType) {
   switch (functionType) {
     case FunctionType::Master:
       return "M";
@@ -75,42 +76,98 @@ inline const char *AbbreviatedFunctionType(FunctionType functionType) {
   return nullptr;
 }
 
+FunctionType GetFunctionType(const std::string& name) {
+  const char c = name.empty() ? 0 : name[0];
+  switch (c) {
+    case 'A':
+      if (name == "Amber") return FunctionType::Amber;
+      break;
+    case 'B':
+      if (name == "Blue") return FunctionType::Blue;
+      break;
+    case 'C':
+      if (name == "Cold white")
+        return FunctionType::ColdWhite;
+      else if (name == "Color macro")
+        return FunctionType::ColorMacro;
+      break;
+    case 'E':
+      if (name == "Effect") return FunctionType::Effect;
+      break;
+    case 'G':
+      if (name == "Green") return FunctionType::Green;
+      break;
+    case 'L':
+      if (name == "Lime") return FunctionType::Lime;
+      break;
+    case 'M':
+      if (name == "Master") return FunctionType::Master;
+      break;
+    case 'P':
+      if (name == "Pan")
+        return FunctionType::Pan;
+      else if (name == "Pulse")
+        return FunctionType::Pulse;
+      break;
+    case 'R':
+      if (name == "Red") return FunctionType::Red;
+      if (name == "Rotation") return FunctionType::Rotation;
+      break;
+    case 'S':
+      if (name == "Strobe") return FunctionType::Strobe;
+      break;
+    case 'T':
+      if (name == "Tilt") return FunctionType::Tilt;
+      break;
+    case 'U':
+      if (name == "UV") return FunctionType::UV;
+      break;
+    case 'W':
+      if (name == "Warm white")
+        return FunctionType::WarmWhite;
+      else if (name == "White")
+        return FunctionType::White;
+      break;
+  }
+  throw std::runtime_error("Function type not found: " + name);
+}
+
 inline std::string FunctionTypeDescription(FunctionType functionType) {
   switch (functionType) {
-    case FunctionType::Master:
-      return "Master";
-    case FunctionType::Red:
-      return "Red";
-    case FunctionType::Green:
-      return "Green";
-    case FunctionType::Blue:
-      return "Blue";
-    case FunctionType::White:
-      return "White";
     case FunctionType::Amber:
       return "Amber";
-    case FunctionType::UV:
-      return "UV";
-    case FunctionType::Lime:
-      return "Lime";
-    case FunctionType::ColorMacro:
-      return "Color";
-    case FunctionType::Pulse:
-      return "Pulse";
-    case FunctionType::Strobe:
-      return "Strobe";
-    case FunctionType::Rotation:
-      return "Rotation";
-    case FunctionType::Pan:
-      return "Pan";
-    case FunctionType::Tilt:
-      return "Tilt";
-    case FunctionType::Effect:
-      return "Effect";
+    case FunctionType::Blue:
+      return "Blue";
     case FunctionType::ColdWhite:
       return "Cold white";
+    case FunctionType::ColorMacro:
+      return "Color macro";
+    case FunctionType::Effect:
+      return "Effect";
+    case FunctionType::Green:
+      return "Green";
+    case FunctionType::Lime:
+      return "Lime";
+    case FunctionType::Master:
+      return "Master";
+    case FunctionType::Pan:
+      return "Pan";
+    case FunctionType::Pulse:
+      return "Pulse";
+    case FunctionType::Red:
+      return "Red";
+    case FunctionType::Rotation:
+      return "Rotation";
+    case FunctionType::Strobe:
+      return "Strobe";
+    case FunctionType::Tilt:
+      return "Tilt";
+    case FunctionType::UV:
+      return "UV";
     case FunctionType::WarmWhite:
       return "Warm white";
+    case FunctionType::White:
+      return "White";
   }
   return "?";
 }
