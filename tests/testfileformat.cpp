@@ -78,7 +78,9 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
 
   BOOST_CHECK(!management.HasCycle());
   Writer writer(management);
-  writer.Write("tmp-testfileformat.gshow");
+  //writer.Write("tmp-testfileformat.gshow");
+  std::ostringstream stream;
+  writer.Write(stream);
 
   BOOST_CHECK(boost::filesystem::exists("tmp-testfileformat.gshow"));
 
@@ -91,7 +93,8 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   //
   BOOST_TEST_CHECKPOINT("Start of reading");
   Reader reader(management);
-  reader.Read("tmp-testfileformat.gshow");
+  std::istringstream istream(stream.str());
+  reader.Read(istream);
 
   BOOST_CHECK_EQUAL(management.RootFolder().Name(), "The root folder");
   BOOST_CHECK_EQUAL(management.RootFolder().Children()[0]->Name(),
