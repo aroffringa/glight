@@ -9,6 +9,8 @@
 
 #include "../theatre/effects/audioleveleffect.h"
 
+#include "../gui/guistate.h"
+
 #include "../system/reader.h"
 #include "../system/writer.h"
 
@@ -17,10 +19,8 @@
 
 #include <memory>
 
-BOOST_AUTO_TEST_SUITE(file_format)
-
-BOOST_AUTO_TEST_CASE(ReadAndWrite) {
-  Management management;
+namespace {
+void FillManagement(Management &management) {
   Folder &root = management.RootFolder();
   root.SetName("The root folder");
   Folder &subFolder = management.AddFolder(root, "A subfolder");
@@ -77,8 +77,28 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   effect.AddConnection(fc, 1);
 
   BOOST_CHECK(!management.HasCycle());
+}
+
+}  // namespace
+
+BOOST_AUTO_TEST_SUITE(file_format)
+
+BOOST_AUTO_TEST_CASE(ReadAndWrite) {
+  Management management;
+  FillManagement(management);
+
+  GUIState guiState;
+  std::vector<std::unique_ptr<FaderSetupState>> &setups =
+      guiState.FaderSetups();
+  std::unique_ptr<FaderSetupState> &setup =
+      setups.emplace_back(std::make_unique<FaderSetupState>());
+  setup->name = "testfader";
+  FaderState &state = setup->faders.emplace_back();
+  state.SetSourceValue(management.SourceValues()[0].get());
+
   Writer writer(management);
-  //writer.Write("tmp-testfileformat.gshow");
+  writer.SetGUIState(guiState);
+  // writer.Write("tmp-testfileformat.gshow");
   std::ostringstream stream;
   writer.Write(stream);
 
@@ -92,9 +112,9 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   // Read and check if the result is correct
   //
   BOOST_TEST_CHECKPOINT("Start of reading");
-  Reader reader(management);
+  GUIState resultGuiState;
   std::istringstream istream(stream.str());
-  reader.Read(istream);
+  Read(istream, management, &resultGuiState);
 
   BOOST_CHECK_EQUAL(management.RootFolder().Name(), "The root folder");
   BOOST_CHECK_EQUAL(management.RootFolder().Children()[0]->Name(),

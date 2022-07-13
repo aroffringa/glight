@@ -1,5 +1,7 @@
 #include "reader.h"
 
+#include "jsonreader.h"
+
 #include "../theatre/properties/propertyset.h"
 
 #include "../theatre/chase.h"
@@ -13,6 +15,7 @@
 #include "../theatre/scene.h"
 #include "../theatre/show.h"
 #include "../theatre/theatre.h"
+#include "../theatre/timesequence.h"
 
 #include "../gui/guistate.h"
 
@@ -339,7 +342,8 @@ void ParseGUIPresetRef(const Object &node, FaderSetupState &fader,
   }
   FaderState &state = fader.faders.back();
   state.SetIsToggleButton(ToBool(node["is-toggle"]));
-  state.SetNewToggleButtonColumn(ToBool(node["new-toggle-column"]));
+  if (state.IsToggleButton())
+    state.SetNewToggleButtonColumn(ToBool(node["new-toggle-column"]));
 }
 
 void ParseGUIFaders(const Object &node, GUIState &guiState,
@@ -368,31 +372,30 @@ void ParseGUI(const Object &node, GUIState &guiState, Management &management) {
   }
 }
 
-}  // namespace
-
-Reader::Reader(Management &management)
-    : _management(management), _guiState(nullptr) {}
-
-void Reader::Read(std::istream &stream) {
-  std::unique_ptr<Node> root = json::Parse(stream);
-  parseGlightShow(ToObj(*root));
-}
-
-void Reader::Read(const std::string &filename) {
-  std::ifstream stream(filename);
-  if (!stream) throw std::runtime_error("Failed to open file");
-  Read(stream);
-}
-
-void Reader::parseGlightShow(const Object &node) {
-  ParseFolders(ToArr(node["folders"]), _management);
-  ParseTheatre(ToObj(node["theatre"]), _management);
-  ParseControls(ToArr(node["controls"]), _management);
-  ParseSourceValues(ToArr(node["source-values"]), _management);
-  ParseScenes(ToArr(node["scenes"]), _management);
-  if (_guiState != nullptr) {
+void parseGlightShow(const Object &node, Management &management,
+                     GUIState *guiState) {
+  ParseFolders(ToArr(node["folders"]), management);
+  ParseTheatre(ToObj(node["theatre"]), management);
+  ParseControls(ToArr(node["controls"]), management);
+  ParseSourceValues(ToArr(node["source-values"]), management);
+  ParseScenes(ToArr(node["scenes"]), management);
+  if (guiState != nullptr) {
     const auto &gui = node.children.find("gui");
     if (gui != node.children.end())
-      ParseGUI(ToObj(*gui->second), *_guiState, _management);
+      ParseGUI(ToObj(*gui->second), *guiState, management);
   }
+}
+
+}  // namespace
+
+void Read(std::istream &stream, Management &management, GUIState *guiState) {
+  std::unique_ptr<Node> root = json::Parse(stream);
+  parseGlightShow(ToObj(*root), management, guiState);
+}
+
+void Read(const std::string &filename, Management &management,
+          GUIState *guiState) {
+  std::ifstream stream(filename);
+  if (!stream) throw std::runtime_error("Failed to open file");
+  Read(stream, management, guiState);
 }

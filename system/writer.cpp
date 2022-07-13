@@ -419,6 +419,7 @@ void Writer::writeFaderState(const FaderSetupState &guiState) {
           _folderIds[&fader.GetSourceValue()->Controllable().Parent()]);
       writer_.String("name", fader.GetSourceValue()->Controllable().Name());
     }
+    writer_.EndObject();
   }
   writer_.EndArray();  // faders
   writer_.EndObject();

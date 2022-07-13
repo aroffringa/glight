@@ -369,9 +369,8 @@ void ShowWindow::OpenFile(const std::string &filename) {
   _management->Clear();
   _faderWindows.clear();
   _state.Clear();
-  Reader reader(*_management);
-  reader.SetGUIState(_state);
-  reader.Read(filename);
+
+  Read(filename, *_management, &_state);
 
   if (_management->GetShow().Scenes().size() != 0)
     _sceneFrame->SetSelectedScene(*_management->GetShow().Scenes()[0]);
