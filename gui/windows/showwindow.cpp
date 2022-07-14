@@ -449,9 +449,7 @@ void ShowWindow::onMISaveClicked() {
     if (filename.find('.') == Glib::ustring::npos) filename += ".gshow";
 
     std::lock_guard<std::mutex> lock(_management->Mutex());
-    Writer writer(*_management);
-    writer.SetGUIState(_state);
-    writer.Write(filename);
+    Write(filename, *_management, &_state);
   }
 }
 

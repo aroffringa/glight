@@ -96,11 +96,9 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   FaderState &state = setup->faders.emplace_back();
   state.SetSourceValue(management.SourceValues()[0].get());
 
-  Writer writer(management);
-  writer.SetGUIState(guiState);
-  // writer.Write("tmp-testfileformat.gshow");
+  // Write("tmp-testfileformat.gshow", management, &guiState);
   std::ostringstream stream;
-  writer.Write(stream);
+  Write(stream, management, &guiState);
 
   BOOST_CHECK(boost::filesystem::exists("tmp-testfileformat.gshow"));
 
