@@ -97,10 +97,9 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   state.SetSourceValue(management.SourceValues()[0].get());
 
   // Write("tmp-testfileformat.gshow", management, &guiState);
+  // BOOST_CHECK(boost::filesystem::exists("tmp-testfileformat.gshow"));
   std::ostringstream stream;
   Write(stream, management, &guiState);
-
-  BOOST_CHECK(boost::filesystem::exists("tmp-testfileformat.gshow"));
 
   management.Clear();
   BOOST_CHECK_EQUAL(management.Controllables().size(), 0);

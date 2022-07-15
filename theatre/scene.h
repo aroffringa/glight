@@ -11,30 +11,35 @@
 #include "keysceneitem.h"
 #include "startable.h"
 
+class Management;
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class Scene : public Startable, private SyncListener {
  public:
-  Scene(class Management &management);
+  Scene(Management &management);
 
   ~Scene();
 
   ControlSceneItem *AddControlSceneItem(double offsetInMS,
                                         Controllable &controllable,
                                         size_t input) {
-    ControlSceneItem *item = new ControlSceneItem(controllable, input);
+    std::unique_ptr<ControlSceneItem> item =
+        std::make_unique<ControlSceneItem>(controllable, input);
     item->SetOffsetInMS(offsetInMS);
-    _items.insert(std::pair<double, SceneItem *>(offsetInMS, item));
+    ControlSceneItem *result = item.get();
+    _items.emplace(offsetInMS, std::move(item));
     resetCurrentOffset();
-    return item;
+    return result;
   }
   KeySceneItem *AddKeySceneItem(double offsetInMS) {
-    KeySceneItem *item = new KeySceneItem();
+    std::unique_ptr<KeySceneItem> item = std::make_unique<KeySceneItem>();
     item->SetOffsetInMS(offsetInMS);
-    _items.insert(std::pair<double, SceneItem *>(offsetInMS, item));
+    KeySceneItem *result = item.get();
+    _items.emplace(offsetInMS, std::move(item));
     resetCurrentOffset();
-    return item;
+    return result;
   }
   void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS) {
     _items.erase(find(item));
@@ -155,7 +160,7 @@ class Scene : public Startable, private SyncListener {
   }
 
  private:
-  class Management &_management;
+  Management &_management;
   std::mutex &_mutex;
   std::vector<SceneItem *> _startedItems;
   std::multimap<double, std::unique_ptr<SceneItem>> _items;

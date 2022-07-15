@@ -54,6 +54,8 @@ void ParseFolderAttr(const Object &node, FolderObject &object,
                      Management &management, bool hasFolder = true) {
   if (hasFolder) {
     size_t parent = ToNum(node["parent"]).AsSize();
+    if (parent >= management.Folders().size())
+      throw std::runtime_error("Invalid parent specified in file");
     management.Folders()[parent]->Add(object);
   }
   ParseNameAttr(node, object);
@@ -317,7 +319,7 @@ void ParseSceneItem(const Object &node, Scene &scene, Management &management) {
 void ParseScenes(const json::Array &node, Management &management) {
   for (const Node &item : node) {
     const Object &scene_node = ToObj(item);
-    Scene *scene = management.GetShow().AddScene();
+    Scene *scene = management.GetShow().AddScene(false);
     ParseFolderAttr(scene_node, *scene, management);
     scene->SetAudioFile(ToStr(scene_node["audio-file"]));
     const Array &items = ToArr(scene_node["items"]);

@@ -91,8 +91,8 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
   _state.FaderSetupSignalChange().connect([&]() { onFaderListChange(); });
   addFaderWindow();
 
-  _objectListFrame.reset(new ObjectListFrame(*_management, *this));
-  _sceneFrame.reset(new SceneFrame(*_management, *this));
+  _objectListFrame = std::make_unique<ObjectListFrame>(*_management, *this);
+  _sceneFrame = std::make_unique<SceneFrame>(*_management, *this);
 
   _notebook.append_page(*_objectListFrame, "Objects");
   _notebook.append_page(*_sceneFrame, "Timeline");

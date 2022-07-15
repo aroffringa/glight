@@ -4,8 +4,8 @@
 #include "folderobject.h"
 
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class Startable : public FolderObject {
  public:
   Startable() {}

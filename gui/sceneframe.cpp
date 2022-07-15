@@ -170,7 +170,7 @@ void SceneFrame::Update() {
   }
   // For testing
   if (_show->Scenes().empty())
-    _selectedScene = _show->AddScene();
+    _selectedScene = _show->AddScene(true);
   else
     _selectedScene = _show->Scenes()[0].get();
   _audioWidget.SetScene(*_selectedScene);
