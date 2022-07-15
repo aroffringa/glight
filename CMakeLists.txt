@@ -10,7 +10,6 @@ pkg_check_modules(ALSA alsa REQUIRED)
 pkg_check_modules(LIBOLA libola REQUIRED)
 
 find_package(Boost COMPONENTS filesystem system REQUIRED)
-find_package(LibXml2 REQUIRED)
 find_package(Threads REQUIRED)
 
 find_library(AUBIO_LIBRARY NAMES aubio)
@@ -35,7 +34,6 @@ include_directories(${LIBOLA_INCLUDE_DIRS})
 include_directories(${AUBIO_INCLUDE_DIR})
 
 include_directories(${Boost_INCLUDE_DIR})
-include_directories(${LIBXML2_INCLUDE_DIR})
 
 set(GUIFILES
   gui/application.cpp  
@@ -108,7 +106,6 @@ set(GLIGHT_LIBRARIES
   ${LIBOLA_LIBRARIES} 
   ${AUBIO_LIBRARY}
   ${GTKMM_LIBRARIES} 
-  ${LIBXML2_LIBRARIES} 
   ${LIBOLA_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT})
 
@@ -120,18 +117,18 @@ if(Boost_FOUND)
   add_executable(runtests EXCLUDE_FROM_ALL
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
-    tests/testchase.cpp
-    tests/testfileformat.cpp
-    tests/testfixturecontrol.cpp
-    tests/testfixturefunction.cpp
-    tests/testfixturetype.cpp
-    tests/testfixturetypefunction.cpp
-    tests/testfolder.cpp
-    tests/testmanagement.cpp
-    tests/testpresetcollection.cpp
-    tests/testpresetvalue.cpp
+    tests/tchase.cpp
+    tests/tfileformat.cpp
+    tests/tfixturecontrol.cpp
+    tests/tfixturefunction.cpp
+    tests/tfixturetype.cpp
+    tests/tfixturetypefunction.cpp
+    tests/tfolder.cpp
     tests/tjsonreader.cpp
     tests/tjsonwriter.cpp
+    tests/tmanagement.cpp
+    tests/tpresetcollection.cpp
+    tests/tpresetvalue.cpp
     )
   target_link_directories(runtests PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})
