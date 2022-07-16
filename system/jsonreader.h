@@ -44,10 +44,10 @@ struct Object : public Node {
 struct Array : public Node {
   std::vector<std::unique_ptr<Node>> items;
 
-  using iterator =
-      system::DereferencingIterator<std::vector<std::unique_ptr<Node>>::iterator>;
-  using const_iterator =
-      system::DereferencingIterator<std::vector<std::unique_ptr<Node>>::const_iterator>;
+  using iterator = system::DereferencingIterator<
+      std::vector<std::unique_ptr<Node>>::iterator>;
+  using const_iterator = system::DereferencingIterator<
+      std::vector<std::unique_ptr<Node>>::const_iterator>;
 
   iterator begin() { return iterator(items.begin()); }
   const_iterator begin() const { return const_iterator(items.begin()); }
@@ -96,6 +96,6 @@ bool ReadString(std::istream& stream, std::string& data);
 
 std::unique_ptr<Node> Parse(std::istream& stream);
 
-}  // namespace json
+}  // namespace glight::json
 
 #endif

@@ -120,4 +120,4 @@ void AudioPlayer::close() {
   }
 }
 
-}
+}  // namespace glight::system

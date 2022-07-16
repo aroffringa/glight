@@ -169,10 +169,6 @@ class FixtureType : public FolderObject {
 
   void SetFixtureClass(FixtureClass new_class) { class_ = new_class; }
 
-  bool Is16Bit(size_t functionIndex) const {
-    return functions_[functionIndex].Is16Bit();
-  }
-
   size_t ShapeCount() const {
     switch (class_) {
       case FixtureClass::Par:

@@ -50,5 +50,4 @@ std::string JsonWriter::Encode(const std::string_view& str) {
          '\"';
 }
 
-}
-
+}  // namespace glight::json

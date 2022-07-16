@@ -40,7 +40,7 @@ class Theatre {
   FixtureType &GetFixtureType(const std::string &name) const;
   FixtureFunction &GetFixtureFunction(const std::string &name) const;
 
-  void RemoveFixture(Fixture &fixture);
+  void RemoveFixture(const Fixture &fixture);
   void RemoveFixtureType(const FixtureType &fixtureType);
 
   bool IsUsed(const FixtureType &fixtureType) const;

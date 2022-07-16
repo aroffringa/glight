@@ -156,14 +156,14 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
 
   // Reset all inputs
   for (const std::unique_ptr<class SourceValue> &sv : _sourceValues) {
-    for (size_t inputIndex = 0; inputIndex != sv->Controllable().NInputs();
+    for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs();
          ++inputIndex) {
-      sv->Controllable().InputValue(inputIndex) = 0;
+      sv->GetControllable().InputValue(inputIndex) = 0;
     }
   }
 
   for (const std::unique_ptr<class SourceValue> &sv : _sourceValues)
-    sv->Controllable().MixInput(sv->Preset().InputIndex(),
+    sv->GetControllable().MixInput(sv->Preset().InputIndex(),
                                 sv->Preset().Value());
 
   // Solve dependency graph of controllables
@@ -249,7 +249,7 @@ void Management::removeControllable(
   auto result =
       std::remove_if(_sourceValues.begin(), _sourceValues.end(),
                      [&controllable](std::unique_ptr<SourceValue> &pv) {
-                       return &pv->Controllable() == controllable.get();
+                       return &pv->GetControllable() == controllable.get();
                      });
   _sourceValues.erase(result, _sourceValues.end());
 
@@ -276,19 +276,19 @@ bool Management::Contains(Controllable &controllable) const {
   return false;
 }
 
-FixtureControl &Management::AddFixtureControl(Fixture &fixture) {
-  _controllables.emplace_back(new FixtureControl(fixture));
+FixtureControl &Management::AddFixtureControl(const Fixture &fixture) {
+  _controllables.emplace_back(new FixtureControl(const_cast<Fixture&>(fixture)));
   return static_cast<FixtureControl &>(*_controllables.back());
 }
 
-FixtureControl &Management::AddFixtureControl(Fixture &fixture,
-                                              Folder &parent) {
-  _controllables.emplace_back(new FixtureControl(fixture));
-  parent.Add(*_controllables.back());
+FixtureControl &Management::AddFixtureControl(const Fixture &fixture,
+                                              const Folder &parent) {
+  _controllables.emplace_back(new FixtureControl(const_cast<Fixture&>(fixture)));
+  const_cast<Folder&>(parent).Add(*_controllables.back());
   return static_cast<FixtureControl &>(*_controllables.back());
 }
 
-FixtureControl &Management::GetFixtureControl(class Fixture &fixture) {
+FixtureControl &Management::GetFixtureControl(const Fixture &fixture) {
   for (const std::unique_ptr<Controllable> &contr : _controllables) {
     FixtureControl *fc = dynamic_cast<FixtureControl *>(contr.get());
     if (fc) {
@@ -298,13 +298,13 @@ FixtureControl &Management::GetFixtureControl(class Fixture &fixture) {
   throw std::runtime_error("GetFixtureControl() : Fixture control not found");
 }
 
-void Management::RemoveFixture(Fixture &fixture) {
+void Management::RemoveFixture(const Fixture &fixture) {
   FixtureControl &control = GetFixtureControl(fixture);
   _theatre->RemoveFixture(fixture);
   RemoveControllable(control);
 }
 
-void Management::RemoveFixtureType(FixtureType &fixtureType) {
+void Management::RemoveFixtureType(const FixtureType &fixtureType) {
   const std::vector<std::unique_ptr<Fixture>> &fixtures = _theatre->Fixtures();
   bool isUsed = false;
   size_t i = 0;
@@ -320,7 +320,7 @@ void Management::RemoveFixtureType(FixtureType &fixtureType) {
     }
   }
   // When the fixture type was used, removing the last fixture of that type
-  // will remove the type. Otherwise, remove it manually.
+  // will remove the type (elsewhere). Otherwise, remove it manually.
   if (!isUsed) {
     _theatre->RemoveFixtureType(fixtureType);
   }
@@ -385,7 +385,7 @@ FolderObject *Management::GetObjectFromPathIfExists(
   return nullptr;
 }
 
-FolderObject &Management::GetObjectFromPath(const std::string &path) const {
+FolderObject &Management::GetObjectFromPath(const std::string &path) {
   FolderObject *result = GetObjectFromPathIfExists(path);
   if (result)
     return *result;
@@ -397,10 +397,10 @@ size_t Management::ControllableIndex(const Controllable *controllable) const {
   return FolderObject::FindIndex(_controllables, controllable);
 }
 
-SourceValue *Management::GetSourceValue(Controllable &controllable,
-                                        size_t inputIndex) const {
+SourceValue *Management::GetSourceValue(const Controllable &controllable,
+                                        size_t inputIndex) {
   for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-    if (&sv->Controllable() == &controllable &&
+    if (&sv->GetControllable() == &controllable &&
         sv->Preset().InputIndex() == inputIndex)
       return sv.get();
   return nullptr;
@@ -451,7 +451,7 @@ Management::Management(const Management &forDryCopy,
   for (size_t i = 0; i != forDryCopy._sourceValues.size(); ++i) {
     if (_sourceValues[i] == nullptr) {
       size_t cIndex = forDryCopy.ControllableIndex(
-          &forDryCopy._sourceValues[i]->Controllable());
+          &forDryCopy._sourceValues[i]->GetControllable());
       _sourceValues[i] = std::make_unique<SourceValue>(
           *forDryCopy._sourceValues[i], *_controllables[cIndex]);
     }
@@ -598,7 +598,7 @@ void Management::BlackOut() {
 void Management::Recover(Management &other) {
   std::scoped_lock<std::mutex, std::mutex> lock(other._mutex, _mutex);
   for (const std::unique_ptr<SourceValue> &sv : other._sourceValues) {
-    std::string path = sv->Controllable().FullPath();
+    std::string path = sv->GetControllable().FullPath();
     FolderObject *object = GetObjectFromPathIfExists(path);
     Controllable *control = dynamic_cast<Controllable *>(object);
     if (control) {

@@ -88,7 +88,7 @@ void PresetCollection::SetFromCurrentSituation(const Management &management) {
   const std::vector<std::unique_ptr<SourceValue>> &values =
       management.SourceValues();
   for (const std::unique_ptr<SourceValue> &sv : values) {
-    if (!sv->IsIgnorable() && (&sv->Controllable()) != this)
+    if (!sv->IsIgnorable() && (&sv->GetControllable()) != this)
       _presetValues.emplace_back(new PresetValue(sv->Preset()));
   }
 }

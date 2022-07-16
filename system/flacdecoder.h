@@ -146,6 +146,6 @@ class FlacDecoder : private FLAC::Decoder::File {
   virtual void metadata_callback(const ::FLAC__StreamMetadata *metadata);
 };
 
-}
+}  // namespace glight::system
 
 #endif

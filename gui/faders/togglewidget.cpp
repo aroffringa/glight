@@ -159,7 +159,7 @@ void ToggleWidget::ChangeManagement(theatre::Management &management,
   if (_sourceValue == nullptr) {
     _management = &management;
   } else {
-    std::string controllablePath = _sourceValue->Controllable().FullPath();
+    std::string controllablePath = _sourceValue->GetControllable().FullPath();
     size_t input = _sourceValue->Preset().InputIndex();
     _management = &management;
     theatre::Controllable &controllable = static_cast<theatre::Controllable &>(

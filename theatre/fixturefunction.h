@@ -12,17 +12,19 @@
 
 namespace glight::theatre {
 
+class Theatre;
+
 /**
  * @author Andre Offringa
  */
 class FixtureFunction : public NamedObject {
  public:
-  FixtureFunction(class Theatre &theatre, FunctionType type,
+  FixtureFunction(Theatre &theatre, FunctionType type,
                   const std::string &name);
 
-  FixtureFunction(class Theatre &theatre, FunctionType type);
+  FixtureFunction(Theatre &theatre, FunctionType type);
 
-  FixtureFunction(const FixtureFunction &source, class Theatre &theatre);
+  FixtureFunction(const FixtureFunction &source, Theatre &theatre);
 
   FixtureFunction(const FixtureFunction &source) = delete;
   FixtureFunction &operator=(const FixtureFunction &source) = delete;
@@ -54,14 +56,14 @@ class FixtureFunction : public NamedObject {
   const DmxChannel &FirstChannel() const { return _firstChannel; }
   void IncChannel();
   void DecChannel();
-  enum FunctionType Type() const { return _type; }
+  FunctionType Type() const { return _type; }
   unsigned char GetValue(const ValueSnapshot &snapshot) const {
     return snapshot.GetValue(_firstChannel);
   }
 
  private:
-  class Theatre &_theatre;
-  enum FunctionType _type;
+  Theatre &_theatre;
+  FunctionType _type;
   DmxChannel _firstChannel;
   bool _is16Bit;
 };

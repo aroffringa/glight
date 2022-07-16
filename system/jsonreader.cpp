@@ -343,4 +343,4 @@ bool ReadNumber(char first, std::istream& stream, std::string& data) {
 
 std::unique_ptr<Node> Parse(std::istream& stream) { return ParseValue(stream); }
 
-}  // namespace json
+}  // namespace glight::json

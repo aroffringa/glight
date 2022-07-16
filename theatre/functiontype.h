@@ -134,7 +134,7 @@ inline FunctionType GetFunctionType(const std::string& name) {
   throw std::runtime_error("Function type not found: " + name);
 }
 
-inline std::string FunctionTypeDescription(FunctionType functionType) {
+inline std::string ToString(FunctionType functionType) {
   switch (functionType) {
     case FunctionType::Amber:
       return "Amber";

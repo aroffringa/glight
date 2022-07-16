@@ -53,6 +53,6 @@ class DereferencingMapIterator {
   IterT iterator_;
 };
 
-}
+}  // namespace glight::system
 
 #endif

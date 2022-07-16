@@ -168,6 +168,6 @@ class JsonWriter {
   size_t indent_ = 0;
 };
 
-}
+}  // namespace glight::json
 
 #endif

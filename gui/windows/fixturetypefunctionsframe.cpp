@@ -56,7 +56,7 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     Gtk::TreeModel::iterator iter = function_type_model_->append();
     (*iter)[function_type_columns_.function_type_] = t;
     (*iter)[function_type_columns_.function_type_str_] =
-        FunctionTypeDescription(t);
+        ToString(t);
   }
   function_type_combo_.set_model(function_type_model_);
   function_type_combo_.pack_start(function_type_columns_.function_type_str_);
@@ -88,7 +88,7 @@ FixtureTypeFunctionsFrame::GetFunctions() const {
     const theatre::FunctionType type = child[functions_columns_.function_type_];
     const bool is_16_bit = child[functions_columns_.is_16_bit_];
     const size_t shape = 0;
-    functions.emplace_back(dmx_offset, type, is_16_bit, shape);
+    functions.emplace_back(type, dmx_offset, is_16_bit, shape);
   }
   return functions;
 }
@@ -104,7 +104,7 @@ void FixtureTypeFunctionsFrame::SetFunctions(
     row[functions_columns_.is_16_bit_] = f.Is16Bit();
     row[functions_columns_.function_type_] = f.Type();
     row[functions_columns_.function_type_str_] =
-        FunctionTypeDescription(f.Type());
+        ToString(f.Type());
   }
 }
 
@@ -124,7 +124,7 @@ void FixtureTypeFunctionsFrame::onAdd() {
   row[functions_columns_.is_16_bit_] = false;
   row[functions_columns_.function_type_] = theatre::FunctionType::White;
   row[functions_columns_.function_type_str_] =
-      FunctionTypeDescription(theatre::FunctionType::White);
+      ToString(theatre::FunctionType::White);
 }
 
 void FixtureTypeFunctionsFrame::onRemove() {

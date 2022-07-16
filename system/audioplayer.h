@@ -17,7 +17,7 @@ class SyncListener {
   virtual ~SyncListener(){};
   virtual void OnSyncUpdate(double offsetInMS) = 0;
 };
-  
+
 class AudioPlayer : private SyncListener {
  public:
   class AlsaError : public std::runtime_error {
@@ -87,6 +87,6 @@ class AudioPlayer : private SyncListener {
   void OnSyncUpdate(double offsetInMS) {}
 };
 
-}
+}  // namespace glight::system
 
 #endif

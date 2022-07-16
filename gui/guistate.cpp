@@ -57,7 +57,7 @@ void FaderState::onPresetValueDeleted() {
 void FaderSetupState::ChangeManagement(Management &management) {
   for (FaderState &fader : faders) {
     if (fader.GetSourceValue() != nullptr) {
-      Controllable *oldControllable = &fader.GetSourceValue()->Controllable();
+      Controllable *oldControllable = &fader.GetSourceValue()->GetControllable();
       size_t inputIndex = fader.GetSourceValue()->Preset().InputIndex();
       Controllable *newControllable = dynamic_cast<Controllable *>(
           management.GetObjectFromPathIfExists(oldControllable->FullPath()));
