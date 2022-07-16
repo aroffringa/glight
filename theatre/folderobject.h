@@ -5,6 +5,8 @@
 
 namespace glight::theatre {
 
+class Folder;
+  
 /**
  * @author Andre Offringa
  */
@@ -24,17 +26,15 @@ class FolderObject : public NamedObject {
   std::string FullPath() const;
 
   bool IsRoot() const { return _parent == nullptr; }
-  const class Folder &Parent() const { return *_parent; }
-  class Folder &Parent() {
+  const Folder &Parent() const { return *_parent; }
+  Folder &Parent() {
     return *_parent;
   }
 
  private:
-  void SetParent(class Folder &parent) { _parent = &parent; }
+  void SetParent(Folder &parent) { _parent = &parent; }
 
-  friend class Folder;
-
-  class Folder *_parent;
+  Folder *_parent;
 };
 
 }  // namespace glight::theatre

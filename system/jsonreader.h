@@ -75,6 +75,7 @@ struct Number : public Node {
 
   size_t AsSize() const { return AsType<size_t>(); }
   int AsInt() const { return AsType<int>(); }
+  unsigned char AsUChar() const { return AsType<unsigned>(); }
   unsigned AsUInt() const { return AsType<unsigned>(); }
   float AsFloat() const { return AsType<float>(); }
   double AsDouble() const { return AsType<double>(); }

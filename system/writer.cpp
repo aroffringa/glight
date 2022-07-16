@@ -56,6 +56,8 @@ void writeNameAttributes(WriteState &state, const NamedObject &obj) {
 
 void writeFolderAttributes(WriteState &state, const FolderObject &obj) {
   writeNameAttributes(state, obj);
+  if(obj.IsRoot())
+    throw std::runtime_error("Folder object '" + obj.Name() + "' has no parent");
   state.writer.Number("parent", state.folderIds.find(&obj.Parent())->second);
 }
 
@@ -100,13 +102,20 @@ void witeMacroParameters(WriteState &state, const MacroParameters &pars) {
     state.writer.StartObject();
     state.writer.Number("input-min", range.input_min);
     state.writer.Number("input-max", range.input_max);
-    state.writer.Number("red", range.color->Red());
-    state.writer.Number("green", range.color->Green());
-    state.writer.Number("blue", range.color->Blue());
-    state.writer.EndObject();
+    if(range.color) {
+      state.writer.StartObject("color");
+      state.writer.Number("red", range.color->Red());
+      state.writer.Number("green", range.color->Green());
+      state.writer.Number("blue", range.color->Blue());
+      state.writer.EndObject(); // color
+    }
+    else {
+      state.writer.Null("color");
+    }
+    state.writer.EndObject(); // range
   }
   state.writer.EndArray();
-  state.writer.EndObject();
+  state.writer.EndObject(); // parameters
 }
 
 void writeRotationParameters(WriteState &state,

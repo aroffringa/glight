@@ -78,6 +78,29 @@ void ParseFolders(const Array &node, Management &management) {
   }
 }
 
+void ParseMacroParameters(const json::Object &node, MacroParameters& parameters) {
+  const json::Array& ranges = ToArr(node["ranges"]);
+  for(json::Node& item : ranges) {
+    const json::Object& obj = ToObj(item);
+    unsigned input_min = ToNum(obj["input-min"]).AsUInt();
+    unsigned input_max = ToNum(obj["input-max"]).AsUInt();
+    if(dynamic_cast<const json::Null*>(&obj["color"])) {
+      parameters.GetRanges().emplace_back(input_min, input_max, std::optional<Color>());
+    }
+    else {
+      const json::Object& color = ToObj(obj["color"]);
+      const unsigned char r = ToNum(color["red"]).AsUChar();
+      const unsigned char g = ToNum(color["green"]).AsUChar();
+      const unsigned char b = ToNum(color["blue"]).AsUChar();
+      parameters.GetRanges().emplace_back(input_min, input_max, std::optional<Color>(std::in_place, r, g, b));
+    }
+  }
+}
+
+void ParseRotationParameters(const json::Object &node, RotationParameters& parameters) {
+  
+}
+
 void ParseFixtureTypeFunctions(const json::Array &node,
                                FixtureType &fixture_type) {
   std::vector<FixtureTypeFunction> functions;
@@ -87,8 +110,17 @@ void ParseFixtureTypeFunctions(const json::Array &node,
     const size_t dmx_offset = ToNum(obj["dmx-offset"]).AsSize();
     const bool is_16_bit = ToBool(obj["is-16-bit"]);
     const unsigned shape = ToNum(obj["shape"]).AsUInt();
-    // TODO parameters
-    functions.emplace_back(ft, dmx_offset, is_16_bit, shape);
+    FixtureTypeFunction& new_function = functions.emplace_back(ft, dmx_offset, is_16_bit, shape);
+    switch(ft) {
+      case FunctionType::ColorMacro:
+      ParseMacroParameters(ToObj(obj["parameters"]), new_function.GetMacroParameters());
+      break;
+      case FunctionType::Rotation:
+      //ParseRotationParameters(ToObj(obj["parameters"]), new_function.GetRotationParameters());
+      break;
+      default:
+      break;
+    }
   }
   fixture_type.SetFunctions(std::move(functions));
 }
@@ -100,10 +132,10 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
     FixtureType ft;
     ft.SetFixtureClass(FixtureType::NameToClass(class_name));
     FixtureType &new_type = management.GetTheatre().AddFixtureType(ft);
-    ParseNameAttr(ft_node, new_type);
     if (management.RootFolder().GetChildIfExists(new_type.Name())) {
       throw std::runtime_error("Error in file: fixture type listed twice");
     }
+    ParseFolderAttr(ft_node, new_type, management);
     ParseFixtureTypeFunctions(ToArr(ft_node["functions"]), new_type);
   }
 }
