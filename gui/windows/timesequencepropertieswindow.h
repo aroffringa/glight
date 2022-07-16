@@ -24,6 +24,8 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
+namespace glight::gui {
+
 /**
  * @author Andre Offringa
  */
@@ -111,5 +113,7 @@ class TimeSequencePropertiesWindow : public PropertiesWindow {
   EventTransmitter &_eventHub;
   sigc::connection _changeManagementConnection, _updateControllablesConnection;
 };
+
+}  // namespace glight::gui
 
 #endif

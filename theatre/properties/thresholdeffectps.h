@@ -5,6 +5,8 @@
 
 #include "../effects/thresholdeffect.h"
 
+namespace glight::theatre {
+
 class ThresholdEffectPS final : public PropertySet {
  public:
   ThresholdEffectPS() {
@@ -54,5 +56,7 @@ class ThresholdEffectPS final : public PropertySet {
     return 0;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

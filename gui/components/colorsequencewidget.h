@@ -13,6 +13,10 @@
 
 #include <vector>
 
+namespace glight::gui {
+
+using theatre::Color;
+
 class ColorSequenceWidget : public Gtk::VBox {
  public:
   ColorSequenceWidget(Gtk::Window *parent, bool showGradientButton = true)
@@ -167,5 +171,7 @@ class ColorSequenceWidget : public Gtk::VBox {
     }
   }
 };
+
+}  // namespace glight::gui
 
 #endif

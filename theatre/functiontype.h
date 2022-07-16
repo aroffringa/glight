@@ -1,11 +1,13 @@
-#ifndef FUNCTION_TYPE_H_
-#define FUNCTION_TYPE_H_
+#ifndef THEATRE_FUNCTION_TYPE_H_
+#define THEATRE_FUNCTION_TYPE_H_
 
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 #include "color.h"
+
+namespace glight::theatre {
 
 enum class FunctionType {
   Master,
@@ -204,5 +206,7 @@ inline constexpr Color GetFunctionColor(FunctionType type) {
   }
   return Color::Black();
 }
+
+}  // namespace glight::theatre
 
 #endif

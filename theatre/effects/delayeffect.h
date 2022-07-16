@@ -4,6 +4,8 @@
 #include "../effect.h"
 #include "../timing.h"
 
+namespace glight::theatre {
+
 class DelayEffect : public Effect {
  public:
   DelayEffect()
@@ -60,5 +62,7 @@ class DelayEffect : public Effect {
 
   double _delayInMS;
 };
+
+}  // namespace glight::theatre
 
 #endif

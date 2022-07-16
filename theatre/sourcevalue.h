@@ -1,7 +1,9 @@
-#ifndef SOURCE_VALUE_H
-#define SOURCE_VALUE_H
+#ifndef THEATRE_SOURCE_VALUE_H_
+#define THEATRE_SOURCE_VALUE_H_
 
 #include "presetvalue.h"
+
+namespace glight::theatre {
 
 class Controllable;
 
@@ -68,5 +70,7 @@ class SourceValue {
   double _fadeSpeed;
   unsigned _targetValue;
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -3,6 +3,8 @@
 
 #include <array>
 
+namespace glight::theatre {
+
 FixtureType::FixtureType(StockFixture stock_fixture)
     : FolderObject(StockName(stock_fixture)), class_(FixtureClass::Par) {
   switch (stock_fixture) {
@@ -307,3 +309,5 @@ int FixtureType::GetRotationSpeed(const Fixture &fixture,
   }
   return 0;
 }
+
+}  // namespace glight::theatre

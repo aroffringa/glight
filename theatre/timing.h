@@ -1,7 +1,9 @@
-#ifndef TIMING_H
-#define TIMING_H
+#ifndef THEATRE_TIMING_H_
+#define THEATRE_TIMING_H_
 
 #include <random>
+
+namespace glight::theatre {
 
 class Timing {
  public:
@@ -48,5 +50,7 @@ class Timing {
   unsigned _audioLevel, _randomValue;
   mutable std::mt19937 _rng;
 };
+
+}  // namespace glight::theatre
 
 #endif

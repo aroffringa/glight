@@ -14,6 +14,8 @@
 
 #include "sceneframe.h"
 
+namespace glight::gui {
+
 SceneFrame::SceneFrame(Management &management, ShowWindow &parentWindow)
     : Gtk::Frame("Scene"),
       _management(&management),
@@ -638,3 +640,5 @@ void SceneFrame::updateAudioWidgetKeys() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   _audioWidget.UpdateKeys();
 }
+
+}  // namespace glight::gui

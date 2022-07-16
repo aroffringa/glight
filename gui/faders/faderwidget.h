@@ -1,5 +1,5 @@
-#ifndef FADER_WIDGET_H
-#define FADER_WIDGET_H
+#ifndef GUI_FADER_WIDGET_H_
+#define GUI_FADER_WIDGET_H_
 
 #include "controlwidget.h"
 
@@ -9,29 +9,33 @@
 #include <gtkmm/label.h>
 #include <gtkmm/scale.h>
 
-class SourceValue;
+#include "../../theatre/forwards.h"
 
+namespace glight::gui {
+
+class EventTransmitter;
+  
 /**
  * @author Andre Offringa
  */
 class FaderWidget : public ControlWidget {
  public:
-  FaderWidget(class Management &management, class EventTransmitter &eventHub,
+  FaderWidget(theatre::Management &management, EventTransmitter &eventHub,
               char key);
   ~FaderWidget();
 
   void Toggle() final override;
   void FullOn() final override;
   void FullOff() final override;
-  void Assign(SourceValue *item, bool moveFader) final override;
+  void Assign(theatre::SourceValue *item, bool moveFader) final override;
   void MoveSlider() final override;
-  SourceValue *GetSourceValue() const final override { return _sourceValue; }
+  theatre::SourceValue *GetSourceValue() const final override { return _sourceValue; }
 
   void Limit(double value) final override {
     if (_scale.get_value() > value) _scale.set_value(value);
   }
 
-  void ChangeManagement(class Management &management,
+  void ChangeManagement(theatre::Management &management,
                         bool moveSliders) final override;
 
   Gtk::Widget &NameLabel() { return _eventBox; }
@@ -52,11 +56,13 @@ class FaderWidget : public ControlWidget {
   Gtk::Label _nameLabel;
 
   sigc::connection _updateConnection;
-  class Management *_management;
-  class EventTransmitter &_eventHub;
-  class SourceValue *_sourceValue;
+  theatre::Management *_management;
+  EventTransmitter &_eventHub;
+  theatre::SourceValue *_sourceValue;
 
   bool _holdUpdates;
 };
+
+}  // namespace glight::gui
 
 #endif

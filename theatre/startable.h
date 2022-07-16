@@ -1,7 +1,9 @@
-#ifndef STARTABLE_H
-#define STARTABLE_H
+#ifndef THEATRE_STARTABLE_H_
+#define THEATRE_STARTABLE_H_
 
 #include "folderobject.h"
+
+namespace glight::theatre {
 
 /**
  * @author Andre Offringa
@@ -29,5 +31,7 @@ class Startable : public FolderObject {
  private:
   double _startTimeInMS;
 };
+
+}  // namespace glight::theatre
 
 #endif

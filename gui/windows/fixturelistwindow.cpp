@@ -15,6 +15,8 @@
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 
+namespace glight::gui {
+
 FixtureListWindow::FixtureListWindow(EventTransmitter *eventHub,
                                      class Management &management,
                                      class FixtureSelection *globalSelection)
@@ -267,3 +269,5 @@ void FixtureListWindow::onGlobalSelectionChange() {
     }
   }
 }
+
+}  // namespace glight::gui

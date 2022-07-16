@@ -11,6 +11,8 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/treeview.h>
 
+namespace glight::gui {
+
 class FixtureTypeFunctionsFrame : public Gtk::Frame {
  public:
   FixtureTypeFunctionsFrame();
@@ -59,5 +61,7 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
     Gtk::TreeModelColumn<Glib::ustring> function_type_str_;
   } function_type_columns_;
 };
+
+}  // namespace glight::gui
 
 #endif

@@ -7,6 +7,8 @@
 
 #include <unistd.h>
 
+namespace glight::theatre {
+
 OLADevice::OLADevice() : _universe(1) {}
 
 void OLADevice::Abort() {}
@@ -43,3 +45,5 @@ void OLADevice::GetValues(unsigned char *destination, size_t size) {
 }
 
 void OLADevice::WaitForNextSync() { usleep(40000); }
+
+}  // namespace glight::theatre

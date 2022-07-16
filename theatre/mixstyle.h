@@ -3,6 +3,8 @@
 
 #include <string>
 
+namespace glight::theatre {
+
 enum class MixStyle {
   Default,
   HighestValue,
@@ -49,5 +51,7 @@ inline MixStyle GetMixStyle(const std::string& str) {
   else
     return MixStyle::Default;
 }
+
+}  // namespace glight::theatre
 
 #endif

@@ -15,6 +15,8 @@
 
 #include "properties/propertyset.h"
 
+namespace glight::theatre {
+
 std::unique_ptr<Effect> Effect::Make(Effect::Type type) {
   using up = std::unique_ptr<Effect>;
   switch (type) {
@@ -130,3 +132,5 @@ std::unique_ptr<Effect> Effect::Copy() const {
   copy->SetName(Name());
   return copy;
 }
+
+}  // namespace glight::theatre

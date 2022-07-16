@@ -3,6 +3,8 @@
 
 #include <sstream>
 
+namespace glight::theatre {
+
 std::string FolderObject::FullPath() const {
   // This is more easy to do recursively (basically with
   // return Name + "/" + Parent()->FullPath() ), but I've
@@ -26,3 +28,5 @@ std::string FolderObject::FullPath() const {
   }
   return str.str();
 }
+
+}  // namespace glight::theatre

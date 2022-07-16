@@ -3,6 +3,8 @@
 
 #include <string>
 
+namespace glight::theatre {
+
 enum class TriggerType { Delay, Sync, Beat };
 
 inline std::string ToString(TriggerType trigger_style) {
@@ -67,5 +69,7 @@ class Trigger {
   unsigned _delaySynced;
   double _delayInBeats;
 };
+
+}  // namespace glight::theatre
 
 #endif

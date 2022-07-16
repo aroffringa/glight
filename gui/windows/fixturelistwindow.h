@@ -21,6 +21,8 @@ class Fixture;
 class FixtureSelection;
 class Management;
 
+namespace glight::gui {
+
 /**
  * @author Andre Offringa
  */
@@ -78,5 +80,7 @@ class FixtureListWindow : public Gtk::Window {
   Gtk::Button _newButton, _removeButton;
   Gtk::Button _incChannelButton, _decChannelButton, _setChannelButton;
 };
+
+}  // namespace glight::gui
 
 #endif

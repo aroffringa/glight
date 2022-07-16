@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 
+namespace glight::gui {
+
 template <typename T>
 class WindowList {
  public:
@@ -35,5 +37,7 @@ class WindowList {
 
   std::vector<std::unique_ptr<T>> _list;
 };
+
+}  // namespace glight::gui
 
 #endif

@@ -5,6 +5,8 @@
 
 #include "../../theatre/effects/musicactivationeffect.h"
 
+namespace glight::theatre {
+
 class MusicActivationEffectPS final : public PropertySet {
  public:
   MusicActivationEffectPS() {
@@ -33,5 +35,7 @@ class MusicActivationEffectPS final : public PropertySet {
     return 0.0;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -1,9 +1,10 @@
-#ifndef SHOWWINDOW_H
-#define SHOWWINDOW_H
+#ifndef GUI_SHOWWINDOW_H_
+#define GUI_SHOWWINDOW_H_
 
 #include "../eventtransmitter.h"
 #include "../fixtureselection.h"
 #include "../guistate.h"
+#include "../../theatre/forwards.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
@@ -20,11 +21,12 @@
 
 #include <vector>
 
+namespace glight::gui {
+
 class DesignWizard;
 class FaderWindow;
 class FixtureListWindow;
 class FixtureTypesWindow;
-class Management;
 class ObjectListFrame;
 class SceneFrame;
 class VisualizationWindow;
@@ -34,29 +36,27 @@ class VisualizationWindow;
  */
 class ShowWindow : public Gtk::Window, public EventTransmitter {
  public:
-  ShowWindow(std::unique_ptr<class DmxDevice> dmxDevice);
+  ShowWindow(std::unique_ptr<theatre::DmxDevice> dmxDevice);
   ~ShowWindow();
 
   void EmitUpdate() final override;
 
   GUIState &State() { return _state; }
 
-  sigc::signal<void(Management &)> &SignalChangeManagement() final override {
+  sigc::signal<void(theatre::Management &)> &SignalChangeManagement() final override {
     return _signalChangeManagement;
   }
   sigc::signal<void()> &SignalUpdateControllables() final override {
     return _signalUpdateControllables;
   }
 
-  Management &GetManagement() const { return *_management; }
+  theatre::Management &GetManagement() const { return *_management; }
 
   void OpenFile(const std::string &filename);
 
   std::string Path();
 
-  std::unique_ptr<class DesignWizard> &GetDesignWizard() {
-    return _designWizard;
-  }
+  std::unique_ptr<DesignWizard> &GetDesignWizard() { return _designWizard; }
 
  private:
   void onFixtureListButtonClicked();
@@ -102,7 +102,7 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
                              FaderSetupState &state);
   FaderWindow *getFaderWindow(FaderSetupState &state);
 
-  void changeManagement(Management *newManagement, bool moveControlSliders);
+  void changeManagement(theatre::Management *newManagement, bool moveControlSliders);
 
   size_t nextControlKeyRow() const;
 
@@ -114,13 +114,13 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   std::unique_ptr<VisualizationWindow> _visualizationWindow;
   std::unique_ptr<DesignWizard> _designWizard;
 
-  std::unique_ptr<Management> _management;
+  std::unique_ptr<theatre::Management> _management;
   /**
    * When running in dry mode, the running management is moved here
    * and kept running, while all actions from then on affect the
    * dry mode management that is not connected to a device.
    */
-  std::unique_ptr<Management> _backgroundManagement;
+  std::unique_ptr<theatre::Management> _backgroundManagement;
 
   std::unique_ptr<ObjectListFrame> _objectListFrame;
   std::unique_ptr<SceneFrame> _sceneFrame;
@@ -128,7 +128,7 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   GUIState _state;
   FixtureSelection _fixtureSelection;
 
-  sigc::signal<void(Management &)> _signalChangeManagement;
+  sigc::signal<void(theatre::Management &)> _signalChangeManagement;
   sigc::signal<void()> _signalUpdateControllables;
 
   Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
@@ -155,5 +155,7 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   Gtk::MenuBar _menuBar;
   Gtk::Notebook _notebook;
 };
+
+}  // namespace glight::gui
 
 #endif

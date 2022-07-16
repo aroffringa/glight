@@ -1,5 +1,5 @@
-#ifndef MANAGEMENT_H
-#define MANAGEMENT_H
+#ifndef THEATRE_MANAGEMENT_H_
+#define THEATRE_MANAGEMENT_H_
 
 #include <atomic>
 #include <mutex>
@@ -10,6 +10,8 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "valuesnapshot.h"
+
+namespace glight::theatre {
 
 class BeatFinder;
 class Chase;
@@ -188,5 +190,7 @@ class Management {
   std::vector<std::unique_ptr<SourceValue>> _sourceValues;
   std::vector<std::unique_ptr<DmxDevice>> _devices;
 };
+
+}  // namespace glight::theatre
 
 #endif

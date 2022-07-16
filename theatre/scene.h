@@ -1,5 +1,5 @@
-#ifndef SCENE_H
-#define SCENE_H
+#ifndef THEATRE_SCENE_H_
+#define THEATRE_SCENE_H_
 
 #include <map>
 
@@ -10,6 +10,8 @@
 #include "controlsceneitem.h"
 #include "keysceneitem.h"
 #include "startable.h"
+
+namespace glight::theatre {
 
 class Management;
 
@@ -173,5 +175,7 @@ class Scene : public Startable, private SyncListener {
 
   virtual void OnSyncUpdate(double offsetInMS);
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef PRESET_COLLECTION_WINDOW_H
-#define PRESET_COLLECTION_WINDOW_H
+#ifndef GUI_PRESET_COLLECTION_WINDOW_H_
+#define GUI_PRESET_COLLECTION_WINDOW_H_
 
 #include "propertieswindow.h"
 
@@ -7,6 +7,7 @@
 
 #include "../components/inputselectwidget.h"
 
+#include "../../theatre/forwards.h"
 #include "../../theatre/presetcollection.h"
 #include "../../theatre/transition.h"
 
@@ -21,18 +22,19 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::gui {
+
+class EventTransmitter;
+
 class PresetCollectionWindow : public PropertiesWindow {
  public:
-  PresetCollectionWindow(PresetCollection &presetCollection,
-                         class Management &management,
-                         class EventTransmitter &eventHub);
+  PresetCollectionWindow(theatre::PresetCollection &presetCollection,
+                         theatre::Management &management,
+                         EventTransmitter &eventHub);
   ~PresetCollectionWindow();
 
-  class FolderObject &GetObject() final override;
-  class PresetCollection &GetPresetCollection() {
+  theatre::FolderObject &GetObject() final override;
+  theatre::PresetCollection &GetPresetCollection() {
     return *_presetCollection;
   }
 
@@ -46,7 +48,7 @@ class PresetCollectionWindow : public PropertiesWindow {
   void onRemovePreset();
   void onControlValueChanged();
 
-  void onChangeManagement(class Management &management) {
+  void onChangeManagement(theatre::Management &management) {
     _management = &management;
   }
   void onUpdateControllables();
@@ -82,10 +84,12 @@ class PresetCollectionWindow : public PropertiesWindow {
 
   RecursionLock _recursionLock;
 
-  PresetCollection *_presetCollection;
-  Management *_management;
+  theatre::PresetCollection *_presetCollection;
+  theatre::Management *_management;
   EventTransmitter &_eventHub;
   sigc::connection _changeManagementConnection, _updateControllablesConnection;
 };
+
+}  // namespace glight::gui
 
 #endif

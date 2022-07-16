@@ -5,6 +5,8 @@
 
 #include <string>
 
+namespace glight::theatre {
+
 class InvertEffect : public Effect {
  public:
   InvertEffect()
@@ -35,5 +37,7 @@ class InvertEffect : public Effect {
  private:
   unsigned _offThreshold;
 };
+
+}  // namespace glight::theatre
 
 #endif

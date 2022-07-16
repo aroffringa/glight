@@ -1,6 +1,8 @@
 #ifndef RECURSION_LOCK_H
 #define RECURSION_LOCK_H
 
+namespace glight::gui {
+
 class RecursionLock {
  public:
   RecursionLock() : _isTaken(false) {}
@@ -56,5 +58,7 @@ class RecursionLock {
  private:
   bool _isTaken;
 };
+
+}  // namespace glight::gui
 
 #endif

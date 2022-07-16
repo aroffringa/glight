@@ -1,11 +1,13 @@
-#ifndef CHASE_H
-#define CHASE_H
+#ifndef THEATRE_CHASE_H_
+#define THEATRE_CHASE_H_
 
 #include "controllable.h"
 #include "sequence.h"
 #include "timing.h"
 #include "transition.h"
 #include "trigger.h"
+
+namespace glight::theatre {
 
 /**
         @author Andre Offringa
@@ -159,5 +161,7 @@ class Chase : public Controllable {
   class Transition _transition;
   double _phaseOffset;
 };
+
+}  // namespace glight::theatre
 
 #endif

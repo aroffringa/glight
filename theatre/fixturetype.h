@@ -1,5 +1,5 @@
-#ifndef FIXTURE_TYPE_H_
-#define FIXTURE_TYPE_H_
+#ifndef THEATRE_FIXTURE_TYPE_H_
+#define THEATRE_FIXTURE_TYPE_H_
 
 #include <map>
 #include <string>
@@ -9,6 +9,8 @@
 #include "folderobject.h"
 #include "fixturetypefunction.h"
 #include "valuesnapshot.h"
+
+namespace glight::theatre {
 
 class Fixture;
 
@@ -205,5 +207,7 @@ class FixtureType : public FolderObject {
   std::vector<FixtureTypeFunction> functions_;
   unsigned scaling_value_;
 };
+
+}  // namespace glight::theatre
 
 #endif

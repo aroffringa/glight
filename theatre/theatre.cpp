@@ -6,6 +6,8 @@
 #include <cmath>
 #include <sstream>
 
+namespace glight::theatre {
+
 Theatre::Theatre(const Theatre &source)
     : _highestChannel(source._highestChannel) {
   _fixtureTypes.reserve(source._fixtureTypes.size());
@@ -178,3 +180,5 @@ Position Theatre::Extend() const {
   }
   return extend;
 }
+
+}  // namespace glight::theatre

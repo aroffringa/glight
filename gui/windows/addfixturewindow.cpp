@@ -8,6 +8,8 @@
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 
+namespace glight::gui {
+
 AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
                                    Management &management)
     : stock_button_("Stock"),
@@ -150,3 +152,5 @@ void AddFixtureWindow::onIncCount() {
   count++;
   _countEntry.set_text(std::to_string(count));
 }
+
+}  // namespace glight::gui

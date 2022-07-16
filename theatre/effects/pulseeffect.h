@@ -5,6 +5,8 @@
 #include "../timing.h"
 #include "../transition.h"
 
+namespace glight::theatre {
+
 class PulseEffect : public Effect {
  public:
   PulseEffect()
@@ -89,5 +91,7 @@ class PulseEffect : public Effect {
   // all in ms.
   unsigned _attack, _hold, _release, _sleep;
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -2,6 +2,8 @@
 
 #include <gtkmm/colorchooserdialog.h>
 
+namespace glight::gui {
+
 ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent)
     : _parent(parent),
       _label("Color:"),
@@ -50,3 +52,5 @@ bool ColorSelectWidget::onColorAreaDraw(
   cr->paint();
   return true;
 }
+
+}  // namespace glight::gui

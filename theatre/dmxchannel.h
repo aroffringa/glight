@@ -1,8 +1,10 @@
-#ifndef DMXCHANNEL_H
-#define DMXCHANNEL_H
+#ifndef THEATRE_DMXCHANNEL_H_
+#define THEATRE_DMXCHANNEL_H_
 
 #include "controlvalue.h"
 #include "mixstyle.h"
+
+namespace glight::theatre {
 
 /**
  * @author Andre Offringa
@@ -32,5 +34,7 @@ class DmxChannel {
   unsigned _channel;
   MixStyle _defaultMixStyle;
 };
+
+}  // namespace glight::theatre
 
 #endif

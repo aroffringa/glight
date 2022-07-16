@@ -1,5 +1,7 @@
 #include "fixturetypefunctionsframe.h"
 
+namespace glight::gui {
+
 FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     : Gtk::Frame("Functions"),
       add_function_button_("+"),
@@ -154,3 +156,5 @@ void FixtureTypeFunctionsFrame::onSelectionChanged() {
     function_type_combo_.set_active(-1);
   }
 }
+
+}  // namespace glight::gui

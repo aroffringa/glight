@@ -1,5 +1,5 @@
-#ifndef PRESETCOLLECTION_H
-#define PRESETCOLLECTION_H
+#ifndef THEATRE_PRESETCOLLECTION_H_
+#define THEATRE_PRESETCOLLECTION_H_
 
 #include <memory>
 #include <vector>
@@ -8,6 +8,8 @@
 #include "dmxchannel.h"
 #include "presetvalue.h"
 #include "sourcevalue.h"
+
+namespace glight::theatre {
 
 /**
  * @author Andre Offringa
@@ -73,7 +75,11 @@ class PresetCollection : public Controllable {
   std::vector<std::unique_ptr<PresetValue>> _presetValues;
 };
 
+}  // namespace glight::theatre
+
 #include "management.h"
+
+namespace glight::theatre {
 
 void PresetCollection::SetFromCurrentSituation(const Management &management) {
   Clear();
@@ -84,5 +90,7 @@ void PresetCollection::SetFromCurrentSituation(const Management &management) {
       _presetValues.emplace_back(new PresetValue(sv->Preset()));
   }
 }
+
+}  // namespace glight::theatre
 
 #endif

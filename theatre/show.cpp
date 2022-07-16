@@ -3,6 +3,8 @@
 #include "folder.h"
 #include "management.h"
 
+namespace glight::theatre {
+
 Scene *Show::AddScene(bool in_folder) {
   std::unique_ptr<Scene> &result =
       _scenes.emplace_back(std::make_unique<Scene>(_management));
@@ -31,3 +33,5 @@ void Show::Clear() {
   _runningScenes.clear();
   _scenes.clear();
 }
+
+}  // namespace glight::theatre

@@ -6,6 +6,8 @@
 
 #include <utility>
 
+namespace glight::theatre {
+
 class FixtureTypeFunction {
  public:
   FixtureTypeFunction(size_t dmx_offset, FunctionType type, bool is_16_bit,
@@ -105,5 +107,7 @@ class FixtureTypeFunction {
   unsigned shape_;
   FixtureFunctionParameters parameters_;
 };
+
+}  // namespace glight::theatre
 
 #endif

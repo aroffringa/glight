@@ -5,6 +5,8 @@
 
 #include "../effects/inverteffect.h"
 
+namespace glight::theatre {
+
 class InvertEffectPS final : public PropertySet {
  public:
   InvertEffectPS() {
@@ -33,5 +35,7 @@ class InvertEffectPS final : public PropertySet {
     return 0;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -2,6 +2,8 @@
 
 #include "management.h"
 
+namespace glight::theatre {
+
 Scene::Scene(Management &management)
     : _management(management),
       _mutex(management.Mutex()),
@@ -25,3 +27,5 @@ void Scene::OnSyncUpdate(double offsetInMS) {
   setStartTimeInMS(StartTimeInMS() +
                    (currentTime - StartTimeInMS() - offsetInMS) * 0.05);
 }
+
+}  // namespace glight::theatre

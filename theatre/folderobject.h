@@ -1,11 +1,13 @@
-#ifndef FOLDEROBJECT_H
-#define FOLDEROBJECT_H
+#ifndef THEATRE_FOLDEROBJECT_H_
+#define THEATRE_FOLDEROBJECT_H_
 
 #include "namedobject.h"
 
+namespace glight::theatre {
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class FolderObject : public NamedObject {
  public:
   friend class Folder;
@@ -34,5 +36,7 @@ class FolderObject : public NamedObject {
 
   class Folder *_parent;
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -18,6 +18,8 @@
 #include "../theatre/sequence.h"
 #include "../theatre/timesequence.h"
 
+namespace glight::gui {
+
 ObjectListFrame::ObjectListFrame(Management &management,
                                  ShowWindow &parentWindow)
     : _objectListFrame("Object programming"),
@@ -234,3 +236,5 @@ void ObjectListFrame::onObjectActivated(FolderObject &object) {
     }
   }
 }
+
+}  // namespace glight::gui

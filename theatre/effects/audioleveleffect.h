@@ -6,6 +6,8 @@
 
 #include <string>
 
+namespace glight::theatre {
+
 class AudioLevelEffect final : public Effect {
  public:
   AudioLevelEffect()
@@ -50,5 +52,7 @@ class AudioLevelEffect final : public Effect {
   // 2^24-1 means fully fade down in one second
   unsigned _decaySpeed;
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -18,16 +18,18 @@
 #include "windows/propertieswindow.h"
 
 #include "../theatre/effect.h"
+#include "../theatre/forwards.h"
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::gui {
+
+class ShowWindow;
+
 class ObjectListFrame : public Gtk::VPaned {
  public:
-  ObjectListFrame(class Management &management, class ShowWindow &parentWindow);
+  ObjectListFrame(theatre::Management &management, ShowWindow &parentWindow);
 
-  Folder &SelectedFolder() { return _list.SelectedFolder(); }
-  void OpenFolder(const Folder &folder) { _list.OpenFolder(folder); }
+  theatre::Folder &SelectedFolder() { return _list.SelectedFolder(); }
+  void OpenFolder(const theatre::Folder &folder) { _list.OpenFolder(folder); }
 
  private:
   void initPresetsPart();
@@ -39,10 +41,10 @@ class ObjectListFrame : public Gtk::VPaned {
   void onNewFolderButtonClicked();
   void onDeletePresetButtonClicked();
   void onSelectedObjectChanged();
-  void onObjectActivated(class FolderObject &object);
-  void onNewEffectMenuClicked(enum Effect::Type effectType);
+  void onObjectActivated(theatre::FolderObject &object);
+  void onNewEffectMenuClicked(enum theatre::Effect::Type effectType);
 
-  void changeManagement(class Management &management) {
+  void changeManagement(theatre::Management &management) {
     _nameFrame.ChangeManagement(management);
     _management = &management;
   }
@@ -62,10 +64,12 @@ class ObjectListFrame : public Gtk::VPaned {
 
   WindowList<PropertiesWindow> _windowList;
 
-  Management *_management;
-  class ShowWindow &_parentWindow;
+  theatre::Management *_management;
+  ShowWindow &_parentWindow;
   NameFrame _nameFrame;
   RecursionLock _delayUpdates;
 };
+
+}  // namespace glight::gui
 
 #endif

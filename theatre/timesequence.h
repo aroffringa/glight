@@ -1,5 +1,5 @@
-#ifndef TIME_SEQUENCE_H
-#define TIME_SEQUENCE_H
+#ifndef THEATRE_TIME_SEQUENCE_H_
+#define THEATRE_TIME_SEQUENCE_H_
 
 #include "controllable.h"
 #include "controlvalue.h"
@@ -7,6 +7,8 @@
 #include "timing.h"
 #include "transition.h"
 #include "trigger.h"
+
+namespace glight::theatre {
 
 /**
         @author Andre Offringa
@@ -185,5 +187,7 @@ class TimeSequence : public Controllable {
   bool _sustain;
   size_t _repeatCount;
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef GUI_STATE_H
-#define GUI_STATE_H
+#ifndef GUI_GUI_STATE_H_
+#define GUI_GUI_STATE_H_
 
 #include <memory>
 #include <string>
@@ -8,9 +8,16 @@
 #include <sigc++/connection.h>
 #include <sigc++/signal.h>
 
+namespace glight::theatre {
+class Management;
+class SourceValue;
+}  // namespace glight::theatre
+
+namespace glight::gui {
+
 class FaderState {
  public:
-  explicit FaderState(class SourceValue *pv);
+  explicit FaderState(theatre::SourceValue *pv);
   FaderState()
       : _sourceValue(nullptr),
         _isToggleButton(false),
@@ -20,7 +27,7 @@ class FaderState {
   FaderState &operator=(const FaderState &rhs);
 
   ~FaderState() { _presetValueDeletedConnection.disconnect(); }
-  void SetSourceValue(class SourceValue *presetValue);
+  void SetSourceValue(theatre::SourceValue *presetValue);
   void SetNoSourceValue() { SetSourceValue(nullptr); }
   void SetIsToggleButton(bool isToggle) { _isToggleButton = isToggle; }
   void SetNewToggleButtonColumn(bool newColumn) {
@@ -28,15 +35,13 @@ class FaderState {
   }
 
   // This might return a nullptr to indicate an unset control.
-  class SourceValue *GetSourceValue() const {
-    return _sourceValue;
-  }
+  theatre::SourceValue *GetSourceValue() const { return _sourceValue; }
   bool IsToggleButton() const { return _isToggleButton; }
   bool NewToggleButtonColumn() const { return _newToggleButtonColumn; }
 
  private:
   void onPresetValueDeleted();
-  class SourceValue *_sourceValue;
+  theatre::SourceValue *_sourceValue;
   bool _isToggleButton;
   bool _newToggleButtonColumn;
   sigc::connection _presetValueDeletedConnection;
@@ -57,13 +62,13 @@ class FaderSetupState {
   size_t fadeInSpeed, fadeOutSpeed;
   size_t width, height;
 
-  bool IsAssigned(const class SourceValue *p) const {
+  bool IsAssigned(const theatre::SourceValue *p) const {
     for (const class FaderState &fader : faders)
       if (p == fader.GetSourceValue()) return true;
     return false;
   }
 
-  void ChangeManagement(class Management &management);
+  void ChangeManagement(theatre::Management &management);
 
   std::vector<FaderState> faders;
 };
@@ -90,14 +95,14 @@ class GUIState {
 
   bool Empty() const { return _faderSetups.empty(); }
 
-  bool IsAssigned(const class SourceValue *s) const {
+  bool IsAssigned(const theatre::SourceValue *s) const {
     for (const std::unique_ptr<FaderSetupState> &fader : _faderSetups) {
       if (fader->IsAssigned(s)) return true;
     }
     return false;
   }
 
-  void ChangeManagement(class Management &management) {
+  void ChangeManagement(theatre::Management &management) {
     for (std::unique_ptr<FaderSetupState> &fader : _faderSetups)
       fader->ChangeManagement(management);
   }
@@ -106,5 +111,7 @@ class GUIState {
   sigc::signal<void()> _faderSetupSignalChange;
   std::vector<std::unique_ptr<FaderSetupState>> _faderSetups;
 };
+
+}  // namespace glight::gui
 
 #endif

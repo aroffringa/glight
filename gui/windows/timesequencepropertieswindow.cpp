@@ -6,6 +6,8 @@
 
 #include <gtkmm/messagedialog.h>
 
+namespace glight::gui {
+
 TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
     class TimeSequence &timeSequence, Management &management,
     EventTransmitter &eventHub)
@@ -358,3 +360,5 @@ void TimeSequencePropertiesWindow::onUpdateControllables() {
   else
     hide();
 }
+
+}  // namespace glight::gui

@@ -1,5 +1,5 @@
-#ifndef OLA_DEVICE_H
-#define OLA_DEVICE_H
+#ifndef THEATRE_OLA_DEVICE_H_
+#define THEATRE_OLA_DEVICE_H_
 
 #include "dmxdevice.h"
 
@@ -7,6 +7,8 @@
 #include <ola/client/StreamingClient.h>
 
 #include <memory>
+
+namespace glight::theatre {
 
 class OLADevice : public DmxDevice {
  public:
@@ -24,5 +26,7 @@ class OLADevice : public DmxDevice {
   std::unique_ptr<ola::client::StreamingClient> _client;
   unsigned int _universe;
 };
+
+}  // namespace glight::theatre
 
 #endif

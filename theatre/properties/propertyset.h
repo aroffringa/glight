@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+namespace glight::theatre {
+
 class PropertySet {
  public:
   using iterator = std::vector<Property>::iterator;
@@ -156,5 +158,7 @@ class PropertySet {
   FolderObject *_object;
   std::vector<Property> _properties;
 };
+
+}  // namespace glight::theatre
 
 #endif

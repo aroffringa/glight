@@ -15,6 +15,8 @@
 #include <glibmm/main.h>
 #include <gtkmm/main.h>
 
+namespace glight::gui {
+
 VisualizationWindow::VisualizationWindow(Management *management,
                                          EventTransmitter *eventTransmitter,
                                          FixtureSelection *fixtureSelection,
@@ -551,3 +553,5 @@ void VisualizationWindow::onGlobalSelectionChanged() {
   _selectedFixtures = _globalSelection->Selection();
   queue_draw();
 }
+
+}  // namespace glight::gui

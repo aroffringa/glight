@@ -1,5 +1,5 @@
-#ifndef FIXTURE_H_
-#define FIXTURE_H_
+#ifndef THEATRE_FIXTURE_H_
+#define THEATRE_FIXTURE_H_
 
 #include <set>
 
@@ -8,6 +8,8 @@
 #include "fixturesymbol.h"
 #include "namedobject.h"
 #include "position.h"
+
+namespace glight::theatre {
 
 class FixtureType;
 class Position;
@@ -69,7 +71,11 @@ class Fixture : public NamedObject {
   std::vector<std::unique_ptr<FixtureFunction>> _functions;
 };
 
+}  // namespace glight::theatre
+
 #include "fixturetype.h"
+
+namespace glight::theatre {
 
 Color Fixture::GetColor(const ValueSnapshot &snapshot,
                         size_t shapeIndex) const {
@@ -80,4 +86,7 @@ int Fixture::GetRotationSpeed(const ValueSnapshot &snapshot,
                               size_t shapeIndex) const {
   return _type.GetRotationSpeed(*this, snapshot, shapeIndex);
 }
+
+}  // namespace glight::theatre
+
 #endif

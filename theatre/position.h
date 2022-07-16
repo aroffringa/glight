@@ -1,7 +1,9 @@
-#ifndef POSITION_H
-#define POSITION_H
+#ifndef THEATRE_POSITION_H_
+#define THEATRE_POSITION_H_
 
 #include <utility>
+
+namespace glight::theatre {
 
 class Position {
  public:
@@ -59,5 +61,7 @@ class Position {
 
   double _x, _y;
 };
+
+}  // namespace glight::theatre
 
 #endif

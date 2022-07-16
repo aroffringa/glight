@@ -1,11 +1,13 @@
-#ifndef FOLDER_H
-#define FOLDER_H
+#ifndef THEATRE_FOLDER_H_
+#define THEATRE_FOLDER_H_
 
 #include <algorithm>
 #include <string>
 #include <vector>
 
 #include "folderobject.h"
+
+namespace glight::theatre {
 
 class Folder : public FolderObject {
  public:
@@ -240,5 +242,7 @@ class Folder : public FolderObject {
 
   std::vector<FolderObject *> _objects;
 };
+
+}  // namespace glight::theatre
 
 #endif

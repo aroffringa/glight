@@ -10,6 +10,8 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
+namespace glight::gui {
+
 EffectPropertiesWindow::EffectPropertiesWindow(class Effect &effect,
                                                Management &management,
                                                ShowWindow &parentWindow)
@@ -143,3 +145,5 @@ void EffectPropertiesWindow::onUpdateControllables() {
   } else
     hide();
 }
+
+}  // namespace glight::gui

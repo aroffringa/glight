@@ -8,6 +8,8 @@
 #include "../../theatre/management.h"
 #include "../../theatre/timesequence.h"
 
+namespace glight::gui {
+
 ChasePropertiesWindow::ChasePropertiesWindow(class Chase &chase,
                                              Management &management,
                                              EventTransmitter &eventHub)
@@ -212,3 +214,5 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   //_management->AddPreset(tSequence, 0);
   _eventHub.EmitUpdate();
 }
+
+}  // namespace glight::gui

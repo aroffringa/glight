@@ -14,6 +14,8 @@
 
 #include <glibmm/main.h>
 
+namespace glight::gui {
+
 const char FaderWindow::_keyRowsUpper[3][10] = {
     {'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?'},
     {'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':'},
@@ -563,3 +565,5 @@ void FaderWindow::ReloadValues() {
     cw->MoveSlider();
   }
 }
+
+}  // namespace glight::gui

@@ -5,6 +5,8 @@
 
 #include <vector>
 
+namespace glight::gui {
+
 class FixtureSelection {
  public:
   sigc::signal<void> &SignalChange() { return _signalChange; }
@@ -24,5 +26,7 @@ class FixtureSelection {
   sigc::signal<void> _signalChange;
   std::vector<class Fixture *> _selection;
 };
+
+}  // namespace glight::gui
 
 #endif

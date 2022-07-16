@@ -1,19 +1,22 @@
-#ifndef OBJECT_BROWSER_H
-#define OBJECT_BROWSER_H
+#ifndef GUI_OBJECT_BROWSER_H_
+#define GUI_OBJECT_BROWSER_H_
 
 #include "foldercombo.h"
 #include "objectlist.h"
 
 #include "../../theatre/folder.h"
 #include "../../theatre/folderobject.h"
+#include "../../theatre/forwards.h"
 
 #include <gtkmm/box.h>
 
 #include <sigc++/signal.h>
 
+namespace glight::gui {
+
 class ObjectBrowser : public Gtk::VBox {
  public:
-  ObjectBrowser(class Management &management, class EventTransmitter &eventHub)
+  ObjectBrowser(theatre::Management &management, EventTransmitter &eventHub)
       : _folderCombo(management, eventHub), _list(management, eventHub) {
     _parentFolderButton.set_image_from_icon_name("go-up");
     _parentFolderButton.signal_clicked().connect(
@@ -31,7 +34,7 @@ class ObjectBrowser : public Gtk::VBox {
 
     _list.SignalSelectionChange().connect([&]() { onSelectionChanged(); });
     _list.SignalObjectActivated().connect(
-        [&](FolderObject &object) { onObjectActivated(object); });
+        [&](theatre::FolderObject &object) { onObjectActivated(object); });
     pack_start(_list, true, true);
     _list.show();
   }
@@ -46,9 +49,9 @@ class ObjectBrowser : public Gtk::VBox {
   }
   bool ShowTypeColumn() const { return _list.ShowTypeColumn(); }
 
-  FolderObject *SelectedObject() { return _list.SelectedObject(); }
+  theatre::FolderObject *SelectedObject() { return _list.SelectedObject(); }
 
-  Folder &SelectedFolder() { return _folderCombo.Selection(); }
+  theatre::Folder &SelectedFolder() { return _folderCombo.Selection(); }
 
   sigc::signal<void()> &SignalSelectionChange() {
     return _signalSelectionChange;
@@ -56,34 +59,36 @@ class ObjectBrowser : public Gtk::VBox {
 
   sigc::signal<void()> &SignalFolderChange() { return _signalFolderChange; }
 
-  sigc::signal<void(FolderObject &object)> &SignalObjectActivated() {
+  sigc::signal<void(theatre::FolderObject &object)> &SignalObjectActivated() {
     return _signalObjectActivated;
   }
 
-  void SelectObject(const FolderObject &object) {
+  void SelectObject(const theatre::FolderObject &object) {
     _folderCombo.Select(object.Parent());
     _list.SelectObject(object);
   }
 
-  void OpenFolder(const Folder &folder) { _folderCombo.Select(folder); }
+  void OpenFolder(const theatre::Folder &folder) {
+    _folderCombo.Select(folder);
+  }
 
  private:
   void onSelectionChanged() { _signalSelectionChange.emit(); }
   void onFolderChanged() {
-    Folder &folder = _folderCombo.Selection();
+    theatre::Folder &folder = _folderCombo.Selection();
     _parentFolderButton.set_sensitive(!folder.IsRoot());
     _list.SetFolder(folder);
     _signalFolderChange.emit();
   }
-  void onObjectActivated(FolderObject &object) {
-    Folder *folder = dynamic_cast<Folder *>(&object);
+  void onObjectActivated(theatre::FolderObject &object) {
+    theatre::Folder *folder = dynamic_cast<theatre::Folder *>(&object);
     if (folder == nullptr)
       _signalObjectActivated.emit(object);
     else
       _folderCombo.Select(*folder);
   }
   void onParentFolderClicked() {
-    const Folder &folder = _folderCombo.Selection();
+    const theatre::Folder &folder = _folderCombo.Selection();
     if (!folder.IsRoot()) _folderCombo.Select(folder.Parent());
   }
 
@@ -94,7 +99,9 @@ class ObjectBrowser : public Gtk::VBox {
 
   sigc::signal<void()> _signalSelectionChange;
   sigc::signal<void()> _signalFolderChange;
-  sigc::signal<void(FolderObject &object)> _signalObjectActivated;
+  sigc::signal<void(theatre::FolderObject &object)> _signalObjectActivated;
 };
+
+}  // namespace glight::gui
 
 #endif

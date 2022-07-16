@@ -1,8 +1,10 @@
-#ifndef FIXTURE_CONTROL_H
-#define FIXTURE_CONTROL_H
+#ifndef THEATRE_FIXTURE_CONTROL_H_
+#define THEATRE_FIXTURE_CONTROL_H_
 
 #include "controllable.h"
 #include "fixture.h"
+
+namespace glight::theatre {
 
 class FixtureControl : public Controllable {
  public:
@@ -77,5 +79,7 @@ class FixtureControl : public Controllable {
   class Fixture *_fixture;
   std::vector<ControlValue> _values;
 };
+
+}  // namespace glight::theatre
 
 #endif

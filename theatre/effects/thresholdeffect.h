@@ -5,6 +5,8 @@
 
 #include <string>
 
+namespace glight::theatre {
+
 /**
  * This effect applies the following transformation to the control value:
  *
@@ -77,5 +79,7 @@ class ThresholdEffect : public Effect {
  private:
   unsigned _lowerStartLimit, _lowerEndLimit, _upperStartLimit, _upperEndLimit;
 };
+
+}  // namespace glight::theatre
 
 #endif

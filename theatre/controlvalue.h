@@ -1,9 +1,11 @@
-#ifndef CONTROLVALUE_H
-#define CONTROLVALUE_H
+#ifndef THEATRE_CONTROLVALUE_H_
+#define THEATRE_CONTROLVALUE_H_
 
 #include "mixstyle.h"
 
 #include <cmath>
+
+namespace glight::theatre {
 
 /**
  * @author Andre Offringa
@@ -70,5 +72,7 @@ class ControlValue {
  private:
   unsigned int _value;
 };
+
+}  // namespace glight::theatre
 
 #endif

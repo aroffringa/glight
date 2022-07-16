@@ -1,5 +1,5 @@
-#ifndef FIXTUREFUNCTION_H
-#define FIXTUREFUNCTION_H
+#ifndef THEATRE_FIXTUREFUNCTION_H_
+#define THEATRE_FIXTUREFUNCTION_H_
 
 #include <string>
 #include <vector>
@@ -9,6 +9,8 @@
 #include "functiontype.h"
 #include "namedobject.h"
 #include "valuesnapshot.h"
+
+namespace glight::theatre {
 
 /**
  * @author Andre Offringa
@@ -63,5 +65,7 @@ class FixtureFunction : public NamedObject {
   DmxChannel _firstChannel;
   bool _is16Bit;
 };
+
+}  // namespace glight::theatre
 
 #endif

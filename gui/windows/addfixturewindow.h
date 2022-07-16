@@ -16,6 +16,8 @@ class EventTransmitter;
 class FixtureType;
 class Management;
 
+namespace glight::gui {
+
 /**
  * @author Andre Offringa
  */
@@ -64,5 +66,7 @@ class AddFixtureWindow : public Gtk::Window {
   void onCancel() { hide(); }
   void onAdd();
 };
+
+}  // namespace glight::gui
 
 #endif

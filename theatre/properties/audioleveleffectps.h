@@ -5,6 +5,8 @@
 
 #include "../../theatre/effects/audioleveleffect.h"
 
+namespace glight::theatre {
+
 class AudioLevelEffectPS final : public PropertySet {
  public:
   AudioLevelEffectPS() {
@@ -32,5 +34,7 @@ class AudioLevelEffectPS final : public PropertySet {
     return 0;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

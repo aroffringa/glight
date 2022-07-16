@@ -1,10 +1,11 @@
-#ifndef CHASE_WIZARD_H
-#define CHASE_WIZARD_H
+#ifndef GUI_CHASE_WIZARD_H_
+#define GUI_CHASE_WIZARD_H_
 
 #include "components/colorsequencewidget.h"
 #include "components/objectbrowser.h"
 
 #include "../theatre/autodesign.h"
+#include "../theatre/forwards.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -21,9 +22,13 @@
 
 #include <vector>
 
+namespace glight::gui {
+
+class EventTransmitter;
+
 class DesignWizard : public Gtk::Window {
  public:
-  DesignWizard(class Management &management, class EventTransmitter &hub,
+  DesignWizard(theatre::Management &management, EventTransmitter &hub,
                const std::string &destinationPath);
   ~DesignWizard();
 
@@ -31,7 +36,7 @@ class DesignWizard : public Gtk::Window {
     _destinationPath = destinationPath;
   }
 
-  void Select(const std::vector<class Fixture *> &fixtures);
+  void Select(const std::vector<theatre::Fixture *> &fixtures);
 
  private:
   enum Page {
@@ -46,7 +51,7 @@ class DesignWizard : public Gtk::Window {
   };
 
   void fillFixturesList();
-  void onManagementChange(class Management &newManagement) {
+  void onManagementChange(theatre::Management &newManagement) {
     _management = &newManagement;
     fillFixturesList();
   }
@@ -59,18 +64,18 @@ class DesignWizard : public Gtk::Window {
   void initPage3_4VUMeter();
   void initPage3_5ColorPreset();
   void initPage3_6Increasing();
-  class Folder &getFolder() const;
+  theatre::Folder &getFolder() const;
 
   // 1b
   void onAddControllable();
-  void addControllable(FolderObject &object);
+  void addControllable(theatre::FolderObject &object);
   void onRemoveControllable();
   void onControllableSelected();
 
-  AutoDesign::ColorDeduction colorDeduction() const;
+  theatre::AutoDesign::ColorDeduction colorDeduction() const;
 
-  class EventTransmitter &_eventHub;
-  class Management *_management;
+  EventTransmitter &_eventHub;
+  theatre::Management *_management;
   std::string _destinationPath;
 
   Gtk::VBox _mainBox;
@@ -81,7 +86,7 @@ class DesignWizard : public Gtk::Window {
   // 1a
   Gtk::Label _selectLabel;
   Gtk::TreeView _fixturesListView;
-  std::vector<class Controllable *> _selectedControllables;
+  std::vector<theatre::Controllable *> _selectedControllables;
   // 1b
   ObjectBrowser _objectBrowser;
   Gtk::HBox _controllableButtonBox;
@@ -129,7 +134,7 @@ class DesignWizard : public Gtk::Window {
     }
 
     Gtk::TreeModelColumn<Glib::ustring> _title, _type;
-    Gtk::TreeModelColumn<class Fixture *> _fixture;
+    Gtk::TreeModelColumn<theatre::Fixture *> _fixture;
   } _fixturesListColumns;
   Gtk::ScrolledWindow _fixturesScrolledWindow;
 
@@ -142,9 +147,11 @@ class DesignWizard : public Gtk::Window {
     }
 
     Gtk::TreeModelColumn<Glib::ustring> _title, _path;
-    Gtk::TreeModelColumn<class Controllable *> _controllable;
+    Gtk::TreeModelColumn<theatre::Controllable *> _controllable;
   } _controllablesListColumns;
   Gtk::ScrolledWindow _controllablesScrolledWindow;
 };
+
+}  // namespace glight::gui
 
 #endif  // CHASE_WIZARD_H

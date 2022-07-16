@@ -1,9 +1,11 @@
-#ifndef KEYSCENEITEM_H
-#define KEYSCENEITEM_H
+#ifndef THEATRE_KEYSCENEITEM_H_
+#define THEATRE_KEYSCENEITEM_H_
 
 #include <sstream>
 
 #include "sceneitem.h"
+
+namespace glight::theatre {
 
 enum KeySceneLevel { Key, Beat, Highlight, Measure, Section };
 
@@ -68,5 +70,7 @@ class KeySceneItem : public SceneItem {
  private:
   KeySceneLevel _level;
 };
+
+}  // namespace glight::theatre
 
 #endif

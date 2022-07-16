@@ -1,10 +1,12 @@
-#ifndef SHOW_H
-#define SHOW_H
+#ifndef THEATRE_SHOW_H_
+#define THEATRE_SHOW_H_
 
 #include <memory>
 #include <vector>
 
 #include "scene.h"
+
+namespace glight::theatre {
 
 class Management;
 
@@ -56,5 +58,7 @@ class Show {
   std::vector<std::unique_ptr<Scene>> _scenes;
   std::vector<Scene *> _runningScenes;
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -4,7 +4,13 @@
 #include "../theatre/management.h"
 #include "../theatre/sourcevalue.h"
 
-FaderState::FaderState(class SourceValue *sourceValue)
+namespace glight::gui {
+
+using theatre::Controllable;
+using theatre::Management;
+using theatre::SourceValue;
+
+FaderState::FaderState(SourceValue *sourceValue)
     : _sourceValue(sourceValue),
       _isToggleButton(false),
       _newToggleButtonColumn(false) {
@@ -65,3 +71,5 @@ void FaderSetupState::ChangeManagement(Management &management) {
     }
   }
 }
+
+}  // namespace glight::gui

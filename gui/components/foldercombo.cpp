@@ -8,7 +8,12 @@
 #include "../../theatre/management.h"
 #include "../../theatre/presetcollection.h"
 
-FolderCombo::FolderCombo(Management &management, EventTransmitter &eventHub)
+namespace glight::gui {
+
+using theatre::Folder;
+using theatre::FolderObject;
+  
+FolderCombo::FolderCombo(theatre::Management &management, EventTransmitter &eventHub)
     : Gtk::ComboBox(false), _management(&management), _eventHub(eventHub) {
   _eventHub.SignalChangeManagement().connect(
       sigc::mem_fun(*this, &FolderCombo::changeManagement));
@@ -95,3 +100,5 @@ bool FolderCombo::selectObject(const Folder &object,
   }
   return false;
 }
+
+}  // namespace glight::gui

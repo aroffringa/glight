@@ -2,6 +2,8 @@
 
 #include <gtkmm/window.h>
 
+namespace glight::gui {
+
 class GradientWindow : public Gtk::Window {
  public:
   GradientWindow(size_t maxCount)
@@ -39,3 +41,5 @@ class GradientWindow : public Gtk::Window {
   Gtk::Button _cancelButton, _okayButton;
   bool _result;
 };
+
+}  // namespace glight::gui

@@ -13,6 +13,8 @@
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 
+namespace glight::gui {
+
 FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
                                        Management &management)
     : event_hub_(eventHub),
@@ -198,3 +200,5 @@ void FixtureTypesWindow::onSelectionChanged() {
     }
   }
 }
+
+}  // namespace glight::gui

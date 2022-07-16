@@ -4,6 +4,8 @@
 #include "../effect.h"
 #include "../timing.h"
 
+namespace glight::theatre {
+
 class FadeEffect : public Effect {
  public:
   FadeEffect()
@@ -85,5 +87,7 @@ class FadeEffect : public Effect {
   double _sustain;
   double _previousTime, _sustainTimer;
 };
+
+}  // namespace glight::theatre
 
 #endif

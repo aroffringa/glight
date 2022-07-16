@@ -18,6 +18,8 @@
 #include "timesequence.h"
 #include "valuesnapshot.h"
 
+namespace glight::theatre {
+
 Management::Management()
     : _thread(),
       _isQuitting(false),
@@ -606,3 +608,5 @@ void Management::Recover(Management &other) {
     }
   }
 }
+
+}  // namespace glight::theatre

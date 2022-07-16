@@ -5,6 +5,8 @@
 
 #include "../effects/delayeffect.h"
 
+namespace glight::theatre {
+
 class DelayEffectPS final : public PropertySet {
  public:
   DelayEffectPS() {
@@ -32,5 +34,7 @@ class DelayEffectPS final : public PropertySet {
     return 0;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

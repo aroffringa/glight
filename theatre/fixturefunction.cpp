@@ -1,6 +1,8 @@
 #include "fixturefunction.h"
 #include "theatre.h"
 
+namespace glight::theatre {
+
 FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type,
                                  const std::string &name)
     : NamedObject(name),
@@ -41,3 +43,5 @@ void FixtureFunction::SetChannel(const DmxChannel &channel, bool is16Bit) {
   _is16Bit = is16Bit;
   _theatre.NotifyDmxChange();
 }
+
+}  // namespace glight::theatre

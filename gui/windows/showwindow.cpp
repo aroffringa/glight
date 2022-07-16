@@ -27,6 +27,8 @@
 
 #include <filesystem>
 
+namespace glight::gui {
+
 ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
     : _miFile("_File", true),
       _miDesign("_Design", true),
@@ -656,3 +658,5 @@ void ShowWindow::onHideFixtureTypes() {
 void ShowWindow::onHideVisualizationWindow() {
   _miVisualizationWindow.set_active(false);
 }
+
+}  // namespace glight::gui

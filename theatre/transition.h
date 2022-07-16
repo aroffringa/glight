@@ -4,6 +4,8 @@
 #include "presetcollection.h"
 #include "timing.h"
 
+namespace glight::theatre {
+
 enum class TransitionType {
   None,
   Fade,
@@ -122,5 +124,7 @@ class Transition {
   double _lengthInMs;
   TransitionType _type;
 };
+
+}  // namespace glight::theatre
 
 #endif

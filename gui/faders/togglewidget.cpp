@@ -9,6 +9,8 @@
 #include "../../theatre/presetvalue.h"
 #include "../../theatre/sourcevalue.h"
 
+namespace glight::gui {
+
 ToggleWidget::ToggleWidget(class Management &management,
                            EventTransmitter &eventHub, char key)
     : _flashButton(std::string(1, key)),
@@ -174,3 +176,5 @@ void ToggleWidget::ChangeManagement(class Management &management,
 void ToggleWidget::Limit(double value) {
   if (value < ControlValue::MaxUInt()) _onCheckButton.set_active(false);
 }
+
+}  // namespace glight::gui

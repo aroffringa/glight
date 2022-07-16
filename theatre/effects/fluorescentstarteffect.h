@@ -6,6 +6,8 @@
 
 #include <vector>
 
+namespace glight::theatre {
+
 class FluorescentStartEffect : public Effect {
  public:
   FluorescentStartEffect()
@@ -96,5 +98,7 @@ class FluorescentStartEffect : public Effect {
   size_t _glowValue;
   bool _independentOutputs;
 };
+
+}  // namespace glight::theatre
 
 #endif

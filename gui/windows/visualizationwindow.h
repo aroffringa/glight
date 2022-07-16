@@ -1,7 +1,8 @@
-#ifndef VISUALIZATIONWINDOW_H
-#define VISUALIZATIONWINDOW_H
+#ifndef GUI_VISUALIZATIONWINDOW_H_
+#define GUI_VISUALIZATIONWINDOW_H_
 
 #include "../../theatre/fixturesymbol.h"
+#include "../../theatre/forwards.h"
 #include "../../theatre/position.h"
 
 #include <gdkmm/pixbuf.h>
@@ -12,20 +13,23 @@
 #include <gtkmm/separatormenuitem.h>
 #include <gtkmm/window.h>
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::gui {
+
+class EventTransmitter;
+class FixtureSelection;
+class ShowWindow;
+  
 class VisualizationWindow : public Gtk::Window {
  public:
-  VisualizationWindow(class Management *management,
-                      class EventTransmitter *eventTransmitter,
-                      class FixtureSelection *fixtureSelection,
-                      class ShowWindow *showWindow);
+  VisualizationWindow(theatre::Management *management,
+                      EventTransmitter *eventTransmitter,
+                      FixtureSelection *fixtureSelection,
+                      ShowWindow *showWindow);
   ~VisualizationWindow();
 
   void Update() { queue_draw(); }
 
-  void SetDryMode(class Management *dryManagement) {
+  void SetDryMode(theatre::Management *dryManagement) {
     _dryManagement = dryManagement;
     Update();
   }
@@ -41,8 +45,8 @@ class VisualizationWindow : public Gtk::Window {
 
  private:
   Gtk::DrawingArea _drawingArea;
-  Management *_management;
-  Management *_dryManagement;
+  theatre::Management *_management;
+  theatre::Management *_dryManagement;
   class EventTransmitter *_eventTransmitter;
   class FixtureSelection *_globalSelection;
   sigc::connection _globalSelectionConnection;
@@ -56,7 +60,7 @@ class VisualizationWindow : public Gtk::Window {
     DragAddRectangle
   } _dragType;
   std::vector<class Fixture *> _selectedFixtures, _selectedFixturesBeforeDrag;
-  Position _draggingStart, _draggingTo;
+  theatre::Position _draggingStart, _draggingTo;
   struct FixtureState {
     double rotation = 0.0;
   };
@@ -93,20 +97,20 @@ class VisualizationWindow : public Gtk::Window {
     Update();
     return true;
   }
-  static double radius(FixtureSymbol::Symbol symbol) {
+  static double radius(theatre::FixtureSymbol::Symbol symbol) {
     switch (symbol) {
-      case FixtureSymbol::Hidden:
+      case theatre::FixtureSymbol::Hidden:
         return 0.0;
-      case FixtureSymbol::Small:
+      case theatre::FixtureSymbol::Small:
         return 0.3;
-      case FixtureSymbol::Normal:
+      case theatre::FixtureSymbol::Normal:
         return 0.4;
-      case FixtureSymbol::Large:
+      case theatre::FixtureSymbol::Large:
         return 0.5;
     }
     return 0.4;
   }
-  static double radiusSq(FixtureSymbol::Symbol symbol) {
+  static double radiusSq(theatre::FixtureSymbol::Symbol symbol) {
     return radius(symbol) * radius(symbol);
   }
 
@@ -117,7 +121,7 @@ class VisualizationWindow : public Gtk::Window {
   void onRemoveFixtures();
   void onDesignFixtures();
   void onFullscreen();
-  void onSetSymbol(FixtureSymbol::Symbol symbol);
+  void onSetSymbol(theatre::FixtureSymbol::Symbol symbol);
   void onGlobalSelectionChanged();
 
   double scale(Management &management, double width, double height);
@@ -128,9 +132,11 @@ class VisualizationWindow : public Gtk::Window {
     else
       return 1.0 / sc;
   }
-  class Fixture *fixtureAt(Management &management, const Position &position);
-  void selectFixtures(const Position &a, const Position &b);
-  void addFixtures(const Position &a, const Position &b);
+  class Fixture *fixtureAt(theatre::Management &management, const theatre::Position &position);
+  void selectFixtures(const theatre::Position &a, const theatre::Position &b);
+  void addFixtures(const theatre::Position &a, const theatre::Position &b);
 };
+
+}  // namespace glight::gui
 
 #endif

@@ -6,6 +6,8 @@
 
 #include <gtkmm/messagedialog.h>
 
+namespace glight::gui {
+
 PresetCollectionWindow::PresetCollectionWindow(
     PresetCollection &presetCollection, Management &management,
     EventTransmitter &eventHub)
@@ -221,3 +223,5 @@ void PresetCollectionWindow::onControlValueChanged() {
   lock.unlock();
   fillPresetsList();
 }
+
+}  // namespace glight::gui

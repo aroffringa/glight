@@ -5,6 +5,8 @@
 
 #include <cmath>
 
+namespace glight::theatre {
+
 class CurveEffect : public Effect {
  public:
   enum Function {
@@ -71,5 +73,7 @@ class CurveEffect : public Effect {
  private:
   Function _function;
 };
+
+}  // namespace glight::theatre
 
 #endif

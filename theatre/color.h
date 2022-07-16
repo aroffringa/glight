@@ -1,5 +1,7 @@
-#ifndef COLOR_H
-#define COLOR_H
+#ifndef THEATRE_COLOR_H_
+#define THEATRE_COLOR_H_
+
+namespace glight::theatre {
 
 class Color {
  public:
@@ -58,5 +60,7 @@ inline bool operator==(const Color &lhs, const Color &rhs) {
   return lhs.Red() == rhs.Red() && lhs.Green() == rhs.Green() &&
          lhs.Blue() == rhs.Blue();
 }
+
+}  // namespace glight::theatre
 
 #endif  // COLOR_H

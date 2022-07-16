@@ -11,7 +11,12 @@
 
 #include <memory>
 
-DesignWizard::DesignWizard(Management &management, EventTransmitter &hub,
+namespace glight::gui {
+
+using theatre::AutoDesign;
+
+DesignWizard::DesignWizard(theatre::Management &management,
+                           EventTransmitter &hub,
                            const std::string &destinationPath)
     : _eventHub(hub),
       _management(&management),
@@ -111,7 +116,7 @@ void DesignWizard::initPage1() {
   _objectBrowser.SignalSelectionChange().connect(
       [&]() { onControllableSelected(); });
   _objectBrowser.SignalObjectActivated().connect(
-      [&](FolderObject &object) { addControllable(object); });
+      [&](theatre::FolderObject &object) { addControllable(object); });
   _vBoxPage1b.pack_start(_objectBrowser);
 
   _addControllableButton.set_image_from_icon_name("go-down");
@@ -239,9 +244,9 @@ void DesignWizard::fillFixturesList() {
   _fixturesListModel->clear();
 
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  const std::vector<std::unique_ptr<Fixture>> &fixtures =
+  const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
       _management->GetTheatre().Fixtures();
-  for (const std::unique_ptr<Fixture> &fixture : fixtures) {
+  for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = _fixturesListModel->append();
     Gtk::TreeModel::Row row = *iter;
     row[_fixturesListColumns._title] = fixture->Name();
@@ -250,20 +255,20 @@ void DesignWizard::fillFixturesList() {
   }
 }
 
-void DesignWizard::Select(const std::vector<class Fixture *> &fixtures) {
+void DesignWizard::Select(const std::vector<theatre::Fixture *> &fixtures) {
   _fixturesListView.get_selection()->unselect_all();
   Gtk::TreeModel::iterator iter;
   Gtk::TreeModel::Children children = _fixturesListModel->children();
   for (auto &child : children) {
-    Fixture *fixture = child.get_value(_fixturesListColumns._fixture);
+    theatre::Fixture *fixture = child.get_value(_fixturesListColumns._fixture);
     auto iter = std::find(fixtures.begin(), fixtures.end(), fixture);
     if (iter != fixtures.end())
       _fixturesListView.get_selection()->select(child);
   }
 }
 
-Folder &DesignWizard::getFolder() const {
-  Folder *folder = dynamic_cast<Folder *>(
+theatre::Folder &DesignWizard::getFolder() const {
+  theatre::Folder *folder = dynamic_cast<theatre::Folder *>(
       _management->GetObjectFromPathIfExists(_destinationPath));
   if (folder)
     return *folder;
@@ -280,7 +285,7 @@ void DesignWizard::onNextClicked() {
             _fixturesListView.get_selection();
         auto selected = selection->get_selected_rows();
         for (auto &row : selected) {
-          Fixture *fixture = (*_fixturesListModel->get_iter(
+          theatre::Fixture *fixture = (*_fixturesListModel->get_iter(
               row))[_fixturesListColumns._fixture];
           _selectedControllables.emplace_back(
               &_management->GetFixtureControl(*fixture));
@@ -437,8 +442,9 @@ void DesignWizard::onNextClicked() {
   }
 }
 
-void DesignWizard::addControllable(FolderObject &object) {
-  Controllable *controllable = dynamic_cast<Controllable *>(&object);
+void DesignWizard::addControllable(theatre::FolderObject &object) {
+  theatre::Controllable *controllable =
+      dynamic_cast<theatre::Controllable *>(&object);
   if (controllable) {
     Gtk::TreeModel::iterator iter = _controllablesListModel->append();
     Gtk::TreeModel::Row row = *iter;
@@ -451,7 +457,7 @@ void DesignWizard::addControllable(FolderObject &object) {
 }
 
 void DesignWizard::onAddControllable() {
-  FolderObject *object = _objectBrowser.SelectedObject();
+  theatre::FolderObject *object = _objectBrowser.SelectedObject();
   if (object) addControllable(*object);
 }
 
@@ -467,8 +473,8 @@ void DesignWizard::onRemoveControllable() {
 }
 
 void DesignWizard::onControllableSelected() {
-  Controllable *object =
-      dynamic_cast<Controllable *>(_objectBrowser.SelectedObject());
+  theatre::Controllable *object =
+      dynamic_cast<theatre::Controllable *>(_objectBrowser.SelectedObject());
   _addControllableButton.set_sensitive(object != nullptr);
 }
 
@@ -479,3 +485,5 @@ AutoDesign::ColorDeduction DesignWizard::colorDeduction() const {
   deduction.uvFromRGB = _deduceUV.get_active();
   return deduction;
 }
+
+}  // namespace glight::gui

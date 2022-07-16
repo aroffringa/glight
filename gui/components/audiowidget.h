@@ -1,5 +1,5 @@
-#ifndef AUDIOWIDGET_H
-#define AUDIOWIDGET_H
+#ifndef GUI_AUDIOWIDGET_H_
+#define GUI_AUDIOWIDGET_H_
 
 #include <cmath>
 #include <map>
@@ -8,15 +8,18 @@
 
 #include <gdkmm/pixbuf.h>
 
-/**
-        @author Andre Offringa
-*/
+#include "../../theatre/forwards.h"
+
+class FlacDecoder;
+
+namespace glight::gui {
+
 class AudioWidget : public Gtk::DrawingArea {
  public:
   AudioWidget();
   ~AudioWidget();
 
-  void SetAudioData(class FlacDecoder &decoder);
+  void SetAudioData(FlacDecoder &decoder);
   void SetPosition(double offsetInMS) {
     _centerPosition = (offsetInMS * 44.100 * 4.0) / _chunkSize;
     _isUpToDate = false;
@@ -25,7 +28,7 @@ class AudioWidget : public Gtk::DrawingArea {
   double Position() const {
     return _centerPosition * _chunkSize / (44.100 * 4.0);
   }
-  void SetScene(class Scene &scene) { _scene = &scene; }
+  void SetScene(theatre::Scene &scene) { _scene = &scene; }
   void SetNoScene() { _scene = nullptr; }
   sigc::signal<void, double> SignalClicked() { return _signalClicked; }
   size_t DataSize() const { return _audioDataMax.size(); }
@@ -48,7 +51,7 @@ class AudioWidget : public Gtk::DrawingArea {
   const int _chunkSize;
   std::vector<unsigned char> _chunkBuffer;
   sigc::signal<void, double> _signalClicked;
-  class Scene *_scene;
+  theatre::Scene *_scene;
   std::map<int, enum KeyType> _keys;
 
   void initialize();
@@ -113,5 +116,7 @@ class AudioWidget : public Gtk::DrawingArea {
     }
   }
 };
+
+}  // namespace glight::gui
 
 #endif

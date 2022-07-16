@@ -7,6 +7,8 @@
 
 #include <string>
 
+namespace glight::theatre {
+
 class Property final {
  public:
   enum Type { Choice, ControlValue, Duration, Boolean, Integer };
@@ -43,5 +45,7 @@ class Property final {
   std::string _name, _description;
   std::vector<std::pair<std::string, std::string>> _options;
 };
+
+}  // namespace glight::theatre
 
 #endif

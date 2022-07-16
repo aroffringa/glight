@@ -1,11 +1,13 @@
-#ifndef NAMEDOBJECT_H
-#define NAMEDOBJECT_H
+#ifndef THEATRE_NAMEDOBJECT_H_
+#define THEATRE_NAMEDOBJECT_H_
 
 #include <memory>
 #include <stdexcept>
 #include <vector>
 
 #include <sigc++/signal.h>
+
+namespace glight::theatre {
 
 /**
         @author Andre Offringa
@@ -119,5 +121,7 @@ class NamedObject {
   [[no_unique_address]] std::string _name;
   sigc::signal<void()> _signalDelete;
 };
+
+}  // namespace glight::theatre
 
 #endif

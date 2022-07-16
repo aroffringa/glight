@@ -19,9 +19,8 @@
 
 #include "nameframe.h"
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::gui {
+
 class SceneFrame : public Gtk::Frame {
  public:
   SceneFrame(class Management &management, class ShowWindow &parentWindow);
@@ -149,5 +148,7 @@ class SceneFrame : public Gtk::Frame {
     }
   }
 };
+
+}  // namespace glight::gui
 
 #endif

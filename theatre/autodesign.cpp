@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <random>
 
+namespace glight::theatre {
+
 void AutoDesign::addColorPresets(Management &management, Controllable &control,
                                  PresetCollection &pc, const Color &color,
                                  const ColorDeduction &deduction) {
@@ -416,3 +418,5 @@ Chase &AutoDesign::MakeIncreasingChase(
   }
   return chase;
 }
+
+}  // namespace glight::theatre
