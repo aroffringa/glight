@@ -12,8 +12,9 @@ namespace glight::gui {
 
 using theatre::Folder;
 using theatre::FolderObject;
-  
-FolderCombo::FolderCombo(theatre::Management &management, EventTransmitter &eventHub)
+
+FolderCombo::FolderCombo(theatre::Management &management,
+                         EventTransmitter &eventHub)
     : Gtk::ComboBox(false), _management(&management), _eventHub(eventHub) {
   _eventHub.SignalChangeManagement().connect(
       sigc::mem_fun(*this, &FolderCombo::changeManagement));

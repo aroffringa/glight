@@ -18,7 +18,7 @@ namespace glight::gui {
 class EventTransmitter;
 class FixtureSelection;
 class ShowWindow;
-  
+
 class VisualizationWindow : public Gtk::Window {
  public:
   VisualizationWindow(theatre::Management *management,
@@ -132,7 +132,8 @@ class VisualizationWindow : public Gtk::Window {
     else
       return 1.0 / sc;
   }
-  class Fixture *fixtureAt(theatre::Management &management, const theatre::Position &position);
+  class Fixture *fixtureAt(theatre::Management &management,
+                           const theatre::Position &position);
   void selectFixtures(const theatre::Position &a, const theatre::Position &b);
   void addFixtures(const theatre::Position &a, const theatre::Position &b);
 };

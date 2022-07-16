@@ -24,12 +24,9 @@ class ShowWindow;
 
 class CreateChaseDialog : public Gtk::Dialog {
  public:
-  CreateChaseDialog(theatre::Management &management,
-                    ShowWindow &parentWindow);
+  CreateChaseDialog(theatre::Management &management, ShowWindow &parentWindow);
 
-  theatre::Chase &CreatedChase() {
-    return *_newChase;
-  }
+  theatre::Chase &CreatedChase() { return *_newChase; }
 
  private:
   void initListPart();

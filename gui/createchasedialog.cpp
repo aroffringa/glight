@@ -83,7 +83,8 @@ void CreateChaseDialog::initNewSequencePart() {
 void CreateChaseDialog::onAddObjectToChaseButtonClicked() {
   theatre::FolderObject *selectedObj = _list.SelectedObject();
   if (selectedObj) {
-    theatre::Controllable *object = dynamic_cast<theatre::Controllable *>(selectedObj);
+    theatre::Controllable *object =
+        dynamic_cast<theatre::Controllable *>(selectedObj);
     if (object) {
       Gtk::TreeModel::iterator newRow = _newChaseListModel->append();
       std::lock_guard<std::mutex> lock(_management->Mutex());
@@ -129,7 +130,8 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
 void CreateChaseDialog::onSelectedObjectChanged() {
   if (_delayUpdates.IsFirst()) {
     theatre::FolderObject *selectedObj = _list.SelectedObject();
-    theatre::PresetCollection *preset = dynamic_cast<theatre::PresetCollection *>(selectedObj);
+    theatre::PresetCollection *preset =
+        dynamic_cast<theatre::PresetCollection *>(selectedObj);
     if (preset)
       _addObjectToChaseButton.set_sensitive(true);
     else

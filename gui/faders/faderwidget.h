@@ -14,7 +14,7 @@
 namespace glight::gui {
 
 class EventTransmitter;
-  
+
 /**
  * @author Andre Offringa
  */
@@ -29,7 +29,9 @@ class FaderWidget : public ControlWidget {
   void FullOff() final override;
   void Assign(theatre::SourceValue *item, bool moveFader) final override;
   void MoveSlider() final override;
-  theatre::SourceValue *GetSourceValue() const final override { return _sourceValue; }
+  theatre::SourceValue *GetSourceValue() const final override {
+    return _sourceValue;
+  }
 
   void Limit(double value) final override {
     if (_scale.get_value() > value) _scale.set_value(value);

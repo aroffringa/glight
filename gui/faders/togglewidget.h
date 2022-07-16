@@ -22,7 +22,8 @@ class ToggleWidget : public ControlWidget {
   virtual void Toggle() final override;
   virtual void FullOn() final override;
   virtual void FullOff() final override;
-  virtual void Assign(theatre::SourceValue *item, bool moveFader) final override;
+  virtual void Assign(theatre::SourceValue *item,
+                      bool moveFader) final override;
   virtual void MoveSlider() final override;
   virtual theatre::SourceValue *GetSourceValue() const final override {
     return _sourceValue;

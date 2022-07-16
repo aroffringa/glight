@@ -11,7 +11,8 @@ class EventTransmitter {
  public:
   virtual void EmitUpdate() = 0;
 
-  virtual sigc::signal<void(theatre::Management &)> &SignalChangeManagement() = 0;
+  virtual sigc::signal<void(theatre::Management &)>
+      &SignalChangeManagement() = 0;
 
   virtual sigc::signal<void()> &SignalUpdateControllables() = 0;
 };

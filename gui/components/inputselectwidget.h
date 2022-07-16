@@ -13,13 +13,12 @@
 namespace glight::gui {
 
 class EventTransmitter;
-  
+
 class InputSelectWidget : public Gtk::VBox {
  public:
   static const size_t NO_INPUT_SELECTED = std::numeric_limits<size_t>::max();
 
-  InputSelectWidget(theatre::Management &management,
-                    EventTransmitter &eventHub)
+  InputSelectWidget(theatre::Management &management, EventTransmitter &eventHub)
       : _browser(management, eventHub),
         _inputLabel("Input:"),
         _selectedObject(nullptr),

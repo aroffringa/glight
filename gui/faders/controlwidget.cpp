@@ -14,6 +14,8 @@ void ControlWidget::setValue(unsigned target) {
   }
 }
 
-double ControlWidget::MAX_SCALE_VALUE() { return theatre::ControlValue::MaxUInt() + 1; }
+double ControlWidget::MAX_SCALE_VALUE() {
+  return theatre::ControlValue::MaxUInt() + 1;
+}
 
 }  // namespace glight::gui

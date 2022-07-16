@@ -19,7 +19,8 @@ class ShowWindow;
 
 class EffectPropertiesWindow : public PropertiesWindow {
  public:
-  EffectPropertiesWindow(theatre::Effect &effect, theatre::Management &management,
+  EffectPropertiesWindow(theatre::Effect &effect,
+                         theatre::Management &management,
                          ShowWindow &parentWindow);
 
   theatre::FolderObject &GetObject() final override;

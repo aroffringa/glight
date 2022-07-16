@@ -13,11 +13,10 @@
 namespace glight::gui {
 
 class EventTransmitter;
-  
+
 class InputSelectDialog : public Gtk::Dialog {
  public:
-  InputSelectDialog(theatre::Management &management,
-                    EventTransmitter &eventHub)
+  InputSelectDialog(theatre::Management &management, EventTransmitter &eventHub)
       : Dialog("Select input", true),
         _management(management),
         _inputSelector(management, eventHub) {

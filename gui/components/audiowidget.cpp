@@ -147,7 +147,8 @@ void AudioWidget::UpdateKeys() {
   if (_scene) {
     const std::multimap<double, std::unique_ptr<theatre::SceneItem>> &items =
         _scene->SceneItems();
-    for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>> &p : items) {
+    for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>> &p :
+         items) {
       theatre::SceneItem *item = p.second.get();
       theatre::KeySceneItem *key = dynamic_cast<theatre::KeySceneItem *>(item);
       if (key != nullptr)

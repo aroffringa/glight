@@ -43,7 +43,8 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
 
   GUIState &State() { return _state; }
 
-  sigc::signal<void(theatre::Management &)> &SignalChangeManagement() final override {
+  sigc::signal<void(theatre::Management &)> &SignalChangeManagement()
+      final override {
     return _signalChangeManagement;
   }
   sigc::signal<void()> &SignalUpdateControllables() final override {
@@ -102,7 +103,8 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
                              FaderSetupState &state);
   FaderWindow *getFaderWindow(FaderSetupState &state);
 
-  void changeManagement(theatre::Management *newManagement, bool moveControlSliders);
+  void changeManagement(theatre::Management *newManagement,
+                        bool moveControlSliders);
 
   size_t nextControlKeyRow() const;
 

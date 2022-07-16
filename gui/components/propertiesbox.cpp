@@ -8,7 +8,7 @@
 namespace glight::gui {
 
 using theatre::Property;
-  
+
 PropertiesBox::PropertiesBox()
     : _typeLabel("No object selected"), _applyButton(Gtk::Stock::APPLY) {
   pack_start(_typeLabel);

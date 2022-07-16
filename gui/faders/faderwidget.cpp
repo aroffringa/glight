@@ -12,7 +12,7 @@
 namespace glight::gui {
 
 using theatre::ControlValue;
-  
+
 FaderWidget::FaderWidget(theatre::Management &management,
                          EventTransmitter &eventHub, char key)
     : _scale(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
