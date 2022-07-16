@@ -55,8 +55,7 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
   for (theatre::FunctionType t : types) {
     Gtk::TreeModel::iterator iter = function_type_model_->append();
     (*iter)[function_type_columns_.function_type_] = t;
-    (*iter)[function_type_columns_.function_type_str_] =
-        ToString(t);
+    (*iter)[function_type_columns_.function_type_str_] = ToString(t);
   }
   function_type_combo_.set_model(function_type_model_);
   function_type_combo_.pack_start(function_type_columns_.function_type_str_);
@@ -103,8 +102,7 @@ void FixtureTypeFunctionsFrame::SetFunctions(
     row[functions_columns_.dmx_offset_] = f.DmxOffset();
     row[functions_columns_.is_16_bit_] = f.Is16Bit();
     row[functions_columns_.function_type_] = f.Type();
-    row[functions_columns_.function_type_str_] =
-        ToString(f.Type());
+    row[functions_columns_.function_type_str_] = ToString(f.Type());
   }
 }
 

@@ -295,7 +295,8 @@ void FaderWindow::onAssignChasesClicked() {
     size_t controlIndex = 0;
     for (size_t i = 0; i != _management->SourceValues().size(); ++i) {
       theatre::SourceValue *sv = _management->SourceValues()[i].get();
-      theatre::Chase *c = dynamic_cast<theatre::Chase *>(&sv->GetControllable());
+      theatre::Chase *c =
+          dynamic_cast<theatre::Chase *>(&sv->GetControllable());
       if (c != nullptr) {
         _controls[controlIndex]->Assign(sv, true);
         ++controlIndex;

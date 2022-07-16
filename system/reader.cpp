@@ -78,10 +78,11 @@ void ParseFolders(const Array &node, Management &management) {
   }
 }
 
-void ParseFixtureTypeFunctions(const json::Array &node, FixtureType &fixture_type) {
+void ParseFixtureTypeFunctions(const json::Array &node,
+                               FixtureType &fixture_type) {
   std::vector<FixtureTypeFunction> functions;
-  for(const json::Node& child : node) {
-    const json::Object& obj = ToObj(child);
+  for (const json::Node &child : node) {
+    const json::Object &obj = ToObj(child);
     const FunctionType ft = GetFunctionType(ToStr(obj["type"]));
     const size_t dmx_offset = ToNum(obj["dmx-offset"]).AsSize();
     const bool is_16_bit = ToBool(obj["is-16-bit"]);

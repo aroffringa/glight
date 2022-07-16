@@ -62,11 +62,11 @@ class Management {
   void RemoveFolder(Folder &folder);
 
   FixtureControl &AddFixtureControl(const Fixture &fixture);
-  FixtureControl &AddFixtureControl(const Fixture &fixture, const Folder &parent);
+  FixtureControl &AddFixtureControl(const Fixture &fixture,
+                                    const Folder &parent);
   FixtureControl &GetFixtureControl(const Fixture &fixture);
-  const FixtureControl &GetFixtureControl(const Fixture &fixture) const
-  {
-    return const_cast<Management&>(*this).GetFixtureControl(fixture);
+  const FixtureControl &GetFixtureControl(const Fixture &fixture) const {
+    return const_cast<Management &>(*this).GetFixtureControl(fixture);
   }
 
   void RemoveFixture(const Fixture &fixture);
@@ -88,17 +88,18 @@ class Management {
 
   FolderObject &GetObjectFromPath(const std::string &path);
   const FolderObject &GetObjectFromPath(const std::string &path) const {
-    return const_cast<Management&>(*this).GetObjectFromPath(path);
+    return const_cast<Management &>(*this).GetObjectFromPath(path);
   }
-  
+
   FolderObject *GetObjectFromPathIfExists(const std::string &path) const;
   size_t ControllableIndex(const Controllable *controllable) const;
 
   SourceValue *GetSourceValue(const Controllable &controllable,
                               size_t input_index);
   const SourceValue *GetSourceValue(const Controllable &controllable,
-    size_t input_index) const {
-      return const_cast<Management&>(*this).GetSourceValue(controllable, input_index);
+                                    size_t input_index) const {
+    return const_cast<Management &>(*this).GetSourceValue(controllable,
+                                                          input_index);
   }
   size_t SourceValueIndex(const SourceValue *sourceValue) const;
   ValueSnapshot Snapshot();

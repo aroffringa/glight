@@ -93,10 +93,10 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   state.writer.EndObject();  // fixture
 }
 
-void witeMacroParameters(WriteState &state, const MacroParameters& pars) {
+void witeMacroParameters(WriteState &state, const MacroParameters &pars) {
   state.writer.StartObject("parameters");
   state.writer.StartArray("ranges");
-  for(const MacroParameters::Range& range : pars.GetRanges()) {
+  for (const MacroParameters::Range &range : pars.GetRanges()) {
     state.writer.StartObject();
     state.writer.Number("input-min", range.input_min);
     state.writer.Number("input-max", range.input_max);
@@ -109,26 +109,27 @@ void witeMacroParameters(WriteState &state, const MacroParameters& pars) {
   state.writer.EndObject();
 }
 
-void writeRotationParameters(WriteState &state, const RotationParameters& pars) {
-}
+void writeRotationParameters(WriteState &state,
+                             const RotationParameters &pars) {}
 
-void writeFixtureTypeFunction(WriteState &state, const FixtureTypeFunction &function) {
-    state.writer.StartObject();
-    state.writer.String("type", ToString(function.Type()));
-    state.writer.Number("dmx-offset", function.DmxOffset());
-    state.writer.Boolean("is-16-bit", function.Is16Bit());
-    state.writer.Number("shape", function.Shape());
-    switch(function.Type()) {
-      case FunctionType::ColorMacro:
-        witeMacroParameters(state, function.GetMacroParameters());
-        break;
-      case FunctionType::Rotation:
-        writeRotationParameters(state, function.GetRotationParameters());
-        break;
-      default:
-        break;
-    }
-    state.writer.EndObject();
+void writeFixtureTypeFunction(WriteState &state,
+                              const FixtureTypeFunction &function) {
+  state.writer.StartObject();
+  state.writer.String("type", ToString(function.Type()));
+  state.writer.Number("dmx-offset", function.DmxOffset());
+  state.writer.Boolean("is-16-bit", function.Is16Bit());
+  state.writer.Number("shape", function.Shape());
+  switch (function.Type()) {
+    case FunctionType::ColorMacro:
+      witeMacroParameters(state, function.GetMacroParameters());
+      break;
+    case FunctionType::Rotation:
+      writeRotationParameters(state, function.GetRotationParameters());
+      break;
+    default:
+      break;
+  }
+  state.writer.EndObject();
 }
 
 void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
@@ -138,10 +139,10 @@ void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
                       FixtureType::ClassName(fixtureType.GetFixtureClass()));
   state.writer.Number("shape-count", fixtureType.ShapeCount());
   state.writer.StartArray("functions");
-  for(const FixtureTypeFunction& f : fixtureType.Functions()) {
+  for (const FixtureTypeFunction &f : fixtureType.Functions()) {
     writeFixtureTypeFunction(state, f);
   }
-  state.writer.EndArray(); // functions
+  state.writer.EndArray();  // functions
   state.writer.EndObject();
 }
 

@@ -28,9 +28,7 @@ class SourceValue {
 
   bool IsIgnorable() const { return _value.IsIgnorable(); }
 
-  Controllable &GetControllable() const {
-    return _value.Controllable();
-  }
+  Controllable &GetControllable() const { return _value.Controllable(); }
 
   void ApplyFade(double timePassed) {
     unsigned fadingValue = _value.Value().UInt();

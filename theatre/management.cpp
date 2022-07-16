@@ -164,7 +164,7 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
 
   for (const std::unique_ptr<class SourceValue> &sv : _sourceValues)
     sv->GetControllable().MixInput(sv->Preset().InputIndex(),
-                                sv->Preset().Value());
+                                   sv->Preset().Value());
 
   // Solve dependency graph of controllables
   std::vector<Controllable *> unorderedList, orderedList;
@@ -277,14 +277,16 @@ bool Management::Contains(Controllable &controllable) const {
 }
 
 FixtureControl &Management::AddFixtureControl(const Fixture &fixture) {
-  _controllables.emplace_back(new FixtureControl(const_cast<Fixture&>(fixture)));
+  _controllables.emplace_back(
+      new FixtureControl(const_cast<Fixture &>(fixture)));
   return static_cast<FixtureControl &>(*_controllables.back());
 }
 
 FixtureControl &Management::AddFixtureControl(const Fixture &fixture,
                                               const Folder &parent) {
-  _controllables.emplace_back(new FixtureControl(const_cast<Fixture&>(fixture)));
-  const_cast<Folder&>(parent).Add(*_controllables.back());
+  _controllables.emplace_back(
+      new FixtureControl(const_cast<Fixture &>(fixture)));
+  const_cast<Folder &>(parent).Add(*_controllables.back());
   return static_cast<FixtureControl &>(*_controllables.back());
 }
 

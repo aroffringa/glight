@@ -82,9 +82,8 @@ class InputSelectWidget : public Gtk::VBox {
       for (size_t input = 0; input != _selectedObject->NInputs(); ++input) {
         Gtk::TreeModel::iterator iter = _listModel->append();
         Gtk::TreeModel::Row row = *iter;
-        row[_listColumns._title] =
-            std::to_string(input + 1) + ". " +
-            ToString(_selectedObject->InputType(input));
+        row[_listColumns._title] = std::to_string(input + 1) + ". " +
+                                   ToString(_selectedObject->InputType(input));
         row[_listColumns._inputIndex] = input;
       }
     }
