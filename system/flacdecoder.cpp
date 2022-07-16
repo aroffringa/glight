@@ -1,5 +1,7 @@
 #include "flacdecoder.h"
 
+namespace glight::system {
+  
 void FlacDecoder::open() {
   if (_isOpen) throw std::runtime_error("Flac was opened twice");
 
@@ -89,4 +91,6 @@ void FlacDecoder::metadata_callback(const ::FLAC__StreamMetadata *metadata) {
               << "\nchannels       : " << channels
               << "\nbits per sample: " << bps << std::endl;
   }
+}
+
 }

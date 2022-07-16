@@ -1,5 +1,5 @@
-#ifndef FLACDECODER_H
-#define FLACDECODER_H
+#ifndef SYSTEM_FLAC_DECODER_H_
+#define SYSTEM_FLAC_DECODER_H_
 
 #include <iostream>
 #include <stdexcept>
@@ -10,9 +10,8 @@
 
 #include <FLAC++/decoder.h>
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::system {
+
 class FlacDecoder : private FLAC::Decoder::File {
  public:
   class FlacError : public std::runtime_error {
@@ -146,5 +145,7 @@ class FlacDecoder : private FLAC::Decoder::File {
   virtual void error_callback(FLAC__StreamDecoderErrorStatus status);
   virtual void metadata_callback(const ::FLAC__StreamMetadata *metadata);
 };
+
+}
 
 #endif

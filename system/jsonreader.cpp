@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-namespace json {
+namespace glight::json {
 namespace {
 
 std::unique_ptr<Node> ParseValue(std::istream& stream);

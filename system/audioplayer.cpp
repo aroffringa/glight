@@ -4,6 +4,8 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+namespace glight::system {
+
 void AudioPlayer::open() {
   if (_isOpen) throw AlsaError("Alsa was opened twice");
 
@@ -116,4 +118,6 @@ void AudioPlayer::close() {
     snd_pcm_close(_handle);
     _isOpen = false;
   }
+}
+
 }

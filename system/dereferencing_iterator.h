@@ -3,6 +3,8 @@
 
 #include <utility>
 
+namespace glight::system {
+
 template <typename IterT>
 class DereferencingIterator {
  public:
@@ -50,5 +52,7 @@ class DereferencingMapIterator {
 
   IterT iterator_;
 };
+
+}
 
 #endif

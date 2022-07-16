@@ -10,7 +10,9 @@
 
 #include "../../theatre/forwards.h"
 
+namespace glight::system {
 class FlacDecoder;
+}
 
 namespace glight::gui {
 
@@ -19,7 +21,7 @@ class AudioWidget : public Gtk::DrawingArea {
   AudioWidget();
   ~AudioWidget();
 
-  void SetAudioData(FlacDecoder &decoder);
+  void SetAudioData(system::FlacDecoder &decoder);
   void SetPosition(double offsetInMS) {
     _centerPosition = (offsetInMS * 44.100 * 4.0) / _chunkSize;
     _isUpToDate = false;

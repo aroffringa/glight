@@ -10,7 +10,7 @@
 
 #include "dereferencing_iterator.h"
 
-namespace json {
+namespace glight::json {
 
 struct Node {
   virtual ~Node() {}
@@ -18,9 +18,9 @@ struct Node {
 
 struct Object : public Node {
   std::map<std::string, std::unique_ptr<Node>> children;
-  using iterator = DereferencingMapIterator<
+  using iterator = system::DereferencingMapIterator<
       std::map<std::string, std::unique_ptr<Node>>::iterator>;
-  using const_iterator = DereferencingMapIterator<
+  using const_iterator = system::DereferencingMapIterator<
       std::map<std::string, std::unique_ptr<Node>>::const_iterator>;
 
   const Node& operator[](const char* name) const {
@@ -45,9 +45,9 @@ struct Array : public Node {
   std::vector<std::unique_ptr<Node>> items;
 
   using iterator =
-      DereferencingIterator<std::vector<std::unique_ptr<Node>>::iterator>;
+      system::DereferencingIterator<std::vector<std::unique_ptr<Node>>::iterator>;
   using const_iterator =
-      DereferencingIterator<std::vector<std::unique_ptr<Node>>::const_iterator>;
+      system::DereferencingIterator<std::vector<std::unique_ptr<Node>>::const_iterator>;
 
   iterator begin() { return iterator(items.begin()); }
   const_iterator begin() const { return const_iterator(items.begin()); }

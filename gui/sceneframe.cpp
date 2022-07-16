@@ -630,7 +630,7 @@ void SceneFrame::updateAudio() {
     lock.unlock();
     _audioLabel.set_text(std::string("Audio file: ") + _audioFile);
     try {
-      FlacDecoder decoder(_audioFile);
+      system::FlacDecoder decoder(_audioFile);
       std::cout << "Starting decoder" << std::endl;
       decoder.Start();
       _audioWidget.SetAudioData(decoder);

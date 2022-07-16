@@ -8,6 +8,8 @@
 #include <string>
 #include <string_view>
 
+namespace glight::json {
+
 class JsonWriter {
  public:
   JsonWriter() = default;
@@ -165,5 +167,7 @@ class JsonWriter {
 
   size_t indent_ = 0;
 };
+
+}
 
 #endif

@@ -30,7 +30,7 @@ AudioWidget::AudioWidget()
 
 AudioWidget::~AudioWidget() {}
 
-void AudioWidget::SetAudioData(FlacDecoder &decoder) {
+void AudioWidget::SetAudioData(system::FlacDecoder &decoder) {
   _audioDataMax.clear();
   _audioDataMin.clear();
   _audioDataStdDev.clear();

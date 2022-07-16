@@ -4,13 +4,15 @@
 
 #include <sstream>
 
+using namespace glight::json;
+
 namespace {
 void Check(const char* input, bool expected_result,
            const char* output = nullptr) {
   std::istringstream stream(input + 1);
   std::string output_string;
   const bool result =
-      json::details::ReadNumber(input[0], stream, output_string);
+      details::ReadNumber(input[0], stream, output_string);
   BOOST_TEST_INFO("input=\"" << input << "\"");
   BOOST_TEST(result == expected_result);
   if (result && expected_result) {
@@ -21,16 +23,16 @@ void Check(const char* input, bool expected_result,
 void SCheck(const char* input, bool expected_result, const char* output) {
   std::istringstream stream(input);
   std::string output_string;
-  const bool result = json::details::ReadString(stream, output_string);
+  const bool result = details::ReadString(stream, output_string);
   BOOST_TEST_INFO("input=\"" << input << "\", output=\"" << output_string
                              << "\"");
   BOOST_TEST(result == expected_result);
   BOOST_CHECK_EQUAL(output_string, output);
 }
 
-std::unique_ptr<json::Node> Parse(const char* input) {
+std::unique_ptr<Node> Parse(const char* input) {
   std::istringstream str(input);
-  return json::Parse(str);
+  return glight::json::Parse(str);
 }
 
 }  // namespace
@@ -81,58 +83,58 @@ BOOST_AUTO_TEST_CASE(read_string) {
 }
 
 BOOST_AUTO_TEST_CASE(null) {
-  std::unique_ptr<json::Node> node = Parse("null");
-  BOOST_CHECK(dynamic_cast<json::Null*>(node.get()));
+  std::unique_ptr<Node> node = Parse("null");
+  BOOST_CHECK(dynamic_cast<Null*>(node.get()));
 }
 
 BOOST_AUTO_TEST_CASE(boolean) {
-  std::unique_ptr<json::Node> node = Parse("true");
-  json::Boolean* b = dynamic_cast<json::Boolean*>(node.get());
+  std::unique_ptr<Node> node = Parse("true");
+  Boolean* b = dynamic_cast<Boolean*>(node.get());
   BOOST_REQUIRE(b);
   BOOST_CHECK_EQUAL(b->value, true);
 
   node = Parse("false");
-  b = dynamic_cast<json::Boolean*>(node.get());
+  b = dynamic_cast<Boolean*>(node.get());
   BOOST_REQUIRE(b);
   BOOST_CHECK_EQUAL(b->value, false);
 }
 
 BOOST_AUTO_TEST_CASE(number) {
-  std::unique_ptr<json::Node> node = Parse("3.1415e-0");
-  json::Number* n = dynamic_cast<json::Number*>(node.get());
+  std::unique_ptr<Node> node = Parse("3.1415e-0");
+  Number* n = dynamic_cast<Number*>(node.get());
   BOOST_REQUIRE(n);
   BOOST_CHECK_EQUAL(n->value, "3.1415e-0");
   BOOST_CHECK_CLOSE_FRACTION(n->AsDouble(), 3.1415, 1e-6);
 }
 
 BOOST_AUTO_TEST_CASE(string) {
-  std::unique_ptr<json::Node> node = Parse("\"Simple\"");
-  json::String* s = dynamic_cast<json::String*>(node.get());
+  std::unique_ptr<Node> node = Parse("\"Simple\"");
+  String* s = dynamic_cast<String*>(node.get());
   BOOST_REQUIRE(s);
   BOOST_CHECK_EQUAL(s->value, "Simple");
 
   node = Parse("\"\\\"hello world\\\"\\n— André\"");
-  s = dynamic_cast<json::String*>(node.get());
+  s = dynamic_cast<String*>(node.get());
   BOOST_REQUIRE(s);
   BOOST_CHECK_EQUAL(s->value, "\"hello world\"\n— André");
 }
 
 BOOST_AUTO_TEST_CASE(object) {
-  std::unique_ptr<json::Node> node =
+  std::unique_ptr<Node> node =
       Parse("{ \"name\": \"André\", \"person\": true, \"age\": 40 }");
-  json::Object* o = dynamic_cast<json::Object*>(node.get());
+  Object* o = dynamic_cast<Object*>(node.get());
   BOOST_REQUIRE(o);
   BOOST_CHECK_EQUAL(o->children.size(), 3);
-  const json::String* name =
-      dynamic_cast<json::String*>(o->children["name"].get());
+  const String* name =
+      dynamic_cast<String*>(o->children["name"].get());
   BOOST_REQUIRE(name);
   BOOST_CHECK_EQUAL(name->value, "André");
-  const json::Boolean* person =
-      dynamic_cast<json::Boolean*>(o->children["person"].get());
+  const Boolean* person =
+      dynamic_cast<Boolean*>(o->children["person"].get());
   BOOST_REQUIRE(person);
   BOOST_CHECK_EQUAL(person->value, true);
-  const json::Number* age =
-      dynamic_cast<json::Number*>(o->children["age"].get());
+  const Number* age =
+      dynamic_cast<Number*>(o->children["age"].get());
   BOOST_REQUIRE(age);
   BOOST_CHECK_EQUAL(age->value, "40");
   BOOST_CHECK_EQUAL(age->AsInt(), 40);
@@ -142,18 +144,18 @@ BOOST_AUTO_TEST_CASE(object) {
 }
 
 BOOST_AUTO_TEST_CASE(array) {
-  std::unique_ptr<json::Node> node = Parse("[\"André\",false,40]");
-  const json::Array* a = dynamic_cast<json::Array*>(node.get());
+  std::unique_ptr<Node> node = Parse("[\"André\",false,40]");
+  const Array* a = dynamic_cast<Array*>(node.get());
   BOOST_REQUIRE(a);
   BOOST_REQUIRE_EQUAL(a->items.size(), 3);
-  const json::String* andre = dynamic_cast<json::String*>(a->items[0].get());
+  const String* andre = dynamic_cast<String*>(a->items[0].get());
   BOOST_REQUIRE(andre);
   BOOST_CHECK_EQUAL(andre->value, "André");
-  const json::Boolean* boolean =
-      dynamic_cast<json::Boolean*>(a->items[1].get());
+  const Boolean* boolean =
+      dynamic_cast<Boolean*>(a->items[1].get());
   BOOST_REQUIRE(boolean);
   BOOST_CHECK_EQUAL(boolean->value, false);
-  const json::Number* fourty = dynamic_cast<json::Number*>(a->items[2].get());
+  const Number* fourty = dynamic_cast<Number*>(a->items[2].get());
   BOOST_REQUIRE(fourty);
   BOOST_CHECK_EQUAL(fourty->value, "40");
   BOOST_CHECK_EQUAL(fourty->AsInt(), 40);
@@ -163,55 +165,55 @@ BOOST_AUTO_TEST_CASE(array) {
 }
 
 BOOST_AUTO_TEST_CASE(recursive) {
-  std::unique_ptr<json::Node> node = Parse(R"({
+  std::unique_ptr<Node> node = Parse(R"({
   "person": {"name": "Xam", "age": 3.5},
   "relatives": [{"name": "André"}, {"name": "Lars"}, {"name": "Shanthi"}]
 })");
-  json::Object* root = dynamic_cast<json::Object*>(node.get());
+  Object* root = dynamic_cast<Object*>(node.get());
   BOOST_REQUIRE(root);
   BOOST_CHECK_EQUAL(root->children.size(), 2);
 
-  json::Object* person =
-      dynamic_cast<json::Object*>(root->children["person"].get());
+  Object* person =
+      dynamic_cast<Object*>(root->children["person"].get());
   BOOST_REQUIRE(person);
   BOOST_CHECK_EQUAL(person->children.size(), 2);
-  const json::String* name =
-      dynamic_cast<json::String*>(person->children["name"].get());
+  const String* name =
+      dynamic_cast<String*>(person->children["name"].get());
   BOOST_REQUIRE(name);
   BOOST_CHECK_EQUAL(name->value, "Xam");
-  const json::Number* age =
-      dynamic_cast<json::Number*>(person->children["age"].get());
+  const Number* age =
+      dynamic_cast<Number*>(person->children["age"].get());
   BOOST_REQUIRE(age);
   BOOST_CHECK_EQUAL(age->value, "3.5");
   BOOST_CHECK_CLOSE_FRACTION(age->AsDouble(), 3.5, 1e-6);
 
-  json::Array* relatives =
-      dynamic_cast<json::Array*>(root->children["relatives"].get());
+  Array* relatives =
+      dynamic_cast<Array*>(root->children["relatives"].get());
   BOOST_REQUIRE(relatives);
   BOOST_REQUIRE_EQUAL(relatives->items.size(), 3);
 
-  json::Object* andre = dynamic_cast<json::Object*>(relatives->items[0].get());
+  Object* andre = dynamic_cast<Object*>(relatives->items[0].get());
   BOOST_REQUIRE(andre);
   BOOST_REQUIRE_EQUAL(andre->children.size(), 1);
-  json::String* a_name =
-      dynamic_cast<json::String*>(andre->children["name"].get());
+  String* a_name =
+      dynamic_cast<String*>(andre->children["name"].get());
   BOOST_REQUIRE(a_name);
   BOOST_REQUIRE_EQUAL(a_name->value, "André");
 
-  json::Object* lars = dynamic_cast<json::Object*>(relatives->items[1].get());
+  Object* lars = dynamic_cast<Object*>(relatives->items[1].get());
   BOOST_REQUIRE(lars);
   BOOST_REQUIRE_EQUAL(lars->children.size(), 1);
-  json::String* l_name =
-      dynamic_cast<json::String*>(lars->children["name"].get());
+  String* l_name =
+      dynamic_cast<String*>(lars->children["name"].get());
   BOOST_REQUIRE(l_name);
   BOOST_REQUIRE_EQUAL(l_name->value, "Lars");
 
-  json::Object* shanthi =
-      dynamic_cast<json::Object*>(relatives->items[2].get());
+  Object* shanthi =
+      dynamic_cast<Object*>(relatives->items[2].get());
   BOOST_REQUIRE(shanthi);
   BOOST_REQUIRE_EQUAL(shanthi->children.size(), 1);
-  json::String* s_name =
-      dynamic_cast<json::String*>(shanthi->children["name"].get());
+  String* s_name =
+      dynamic_cast<String*>(shanthi->children["name"].get());
   BOOST_REQUIRE(s_name);
   BOOST_REQUIRE_EQUAL(s_name->value, "Shanthi");
 }

@@ -5,6 +5,8 @@
 #include <locale>
 #include <vector>
 
+namespace glight::json {
+
 std::string JsonWriter::Encode(const std::string_view& str) {
   std::vector<char32_t> result{U'\"'};
   std::u32string utf32 =
@@ -47,3 +49,6 @@ std::string JsonWriter::Encode(const std::string_view& str) {
              result.data(), result.data() + result.size()) +
          '\"';
 }
+
+}
+

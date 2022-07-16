@@ -18,7 +18,7 @@ class Management;
 /**
  * @author Andre Offringa
  */
-class Scene : public Startable, private SyncListener {
+class Scene : public Startable, private system::SyncListener {
  public:
   Scene(Management &management);
 
@@ -107,8 +107,8 @@ class Scene : public Startable, private SyncListener {
       try {
         _audioPlayer.reset();
         _decoder.reset();
-        _decoder.reset(new FlacDecoder(_audioFilename));
-        _audioPlayer.reset(new AudioPlayer(*_decoder));
+        _decoder = std::make_unique<system::FlacDecoder>(_audioFilename);
+        _audioPlayer = std::make_unique<system::AudioPlayer>(*_decoder);
         _audioPlayer->SetSyncListener(*this);
         _audioPlayer->Seek(_startOffset);
       } catch (std::exception &e) {
@@ -168,8 +168,8 @@ class Scene : public Startable, private SyncListener {
   std::multimap<double, std::unique_ptr<SceneItem>> _items;
   std::multimap<double, std::unique_ptr<SceneItem>>::iterator _nextStartedItem;
   double _currentOffset, _startOffset;
-  std::unique_ptr<FlacDecoder> _decoder;
-  std::unique_ptr<AudioPlayer> _audioPlayer;
+  std::unique_ptr<system::FlacDecoder> _decoder;
+  std::unique_ptr<system::AudioPlayer> _audioPlayer;
   bool _hasAudio, _isPlaying;
   std::string _audioFilename;
 

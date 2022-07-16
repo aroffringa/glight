@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+using glight::json::JsonWriter;
+
 BOOST_AUTO_TEST_SUITE(json_writer)
 
 BOOST_AUTO_TEST_CASE(object) {

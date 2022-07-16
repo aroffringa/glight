@@ -25,7 +25,7 @@ using namespace glight::theatre;
 
 struct WriteState {
   WriteState(Management &management_) : management(management_) {}
-  JsonWriter writer;
+  json::JsonWriter writer;
   std::set<const Controllable *> controllablesWritten;
   std::map<const Folder *, size_t> folderIds;
   Management &management;
@@ -436,7 +436,7 @@ void writeGlightShow(WriteState &state) {
 void Write(std::ostream &stream, Management &management,
            gui::GUIState *guiState) {
   WriteState state(management);
-  state.writer = JsonWriter(stream);
+  state.writer = json::JsonWriter(stream);
   state.guiState = guiState;
 
   writeGlightShow(state);
