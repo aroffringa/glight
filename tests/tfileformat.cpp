@@ -30,8 +30,9 @@ void FillManagement(Management &management) {
   // Use the RGB_ADJ_6CH fixture to test storing macro parameters
   root.Add(management.GetTheatre().AddFixtureType(StockFixture::RGB_ADJ_6CH));
   // Use the AyraTDCSunrise fixture to test rotation parameters:
-  root.Add(management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise));
-  
+  root.Add(
+      management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise));
+
   FixtureType &ft =
       management.GetTheatre().AddFixtureType(StockFixture::RGBWLight4Ch);
   root.Add(ft);
@@ -92,26 +93,26 @@ void CheckEqual(const FixtureTypeFunction &a, const FixtureTypeFunction &b) {
   BOOST_CHECK_EQUAL(a.Is16Bit(), b.Is16Bit());
   BOOST_CHECK_EQUAL(a.Shape(), b.Shape());
 
-  switch(a.Type()) {
+  switch (a.Type()) {
     case FunctionType::ColorMacro: {
-      const MacroParameters& a_pars = a.GetMacroParameters();
-      const MacroParameters& b_pars = b.GetMacroParameters();
+      const MacroParameters &a_pars = a.GetMacroParameters();
+      const MacroParameters &b_pars = b.GetMacroParameters();
       BOOST_REQUIRE_EQUAL(a_pars.GetRanges().size(), b_pars.GetRanges().size());
-      for(size_t i=0; i!=a_pars.GetRanges().size(); ++i) {
-        const MacroParameters::Range& a_range = a_pars.GetRanges()[i];
-        const MacroParameters::Range& b_range = b_pars.GetRanges()[i];
+      for (size_t i = 0; i != a_pars.GetRanges().size(); ++i) {
+        const MacroParameters::Range &a_range = a_pars.GetRanges()[i];
+        const MacroParameters::Range &b_range = b_pars.GetRanges()[i];
         BOOST_CHECK(a_range.color == b_range.color);
         BOOST_CHECK_EQUAL(a_range.input_max, b_range.input_max);
         BOOST_CHECK_EQUAL(a_range.input_min, b_range.input_min);
       }
     } break;
     case FunctionType::Rotation: {
-      const RotationParameters& a_pars = a.GetRotationParameters();
-      const RotationParameters& b_pars = b.GetRotationParameters();
+      const RotationParameters &a_pars = a.GetRotationParameters();
+      const RotationParameters &b_pars = b.GetRotationParameters();
       BOOST_REQUIRE_EQUAL(a_pars.GetRanges().size(), b_pars.GetRanges().size());
-      for(size_t i=0; i!=a_pars.GetRanges().size(); ++i) {
-        const RotationParameters::Range& a_range = a_pars.GetRanges()[i];
-        const RotationParameters::Range& b_range = b_pars.GetRanges()[i];
+      for (size_t i = 0; i != a_pars.GetRanges().size(); ++i) {
+        const RotationParameters::Range &a_range = a_pars.GetRanges()[i];
+        const RotationParameters::Range &b_range = b_pars.GetRanges()[i];
         BOOST_CHECK_EQUAL(a_range.input_min, b_range.input_min);
         BOOST_CHECK_EQUAL(a_range.input_max, b_range.input_max);
         BOOST_CHECK_EQUAL(a_range.speed_min, b_range.speed_min);

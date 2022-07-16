@@ -6,7 +6,7 @@
 namespace glight::theatre {
 
 class Folder;
-  
+
 /**
  * @author Andre Offringa
  */
@@ -27,9 +27,7 @@ class FolderObject : public NamedObject {
 
   bool IsRoot() const { return _parent == nullptr; }
   const Folder &Parent() const { return *_parent; }
-  Folder &Parent() {
-    return *_parent;
-  }
+  Folder &Parent() { return *_parent; }
 
  private:
   void SetParent(Folder &parent) { _parent = &parent; }
