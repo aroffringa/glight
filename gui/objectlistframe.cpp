@@ -99,7 +99,8 @@ void ObjectListFrame::initPresetsPart() {
 void ObjectListFrame::onNewPresetButtonClicked() {
   Folder &parent = _list.SelectedFolder();
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  theatre::PresetCollection &presetCollection = _management->AddPresetCollection();
+  theatre::PresetCollection &presetCollection =
+      _management->AddPresetCollection();
   presetCollection.SetName(parent.GetAvailableName("Preset"));
   parent.Add(presetCollection);
   presetCollection.SetFromCurrentSituation(*_management);
@@ -155,7 +156,8 @@ bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
   return false;
 }
 
-void ObjectListFrame::onNewEffectMenuClicked(enum theatre::Effect::Type effectType) {
+void ObjectListFrame::onNewEffectMenuClicked(
+    enum theatre::Effect::Type effectType) {
   using theatre::Effect;
   std::unique_ptr<Effect> effect(Effect::Make(effectType));
   Folder &parent = _list.SelectedFolder();
@@ -224,7 +226,8 @@ void ObjectListFrame::onObjectActivated(FolderObject &object) {
       newWindow->present();
       _windowList.Add(std::move(newWindow));
     }
-    theatre::TimeSequence *timeSequence = dynamic_cast<theatre::TimeSequence *>(&object);
+    theatre::TimeSequence *timeSequence =
+        dynamic_cast<theatre::TimeSequence *>(&object);
     if (timeSequence) {
       std::unique_ptr<TimeSequencePropertiesWindow> newWindow(
           new TimeSequencePropertiesWindow(*timeSequence, *_management,

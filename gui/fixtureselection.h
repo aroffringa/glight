@@ -13,7 +13,9 @@ class FixtureSelection {
  public:
   sigc::signal<void> &SignalChange() { return _signalChange; }
 
-  const std::vector<theatre::Fixture *> &Selection() const { return _selection; }
+  const std::vector<theatre::Fixture *> &Selection() const {
+    return _selection;
+  }
 
   void SetSelection(const std::vector<theatre::Fixture *> &selection) {
     _selection = selection;

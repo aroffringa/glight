@@ -66,8 +66,8 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     if (selected) {
       Gtk::TreeModel::const_iterator iter = function_type_combo_.get_active();
       if (iter) {
-        (*selected)[functions_columns_.function_type_] =
-            theatre::FunctionType((*iter)[function_type_columns_.function_type_]);
+        (*selected)[functions_columns_.function_type_] = theatre::FunctionType(
+            (*iter)[function_type_columns_.function_type_]);
         (*selected)[functions_columns_.function_type_str_] =
             Glib::ustring((*iter)[function_type_columns_.function_type_str_]);
       }
@@ -80,8 +80,8 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
   onSelectionChanged();
 }
 
-std::vector<theatre::FixtureTypeFunction> FixtureTypeFunctionsFrame::GetFunctions()
-    const {
+std::vector<theatre::FixtureTypeFunction>
+FixtureTypeFunctionsFrame::GetFunctions() const {
   std::vector<theatre::FixtureTypeFunction> functions;
   for (const Gtk::TreeRow &child : functions_model_->children()) {
     const size_t dmx_offset = child[functions_columns_.dmx_offset_];

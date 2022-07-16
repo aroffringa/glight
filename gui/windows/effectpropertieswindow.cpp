@@ -119,7 +119,8 @@ void EffectPropertiesWindow::onRemoveConnectionClicked() {
   fillConnectionsList();
 }
 
-void EffectPropertiesWindow::onInputSelected(theatre::SourceValue *sourceValue) {
+void EffectPropertiesWindow::onInputSelected(
+    theatre::SourceValue *sourceValue) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
   _effect->AddConnection(sourceValue->Controllable(),
                          sourceValue->Preset().InputIndex());

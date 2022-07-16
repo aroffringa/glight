@@ -14,12 +14,12 @@ class Management;
 }
 
 namespace system {
-  
+
 void Read(const std::string &filename, theatre::Management &management,
           gui::GUIState *guiState = nullptr);
 void Read(std::istream &stream, theatre::Management &management,
           gui::GUIState *guiState = nullptr);
-}
-}
+}  // namespace system
+}  // namespace glight
 
 #endif

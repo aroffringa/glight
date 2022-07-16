@@ -32,7 +32,8 @@ class FixtureSelection;
  */
 class FixtureTypesWindow : public Gtk::Window {
  public:
-  FixtureTypesWindow(EventTransmitter *eventHub, theatre::Management &management);
+  FixtureTypesWindow(EventTransmitter *eventHub,
+                     theatre::Management &management);
   ~FixtureTypesWindow();
 
  private:

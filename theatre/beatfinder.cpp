@@ -160,4 +160,4 @@ void BeatFinder::close() {
   }
 }
 
-}
+}  // namespace glight::theatre

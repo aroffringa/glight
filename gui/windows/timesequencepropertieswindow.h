@@ -40,9 +40,7 @@ class TimeSequencePropertiesWindow : public PropertiesWindow {
   ~TimeSequencePropertiesWindow();
 
   theatre::FolderObject &GetObject() final override;
-  theatre::TimeSequence &GetTimeSequence() {
-    return *_timeSequence;
-  }
+  theatre::TimeSequence &GetTimeSequence() { return *_timeSequence; }
 
  private:
   void onInputSelectionChanged();

@@ -24,11 +24,12 @@ class WriterException : public std::runtime_error {
   WriterException(const std::string &msg) : std::runtime_error(msg) {}
 };
 
-void Write(std::ostream &stream, theatre::Management &management, gui::GUIState *guiState);
+void Write(std::ostream &stream, theatre::Management &management,
+           gui::GUIState *guiState);
 void Write(const std::string &filename, theatre::Management &management,
            gui::GUIState *guiState);
 
-}
-}
+}  // namespace system
+}  // namespace glight
 
 #endif

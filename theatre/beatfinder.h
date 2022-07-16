@@ -80,6 +80,6 @@ class BeatFinder {
   void close();
 };
 
-}
+}  // namespace glight::theatre
 
 #endif

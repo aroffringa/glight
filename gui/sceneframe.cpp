@@ -16,7 +16,8 @@
 
 namespace glight::gui {
 
-SceneFrame::SceneFrame(theatre::Management &management, ShowWindow &parentWindow)
+SceneFrame::SceneFrame(theatre::Management &management,
+                       ShowWindow &parentWindow)
     : Gtk::Frame("Scene"),
       _management(&management),
       _show(&_management->GetShow()),
@@ -238,8 +239,8 @@ void SceneFrame::fillSceneItemList() {
     std::unique_lock<std::mutex> lock(_management->Mutex());
     const std::multimap<double, std::unique_ptr<theatre::SceneItem>> &items =
         _selectedScene->SceneItems();
-    for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>> &item :
-         items) {
+    for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>>
+             &item : items) {
       Gtk::TreeModel::iterator iter = _sceneItemsListModel->append();
       Gtk::TreeRow row = *iter;
       setSceneItemListRow(item.second.get(), row);
@@ -286,7 +287,7 @@ void SceneFrame::updateSelectedSceneItems() {
        pathPtr != pathHandle.end(); ++pathPtr) {
     Gtk::TreeModel::iterator iter = _sceneItemsListModel->get_iter(*pathPtr);
     Gtk::TreeModel::Row row = *iter;
-   theatre:: SceneItem *item = row[_sceneItemsListColumns._item];
+    theatre::SceneItem *item = row[_sceneItemsListColumns._item];
     setSceneItemListRow(item, row);
   }
 }
@@ -399,7 +400,8 @@ void SceneFrame::onSelectedSceneItemChanged() {
         _endScale.set_sensitive(true);
         std::unique_lock<std::mutex> lock(_management->Mutex());
         theatre::SceneItem *item = selectedItem();
-        theatre::ControlSceneItem *csi = dynamic_cast<theatre::ControlSceneItem *>(item);
+        theatre::ControlSceneItem *csi =
+            dynamic_cast<theatre::ControlSceneItem *>(item);
         if (csi != nullptr) {
           unsigned s = csi->StartValue().UInt(), e = csi->EndValue().UInt();
           lock.unlock();
@@ -428,8 +430,8 @@ void SceneFrame::onSetEndTimeButtonPressed() {
            pathHandle.begin();
        pathPtr != pathHandle.end(); ++pathPtr) {
     theatre::SceneItem *selItem = (*_sceneItemsListModel->get_iter(
-                  *pathPtr))[_sceneItemsListColumns._item],
-              *nextItem = nullptr;
+                           *pathPtr))[_sceneItemsListColumns._item],
+                       *nextItem = nullptr;
     std::vector<Gtk::TreeModel::Path>::const_iterator nextPtr = pathPtr;
     ++nextPtr;
     if (nextPtr != pathHandle.end()) {
@@ -502,7 +504,8 @@ void SceneFrame::onScalesChanged() {
          pathPtr != pathHandle.end(); ++pathPtr) {
       theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
           *pathPtr))[_sceneItemsListColumns._item];
-      theatre::ControlSceneItem *csi = dynamic_cast<theatre::ControlSceneItem *>(item);
+      theatre::ControlSceneItem *csi =
+          dynamic_cast<theatre::ControlSceneItem *>(item);
       if (csi != nullptr) {
         csi->StartValue().Set((unsigned)_startScale.get_value());
         csi->EndValue().Set((unsigned)_endScale.get_value());

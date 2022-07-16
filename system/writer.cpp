@@ -433,7 +433,8 @@ void writeGlightShow(WriteState &state) {
 
 }  // namespace
 
-void Write(std::ostream &stream, Management &management, gui::GUIState *guiState) {
+void Write(std::ostream &stream, Management &management,
+           gui::GUIState *guiState) {
   WriteState state(management);
   state.writer = JsonWriter(stream);
   state.guiState = guiState;
@@ -447,4 +448,4 @@ void Write(const std::string &filename, Management &management,
   Write(file, management, guiState);
 }
 
-}
+}  // namespace glight::system

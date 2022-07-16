@@ -17,7 +17,7 @@
 namespace glight::gui {
 
 class EventTransmitter;
-  
+
 /**
  * @author Andre Offringa
  */

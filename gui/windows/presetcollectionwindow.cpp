@@ -9,8 +9,8 @@
 namespace glight::gui {
 
 PresetCollectionWindow::PresetCollectionWindow(
-    theatre::PresetCollection &presetCollection, theatre::Management &management,
-    EventTransmitter &eventHub)
+    theatre::PresetCollection &presetCollection,
+    theatre::Management &management, EventTransmitter &eventHub)
     : PropertiesWindow(),
       _inputSelector(management, eventHub),
 
@@ -146,7 +146,8 @@ void PresetCollectionWindow::onAddPreset() {
   size_t input = _inputSelector.SelectedInput();
   if (object && input != InputSelectWidget::NO_INPUT_SELECTED) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
-    theatre::PresetValue &preset = _presetCollection->AddPresetValue(*object, input);
+    theatre::PresetValue &preset =
+        _presetCollection->AddPresetValue(*object, input);
     if (_management->HasCycle()) {
       _presetCollection->RemovePresetValue(_presetCollection->Size() - 1);
       lock.unlock();
@@ -191,7 +192,8 @@ void PresetCollectionWindow::onSelectedPresetChanged() {
 
 void PresetCollectionWindow::loadPreset(size_t index) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  theatre::ControlValue controlValue = _presetCollection->PresetValues()[index]->Value();
+  theatre::ControlValue controlValue =
+      _presetCollection->PresetValues()[index]->Value();
   lock.unlock();
   std::ostringstream str;
   str << controlValue.RoundedPercentage();
@@ -216,7 +218,8 @@ void PresetCollectionWindow::onControlValueChanged() {
   if (selectedPresetIndex(index)) {
     double percentage = std::atof(_controlValueEntry.get_text().c_str());
     if (percentage >= 0.0 && percentage <= 100.0) {
-      theatre::ControlValue controlValue(percentage * theatre::ControlValue::MaxUInt() / 100.0);
+      theatre::ControlValue controlValue(
+          percentage * theatre::ControlValue::MaxUInt() / 100.0);
       _presetCollection->PresetValues()[index]->SetValue(controlValue);
     }
   }

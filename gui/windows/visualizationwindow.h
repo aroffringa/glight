@@ -59,7 +59,8 @@ class VisualizationWindow : public Gtk::Window {
     DragRectangle,
     DragAddRectangle
   } _dragType;
-  std::vector<theatre::Fixture *> _selectedFixtures, _selectedFixturesBeforeDrag;
+  std::vector<theatre::Fixture *> _selectedFixtures,
+      _selectedFixturesBeforeDrag;
   theatre::Position _draggingStart, _draggingTo;
   struct FixtureState {
     double rotation = 0.0;
@@ -125,7 +126,8 @@ class VisualizationWindow : public Gtk::Window {
   void onGlobalSelectionChanged();
 
   double scale(theatre::Management &management, double width, double height);
-  double invScale(theatre::Management &management, double width, double height) {
+  double invScale(theatre::Management &management, double width,
+                  double height) {
     double sc = scale(management, width, height);
     if (sc == 0.0)
       return 1.0;
@@ -133,7 +135,7 @@ class VisualizationWindow : public Gtk::Window {
       return 1.0 / sc;
   }
   theatre::Fixture *fixtureAt(theatre::Management &management,
-                           const theatre::Position &position);
+                              const theatre::Position &position);
   void selectFixtures(const theatre::Position &a, const theatre::Position &b);
   void addFixtures(const theatre::Position &a, const theatre::Position &b);
 };

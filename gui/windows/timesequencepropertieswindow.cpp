@@ -315,7 +315,8 @@ void TimeSequencePropertiesWindow::onSelectedStepChanged() {
   }
 }
 
-void TimeSequencePropertiesWindow::loadStep(const theatre::TimeSequence::Step &step) {
+void TimeSequencePropertiesWindow::loadStep(
+    const theatre::TimeSequence::Step &step) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
   theatre::TriggerType triggerType = step.trigger.Type();
   theatre::TransitionType transitionType = step.transition.Type();

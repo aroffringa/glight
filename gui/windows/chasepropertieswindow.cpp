@@ -140,7 +140,8 @@ void ChasePropertiesWindow::onTransitionSpeedChanged(double newValue) {
   }
 }
 
-void ChasePropertiesWindow::onTransitionTypeChanged(theatre::TransitionType type) {
+void ChasePropertiesWindow::onTransitionTypeChanged(
+    theatre::TransitionType type) {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   _chase->Transition().SetType(type);
 }

@@ -11,7 +11,7 @@
 namespace glight::gui {
 
 using theatre::FixtureType;
-  
+
 AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
                                    theatre::Management &management)
     : stock_button_("Stock"),
@@ -118,8 +118,10 @@ void AddFixtureWindow::onAdd() {
     }
 
     for (size_t fixIter = 0; fixIter != size_t(count); ++fixIter) {
-      const theatre::Position position = _management->GetTheatre().GetFreePosition();
-      theatre::Fixture &fixture = _management->GetTheatre().AddFixture(*project_type);
+      const theatre::Position position =
+          _management->GetTheatre().GetFreePosition();
+      theatre::Fixture &fixture =
+          _management->GetTheatre().AddFixture(*project_type);
       fixture.GetPosition() = position;
 
       const std::vector<std::unique_ptr<theatre::FixtureFunction>> &functions =

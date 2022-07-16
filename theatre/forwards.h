@@ -2,7 +2,7 @@
 #define THEATRE_FORWARDS_H_
 
 namespace glight::theatre {
-  
+
 class BeatFinder;
 class Chase;
 class Controllable;

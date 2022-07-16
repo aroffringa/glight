@@ -106,7 +106,8 @@ void FixtureListWindow::fillFixturesList() {
   }
 }
 
-std::string FixtureListWindow::getChannelString(const theatre::Fixture &fixture) {
+std::string FixtureListWindow::getChannelString(
+    const theatre::Fixture &fixture) {
   std::vector<unsigned> channels = fixture.GetChannels();
 
   std::vector<unsigned>::const_iterator i = channels.begin();
@@ -145,7 +146,8 @@ void FixtureListWindow::onIncChannelButtonClicked() {
   if (selected) {
     theatre::Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
     fixture->IncChannel();
-    if (!fixture->IsVisible()) fixture->SetSymbol(theatre::FixtureSymbol::Normal);
+    if (!fixture->IsVisible())
+      fixture->SetSymbol(theatre::FixtureSymbol::Normal);
     updateFixture(fixture);
   }
 }
@@ -157,7 +159,8 @@ void FixtureListWindow::onDecChannelButtonClicked() {
   if (selected) {
     theatre::Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
     fixture->DecChannel();
-    if (!fixture->IsVisible()) fixture->SetSymbol(theatre::FixtureSymbol::Normal);
+    if (!fixture->IsVisible())
+      fixture->SetSymbol(theatre::FixtureSymbol::Normal);
     updateFixture(fixture);
   }
 }
@@ -182,7 +185,8 @@ void FixtureListWindow::onSetChannelButtonClicked() {
       std::string dmxChannel = entry.get_text();
       unsigned value = std::atoi(dmxChannel.c_str());
       if (value > 0 && value <= 512) {
-        if (!fixture->IsVisible()) fixture->SetSymbol(theatre::FixtureSymbol::Normal);
+        if (!fixture->IsVisible())
+          fixture->SetSymbol(theatre::FixtureSymbol::Normal);
         fixture->SetChannel(value - 1);
         updateFixture(fixture);
       }

@@ -10,7 +10,7 @@
 #include "sourcevalue.h"
 
 namespace glight::theatre {
-  
+
 class Management;
 
 /**

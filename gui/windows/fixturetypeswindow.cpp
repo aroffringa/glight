@@ -58,8 +58,10 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   name_entry_.set_hexpand(true);
 
   right_grid_.attach(class_label_, 0, 1);
-  const std::vector<theatre::FixtureClass> classes = theatre::FixtureType::GetClassList();
-  for (theatre::FixtureClass c : classes) class_combo_.append(theatre::FixtureType::ClassName(c));
+  const std::vector<theatre::FixtureClass> classes =
+      theatre::FixtureType::GetClassList();
+  for (theatre::FixtureClass c : classes)
+    class_combo_.append(theatre::FixtureType::ClassName(c));
   right_grid_.attach(class_combo_, 1, 1);
   class_combo_.set_hexpand(true);
   right_grid_.attach(functions_frame_, 0, 2, 2, 1);
@@ -195,7 +197,8 @@ void FixtureTypesWindow::onSelectionChanged() {
           theatre::FixtureType::ClassName(type->GetFixtureClass()));
       functions_frame_.SetFunctions(type->Functions());
     } else {
-      class_combo_.set_active_text(theatre::FixtureType::ClassName(theatre::FixtureClass::Par));
+      class_combo_.set_active_text(
+          theatre::FixtureType::ClassName(theatre::FixtureClass::Par));
       functions_frame_.SetFunctions({});
     }
   }

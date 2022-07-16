@@ -369,7 +369,8 @@ void ParseGUIFaders(const Object &node, gui::GUIState &guiState,
   }
 }
 
-void ParseGUI(const Object &node, gui::GUIState &guiState, Management &management) {
+void ParseGUI(const Object &node, gui::GUIState &guiState,
+              Management &management) {
   const Array &states = ToArr(node["states"]);
   for (const Node &item : states) {
     const Object &state_node = ToObj(item);
@@ -393,16 +394,17 @@ void parseGlightShow(const Object &node, Management &management,
 
 }  // namespace
 
-void Read(std::istream &stream, Management &management, gui::GUIState *guiState) {
+void Read(std::istream &stream, Management &management,
+          gui::GUIState *guiState) {
   std::unique_ptr<Node> root = json::Parse(stream);
   parseGlightShow(ToObj(*root), management, guiState);
 }
 
 void Read(const std::string &filename, Management &management,
-         gui::GUIState *guiState) {
+          gui::GUIState *guiState) {
   std::ifstream stream(filename);
   if (!stream) throw std::runtime_error("Failed to open file");
   Read(stream, management, guiState);
 }
 
-}
+}  // namespace glight::system

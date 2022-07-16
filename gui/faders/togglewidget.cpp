@@ -174,7 +174,8 @@ void ToggleWidget::ChangeManagement(theatre::Management &management,
 }
 
 void ToggleWidget::Limit(double value) {
-  if (value < theatre::ControlValue::MaxUInt()) _onCheckButton.set_active(false);
+  if (value < theatre::ControlValue::MaxUInt())
+    _onCheckButton.set_active(false);
 }
 
 }  // namespace glight::gui

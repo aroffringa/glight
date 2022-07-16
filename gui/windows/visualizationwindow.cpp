@@ -70,7 +70,8 @@ VisualizationWindow::~VisualizationWindow() {
 }
 
 void VisualizationWindow::inializeContextMenu() {
-  std::vector<theatre::FixtureSymbol::Symbol> symbols(theatre::FixtureSymbol::List());
+  std::vector<theatre::FixtureSymbol::Symbol> symbols(
+      theatre::FixtureSymbol::List());
   _miSymbols.reserve(symbols.size());
   for (theatre::FixtureSymbol::Symbol symbol : symbols) {
     _miSymbols.emplace_back(theatre::FixtureSymbol(symbol).Name());
@@ -293,8 +294,8 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
   }
 }
 
-theatre::Fixture *VisualizationWindow::fixtureAt(theatre::Management &management,
-                                        const theatre::Position &position) {
+theatre::Fixture *VisualizationWindow::fixtureAt(
+    theatre::Management &management, const theatre::Position &position) {
   const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
       management.GetTheatre().Fixtures();
 
@@ -388,8 +389,8 @@ bool VisualizationWindow::onMotion(GdkEventMotion *event) {
   if (_dragType != NotDragging && !_dryManagement) {
     double width = _drawingArea.get_width();
     double height = _drawingArea.get_height();
-    theatre::Position pos =
-        theatre::Position(event->x, event->y) / scale(*_management, width, height);
+    theatre::Position pos = theatre::Position(event->x, event->y) /
+                            scale(*_management, width, height);
     switch (_dragType) {
       case NotDragging:
         break;
@@ -412,7 +413,8 @@ bool VisualizationWindow::onMotion(GdkEventMotion *event) {
   return true;
 }
 
-void VisualizationWindow::selectFixtures(const theatre::Position &a, const theatre::Position &b) {
+void VisualizationWindow::selectFixtures(const theatre::Position &a,
+                                         const theatre::Position &b) {
   _selectedFixtures.clear();
   double x1 = a.X(), y1 = a.Y(), x2 = b.X(), y2 = b.Y();
   if (x1 > x2) std::swap(x1, x2);
@@ -430,7 +432,8 @@ void VisualizationWindow::selectFixtures(const theatre::Position &a, const theat
   }
 }
 
-void VisualizationWindow::addFixtures(const theatre::Position &a, const theatre::Position &b) {
+void VisualizationWindow::addFixtures(const theatre::Position &a,
+                                      const theatre::Position &b) {
   selectFixtures(a, b);
   for (theatre::Fixture *fixture : _selectedFixturesBeforeDrag) {
     auto iter =
@@ -451,7 +454,8 @@ void VisualizationWindow::onAlignHorizontally() {
 
     y /= _selectedFixtures.size();
 
-    for (theatre::Fixture *fixture : _selectedFixtures) fixture->GetPosition().Y() = y;
+    for (theatre::Fixture *fixture : _selectedFixtures)
+      fixture->GetPosition().Y() = y;
   }
 }
 
@@ -464,7 +468,8 @@ void VisualizationWindow::onAlignVertically() {
 
     x /= _selectedFixtures.size();
 
-    for (theatre::Fixture *fixture : _selectedFixtures) fixture->GetPosition().X() = x;
+    for (theatre::Fixture *fixture : _selectedFixtures)
+      fixture->GetPosition().X() = x;
   }
 }
 

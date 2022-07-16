@@ -114,7 +114,8 @@ class SceneFrame : public Gtk::Frame {
   void createControllablesList1();
   void createControllablesList2();
   void fillSceneItemList();
-  void setSceneItemListRow(theatre::SceneItem *sceneItem, Gtk::TreeModel::Row row);
+  void setSceneItemListRow(theatre::SceneItem *sceneItem,
+                           Gtk::TreeModel::Row row);
   void updateSelectedSceneItems();
   void fillControllablesList();
   void addKey(theatre::KeySceneLevel level);
