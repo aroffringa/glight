@@ -9,26 +9,10 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include "forwards.h"
 #include "valuesnapshot.h"
 
 namespace glight::theatre {
-
-class BeatFinder;
-class Chase;
-class Controllable;
-class DmxDevice;
-class Effect;
-class Fixture;
-class FixtureControl;
-class FixtureType;
-class Folder;
-class FolderObject;
-class PresetCollection;
-class PresetValue;
-class Show;
-class SourceValue;
-class Theatre;
-class TimeSequence;
 
 /**
  * @author Andre Offringa

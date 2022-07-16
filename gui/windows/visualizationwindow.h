@@ -47,10 +47,10 @@ class VisualizationWindow : public Gtk::Window {
   Gtk::DrawingArea _drawingArea;
   theatre::Management *_management;
   theatre::Management *_dryManagement;
-  class EventTransmitter *_eventTransmitter;
-  class FixtureSelection *_globalSelection;
+  EventTransmitter *_eventTransmitter;
+  FixtureSelection *_globalSelection;
   sigc::connection _globalSelectionConnection;
-  class ShowWindow *_showWindow;
+  ShowWindow *_showWindow;
   bool _isInitialized, _isTimerRunning;
   sigc::connection _timeoutConnection;
   enum DragType {
@@ -59,7 +59,7 @@ class VisualizationWindow : public Gtk::Window {
     DragRectangle,
     DragAddRectangle
   } _dragType;
-  std::vector<class Fixture *> _selectedFixtures, _selectedFixturesBeforeDrag;
+  std::vector<theatre::Fixture *> _selectedFixtures, _selectedFixturesBeforeDrag;
   theatre::Position _draggingStart, _draggingTo;
   struct FixtureState {
     double rotation = 0.0;
@@ -87,7 +87,7 @@ class VisualizationWindow : public Gtk::Window {
     double timeSince;
   };
   void drawManagement(const Cairo::RefPtr<Cairo::Context> &cairo,
-                      class Management &management, const DrawStyle &style);
+                      theatre::Management &management, const DrawStyle &style);
   void onTheatreChanged();
   bool onButtonPress(GdkEventButton *event);
   bool onButtonRelease(GdkEventButton *event);
@@ -124,15 +124,15 @@ class VisualizationWindow : public Gtk::Window {
   void onSetSymbol(theatre::FixtureSymbol::Symbol symbol);
   void onGlobalSelectionChanged();
 
-  double scale(Management &management, double width, double height);
-  double invScale(Management &management, double width, double height) {
+  double scale(theatre::Management &management, double width, double height);
+  double invScale(theatre::Management &management, double width, double height) {
     double sc = scale(management, width, height);
     if (sc == 0.0)
       return 1.0;
     else
       return 1.0 / sc;
   }
-  class Fixture *fixtureAt(theatre::Management &management,
+  theatre::Fixture *fixtureAt(theatre::Management &management,
                            const theatre::Position &position);
   void selectFixtures(const theatre::Position &a, const theatre::Position &b);
   void addFixtures(const theatre::Position &a, const theatre::Position &b);

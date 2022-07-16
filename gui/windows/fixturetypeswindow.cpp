@@ -16,7 +16,7 @@
 namespace glight::gui {
 
 FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
-                                       Management &management)
+                                       theatre::Management &management)
     : event_hub_(eventHub),
       management_(&management),
       name_label_("Name:"),
@@ -58,8 +58,8 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   name_entry_.set_hexpand(true);
 
   right_grid_.attach(class_label_, 0, 1);
-  const std::vector<FixtureClass> classes = FixtureType::GetClassList();
-  for (FixtureClass c : classes) class_combo_.append(FixtureType::ClassName(c));
+  const std::vector<theatre::FixtureClass> classes = theatre::FixtureType::GetClassList();
+  for (theatre::FixtureClass c : classes) class_combo_.append(theatre::FixtureType::ClassName(c));
   right_grid_.attach(class_combo_, 1, 1);
   class_combo_.set_hexpand(true);
   right_grid_.attach(functions_frame_, 0, 2, 2, 1);
@@ -108,9 +108,9 @@ void FixtureTypesWindow::fillList() {
   list_model_->clear();
 
   std::lock_guard<std::mutex> lock(management_->Mutex());
-  const std::vector<std::unique_ptr<FixtureType>> &types =
+  const std::vector<std::unique_ptr<theatre::FixtureType>> &types =
       management_->GetTheatre().FixtureTypes();
-  for (const std::unique_ptr<FixtureType> &type : types) {
+  for (const std::unique_ptr<theatre::FixtureType> &type : types) {
     Gtk::TreeModel::iterator iter = list_model_->append();
     Gtk::TreeModel::Row row = *iter;
     row[list_columns_.fixture_type_] = type.get();
@@ -136,7 +136,7 @@ void FixtureTypesWindow::onNewButtonClicked() {
 }
 
 void FixtureTypesWindow::onRemoveClicked() {
-  FixtureType *type = getSelected();
+  theatre::FixtureType *type = getSelected();
   if (type) {
     management_->RemoveFixtureType(*type);
     event_hub_->EmitUpdate();
@@ -148,7 +148,7 @@ void FixtureTypesWindow::onRemoveClicked() {
 }
 
 void FixtureTypesWindow::onSaveClicked() {
-  FixtureType *type = getSelected();
+  theatre::FixtureType *type = getSelected();
   if (type) {
     if (management_->GetTheatre().IsUsed(*type)) {
       Gtk::MessageDialog dialog(*this,
@@ -157,18 +157,18 @@ void FixtureTypesWindow::onSaveClicked() {
       dialog.run();
     }
   } else {
-    FixtureType ft;
+    theatre::FixtureType ft;
     type = &management_->GetTheatre().AddFixtureType(ft);
     management_->RootFolder().Add(*type);
   }
   type->SetName(name_entry_.get_text());
   type->SetFixtureClass(
-      FixtureType::NameToClass(class_combo_.get_active_text()));
+      theatre::FixtureType::NameToClass(class_combo_.get_active_text()));
   type->SetFunctions(functions_frame_.GetFunctions());
   event_hub_->EmitUpdate();
 }
 
-FixtureType *FixtureTypesWindow::getSelected() {
+theatre::FixtureType *FixtureTypesWindow::getSelected() {
   Glib::RefPtr<Gtk::TreeSelection> selection = list_view_.get_selection();
   const Gtk::TreeModel::const_iterator selected = selection->get_selected();
   if (selected)
@@ -183,8 +183,8 @@ void FixtureTypesWindow::onSelectionChanged() {
     Glib::RefPtr<Gtk::TreeSelection> selection = list_view_.get_selection();
     const Gtk::TreeModel::const_iterator selected = selection->get_selected();
     const bool has_selection = selected;
-    const FixtureType *type =
-        has_selection ? static_cast<FixtureType *>(
+    const theatre::FixtureType *type =
+        has_selection ? static_cast<theatre::FixtureType *>(
                             (*selected)[list_columns_.fixture_type_])
                       : nullptr;
     remove_button_.set_sensitive(has_selection);
@@ -192,10 +192,10 @@ void FixtureTypesWindow::onSelectionChanged() {
     right_grid_.set_sensitive(has_selection);
     if (type) {
       class_combo_.set_active_text(
-          FixtureType::ClassName(type->GetFixtureClass()));
+          theatre::FixtureType::ClassName(type->GetFixtureClass()));
       functions_frame_.SetFunctions(type->Functions());
     } else {
-      class_combo_.set_active_text(FixtureType::ClassName(FixtureClass::Par));
+      class_combo_.set_active_text(theatre::FixtureType::ClassName(theatre::FixtureClass::Par));
       functions_frame_.SetFunctions({});
     }
   }

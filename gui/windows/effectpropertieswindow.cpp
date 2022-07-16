@@ -12,8 +12,8 @@
 
 namespace glight::gui {
 
-EffectPropertiesWindow::EffectPropertiesWindow(class Effect &effect,
-                                               Management &management,
+EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
+                                               theatre::Management &management,
                                                ShowWindow &parentWindow)
     : PropertiesWindow(),
 
@@ -72,13 +72,13 @@ EffectPropertiesWindow::EffectPropertiesWindow(class Effect &effect,
   add(_topBox);
 
   fillConnectionsList();
-  _propertySet = PropertySet::Make(effect);
+  _propertySet = theatre::PropertySet::Make(effect);
   _propertiesBox.SetPropertySet(_propertySet.get());
 
   show_all_children();
 }
 
-FolderObject &EffectPropertiesWindow::GetObject() { return *_effect; }
+theatre::FolderObject &EffectPropertiesWindow::GetObject() { return *_effect; }
 
 void EffectPropertiesWindow::fillConnectionsList() {
   _connectionsListModel->clear();
@@ -119,7 +119,7 @@ void EffectPropertiesWindow::onRemoveConnectionClicked() {
   fillConnectionsList();
 }
 
-void EffectPropertiesWindow::onInputSelected(class SourceValue *sourceValue) {
+void EffectPropertiesWindow::onInputSelected(theatre::SourceValue *sourceValue) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
   _effect->AddConnection(sourceValue->Controllable(),
                          sourceValue->Preset().InputIndex());
@@ -140,7 +140,7 @@ void EffectPropertiesWindow::onInputSelected(class SourceValue *sourceValue) {
 void EffectPropertiesWindow::onUpdateControllables() {
   if (_management->Contains(*_effect)) {
     fillConnectionsList();
-    _propertySet = PropertySet::Make(*_effect);
+    _propertySet = theatre::PropertySet::Make(*_effect);
     _propertiesBox.SetPropertySet(_propertySet.get());
   } else
     hide();

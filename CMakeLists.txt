@@ -68,7 +68,6 @@ set(GUIFILES
 
 set(SYSTEMFILES
   system/audioplayer.cpp
-  system/beatfinder.cpp
   system/flacdecoder.cpp
   system/jsonreader.cpp
   system/jsonwriter.cpp
@@ -78,6 +77,7 @@ set(SYSTEMFILES
 
 set(THEATREFILES
   theatre/autodesign.cpp
+  theatre/beatfinder.cpp
   theatre/effect.cpp
   theatre/fixture.cpp
   theatre/fixturefunction.cpp

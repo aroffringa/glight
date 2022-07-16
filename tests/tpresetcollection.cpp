@@ -8,6 +8,8 @@
 
 #include <memory>
 
+using namespace glight::theatre;
+
 BOOST_AUTO_TEST_SUITE(preset_collection)
 
 BOOST_AUTO_TEST_CASE(Add) {

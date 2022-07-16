@@ -1,5 +1,5 @@
-#ifndef ADD_FIXTURE_WINDOW_H
-#define ADD_FIXTURE_WINDOW_H
+#ifndef GUI_ADD_FIXTURE_WINDOW_H_
+#define GUI_ADD_FIXTURE_WINDOW_H_
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -12,18 +12,18 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/window.h>
 
-class EventTransmitter;
-class FixtureType;
-class Management;
+#include "../../theatre/forwards.h"
 
 namespace glight::gui {
 
+class EventTransmitter;
+  
 /**
  * @author Andre Offringa
  */
 class AddFixtureWindow : public Gtk::Window {
  public:
-  AddFixtureWindow(EventTransmitter *eventHub, Management &management);
+  AddFixtureWindow(EventTransmitter *eventHub, theatre::Management &management);
 
  private:
   void fillStock();
@@ -34,7 +34,7 @@ class AddFixtureWindow : public Gtk::Window {
       add(type_);
       add(type_str_);
     }
-    Gtk::TreeModelColumn<const FixtureType *> type_;
+    Gtk::TreeModelColumn<const theatre::FixtureType *> type_;
     Gtk::TreeModelColumn<Glib::ustring> type_str_;
   } type_columns_;
 
@@ -54,9 +54,9 @@ class AddFixtureWindow : public Gtk::Window {
   Gtk::Button _addButton;
 
   EventTransmitter &_eventHub;
-  Management *_management;
+  theatre::Management *_management;
 
-  const std::map<std::string, FixtureType> stock_list_;
+  const std::map<std::string, theatre::FixtureType> stock_list_;
 
   void onStockProjectToggled();
 

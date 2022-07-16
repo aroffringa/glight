@@ -26,7 +26,7 @@ const char FaderWindow::_keyRowsLower[3][10] = {
     {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'}};
 
 FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
-                         Management &management, size_t keyRowIndex)
+                         theatre::Management &management, size_t keyRowIndex)
     : _management(&management),
       _keyRowIndex(keyRowIndex),
       _faderSetupLabel("Fader setup: "),
@@ -276,7 +276,7 @@ void FaderWindow::onAssignClicked() {
   if (!_controls.empty()) {
     size_t controlIndex = 0;
     for (size_t i = 0; i != n; ++i) {
-      SourceValue *sv = _management->SourceValues()[i].get();
+      theatre::SourceValue *sv = _management->SourceValues()[i].get();
       if (!_guiState.IsAssigned(sv)) {
         _controls[controlIndex]->Assign(sv, true);
         ++controlIndex;
@@ -294,8 +294,8 @@ void FaderWindow::onAssignChasesClicked() {
   if (!_controls.empty()) {
     size_t controlIndex = 0;
     for (size_t i = 0; i != _management->SourceValues().size(); ++i) {
-      SourceValue *sv = _management->SourceValues()[i].get();
-      Chase *c = dynamic_cast<Chase *>(&sv->Controllable());
+      theatre::SourceValue *sv = _management->SourceValues()[i].get();
+      theatre::Chase *c = dynamic_cast<theatre::Chase *>(&sv->Controllable());
       if (c != nullptr) {
         _controls[controlIndex]->Assign(sv, true);
         ++controlIndex;
@@ -368,7 +368,7 @@ bool FaderWindow::HandleKeyUp(char key) {
   return false;
 }
 
-bool FaderWindow::IsAssigned(SourceValue *sourceValue) {
+bool FaderWindow::IsAssigned(theatre::SourceValue *sourceValue) {
   for (std::unique_ptr<ControlWidget> &c : _controls) {
     if (c->GetSourceValue() == sourceValue) return true;
   }
@@ -540,7 +540,7 @@ void FaderWindow::onChangeUpSpeed() {
     cw->SetFadeUpSpeed(speed);
 }
 
-void FaderWindow::ChangeManagement(class Management &management,
+void FaderWindow::ChangeManagement(theatre::Management &management,
                                    bool moveSliders) {
   _management = &management;
   for (std::unique_ptr<ControlWidget> &cw : _controls) {

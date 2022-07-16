@@ -8,6 +8,8 @@
 #include <aubio/tempo/beattracking.h>
 #include <aubio/tempo/tempo.h>
 
+namespace glight::theatre {
+
 void BeatFinder::open() {
   if (_isOpen) throw AlsaError("Alsa was opened twice");
 
@@ -156,4 +158,6 @@ void BeatFinder::close() {
     snd_pcm_close(_handle);
     _isOpen = false;
   }
+}
+
 }

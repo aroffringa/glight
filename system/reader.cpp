@@ -21,7 +21,10 @@
 
 #include <fstream>
 
+namespace glight::system {
 namespace {
+
+using namespace glight::theatre;
 
 using json::Array;
 using json::Boolean;
@@ -329,7 +332,7 @@ void ParseScenes(const json::Array &node, Management &management) {
   }
 }
 
-void ParseGUIPresetRef(const Object &node, FaderSetupState &fader,
+void ParseGUIPresetRef(const Object &node, gui::FaderSetupState &fader,
                        Management &management) {
   if (node.children.count("name")) {
     const size_t input = ToNum(node["input-index"]).AsSize();
@@ -342,16 +345,16 @@ void ParseGUIPresetRef(const Object &node, FaderSetupState &fader,
   } else {
     fader.faders.emplace_back(nullptr);
   }
-  FaderState &state = fader.faders.back();
+  gui::FaderState &state = fader.faders.back();
   state.SetIsToggleButton(ToBool(node["is-toggle"]));
   if (state.IsToggleButton())
     state.SetNewToggleButtonColumn(ToBool(node["new-toggle-column"]));
 }
 
-void ParseGUIFaders(const Object &node, GUIState &guiState,
+void ParseGUIFaders(const Object &node, gui::GUIState &guiState,
                     Management &management) {
-  guiState.FaderSetups().emplace_back(new FaderSetupState());
-  FaderSetupState &fader = *guiState.FaderSetups().back().get();
+  guiState.FaderSetups().emplace_back(std::make_unique<gui::FaderSetupState>());
+  gui::FaderSetupState &fader = *guiState.FaderSetups().back().get();
   fader.name = ToStr(node["name"]);
   fader.isActive = ToBool(node["active"]);
   fader.isSolo = ToBool(node["solo"]);
@@ -366,7 +369,7 @@ void ParseGUIFaders(const Object &node, GUIState &guiState,
   }
 }
 
-void ParseGUI(const Object &node, GUIState &guiState, Management &management) {
+void ParseGUI(const Object &node, gui::GUIState &guiState, Management &management) {
   const Array &states = ToArr(node["states"]);
   for (const Node &item : states) {
     const Object &state_node = ToObj(item);
@@ -375,7 +378,7 @@ void ParseGUI(const Object &node, GUIState &guiState, Management &management) {
 }
 
 void parseGlightShow(const Object &node, Management &management,
-                     GUIState *guiState) {
+                     gui::GUIState *guiState) {
   ParseFolders(ToArr(node["folders"]), management);
   ParseTheatre(ToObj(node["theatre"]), management);
   ParseControls(ToArr(node["controls"]), management);
@@ -390,14 +393,16 @@ void parseGlightShow(const Object &node, Management &management,
 
 }  // namespace
 
-void Read(std::istream &stream, Management &management, GUIState *guiState) {
+void Read(std::istream &stream, Management &management, gui::GUIState *guiState) {
   std::unique_ptr<Node> root = json::Parse(stream);
   parseGlightShow(ToObj(*root), management, guiState);
 }
 
 void Read(const std::string &filename, Management &management,
-          GUIState *guiState) {
+         gui::GUIState *guiState) {
   std::ifstream stream(filename);
   if (!stream) throw std::runtime_error("Failed to open file");
   Read(stream, management, guiState);
+}
+
 }

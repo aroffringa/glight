@@ -10,6 +10,8 @@
 #include "sourcevalue.h"
 
 namespace glight::theatre {
+  
+class Management;
 
 /**
  * @author Andre Offringa
@@ -22,7 +24,7 @@ class PresetCollection : public Controllable {
   ~PresetCollection() { Clear(); }
 
   void Clear() { _presetValues.clear(); }
-  inline void SetFromCurrentSituation(const class Management &management);
+  inline void SetFromCurrentSituation(const Management &management);
 
   size_t NInputs() const final override { return 1; }
 

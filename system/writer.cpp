@@ -18,7 +18,10 @@
 
 #include "../gui/guistate.h"
 
+namespace glight::system {
 namespace {
+
+using namespace glight::theatre;
 
 struct WriteState {
   WriteState(Management &management_) : management(management_) {}
@@ -26,7 +29,7 @@ struct WriteState {
   std::set<const Controllable *> controllablesWritten;
   std::map<const Folder *, size_t> folderIds;
   Management &management;
-  GUIState *guiState = nullptr;
+  gui::GUIState *guiState = nullptr;
 };
 
 void writeControllable(WriteState &state, const Controllable &controllable);
@@ -332,7 +335,7 @@ void writeScene(WriteState &state, const Scene &scene) {
   state.writer.EndObject();
 }
 
-void writeFaderState(WriteState &state, const FaderSetupState &guiState) {
+void writeFaderState(WriteState &state, const gui::FaderSetupState &guiState) {
   state.writer.StartObject();
   state.writer.String("name", guiState.name);
   state.writer.Boolean("active", guiState.isActive);
@@ -342,7 +345,7 @@ void writeFaderState(WriteState &state, const FaderSetupState &guiState) {
   state.writer.Number("width", guiState.width);
   state.writer.Number("height", guiState.height);
   state.writer.StartArray("faders");
-  for (const FaderState &fader : guiState.faders) {
+  for (const gui::FaderState &fader : guiState.faders) {
     state.writer.StartObject();
     state.writer.Boolean("is-toggle", fader.IsToggleButton());
     if (fader.IsToggleButton())
@@ -364,7 +367,7 @@ void writeFaderState(WriteState &state, const FaderSetupState &guiState) {
 
 void writeGUIState(WriteState &state) {
   state.writer.StartArray("states");
-  for (const std::unique_ptr<FaderSetupState> &fState :
+  for (const std::unique_ptr<gui::FaderSetupState> &fState :
        state.guiState->FaderSetups())
     writeFaderState(state, *fState);
   state.writer.EndArray();  // states
@@ -430,7 +433,7 @@ void writeGlightShow(WriteState &state) {
 
 }  // namespace
 
-void Write(std::ostream &stream, Management &management, GUIState *guiState) {
+void Write(std::ostream &stream, Management &management, gui::GUIState *guiState) {
   WriteState state(management);
   state.writer = JsonWriter(stream);
   state.guiState = guiState;
@@ -439,7 +442,9 @@ void Write(std::ostream &stream, Management &management, GUIState *guiState) {
 }
 
 void Write(const std::string &filename, Management &management,
-           GUIState *guiState) {
+           gui::GUIState *guiState) {
   std::ofstream file(filename);
   Write(file, management, guiState);
+}
+
 }

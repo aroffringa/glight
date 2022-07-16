@@ -3,6 +3,12 @@
 
 #include <boost/test/unit_test.hpp>
 
+using glight::theatre::DmxChannel;
+using glight::theatre::FixtureFunction;
+using glight::theatre::FunctionType;
+using glight::theatre::MixStyle;
+using glight::theatre::Theatre;
+
 BOOST_AUTO_TEST_SUITE(fixture_function)
 
 BOOST_AUTO_TEST_CASE(MixChannels_8bit) {

@@ -3,6 +3,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+using namespace glight::theatre;
+
 BOOST_AUTO_TEST_SUITE(presetvalue)
 
 BOOST_AUTO_TEST_CASE(SignalDelete) {

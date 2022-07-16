@@ -5,6 +5,8 @@
 
 #include <memory>
 
+using namespace glight::theatre;
+
 BOOST_AUTO_TEST_SUITE(fixture_type_function)
 
 BOOST_AUTO_TEST_CASE(range_function) {

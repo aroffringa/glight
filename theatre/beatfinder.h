@@ -1,5 +1,5 @@
-#ifndef BEATFINDER_H
-#define BEATFINDER_H
+#ifndef THEATRE_BEAT_FINDER_H_
+#define THEATRE_BEAT_FINDER_H_
 
 #include <alsa/asoundlib.h>
 
@@ -10,9 +10,8 @@
 #include <string>
 #include <thread>
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::theatre {
+
 class BeatFinder {
  public:
   class AlsaError : public std::runtime_error {
@@ -80,5 +79,7 @@ class BeatFinder {
   void open();
   void close();
 };
+
+}
 
 #endif

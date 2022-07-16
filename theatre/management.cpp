@@ -1,7 +1,6 @@
 #include "management.h"
 
-#include "../system/beatfinder.h"
-
+#include "beatfinder.h"
 #include "chase.h"
 #include "controllable.h"
 #include "dmxdevice.h"

@@ -9,7 +9,7 @@
 namespace glight::gui {
 
 PresetCollectionWindow::PresetCollectionWindow(
-    PresetCollection &presetCollection, Management &management,
+    theatre::PresetCollection &presetCollection, theatre::Management &management,
     EventTransmitter &eventHub)
     : PropertiesWindow(),
       _inputSelector(management, eventHub),
@@ -88,7 +88,7 @@ PresetCollectionWindow::~PresetCollectionWindow() {
 
 void PresetCollectionWindow::load() { fillPresetsList(); }
 
-FolderObject &PresetCollectionWindow::GetObject() {
+theatre::FolderObject &PresetCollectionWindow::GetObject() {
   return GetPresetCollection();
 }
 
@@ -118,7 +118,7 @@ void PresetCollectionWindow::fillPresetsList() {
   }
   _presetsStore->clear();
   for (size_t i = 0; i != _presetCollection->PresetValues().size(); ++i) {
-    const std::unique_ptr<PresetValue> &pValue =
+    const std::unique_ptr<theatre::PresetValue> &pValue =
         _presetCollection->PresetValues()[i];
     Gtk::TreeModel::iterator iter = _presetsStore->append();
     Gtk::TreeModel::Row row = *iter;
@@ -142,11 +142,11 @@ void PresetCollectionWindow::onInputSelectionChanged() {
 }
 
 void PresetCollectionWindow::onAddPreset() {
-  Controllable *object = _inputSelector.SelectedObject();
+  theatre::Controllable *object = _inputSelector.SelectedObject();
   size_t input = _inputSelector.SelectedInput();
   if (object && input != InputSelectWidget::NO_INPUT_SELECTED) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
-    PresetValue &preset = _presetCollection->AddPresetValue(*object, input);
+    theatre::PresetValue &preset = _presetCollection->AddPresetValue(*object, input);
     if (_management->HasCycle()) {
       _presetCollection->RemovePresetValue(_presetCollection->Size() - 1);
       lock.unlock();
@@ -156,7 +156,7 @@ void PresetCollectionWindow::onAddPreset() {
           false, Gtk::MESSAGE_ERROR);
       dialog.run();
     } else {
-      preset.SetValue(ControlValue::MaxUInt());
+      preset.SetValue(theatre::ControlValue::MaxUInt());
       lock.unlock();
       fillPresetsList();
       selectPreset(_presetCollection->Size() - 1);
@@ -191,7 +191,7 @@ void PresetCollectionWindow::onSelectedPresetChanged() {
 
 void PresetCollectionWindow::loadPreset(size_t index) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  ControlValue controlValue = _presetCollection->PresetValues()[index]->Value();
+  theatre::ControlValue controlValue = _presetCollection->PresetValues()[index]->Value();
   lock.unlock();
   std::ostringstream str;
   str << controlValue.RoundedPercentage();
@@ -216,7 +216,7 @@ void PresetCollectionWindow::onControlValueChanged() {
   if (selectedPresetIndex(index)) {
     double percentage = std::atof(_controlValueEntry.get_text().c_str());
     if (percentage >= 0.0 && percentage <= 100.0) {
-      ControlValue controlValue(percentage * ControlValue::MaxUInt() / 100.0);
+      theatre::ControlValue controlValue(percentage * theatre::ControlValue::MaxUInt() / 100.0);
       _presetCollection->PresetValues()[index]->SetValue(controlValue);
     }
   }

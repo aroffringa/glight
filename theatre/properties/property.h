@@ -1,5 +1,5 @@
-#ifndef PROPERTY_H
-#define PROPERTY_H
+#ifndef THEATRE_PROPERTY_H_
+#define THEATRE_PROPERTY_H_
 
 #include "../../theatre/folderobject.h"
 

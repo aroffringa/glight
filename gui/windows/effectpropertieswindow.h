@@ -56,7 +56,7 @@ class EffectPropertiesWindow : public PropertiesWindow {
   Gtk::VBox _topBox;
   Gtk::HBox _mainHBox, _connectionsBox;
   Gtk::Frame _connectionsFrame, _propertiesFrame;
-  std::unique_ptr<class PropertySet> _propertySet;
+  std::unique_ptr<theatre::PropertySet> _propertySet;
   PropertiesBox _propertiesBox;
 
   Gtk::ScrolledWindow _connectionsScrolledWindow;

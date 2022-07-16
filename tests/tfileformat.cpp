@@ -19,6 +19,8 @@
 
 #include <memory>
 
+using namespace glight::theatre;
+
 namespace {
 void FillManagement(Management &management) {
   Folder &root = management.RootFolder();
@@ -87,19 +89,19 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   Management management;
   FillManagement(management);
 
-  GUIState guiState;
-  std::vector<std::unique_ptr<FaderSetupState>> &setups =
+  glight::gui::GUIState guiState;
+  std::vector<std::unique_ptr<glight::gui::FaderSetupState>> &setups =
       guiState.FaderSetups();
-  std::unique_ptr<FaderSetupState> &setup =
-      setups.emplace_back(std::make_unique<FaderSetupState>());
+  std::unique_ptr<glight::gui::FaderSetupState> &setup =
+      setups.emplace_back(std::make_unique<glight::gui::FaderSetupState>());
   setup->name = "testfader";
-  FaderState &state = setup->faders.emplace_back();
+  glight::gui::FaderState &state = setup->faders.emplace_back();
   state.SetSourceValue(management.SourceValues()[0].get());
 
   // Write("tmp-testfileformat.gshow", management, &guiState);
   // BOOST_CHECK(boost::filesystem::exists("tmp-testfileformat.gshow"));
   std::ostringstream stream;
-  Write(stream, management, &guiState);
+  glight::system::Write(stream, management, &guiState);
 
   management.Clear();
   BOOST_CHECK_EQUAL(management.Controllables().size(), 0);
@@ -109,9 +111,9 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   // Read and check if the result is correct
   //
   BOOST_TEST_CHECKPOINT("Start of reading");
-  GUIState resultGuiState;
+  glight::gui::GUIState resultGuiState;
   std::istringstream istream(stream.str());
-  Read(istream, management, &resultGuiState);
+  glight::system::Read(istream, management, &resultGuiState);
 
   BOOST_CHECK_EQUAL(management.RootFolder().Name(), "The root folder");
   BOOST_CHECK_EQUAL(management.RootFolder().Children()[0]->Name(),

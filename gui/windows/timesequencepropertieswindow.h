@@ -1,5 +1,5 @@
-#ifndef TIME_SEQUENCE_PROPERTIES_WINDOW_H
-#define TIME_SEQUENCE_PROPERTIES_WINDOW_H
+#ifndef GUI_TIME_SEQUENCE_PROPERTIES_WINDOW_H_
+#define GUI_TIME_SEQUENCE_PROPERTIES_WINDOW_H_
 
 #include "propertieswindow.h"
 
@@ -9,6 +9,7 @@
 
 #include "../recursionlock.h"
 
+#include "../../theatre/forwards.h"
 #include "../../theatre/timesequence.h"
 #include "../../theatre/transition.h"
 
@@ -26,18 +27,20 @@
 
 namespace glight::gui {
 
+class EventTransmitter;
+
 /**
  * @author Andre Offringa
  */
 class TimeSequencePropertiesWindow : public PropertiesWindow {
  public:
-  TimeSequencePropertiesWindow(TimeSequence &timeSequence,
-                               class Management &management,
-                               class EventTransmitter &eventHub);
+  TimeSequencePropertiesWindow(theatre::TimeSequence &timeSequence,
+                               theatre::Management &management,
+                               EventTransmitter &eventHub);
   ~TimeSequencePropertiesWindow();
 
-  class FolderObject &GetObject() final override;
-  class TimeSequence &GetTimeSequence() {
+  theatre::FolderObject &GetObject() final override;
+  theatre::TimeSequence &GetTimeSequence() {
     return *_timeSequence;
   }
 
@@ -46,7 +49,7 @@ class TimeSequencePropertiesWindow : public PropertiesWindow {
   void onSelectedStepChanged();
   void load();
   void fillStepsList();
-  void loadStep(const TimeSequence::Step &step);
+  void loadStep(const theatre::TimeSequence::Step &step);
   void onAddStep();
   void onRemoveStep();
   void onSustainChanged();
@@ -54,16 +57,16 @@ class TimeSequencePropertiesWindow : public PropertiesWindow {
   void onTriggerTypeChanged();
   void onTriggerSpeedChanged(double newValue);
   void onTransitionSpeedChanged(double newValue);
-  void onTransitionTypeChanged(TransitionType type);
+  void onTransitionTypeChanged(theatre::TransitionType type);
   void onSyncCountChanged();
   void onBeatSpeedChanged();
 
-  void onChangeManagement(class Management &management) {
+  void onChangeManagement(theatre::Management &management) {
     _management = &management;
   }
   void onUpdateControllables();
   void setStepSensitive(bool sensitive);
-  TimeSequence::Step *selectedStep();
+  theatre::TimeSequence::Step *selectedStep();
   void selectStep(size_t index);
 
   Gtk::HBox _topBox;
@@ -108,8 +111,8 @@ class TimeSequencePropertiesWindow : public PropertiesWindow {
 
   RecursionLock _recursionLock;
 
-  TimeSequence *_timeSequence;
-  Management *_management;
+  theatre::TimeSequence *_timeSequence;
+  theatre::Management *_management;
   EventTransmitter &_eventHub;
   sigc::connection _changeManagementConnection, _updateControllablesConnection;
 };

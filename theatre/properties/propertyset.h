@@ -1,5 +1,5 @@
-#ifndef PROPERTY_SET_H
-#define PROPERTY_SET_H
+#ifndef THEATRE_PROPERTY_SET_H_
+#define THEATRE_PROPERTY_SET_H_
 
 #include "property.h"
 

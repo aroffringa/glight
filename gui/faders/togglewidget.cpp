@@ -11,7 +11,7 @@
 
 namespace glight::gui {
 
-ToggleWidget::ToggleWidget(class Management &management,
+ToggleWidget::ToggleWidget(theatre::Management &management,
                            EventTransmitter &eventHub, char key)
     : _flashButton(std::string(1, key)),
       _nameLabel("<..>"),
@@ -61,7 +61,7 @@ void ToggleWidget::onOnButtonClicked() {
   if (!_holdUpdates) {
     unsigned value;
     if (_onCheckButton.get_active())
-      value = ControlValue::MaxUInt();
+      value = theatre::ControlValue::MaxUInt();
     else
       value = 0;
 
@@ -88,7 +88,7 @@ bool ToggleWidget::onNameLabelClicked(GdkEventButton *event) {
   return true;
 }
 
-void ToggleWidget::Assign(SourceValue *item, bool moveFader) {
+void ToggleWidget::Assign(theatre::SourceValue *item, bool moveFader) {
   if (item != _sourceValue) {
     _sourceValue = item;
     if (_sourceValue != nullptr) {
@@ -97,7 +97,7 @@ void ToggleWidget::Assign(SourceValue *item, bool moveFader) {
         _onCheckButton.set_active(_sourceValue->Preset().Value().UInt() != 0);
       } else {
         if (_onCheckButton.get_active())
-          setValue(ControlValue::MaxUInt());
+          setValue(theatre::ControlValue::MaxUInt());
         else
           setValue(0);
       }
@@ -107,7 +107,7 @@ void ToggleWidget::Assign(SourceValue *item, bool moveFader) {
         _onCheckButton.set_active(false);
       } else {
         if (_onCheckButton.get_active())
-          setValue(ControlValue::MaxUInt());
+          setValue(theatre::ControlValue::MaxUInt());
         else
           setValue(0);
       }
@@ -116,7 +116,7 @@ void ToggleWidget::Assign(SourceValue *item, bool moveFader) {
     if (moveFader) {
       unsigned value;
       if (_onCheckButton.get_active())
-        value = ControlValue::MaxUInt();
+        value = theatre::ControlValue::MaxUInt();
       else
         value = 0;
       SignalValueChange().emit(value);
@@ -154,7 +154,7 @@ void ToggleWidget::FullOn() { _onCheckButton.set_active(true); }
 
 void ToggleWidget::FullOff() { _onCheckButton.set_active(false); }
 
-void ToggleWidget::ChangeManagement(class Management &management,
+void ToggleWidget::ChangeManagement(theatre::Management &management,
                                     bool moveSliders) {
   if (_sourceValue == nullptr) {
     _management = &management;
@@ -162,9 +162,9 @@ void ToggleWidget::ChangeManagement(class Management &management,
     std::string controllablePath = _sourceValue->Controllable().FullPath();
     size_t input = _sourceValue->Preset().InputIndex();
     _management = &management;
-    Controllable &controllable = static_cast<Controllable &>(
+    theatre::Controllable &controllable = static_cast<theatre::Controllable &>(
         _management->GetObjectFromPath(controllablePath));
-    SourceValue *sv = _management->GetSourceValue(controllable, input);
+    theatre::SourceValue *sv = _management->GetSourceValue(controllable, input);
     if (sv == nullptr)
       Unassign();
     else {
@@ -174,7 +174,7 @@ void ToggleWidget::ChangeManagement(class Management &management,
 }
 
 void ToggleWidget::Limit(double value) {
-  if (value < ControlValue::MaxUInt()) _onCheckButton.set_active(false);
+  if (value < theatre::ControlValue::MaxUInt()) _onCheckButton.set_active(false);
 }
 
 }  // namespace glight::gui

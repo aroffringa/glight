@@ -20,7 +20,10 @@
 
 namespace glight::gui {
 
-ObjectListFrame::ObjectListFrame(Management &management,
+using theatre::Folder;
+using theatre::FolderObject;
+
+ObjectListFrame::ObjectListFrame(theatre::Management &management,
                                  ShowWindow &parentWindow)
     : _objectListFrame("Object programming"),
       _list(management, parentWindow),
@@ -96,7 +99,7 @@ void ObjectListFrame::initPresetsPart() {
 void ObjectListFrame::onNewPresetButtonClicked() {
   Folder &parent = _list.SelectedFolder();
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  PresetCollection &presetCollection = _management->AddPresetCollection();
+  theatre::PresetCollection &presetCollection = _management->AddPresetCollection();
   presetCollection.SetName(parent.GetAvailableName("Preset"));
   parent.Add(presetCollection);
   presetCollection.SetFromCurrentSituation(*_management);
@@ -118,7 +121,7 @@ void ObjectListFrame::onNewChaseButtonClicked() {
 void ObjectListFrame::onNewTimeSequenceButtonClicked() {
   Folder &parent = _list.SelectedFolder();
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  TimeSequence &tSequence = _management->AddTimeSequence();
+  theatre::TimeSequence &tSequence = _management->AddTimeSequence();
   tSequence.SetName(parent.GetAvailableName("Seq"));
   parent.Add(tSequence);
   _management->AddSourceValue(tSequence, 0);
@@ -130,6 +133,7 @@ void ObjectListFrame::onNewTimeSequenceButtonClicked() {
 }
 
 bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
+  using theatre::Effect;
   if (event->button == 1) {
     _popupEffectMenuItems.clear();
     _popupEffectMenu.reset(new Gtk::Menu());
@@ -151,7 +155,8 @@ bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
   return false;
 }
 
-void ObjectListFrame::onNewEffectMenuClicked(enum Effect::Type effectType) {
+void ObjectListFrame::onNewEffectMenuClicked(enum theatre::Effect::Type effectType) {
+  using theatre::Effect;
   std::unique_ptr<Effect> effect(Effect::Make(effectType));
   Folder &parent = _list.SelectedFolder();
   effect->SetName(parent.GetAvailableName(Effect::TypeToName(effectType)));
@@ -203,8 +208,8 @@ void ObjectListFrame::onObjectActivated(FolderObject &object) {
   if (window) {
     window->present();
   } else {
-    PresetCollection *presetCollection =
-        dynamic_cast<PresetCollection *>(&object);
+    theatre::PresetCollection *presetCollection =
+        dynamic_cast<theatre::PresetCollection *>(&object);
     if (presetCollection) {
       std::unique_ptr<PresetCollectionWindow> newWindow(
           new PresetCollectionWindow(*presetCollection, *_management,
@@ -212,14 +217,14 @@ void ObjectListFrame::onObjectActivated(FolderObject &object) {
       newWindow->present();
       _windowList.Add(std::move(newWindow));
     }
-    Chase *chase = dynamic_cast<Chase *>(&object);
+    theatre::Chase *chase = dynamic_cast<theatre::Chase *>(&object);
     if (chase) {
       std::unique_ptr<ChasePropertiesWindow> newWindow(
           new ChasePropertiesWindow(*chase, *_management, _parentWindow));
       newWindow->present();
       _windowList.Add(std::move(newWindow));
     }
-    TimeSequence *timeSequence = dynamic_cast<TimeSequence *>(&object);
+    theatre::TimeSequence *timeSequence = dynamic_cast<theatre::TimeSequence *>(&object);
     if (timeSequence) {
       std::unique_ptr<TimeSequencePropertiesWindow> newWindow(
           new TimeSequencePropertiesWindow(*timeSequence, *_management,
@@ -227,7 +232,7 @@ void ObjectListFrame::onObjectActivated(FolderObject &object) {
       newWindow->present();
       _windowList.Add(std::move(newWindow));
     }
-    Effect *effect = dynamic_cast<Effect *>(&object);
+    theatre::Effect *effect = dynamic_cast<theatre::Effect *>(&object);
     if (effect) {
       std::unique_ptr<EffectPropertiesWindow> newWindow(
           new EffectPropertiesWindow(*effect, *_management, _parentWindow));

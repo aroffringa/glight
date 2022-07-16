@@ -1,5 +1,5 @@
-#ifndef CHASE_PROPERTIES_WINDOW_H
-#define CHASE_PROPERTIES_WINDOW_H
+#ifndef GUI_CHASE_PROPERTIES_WINDOW_H_
+#define GUI_CHASE_PROPERTIES_WINDOW_H_
 
 #include "propertieswindow.h"
 
@@ -33,7 +33,7 @@ class ChasePropertiesWindow : public PropertiesWindow {
   theatre::Chase &GetChase() { return *_chase; }
 
  private:
-  void loadChaseInfo(class Chase &chase);
+  void loadChaseInfo(theatre::Chase &chase);
   void onTriggerTypeChanged();
   void onTriggerSpeedChanged(double newValue);
   void onTransitionSpeedChanged(double newValue);

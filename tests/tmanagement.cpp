@@ -14,6 +14,8 @@
 
 #include <memory>
 
+using namespace glight::theatre;
+
 BOOST_AUTO_TEST_SUITE(management)
 
 BOOST_AUTO_TEST_CASE(Destruct) {
