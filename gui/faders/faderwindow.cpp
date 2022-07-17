@@ -56,10 +56,8 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
 
 FaderWindow::~FaderWindow() {
   _faderSetupChangeConnection.disconnect();
-  if (_state) {
-    _state->isActive = false;
-    _guiState.EmitFaderSetupChangeSignal();
-  }
+  if (_state) _state->isActive = false;
+  _guiState.EmitFaderSetupChangeSignal();
 }
 
 void FaderWindow::LoadNew() {

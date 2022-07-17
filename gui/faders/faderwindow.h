@@ -39,7 +39,6 @@ class FaderWindow : public Gtk::Window {
 
   void LoadNew();
   void LoadState(FaderSetupState *state);
-  void DisconnectState() { _state = nullptr; }
 
   /**
    * Set all sliders to the preset values

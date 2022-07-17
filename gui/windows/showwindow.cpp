@@ -356,14 +356,12 @@ void ShowWindow::onMINewClicked() {
   if (confirmed) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
     _management->Clear();
+    _faderWindows.clear();
     _state.Clear();
     lock.unlock();
 
     EmitUpdate();
 
-    for (std::unique_ptr<FaderWindow> &fw : _faderWindows)
-      fw->DisconnectState();
-    _faderWindows.clear();
     addFaderWindow();
   }
 }
