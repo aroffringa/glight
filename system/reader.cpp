@@ -100,7 +100,18 @@ void ParseMacroParameters(const json::Object &node,
 }
 
 void ParseRotationParameters(const json::Object &node,
-                             RotationParameters &parameters) {}
+                             RotationParameters &parameters) {
+  const json::Array &ranges = ToArr(node["ranges"]);
+  for (json::Node &item : ranges) {
+    const json::Object &obj = ToObj(item);
+    const unsigned input_min = ToNum(obj["input-min"]).AsUInt();
+    const unsigned input_max = ToNum(obj["input-max"]).AsUInt();
+    const int speed_min = ToNum(obj["speed-min"]).AsInt();
+    const int speed_max = ToNum(obj["speed-max"]).AsInt();
+    parameters.GetRanges().emplace_back(input_min, input_max, speed_min,
+                                        speed_max);
+  }
+}
 
 void ParseFixtureTypeFunctions(const json::Array &node,
                                FixtureType &fixture_type) {
@@ -119,8 +130,8 @@ void ParseFixtureTypeFunctions(const json::Array &node,
                              new_function.GetMacroParameters());
         break;
       case FunctionType::Rotation:
-        // ParseRotationParameters(ToObj(obj["parameters"]),
-        // new_function.GetRotationParameters());
+        ParseRotationParameters(ToObj(obj["parameters"]),
+                                new_function.GetRotationParameters());
         break;
       default:
         break;

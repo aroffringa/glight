@@ -119,7 +119,20 @@ void witeMacroParameters(WriteState &state, const MacroParameters &pars) {
 }
 
 void writeRotationParameters(WriteState &state,
-                             const RotationParameters &pars) {}
+                             const RotationParameters &pars) {
+  state.writer.StartObject("parameters");
+  state.writer.StartArray("ranges");
+  for (const RotationParameters::Range &range : pars.GetRanges()) {
+    state.writer.StartObject();
+    state.writer.Number("input-min", range.input_min);
+    state.writer.Number("input-max", range.input_max);
+    state.writer.Number("speed-min", range.speed_min);
+    state.writer.Number("speed-max", range.speed_max);
+    state.writer.EndObject();  // range
+  }
+  state.writer.EndArray();
+  state.writer.EndObject();  // parameters
+}
 
 void writeFixtureTypeFunction(WriteState &state,
                               const FixtureTypeFunction &function) {
