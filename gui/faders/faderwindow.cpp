@@ -56,12 +56,14 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
 
 FaderWindow::~FaderWindow() {
   _faderSetupChangeConnection.disconnect();
-  _state->isActive = false;
-  _guiState.EmitFaderSetupChangeSignal();
+  if (_state) {
+    _state->isActive = false;
+    _guiState.EmitFaderSetupChangeSignal();
+  }
 }
 
 void FaderWindow::LoadNew() {
-  _guiState.FaderSetups().emplace_back(new FaderSetupState());
+  _guiState.FaderSetups().emplace_back(std::make_unique<FaderSetupState>());
   _state = _guiState.FaderSetups().back().get();
   _state->name = "Unnamed fader setup";
   _state->isActive = true;
@@ -74,7 +76,7 @@ void FaderWindow::LoadNew() {
   updateFaderSetupList();
 }
 
-void FaderWindow::LoadState(class FaderSetupState *state) {
+void FaderWindow::LoadState(FaderSetupState *state) {
   _state = state;
   _state->isActive = true;
   RecursionLock::Token token(_recursionLock);

@@ -361,6 +361,8 @@ void ShowWindow::onMINewClicked() {
 
     EmitUpdate();
 
+    for (std::unique_ptr<FaderWindow> &fw : _faderWindows)
+      fw->DisconnectState();
     _faderWindows.clear();
     addFaderWindow();
   }
