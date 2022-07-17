@@ -1,5 +1,7 @@
 #include "fixturetypefunctionsframe.h"
 
+namespace glight::gui {
+
 FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     : Gtk::Frame("Functions"),
       add_function_button_("+"),
@@ -49,12 +51,11 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
   grid_.attach(function_type_label_, 0, 4);
 
   function_type_model_ = Gtk::ListStore::create(function_type_columns_);
-  const std::vector<FunctionType> types = GetFunctionTypes();
-  for (FunctionType t : types) {
+  const std::vector<theatre::FunctionType> types = theatre::GetFunctionTypes();
+  for (theatre::FunctionType t : types) {
     Gtk::TreeModel::iterator iter = function_type_model_->append();
     (*iter)[function_type_columns_.function_type_] = t;
-    (*iter)[function_type_columns_.function_type_str_] =
-        FunctionTypeDescription(t);
+    (*iter)[function_type_columns_.function_type_str_] = ToString(t);
   }
   function_type_combo_.set_model(function_type_model_);
   function_type_combo_.pack_start(function_type_columns_.function_type_str_);
@@ -64,8 +65,8 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     if (selected) {
       Gtk::TreeModel::const_iterator iter = function_type_combo_.get_active();
       if (iter) {
-        (*selected)[functions_columns_.function_type_] =
-            FunctionType((*iter)[function_type_columns_.function_type_]);
+        (*selected)[functions_columns_.function_type_] = theatre::FunctionType(
+            (*iter)[function_type_columns_.function_type_]);
         (*selected)[functions_columns_.function_type_str_] =
             Glib::ustring((*iter)[function_type_columns_.function_type_str_]);
       }
@@ -78,31 +79,30 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
   onSelectionChanged();
 }
 
-std::vector<FixtureTypeFunction> FixtureTypeFunctionsFrame::GetFunctions()
-    const {
-  std::vector<FixtureTypeFunction> functions;
+std::vector<theatre::FixtureTypeFunction>
+FixtureTypeFunctionsFrame::GetFunctions() const {
+  std::vector<theatre::FixtureTypeFunction> functions;
   for (const Gtk::TreeRow &child : functions_model_->children()) {
     const size_t dmx_offset = child[functions_columns_.dmx_offset_];
-    const FunctionType type = child[functions_columns_.function_type_];
+    const theatre::FunctionType type = child[functions_columns_.function_type_];
     const bool is_16_bit = child[functions_columns_.is_16_bit_];
     const size_t shape = 0;
-    functions.emplace_back(dmx_offset, type, is_16_bit, shape);
+    functions.emplace_back(type, dmx_offset, is_16_bit, shape);
   }
   return functions;
 }
 
 void FixtureTypeFunctionsFrame::SetFunctions(
-    const std::vector<FixtureTypeFunction> &functions) {
+    const std::vector<theatre::FixtureTypeFunction> &functions) {
   functions_model_->clear();
   for (size_t i = 0; i != functions.size(); ++i) {
     Gtk::TreeModel::iterator iter = functions_model_->append();
     Gtk::TreeModel::Row row = *iter;
-    const FixtureTypeFunction &f = functions[i];
+    const theatre::FixtureTypeFunction &f = functions[i];
     row[functions_columns_.dmx_offset_] = f.DmxOffset();
     row[functions_columns_.is_16_bit_] = f.Is16Bit();
     row[functions_columns_.function_type_] = f.Type();
-    row[functions_columns_.function_type_str_] =
-        FunctionTypeDescription(f.Type());
+    row[functions_columns_.function_type_str_] = ToString(f.Type());
   }
 }
 
@@ -120,9 +120,9 @@ void FixtureTypeFunctionsFrame::onAdd() {
   Gtk::TreeModel::Row row = *iter;
   row[functions_columns_.dmx_offset_] = dmx_offset;
   row[functions_columns_.is_16_bit_] = false;
-  row[functions_columns_.function_type_] = FunctionType::White;
+  row[functions_columns_.function_type_] = theatre::FunctionType::White;
   row[functions_columns_.function_type_str_] =
-      FunctionTypeDescription(FunctionType::White);
+      ToString(theatre::FunctionType::White);
 }
 
 void FixtureTypeFunctionsFrame::onRemove() {
@@ -146,7 +146,7 @@ void FixtureTypeFunctionsFrame::onSelectionChanged() {
         std::to_string((*selected)[functions_columns_.dmx_offset_]));
     is_16_bit_button_.set_active((*selected)[functions_columns_.is_16_bit_]);
     const int ft_index = static_cast<int>(
-        FunctionType((*selected)[functions_columns_.function_type_]));
+        theatre::FunctionType((*selected)[functions_columns_.function_type_]));
     function_type_combo_.set_active(ft_index);
   } else {
     dmx_offset_entry_.set_text("");
@@ -154,3 +154,5 @@ void FixtureTypeFunctionsFrame::onSelectionChanged() {
     function_type_combo_.set_active(-1);
   }
 }
+
+}  // namespace glight::gui

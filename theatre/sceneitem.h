@@ -1,5 +1,7 @@
-#ifndef SCENEITEM_H
-#define SCENEITEM_H
+#ifndef THEATRE_SCENEITEM_H_
+#define THEATRE_SCENEITEM_H_
+
+namespace glight::theatre {
 
 class SceneItem {
  public:
@@ -21,5 +23,7 @@ class SceneItem {
   double _offsetInMS;
   double _durationInMS;
 };
+
+}  // namespace glight::theatre
 
 #endif  // SCENEITEM_H

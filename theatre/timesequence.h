@@ -1,5 +1,5 @@
-#ifndef TIME_SEQUENCE_H
-#define TIME_SEQUENCE_H
+#ifndef THEATRE_TIME_SEQUENCE_H_
+#define THEATRE_TIME_SEQUENCE_H_
 
 #include "controllable.h"
 #include "controlvalue.h"
@@ -7,6 +7,8 @@
 #include "timing.h"
 #include "transition.h"
 #include "trigger.h"
+
+namespace glight::theatre {
 
 /**
         @author Andre Offringa
@@ -68,14 +70,14 @@ class TimeSequence : public Controllable {
         const Step &activeStep = _steps[_stepNumber % _steps.size()];
         if (!_transitionTriggered) {
           switch (activeStep.trigger.Type()) {
-            case Trigger::DelayTriggered: {
+            case TriggerType::Delay: {
               double timePassed = timing.TimeInMS() - _stepStart.TimeInMS();
               if (timePassed >= activeStep.trigger.DelayInMs()) {
                 _transitionTriggered = true;
                 _stepStart = timing;
               }
             } break;
-            case Trigger::SyncTriggered: {
+            case TriggerType::Sync: {
               size_t syncsPassed =
                   timing.TimestepNumber() - _stepStart.TimestepNumber();
               if (syncsPassed >= activeStep.trigger.DelayInSyncs()) {
@@ -83,7 +85,7 @@ class TimeSequence : public Controllable {
                 _stepStart = timing;
               }
             } break;
-            case Trigger::BeatTriggered: {
+            case TriggerType::Beat: {
               size_t beatsPassed = timing.BeatValue() - _stepStart.BeatValue();
               if (beatsPassed >= activeStep.trigger.DelayInBeats()) {
                 _transitionTriggered = true;
@@ -185,5 +187,7 @@ class TimeSequence : public Controllable {
   bool _sustain;
   size_t _repeatCount;
 };
+
+}  // namespace glight::theatre
 
 #endif

@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+namespace glight::gui {
+
 const double DurationInput::values[NVALUES] = {
     0.0,    40.0,    80.0,    160.0,   300.0,   500.0,    750.0,
     1000.0, 1500.0,  2000.0,  2500.0,  3000.0,  4000.0,   5000.0,
@@ -79,3 +81,5 @@ void DurationInput::setEntry(double newValue) {
   str << (round(newValue * 0.1) * 1e-2);
   _entry.set_text(str.str());
 }
+
+}  // namespace glight::gui

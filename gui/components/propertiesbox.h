@@ -1,5 +1,5 @@
-#ifndef PROPERTIES_BOX_H
-#define PROPERTIES_BOX_H
+#ifndef GUI_PROPERTIES_BOX_H_
+#define GUI_PROPERTIES_BOX_H_
 
 #include "../../theatre/properties/propertyset.h"
 
@@ -14,11 +14,13 @@
 #include <memory>
 #include <vector>
 
+namespace glight::gui {
+
 class PropertiesBox : public Gtk::VBox {
  public:
   PropertiesBox();
 
-  void SetPropertySet(PropertySet *propertySet) {
+  void SetPropertySet(theatre::PropertySet *propertySet) {
     _propertySet = propertySet;
     fillProperties();
   }
@@ -27,11 +29,11 @@ class PropertiesBox : public Gtk::VBox {
 
  private:
   struct PropertyRow {
-    Property *_property;
+    theatre::Property *_property;
     std::vector<std::unique_ptr<Gtk::Widget>> _widgets;
   };
 
-  PropertySet *_propertySet;
+  theatre::PropertySet *_propertySet;
   std::vector<PropertyRow> _rows;
   Gtk::Label _typeLabel;
   Gtk::Grid _grid;
@@ -41,5 +43,7 @@ class PropertiesBox : public Gtk::VBox {
   void onApplyClicked();
   void fillProperties();
 };
+
+}  // namespace glight::gui
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef MANAGEMENT_H
-#define MANAGEMENT_H
+#ifndef THEATRE_MANAGEMENT_H_
+#define THEATRE_MANAGEMENT_H_
 
 #include <atomic>
 #include <mutex>
@@ -9,24 +9,10 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include "forwards.h"
 #include "valuesnapshot.h"
 
-class BeatFinder;
-class Chase;
-class Controllable;
-class DmxDevice;
-class Effect;
-class Fixture;
-class FixtureControl;
-class FixtureType;
-class Folder;
-class FolderObject;
-class PresetCollection;
-class PresetValue;
-class Show;
-class SourceValue;
-class Theatre;
-class TimeSequence;
+namespace glight::theatre {
 
 /**
  * @author Andre Offringa
@@ -49,7 +35,8 @@ class Management {
 
   void StartBeatFinder();
 
-  Theatre &GetTheatre() const { return *_theatre; }
+  Theatre &GetTheatre() { return *_theatre; }
+  const Theatre &GetTheatre() const { return *_theatre; }
 
   const std::vector<std::unique_ptr<Folder>> &Folders() const {
     return _folders;
@@ -74,12 +61,16 @@ class Management {
   Folder &GetFolder(const std::string &path);
   void RemoveFolder(Folder &folder);
 
-  FixtureControl &AddFixtureControl(Fixture &fixture);
-  FixtureControl &AddFixtureControl(Fixture &fixture, Folder &parent);
-  FixtureControl &GetFixtureControl(Fixture &fixture);
+  FixtureControl &AddFixtureControl(const Fixture &fixture);
+  FixtureControl &AddFixtureControl(const Fixture &fixture,
+                                    const Folder &parent);
+  FixtureControl &GetFixtureControl(const Fixture &fixture);
+  const FixtureControl &GetFixtureControl(const Fixture &fixture) const {
+    return const_cast<Management &>(*this).GetFixtureControl(fixture);
+  }
 
-  void RemoveFixture(Fixture &fixture);
-  void RemoveFixtureType(FixtureType &fixture);
+  void RemoveFixture(const Fixture &fixture);
+  void RemoveFixtureType(const FixtureType &fixture);
 
   SourceValue &AddSourceValue(Controllable &controllable, size_t inputIndex);
 
@@ -95,12 +86,21 @@ class Management {
 
   std::mutex &Mutex() { return _mutex; }
 
-  FolderObject &GetObjectFromPath(const std::string &path) const;
+  FolderObject &GetObjectFromPath(const std::string &path);
+  const FolderObject &GetObjectFromPath(const std::string &path) const {
+    return const_cast<Management &>(*this).GetObjectFromPath(path);
+  }
+
   FolderObject *GetObjectFromPathIfExists(const std::string &path) const;
   size_t ControllableIndex(const Controllable *controllable) const;
 
-  SourceValue *GetSourceValue(Controllable &controllable,
-                              size_t inputIndex) const;
+  SourceValue *GetSourceValue(const Controllable &controllable,
+                              size_t input_index);
+  const SourceValue *GetSourceValue(const Controllable &controllable,
+                                    size_t input_index) const {
+    return const_cast<Management &>(*this).GetSourceValue(controllable,
+                                                          input_index);
+  }
   size_t SourceValueIndex(const SourceValue *sourceValue) const;
   ValueSnapshot Snapshot();
 
@@ -188,5 +188,7 @@ class Management {
   std::vector<std::unique_ptr<SourceValue>> _sourceValues;
   std::vector<std::unique_ptr<DmxDevice>> _devices;
 };
+
+}  // namespace glight::theatre
 
 #endif

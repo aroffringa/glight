@@ -4,6 +4,8 @@
 #include "../effect.h"
 #include "../timing.h"
 
+namespace glight::theatre {
+
 class DelayEffect : public Effect {
  public:
   DelayEffect()
@@ -27,7 +29,7 @@ class DelayEffect : public Effect {
           (_bufferWritePos + _buffer.size() - 1) % _buffer.size();
       _buffer[prevWritePos].second.Set(
           ControlValue::Mix(_buffer[prevWritePos].second.UInt(),
-                            values[0].UInt(), ControlValue::Default));
+                            values[0].UInt(), MixStyle::Default));
     } else {
       _previousTimestep = timing.TimestepNumber();
       _buffer[_bufferWritePos].first = timing.TimeInMS();
@@ -60,5 +62,7 @@ class DelayEffect : public Effect {
 
   double _delayInMS;
 };
+
+}  // namespace glight::theatre
 
 #endif

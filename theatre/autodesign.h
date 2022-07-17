@@ -1,7 +1,9 @@
-#ifndef AUTO_DESIGN_H
-#define AUTO_DESIGN_H
+#ifndef THEATRE_AUTO_DESIGN_H_
+#define THEATRE_AUTO_DESIGN_H_
 
 #include <vector>
+
+namespace glight::theatre {
 
 class AutoDesign {
  public:
@@ -80,5 +82,7 @@ class AutoDesign {
                               class PresetCollection &pc, const Color &color,
                               const ColorDeduction &deduction);
 };
+
+}  // namespace glight::theatre
 
 #endif

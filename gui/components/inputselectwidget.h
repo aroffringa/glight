@@ -1,5 +1,5 @@
-#ifndef INPUT_SELECT_WIDGET_H
-#define INPUT_SELECT_WIDGET_H
+#ifndef GUI_INPUT_SELECT_WIDGET_H_
+#define GUI_INPUT_SELECT_WIDGET_H_
 
 #include <gtkmm/box.h>
 #include <gtkmm/combobox.h>
@@ -8,13 +8,17 @@
 #include "objectbrowser.h"
 
 #include "../../theatre/controllable.h"
+#include "../../theatre/forwards.h"
+
+namespace glight::gui {
+
+class EventTransmitter;
 
 class InputSelectWidget : public Gtk::VBox {
  public:
   static const size_t NO_INPUT_SELECTED = std::numeric_limits<size_t>::max();
 
-  InputSelectWidget(class Management &management,
-                    class EventTransmitter &eventHub)
+  InputSelectWidget(theatre::Management &management, EventTransmitter &eventHub)
       : _browser(management, eventHub),
         _inputLabel("Input:"),
         _selectedObject(nullptr),
@@ -43,7 +47,7 @@ class InputSelectWidget : public Gtk::VBox {
     return _signalSelectionChange;
   }
 
-  Controllable *SelectedObject() const { return _selectedObject; }
+  theatre::Controllable *SelectedObject() const { return _selectedObject; }
   size_t SelectedInput() const { return _selectedInput; }
   bool HasInputSelected() const { return _selectedInput != NO_INPUT_SELECTED; }
 
@@ -53,7 +57,7 @@ class InputSelectWidget : public Gtk::VBox {
   Gtk::Label _inputLabel;
   Gtk::ComboBox _inputCombo;
 
-  Controllable *_selectedObject;
+  theatre::Controllable *_selectedObject;
   size_t _selectedInput;
 
   sigc::signal<void()> _signalSelectionChange;
@@ -78,17 +82,16 @@ class InputSelectWidget : public Gtk::VBox {
       for (size_t input = 0; input != _selectedObject->NInputs(); ++input) {
         Gtk::TreeModel::iterator iter = _listModel->append();
         Gtk::TreeModel::Row row = *iter;
-        row[_listColumns._title] =
-            std::to_string(input + 1) + ". " +
-            FunctionTypeDescription(_selectedObject->InputType(input));
+        row[_listColumns._title] = std::to_string(input + 1) + ". " +
+                                   ToString(_selectedObject->InputType(input));
         row[_listColumns._inputIndex] = input;
       }
     }
   }
 
   void onBrowserSelectionChange() {
-    Controllable *controllable =
-        dynamic_cast<Controllable *>(_browser.SelectedObject());
+    theatre::Controllable *controllable =
+        dynamic_cast<theatre::Controllable *>(_browser.SelectedObject());
     if (controllable != _selectedObject) {
       bool selectionChanged = (_selectedInput != NO_INPUT_SELECTED);
       _selectedObject = controllable;
@@ -121,5 +124,7 @@ class InputSelectWidget : public Gtk::VBox {
     }
   }
 };
+
+}  // namespace glight::gui
 
 #endif

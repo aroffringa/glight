@@ -13,6 +13,8 @@
 #include "randomselecteffectps.h"
 #include "thresholdeffectps.h"
 
+namespace glight::theatre {
+
 std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
   std::unique_ptr<PropertySet> ps;
   const AudioLevelEffect *afx = dynamic_cast<const AudioLevelEffect *>(&object);
@@ -85,3 +87,5 @@ void PropertySet::AssignProperty(const Property &to, const Property &from,
       break;
   }
 }
+
+}  // namespace glight::theatre

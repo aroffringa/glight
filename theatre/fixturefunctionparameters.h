@@ -1,11 +1,13 @@
-#ifndef FIXTURE_FUNCTION_PARAMETERS_H_
-#define FIXTURE_FUNCTION_PARAMETERS_H_
+#ifndef THEATRE_FIXTURE_FUNCTION_PARAMETERS_H_
+#define THEATRE_FIXTURE_FUNCTION_PARAMETERS_H_
 
 #include "color.h"
 
 #include <algorithm>
 #include <optional>
 #include <vector>
+
+namespace glight::theatre {
 
 namespace details {
 template <typename Range>
@@ -102,5 +104,7 @@ struct FixtureFunctionParameters {
     RotationParameters rotation;
   } parameters;
 };
+
+}  // namespace glight::theatre
 
 #endif

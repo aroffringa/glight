@@ -1,5 +1,7 @@
-#ifndef VALUEUNIVERSESNAPSHOT_H
-#define VALUEUNIVERSESNAPSHOT_H
+#ifndef THEATRE_VALUEUNIVERSESNAPSHOT_H_
+#define THEATRE_VALUEUNIVERSESNAPSHOT_H_
+
+namespace glight::theatre {
 
 class ValueUniverseSnapshot {
  public:
@@ -12,5 +14,7 @@ class ValueUniverseSnapshot {
  private:
   unsigned char _values[512];
 };
+
+}  // namespace glight::theatre
 
 #endif  // VALUEUNIVERSESNAPSHOT_H

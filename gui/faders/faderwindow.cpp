@@ -14,6 +14,8 @@
 
 #include <glibmm/main.h>
 
+namespace glight::gui {
+
 const char FaderWindow::_keyRowsUpper[3][10] = {
     {'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?'},
     {'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':'},
@@ -24,7 +26,7 @@ const char FaderWindow::_keyRowsLower[3][10] = {
     {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'}};
 
 FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
-                         Management &management, size_t keyRowIndex)
+                         theatre::Management &management, size_t keyRowIndex)
     : _management(&management),
       _keyRowIndex(keyRowIndex),
       _faderSetupLabel("Fader setup: "),
@@ -54,12 +56,12 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
 
 FaderWindow::~FaderWindow() {
   _faderSetupChangeConnection.disconnect();
-  _state->isActive = false;
+  if (_state) _state->isActive = false;
   _guiState.EmitFaderSetupChangeSignal();
 }
 
 void FaderWindow::LoadNew() {
-  _guiState.FaderSetups().emplace_back(new FaderSetupState());
+  _guiState.FaderSetups().emplace_back(std::make_unique<FaderSetupState>());
   _state = _guiState.FaderSetups().back().get();
   _state->name = "Unnamed fader setup";
   _state->isActive = true;
@@ -72,7 +74,7 @@ void FaderWindow::LoadNew() {
   updateFaderSetupList();
 }
 
-void FaderWindow::LoadState(class FaderSetupState *state) {
+void FaderWindow::LoadState(FaderSetupState *state) {
   _state = state;
   _state->isActive = true;
   RecursionLock::Token token(_recursionLock);
@@ -274,7 +276,7 @@ void FaderWindow::onAssignClicked() {
   if (!_controls.empty()) {
     size_t controlIndex = 0;
     for (size_t i = 0; i != n; ++i) {
-      SourceValue *sv = _management->SourceValues()[i].get();
+      theatre::SourceValue *sv = _management->SourceValues()[i].get();
       if (!_guiState.IsAssigned(sv)) {
         _controls[controlIndex]->Assign(sv, true);
         ++controlIndex;
@@ -292,8 +294,9 @@ void FaderWindow::onAssignChasesClicked() {
   if (!_controls.empty()) {
     size_t controlIndex = 0;
     for (size_t i = 0; i != _management->SourceValues().size(); ++i) {
-      SourceValue *sv = _management->SourceValues()[i].get();
-      Chase *c = dynamic_cast<Chase *>(&sv->Controllable());
+      theatre::SourceValue *sv = _management->SourceValues()[i].get();
+      theatre::Chase *c =
+          dynamic_cast<theatre::Chase *>(&sv->GetControllable());
       if (c != nullptr) {
         _controls[controlIndex]->Assign(sv, true);
         ++controlIndex;
@@ -366,7 +369,7 @@ bool FaderWindow::HandleKeyUp(char key) {
   return false;
 }
 
-bool FaderWindow::IsAssigned(SourceValue *sourceValue) {
+bool FaderWindow::IsAssigned(theatre::SourceValue *sourceValue) {
   for (std::unique_ptr<ControlWidget> &c : _controls) {
     if (c->GetSourceValue() == sourceValue) return true;
   }
@@ -538,7 +541,7 @@ void FaderWindow::onChangeUpSpeed() {
     cw->SetFadeUpSpeed(speed);
 }
 
-void FaderWindow::ChangeManagement(class Management &management,
+void FaderWindow::ChangeManagement(theatre::Management &management,
                                    bool moveSliders) {
   _management = &management;
   for (std::unique_ptr<ControlWidget> &cw : _controls) {
@@ -563,3 +566,5 @@ void FaderWindow::ReloadValues() {
     cw->MoveSlider();
   }
 }
+
+}  // namespace glight::gui

@@ -5,6 +5,8 @@
 
 #include "../effects/randomselecteffect.h"
 
+namespace glight::theatre {
+
 class RandomSelectEffectPS final : public PropertySet {
  public:
   RandomSelectEffectPS() {
@@ -55,5 +57,7 @@ class RandomSelectEffectPS final : public PropertySet {
     return 0;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

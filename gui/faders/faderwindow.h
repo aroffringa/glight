@@ -1,5 +1,5 @@
-#ifndef CONTROLWINDOW_H
-#define CONTROLWINDOW_H
+#ifndef GUI_FADER_WINDOW_H_
+#define GUI_FADER_WINDOW_H_
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -16,23 +16,29 @@
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include "../../theatre/forwards.h"
+
 #include "../recursionlock.h"
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::gui {
+
+class ControlWidget;
+class EventTransmitter;
+class FaderSetupState;
+class GUIState;
+
 class FaderWindow : public Gtk::Window {
  public:
   /**
    * Construct a fader window with a new, empty fader setup.
    */
-  FaderWindow(class EventTransmitter &showWindow, class GUIState &guiState,
-              class Management &management, size_t keyRowIndex);
+  FaderWindow(EventTransmitter &showWindow, GUIState &guiState,
+              theatre::Management &management, size_t keyRowIndex);
 
   ~FaderWindow();
 
   void LoadNew();
-  void LoadState(class FaderSetupState *state);
+  void LoadState(FaderSetupState *state);
 
   /**
    * Set all sliders to the preset values
@@ -41,7 +47,7 @@ class FaderWindow : public Gtk::Window {
 
   bool HandleKeyDown(char key);
   bool HandleKeyUp(char key);
-  bool IsAssigned(class SourceValue *presetValue);
+  bool IsAssigned(theatre::SourceValue *presetValue);
   size_t KeyRowIndex() const { return _keyRowIndex; }
 
   /**
@@ -52,7 +58,7 @@ class FaderWindow : public Gtk::Window {
    * dry and real mode. Faders that are assigned to a preset with an Id that
    * does not correspond to a preset in the new instance are unassigned.
    */
-  void ChangeManagement(class Management &management, bool moveSliders);
+  void ChangeManagement(theatre::Management &management, bool moveSliders);
 
   FaderSetupState *State() { return _state; }
 
@@ -83,7 +89,7 @@ class FaderWindow : public Gtk::Window {
   void onSoloToggled();
   void onNameButtonClicked();
   void onNewFaderSetupButtonClicked();
-  void onControlValueChanged(double newValue, class ControlWidget *widget);
+  void onControlValueChanged(double newValue, ControlWidget *widget);
   void onControlAssigned(size_t widgetIndex);
   bool onResize(GdkEventConfigure *event);
   double mapSliderToSpeed(int sliderVal);
@@ -104,7 +110,7 @@ class FaderWindow : public Gtk::Window {
   size_t getFadeInSpeed() const;
   size_t getFadeOutSpeed() const;
 
-  class Management *_management;
+  theatre::Management *_management;
   size_t _keyRowIndex;
 
   Gtk::VBox _vBox;
@@ -127,11 +133,11 @@ class FaderWindow : public Gtk::Window {
       _miAdd5ToggleButtons, _miAddToggleColumn, _miRemoveFader,
       _miRemove5Faders;
 
-  std::vector<std::unique_ptr<class ControlWidget>> _controls;
+  std::vector<std::unique_ptr<ControlWidget>> _controls;
   std::vector<Gtk::VBox> _toggleColumns;
-  class EventTransmitter &_eventHub;
-  class GUIState &_guiState;
-  class FaderSetupState *_state;
+  EventTransmitter &_eventHub;
+  GUIState &_guiState;
+  FaderSetupState *_state;
   RecursionLock _recursionLock;
   sigc::connection _faderSetupChangeConnection, _timeoutConnection;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
@@ -145,9 +151,11 @@ class FaderWindow : public Gtk::Window {
       add(_name);
     }
 
-    Gtk::TreeModelColumn<class FaderSetupState *> _obj;
+    Gtk::TreeModelColumn<FaderSetupState *> _obj;
     Gtk::TreeModelColumn<Glib::ustring> _name;
   } _faderSetupColumns;
 };
+
+}  // namespace glight::gui
 
 #endif

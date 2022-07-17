@@ -9,15 +9,16 @@
 #include "../theatre/dummydevice.h"
 #include "../theatre/oladevice.h"
 
+namespace glight::gui {
+
 Application::Application() {}
 
 void Application::Run(int argc, char *argv[]) {
   Gtk::Main kit(argc, argv);
-  // std::unique_ptr<DmxDevice> device(new FtdiDevice());
-  std::unique_ptr<DmxDevice> device;
+  std::unique_ptr<theatre::DmxDevice> device;
   bool isOpen = false;
   try {
-    device.reset(new OLADevice());
+    device.reset(new theatre::OLADevice());
     device->Open();
     isOpen = device->IsOpen();
   } catch (std::exception &e) {
@@ -25,7 +26,7 @@ void Application::Run(int argc, char *argv[]) {
   }
   if (!isOpen) {
     std::cerr << "DMX device not working, switching to dummy device.\n";
-    device.reset(new DummyDevice());
+    device.reset(new theatre::DummyDevice());
   }
   ShowWindow window(std::move(device));
   if (argc > 1) {
@@ -33,3 +34,5 @@ void Application::Run(int argc, char *argv[]) {
   }
   Gtk::Main::run(window);
 }
+
+}  // namespace glight::gui

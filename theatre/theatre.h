@@ -1,5 +1,5 @@
-#ifndef THEATRE_H
-#define THEATRE_H
+#ifndef THEATRE_THEATRE_H_
+#define THEATRE_THEATRE_H_
 
 #include <memory>
 #include <vector>
@@ -7,6 +7,8 @@
 #include "fixture.h"
 #include "fixturetype.h"
 #include "position.h"
+
+namespace glight::theatre {
 
 class Fixture;
 class FixtureType;
@@ -38,7 +40,7 @@ class Theatre {
   FixtureType &GetFixtureType(const std::string &name) const;
   FixtureFunction &GetFixtureFunction(const std::string &name) const;
 
-  void RemoveFixture(Fixture &fixture);
+  void RemoveFixture(const Fixture &fixture);
   void RemoveFixtureType(const FixtureType &fixtureType);
 
   bool IsUsed(const FixtureType &fixtureType) const;
@@ -58,5 +60,7 @@ class Theatre {
   std::vector<std::unique_ptr<FixtureType>> _fixtureTypes;
   unsigned _highestChannel = 0;
 };
+
+}  // namespace glight::theatre
 
 #endif

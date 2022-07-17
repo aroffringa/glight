@@ -1,5 +1,5 @@
-#ifndef EFFECT_H
-#define EFFECT_H
+#ifndef THEATRE_EFFECT_H_
+#define THEATRE_EFFECT_H_
 
 #include "folderobject.h"
 
@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <stdexcept>
 #include <vector>
+
+namespace glight::theatre {
 
 class Effect : public Controllable {
  public:
@@ -116,5 +118,7 @@ class Effect : public Controllable {
   std::vector<std::pair<Controllable *, size_t>> _connections;
   std::vector<sigc::connection> _onDeleteConnections;
 };
+
+}  // namespace glight::theatre
 
 #endif

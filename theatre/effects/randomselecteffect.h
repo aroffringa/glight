@@ -6,6 +6,8 @@
 
 #include <vector>
 
+namespace glight::theatre {
+
 class RandomSelectEffect : public Effect {
  public:
   RandomSelectEffect()
@@ -59,5 +61,7 @@ class RandomSelectEffect : public Effect {
   double _delay;
   size_t _count;
 };
+
+}  // namespace glight::theatre
 
 #endif

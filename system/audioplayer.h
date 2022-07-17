@@ -1,5 +1,5 @@
-#ifndef AUDIOPLAYER_H
-#define AUDIOPLAYER_H
+#ifndef SYSTEM_AUDIOPLAYER_H_
+#define SYSTEM_AUDIOPLAYER_H_
 
 #include "flacdecoder.h"
 
@@ -10,15 +10,14 @@
 #include <string>
 #include <thread>
 
+namespace glight::system {
+
 class SyncListener {
  public:
   virtual ~SyncListener(){};
   virtual void OnSyncUpdate(double offsetInMS) = 0;
 };
 
-/**
-        @author Andre Offringa
-*/
 class AudioPlayer : private SyncListener {
  public:
   class AlsaError : public std::runtime_error {
@@ -27,7 +26,7 @@ class AudioPlayer : private SyncListener {
         : runtime_error(std::string("Alsa error: ") + message) {}
   };
 
-  AudioPlayer(class FlacDecoder &decoder)
+  AudioPlayer(FlacDecoder &decoder)
       : _alsaPeriodSize(256),
         _alsaBufferSize(2048),
         _alsaThread(),
@@ -65,7 +64,8 @@ class AudioPlayer : private SyncListener {
 
   unsigned char _alsaBuffer[1024 * 64 * 4];
   snd_pcm_t *_handle;
-  unsigned _alsaPeriodSize, _alsaBufferSize;
+  unsigned _alsaPeriodSize;
+  unsigned _alsaBufferSize;
   std::unique_ptr<std::thread> _alsaThread;
   bool _isStopping;
   bool _isOpen;
@@ -86,5 +86,7 @@ class AudioPlayer : private SyncListener {
   }
   void OnSyncUpdate(double offsetInMS) {}
 };
+
+}  // namespace glight::system
 
 #endif

@@ -1,11 +1,13 @@
-#ifndef PRESETVALUE_H
-#define PRESETVALUE_H
+#ifndef THEATRE_PRESETVALUE_H_
+#define THEATRE_PRESETVALUE_H_
 
 #include "controlvalue.h"
 
 #include <sigc++/signal.h>
 
 #include <string>
+
+namespace glight::theatre {
 
 class Controllable;
 
@@ -66,5 +68,7 @@ class PresetValue {
 
   sigc::signal<void()> _signalDelete;
 };
+
+}  // namespace glight::theatre
 
 #endif

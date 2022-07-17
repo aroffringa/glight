@@ -8,6 +8,8 @@
 
 #include <memory>
 
+using namespace glight::theatre;
+
 BOOST_AUTO_TEST_SUITE(fixture_control)
 
 BOOST_AUTO_TEST_CASE(Add) {

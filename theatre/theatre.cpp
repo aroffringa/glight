@@ -6,6 +6,8 @@
 #include <cmath>
 #include <sstream>
 
+namespace glight::theatre {
+
 Theatre::Theatre(const Theatre &source)
     : _highestChannel(source._highestChannel) {
   _fixtureTypes.reserve(source._fixtureTypes.size());
@@ -91,7 +93,7 @@ FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
       std::string("Can not find fixture function with name ") + name);
 }
 
-void Theatre::RemoveFixture(Fixture &fixture) {
+void Theatre::RemoveFixture(const Fixture &fixture) {
   const FixtureType *t = &fixture.Type();
 
   const size_t fIndex = FolderObject::FindIndex(_fixtures, &fixture);
@@ -178,3 +180,5 @@ Position Theatre::Extend() const {
   }
   return extend;
 }
+
+}  // namespace glight::theatre

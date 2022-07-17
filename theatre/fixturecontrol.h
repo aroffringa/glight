@@ -1,8 +1,10 @@
-#ifndef FIXTURE_CONTROL_H
-#define FIXTURE_CONTROL_H
+#ifndef THEATRE_FIXTURE_CONTROL_H_
+#define THEATRE_FIXTURE_CONTROL_H_
 
 #include "controllable.h"
 #include "fixture.h"
+
+namespace glight::theatre {
 
 class FixtureControl : public Controllable {
  public:
@@ -68,7 +70,7 @@ class FixtureControl : public Controllable {
   void MixChannels(unsigned *channelValues, unsigned universe) {
     for (size_t i = 0; i != _fixture->Functions().size(); ++i) {
       const std::unique_ptr<FixtureFunction> &ff = _fixture->Functions()[i];
-      ff->MixChannels(_values[i].UInt(), ControlValue::Default, channelValues,
+      ff->MixChannels(_values[i].UInt(), MixStyle::Default, channelValues,
                       universe);
     }
   }
@@ -77,5 +79,7 @@ class FixtureControl : public Controllable {
   class Fixture *_fixture;
   std::vector<ControlValue> _values;
 };
+
+}  // namespace glight::theatre
 
 #endif

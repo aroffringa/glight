@@ -5,6 +5,8 @@
 #include <glibmm/main.h>
 #include <gtkmm/main.h>
 
+namespace glight::gui {
+
 void ColorSequenceWidget::onGradient() {
   if (!_allEqual.get_active() && _widgets.size() > 2) {
     GradientWindow window(_widgets.size());
@@ -33,3 +35,5 @@ void ColorSequenceWidget::onGradient() {
     }
   }
 }
+
+}  // namespace glight::gui

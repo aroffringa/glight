@@ -7,6 +7,8 @@
 
 #include <vector>
 
+using namespace glight::theatre;
+
 BOOST_AUTO_TEST_SUITE(fixture_type)
 
 BOOST_AUTO_TEST_CASE(ClassList) {

@@ -1,5 +1,5 @@
-#ifndef SCENE_H
-#define SCENE_H
+#ifndef THEATRE_SCENE_H_
+#define THEATRE_SCENE_H_
 
 #include <map>
 
@@ -11,30 +11,37 @@
 #include "keysceneitem.h"
 #include "startable.h"
 
+namespace glight::theatre {
+
+class Management;
+
 /**
-        @author Andre Offringa
-*/
-class Scene : public Startable, private SyncListener {
+ * @author Andre Offringa
+ */
+class Scene : public Startable, private system::SyncListener {
  public:
-  Scene(class Management &management);
+  Scene(Management &management);
 
   ~Scene();
 
   ControlSceneItem *AddControlSceneItem(double offsetInMS,
                                         Controllable &controllable,
                                         size_t input) {
-    ControlSceneItem *item = new ControlSceneItem(controllable, input);
+    std::unique_ptr<ControlSceneItem> item =
+        std::make_unique<ControlSceneItem>(controllable, input);
     item->SetOffsetInMS(offsetInMS);
-    _items.insert(std::pair<double, SceneItem *>(offsetInMS, item));
+    ControlSceneItem *result = item.get();
+    _items.emplace(offsetInMS, std::move(item));
     resetCurrentOffset();
-    return item;
+    return result;
   }
   KeySceneItem *AddKeySceneItem(double offsetInMS) {
-    KeySceneItem *item = new KeySceneItem();
+    std::unique_ptr<KeySceneItem> item = std::make_unique<KeySceneItem>();
     item->SetOffsetInMS(offsetInMS);
-    _items.insert(std::pair<double, SceneItem *>(offsetInMS, item));
+    KeySceneItem *result = item.get();
+    _items.emplace(offsetInMS, std::move(item));
     resetCurrentOffset();
-    return item;
+    return result;
   }
   void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS) {
     _items.erase(find(item));
@@ -77,7 +84,7 @@ class Scene : public Startable, private SyncListener {
       _isPlaying = false;
       initPlayer();
     } else {
-      if (_audioPlayer == 0) initPlayer();
+      if (_audioPlayer == nullptr) initPlayer();
     }
   }
   bool HasAudio() const { return _hasAudio; }
@@ -100,8 +107,8 @@ class Scene : public Startable, private SyncListener {
       try {
         _audioPlayer.reset();
         _decoder.reset();
-        _decoder.reset(new FlacDecoder(_audioFilename));
-        _audioPlayer.reset(new AudioPlayer(*_decoder));
+        _decoder = std::make_unique<system::FlacDecoder>(_audioFilename);
+        _audioPlayer = std::make_unique<system::AudioPlayer>(*_decoder);
         _audioPlayer->SetSyncListener(*this);
         _audioPlayer->Seek(_startOffset);
       } catch (std::exception &e) {
@@ -155,18 +162,20 @@ class Scene : public Startable, private SyncListener {
   }
 
  private:
-  class Management &_management;
+  Management &_management;
   std::mutex &_mutex;
   std::vector<SceneItem *> _startedItems;
   std::multimap<double, std::unique_ptr<SceneItem>> _items;
   std::multimap<double, std::unique_ptr<SceneItem>>::iterator _nextStartedItem;
   double _currentOffset, _startOffset;
-  std::unique_ptr<FlacDecoder> _decoder;
-  std::unique_ptr<AudioPlayer> _audioPlayer;
+  std::unique_ptr<system::FlacDecoder> _decoder;
+  std::unique_ptr<system::AudioPlayer> _audioPlayer;
   bool _hasAudio, _isPlaying;
   std::string _audioFilename;
 
   virtual void OnSyncUpdate(double offsetInMS);
 };
+
+}  // namespace glight::theatre
 
 #endif

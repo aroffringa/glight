@@ -8,16 +8,18 @@
 #include <cairomm/context.h>
 #include <gdkmm/general.h>  // set_source_pixbuf()
 
+namespace glight::gui {
+
 AudioWidget::AudioWidget()
     : _centerPosition(0),
       _renderStartPosition(0),
-      _buffer(0),
+      _buffer(nullptr),
       _width(0),
       _height(0),
       _isUpToDate(false),
       _chunkSize(800),
       _chunkBuffer(_chunkSize),
-      _scene(0) {
+      _scene(nullptr) {
   add_events(Gdk::BUTTON_PRESS_MASK);
 
   signal_button_press_event().connect(
@@ -28,7 +30,7 @@ AudioWidget::AudioWidget()
 
 AudioWidget::~AudioWidget() {}
 
-void AudioWidget::SetAudioData(FlacDecoder &decoder) {
+void AudioWidget::SetAudioData(system::FlacDecoder &decoder) {
   _audioDataMax.clear();
   _audioDataMin.clear();
   _audioDataStdDev.clear();
@@ -143,11 +145,12 @@ void AudioWidget::UpdateKeys() {
   _keys.clear();
 
   if (_scene) {
-    const std::multimap<double, std::unique_ptr<SceneItem>> &items =
+    const std::multimap<double, std::unique_ptr<theatre::SceneItem>> &items =
         _scene->SceneItems();
-    for (const std::pair<const double, std::unique_ptr<SceneItem>> &p : items) {
-      SceneItem *item = p.second.get();
-      KeySceneItem *key = dynamic_cast<KeySceneItem *>(item);
+    for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>> &p :
+         items) {
+      theatre::SceneItem *item = p.second.get();
+      theatre::KeySceneItem *key = dynamic_cast<theatre::KeySceneItem *>(item);
       if (key != nullptr)
         _keys.insert(std::pair<int, KeyType>(
             (int)round(item->OffsetInMS() * 44.100 * 4.0 / _chunkSize),
@@ -161,3 +164,5 @@ void AudioWidget::UpdateKeys() {
   _isUpToDate = false;
   queue_draw();
 }
+
+}  // namespace glight::gui

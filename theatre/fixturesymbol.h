@@ -1,9 +1,11 @@
-#ifndef FIXTURE_SYMBOL_H
-#define FIXTURE_SYMBOL_H
+#ifndef THEATRE_FIXTURE_SYMBOL_H
+#define THEATRE_FIXTURE_SYMBOL_H
 
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+namespace glight::theatre {
 
 class FixtureSymbol {
  public:
@@ -64,5 +66,7 @@ inline bool operator!=(const FixtureSymbol &lhs, FixtureSymbol::Symbol rhs) {
 inline bool operator!=(FixtureSymbol::Symbol lhs, const FixtureSymbol &rhs) {
   return lhs != rhs.Value();
 }
+
+}  // namespace glight::theatre
 
 #endif

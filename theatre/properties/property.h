@@ -1,11 +1,13 @@
-#ifndef PROPERTY_H
-#define PROPERTY_H
+#ifndef THEATRE_PROPERTY_H_
+#define THEATRE_PROPERTY_H_
 
 #include "../../theatre/folderobject.h"
 
 #include "../../theatre/effects/thresholdeffect.h"
 
 #include <string>
+
+namespace glight::theatre {
 
 class Property final {
  public:
@@ -43,5 +45,7 @@ class Property final {
   std::string _name, _description;
   std::vector<std::pair<std::string, std::string>> _options;
 };
+
+}  // namespace glight::theatre
 
 #endif

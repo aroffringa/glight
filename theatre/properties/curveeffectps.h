@@ -7,6 +7,8 @@
 
 #include <string>
 
+namespace glight::theatre {
+
 class CurveEffectPS final : public PropertySet {
  public:
   CurveEffectPS() {
@@ -69,8 +71,10 @@ class CurveEffectPS final : public PropertySet {
         }
         break;
     }
-    return 0;
+    return nullptr;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

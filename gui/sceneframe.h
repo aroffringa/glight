@@ -1,5 +1,5 @@
-#ifndef SCENEFRAME_H
-#define SCENEFRAME_H
+#ifndef GUI_SCENEFRAME_H_
+#define GUI_SCENEFRAME_H_
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -15,21 +15,23 @@
 
 #include "components/audiowidget.h"
 
+#include "../theatre/forwards.h"
 #include "../theatre/keysceneitem.h"
 
 #include "nameframe.h"
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::gui {
+
+class ShowWindow;
+
 class SceneFrame : public Gtk::Frame {
  public:
-  SceneFrame(class Management &management, class ShowWindow &parentWindow);
+  SceneFrame(theatre::Management &management, ShowWindow &parentWindow);
   ~SceneFrame();
 
   void Update();
   bool HandleKeyDown(char key);
-  void SetSelectedScene(class Scene &scene) {
+  void SetSelectedScene(theatre::Scene &scene) {
     _selectedScene = &scene;
     _audioWidget.SetScene(scene);
     set_sensitive(true);
@@ -37,13 +39,13 @@ class SceneFrame : public Gtk::Frame {
   void SetNoSelectedScene() {
     set_sensitive(false);
     _audioWidget.SetNoScene();
-    _selectedScene = 0;
+    _selectedScene = nullptr;
   }
-  void ChangeManagement(class Management &management);
+  void ChangeManagement(theatre::Management &management);
 
  private:
-  class Management *_management;
-  class Show *_show;
+  theatre::Management *_management;
+  theatre::Show *_show;
 
   struct SceneItemsListColumns : public Gtk::TreeModelColumnRecord {
     SceneItemsListColumns() {
@@ -59,7 +61,7 @@ class SceneFrame : public Gtk::Frame {
     Gtk::TreeModelColumn<Glib::ustring> _startValue;
     Gtk::TreeModelColumn<Glib::ustring> _endValue;
     Gtk::TreeModelColumn<Glib::ustring> _description;
-    Gtk::TreeModelColumn<class SceneItem *> _item;
+    Gtk::TreeModelColumn<theatre::SceneItem *> _item;
   } _sceneItemsListColumns;
 
   struct ControllablesListColumns : public Gtk::TreeModelColumnRecord {
@@ -69,7 +71,7 @@ class SceneFrame : public Gtk::Frame {
     }
 
     Gtk::TreeModelColumn<Glib::ustring> _text;
-    Gtk::TreeModelColumn<class Controllable *> _controllable;
+    Gtk::TreeModelColumn<theatre::Controllable *> _controllable;
   } _controllablesListColumns;
 
   AudioWidget _audioWidget;
@@ -105,17 +107,18 @@ class SceneFrame : public Gtk::Frame {
 
   NameFrame _nameFrame;
 
-  class Scene *_selectedScene;
+  theatre::Scene *_selectedScene;
   bool _isUpdating;
 
   void createSceneItemsList();
   void createControllablesList1();
   void createControllablesList2();
   void fillSceneItemList();
-  void setSceneItemListRow(SceneItem *sceneItem, Gtk::TreeModel::Row row);
+  void setSceneItemListRow(theatre::SceneItem *sceneItem,
+                           Gtk::TreeModel::Row row);
   void updateSelectedSceneItems();
   void fillControllablesList();
-  void addKey(enum KeySceneItem::Level level);
+  void addKey(theatre::KeySceneLevel level);
 
   void onChangeAudioButtonPressed();
   void onStartButtonPressed();
@@ -137,7 +140,7 @@ class SceneFrame : public Gtk::Frame {
     return _sceneItemsListView.get_selection()->count_selected_rows();
   }
 
-  SceneItem *selectedItem() {
+  theatre::SceneItem *selectedItem() {
     if (selectedSceneItemCount() == 1) {
       Glib::RefPtr<Gtk::TreeSelection> selection =
           _sceneItemsListView.get_selection();
@@ -149,5 +152,7 @@ class SceneFrame : public Gtk::Frame {
     }
   }
 };
+
+}  // namespace glight::gui
 
 #endif

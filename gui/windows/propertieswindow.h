@@ -3,9 +3,15 @@
 
 #include <gtkmm/window.h>
 
+#include "../../theatre/forwards.h"
+
+namespace glight::gui {
+
 class PropertiesWindow : public Gtk::Window {
  public:
-  virtual class FolderObject &GetObject() = 0;
+  virtual theatre::FolderObject &GetObject() = 0;
 };
+
+}  // namespace glight::gui
 
 #endif

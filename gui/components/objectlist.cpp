@@ -10,7 +10,13 @@
 #include "../../theatre/presetcollection.h"
 #include "../../theatre/timesequence.h"
 
-ObjectList::ObjectList(Management &management, EventTransmitter &eventHub)
+namespace glight::gui {
+
+using theatre::Folder;
+using theatre::FolderObject;
+
+ObjectList::ObjectList(theatre::Management &management,
+                       EventTransmitter &eventHub)
     : _management(&management),
       _eventHub(eventHub),
       _displayType(ObjectListType::AllExceptFixtures),
@@ -98,14 +104,17 @@ void ObjectList::fillListFolder(const Folder &folder,
 
   for (FolderObject *obj : folder.Children()) {
     Folder *childFolder = showFolders ? dynamic_cast<Folder *>(obj) : nullptr;
-    PresetCollection *presetCollection =
-        showPresetCollections ? dynamic_cast<PresetCollection *>(obj) : nullptr;
-    Chase *chase = showChases ? dynamic_cast<Chase *>(obj) : nullptr;
-    TimeSequence *timeSequence =
-        showChases ? dynamic_cast<TimeSequence *>(obj) : nullptr;
-    Effect *effect = showEffects ? dynamic_cast<Effect *>(obj) : nullptr;
-    FixtureControl *fixtureControl =
-        showFixtures ? dynamic_cast<FixtureControl *>(obj) : nullptr;
+    theatre::PresetCollection *presetCollection =
+        showPresetCollections ? dynamic_cast<theatre::PresetCollection *>(obj)
+                              : nullptr;
+    theatre::Chase *chase =
+        showChases ? dynamic_cast<theatre::Chase *>(obj) : nullptr;
+    theatre::TimeSequence *timeSequence =
+        showChases ? dynamic_cast<theatre::TimeSequence *>(obj) : nullptr;
+    theatre::Effect *effect =
+        showEffects ? dynamic_cast<theatre::Effect *>(obj) : nullptr;
+    theatre::FixtureControl *fixtureControl =
+        showFixtures ? dynamic_cast<theatre::FixtureControl *>(obj) : nullptr;
 
     if (childFolder || presetCollection || chase || timeSequence || effect ||
         fixtureControl) {
@@ -256,3 +265,5 @@ void ObjectList::onMoveDownSelected() {
   SelectedObject()->Parent().MoveDown(*SelectedObject());
   _eventHub.EmitUpdate();
 }
+
+}  // namespace glight::gui

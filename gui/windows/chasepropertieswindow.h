@@ -1,7 +1,9 @@
-#ifndef CHASE_PROPERTIES_WINDOW_H
-#define CHASE_PROPERTIES_WINDOW_H
+#ifndef GUI_CHASE_PROPERTIES_WINDOW_H_
+#define GUI_CHASE_PROPERTIES_WINDOW_H_
 
 #include "propertieswindow.h"
+
+#include "../../theatre/forwards.h"
 
 #include "../components/durationinput.h"
 #include "../components/transitiontypebox.h"
@@ -17,30 +19,29 @@
 #include <gtkmm/separator.h>
 #include <gtkmm/window.h>
 
-/**
- * @author Andre Offringa
- */
+namespace glight::gui {
+
+class EventTransmitter;
+
 class ChasePropertiesWindow : public PropertiesWindow {
  public:
-  ChasePropertiesWindow(class Chase &chase, class Management &management,
-                        class EventTransmitter &eventHub);
+  ChasePropertiesWindow(theatre::Chase &chase, theatre::Management &management,
+                        EventTransmitter &eventHub);
   ~ChasePropertiesWindow();
 
-  class FolderObject &GetObject() final override;
-  class Chase &GetChase() {
-    return *_chase;
-  }
+  theatre::FolderObject &GetObject() final override;
+  theatre::Chase &GetChase() { return *_chase; }
 
  private:
-  void loadChaseInfo(class Chase &chase);
+  void loadChaseInfo(theatre::Chase &chase);
   void onTriggerTypeChanged();
   void onTriggerSpeedChanged(double newValue);
   void onTransitionSpeedChanged(double newValue);
-  void onTransitionTypeChanged(enum Transition::Type type);
+  void onTransitionTypeChanged(theatre::TransitionType type);
   void onSyncCountChanged();
   void onBeatSpeedChanged();
 
-  void onChangeManagement(class Management &management) {
+  void onChangeManagement(theatre::Management &management) {
     _management = &management;
   }
   void onUpdateControllables();
@@ -67,9 +68,11 @@ class ChasePropertiesWindow : public PropertiesWindow {
   Gtk::HButtonBox _buttonBox;
   Gtk::Button _toTimeSequenceButton, _closeButton;
 
-  Chase *_chase;
-  Management *_management;
+  theatre::Chase *_chase;
+  theatre::Management *_management;
   EventTransmitter &_eventHub;
 };
+
+}  // namespace glight::gui
 
 #endif

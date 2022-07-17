@@ -1,9 +1,13 @@
-#ifndef CONTROLWIDGET_H
-#define CONTROLWIDGET_H
+#ifndef GUI_CONTROLWIDGET_H_
+#define GUI_CONTROLWIDGET_H_
 
 #include <memory>
 
 #include <gtkmm/bin.h>
+
+#include "../../theatre/forwards.h"
+
+namespace glight::gui {
 
 /**
  * @author Andre Offringa
@@ -40,15 +44,15 @@ class ControlWidget : public Gtk::Bin {
    * the control will change its state to reflact the value of the
    * source's value.
    */
-  virtual void Assign(class SourceValue *item, bool moveFader) = 0;
+  virtual void Assign(theatre::SourceValue *item, bool moveFader) = 0;
 
   /**
    * Resyncs the fader with the preset value.
    */
   virtual void MoveSlider() = 0;
-  virtual class SourceValue *GetSourceValue() const = 0;
+  virtual theatre::SourceValue *GetSourceValue() const = 0;
   virtual void Limit(double value) = 0;
-  virtual void ChangeManagement(class Management &management,
+  virtual void ChangeManagement(theatre::Management &management,
                                 bool moveSliders) = 0;
 
   sigc::signal<void, double> &SignalValueChange() { return _signalValueChange; }
@@ -81,5 +85,7 @@ class ControlWidget : public Gtk::Bin {
   sigc::signal<void, double> _signalValueChange;
   sigc::signal<void> _signalAssigned;
 };
+
+}  // namespace glight::gui
 
 #endif

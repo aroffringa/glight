@@ -1,5 +1,5 @@
-#ifndef CONTROL_H
-#define CONTROL_H
+#ifndef THEATRE_CONTROL_H_
+#define THEATRE_CONTROL_H_
 
 #include <string>
 
@@ -7,6 +7,8 @@
 #include "controlvalue.h"
 #include "fixturefunction.h"
 #include "folderobject.h"
+
+namespace glight::theatre {
 
 /**
  * A Controllable has a number of inputs and optionally some outputs
@@ -65,7 +67,7 @@ class Controllable : public FolderObject {
 
   void MixInput(size_t index, const ControlValue &value) {
     unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(), value.UInt(),
-                                        ControlValue::Default);
+                                        MixStyle::Default);
     InputValue(index) = ControlValue(mixVal);
   }
 
@@ -84,5 +86,7 @@ class Controllable : public FolderObject {
   ControlValue _inputValue;
   char _visitLevel;
 };
+
+}  // namespace glight::theatre
 
 #endif

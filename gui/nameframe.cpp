@@ -9,10 +9,12 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
-NameFrame::NameFrame(Management &management, ShowWindow &showWindow)
+namespace glight::gui {
+
+NameFrame::NameFrame(theatre::Management &management, ShowWindow &showWindow)
     : _management(&management),
       _showWindow(showWindow),
-      _namedObject(0),
+      _namedObject(nullptr),
       _label("Name:"),
       _button(Gtk::Stock::APPLY) {
   pack_start(_label, false, false, 2);
@@ -52,7 +54,8 @@ void NameFrame::onButtonClicked() {
     const std::string newName = _entry.get_text();
 
     if (newName != _namedObject->Name()) {
-      FolderObject *folderObject = dynamic_cast<FolderObject *>(_namedObject);
+      theatre::FolderObject *folderObject =
+          dynamic_cast<theatre::FolderObject *>(_namedObject);
       if (folderObject && !folderObject->IsRoot() &&
           folderObject->Parent().GetChildIfExists(newName)) {
         Gtk::MessageDialog dialog(
@@ -71,3 +74,5 @@ void NameFrame::onButtonClicked() {
     }
   }
 }
+
+}  // namespace glight::gui

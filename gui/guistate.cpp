@@ -4,7 +4,13 @@
 #include "../theatre/management.h"
 #include "../theatre/sourcevalue.h"
 
-FaderState::FaderState(class SourceValue *sourceValue)
+namespace glight::gui {
+
+using theatre::Controllable;
+using theatre::Management;
+using theatre::SourceValue;
+
+FaderState::FaderState(SourceValue *sourceValue)
     : _sourceValue(sourceValue),
       _isToggleButton(false),
       _newToggleButtonColumn(false) {
@@ -51,7 +57,8 @@ void FaderState::onPresetValueDeleted() {
 void FaderSetupState::ChangeManagement(Management &management) {
   for (FaderState &fader : faders) {
     if (fader.GetSourceValue() != nullptr) {
-      Controllable *oldControllable = &fader.GetSourceValue()->Controllable();
+      Controllable *oldControllable =
+          &fader.GetSourceValue()->GetControllable();
       size_t inputIndex = fader.GetSourceValue()->Preset().InputIndex();
       Controllable *newControllable = dynamic_cast<Controllable *>(
           management.GetObjectFromPathIfExists(oldControllable->FullPath()));
@@ -65,3 +72,5 @@ void FaderSetupState::ChangeManagement(Management &management) {
     }
   }
 }
+
+}  // namespace glight::gui

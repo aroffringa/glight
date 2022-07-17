@@ -9,6 +9,8 @@
 
 #include <memory>
 
+using namespace glight::theatre;
+
 BOOST_AUTO_TEST_SUITE(folder)
 
 BOOST_AUTO_TEST_CASE(AddItem) {

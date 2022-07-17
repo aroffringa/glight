@@ -1,10 +1,14 @@
-#ifndef WINDOW_LIST_H
-#define WINDOW_LIST_H
+#ifndef GUI_WINDOW_LIST_H_
+#define GUI_WINDOW_LIST_H_
 
 #include <gtkmm/window.h>
 
 #include <memory>
 #include <vector>
+
+#include "../theatre/forwards.h"
+
+namespace glight::gui {
 
 template <typename T>
 class WindowList {
@@ -16,7 +20,7 @@ class WindowList {
 
   const std::vector<std::unique_ptr<T>> &List() const { return _list; }
 
-  T *GetOpenWindow(class FolderObject &object) const {
+  T *GetOpenWindow(theatre::FolderObject &object) const {
     for (auto &window : _list) {
       if (&window->GetObject() == &object) return window.get();
     }
@@ -35,5 +39,7 @@ class WindowList {
 
   std::vector<std::unique_ptr<T>> _list;
 };
+
+}  // namespace glight::gui
 
 #endif

@@ -5,6 +5,8 @@
 
 #include "../effects/fluorescentstarteffect.h"
 
+namespace glight::theatre {
+
 class FluorescentStartEffectPS final : public PropertySet {
  public:
   FluorescentStartEffectPS() {
@@ -95,5 +97,7 @@ class FluorescentStartEffectPS final : public PropertySet {
     return false;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

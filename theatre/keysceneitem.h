@@ -1,23 +1,53 @@
-#ifndef KEYSCENEITEM_H
-#define KEYSCENEITEM_H
+#ifndef THEATRE_KEYSCENEITEM_H_
+#define THEATRE_KEYSCENEITEM_H_
 
 #include <sstream>
 
 #include "sceneitem.h"
 
+namespace glight::theatre {
+
+enum KeySceneLevel { Key, Beat, Highlight, Measure, Section };
+
+inline std::string ToString(KeySceneLevel level) {
+  switch (level) {
+    default:
+    case KeySceneLevel::Key:
+      return "key";
+    case KeySceneLevel::Beat:
+      return "beat";
+    case KeySceneLevel::Highlight:
+      return "highlight";
+    case KeySceneLevel::Measure:
+      return "measure";
+    case KeySceneLevel::Section:
+      return "section";
+  }
+}
+
+inline KeySceneLevel GetKeySceneLevel(const std::string &str) {
+  if (str == "beat")
+    return KeySceneLevel::Beat;
+  else if (str == "highlight")
+    return KeySceneLevel::Highlight;
+  else if (str == "measure")
+    return KeySceneLevel::Measure;
+  else if (str == "section")
+    return KeySceneLevel::Section;
+  else  // "key"
+    return KeySceneLevel::Key;
+}
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class KeySceneItem : public SceneItem {
  public:
-  enum Level { Key, Beat, Highlight, Measure, Section };
-
   KeySceneItem() : _level(Key) {}
-
   ~KeySceneItem() {}
 
-  enum Level Level() const { return _level; }
-  void SetLevel(enum Level level) { _level = level; }
+  KeySceneLevel Level() const { return _level; }
+  void SetLevel(KeySceneLevel level) { _level = level; }
 
   virtual std::string Description() const {
     switch (_level) {
@@ -38,7 +68,9 @@ class KeySceneItem : public SceneItem {
                    const class Timing &timing) {}
 
  private:
-  enum Level _level;
+  KeySceneLevel _level;
 };
+
+}  // namespace glight::theatre
 
 #endif

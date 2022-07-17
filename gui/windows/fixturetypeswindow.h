@@ -1,9 +1,9 @@
-#ifndef FIXTURE_TYPES_WINDOW_H
-#define FIXTURE_TYPES_WINDOW_H
+#ifndef GUI_FIXTURE_TYPES_WINDOW_H_
+#define GUI_FIXTURE_TYPES_WINDOW_H_
 
 #include "fixturetypefunctionsframe.h"
 
-#include "../../theatre/fixturetype.h"
+#include "../../theatre/forwards.h"
 
 #include "../recursionlock.h"
 
@@ -22,21 +22,22 @@
 
 #include <memory>
 
+namespace glight::gui {
+
 class EventTransmitter;
-class Fixture;
 class FixtureSelection;
-class Management;
 
 /**
  * @author Andre Offringa
  */
 class FixtureTypesWindow : public Gtk::Window {
  public:
-  FixtureTypesWindow(EventTransmitter *eventHub, Management &management);
+  FixtureTypesWindow(EventTransmitter *eventHub,
+                     theatre::Management &management);
   ~FixtureTypesWindow();
 
  private:
-  void onChangeManagement(Management &management) {
+  void onChangeManagement(theatre::Management &management) {
     management_ = &management;
     fillList();
   }
@@ -46,10 +47,10 @@ class FixtureTypesWindow : public Gtk::Window {
   void onRemoveClicked();
   void onSaveClicked();
   void onSelectionChanged();
-  FixtureType *getSelected();
+  theatre::FixtureType *getSelected();
 
   EventTransmitter *event_hub_;
-  Management *management_;
+  theatre::Management *management_;
 
   sigc::connection change_management_connection_;
   sigc::connection update_controllables_connection_;
@@ -68,7 +69,7 @@ class FixtureTypesWindow : public Gtk::Window {
     Gtk::TreeModelColumn<Glib::ustring> name_;
     Gtk::TreeModelColumn<Glib::ustring> functions_;
     Gtk::TreeModelColumn<bool> in_use_;
-    Gtk::TreeModelColumn<FixtureType *> fixture_type_;
+    Gtk::TreeModelColumn<theatre::FixtureType *> fixture_type_;
   } list_columns_;
   Gtk::ScrolledWindow scrolled_window_;
 
@@ -90,5 +91,7 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::Button remove_button_;
   Gtk::Button save_button_;
 };
+
+}  // namespace glight::gui
 
 #endif

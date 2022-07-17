@@ -5,6 +5,8 @@
 
 #include "../effects/constantvalueeffect.h"
 
+namespace glight::theatre {
+
 class ConstantValueEffectPS final : public PropertySet {
  public:
   ConstantValueEffectPS() {
@@ -33,5 +35,7 @@ class ConstantValueEffectPS final : public PropertySet {
     return 0;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

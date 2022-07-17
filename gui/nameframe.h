@@ -1,5 +1,5 @@
-#ifndef NAMEFRAME_H
-#define NAMEFRAME_H
+#ifndef GUI_NAMEFRAME_H_
+#define GUI_NAMEFRAME_H_
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -7,25 +7,28 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 
-/**
-        @author Andre Offringa
-*/
+#include "../theatre/forwards.h"
+
+namespace glight::gui {
+
+class ShowWindow;
+
 class NameFrame : public Gtk::HBox {
  public:
-  NameFrame(class Management &management, class ShowWindow &showWindow);
+  NameFrame(theatre::Management &management, ShowWindow &showWindow);
   ~NameFrame();
 
-  void SetNamedObject(class FolderObject &namedObject) {
+  void SetNamedObject(theatre::FolderObject &namedObject) {
     _namedObject = &namedObject;
     update();
   }
-  FolderObject *GetNamedObject() const { return _namedObject; }
+  theatre::FolderObject *GetNamedObject() const { return _namedObject; }
   void SetNoNamedObject() {
-    _namedObject = 0;
+    _namedObject = nullptr;
     update();
   }
   sigc::signal<void> &SignalNameChange() { return _signalNameChange; }
-  void ChangeManagement(class Management &management) {
+  void ChangeManagement(theatre::Management &management) {
     _management = &management;
   }
 
@@ -33,9 +36,9 @@ class NameFrame : public Gtk::HBox {
   void onButtonClicked();
   void update();
 
-  class Management *_management;
-  class ShowWindow &_showWindow;
-  class FolderObject *_namedObject;
+  theatre::Management *_management;
+  ShowWindow &_showWindow;
+  theatre::FolderObject *_namedObject;
 
   Gtk::Entry _entry;
   Gtk::Label _label;
@@ -43,5 +46,7 @@ class NameFrame : public Gtk::HBox {
   Gtk::Button _button;
   sigc::signal<void> _signalNameChange;
 };
+
+}  // namespace glight::gui
 
 #endif

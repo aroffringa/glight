@@ -2,7 +2,11 @@
 
 #include "../../theatre/management.h"
 
-SourceValue *InputSelectDialog::SelectedInputPreset() const {
+namespace glight::gui {
+
+theatre::SourceValue *InputSelectDialog::SelectedInputPreset() const {
   return _management.GetSourceValue(*_inputSelector.SelectedObject(),
                                     _inputSelector.SelectedInput());
 }
+
+}  // namespace glight::gui

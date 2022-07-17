@@ -15,9 +15,11 @@
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 
+namespace glight::gui {
+
 FixtureListWindow::FixtureListWindow(EventTransmitter *eventHub,
-                                     class Management &management,
-                                     class FixtureSelection *globalSelection)
+                                     theatre::Management &management,
+                                     FixtureSelection *globalSelection)
     : _eventHub(eventHub),
       _management(&management),
       _globalSelection(globalSelection),
@@ -91,9 +93,9 @@ void FixtureListWindow::fillFixturesList() {
   _fixturesListModel->clear();
 
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  const std::vector<std::unique_ptr<Fixture>> &fixtures =
+  const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
       _management->GetTheatre().Fixtures();
-  for (const std::unique_ptr<Fixture> &fixture : fixtures) {
+  for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = _fixturesListModel->append();
     Gtk::TreeModel::Row row = *iter;
     row[_fixturesListColumns._title] = fixture->Name();
@@ -104,7 +106,8 @@ void FixtureListWindow::fillFixturesList() {
   }
 }
 
-std::string FixtureListWindow::getChannelString(const class Fixture &fixture) {
+std::string FixtureListWindow::getChannelString(
+    const theatre::Fixture &fixture) {
   std::vector<unsigned> channels = fixture.GetChannels();
 
   std::vector<unsigned>::const_iterator i = channels.begin();
@@ -129,53 +132,22 @@ void FixtureListWindow::onRemoveButtonClicked() {
       _fixturesListView.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
   if (selected) {
-    Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
+    theatre::Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
     std::lock_guard<std::mutex> lock(_management->Mutex());
     _management->RemoveFixture(*fixture);
   }
   _eventHub->EmitUpdate();
 }
 
-/*void FixtureListWindow::onMenuItemClicked(StockFixture cl) {
-  std::unique_lock<std::mutex> lock(_management->Mutex());
-  const Position position = _management->GetTheatre().GetFreePosition();
-  FixtureType *type = dynamic_cast<FixtureType *>(
-      _management->RootFolder().GetChildIfExists(FixtureType::StockName(cl)));
-  if (!type) {
-    type = &_management->GetTheatre().AddFixtureType(
-        cl);  // TODO we shouldn't use a type by its name, types should be
-              // editable etc
-    _management->RootFolder().Add(*type);
-  }
-  Fixture &fixture = _management->GetTheatre().AddFixture(*type);
-  fixture.GetPosition() = position;
-
-  const std::vector<std::unique_ptr<FixtureFunction>> &functions =
-      fixture.Functions();
-
-  int number = 1;
-  FixtureControl &control = _management->AddFixtureControl(
-      fixture, _management->RootFolder() // TODO
-      );
-  for (size_t i = 0; i != functions.size(); ++i) {
-    // std::stringstream funcName;
-    // funcName << fixture.Name() << number;
-    _management->AddSourceValue(control, i);
-    ++number;
-  }
-  lock.unlock();
-
-  _eventHub->EmitUpdate();
-}*/
-
 void FixtureListWindow::onIncChannelButtonClicked() {
   Glib::RefPtr<Gtk::TreeSelection> selection =
       _fixturesListView.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
   if (selected) {
-    Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
+    theatre::Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
     fixture->IncChannel();
-    if (!fixture->IsVisible()) fixture->SetSymbol(FixtureSymbol::Normal);
+    if (!fixture->IsVisible())
+      fixture->SetSymbol(theatre::FixtureSymbol::Normal);
     updateFixture(fixture);
   }
 }
@@ -185,9 +157,10 @@ void FixtureListWindow::onDecChannelButtonClicked() {
       _fixturesListView.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
   if (selected) {
-    Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
+    theatre::Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
     fixture->DecChannel();
-    if (!fixture->IsVisible()) fixture->SetSymbol(FixtureSymbol::Normal);
+    if (!fixture->IsVisible())
+      fixture->SetSymbol(theatre::FixtureSymbol::Normal);
     updateFixture(fixture);
   }
 }
@@ -197,7 +170,7 @@ void FixtureListWindow::onSetChannelButtonClicked() {
       _fixturesListView.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
   if (selected) {
-    Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
+    theatre::Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
     Gtk::MessageDialog dialog(*this, "Set DMX channel", false,
                               Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
     Gtk::Entry entry;
@@ -212,7 +185,8 @@ void FixtureListWindow::onSetChannelButtonClicked() {
       std::string dmxChannel = entry.get_text();
       unsigned value = std::atoi(dmxChannel.c_str());
       if (value > 0 && value <= 512) {
-        if (!fixture->IsVisible()) fixture->SetSymbol(FixtureSymbol::Normal);
+        if (!fixture->IsVisible())
+          fixture->SetSymbol(theatre::FixtureSymbol::Normal);
         fixture->SetChannel(value - 1);
         updateFixture(fixture);
       }
@@ -220,7 +194,7 @@ void FixtureListWindow::onSetChannelButtonClicked() {
   }
 }
 
-void FixtureListWindow::updateFixture(const Fixture *fixture) {
+void FixtureListWindow::updateFixture(const theatre::Fixture *fixture) {
   Gtk::TreeModel::iterator iter = _fixturesListModel->children().begin();
   while (iter) {
     Gtk::TreeModel::Row row = *iter;
@@ -244,10 +218,10 @@ void FixtureListWindow::onSelectionChanged() {
         _fixturesListView.get_selection();
     Gtk::TreeModel::iterator selected = selection->get_selected();
     if (selected) {
-      Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
-      _globalSelection->SetSelection(std::vector<Fixture *>{fixture});
+      theatre::Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
+      _globalSelection->SetSelection(std::vector<theatre::Fixture *>{fixture});
     } else {
-      _globalSelection->SetSelection(std::vector<Fixture *>());
+      _globalSelection->SetSelection(std::vector<theatre::Fixture *>());
     }
   }
 }
@@ -267,3 +241,5 @@ void FixtureListWindow::onGlobalSelectionChange() {
     }
   }
 }
+
+}  // namespace glight::gui

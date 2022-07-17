@@ -1,17 +1,22 @@
-#ifndef INPUT_SELECT_DIALOG_H
-#define INPUT_SELECT_DIALOG_H
+#ifndef GUI_INPUT_SELECT_DIALOG_H_
+#define GUI_INPUT_SELECT_DIALOG_H_
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/dialog.h>
 
+#include "../../theatre/forwards.h"
+
 #include "../components/inputselectwidget.h"
+
+namespace glight::gui {
+
+class EventTransmitter;
 
 class InputSelectDialog : public Gtk::Dialog {
  public:
-  InputSelectDialog(class Management &management,
-                    class EventTransmitter &eventHub)
+  InputSelectDialog(theatre::Management &management, EventTransmitter &eventHub)
       : Dialog("Select input", true),
         _management(management),
         _inputSelector(management, eventHub) {
@@ -28,20 +33,22 @@ class InputSelectDialog : public Gtk::Dialog {
     show_all_children();
   }
 
-  std::pair<Controllable *, size_t> SelectedInput() const {
+  std::pair<theatre::Controllable *, size_t> SelectedInput() const {
     return std::make_pair(_inputSelector.SelectedObject(),
                           _inputSelector.SelectedInput());
   }
 
-  class SourceValue *SelectedInputPreset() const;
+  theatre::SourceValue *SelectedInputPreset() const;
 
  private:
   void onSelectionChanged() {
     _selectButton->set_sensitive(_inputSelector.HasInputSelected());
   }
-  Management &_management;
+  theatre::Management &_management;
   InputSelectWidget _inputSelector;
   Gtk::Button *_selectButton;
 };
+
+}  // namespace glight::gui
 
 #endif

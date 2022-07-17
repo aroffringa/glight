@@ -1,8 +1,10 @@
-#ifndef SEQUENCE_H
-#define SEQUENCE_H
+#ifndef THEATRE_SEQUENCE_H_
+#define THEATRE_SEQUENCE_H_
 
 #include <utility>
 #include <vector>
+
+namespace glight::theatre {
 
 /**
         @author Andre Offringa
@@ -32,5 +34,7 @@ class Sequence {
  private:
   std::vector<std::pair<class Controllable *, size_t>> _list;
 };
+
+}  // namespace glight::theatre
 
 #endif

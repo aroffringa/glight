@@ -11,11 +11,13 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/treeview.h>
 
+namespace glight::gui {
+
 class FixtureTypeFunctionsFrame : public Gtk::Frame {
  public:
   FixtureTypeFunctionsFrame();
-  std::vector<FixtureTypeFunction> GetFunctions() const;
-  void SetFunctions(const std::vector<FixtureTypeFunction> &functions);
+  std::vector<theatre::FixtureTypeFunction> GetFunctions() const;
+  void SetFunctions(const std::vector<theatre::FixtureTypeFunction> &functions);
 
  private:
   void onAdd();
@@ -34,7 +36,7 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
 
     Gtk::TreeModelColumn<size_t> dmx_offset_;
     Gtk::TreeModelColumn<bool> is_16_bit_;
-    Gtk::TreeModelColumn<FunctionType> function_type_;
+    Gtk::TreeModelColumn<theatre::FunctionType> function_type_;
     Gtk::TreeModelColumn<Glib::ustring> function_type_str_;
   } functions_columns_;
 
@@ -55,9 +57,11 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
       add(function_type_str_);
       add(function_type_);
     }
-    Gtk::TreeModelColumn<FunctionType> function_type_;
+    Gtk::TreeModelColumn<theatre::FunctionType> function_type_;
     Gtk::TreeModelColumn<Glib::ustring> function_type_str_;
   } function_type_columns_;
 };
+
+}  // namespace glight::gui
 
 #endif

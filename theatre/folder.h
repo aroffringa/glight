@@ -1,11 +1,13 @@
-#ifndef FOLDER_H
-#define FOLDER_H
+#ifndef THEATRE_FOLDER_H_
+#define THEATRE_FOLDER_H_
 
 #include <algorithm>
 #include <string>
 #include <vector>
 
 #include "folderobject.h"
+
+namespace glight::theatre {
 
 class Folder : public FolderObject {
  public:
@@ -15,7 +17,7 @@ class Folder : public FolderObject {
 
   Folder *CopyHierarchy(
       std::vector<std::unique_ptr<Folder>> &newFolders) const {
-    newFolders.emplace_back(new Folder(_name));
+    newFolders.emplace_back(std::make_unique<Folder>(_name));
     Folder *copy = newFolders.back().get();
     for (const FolderObject *object : _objects) {
       const Folder *child = dynamic_cast<const Folder *>(object);
@@ -100,7 +102,7 @@ class Folder : public FolderObject {
   }
 
   /**
-   * This also sets the parent of the object to this.
+   * This also sets the parent of the specified object to this.
    */
   void Add(FolderObject &object) {
     if (GetChildIfExists(object.Name()))
@@ -240,5 +242,7 @@ class Folder : public FolderObject {
 
   std::vector<FolderObject *> _objects;
 };
+
+}  // namespace glight::theatre
 
 #endif

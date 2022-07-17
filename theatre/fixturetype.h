@@ -1,5 +1,5 @@
-#ifndef FIXTURE_TYPE_H_
-#define FIXTURE_TYPE_H_
+#ifndef THEATRE_FIXTURE_TYPE_H_
+#define THEATRE_FIXTURE_TYPE_H_
 
 #include <map>
 #include <string>
@@ -9,6 +9,8 @@
 #include "folderobject.h"
 #include "fixturetypefunction.h"
 #include "valuesnapshot.h"
+
+namespace glight::theatre {
 
 class Fixture;
 
@@ -149,7 +151,7 @@ class FixtureType : public FolderObject {
     const std::vector<FixtureClass> list = GetClassList();
     for (const FixtureClass &cl : list)
       if (ClassName(cl) == name) return cl;
-    throw std::runtime_error("Class not found: " + name);
+    throw std::runtime_error("Fixture class not found: " + name);
   }
 
   Color GetColor(const Fixture &fixture, const ValueSnapshot &snapshot,
@@ -166,10 +168,6 @@ class FixtureType : public FolderObject {
   FixtureClass GetFixtureClass() const { return class_; }
 
   void SetFixtureClass(FixtureClass new_class) { class_ = new_class; }
-
-  bool Is16Bit(size_t functionIndex) const {
-    return functions_[functionIndex].Is16Bit();
-  }
 
   size_t ShapeCount() const {
     switch (class_) {
@@ -205,5 +203,7 @@ class FixtureType : public FolderObject {
   std::vector<FixtureTypeFunction> functions_;
   unsigned scaling_value_;
 };
+
+}  // namespace glight::theatre
 
 #endif

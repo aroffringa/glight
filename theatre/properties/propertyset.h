@@ -1,5 +1,5 @@
-#ifndef PROPERTY_SET_H
-#define PROPERTY_SET_H
+#ifndef THEATRE_PROPERTY_SET_H_
+#define THEATRE_PROPERTY_SET_H_
 
 #include "property.h"
 
@@ -9,6 +9,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace glight::theatre {
 
 class PropertySet {
  public:
@@ -156,5 +158,7 @@ class PropertySet {
   FolderObject *_object;
   std::vector<Property> _properties;
 };
+
+}  // namespace glight::theatre
 
 #endif

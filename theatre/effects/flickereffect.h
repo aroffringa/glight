@@ -5,6 +5,8 @@
 
 #include <vector>
 
+namespace glight::theatre {
+
 class FlickerEffect : public Effect {
  public:
   FlickerEffect()
@@ -66,5 +68,7 @@ class FlickerEffect : public Effect {
   unsigned _speed;
   bool _independentOutputs;
 };
+
+}  // namespace glight::theatre
 
 #endif

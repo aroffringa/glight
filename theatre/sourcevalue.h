@@ -1,13 +1,15 @@
-#ifndef SOURCE_VALUE_H
-#define SOURCE_VALUE_H
+#ifndef THEATRE_SOURCE_VALUE_H_
+#define THEATRE_SOURCE_VALUE_H_
 
 #include "presetvalue.h"
+
+namespace glight::theatre {
 
 class Controllable;
 
 class SourceValue {
  public:
-  SourceValue(class Controllable &controllable, size_t inputIndex)
+  SourceValue(Controllable &controllable, size_t inputIndex)
       : _value(controllable, inputIndex),
         _fadeSpeed(0.0),
         _targetValue(_value.Value()) {}
@@ -16,18 +18,17 @@ class SourceValue {
    * Copy constructor that copies the source but associates it with the given
    * controllable.
    */
-  SourceValue(const SourceValue &source, class Controllable &controllable)
+  SourceValue(const SourceValue &source, Controllable &controllable)
       : _value(source._value, controllable),
         _fadeSpeed(0.0),
         _targetValue(source._targetValue) {}
 
   PresetValue &Preset() { return _value; }
+  const PresetValue &Preset() const { return _value; }
 
   bool IsIgnorable() const { return _value.IsIgnorable(); }
 
-  class Controllable &Controllable() const {
-    return _value.Controllable();
-  }
+  Controllable &GetControllable() const { return _value.Controllable(); }
 
   void ApplyFade(double timePassed) {
     unsigned fadingValue = _value.Value().UInt();
@@ -68,5 +69,7 @@ class SourceValue {
   double _fadeSpeed;
   unsigned _targetValue;
 };
+
+}  // namespace glight::theatre
 
 #endif

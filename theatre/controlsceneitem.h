@@ -1,10 +1,12 @@
-#ifndef CONTROLSCENEITEM_H
-#define CONTROLSCENEITEM_H
+#ifndef THEATRE_CONTROLSCENEITEM_H_
+#define THEATRE_CONTROLSCENEITEM_H_
 
 #include "controllable.h"
 #include "controlvalue.h"
 #include "sceneitem.h"
 #include "timing.h"
+
+namespace glight::theatre {
 
 /**
         @author Andre Offringa
@@ -40,5 +42,7 @@ class ControlSceneItem : public SceneItem {
   size_t _input;
   ControlValue _startValue, _endValue;
 };
+
+}  // namespace glight::theatre
 
 #endif

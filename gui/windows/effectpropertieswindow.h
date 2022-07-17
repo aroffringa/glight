@@ -1,7 +1,9 @@
-#ifndef EFFECT_PROPERTIES_WINDOW_H
-#define EFFECT_PROPERTIES_WINDOW_H
+#ifndef GUI_EFFECT_PROPERTIES_WINDOW_H_
+#define GUI_EFFECT_PROPERTIES_WINDOW_H_
 
 #include "propertieswindow.h"
+
+#include "../../theatre/forwards.h"
 
 #include "../components/propertiesbox.h"
 
@@ -11,15 +13,17 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::gui {
+
+class ShowWindow;
+
 class EffectPropertiesWindow : public PropertiesWindow {
  public:
-  EffectPropertiesWindow(class Effect &effect, class Management &management,
-                         class ShowWindow &parentWindow);
+  EffectPropertiesWindow(theatre::Effect &effect,
+                         theatre::Management &management,
+                         ShowWindow &parentWindow);
 
-  FolderObject &GetObject() final override;
+  theatre::FolderObject &GetObject() final override;
 
  private:
   void fillProperties();
@@ -28,8 +32,8 @@ class EffectPropertiesWindow : public PropertiesWindow {
   void onAddConnectionClicked();
   void onRemoveConnectionClicked();
   void onSelectedConnectionChanged();
-  void onInputSelected(class SourceValue *preset);
-  void onChangeManagement(class Management &management) {
+  void onInputSelected(theatre::SourceValue *preset);
+  void onChangeManagement(theatre::Management &management) {
     _management = &management;
   }
   void onUpdateControllables();
@@ -52,16 +56,18 @@ class EffectPropertiesWindow : public PropertiesWindow {
   Gtk::VBox _topBox;
   Gtk::HBox _mainHBox, _connectionsBox;
   Gtk::Frame _connectionsFrame, _propertiesFrame;
-  std::unique_ptr<class PropertySet> _propertySet;
+  std::unique_ptr<theatre::PropertySet> _propertySet;
   PropertiesBox _propertiesBox;
 
   Gtk::ScrolledWindow _connectionsScrolledWindow;
   Gtk::VButtonBox _connectionsButtonBox;
   Gtk::Button _addConnectionButton, _removeConnectionButton;
 
-  Effect *_effect;
-  Management *_management;
+  theatre::Effect *_effect;
+  theatre::Management *_management;
   ShowWindow &_parentWindow;
 };
+
+}  // namespace glight::gui
 
 #endif

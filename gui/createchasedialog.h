@@ -1,5 +1,5 @@
-#ifndef CREATE_CHASE_DIALOG_H
-#define CREATE_CHASE_DIALOG_H
+#ifndef GUI_CREATE_CHASE_DIALOG_H_
+#define GUI_CREATE_CHASE_DIALOG_H_
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -11,22 +11,22 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
+#include "../theatre/forwards.h"
+
 #include "nameframe.h"
 #include "recursionlock.h"
 
 #include "components/objectbrowser.h"
 
-/**
-        @author Andre Offringa
-*/
+namespace glight::gui {
+
+class ShowWindow;
+
 class CreateChaseDialog : public Gtk::Dialog {
  public:
-  CreateChaseDialog(class Management &management,
-                    class ShowWindow &parentWindow);
+  CreateChaseDialog(theatre::Management &management, ShowWindow &parentWindow);
 
-  class Chase &CreatedChase() {
-    return *_newChase;
-  }
+  theatre::Chase &CreatedChase() { return *_newChase; }
 
  private:
   void initListPart();
@@ -37,7 +37,7 @@ class CreateChaseDialog : public Gtk::Dialog {
   void onCreateChaseButtonClicked();
   void onSelectedObjectChanged();
 
-  void changeManagement(class Management &management) {
+  void changeManagement(theatre::Management &management) {
     _management = &management;
   }
 
@@ -55,7 +55,7 @@ class CreateChaseDialog : public Gtk::Dialog {
     }
 
     Gtk::TreeModelColumn<Glib::ustring> _title;
-    Gtk::TreeModelColumn<class Controllable *> _controllable;
+    Gtk::TreeModelColumn<theatre::Controllable *> _controllable;
   } _newChaseListColumns;
 
   Gtk::VBox _listVBox;
@@ -70,10 +70,12 @@ class CreateChaseDialog : public Gtk::Dialog {
 
   Gtk::Button *_makeChaseButton;
 
-  Management *_management;
-  class ShowWindow &_parentWindow;
+  theatre::Management *_management;
+  ShowWindow &_parentWindow;
   RecursionLock _delayUpdates;
-  class Chase *_newChase;
+  theatre::Chase *_newChase;
 };
+
+}  // namespace glight::gui
 
 #endif

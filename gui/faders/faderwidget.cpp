@@ -9,7 +9,11 @@
 #include "../../theatre/presetvalue.h"
 #include "../../theatre/sourcevalue.h"
 
-FaderWidget::FaderWidget(class Management &management,
+namespace glight::gui {
+
+using theatre::ControlValue;
+
+FaderWidget::FaderWidget(theatre::Management &management,
                          EventTransmitter &eventHub, char key)
     : _scale(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
              (ControlValue::MaxUInt() + 1) / 100),
@@ -103,7 +107,7 @@ bool FaderWidget::onNameLabelClicked(GdkEventButton *event) {
   return true;
 }
 
-void FaderWidget::Assign(SourceValue *item, bool moveFader) {
+void FaderWidget::Assign(theatre::SourceValue *item, bool moveFader) {
   if (item != _sourceValue) {
     _sourceValue = item;
     if (_sourceValue != nullptr) {
@@ -154,17 +158,17 @@ void FaderWidget::FullOn() { _scale.set_value(ControlValue::MaxUInt()); }
 
 void FaderWidget::FullOff() { _scale.set_value(0); }
 
-void FaderWidget::ChangeManagement(class Management &management,
+void FaderWidget::ChangeManagement(theatre::Management &management,
                                    bool moveSliders) {
   if (_sourceValue == nullptr) {
     _management = &management;
   } else {
-    std::string controllablePath = _sourceValue->Controllable().FullPath();
+    std::string controllablePath = _sourceValue->GetControllable().FullPath();
     size_t input = _sourceValue->Preset().InputIndex();
     _management = &management;
-    Controllable *controllable = dynamic_cast<Controllable *>(
+    theatre::Controllable *controllable = dynamic_cast<theatre::Controllable *>(
         _management->GetObjectFromPathIfExists(controllablePath));
-    SourceValue *sv;
+    theatre::SourceValue *sv;
     if (controllable)
       sv = _management->GetSourceValue(*controllable, input);
     else
@@ -176,3 +180,5 @@ void FaderWidget::ChangeManagement(class Management &management,
     }
   }
 }
+
+}  // namespace glight::gui

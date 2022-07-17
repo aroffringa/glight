@@ -1,6 +1,8 @@
 #include "fixture.h"
 #include "theatre.h"
 
+namespace glight::theatre {
+
 Fixture::Fixture(Theatre &theatre, const FixtureType &type,
                  const std::string &name)
     : NamedObject(name), _theatre(theatre), _type(type) {
@@ -52,3 +54,5 @@ void Fixture::SetChannel(unsigned dmxChannel) {
 
   _theatre.NotifyDmxChange();
 }
+
+}  // namespace glight::theatre

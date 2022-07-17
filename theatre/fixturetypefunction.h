@@ -6,12 +6,14 @@
 
 #include <utility>
 
+namespace glight::theatre {
+
 class FixtureTypeFunction {
  public:
-  FixtureTypeFunction(size_t dmx_offset, FunctionType type, bool is_16_bit,
+  FixtureTypeFunction(FunctionType type, size_t dmx_offset, bool is_16_bit,
                       unsigned shape)
-      : dmx_offset_(dmx_offset),
-        type_(type),
+      : type_(type),
+        dmx_offset_(dmx_offset),
         is_16_bit_(is_16_bit),
         shape_(shape) {
     ConstructParameters();
@@ -20,8 +22,8 @@ class FixtureTypeFunction {
   ~FixtureTypeFunction() { DestructParameters(); }
 
   FixtureTypeFunction(const FixtureTypeFunction& source)
-      : dmx_offset_(source.dmx_offset_),
-        type_(source.type_),
+      : type_(source.type_),
+        dmx_offset_(source.dmx_offset_),
         is_16_bit_(source.is_16_bit_),
         shape_(source.shape_) {
     CopyParameters(source);
@@ -29,8 +31,8 @@ class FixtureTypeFunction {
 
   FixtureTypeFunction& operator=(const FixtureTypeFunction& source) {
     DestructParameters();
-    dmx_offset_ = source.dmx_offset_;
     type_ = source.type_;
+    dmx_offset_ = source.dmx_offset_;
     is_16_bit_ = source.is_16_bit_;
     shape_ = source.shape_;
     CopyParameters(source);
@@ -99,11 +101,13 @@ class FixtureTypeFunction {
     }
   }
 
-  size_t dmx_offset_;
   FunctionType type_;
+  size_t dmx_offset_;
   bool is_16_bit_;
   unsigned shape_;
   FixtureFunctionParameters parameters_;
 };
+
+}  // namespace glight::theatre
 
 #endif

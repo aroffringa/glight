@@ -5,6 +5,8 @@
 
 #include "../effects/flickereffect.h"
 
+namespace glight::theatre {
+
 class FlickerEffectPS final : public PropertySet {
  public:
   FlickerEffectPS() {
@@ -54,5 +56,7 @@ class FlickerEffectPS final : public PropertySet {
     return 0;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

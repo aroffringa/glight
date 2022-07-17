@@ -1,25 +1,27 @@
-#ifndef SHOW_H
-#define SHOW_H
+#ifndef THEATRE_SHOW_H_
+#define THEATRE_SHOW_H_
 
 #include <memory>
 #include <vector>
 
 #include "scene.h"
 
+namespace glight::theatre {
+
+class Management;
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class Show {
  public:
-  Show(class Management &management) : _management(management) {}
+  Show(Management &management) : _management(management) {}
   ~Show() { Clear(); }
 
   void Clear();
 
-  Scene *AddScene() {
-    _scenes.emplace_back(new Scene(_management));
-    return _scenes.back().get();
-  }
+  Scene *AddScene(bool in_folder);
+
   void StartScene(double _timeInMS, Scene *scene) {
     if (!isRunning(scene)) _runningScenes.push_back(scene);
     scene->Start(_timeInMS);
@@ -52,9 +54,11 @@ class Show {
     }
   }
 
-  class Management &_management;
+  Management &_management;
   std::vector<std::unique_ptr<Scene>> _scenes;
   std::vector<Scene *> _runningScenes;
 };
+
+}  // namespace glight::theatre
 
 #endif

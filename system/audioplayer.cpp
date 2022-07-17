@@ -4,6 +4,8 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+namespace glight::system {
+
 void AudioPlayer::open() {
   if (_isOpen) throw AlsaError("Alsa was opened twice");
 
@@ -14,7 +16,7 @@ void AudioPlayer::open() {
   if (snd_device_name_hint(-1, "pcm", &hints) < 0)
     throw AlsaError("snd_device_name_hint() returned error");
   size_t hi = 0;
-  while (hints[hi] != 0) {
+  while (hints[hi] != nullptr) {
     char *deviceName = snd_device_name_get_hint(hints[hi], "NAME");
     std::cout << " - " << deviceName << '\n';
     free(deviceName);
@@ -49,7 +51,7 @@ void AudioPlayer::open() {
   snd_pcm_hw_params_set_buffer_size_near(_handle, hw_params, &buffer_size);
   snd_pcm_hw_params_get_buffer_size(hw_params, &buffer_size);
   std::cout << "Buffer size: " << buffer_size << '\n';
-  snd_pcm_hw_params_get_period_size(hw_params, &period_size, 0);
+  snd_pcm_hw_params_get_period_size(hw_params, &period_size, nullptr);
   std::cout << "Period size: " << period_size << '\n';
 
   _alsaBufferSize = buffer_size;
@@ -117,3 +119,5 @@ void AudioPlayer::close() {
     _isOpen = false;
   }
 }
+
+}  // namespace glight::system

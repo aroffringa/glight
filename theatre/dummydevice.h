@@ -1,9 +1,11 @@
-#ifndef DUMMYDEVICE_H
-#define DUMMYDEVICE_H
+#ifndef THEATRE_DUMMYDEVICE_H_
+#define THEATRE_DUMMYDEVICE_H_
 
 #include "dmxdevice.h"
 
 #include <unistd.h>
+
+namespace glight::theatre {
 
 /**
         @author Andre Offringa
@@ -33,5 +35,7 @@ class DummyDevice : public DmxDevice {
  private:
   bool _isOpen;
 };
+
+}  // namespace glight::theatre
 
 #endif  // DUMMYDEVICE_H

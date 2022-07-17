@@ -1,5 +1,5 @@
-#ifndef FIXTURE_LIST_WINDOW_H
-#define FIXTURE_LIST_WINDOW_H
+#ifndef GUI_FIXTURE_LIST_WINDOW_H_
+#define GUI_FIXTURE_LIST_WINDOW_H_
 
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
@@ -10,28 +10,29 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
+#include "../../theatre/forwards.h"
 #include "../../theatre/fixturetype.h"
 
 #include "../recursionlock.h"
 
 #include <memory>
 
+namespace glight::gui {
+
 class EventTransmitter;
-class Fixture;
 class FixtureSelection;
-class Management;
 
 /**
  * @author Andre Offringa
  */
 class FixtureListWindow : public Gtk::Window {
  public:
-  FixtureListWindow(EventTransmitter *eventHub, Management &management,
+  FixtureListWindow(EventTransmitter *eventHub, theatre::Management &management,
                     FixtureSelection *globalSelection);
   ~FixtureListWindow();
 
  private:
-  void onChangeManagement(Management &management) {
+  void onChangeManagement(theatre::Management &management) {
     _management = &management;
     fillFixturesList();
   }
@@ -43,13 +44,13 @@ class FixtureListWindow : public Gtk::Window {
   void onDecChannelButtonClicked();
   void onSetChannelButtonClicked();
   // void onMenuItemClicked(StockFixture cl);
-  void updateFixture(const Fixture *fixture);
-  static std::string getChannelString(const Fixture &fixture);
+  void updateFixture(const theatre::Fixture *fixture);
+  static std::string getChannelString(const theatre::Fixture &fixture);
   void onSelectionChanged();
   void onGlobalSelectionChange();
 
   EventTransmitter *_eventHub;
-  Management *_management;
+  theatre::Management *_management;
   FixtureSelection *_globalSelection;
 
   sigc::connection _changeManagementConnection, _updateControllablesConnection,
@@ -68,7 +69,7 @@ class FixtureListWindow : public Gtk::Window {
     }
 
     Gtk::TreeModelColumn<Glib::ustring> _title, _type, _channels, _symbol;
-    Gtk::TreeModelColumn<Fixture *> _fixture;
+    Gtk::TreeModelColumn<theatre::Fixture *> _fixture;
   } _fixturesListColumns;
   Gtk::ScrolledWindow _fixturesScrolledWindow;
 
@@ -78,5 +79,7 @@ class FixtureListWindow : public Gtk::Window {
   Gtk::Button _newButton, _removeButton;
   Gtk::Button _incChannelButton, _decChannelButton, _setChannelButton;
 };
+
+}  // namespace glight::gui
 
 #endif

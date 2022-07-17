@@ -6,8 +6,10 @@
 
 #include <gtkmm/messagedialog.h>
 
+namespace glight::gui {
+
 TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
-    class TimeSequence &timeSequence, Management &management,
+    theatre::TimeSequence &timeSequence, theatre::Management &management,
     EventTransmitter &eventHub)
     : PropertiesWindow(),
       _inputSelector(management, eventHub),
@@ -144,11 +146,11 @@ void TimeSequencePropertiesWindow::load() {
   fillStepsList();
 }
 
-FolderObject &TimeSequencePropertiesWindow::GetObject() {
+theatre::FolderObject &TimeSequencePropertiesWindow::GetObject() {
   return GetTimeSequence();
 }
 
-TimeSequence::Step *TimeSequencePropertiesWindow::selectedStep() {
+theatre::TimeSequence::Step *TimeSequencePropertiesWindow::selectedStep() {
   Gtk::TreeModel::iterator selIter = _stepsView.get_selection()->get_selected();
   if (selIter) {
     size_t index = (*selIter)[_stepsListColumns._step];
@@ -175,7 +177,7 @@ void TimeSequencePropertiesWindow::fillStepsList() {
   for (size_t i = 0; i != _timeSequence->Size(); ++i) {
     Gtk::TreeModel::iterator iter = _stepsStore->append();
     Gtk::TreeModel::Row row = *iter;
-    std::pair<Controllable *, size_t> input =
+    std::pair<theatre::Controllable *, size_t> input =
         _timeSequence->Sequence().List()[i];
     row[_stepsListColumns._title] = input.first->InputName(input.second);
     row[_stepsListColumns._trigger] =
@@ -195,7 +197,7 @@ void TimeSequencePropertiesWindow::onInputSelectionChanged() {
 }
 
 void TimeSequencePropertiesWindow::onAddStep() {
-  Controllable *object = _inputSelector.SelectedObject();
+  theatre::Controllable *object = _inputSelector.SelectedObject();
   size_t input = _inputSelector.SelectedInput();
   if (object && input != InputSelectWidget::NO_INPUT_SELECTED) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
@@ -243,21 +245,21 @@ void TimeSequencePropertiesWindow::onRepeatChanged() {
 
 void TimeSequencePropertiesWindow::onTriggerTypeChanged() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  TimeSequence::Step *step = selectedStep();
+  theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     if (_delayTriggerCheckButton.get_active())
-      step->trigger.SetType(Trigger::DelayTriggered);
+      step->trigger.SetType(theatre::TriggerType::Delay);
     else if (_synchronizedTriggerCheckButton.get_active())
-      step->trigger.SetType(Trigger::SyncTriggered);
+      step->trigger.SetType(theatre::TriggerType::Sync);
     else
-      step->trigger.SetType(Trigger::BeatTriggered);
+      step->trigger.SetType(theatre::TriggerType::Beat);
     fillStepsList();
   }
 }
 
 void TimeSequencePropertiesWindow::onTriggerSpeedChanged(double newValue) {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  TimeSequence::Step *step = selectedStep();
+  theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->trigger.SetDelayInMs(newValue);
     fillStepsList();
@@ -266,7 +268,7 @@ void TimeSequencePropertiesWindow::onTriggerSpeedChanged(double newValue) {
 
 void TimeSequencePropertiesWindow::onTransitionSpeedChanged(double newValue) {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  TimeSequence::Step *step = selectedStep();
+  theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->transition.SetLengthInMs(newValue);
     fillStepsList();
@@ -274,9 +276,9 @@ void TimeSequencePropertiesWindow::onTransitionSpeedChanged(double newValue) {
 }
 
 void TimeSequencePropertiesWindow::onTransitionTypeChanged(
-    enum Transition::Type type) {
+    theatre::TransitionType type) {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  TimeSequence::Step *step = selectedStep();
+  theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->transition.SetType(type);
     fillStepsList();
@@ -285,7 +287,7 @@ void TimeSequencePropertiesWindow::onTransitionTypeChanged(
 
 void TimeSequencePropertiesWindow::onSyncCountChanged() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  TimeSequence::Step *step = selectedStep();
+  theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->trigger.SetDelayInSyncs(_synchronizationsCount.get_value());
     fillStepsList();
@@ -294,7 +296,7 @@ void TimeSequencePropertiesWindow::onSyncCountChanged() {
 
 void TimeSequencePropertiesWindow::onBeatSpeedChanged() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  TimeSequence::Step *step = selectedStep();
+  theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->trigger.SetDelayInBeats(_beatSpeed.get_value());
     fillStepsList();
@@ -303,7 +305,7 @@ void TimeSequencePropertiesWindow::onBeatSpeedChanged() {
 
 void TimeSequencePropertiesWindow::onSelectedStepChanged() {
   if (_recursionLock.IsFirst()) {
-    TimeSequence::Step *step = selectedStep();
+    theatre::TimeSequence::Step *step = selectedStep();
     if (step) {
       loadStep(*step);
       setStepSensitive(true);
@@ -313,10 +315,11 @@ void TimeSequencePropertiesWindow::onSelectedStepChanged() {
   }
 }
 
-void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step &step) {
+void TimeSequencePropertiesWindow::loadStep(
+    const theatre::TimeSequence::Step &step) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  enum Trigger::Type triggerType = step.trigger.Type();
-  enum Transition::Type transitionType = step.transition.Type();
+  theatre::TriggerType triggerType = step.trigger.Type();
+  theatre::TransitionType transitionType = step.transition.Type();
   double triggerSpeed = step.trigger.DelayInMs();
   double transitionSpeed = step.transition.LengthInMs();
   double beatSpeed = step.trigger.DelayInBeats();
@@ -327,13 +330,13 @@ void TimeSequencePropertiesWindow::loadStep(const TimeSequence::Step &step) {
   _beatSpeed.set_value(beatSpeed);
   _synchronizationsCount.set_value(syncSpeed);
   switch (triggerType) {
-    case Trigger::DelayTriggered:
+    case theatre::TriggerType::Delay:
       _delayTriggerCheckButton.set_active(true);
       break;
-    case Trigger::SyncTriggered:
+    case theatre::TriggerType::Sync:
       _synchronizedTriggerCheckButton.set_active(true);
       break;
-    case Trigger::BeatTriggered:
+    case theatre::TriggerType::Beat:
       _beatTriggerCheckButton.set_active(true);
       break;
   }
@@ -358,3 +361,5 @@ void TimeSequencePropertiesWindow::onUpdateControllables() {
   else
     hide();
 }
+
+}  // namespace glight::gui

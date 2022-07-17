@@ -5,6 +5,8 @@
 
 #include "../effects/fadeeffect.h"
 
+namespace glight::theatre {
+
 class FadeEffectPS final : public PropertySet {
  public:
   FadeEffectPS() {
@@ -46,5 +48,7 @@ class FadeEffectPS final : public PropertySet {
     return 0;
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

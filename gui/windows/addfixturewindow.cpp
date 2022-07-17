@@ -8,8 +8,12 @@
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 
+namespace glight::gui {
+
+using theatre::FixtureType;
+
 AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
-                                   Management &management)
+                                   theatre::Management &management)
     : stock_button_("Stock"),
       project_button_("Project"),
       _typeLabel("Type:"),
@@ -21,7 +25,7 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
       _addButton("Add"),
       _eventHub(*eventHub),
       _management(&management),
-      stock_list_(FixtureType::GetStockTypes()) {
+      stock_list_(theatre::FixtureType::GetStockTypes()) {
   _grid.set_row_spacing(5);
   _grid.set_column_spacing(2);
 
@@ -114,15 +118,17 @@ void AddFixtureWindow::onAdd() {
     }
 
     for (size_t fixIter = 0; fixIter != size_t(count); ++fixIter) {
-      const Position position = _management->GetTheatre().GetFreePosition();
-      Fixture &fixture = _management->GetTheatre().AddFixture(*project_type);
+      const theatre::Position position =
+          _management->GetTheatre().GetFreePosition();
+      theatre::Fixture &fixture =
+          _management->GetTheatre().AddFixture(*project_type);
       fixture.GetPosition() = position;
 
-      const std::vector<std::unique_ptr<FixtureFunction>> &functions =
+      const std::vector<std::unique_ptr<theatre::FixtureFunction>> &functions =
           fixture.Functions();
 
       int number = 1;
-      FixtureControl &control = _management->AddFixtureControl(
+      theatre::FixtureControl &control = _management->AddFixtureControl(
           fixture, _management->RootFolder() /* TODO */);
       for (size_t i = 0; i != functions.size(); ++i) {
         _management->AddSourceValue(control, i);
@@ -150,3 +156,5 @@ void AddFixtureWindow::onIncCount() {
   count++;
   _countEntry.set_text(std::to_string(count));
 }
+
+}  // namespace glight::gui

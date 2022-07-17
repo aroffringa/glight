@@ -5,6 +5,10 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/stock.h>
 
+namespace glight::gui {
+
+using theatre::Property;
+
 PropertiesBox::PropertiesBox()
     : _typeLabel("No object selected"), _applyButton(Gtk::Stock::APPLY) {
   pack_start(_typeLabel);
@@ -34,8 +38,8 @@ void PropertiesBox::fillProperties() {
   _rows.clear();
   _typeLabel.set_text(
       _propertySet->Object().Name() + " (" +
-      Effect::TypeToName(
-          static_cast<Effect &>(_propertySet->Object()).GetType()) +
+      theatre::Effect::TypeToName(
+          static_cast<theatre::Effect &>(_propertySet->Object()).GetType()) +
       ")");
   for (Property &property : *_propertySet) {
     size_t rowIndex = _rows.size();
@@ -70,7 +74,7 @@ void PropertiesBox::fillProperties() {
       case Property::ControlValue: {
         std::string entryText = std::to_string(
             round(1000.0 * _propertySet->GetControlValue(property) /
-                  ControlValue::MaxUInt()) /
+                  theatre::ControlValue::MaxUInt()) /
             10.0);
 
         row._widgets.emplace_back(new Gtk::Label(property.Description()));
@@ -129,7 +133,7 @@ void PropertiesBox::onApplyClicked() {
             static_cast<Gtk::Entry *>(rowIter->_widgets[1].get())->get_text();
         _propertySet->SetControlValue(
             property, unsigned(std::atof(entryText.c_str()) *
-                               ControlValue::MaxUInt() / 100.0));
+                               theatre::ControlValue::MaxUInt() / 100.0));
       } break;
       case Property::Duration: {
         double value =
@@ -145,3 +149,5 @@ void PropertiesBox::onApplyClicked() {
     ++rowIter;
   }
 }
+
+}  // namespace glight::gui

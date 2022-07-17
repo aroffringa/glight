@@ -8,15 +8,17 @@
 
 #include "../../theatre/color.h"
 
+namespace glight::gui {
+
 class ColorSelectWidget : public Gtk::HBox {
  public:
   ColorSelectWidget(Gtk::Window *parent);
 
-  const Color GetColor() const {
-    return Color(unsigned(_colorR * 255.4), unsigned(_colorG * 255.4),
-                 unsigned(_colorB * 255.4));
+  const theatre::Color GetColor() const {
+    return theatre::Color(unsigned(_colorR * 255.4), unsigned(_colorG * 255.4),
+                          unsigned(_colorB * 255.4));
   }
-  void SetColor(const Color &color) {
+  void SetColor(const theatre::Color &color) {
     _colorR = double(color.Red()) / 255.0;
     _colorG = double(color.Green()) / 255.0;
     _colorB = double(color.Blue()) / 255.0;
@@ -36,5 +38,7 @@ class ColorSelectWidget : public Gtk::HBox {
   void onColorClicked();
   bool onColorAreaDraw(const Cairo::RefPtr<Cairo::Context> &cr);
 };
+
+}  // namespace glight::gui
 
 #endif

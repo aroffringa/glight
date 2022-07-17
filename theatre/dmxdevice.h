@@ -1,7 +1,9 @@
-#ifndef DMXDEVICE_H
-#define DMXDEVICE_H
+#ifndef THEATRE_DMXDEVICE_H_
+#define THEATRE_DMXDEVICE_H_
 
 #include <cstring>
+
+namespace glight::theatre {
 
 /**
         @author Andre Offringa
@@ -24,5 +26,7 @@ class DmxDevice {
 
   virtual bool IsOpen() = 0;
 };
+
+}  // namespace glight::theatre
 
 #endif

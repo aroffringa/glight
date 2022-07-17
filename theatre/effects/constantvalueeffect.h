@@ -3,6 +3,8 @@
 
 #include "../effect.h"
 
+namespace glight::theatre {
+
 class ConstantValueEffect : public Effect {
  public:
   ConstantValueEffect()
@@ -24,5 +26,7 @@ class ConstantValueEffect : public Effect {
  private:
   unsigned _value;
 };
+
+}  // namespace glight::theatre
 
 #endif

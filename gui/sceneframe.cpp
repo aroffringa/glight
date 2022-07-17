@@ -14,7 +14,10 @@
 
 #include "sceneframe.h"
 
-SceneFrame::SceneFrame(Management &management, ShowWindow &parentWindow)
+namespace glight::gui {
+
+SceneFrame::SceneFrame(theatre::Management &management,
+                       ShowWindow &parentWindow)
     : Gtk::Frame("Scene"),
       _management(&management),
       _show(&_management->GetShow()),
@@ -35,10 +38,10 @@ SceneFrame::SceneFrame(Management &management, ShowWindow &parentWindow)
       _setEndTimeButton("Set end time"),
       _removeButton(Gtk::Stock::REMOVE),
       _createTransitionItemButton("Add transition"),
-      _startScale(0, ControlValue::MaxUInt() + 1,
-                  ControlValue::MaxUInt() / 100.0),
-      _endScale(0, ControlValue::MaxUInt() + 1,
-                ControlValue::MaxUInt() / 100.0),
+      _startScale(0, theatre::ControlValue::MaxUInt() + 1,
+                  theatre::ControlValue::MaxUInt() / 100.0),
+      _endScale(0, theatre::ControlValue::MaxUInt() + 1,
+                theatre::ControlValue::MaxUInt() / 100.0),
       _nameFrame(management, parentWindow),
       _selectedScene(nullptr),
       _isUpdating(false) {
@@ -170,7 +173,7 @@ void SceneFrame::Update() {
   }
   // For testing
   if (_show->Scenes().empty())
-    _selectedScene = _show->AddScene();
+    _selectedScene = _show->AddScene(true);
   else
     _selectedScene = _show->Scenes()[0].get();
   _audioWidget.SetScene(*_selectedScene);
@@ -181,7 +184,7 @@ void SceneFrame::Update() {
   updateAudioWidgetKeys();
 }
 
-void SceneFrame::ChangeManagement(class Management &management) {
+void SceneFrame::ChangeManagement(theatre::Management &management) {
   _management = &management;
   Update();
 }
@@ -232,12 +235,12 @@ void SceneFrame::createControllablesList2() {
 void SceneFrame::fillSceneItemList() {
   _sceneItemsListModel->clear();
 
-  if (_selectedScene != 0) {
+  if (_selectedScene != nullptr) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
-    const std::multimap<double, std::unique_ptr<SceneItem>> &items =
+    const std::multimap<double, std::unique_ptr<theatre::SceneItem>> &items =
         _selectedScene->SceneItems();
-    for (const std::pair<const double, std::unique_ptr<SceneItem>> &item :
-         items) {
+    for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>>
+             &item : items) {
       Gtk::TreeModel::iterator iter = _sceneItemsListModel->append();
       Gtk::TreeRow row = *iter;
       setSceneItemListRow(item.second.get(), row);
@@ -249,19 +252,19 @@ void SceneFrame::fillSceneItemList() {
   }
 }
 
-void SceneFrame::setSceneItemListRow(SceneItem *sceneItem,
+void SceneFrame::setSceneItemListRow(theatre::SceneItem *sceneItem,
                                      Gtk::TreeModel::Row row) {
   std::stringstream startTimeStr;
   startTimeStr << (round(sceneItem->OffsetInMS() / 10.0) / 100.0);
   row[_sceneItemsListColumns._startTime] = startTimeStr.str();
-  if (dynamic_cast<const KeySceneItem *>(sceneItem) == 0) {
+  if (dynamic_cast<const theatre::KeySceneItem *>(sceneItem) == nullptr) {
     std::stringstream endTimeStr;
     endTimeStr << (round(sceneItem->DurationInMS() / 10.0) / 100.0);
     row[_sceneItemsListColumns._endTime] = endTimeStr.str();
 
-    const ControlSceneItem *csi =
-        dynamic_cast<const ControlSceneItem *>(sceneItem);
-    if (csi != 0) {
+    const theatre::ControlSceneItem *csi =
+        dynamic_cast<const theatre::ControlSceneItem *>(sceneItem);
+    if (csi != nullptr) {
       std::stringstream sValStr;
       sValStr << (round(csi->StartValue().Ratio() * 1000.0) / 10.0) << "%";
       row[_sceneItemsListColumns._startValue] = sValStr.str();
@@ -284,7 +287,7 @@ void SceneFrame::updateSelectedSceneItems() {
        pathPtr != pathHandle.end(); ++pathPtr) {
     Gtk::TreeModel::iterator iter = _sceneItemsListModel->get_iter(*pathPtr);
     Gtk::TreeModel::Row row = *iter;
-    SceneItem *item = row[_sceneItemsListColumns._item];
+    theatre::SceneItem *item = row[_sceneItemsListColumns._item];
     setSceneItemListRow(item, row);
   }
 }
@@ -293,9 +296,9 @@ void SceneFrame::fillControllablesList() {
   _controllablesListModel->clear();
 
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  const std::vector<std::unique_ptr<Controllable>> &controllable =
+  const std::vector<std::unique_ptr<theatre::Controllable>> &controllable =
       _management->Controllables();
-  for (const std::unique_ptr<Controllable> &contr : controllable) {
+  for (const std::unique_ptr<theatre::Controllable> &contr : controllable) {
     Gtk::TreeModel::iterator iter = _controllablesListModel->append();
     Gtk::TreeModel::Row row = *iter;
     row[_controllablesListColumns._text] = contr->Name();
@@ -326,9 +329,9 @@ void SceneFrame::onStopButtonPressed() {
   }
 }
 
-void SceneFrame::addKey(enum KeySceneItem::Level level) {
+void SceneFrame::addKey(theatre::KeySceneLevel level) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  KeySceneItem *key = _selectedScene->AddKeySceneItem(
+  theatre::KeySceneItem *key = _selectedScene->AddKeySceneItem(
       _management->GetOffsetTimeInMS() - _selectedScene->StartTimeInMS());
   key->SetLevel(level);
   lock.unlock();
@@ -337,7 +340,7 @@ void SceneFrame::addKey(enum KeySceneItem::Level level) {
   updateAudioWidgetKeys();
 }
 
-void SceneFrame::onKey1ButtonPressed() { addKey(KeySceneItem::Key); }
+void SceneFrame::onKey1ButtonPressed() { addKey(theatre::KeySceneLevel::Key); }
 
 void SceneFrame::onCreateControlItemButtonPressed() {
   Gtk::TreeModel::iterator activeControllable =
@@ -353,19 +356,19 @@ void SceneFrame::onCreateControlItemButtonPressed() {
     for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
              pathHandle.begin();
          pathPtr != pathHandle.end(); ++pathPtr) {
-      SceneItem *selItem = (*_sceneItemsListModel->get_iter(
-                    *pathPtr))[_sceneItemsListColumns._item],
-                *nextItem = 0;
+      theatre::SceneItem *selItem = (*_sceneItemsListModel->get_iter(
+          *pathPtr))[_sceneItemsListColumns._item];
+      theatre::SceneItem *nextItem = nullptr;
       std::vector<Gtk::TreeModel::Path>::const_iterator nextPtr = pathPtr;
       ++nextPtr;
       if (nextPtr != pathHandle.end())
         nextItem = (*_sceneItemsListModel->get_iter(
             *nextPtr))[_sceneItemsListColumns._item];
 
-      ControlSceneItem *item = _selectedScene->AddControlSceneItem(
+      theatre::ControlSceneItem *item = _selectedScene->AddControlSceneItem(
           selItem->OffsetInMS(),
           *(*activeControllable)[_controllablesListColumns._controllable], 0);
-      if (nextItem != 0)
+      if (nextItem != nullptr)
         item->SetDurationInMS(nextItem->OffsetInMS() - item->OffsetInMS());
       else
         item->SetDurationInMS(1000);
@@ -396,9 +399,10 @@ void SceneFrame::onSelectedSceneItemChanged() {
         _startScale.set_sensitive(true);
         _endScale.set_sensitive(true);
         std::unique_lock<std::mutex> lock(_management->Mutex());
-        SceneItem *item = selectedItem();
-        ControlSceneItem *csi = dynamic_cast<ControlSceneItem *>(item);
-        if (csi != 0) {
+        theatre::SceneItem *item = selectedItem();
+        theatre::ControlSceneItem *csi =
+            dynamic_cast<theatre::ControlSceneItem *>(item);
+        if (csi != nullptr) {
           unsigned s = csi->StartValue().UInt(), e = csi->EndValue().UInt();
           lock.unlock();
           _startScale.set_value(s);
@@ -425,9 +429,9 @@ void SceneFrame::onSetEndTimeButtonPressed() {
   for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
            pathHandle.begin();
        pathPtr != pathHandle.end(); ++pathPtr) {
-    SceneItem *selItem = (*_sceneItemsListModel->get_iter(
-                  *pathPtr))[_sceneItemsListColumns._item],
-              *nextItem = nullptr;
+    theatre::SceneItem *selItem = (*_sceneItemsListModel->get_iter(
+                           *pathPtr))[_sceneItemsListColumns._item],
+                       *nextItem = nullptr;
     std::vector<Gtk::TreeModel::Path>::const_iterator nextPtr = pathPtr;
     ++nextPtr;
     if (nextPtr != pathHandle.end()) {
@@ -451,7 +455,7 @@ void SceneFrame::onRemoveButtonPressed() {
   for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
            pathHandle.begin();
        pathPtr != pathHandle.end(); ++pathPtr) {
-    SceneItem *item = (*_sceneItemsListModel->get_iter(
+    theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
         *pathPtr))[_sceneItemsListColumns._item];
     _selectedScene->Remove(item);
   }
@@ -463,24 +467,25 @@ void SceneFrame::onRemoveButtonPressed() {
 }
 
 bool SceneFrame::HandleKeyDown(char key) {
+  using theatre::KeySceneLevel;
   switch (key) {
     case '=':
       onStartButtonPressed();
       return true;
     case '1':
-      addKey(KeySceneItem::Section);
+      addKey(KeySceneLevel::Section);
       return true;
     case '2':
-      addKey(KeySceneItem::Measure);
+      addKey(KeySceneLevel::Measure);
       return true;
     case '3':
-      addKey(KeySceneItem::Highlight);
+      addKey(KeySceneLevel::Highlight);
       return true;
     case '4':
-      addKey(KeySceneItem::Beat);
+      addKey(KeySceneLevel::Beat);
       return true;
     case '5':
-      addKey(KeySceneItem::Key);
+      addKey(KeySceneLevel::Key);
       return true;
   }
   return false;
@@ -497,10 +502,11 @@ void SceneFrame::onScalesChanged() {
     for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
              pathHandle.begin();
          pathPtr != pathHandle.end(); ++pathPtr) {
-      SceneItem *item = (*_sceneItemsListModel->get_iter(
+      theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
           *pathPtr))[_sceneItemsListColumns._item];
-      ControlSceneItem *csi = dynamic_cast<ControlSceneItem *>(item);
-      if (csi != 0) {
+      theatre::ControlSceneItem *csi =
+          dynamic_cast<theatre::ControlSceneItem *>(item);
+      if (csi != nullptr) {
         csi->StartValue().Set((unsigned)_startScale.get_value());
         csi->EndValue().Set((unsigned)_endScale.get_value());
       }
@@ -553,7 +559,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS) {
     for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
              pathHandle.begin();
          pathPtr != pathHandle.end(); ++pathPtr) {
-      SceneItem *item = (*_sceneItemsListModel->get_iter(
+      theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
           *pathPtr))[_sceneItemsListColumns._item];
       _selectedScene->ChangeSceneItemStartTime(item, timeInMS);
     }
@@ -573,7 +579,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS) {
     for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
              pathHandle.begin();
          pathPtr != pathHandle.end(); ++pathPtr) {
-      SceneItem *item = (*_sceneItemsListModel->get_iter(
+      theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
           *pathPtr))[_sceneItemsListColumns._item];
       item->SetDurationInMS(timeInMS - item->OffsetInMS());
     }
@@ -587,8 +593,8 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS) {
     _isUpdating = true;
 
     std::unique_lock<std::mutex> lock(_management->Mutex());
-    KeySceneItem *item = _selectedScene->AddKeySceneItem(timeInMS);
-    item->SetLevel(KeySceneItem::Key);
+    theatre::KeySceneItem *item = _selectedScene->AddKeySceneItem(timeInMS);
+    item->SetLevel(theatre::KeySceneLevel::Key);
     lock.unlock();
 
     fillSceneItemList();
@@ -602,7 +608,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS) {
       _isUpdating = true;
 
       std::unique_lock<std::mutex> lock(_management->Mutex());
-      ControlSceneItem *item = _selectedScene->AddControlSceneItem(
+      theatre::ControlSceneItem *item = _selectedScene->AddControlSceneItem(
           timeInMS,
           *(*activeControllable)[_controllablesListColumns._controllable], 0);
       item->SetDurationInMS(1000);
@@ -624,7 +630,7 @@ void SceneFrame::updateAudio() {
     lock.unlock();
     _audioLabel.set_text(std::string("Audio file: ") + _audioFile);
     try {
-      FlacDecoder decoder(_audioFile);
+      system::FlacDecoder decoder(_audioFile);
       std::cout << "Starting decoder" << std::endl;
       decoder.Start();
       _audioWidget.SetAudioData(decoder);
@@ -638,3 +644,5 @@ void SceneFrame::updateAudioWidgetKeys() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   _audioWidget.UpdateKeys();
 }
+
+}  // namespace glight::gui

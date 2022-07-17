@@ -1,5 +1,5 @@
-#ifndef OBJECT_TREE_H
-#define OBJECT_TREE_H
+#ifndef GUI_OBJECT_TREE_H_
+#define GUI_OBJECT_TREE_H_
 
 #include <gtkmm/liststore.h>
 #include <gtkmm/menu.h>
@@ -7,6 +7,10 @@
 #include <gtkmm/treeview.h>
 
 #include "../recursionlock.h"
+
+#include "../../theatre/forwards.h"
+
+namespace glight::gui {
 
 enum class ObjectListType {
   AllExceptFixtures,
@@ -16,9 +20,11 @@ enum class ObjectListType {
   OnlyEffects
 };
 
+class EventTransmitter;
+
 class ObjectList : public Gtk::ScrolledWindow {
  public:
-  ObjectList(class Management &management, class EventTransmitter &eventHub);
+  ObjectList(theatre::Management &management, EventTransmitter &eventHub);
 
   ObjectListType DisplayType() const { return _displayType; }
   void SetDisplayType(ObjectListType displayType) {
@@ -26,19 +32,19 @@ class ObjectList : public Gtk::ScrolledWindow {
     fillList();
   }
 
-  class FolderObject *SelectedObject();
+  theatre::FolderObject *SelectedObject();
 
   sigc::signal<void()> &SignalSelectionChange() {
     return _signalSelectionChange;
   }
 
-  sigc::signal<void(FolderObject &object)> &SignalObjectActivated() {
+  sigc::signal<void(theatre::FolderObject &object)> &SignalObjectActivated() {
     return _signalObjectActivated;
   }
 
-  void SelectObject(const FolderObject &object);
+  void SelectObject(const theatre::FolderObject &object);
 
-  void SetFolder(class Folder &folder) {
+  void SetFolder(theatre::Folder &folder) {
     if (&folder != _openFolder) {
       _openFolder = &folder;
       bool doChangeSelection =
@@ -53,11 +59,11 @@ class ObjectList : public Gtk::ScrolledWindow {
   bool ShowTypeColumn() const { return _showTypeColumn; }
 
  private:
-  class Management *_management;
-  class EventTransmitter &_eventHub;
+  theatre::Management *_management;
+  EventTransmitter &_eventHub;
   enum ObjectListType _displayType;
   bool _showTypeColumn;
-  class Folder *_openFolder;
+  theatre::Folder *_openFolder;
 
   class TreeViewWithMenu : public Gtk::TreeView {
    public:
@@ -78,30 +84,32 @@ class ObjectList : public Gtk::ScrolledWindow {
 
     Gtk::TreeModelColumn<Glib::ustring> _type;
     Gtk::TreeModelColumn<Glib::ustring> _title;
-    Gtk::TreeModelColumn<class FolderObject *> _object;
+    Gtk::TreeModelColumn<theatre::FolderObject *> _object;
   } _listColumns;
 
   void fillList();
-  void fillListFolder(const class Folder &folder,
-                      const class FolderObject *selectedObj);
-  bool selectObject(const FolderObject &object,
+  void fillListFolder(const theatre::Folder &folder,
+                      const theatre::FolderObject *selectedObj);
+  bool selectObject(const theatre::FolderObject &object,
                     const Gtk::TreeModel::Children &children);
-  void changeManagement(class Management &management) {
+  void changeManagement(theatre::Management &management) {
     _management = &management;
     fillList();
   }
   void constructContextMenu();
-  void constructFolderMenu(Gtk::Menu &menu, Folder &folder);
-  void onMoveSelected(Folder *destination);
+  void constructFolderMenu(Gtk::Menu &menu, theatre::Folder &folder);
+  void onMoveSelected(theatre::Folder *destination);
   void onMoveUpSelected();
   void onMoveDownSelected();
 
   sigc::signal<void()> _signalSelectionChange;
-  sigc::signal<void(FolderObject &object)> _signalObjectActivated;
+  sigc::signal<void(theatre::FolderObject &object)> _signalObjectActivated;
 
   RecursionLock _avoidRecursion;
   Gtk::Menu _contextMenu;
   std::vector<std::unique_ptr<Gtk::Widget>> _contextMenuItems;
 };
+
+}  // namespace glight::gui
 
 #endif

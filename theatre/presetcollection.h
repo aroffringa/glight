@@ -1,5 +1,5 @@
-#ifndef PRESETCOLLECTION_H
-#define PRESETCOLLECTION_H
+#ifndef THEATRE_PRESETCOLLECTION_H_
+#define THEATRE_PRESETCOLLECTION_H_
 
 #include <memory>
 #include <vector>
@@ -8,6 +8,10 @@
 #include "dmxchannel.h"
 #include "presetvalue.h"
 #include "sourcevalue.h"
+
+namespace glight::theatre {
+
+class Management;
 
 /**
  * @author Andre Offringa
@@ -20,7 +24,7 @@ class PresetCollection : public Controllable {
   ~PresetCollection() { Clear(); }
 
   void Clear() { _presetValues.clear(); }
-  inline void SetFromCurrentSituation(const class Management &management);
+  inline void SetFromCurrentSituation(const Management &management);
 
   size_t NInputs() const final override { return 1; }
 
@@ -42,7 +46,7 @@ class PresetCollection : public Controllable {
     for (const std::unique_ptr<PresetValue> &pv : _presetValues) {
       unsigned rightHand = pv->Value().UInt();
       ControlValue value(
-          ControlValue::Mix(leftHand, rightHand, ControlValue::Multiply));
+          ControlValue::Mix(leftHand, rightHand, MixStyle::Multiply));
 
       pv->Controllable().MixInput(pv->InputIndex(), value);
     }
@@ -73,16 +77,22 @@ class PresetCollection : public Controllable {
   std::vector<std::unique_ptr<PresetValue>> _presetValues;
 };
 
+}  // namespace glight::theatre
+
 #include "management.h"
+
+namespace glight::theatre {
 
 void PresetCollection::SetFromCurrentSituation(const Management &management) {
   Clear();
   const std::vector<std::unique_ptr<SourceValue>> &values =
       management.SourceValues();
   for (const std::unique_ptr<SourceValue> &sv : values) {
-    if (!sv->IsIgnorable() && (&sv->Controllable()) != this)
+    if (!sv->IsIgnorable() && (&sv->GetControllable()) != this)
       _presetValues.emplace_back(new PresetValue(sv->Preset()));
   }
 }
+
+}  // namespace glight::theatre
 
 #endif

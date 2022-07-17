@@ -27,7 +27,9 @@
 
 #include <filesystem>
 
-ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
+namespace glight::gui {
+
+ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
     : _miFile("_File", true),
       _miDesign("_Design", true),
       _miWindow("_Window", true),
@@ -56,7 +58,7 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
       std::filesystem::path(GLIGHT_INSTALL_PATH) / "share/icons";
   iconTheme->prepend_search_path(iconPath.string());
 
-  _management.reset(new Management());
+  _management = std::make_unique<theatre::Management>();
   _management->AddDevice(std::move(device));
   _management->StartBeatFinder();
 
@@ -91,8 +93,8 @@ ShowWindow::ShowWindow(std::unique_ptr<DmxDevice> device)
   _state.FaderSetupSignalChange().connect([&]() { onFaderListChange(); });
   addFaderWindow();
 
-  _objectListFrame.reset(new ObjectListFrame(*_management, *this));
-  _sceneFrame.reset(new SceneFrame(*_management, *this));
+  _objectListFrame = std::make_unique<ObjectListFrame>(*_management, *this);
+  _sceneFrame = std::make_unique<SceneFrame>(*_management, *this);
 
   _notebook.append_page(*_objectListFrame, "Objects");
   _notebook.append_page(*_sceneFrame, "Timeline");
@@ -354,12 +356,12 @@ void ShowWindow::onMINewClicked() {
   if (confirmed) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
     _management->Clear();
+    _faderWindows.clear();
     _state.Clear();
     lock.unlock();
 
     EmitUpdate();
 
-    _faderWindows.clear();
     addFaderWindow();
   }
 }
@@ -369,9 +371,8 @@ void ShowWindow::OpenFile(const std::string &filename) {
   _management->Clear();
   _faderWindows.clear();
   _state.Clear();
-  Reader reader(*_management);
-  reader.SetGUIState(_state);
-  reader.Read(filename);
+
+  system::Read(filename, *_management, &_state);
 
   if (_management->GetShow().Scenes().size() != 0)
     _sceneFrame->SetSelectedScene(*_management->GetShow().Scenes()[0]);
@@ -450,9 +451,7 @@ void ShowWindow::onMISaveClicked() {
     if (filename.find('.') == Glib::ustring::npos) filename += ".gshow";
 
     std::lock_guard<std::mutex> lock(_management->Mutex());
-    Writer writer(*_management);
-    writer.SetGUIState(_state);
-    writer.Write(filename);
+    system::Write(filename, *_management, &_state);
   }
 }
 
@@ -470,7 +469,7 @@ void ShowWindow::updateDryModeState() {
 }
 
 void ShowWindow::onMIDryModeClicked() {
-  Folder &activeFolder = _objectListFrame->SelectedFolder();
+  theatre::Folder &activeFolder = _objectListFrame->SelectedFolder();
   std::string path = activeFolder.FullPath();
   bool enterDryMode = _miDryMode.get_active();
   if (enterDryMode && _backgroundManagement == nullptr) {
@@ -487,8 +486,8 @@ void ShowWindow::onMIDryModeClicked() {
     _backgroundManagement.reset();
   }
   updateDryModeState();
-  FolderObject &folder = _management->GetObjectFromPath(path);
-  _objectListFrame->OpenFolder(static_cast<Folder &>(folder));
+  theatre::FolderObject &folder = _management->GetObjectFromPath(path);
+  _objectListFrame->OpenFolder(static_cast<theatre::Folder &>(folder));
 }
 
 void ShowWindow::onMICancelDryModeClicked() {
@@ -500,7 +499,7 @@ void ShowWindow::onMICancelDryModeClicked() {
         "All changes made after entering dry mode will be lost");
     int result = dialog.run();
     if (result == Gtk::RESPONSE_OK) {
-      Folder &activeFolder = _objectListFrame->SelectedFolder();
+      theatre::Folder &activeFolder = _objectListFrame->SelectedFolder();
       std::string path = activeFolder.FullPath();
 
       std::swap(_backgroundManagement, _management);
@@ -510,15 +509,15 @@ void ShowWindow::onMICancelDryModeClicked() {
       _miDryMode.set_active(false);
       updateDryModeState();
 
-      FolderObject &folder = _management->GetObjectFromPath(path);
-      _objectListFrame->OpenFolder(static_cast<Folder &>(folder));
+      theatre::FolderObject &folder = _management->GetObjectFromPath(path);
+      _objectListFrame->OpenFolder(static_cast<theatre::Folder &>(folder));
     }
   }
 }
 
 void ShowWindow::onMISwapModesClicked() {
   if (_miDryMode.get_active() && _backgroundManagement != nullptr) {
-    Folder &activeFolder = _objectListFrame->SelectedFolder();
+    theatre::Folder &activeFolder = _objectListFrame->SelectedFolder();
     std::string path = activeFolder.FullPath();
 
     _management->SwapDevices(*_backgroundManagement);
@@ -528,8 +527,8 @@ void ShowWindow::onMISwapModesClicked() {
     changeManagement(_management.get(), true);
 
     updateDryModeState();
-    FolderObject &folder = _management->GetObjectFromPath(path);
-    _objectListFrame->OpenFolder(static_cast<Folder &>(folder));
+    theatre::FolderObject &folder = _management->GetObjectFromPath(path);
+    _objectListFrame->OpenFolder(static_cast<theatre::Folder &>(folder));
   }
 }
 
@@ -542,7 +541,7 @@ void ShowWindow::onMIRecoverClicked() {
 
 void ShowWindow::onMIBlackOutAndDryMode() {
   _miDryMode.set_active(false);
-  Folder &activeFolder = _objectListFrame->SelectedFolder();
+  theatre::Folder &activeFolder = _objectListFrame->SelectedFolder();
   std::string path = activeFolder.FullPath();
   if (!_miDryMode.get_active() && _backgroundManagement == nullptr) {
     // Switch from real mode to dry mode
@@ -557,11 +556,11 @@ void ShowWindow::onMIBlackOutAndDryMode() {
     _miDryMode.set_active(true);
   }
   updateDryModeState();
-  FolderObject &folder = _management->GetObjectFromPath(path);
-  _objectListFrame->OpenFolder(static_cast<Folder &>(folder));
+  theatre::FolderObject &folder = _management->GetObjectFromPath(path);
+  _objectListFrame->OpenFolder(static_cast<theatre::Folder &>(folder));
 }
 
-void ShowWindow::changeManagement(Management *newManagement,
+void ShowWindow::changeManagement(theatre::Management *newManagement,
                                   bool moveControlSliders) {
   _state.ChangeManagement(*newManagement);
   _signalChangeManagement(*newManagement);
@@ -659,3 +658,5 @@ void ShowWindow::onHideFixtureTypes() {
 void ShowWindow::onHideVisualizationWindow() {
   _miVisualizationWindow.set_active(false);
 }
+
+}  // namespace glight::gui

@@ -12,7 +12,9 @@
 #include "../theatre/presetvalue.h"
 #include "../theatre/sequence.h"
 
-CreateChaseDialog::CreateChaseDialog(Management &management,
+namespace glight::gui {
+
+CreateChaseDialog::CreateChaseDialog(theatre::Management &management,
                                      ShowWindow &parentWindow)
     : Dialog("Create chase", true),
       _listFrame("Object list"),
@@ -79,9 +81,10 @@ void CreateChaseDialog::initNewSequencePart() {
 }
 
 void CreateChaseDialog::onAddObjectToChaseButtonClicked() {
-  FolderObject *selectedObj = _list.SelectedObject();
+  theatre::FolderObject *selectedObj = _list.SelectedObject();
   if (selectedObj) {
-    Controllable *object = dynamic_cast<Controllable *>(selectedObj);
+    theatre::Controllable *object =
+        dynamic_cast<theatre::Controllable *>(selectedObj);
     if (object) {
       Gtk::TreeModel::iterator newRow = _newChaseListModel->append();
       std::lock_guard<std::mutex> lock(_management->Mutex());
@@ -100,7 +103,7 @@ void CreateChaseDialog::onClearSequenceButtonClicked() {
 void CreateChaseDialog::onCreateChaseButtonClicked() {
   if (!_newChaseListModel->children().empty()) {
     // Determine folder
-    Folder &folder = _list.SelectedFolder();
+    theatre::Folder &folder = _list.SelectedFolder();
     std::unique_lock<std::mutex> lock(_management->Mutex());
 
     _newChase = &_management->AddChase();
@@ -108,11 +111,11 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
     _newChase->SetName(folder.GetAvailableName("Chase"));
     folder.Add(*_newChase);
 
-    Sequence &sequence = _newChase->Sequence();
+    theatre::Sequence &sequence = _newChase->Sequence();
     Gtk::TreeModel::Children children = _newChaseListModel->children();
     for (Gtk::TreeModel::Children::const_iterator i = children.begin();
          i != children.end(); ++i) {
-      Controllable *object = (*i)[_newChaseListColumns._controllable];
+      theatre::Controllable *object = (*i)[_newChaseListColumns._controllable];
       sequence.Add(*object, 0);
     }
 
@@ -126,11 +129,14 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
 
 void CreateChaseDialog::onSelectedObjectChanged() {
   if (_delayUpdates.IsFirst()) {
-    FolderObject *selectedObj = _list.SelectedObject();
-    PresetCollection *preset = dynamic_cast<PresetCollection *>(selectedObj);
+    theatre::FolderObject *selectedObj = _list.SelectedObject();
+    theatre::PresetCollection *preset =
+        dynamic_cast<theatre::PresetCollection *>(selectedObj);
     if (preset)
       _addObjectToChaseButton.set_sensitive(true);
     else
       _addObjectToChaseButton.set_sensitive(false);
   }
 }
+
+}  // namespace glight::gui

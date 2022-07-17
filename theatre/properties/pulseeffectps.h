@@ -5,6 +5,8 @@
 
 #include "../effects/pulseeffect.h"
 
+namespace glight::theatre {
+
 class PulseEffectPS final : public PropertySet {
  public:
   PulseEffectPS() {
@@ -61,5 +63,7 @@ class PulseEffectPS final : public PropertySet {
     return pfx.Repeat();
   }
 };
+
+}  // namespace glight::theatre
 
 #endif

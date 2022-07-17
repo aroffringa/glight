@@ -1,8 +1,10 @@
-#ifndef VALUESNAPSHOT_H
-#define VALUESNAPSHOT_H
+#ifndef THEATRE_VALUESNAPSHOT_H_
+#define THEATRE_VALUESNAPSHOT_H_
 
 #include "dmxchannel.h"
 #include "valueuniversesnapshot.h"
+
+namespace glight::theatre {
 
 class ValueSnapshot {
  public:
@@ -54,5 +56,7 @@ class ValueSnapshot {
  private:
   std::vector<std::unique_ptr<ValueUniverseSnapshot>> _universeValues;
 };
+
+}  // namespace glight::theatre
 
 #endif  // VALUESNAPSHOT_H

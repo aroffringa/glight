@@ -8,6 +8,8 @@
 
 #include "../recursionlock.h"
 
+namespace glight::gui {
+
 class DurationInput : public Gtk::HBox {
  public:
   DurationInput(double value);
@@ -39,5 +41,7 @@ class DurationInput : public Gtk::HBox {
   RecursionLock _recursionLock;
   sigc::signal<void(double)> _signalValueChanged;
 };
+
+}  // namespace glight::gui
 
 #endif

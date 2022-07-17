@@ -6,6 +6,8 @@
 
 #include <string>
 
+namespace glight::theatre {
+
 class MusicActivationEffect final : public Effect {
  public:
   MusicActivationEffect()
@@ -43,5 +45,7 @@ class MusicActivationEffect final : public Effect {
 
   unsigned _offDelay;
 };
+
+}  // namespace glight::theatre
 
 #endif

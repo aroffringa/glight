@@ -8,8 +8,10 @@
 #include "../../theatre/management.h"
 #include "../../theatre/timesequence.h"
 
-ChasePropertiesWindow::ChasePropertiesWindow(class Chase &chase,
-                                             Management &management,
+namespace glight::gui {
+
+ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
+                                             theatre::Management &management,
                                              EventTransmitter &eventHub)
     : PropertiesWindow(),
       _delayTriggerCheckButton("Delayed trigger"),
@@ -100,16 +102,16 @@ ChasePropertiesWindow::ChasePropertiesWindow(class Chase &chase,
 
 ChasePropertiesWindow::~ChasePropertiesWindow() {}
 
-FolderObject &ChasePropertiesWindow::GetObject() { return GetChase(); }
+theatre::FolderObject &ChasePropertiesWindow::GetObject() { return GetChase(); }
 
 void ChasePropertiesWindow::onTriggerTypeChanged() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   if (_delayTriggerCheckButton.get_active())
-    _chase->Trigger().SetType(Trigger::DelayTriggered);
+    _chase->Trigger().SetType(theatre::TriggerType::Delay);
   else if (_synchronizedTriggerCheckButton.get_active())
-    _chase->Trigger().SetType(Trigger::SyncTriggered);
+    _chase->Trigger().SetType(theatre::TriggerType::Sync);
   else
-    _chase->Trigger().SetType(Trigger::BeatTriggered);
+    _chase->Trigger().SetType(theatre::TriggerType::Beat);
 }
 
 void ChasePropertiesWindow::onTriggerSpeedChanged(double newValue) {
@@ -139,7 +141,7 @@ void ChasePropertiesWindow::onTransitionSpeedChanged(double newValue) {
 }
 
 void ChasePropertiesWindow::onTransitionTypeChanged(
-    enum Transition::Type type) {
+    theatre::TransitionType type) {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   _chase->Transition().SetType(type);
 }
@@ -154,10 +156,10 @@ void ChasePropertiesWindow::onBeatSpeedChanged() {
   _chase->Trigger().SetDelayInBeats(_beatSpeed.get_value());
 }
 
-void ChasePropertiesWindow::loadChaseInfo(Chase &chase) {
+void ChasePropertiesWindow::loadChaseInfo(theatre::Chase &chase) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  enum Trigger::Type triggerType = chase.Trigger().Type();
-  enum Transition::Type transitionType = chase.Transition().Type();
+  theatre::TriggerType triggerType = chase.Trigger().Type();
+  theatre::TransitionType transitionType = chase.Transition().Type();
   double triggerSpeed = chase.Trigger().DelayInMs();
   double transitionSpeed = chase.Transition().LengthInMs();
   double beatSpeed = chase.Trigger().DelayInBeats();
@@ -168,13 +170,13 @@ void ChasePropertiesWindow::loadChaseInfo(Chase &chase) {
   _beatSpeed.set_value(beatSpeed);
   _synchronizationsCount.set_value(syncSpeed);
   switch (triggerType) {
-    case Trigger::DelayTriggered:
+    case theatre::TriggerType::Delay:
       _delayTriggerCheckButton.set_active(true);
       break;
-    case Trigger::SyncTriggered:
+    case theatre::TriggerType::Sync:
       _synchronizedTriggerCheckButton.set_active(true);
       break;
-    case Trigger::BeatTriggered:
+    case theatre::TriggerType::Beat:
       _beatTriggerCheckButton.set_active(true);
       break;
   }
@@ -189,23 +191,23 @@ void ChasePropertiesWindow::onUpdateControllables() {
 }
 
 void ChasePropertiesWindow::onToTimeSequenceClicked() {
-  TimeSequence &tSequence = _management->AddTimeSequence();
+  theatre::TimeSequence &tSequence = _management->AddTimeSequence();
   tSequence.SetRepeatCount(0);
   size_t index = 0;
-  for (const std::pair<Controllable *, size_t> &item :
+  for (const std::pair<theatre::Controllable *, size_t> &item :
        _chase->Sequence().List()) {
     tSequence.AddStep(*item.first, item.second);
-    TimeSequence::Step &step = tSequence.GetStep(index);
-    if (_chase->Trigger().Type() == Trigger::DelayTriggered)
+    theatre::TimeSequence::Step &step = tSequence.GetStep(index);
+    if (_chase->Trigger().Type() == theatre::TriggerType::Delay)
       step.transition = _chase->Transition();
     else
       step.transition.SetLengthInMs(0);
     step.trigger = _chase->Trigger();
     ++index;
   }
-  Folder &folder = _chase->Parent();
+  theatre::Folder &folder = _chase->Parent();
   std::string name = _chase->Name();
-  SourceValue *source = _management->GetSourceValue(*_chase, 0);
+  theatre::SourceValue *source = _management->GetSourceValue(*_chase, 0);
   source->Preset().Reconnect(tSequence, 0);
   _management->RemoveControllable(*_chase);
   tSequence.SetName(name);
@@ -213,3 +215,5 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   //_management->AddPreset(tSequence, 0);
   _eventHub.EmitUpdate();
 }
+
+}  // namespace glight::gui
