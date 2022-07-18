@@ -65,9 +65,9 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
     case FunctionType::Rotation:
       return "O";
     case FunctionType::Pan:
-      return ">";
+      return "PN";
     case FunctionType::Tilt:
-      return "/";
+      return "TL";
     case FunctionType::Effect:
       return "E";
     case FunctionType::ColdWhite:

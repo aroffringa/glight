@@ -2,6 +2,7 @@
 #define THEATRE_FIXTURE_TYPE_H_
 
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -203,6 +204,20 @@ class FixtureType : public FolderObject {
   std::vector<FixtureTypeFunction> functions_;
   unsigned scaling_value_;
 };
+
+inline std::string FunctionSummary(const FixtureType &fixture_type) {
+  const std::vector<FixtureTypeFunction> &functions = fixture_type.Functions();
+  if (functions.empty())
+    return "-";
+  else {
+    std::ostringstream s;
+    s << AbbreviatedFunctionType(functions.front().Type());
+    for (size_t i = 1; i != functions.size(); ++i) {
+      s << "-" << AbbreviatedFunctionType(functions[i].Type());
+    }
+    return s.str();
+  }
+}
 
 }  // namespace glight::theatre
 

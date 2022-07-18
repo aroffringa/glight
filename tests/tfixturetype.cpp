@@ -128,4 +128,16 @@ BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
   BOOST_CHECK_EQUAL(speed, -((1 << 24) / 100));
 }
 
+BOOST_AUTO_TEST_CASE(function_summary) {
+  Management management;
+
+  const FixtureType &rgb_type =
+      management.GetTheatre().AddFixtureType(StockFixture::RGBLight3Ch);
+  BOOST_CHECK_EQUAL(FunctionSummary(rgb_type), "R-G-B");
+
+  const FixtureType &btv_type =
+      management.GetTheatre().AddFixtureType(StockFixture::BT_VINTAGE_7CH);
+  BOOST_CHECK_EQUAL(FunctionSummary(btv_type), "W-M-S-R-G-B-C");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

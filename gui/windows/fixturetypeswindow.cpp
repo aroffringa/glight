@@ -117,7 +117,7 @@ void FixtureTypesWindow::fillList() {
     Gtk::TreeModel::Row row = *iter;
     row[list_columns_.fixture_type_] = type.get();
     row[list_columns_.name_] = type->Name();
-    row[list_columns_.functions_] = type->Name();
+    row[list_columns_.functions_] = FunctionSummary(*type);
     row[list_columns_.in_use_] = management_->GetTheatre().IsUsed(*type);
   }
 }
