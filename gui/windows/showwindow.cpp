@@ -17,6 +17,7 @@
 #include "../../theatre/show.h"
 #include "../../theatre/theatre.h"
 
+#include "../../system/openfixturereader.h"
 #include "../../system/reader.h"
 #include "../../system/writer.h"
 
@@ -26,6 +27,7 @@
 #include <gtkmm/stock.h>
 
 #include <filesystem>
+#include <fstream>
 
 namespace glight::gui {
 
@@ -36,6 +38,7 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
       _miNew(Gtk::Stock::NEW),
       _miOpen(Gtk::Stock::OPEN),
       _miSave(Gtk::Stock::SAVE_AS),
+      _miImport("_Import...", true),
       _miQuit(Gtk::Stock::QUIT),
       _miDryMode("Dry mode"),
       _miCancelDryMode("Cancel dry mode"),
@@ -256,6 +259,10 @@ void ShowWindow::createMenu() {
       sigc::mem_fun(*this, &ShowWindow::onMISaveClicked));
   _menuFile.append(_miSave);
 
+  _miImport.signal_activate().connect(
+      sigc::mem_fun(*this, &ShowWindow::onMIImportClicked));
+  _menuFile.append(_miImport);
+
   _miQuit.signal_activate().connect(
       sigc::mem_fun(*this, &ShowWindow::onMIQuitClicked));
   _menuFile.append(_miQuit);
@@ -424,7 +431,7 @@ void ShowWindow::onMIOpenClicked() {
     Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
     filter->set_name("Glight show");
     filter->add_pattern("*.gshow");
-    filter->add_mime_type("text/gshow+xml");
+    filter->add_mime_type("text/gshow+json");
     dialog.add_filter(filter);
 
     int result = dialog.run();
@@ -442,7 +449,7 @@ void ShowWindow::onMISaveClicked() {
   Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
   filter->set_name("Glight show");
   filter->add_pattern("*.gshow");
-  filter->add_mime_type("text/gshow+xml");
+  filter->add_mime_type("text/gshow+json");
   dialog.add_filter(filter);
 
   int result = dialog.run();
@@ -452,6 +459,31 @@ void ShowWindow::onMISaveClicked() {
 
     std::lock_guard<std::mutex> lock(_management->Mutex());
     system::Write(filename, *_management, &_state);
+  }
+}
+
+void ShowWindow::onMIImportClicked() {
+  Gtk::FileChooserDialog dialog(*this, "Open glight show",
+                                Gtk::FILE_CHOOSER_ACTION_OPEN);
+
+  dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  dialog.add_button("Open", Gtk::RESPONSE_OK);
+
+  Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
+  filter->set_name("Open fixture file");
+  filter->add_pattern("*.json");
+  filter->add_mime_type("text/json");
+  dialog.add_filter(filter);
+
+  const int result = dialog.run();
+  if (result == Gtk::RESPONSE_OK) {
+    std::ifstream stream(dialog.get_filename());
+    std::unique_ptr<json::Node> root = json::Parse(stream);
+    {
+      std::lock_guard<std::mutex> lock(_management->Mutex());
+      system::ReadOpenFixture(_management->GetTheatre(), *root);
+    }
+    EmitUpdate();
   }
 }
 
@@ -466,6 +498,7 @@ void ShowWindow::updateDryModeState() {
                                       !_miProtectBlackout.get_active());
   _miOpen.set_sensitive(!dryMode);
   _miSave.set_sensitive(!dryMode);
+  _miImport.set_sensitive(!dryMode);
 }
 
 void ShowWindow::onMIDryModeClicked() {

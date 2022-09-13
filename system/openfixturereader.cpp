@@ -17,7 +17,7 @@ void ParseCapabilities(const json::Array& capabilities,
     const json::Object& capability = ToObj(capability_child);
     const json::Array& dmxRange = ToArr(capability["dmxRange"]);
     const unsigned start = ToNum(*dmxRange.items[0]).AsUInt();
-    const unsigned end = ToNum(*dmxRange.items[1]).AsUInt();
+    const unsigned end = ToNum(*dmxRange.items[1]).AsUInt()+1;
     const std::string& type = ToStr(capability["type"]);
     FixtureTypeFunction* function = nullptr;
 
@@ -41,6 +41,7 @@ void ParseCapabilities(const json::Array& capabilities,
             ranges.emplace_back(r.first, r.second,
                                 std::optional<theatre::Color>());
           }
+          empty_ranges.clear();
         }
         const std::string& color_str =
             ToStr(*ToArr(capability["colors"]).items[0]);
@@ -71,24 +72,24 @@ std::map<std::string, FixtureTypeFunction> ParseFunctions(
             std::make_tuple(theatre::FunctionType::Master, 0, false, 0));
       } else if (type == "ColorIntensity") {
         theatre::FunctionType t = theatre::FunctionType::Unknown;
-        const std::string& type_str = ToStr(capability["type"]);
-        if (type_str == "Red")
+        const std::string& color_str = ToStr(capability["color"]);
+        if (color_str == "Red")
           t = theatre::FunctionType::Red;
-        else if (type_str == "Green")
+        else if (color_str == "Green")
           t = theatre::FunctionType::Green;
-        else if (type_str == "Blue")
+        else if (color_str == "Blue")
           t = theatre::FunctionType::Blue;
-        else if (type_str == "White")
+        else if (color_str == "White")
           t = theatre::FunctionType::White;
-        else if (type_str == "Amber")
+        else if (color_str == "Amber")
           t = theatre::FunctionType::Amber;
-        else if (type_str == "UV")
+        else if (color_str == "UV")
           t = theatre::FunctionType::UV;
-        else if (type_str == "Lime")
+        else if (color_str == "Lime")
           t = theatre::FunctionType::Lime;
-        else if (type_str == "ColdWhite")
+        else if (color_str == "ColdWhite")
           t = theatre::FunctionType::ColdWhite;
-        else if (type_str == "WarmWhite")
+        else if (color_str == "WarmWhite")
           t = theatre::FunctionType::WarmWhite;
         functions.emplace(std::piecewise_construct,
                           std::make_tuple(channel_name),

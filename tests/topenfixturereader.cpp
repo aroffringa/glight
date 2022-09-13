@@ -1,5 +1,6 @@
 #include "../system/openfixturereader.h"
 
+#include "../theatre/fixturetypefunction.h"
 #include "../theatre/management.h"
 
 #include <boost/test/unit_test.hpp>
@@ -7,6 +8,7 @@
 #include <sstream>
 
 using glight::system::ReadOpenFixture;
+using glight::theatre::FunctionType;
 using glight::theatre::Management;
 
 namespace {
@@ -658,7 +660,26 @@ BOOST_AUTO_TEST_CASE(read) {
   Management management;
   std::istringstream data_stream(kFlatParQA12);
   std::unique_ptr<glight::json::Node> root = glight::json::Parse(data_stream);
-  ReadOpenFixture(management.GetTheatre(), *root);
+  glight::theatre::Theatre& theatre = management.GetTheatre();
+  ReadOpenFixture(theatre, *root);
+  glight::theatre::FixtureType& f1 = theatre.GetFixtureType("Flat Par QA12 (1-channel)");
+  BOOST_REQUIRE_EQUAL(f1.Functions().size(), 1);
+  BOOST_REQUIRE(f1.Functions()[0].Type() == glight::theatre::FunctionType::ColorMacro);
+  const glight::theatre::MacroParameters& parameters = f1.Functions()[0].GetMacroParameters();
+  BOOST_CHECK_EQUAL(parameters.GetRanges().size(), 16);
+  BOOST_CHECK(!parameters.GetRanges()[0].color);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[0].input_min, 0);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[0].input_max, 16);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[1].input_min, 16);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[1].input_max, 32);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[1].color->Red(), 255);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[1].color->Green(), 0);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[1].color->Blue(), 0);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[2].input_min, 32);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[2].input_max, 48);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[2].color->Red(), 0);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[2].color->Green(), 255);
+  BOOST_CHECK_EQUAL(parameters.GetRanges()[2].color->Blue(), 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

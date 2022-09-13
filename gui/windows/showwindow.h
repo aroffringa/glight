@@ -84,6 +84,7 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   void onMINewClicked();
   void onMIOpenClicked();
   void onMISaveClicked();
+  void onMIImportClicked();
   void onMIQuitClicked();
 
   void updateDryModeState();
@@ -136,7 +137,7 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
 
   Gtk::MenuItem _miFile, _miDesign, _miWindow;
-  Gtk::ImageMenuItem _miNew, _miOpen, _miSave, _miQuit;
+  Gtk::ImageMenuItem _miNew, _miOpen, _miSave, _miImport, _miQuit;
   Gtk::CheckMenuItem _miDryMode;
   Gtk::MenuItem _miCancelDryMode;
   Gtk::MenuItem _miSwapModes;
