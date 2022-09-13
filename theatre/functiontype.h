@@ -22,6 +22,7 @@ enum class FunctionType {
   Strobe,
   Pulse,
   Rotation,
+  Unknown,
   Pan,
   Tilt,
   Effect,
@@ -32,10 +33,10 @@ enum class FunctionType {
 inline std::vector<FunctionType> GetFunctionTypes() {
   using FT = FunctionType;
   return std::vector<FunctionType>{
-      FT::Master,    FT::Red,      FT::Green, FT::Blue,       FT::White,
-      FT::Amber,     FT::UV,       FT::Lime,  FT::ColorMacro, FT::Strobe,
-      FT::Pulse,     FT::Rotation, FT::Pan,   FT::Tilt,       FT::Effect,
-      FT::ColdWhite, FT::WarmWhite};
+      FT::Master, FT::Red,       FT::Green,    FT::Blue,       FT::White,
+      FT::Amber,  FT::UV,        FT::Lime,     FT::ColorMacro, FT::Strobe,
+      FT::Pulse,  FT::Rotation,  FT::Unknown,  FT::Pan,        FT::Tilt,
+      FT::Effect, FT::ColdWhite, FT::WarmWhite};
 }
 
 inline const char* AbbreviatedFunctionType(FunctionType functionType) {
@@ -60,6 +61,8 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
       return "C";
     case FunctionType::Pulse:
       return "P";
+    case FunctionType::Unknown:
+      return "?";
     case FunctionType::Strobe:
       return "S";
     case FunctionType::Rotation:
@@ -164,6 +167,8 @@ inline std::string ToString(FunctionType functionType) {
       return "Strobe";
     case FunctionType::Tilt:
       return "Tilt";
+    case FunctionType::Unknown:
+      return "Unknown";
     case FunctionType::UV:
       return "UV";
     case FunctionType::WarmWhite:
@@ -176,14 +181,15 @@ inline std::string ToString(FunctionType functionType) {
 
 inline constexpr Color GetFunctionColor(FunctionType type) {
   switch (type) {
-    case FunctionType::Master:
     case FunctionType::ColorMacro:
-    case FunctionType::Strobe:
+    case FunctionType::Effect:
+    case FunctionType::Master:
     case FunctionType::Pulse:
     case FunctionType::Rotation:
     case FunctionType::Pan:
+    case FunctionType::Strobe:
     case FunctionType::Tilt:
-    case FunctionType::Effect:
+    case FunctionType::Unknown:
       return Color::Black();
     case FunctionType::Red:
       return Color::RedC();

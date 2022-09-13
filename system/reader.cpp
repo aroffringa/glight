@@ -33,22 +33,6 @@ using json::Number;
 using json::Object;
 using json::String;
 
-const Array &ToArr(const Node &node) {
-  return dynamic_cast<const Array &>(node);
-}
-bool ToBool(const Node &node) {
-  return dynamic_cast<const Boolean &>(node).value;
-}
-const Number &ToNum(const Node &node) {
-  return dynamic_cast<const Number &>(node);
-}
-const Object &ToObj(const Node &node) {
-  return dynamic_cast<const Object &>(node);
-}
-const std::string &ToStr(const Node &node) {
-  return dynamic_cast<const String &>(node).value;
-}
-
 void ParseNameAttr(const Object &node, NamedObject &object) {
   object.SetName(static_cast<const String &>(node["name"]).value);
 }

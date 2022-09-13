@@ -29,15 +29,16 @@ class FixtureControl : public Controllable {
 
   virtual Color InputColor(size_t index) const final override {
     switch (InputType(index)) {
-      case FunctionType::Master:
-      case FunctionType::White:
       case FunctionType::ColorMacro:
-      case FunctionType::Strobe:
+      case FunctionType::Effect:
+      case FunctionType::Master:
+      case FunctionType::Pan:
       case FunctionType::Pulse:
       case FunctionType::Rotation:
-      case FunctionType::Pan:
+      case FunctionType::Strobe:
       case FunctionType::Tilt:
-      case FunctionType::Effect:
+      case FunctionType::Unknown:
+      case FunctionType::White:
         return Color::White();
       case FunctionType::Red:
         return Color::RedC();

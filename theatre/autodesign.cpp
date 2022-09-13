@@ -266,7 +266,7 @@ Chase &AutoDesign::MakeColorShift(
     destination.Add(pc);
 
     for (size_t cIndex = 0; cIndex != controllables.size(); ++cIndex) {
-      size_t colourIndex;
+      size_t colourIndex = 0;
       switch (shiftType) {
         case IncreasingShift:
         case BackAndForthShift:
@@ -332,7 +332,7 @@ Controllable &AutoDesign::MakeVUMeter(
     pc.SetName(destination.GetAvailableName(newAudioLevel.Name() + "_Set"));
     destination.Add(pc);
     for (size_t fixInLevel = 0; fixInLevel != nFixInLevel; ++fixInLevel) {
-      size_t fixIndex;
+      size_t fixIndex = 0;
       if (fixInLevel == 0) {
         switch (direction) {
           case VUIncreasing:

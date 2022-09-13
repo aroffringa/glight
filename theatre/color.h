@@ -10,6 +10,21 @@ class Color {
   constexpr Color(const Color &) = default;
   Color &operator=(const Color &) = default;
 
+  static Color FromHexString(const char *s) {
+    const auto from_hex = [](char c) {
+      if (c >= '1' && c <= '9')
+        return c - '0';
+      else if (c >= 'A' && c <= 'F')
+        return c - 'A' + 10;
+      else
+        return 0;
+    };
+    unsigned char red = from_hex(s[0]) * 16 + from_hex(s[1]);
+    unsigned char blue = from_hex(s[2]) * 16 + from_hex(s[3]);
+    unsigned char green = from_hex(s[4]) * 16 + from_hex(s[5]);
+    return Color(red, blue, green);
+  }
+
   constexpr unsigned char Red() const { return red_; }
   constexpr unsigned char Green() const { return green_; }
   constexpr unsigned char Blue() const { return blue_; }
