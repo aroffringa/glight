@@ -17,7 +17,7 @@ void ParseCapabilities(const json::Array& capabilities,
     const json::Object& capability = ToObj(capability_child);
     const json::Array& dmxRange = ToArr(capability["dmxRange"]);
     const unsigned start = ToNum(*dmxRange.items[0]).AsUInt();
-    const unsigned end = ToNum(*dmxRange.items[1]).AsUInt()+1;
+    const unsigned end = ToNum(*dmxRange.items[1]).AsUInt() + 1;
     const std::string& type = ToStr(capability["type"]);
     FixtureTypeFunction* function = nullptr;
 

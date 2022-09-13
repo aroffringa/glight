@@ -662,10 +662,13 @@ BOOST_AUTO_TEST_CASE(read) {
   std::unique_ptr<glight::json::Node> root = glight::json::Parse(data_stream);
   glight::theatre::Theatre& theatre = management.GetTheatre();
   ReadOpenFixture(theatre, *root);
-  glight::theatre::FixtureType& f1 = theatre.GetFixtureType("Flat Par QA12 (1-channel)");
+  glight::theatre::FixtureType& f1 =
+      theatre.GetFixtureType("Flat Par QA12 (1-channel)");
   BOOST_REQUIRE_EQUAL(f1.Functions().size(), 1);
-  BOOST_REQUIRE(f1.Functions()[0].Type() == glight::theatre::FunctionType::ColorMacro);
-  const glight::theatre::MacroParameters& parameters = f1.Functions()[0].GetMacroParameters();
+  BOOST_REQUIRE(f1.Functions()[0].Type() ==
+                glight::theatre::FunctionType::ColorMacro);
+  const glight::theatre::MacroParameters& parameters =
+      f1.Functions()[0].GetMacroParameters();
   BOOST_CHECK_EQUAL(parameters.GetRanges().size(), 16);
   BOOST_CHECK(!parameters.GetRanges()[0].color);
   BOOST_CHECK_EQUAL(parameters.GetRanges()[0].input_min, 0);

@@ -11,7 +11,7 @@ class Color {
   Color &operator=(const Color &) = default;
 
   static Color FromHexString(const char *s) {
-    const auto from_hex = [](char c)->int {
+    const auto from_hex = [](char c) -> int {
       if (c >= '1' && c <= '9')
         return c - '0';
       else if (c >= 'A' && c <= 'F')
