@@ -2,6 +2,7 @@
 
 #include "../theatre/fixturetypefunction.h"
 #include "../theatre/management.h"
+#include "../theatre/theatre.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -661,7 +662,7 @@ BOOST_AUTO_TEST_CASE(read) {
   std::istringstream data_stream(kFlatParQA12);
   std::unique_ptr<glight::json::Node> root = glight::json::Parse(data_stream);
   glight::theatre::Theatre& theatre = management.GetTheatre();
-  ReadOpenFixture(theatre, *root);
+  ReadOpenFixture(management, *root);
   glight::theatre::FixtureType& f1 =
       theatre.GetFixtureType("Flat Par QA12 (1-channel)");
   BOOST_REQUIRE_EQUAL(f1.Functions().size(), 1);

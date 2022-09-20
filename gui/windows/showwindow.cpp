@@ -481,7 +481,7 @@ void ShowWindow::onMIImportClicked() {
     std::unique_ptr<json::Node> root = json::Parse(stream);
     {
       std::lock_guard<std::mutex> lock(_management->Mutex());
-      system::ReadOpenFixture(_management->GetTheatre(), *root);
+      system::ReadOpenFixture(*_management, *root);
     }
     EmitUpdate();
   }

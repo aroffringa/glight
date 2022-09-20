@@ -1,6 +1,8 @@
 #include "openfixturereader.h"
 
 #include "../theatre/fixturetypefunction.h"
+#include "../theatre/folder.h"
+#include "../theatre/theatre.h"
 
 namespace glight::system {
 
@@ -108,7 +110,7 @@ std::map<std::string, FixtureTypeFunction> ParseFunctions(
 }
 }  // namespace
 
-void ReadOpenFixture(theatre::Theatre& theatre, const json::Node& node) {
+void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
   const json::Object& fixture_object = ToObj(node);
 
   std::map<std::string, FixtureTypeFunction> functions =
@@ -131,7 +133,9 @@ void ReadOpenFixture(theatre::Theatre& theatre, const json::Node& node) {
         mode_functions.emplace_back(iter->second);
     }
     fixture_type.SetFunctions(mode_functions);
-    theatre.AddFixtureType(fixture_type);
+    FixtureType& added_type =
+        management.GetTheatre().AddFixtureType(fixture_type);
+    management.RootFolder().Add(added_type);
   }
 }
 

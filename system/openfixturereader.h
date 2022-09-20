@@ -4,11 +4,11 @@
 #include "jsonreader.h"
 
 #include "../theatre/fixturetype.h"
-#include "../theatre/theatre.h"
+#include "../theatre/management.h"
 
 namespace glight::system {
 
-void ReadOpenFixture(theatre::Theatre& theatre, const json::Node& node);
+void ReadOpenFixture(theatre::Management& theatre, const json::Node& node);
 
 }
 
