@@ -193,6 +193,7 @@ void FixtureTypesWindow::onSelectionChanged() {
     save_button_.set_sensitive(has_selection);
     right_grid_.set_sensitive(has_selection);
     if (type) {
+      name_entry_.set_text(type->Name());
       class_combo_.set_active_text(
           theatre::FixtureType::ClassName(type->GetFixtureClass()));
       functions_frame_.SetFunctions(type->Functions());

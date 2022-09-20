@@ -40,6 +40,7 @@ class FixtureTypeFunction {
   }
 
   size_t DmxOffset() const { return dmx_offset_; }
+  void SetDmxOffset(size_t dmx_offset) { dmx_offset_ = dmx_offset; }
   FunctionType Type() const { return type_; }
   void SetType(FunctionType type) {
     type_ = type;
