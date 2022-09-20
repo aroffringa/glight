@@ -128,11 +128,11 @@ void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
     for (const json::Node& channel : mode_channels) {
       const auto iter = functions.find(ToStr(channel));
       if (iter == functions.end())
-        mode_functions.emplace_back(theatre::FunctionType::Unknown, dmx_channel, false,
-                                    0);
+        mode_functions.emplace_back(theatre::FunctionType::Unknown, dmx_channel,
+                                    false, 0);
       else
         mode_functions.emplace_back(iter->second).SetDmxOffset(dmx_channel);
-      if(mode_functions.back().Is16Bit())
+      if (mode_functions.back().Is16Bit())
         dmx_channel += 2;
       else
         ++dmx_channel;
