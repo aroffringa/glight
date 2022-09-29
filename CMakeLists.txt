@@ -71,6 +71,7 @@ set(SYSTEMFILES
   system/flacdecoder.cpp
   system/jsonreader.cpp
   system/jsonwriter.cpp
+  system/openfixturereader.cpp
   system/reader.cpp
   system/writer.cpp
 )
@@ -127,6 +128,7 @@ if(Boost_FOUND)
     tests/tjsonreader.cpp
     tests/tjsonwriter.cpp
     tests/tmanagement.cpp
+    tests/topenfixturereader.cpp
     tests/tpresetcollection.cpp
     tests/tpresetvalue.cpp
     )

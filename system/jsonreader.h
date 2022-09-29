@@ -23,7 +23,7 @@ struct Object : public Node {
   using const_iterator = system::DereferencingMapIterator<
       std::map<std::string, std::unique_ptr<Node>>::const_iterator>;
 
-  const Node& operator[](const char* name) const {
+  const Node &operator[](const char *name) const {
     const auto iter = children.find(name);
     if (iter == children.end())
       throw std::runtime_error(std::string("Missing field in json file: ") +
@@ -32,13 +32,13 @@ struct Object : public Node {
       return *iter->second;
   }
 
-  const_iterator find(const char* name) const {
+  const_iterator find(const char *name) const {
     return const_iterator(children.find(name));
   }
 
-  const_iterator begin() { return const_iterator(children.begin()); }
+  const_iterator begin() const { return const_iterator(children.begin()); }
 
-  const_iterator end() { return const_iterator(children.end()); }
+  const_iterator end() const { return const_iterator(children.end()); }
 };
 
 struct Array : public Node {
@@ -90,12 +90,28 @@ struct Number : public Node {
   }
 };
 
+inline const Array &ToArr(const Node &node) {
+  return dynamic_cast<const Array &>(node);
+}
+inline bool ToBool(const Node &node) {
+  return dynamic_cast<const Boolean &>(node).value;
+}
+inline const Number &ToNum(const Node &node) {
+  return dynamic_cast<const Number &>(node);
+}
+inline const Object &ToObj(const Node &node) {
+  return dynamic_cast<const Object &>(node);
+}
+inline const std::string &ToStr(const Node &node) {
+  return dynamic_cast<const String &>(node).value;
+}
+
 namespace details {
-bool ReadNumber(char first, std::istream& stream, std::string& data);
-bool ReadString(std::istream& stream, std::string& data);
+bool ReadNumber(char first, std::istream &stream, std::string &data);
+bool ReadString(std::istream &stream, std::string &data);
 }  // namespace details
 
-std::unique_ptr<Node> Parse(std::istream& stream);
+std::unique_ptr<Node> Parse(std::istream &stream);
 
 }  // namespace glight::json
 

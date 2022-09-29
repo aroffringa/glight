@@ -41,6 +41,7 @@ class DereferencingMapIterator {
   IterT operator--() { return --iterator_; }
 
   value_type& operator*() { return *iterator_->second; }
+  const value_type& operator*() const { return *iterator_->second; }
 
   bool operator==(const DereferencingMapIterator& rhs) const {
     return iterator_ == rhs.iterator_;
