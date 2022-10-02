@@ -5,8 +5,9 @@
 #include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/checkbutton.h>
-#include <gtkmm/combobox.h>
 #include <gtkmm/grid.h>
+#include <gtkmm/image.h>
+#include <gtkmm/imagemenuitem.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/radiomenuitem.h>
@@ -87,8 +88,7 @@ class FaderWindow : public Gtk::Window {
   void onAssignChasesClicked();
   void onClearClicked();
   void onSoloToggled();
-  void onNameButtonClicked();
-  void onNewFaderSetupButtonClicked();
+  void onSetNameClicked();
   void onControlValueChanged(double newValue, ControlWidget *widget);
   void onControlAssigned(size_t widgetIndex);
   bool onResize(GdkEventConfigure *event);
@@ -103,8 +103,6 @@ class FaderWindow : public Gtk::Window {
 
   void addControl(bool isToggle, bool newToggleColumn);
 
-  void onFaderSetupChanged();
-  void updateFaderSetupList();
   void loadState();
   void updateValues();
   size_t getFadeInSpeed() const;
@@ -114,14 +112,12 @@ class FaderWindow : public Gtk::Window {
   size_t _keyRowIndex;
 
   Gtk::VBox _vBox;
-  Gtk::Label _faderSetupLabel;
-  Gtk::ComboBox _faderSetup;
-  Glib::RefPtr<Gtk::ListStore> _faderSetupList;
   Gtk::HBox _hBoxUpper;
   Gtk::Grid _controlGrid;
-  Gtk::Button _nameButton, _newFaderSetupButton;
   Gtk::Button _menuButton;
 
+  Gtk::ImageMenuItem _miName;
+  Gtk::Image _miNameImage;
   Gtk::Menu _popupMenu, _fadeInMenu, _fadeOutMenu;
   Gtk::CheckMenuItem _miSolo;
   Gtk::MenuItem _miFadeIn, _miFadeOut;
@@ -139,21 +135,10 @@ class FaderWindow : public Gtk::Window {
   GUIState &_guiState;
   FaderSetupState *_state;
   RecursionLock _recursionLock;
-  sigc::connection _faderSetupChangeConnection, _timeoutConnection;
+  sigc::connection _timeoutConnection;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
 
   boost::posix_time::ptime _lastUpdateTime;
-
-  class FaderSetupColumns : public Gtk::TreeModel::ColumnRecord {
-   public:
-    FaderSetupColumns() {
-      add(_obj);
-      add(_name);
-    }
-
-    Gtk::TreeModelColumn<FaderSetupState *> _obj;
-    Gtk::TreeModelColumn<Glib::ustring> _name;
-  } _faderSetupColumns;
 };
 
 }  // namespace glight::gui
