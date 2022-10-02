@@ -9,7 +9,6 @@ pkg_check_modules(FLACPP flac++ REQUIRED)
 pkg_check_modules(ALSA alsa REQUIRED)
 pkg_check_modules(LIBOLA libola REQUIRED)
 
-find_package(Boost COMPONENTS filesystem system REQUIRED)
 find_package(Threads REQUIRED)
 
 find_library(AUBIO_LIBRARY NAMES aubio)
@@ -32,8 +31,6 @@ include_directories(${FLACPP_INCLUDE_DIRS})
 include_directories(${ALSA_INCLUDE_DIRS})
 include_directories(${LIBOLA_INCLUDE_DIRS})
 include_directories(${AUBIO_INCLUDE_DIR})
-
-include_directories(${Boost_INCLUDE_DIR})
 
 set(GUIFILES
   gui/application.cpp  
@@ -100,8 +97,6 @@ add_executable(glight $<TARGET_OBJECTS:glight-object> glight.cpp)
 target_link_directories(glight PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
 
 set(GLIGHT_LIBRARIES
-  ${Boost_FILESYSTEM_LIBRARY} 
-  ${Boost_SYSTEM_LIBRARY} 
   ${FLACPP_LIBRARIES} 
   ${ALSA_LIBRARIES} 
   ${LIBOLA_LIBRARIES} 
@@ -112,7 +107,7 @@ set(GLIGHT_LIBRARIES
 
 target_link_libraries(glight ${GLIGHT_LIBRARIES})
   
-find_package(Boost COMPONENTS filesystem system unit_test_framework)
+find_package(Boost COMPONENTS unit_test_framework)
 if(Boost_FOUND)
 	include_directories(${Boost_INCLUDE_DIR})
   add_executable(runtests EXCLUDE_FROM_ALL

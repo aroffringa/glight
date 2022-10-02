@@ -1,8 +1,6 @@
 #include <cmath>
 #include <sstream>
 
-#include <boost/thread.hpp>
-
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/stock.h>
 
