@@ -104,7 +104,8 @@ void FaderWindow::initializeWidgets() {
 }
 
 void FaderWindow::initializeMenu() {
-  _miNameImage.set_from_icon_name("user-bookmarks", Gtk::BuiltinIconSize::ICON_SIZE_MENU);
+  _miNameImage.set_from_icon_name("user-bookmarks",
+                                  Gtk::BuiltinIconSize::ICON_SIZE_MENU);
   _miName.set_image(_miNameImage);
   _miName.signal_activate().connect([&]() { onSetNameClicked(); });
   _popupMenu.append(_miName);
