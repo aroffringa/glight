@@ -30,7 +30,7 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
                          theatre::Management &management, size_t keyRowIndex)
     : _management(&management),
       _keyRowIndex(keyRowIndex),
-      _menuButton("Menu"),
+      _menuButton(),
       _miName("Set name..."),
       _miSolo("Solo"),
       _miFadeIn("Fade in"),
@@ -87,17 +87,17 @@ void FaderWindow::initializeWidgets() {
   _timeoutConnection = Glib::signal_timeout().connect(
       sigc::mem_fun(*this, &FaderWindow::onTimeout), 40);
 
-  add(_vBox);
-
-  _vBox.pack_start(_hBoxUpper, false, false);
+  add(_hBox);
 
   _menuButton.set_events(Gdk::BUTTON_PRESS_MASK);
-  _menuButton.signal_button_press_event().connect(
-      sigc::mem_fun(*this, &FaderWindow::onMenuButtonClicked), false);
-  _hBoxUpper.pack_start(_menuButton, false, false, 5);
+  _menuButton.set_image_from_icon_name("document-properties");
+  _menuButton.set_tooltip_text("Open options menu");
+  _menuButton.set_menu(_popupMenu);
+  _leftBox.pack_start(_menuButton, false, false, 5);
+  _hBox.pack_start(_leftBox);
 
   _controlGrid.set_column_spacing(3);
-  _vBox.pack_start(_controlGrid, true, true);
+  _hBox.pack_start(_controlGrid, true, true);
 
   show_all_children();
   set_default_size(0, 300);
@@ -240,14 +240,6 @@ void FaderWindow::removeFader() {
     _toggleColumns.pop_back();
   _controls.pop_back();
   _state->faders.pop_back();
-}
-
-bool FaderWindow::onMenuButtonClicked(GdkEventButton *event) {
-  if (event->button == 1) {
-    _popupMenu.popup(event->button, event->time);
-    return true;
-  }
-  return false;
 }
 
 void FaderWindow::onAssignClicked() {

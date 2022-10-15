@@ -2,7 +2,7 @@
 #define GUI_FADER_WINDOW_H_
 
 #include <gtkmm/box.h>
-#include <gtkmm/button.h>
+#include <gtkmm/menubutton.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/grid.h>
@@ -83,7 +83,6 @@ class FaderWindow : public Gtk::Window {
   void onRemove5FadersClicked() {
     for (size_t i = 0; i != 5; ++i) onRemoveFaderClicked();
   }
-  bool onMenuButtonClicked(GdkEventButton *event);
   void onAssignClicked();
   void onAssignChasesClicked();
   void onClearClicked();
@@ -111,10 +110,10 @@ class FaderWindow : public Gtk::Window {
   theatre::Management *_management;
   size_t _keyRowIndex;
 
-  Gtk::VBox _vBox;
-  Gtk::HBox _hBoxUpper;
+  Gtk::HBox _hBox;
+  Gtk::VBox _leftBox;
   Gtk::Grid _controlGrid;
-  Gtk::Button _menuButton;
+  Gtk::MenuButton _menuButton;
 
   Gtk::ImageMenuItem _miName;
   Gtk::Image _miNameImage;
