@@ -14,9 +14,9 @@
 #include "../system/reader.h"
 #include "../system/writer.h"
 
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include <filesystem>
 #include <memory>
 
 using namespace glight::theatre;
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
 
   glight::system::Write("tmp-testfileformat.gshow", write_management,
                         &guiState);
-  BOOST_CHECK(boost::filesystem::exists("tmp-testfileformat.gshow"));
+  BOOST_CHECK(std::filesystem::exists("tmp-testfileformat.gshow"));
   std::ostringstream stream;
   glight::system::Write(stream, write_management, &guiState);
 

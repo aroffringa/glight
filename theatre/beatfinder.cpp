@@ -1,8 +1,7 @@
 #include "beatfinder.h"
 
 #include <iostream>
-
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <vector>
 
 #include <aubio/aubio.h>
 #include <aubio/tempo/beattracking.h>

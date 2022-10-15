@@ -19,7 +19,6 @@ Glight is specifically aimed at shows or events in which the lighting is control
 The source of Glight can be downloaded from Github, currently from https://github.com/aroffringa/glight/. Glight has a few dependencies. Fortunately, these are all available as precompiled packages in Debian, Ubuntu and most other distributions. Apart from system tools such as cmake, these are the important dependencies:
 
 - [Gtkmm](https://www.gtkmm.org/), the C++ interface to GTK+. `libgtkmm-3.0-dev` on Debian and Ubuntu.
-- [Boost](https://www.boost.org/). `libboost-system-dev` and `libboost-filesystem-dev` on Debian and Ubuntu (`libboost-test-dev` is only needed for running unit tests).
 - [Aubio](https://aubio.org/). `libaubio-dev` on Debian and Ubuntu.
 - [Flac++](https://xiph.org/flac/). `libflac++-dev` on Debian and Ubuntu.
 - [Alsa library](https://www.alsa-project.org/). `libasound2-dev` on Debian and Ubuntu.
@@ -34,6 +33,8 @@ Once these prerequisited are installed, glight can be compiled by running the fo
     make -j 4
 
 To also install glight in the system path, `sudo make install` can be run afterwards.
+
+[Boost](https://www.boost.org/) is required to also compile the tests. (`libboost-test-dev` on Debian and Ubuntu).
 
 ## Contact
 Glight is written by André Offringa. Feedback and bugreports are welcome; please use Github for this, or mail me at offringa@gmail.com.

@@ -22,7 +22,7 @@ namespace glight::theatre {
 Management::Management()
     : _thread(),
       _isQuitting(false),
-      _createTime(boost::posix_time::microsec_clock::local_time()),
+      _createTime(std::chrono::steady_clock::now()),
       _rndDistribution(0, ControlValue::MaxUInt() + 1),
       _overridenBeat(0),
       _lastOverridenBeatTime(0.0),
