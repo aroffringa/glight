@@ -15,7 +15,7 @@
 #include <gtkmm/separatormenuitem.h>
 #include <gtkmm/window.h>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <chrono>
 
 #include "../../theatre/forwards.h"
 
@@ -137,7 +137,7 @@ class FaderWindow : public Gtk::Window {
   sigc::connection _timeoutConnection;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
 
-  boost::posix_time::ptime _lastUpdateTime;
+  std::chrono::time_point<std::chrono::steady_clock> _lastUpdateTime;
 };
 
 }  // namespace glight::gui

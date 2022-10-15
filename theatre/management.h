@@ -2,12 +2,12 @@
 #define THEATRE_MANAGEMENT_H_
 
 #include <atomic>
+#include <chrono>
+#include <memory>
 #include <mutex>
 #include <random>
 #include <thread>
 #include <vector>
-
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "forwards.h"
 #include "valuesnapshot.h"
@@ -105,9 +105,10 @@ class Management {
   ValueSnapshot Snapshot();
 
   double GetOffsetTimeInMS() const {
-    boost::posix_time::ptime currentTime(
-        boost::posix_time::microsec_clock::local_time());
-    return (double)(currentTime - _createTime).total_microseconds() / 1000.0;
+    const std::chrono::time_point<std::chrono::steady_clock> current_time = 
+        std::chrono::steady_clock::now();
+    const std::chrono::duration<double> d = current_time - _createTime;
+    return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
   }
   Show &GetShow() const { return *_show; }
 
@@ -170,7 +171,7 @@ class Management {
   std::unique_ptr<std::thread> _thread;
   std::atomic<bool> _isQuitting;
   std::mutex _mutex;
-  boost::posix_time::ptime _createTime;
+  std::chrono::time_point<std::chrono::steady_clock> _createTime;
   std::mt19937 _randomGenerator;
   std::uniform_int_distribution<unsigned> _rndDistribution;
   std::atomic<size_t> _overridenBeat;

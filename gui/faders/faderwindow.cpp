@@ -48,7 +48,7 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
       _eventHub(eventHub),
       _guiState(guiState),
       _state(nullptr),
-      _lastUpdateTime(boost::posix_time::microsec_clock::local_time()) {
+      _lastUpdateTime(std::chrono::steady_clock::now()) {
   initializeWidgets();
   initializeMenu();
 }
