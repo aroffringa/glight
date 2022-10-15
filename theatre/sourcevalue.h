@@ -9,65 +9,72 @@ class Controllable;
 
 class SourceValue {
  public:
-  SourceValue(Controllable &controllable, size_t inputIndex)
-      : _value(controllable, inputIndex),
-        _fadeSpeed(0.0),
-        _targetValue(_value.Value()) {}
+  /**
+   * Construct a SourceValue that is connected to an input
+   * of a controllable.
+   */
+  SourceValue(Controllable &controllable, size_t input_index)
+      : value_(controllable, input_index),
+        fade_speed_(0.0),
+        target_value_(value_.Value()) {}
 
   /**
    * Copy constructor that copies the source but associates it with the given
    * controllable.
    */
   SourceValue(const SourceValue &source, Controllable &controllable)
-      : _value(source._value, controllable),
-        _fadeSpeed(0.0),
-        _targetValue(source._targetValue) {}
+      : value_(source.value_, controllable),
+        fade_speed_(0.0),
+        target_value_(source.target_value_) {}
 
-  PresetValue &Preset() { return _value; }
-  const PresetValue &Preset() const { return _value; }
+  PresetValue &Preset() { return value_; }
+  const PresetValue &Preset() const { return value_; }
 
-  bool IsIgnorable() const { return _value.IsIgnorable(); }
+  bool IsIgnorable() const { return value_.IsIgnorable(); }
 
-  Controllable &GetControllable() const { return _value.Controllable(); }
+  Controllable &GetControllable() const { return value_.GetControllable(); }
 
   void ApplyFade(double timePassed) {
-    unsigned fadingValue = _value.Value().UInt();
-    if (_targetValue != fadingValue) {
-      double fadeSpeed = _fadeSpeed;
+    unsigned fading_value = value_.Value().UInt();
+    if (target_value_ != fading_value) {
+      double fadeSpeed = fade_speed_;
       if (fadeSpeed == 0.0) {
-        fadingValue = _targetValue;
+        fading_value = target_value_;
       } else {
-        unsigned stepSize = unsigned(std::min<double>(
+        unsigned step_size = unsigned(std::min<double>(
             timePassed * fadeSpeed * double(ControlValue::MaxUInt() + 1),
             double(ControlValue::MaxUInt() + 1)));
-        if (_targetValue > fadingValue) {
-          if (fadingValue + stepSize > _targetValue)
-            fadingValue = _targetValue;
+        if (target_value_ > fading_value) {
+          if (fading_value + step_size > target_value_)
+            fading_value = target_value_;
           else
-            fadingValue += stepSize;
+            fading_value += step_size;
         } else {
-          if (_targetValue + stepSize > fadingValue)
-            fadingValue = _targetValue;
+          if (target_value_ + step_size > fading_value)
+            fading_value = target_value_;
           else
-            fadingValue -= stepSize;
+            fading_value -= step_size;
         }
       }
-      _value.Value().Set(fadingValue);
+      value_.Value().Set(fading_value);
     }
   }
 
-  void Set(unsigned targetValue, double fadeSpeed) {
-    _targetValue = targetValue;
-    _fadeSpeed = fadeSpeed;
-    if (fadeSpeed == 0.0) {
-      _value.SetValue(targetValue);
+  void Set(unsigned target_value, double fade_speed) {
+    target_value_ = target_value;
+    fade_speed_ = fade_speed;
+    if (fade_speed == 0.0) {
+      value_.SetValue(target_value);
     }
   }
+
+  double FadeSpeed() const { return fade_speed_; }
+  unsigned TargetValue() const { return target_value_; }
 
  private:
-  PresetValue _value;
-  double _fadeSpeed;
-  unsigned _targetValue;
+  PresetValue value_;
+  double fade_speed_;
+  unsigned target_value_;
 };
 
 }  // namespace glight::theatre

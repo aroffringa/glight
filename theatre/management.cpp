@@ -503,7 +503,7 @@ void Management::dryCopyControllerDependency(const Management &forDryCopy,
     for (const std::unique_ptr<PresetValue> &value :
          presetCollection->PresetValues()) {
       // This preset is owned by the preset collection, not by management.
-      size_t cIndex = forDryCopy.ControllableIndex(&value->Controllable());
+      size_t cIndex = forDryCopy.ControllableIndex(&value->GetControllable());
       if (_controllables[cIndex] == nullptr)
         dryCopyControllerDependency(forDryCopy, cIndex);
       pc.AddPresetValue(*value, *_controllables[cIndex]);

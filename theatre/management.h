@@ -24,7 +24,7 @@ class Management {
 
   void Clear();
 
-  bool IsEmpty() {
+  bool IsEmpty() const {
     return _folders.size() <= 1 && _controllables.empty() &&
            _sourceValues.empty();
   }
@@ -110,7 +110,8 @@ class Management {
     const std::chrono::duration<double> d = current_time - _createTime;
     return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
   }
-  Show &GetShow() const { return *_show; }
+  const Show &GetShow() const { return *_show; }
+  Show &GetShow() { return *_show; }
 
   std::unique_ptr<Management> MakeDryMode();
 

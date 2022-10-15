@@ -18,27 +18,25 @@ class EventTransmitter;
 /**
  * @author Andre Offringa
  */
-class FaderWidget : public ControlWidget {
+class FaderWidget final : public ControlWidget {
  public:
   FaderWidget(theatre::Management &management, EventTransmitter &eventHub,
               char key);
   ~FaderWidget();
 
-  void Toggle() final override;
-  void FullOn() final override;
-  void FullOff() final override;
-  void Assign(theatre::SourceValue *item, bool moveFader) final override;
-  void MoveSlider() final override;
-  theatre::SourceValue *GetSourceValue() const final override {
-    return _sourceValue;
-  }
+  void Toggle() override;
+  void FullOn() override;
+  void FullOff() override;
+  void Assign(theatre::SourceValue *item, bool moveFader) override;
+  void MoveSlider() override;
+  theatre::SourceValue *GetSourceValue() const override { return _sourceValue; }
 
-  void Limit(double value) final override {
+  void Limit(double value) override {
     if (_scale.get_value() > value) _scale.set_value(value);
   }
 
   void ChangeManagement(theatre::Management &management,
-                        bool moveSliders) final override;
+                        bool moveSliders) override;
 
   Gtk::Widget &NameLabel() { return _eventBox; }
 

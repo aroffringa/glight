@@ -18,7 +18,7 @@ class Controllable;
  */
 class PresetValue {
  public:
-  PresetValue(class Controllable &controllable, size_t inputIndex)
+  PresetValue(Controllable &controllable, size_t inputIndex)
       : _value(0), _controllable(&controllable), _inputIndex(inputIndex) {}
 
   /**
@@ -33,7 +33,7 @@ class PresetValue {
    * Copy constructor that copies the source but associates it with the given
    * controllable.
    */
-  PresetValue(const PresetValue &source, class Controllable &controllable)
+  PresetValue(const PresetValue &source, Controllable &controllable)
       : _value(source._value),
         _controllable(&controllable),
         _inputIndex(source._inputIndex) {}
@@ -44,9 +44,7 @@ class PresetValue {
   const ControlValue &Value() const { return _value; }
   ControlValue &Value() { return _value; }
 
-  class Controllable &Controllable() const {
-    return *_controllable;
-  }
+  Controllable &GetControllable() const { return *_controllable; }
 
   size_t InputIndex() const { return _inputIndex; }
 
@@ -56,14 +54,14 @@ class PresetValue {
 
   std::string Title() const;
 
-  void Reconnect(class Controllable &controllable, size_t inputIndex) {
+  void Reconnect(Controllable &controllable, size_t inputIndex) {
     _controllable = &controllable;
     _inputIndex = inputIndex;
   }
 
  private:
   ControlValue _value;
-  class Controllable *_controllable;
+  Controllable *_controllable;
   size_t _inputIndex;
 
   sigc::signal<void()> _signalDelete;

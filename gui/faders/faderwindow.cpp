@@ -47,13 +47,13 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
       _miRemove5Faders("Remove 5"),
       _eventHub(eventHub),
       _guiState(guiState),
-      _state(nullptr),
-      _lastUpdateTime(std::chrono::steady_clock::now()) {
+      _state(nullptr) {
   initializeWidgets();
   initializeMenu();
 }
 
 FaderWindow::~FaderWindow() {
+  _timeoutConnection.disconnect();
   if (_state) _state->isActive = false;
   _guiState.EmitFaderSetupChangeSignal();
 }
@@ -377,17 +377,6 @@ void FaderWindow::loadState() {
 
   for (size_t i = 0; i != _state->faders.size(); ++i)
     _controls[i]->Assign(_state->faders[i].GetSourceValue(), true);
-}
-
-void FaderWindow::updateValues() {
-  /*boost::posix_time::ptime currentTime(
-      boost::posix_time::microsec_clock::local_time());
-  double timePassed =
-      (double)(currentTime - _lastUpdateTime).total_microseconds() * 1e-6;
-  _lastUpdateTime = std::move(currentTime);
-   for (std::unique_ptr<ControlWidget> &cw : _controls) {
-    cw->UpdateValue(timePassed);
-  }*/
 }
 
 double FaderWindow::mapSliderToSpeed(int sliderVal) {
