@@ -57,14 +57,16 @@ class ControlValue {
   }
 
   constexpr static MixStyle CombineMixStyles(MixStyle primaryStyle,
-                                   MixStyle secondaryStyle) {
+                                             MixStyle secondaryStyle) {
     if (primaryStyle == MixStyle::Default)
       return secondaryStyle;
     else
       return primaryStyle;
   }
   void Set(unsigned int uintValue) { _value = uintValue; }
-  constexpr double Ratio() const { return (double)_value / (double)((1 << 24) - 1); }
+  constexpr double Ratio() const {
+    return (double)_value / (double)((1 << 24) - 1);
+  }
   constexpr double RoundedPercentage() const {
     return std::round(1000.0 * (double)_value / (double)((1 << 24) - 1)) * 0.1;
   }

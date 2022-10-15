@@ -67,7 +67,7 @@ class SourceValue {
       value_.SetValue(target_value);
     }
   }
-  
+
   double FadeSpeed() const { return fade_speed_; }
   unsigned TargetValue() const { return target_value_; }
 

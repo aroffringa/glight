@@ -44,9 +44,7 @@ class PresetValue {
   const ControlValue &Value() const { return _value; }
   ControlValue &Value() { return _value; }
 
-  Controllable &GetControllable() const {
-    return *_controllable;
-  }
+  Controllable &GetControllable() const { return *_controllable; }
 
   size_t InputIndex() const { return _inputIndex; }
 

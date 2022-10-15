@@ -29,9 +29,7 @@ class FaderWidget final : public ControlWidget {
   void FullOff() override;
   void Assign(theatre::SourceValue *item, bool moveFader) override;
   void MoveSlider() override;
-  theatre::SourceValue *GetSourceValue() const override {
-    return _sourceValue;
-  }
+  theatre::SourceValue *GetSourceValue() const override { return _sourceValue; }
 
   void Limit(double value) override {
     if (_scale.get_value() > value) _scale.set_value(value);
