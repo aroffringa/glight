@@ -9,6 +9,7 @@
 #include "../../theatre/management.h"
 #include "../../theatre/presetvalue.h"
 
+#include <gtkmm/entry.h>
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
@@ -29,10 +30,8 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
                          theatre::Management &management, size_t keyRowIndex)
     : _management(&management),
       _keyRowIndex(keyRowIndex),
-      _faderSetupLabel("Fader setup: "),
-      _nameButton("Name"),
-      _newFaderSetupButton(Gtk::Stock::NEW),
-      _menuButton("Menu"),
+      _menuButton(),
+      _miName("Set name..."),
       _miSolo("Solo"),
       _miFadeIn("Fade in"),
       _miFadeOut("Fade out"),
@@ -55,7 +54,6 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
 }
 
 FaderWindow::~FaderWindow() {
-  _faderSetupChangeConnection.disconnect();
   if (_state) _state->isActive = false;
   _guiState.EmitFaderSetupChangeSignal();
 }
@@ -71,7 +69,6 @@ void FaderWindow::LoadNew() {
   _state->height = std::max(300, get_height());
   RecursionLock::Token token(_recursionLock);
   loadState();
-  updateFaderSetupList();
 }
 
 void FaderWindow::LoadState(FaderSetupState *state) {
@@ -79,14 +76,10 @@ void FaderWindow::LoadState(FaderSetupState *state) {
   _state->isActive = true;
   RecursionLock::Token token(_recursionLock);
   loadState();
-  updateFaderSetupList();
 }
 
 void FaderWindow::initializeWidgets() {
   set_title("Glight - faders");
-
-  _faderSetupChangeConnection = _guiState.FaderSetupSignalChange().connect(
-      sigc::mem_fun(*this, &FaderWindow::updateFaderSetupList));
 
   signal_configure_event().connect(sigc::mem_fun(*this, &FaderWindow::onResize),
                                    false);
@@ -94,42 +87,29 @@ void FaderWindow::initializeWidgets() {
   _timeoutConnection = Glib::signal_timeout().connect(
       sigc::mem_fun(*this, &FaderWindow::onTimeout), 40);
 
-  add(_vBox);
-
-  _vBox.pack_start(_hBoxUpper, false, false);
+  add(_hBox);
 
   _menuButton.set_events(Gdk::BUTTON_PRESS_MASK);
-  _menuButton.signal_button_press_event().connect(
-      sigc::mem_fun(*this, &FaderWindow::onMenuButtonClicked), false);
-  _hBoxUpper.pack_start(_menuButton, false, false, 5);
-
-  _hBoxUpper.pack_start(_faderSetupLabel, false, false);
-
-  _faderSetupList = Gtk::ListStore::create(_faderSetupColumns);
-  _faderSetup.set_model(_faderSetupList);
-  _faderSetup.pack_start(_faderSetupColumns._name);
-  _faderSetup.signal_changed().connect(
-      sigc::mem_fun(*this, &FaderWindow::onFaderSetupChanged));
-
-  _hBoxUpper.pack_start(_faderSetup, true, true);
-
-  _nameButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &FaderWindow::onNameButtonClicked));
-  _nameButton.set_image_from_icon_name("user-bookmarks");
-  _hBoxUpper.pack_start(_nameButton, false, false, 5);
-
-  _newFaderSetupButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &FaderWindow::onNewFaderSetupButtonClicked));
-  _hBoxUpper.pack_start(_newFaderSetupButton, false, false, 5);
+  _menuButton.set_image_from_icon_name("document-properties");
+  _menuButton.set_tooltip_text("Open options menu");
+  _menuButton.set_menu(_popupMenu);
+  _leftBox.pack_start(_menuButton, false, false, 5);
+  _hBox.pack_start(_leftBox);
 
   _controlGrid.set_column_spacing(3);
-  _vBox.pack_start(_controlGrid, true, true);
+  _hBox.pack_start(_controlGrid, true, true);
 
   show_all_children();
   set_default_size(0, 300);
 }
 
 void FaderWindow::initializeMenu() {
+  _miNameImage.set_from_icon_name("user-bookmarks",
+                                  Gtk::BuiltinIconSize::ICON_SIZE_MENU);
+  _miName.set_image(_miNameImage);
+  _miName.signal_activate().connect([&]() { onSetNameClicked(); });
+  _popupMenu.append(_miName);
+
   _miSolo.signal_activate().connect([&]() { onSoloToggled(); });
   _popupMenu.append(_miSolo);
 
@@ -262,14 +242,6 @@ void FaderWindow::removeFader() {
   _state->faders.pop_back();
 }
 
-bool FaderWindow::onMenuButtonClicked(GdkEventButton *event) {
-  if (event->button == 1) {
-    _popupMenu.popup(event->button, event->time);
-    return true;
-  }
-  return false;
-}
-
 void FaderWindow::onAssignClicked() {
   for (std::unique_ptr<ControlWidget> &c : _controls) c->Unassign();
   size_t n = _management->SourceValues().size();
@@ -376,7 +348,7 @@ bool FaderWindow::IsAssigned(theatre::SourceValue *sourceValue) {
   return false;
 }
 
-void FaderWindow::onNameButtonClicked() {
+void FaderWindow::onSetNameClicked() {
   Gtk::MessageDialog dialog(*this, "Name fader setup", false,
                             Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
   Gtk::Entry entry;
@@ -386,57 +358,6 @@ void FaderWindow::onNameButtonClicked() {
   int result = dialog.run();
   if (result == Gtk::RESPONSE_OK) {
     _state->name = entry.get_text();
-    _guiState.EmitFaderSetupChangeSignal();
-  }
-}
-
-void FaderWindow::onNewFaderSetupButtonClicked() {
-  RecursionLock::Token token(_recursionLock);
-  _state->isActive = false;
-  _guiState.FaderSetups().emplace_back(new FaderSetupState());
-  _state = _guiState.FaderSetups().back().get();
-  _state->isActive = true;
-  _state->name = "Unnamed fader setup";
-  for (size_t i = 0; i != 10; ++i) _state->faders.emplace_back();
-  _state->height = 300;
-  _state->width = 100;
-  loadState();
-
-  token.Release();
-
-  _guiState.EmitFaderSetupChangeSignal();
-}
-
-void FaderWindow::updateFaderSetupList() {
-  RecursionLock::Token token(_recursionLock);
-  _faderSetupList->clear();
-  for (const std::unique_ptr<FaderSetupState> &fState :
-       _guiState.FaderSetups()) {
-    bool itsMe = fState.get() == _state;
-    if (!fState->isActive || itsMe) {
-      Gtk::TreeModel::iterator row = _faderSetupList->append();
-      (*row)[_faderSetupColumns._obj] = fState.get();
-      (*row)[_faderSetupColumns._name] = fState->name;
-      if (itsMe) {
-        _faderSetup.set_active(row);
-      }
-    }
-  }
-}
-
-void FaderWindow::onFaderSetupChanged() {
-  if (_recursionLock.IsFirst()) {
-    RecursionLock::Token token(_recursionLock);
-    _state->isActive = false;
-    _state->height = get_height();
-    _state->width = get_width();
-    _state = (*_faderSetup.get_active())[_faderSetupColumns._obj];
-    _state->isActive = true;
-
-    loadState();
-
-    token.Release();
-
     _guiState.EmitFaderSetupChangeSignal();
   }
 }
