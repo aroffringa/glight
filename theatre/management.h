@@ -105,7 +105,7 @@ class Management {
   ValueSnapshot Snapshot();
 
   double GetOffsetTimeInMS() const {
-    const std::chrono::time_point<std::chrono::steady_clock> current_time = 
+    const std::chrono::time_point<std::chrono::steady_clock> current_time =
         std::chrono::steady_clock::now();
     const std::chrono::duration<double> d = current_time - _createTime;
     return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
