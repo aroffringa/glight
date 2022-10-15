@@ -173,12 +173,12 @@ void CheckEqual(const Management &a, const Management &b) {
   BOOST_CHECK_EQUAL(readCollection.NOutputs(), 2);
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[0]->Value().UInt(),
                     ControlValue::MaxUInt() / 2);
-  BOOST_CHECK_EQUAL(&readCollection.PresetValues()[0]->Controllable(),
+  BOOST_CHECK_EQUAL(&readCollection.PresetValues()[0]->GetControllable(),
                     &a_fixture_control);
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[0]->InputIndex(), 0);
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[1]->Value().UInt(),
                     ControlValue::MaxUInt());
-  BOOST_CHECK_EQUAL(&readCollection.PresetValues()[1]->Controllable(),
+  BOOST_CHECK_EQUAL(&readCollection.PresetValues()[1]->GetControllable(),
                     &a_fixture_control);
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[1]->InputIndex(), 3);
   BOOST_CHECK_NE(a.GetSourceValue(readCollection, 0), nullptr);

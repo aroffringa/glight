@@ -126,8 +126,8 @@ void ToggleWidget::Assign(theatre::SourceValue *item, bool moveFader) {
 
 void ToggleWidget::MoveSlider() {
   if (_sourceValue != nullptr) {
-    _onCheckButton.set_active(_sourceValue->Preset().Value().UInt() != 0);
-    SignalValueChange().emit(_sourceValue->Preset().Value().UInt());
+    _onCheckButton.set_active(_sourceValue->TargetValue() != 0);
+    SignalValueChange().emit(_sourceValue->TargetValue());
   }
 }
 

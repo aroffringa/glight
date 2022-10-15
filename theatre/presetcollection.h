@@ -37,7 +37,7 @@ class PresetCollection : public Controllable {
   size_t NOutputs() const final override { return _presetValues.size(); }
 
   std::pair<Controllable *, size_t> Output(size_t index) const final override {
-    return std::make_pair(&_presetValues[index]->Controllable(),
+    return std::make_pair(&_presetValues[index]->GetControllable(),
                           _presetValues[index]->InputIndex());
   }
 
@@ -48,7 +48,7 @@ class PresetCollection : public Controllable {
       ControlValue value(
           ControlValue::Mix(leftHand, rightHand, MixStyle::Multiply));
 
-      pv->Controllable().MixInput(pv->InputIndex(), value);
+      pv->GetControllable().MixInput(pv->InputIndex(), value);
     }
   }
   const std::vector<std::unique_ptr<PresetValue>> &PresetValues() const {

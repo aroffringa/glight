@@ -12,17 +12,17 @@ namespace glight::theatre {
  */
 class ControlValue {
  public:
-  ControlValue() {}
-  ControlValue(unsigned value) : _value(value) {}
-  ControlValue(const ControlValue &source) = default;
+  constexpr ControlValue() : _value(0) {}
+  constexpr ControlValue(unsigned value) : _value(value) {}
+  constexpr ControlValue(const ControlValue &source) = default;
 
-  operator bool() const { return _value != 0; }
+  constexpr operator bool() const { return _value != 0; }
 
-  unsigned int UInt() const { return _value; }
+  constexpr unsigned int UInt() const { return _value; }
 
-  static ControlValue Zero() { return ControlValue(0); }
-  static ControlValue Max() { return ControlValue((1 << 24) - 1); }
-  static unsigned MaxUInt() { return (1 << 24) - 1; }
+  constexpr static ControlValue Zero() { return ControlValue(0); }
+  constexpr static ControlValue Max() { return ControlValue((1 << 24) - 1); }
+  constexpr static unsigned MaxUInt() { return (1 << 24) - 1; }
 
   static unsigned Mix(unsigned firstValue, unsigned secondValue,
                       MixStyle mixStyle) {
@@ -50,13 +50,13 @@ class ControlValue {
     }
   }
 
-  static unsigned MultiplyValues(unsigned first, unsigned second) {
+  constexpr static unsigned MultiplyValues(unsigned first, unsigned second) {
     first >>= 9;
     second >>= 9;
     return (first * second) >> 6;
   }
 
-  static MixStyle CombineMixStyles(MixStyle primaryStyle,
+  constexpr static MixStyle CombineMixStyles(MixStyle primaryStyle,
                                    MixStyle secondaryStyle) {
     if (primaryStyle == MixStyle::Default)
       return secondaryStyle;
@@ -64,8 +64,8 @@ class ControlValue {
       return primaryStyle;
   }
   void Set(unsigned int uintValue) { _value = uintValue; }
-  double Ratio() const { return (double)_value / (double)((1 << 24) - 1); }
-  double RoundedPercentage() const {
+  constexpr double Ratio() const { return (double)_value / (double)((1 << 24) - 1); }
+  constexpr double RoundedPercentage() const {
     return std::round(1000.0 * (double)_value / (double)((1 << 24) - 1)) * 0.1;
   }
 

@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(Copy) {
   PresetValue value(collection, 42);
   PresetValue copy(value);
 
-  BOOST_CHECK_EQUAL(&copy.Controllable(), &collection);
+  BOOST_CHECK_EQUAL(&copy.GetControllable(), &collection);
   BOOST_CHECK_EQUAL(copy.InputIndex(), 42);
 
   bool isCalled = false;

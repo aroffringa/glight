@@ -123,7 +123,7 @@ void PresetCollectionWindow::fillPresetsList() {
     Gtk::TreeModel::iterator iter = _presetsStore->append();
     Gtk::TreeModel::Row row = *iter;
     row[_presetListColumns._control] =
-        pValue->Controllable().InputName(pValue->InputIndex());
+        pValue->GetControllable().InputName(pValue->InputIndex());
     std::ostringstream str;
     str << pValue->Value().RoundedPercentage();
     row[_presetListColumns._value] = str.str();

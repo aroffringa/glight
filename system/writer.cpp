@@ -169,13 +169,13 @@ void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
 }
 
 void writePresetValue(WriteState &state, const PresetValue &presetValue) {
-  writeControllable(state, presetValue.Controllable());
+  writeControllable(state, presetValue.GetControllable());
 
   state.writer.StartObject();
-  state.writer.String("controllable-ref", presetValue.Controllable().Name());
+  state.writer.String("controllable-ref", presetValue.GetControllable().Name());
   state.writer.Number("input-index", presetValue.InputIndex());
   state.writer.Number("folder",
-                      state.folderIds[&presetValue.Controllable().Parent()]);
+                      state.folderIds[&presetValue.GetControllable().Parent()]);
   state.writer.Number("value", presetValue.Value().UInt());
   state.writer.EndObject();
 }
@@ -185,7 +185,7 @@ void writePresetCollection(WriteState &state,
   const std::vector<std::unique_ptr<PresetValue>> &values =
       presetCollection.PresetValues();
   for (const std::unique_ptr<PresetValue> &pv : values)
-    writeControllable(state, pv->Controllable());
+    writeControllable(state, pv->GetControllable());
 
   state.writer.StartObject();
   state.writer.String("type", "preset-collection");

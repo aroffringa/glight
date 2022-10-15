@@ -130,7 +130,7 @@ void FaderWidget::Assign(theatre::SourceValue *item, bool moveFader) {
 
 void FaderWidget::MoveSlider() {
   if (_sourceValue != nullptr) {
-    _scale.set_value(_sourceValue->Preset().Value().UInt());
+    _scale.set_value(_sourceValue->TargetValue());
     SignalValueChange().emit(_scale.get_value());
   }
 }

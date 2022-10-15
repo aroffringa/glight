@@ -96,14 +96,13 @@ class FaderWindow : public Gtk::Window {
   void onChangeUpSpeed();
   void onChangeDownSpeed();
   bool onTimeout() {
-    updateValues();
+    ReloadValues();
     return true;
   }
 
   void addControl(bool isToggle, bool newToggleColumn);
 
   void loadState();
-  void updateValues();
   size_t getFadeInSpeed() const;
   size_t getFadeOutSpeed() const;
 
@@ -136,8 +135,6 @@ class FaderWindow : public Gtk::Window {
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
-
-  std::chrono::time_point<std::chrono::steady_clock> _lastUpdateTime;
 };
 
 }  // namespace glight::gui
