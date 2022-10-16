@@ -28,7 +28,8 @@ Management::Management()
       _lastOverridenBeatTime(0.0),
 
       _theatre(new class Theatre()),
-      _snapshot(new ValueSnapshot()),
+      _primarySnapshot(new ValueSnapshot(true, 0)),
+      _secondarySnapshot(new ValueSnapshot(false, 0)),
       _show(new class Show(*this)) {
   _folders.emplace_back(new Folder());
   _rootFolder = _folders.back().get();
@@ -65,50 +66,56 @@ void Management::Clear() {
 void Management::AddDevice(std::unique_ptr<class DmxDevice> device) {
   std::lock_guard<std::mutex> lock(_mutex);
   _devices.emplace_back(std::move(device));
-  _snapshot->SetUniverseCount(_devices.size());
+  _primarySnapshot->SetUniverseCount(_devices.size());
+  _secondarySnapshot->SetUniverseCount(_devices.size());
 }
 
 void Management::Run() {
   if (_thread == nullptr) {
     _isQuitting = false;
-    ManagementThread threadFunc;
-    threadFunc.parent = this;
-    _thread.reset(new std::thread(threadFunc));
+    _thread.reset(new std::thread([&](){ ThreadLoop(); }));
   } else
     throw std::runtime_error("Invalid call to Run(): already running");
 }
 
-void Management::ManagementThread::operator()() {
-  std::unique_ptr<ValueSnapshot> nextSnapshot(new ValueSnapshot());
-  nextSnapshot->SetUniverseCount(parent->_devices.size());
+void Management::ThreadLoop() {
+  std::unique_ptr<ValueSnapshot> nextPrimary = std::make_unique<ValueSnapshot>(true, _devices.size());
+  std::unique_ptr<ValueSnapshot> nextSecondary = std::make_unique<ValueSnapshot>(false, _devices.size());
   unsigned timestepNumber = 0;
-  while (!parent->_isQuitting) {
-    for (unsigned universe = 0; universe < parent->_devices.size();
-         ++universe) {
-      unsigned values[512];
-      unsigned char valuesChar[512];
+  while (!_isQuitting) {
+    for(bool is_primary : {true, false}) {
+      for (unsigned universe = 0; universe != _devices.size();
+          ++universe) {
+        unsigned values[512];
+        unsigned char valuesChar[512];
 
-      std::fill_n(values, 512, 0);
+        std::fill_n(values, 512, 0);
 
-      parent->getChannelValues(timestepNumber, values, universe);
+        getChannelValues(timestepNumber, values, universe);
 
-      for (unsigned i = 0; i < 512; ++i) {
-        unsigned val = (values[i] >> 16);
-        if (val > 255) val = 255;
-        valuesChar[i] = static_cast<unsigned char>(val);
+        for (unsigned i = 0; i < 512; ++i) {
+          unsigned val = (values[i] >> 16);
+          if (val > 255) val = 255;
+          valuesChar[i] = static_cast<unsigned char>(val);
+        }
+
+        ValueUniverseSnapshot &universeValues =
+          is_primary ? 
+            nextPrimary->GetUniverseSnapshot(universe) :
+            nextSecondary->GetUniverseSnapshot(universe);
+        universeValues.SetValues(valuesChar,
+                                _theatre->HighestChannel() + 1);
+
+        if(is_primary) {
+          _devices[universe]->WaitForNextSync();
+          _devices[universe]->SetValues(valuesChar, 512);
+        }
       }
-
-      ValueUniverseSnapshot &universeValues =
-          nextSnapshot->GetUniverseSnapshot(universe);
-      universeValues.SetValues(valuesChar,
-                               parent->_theatre->HighestChannel() + 1);
-
-      parent->_devices[universe]->WaitForNextSync();
-      parent->_devices[universe]->SetValues(valuesChar, 512);
     }
 
-    std::lock_guard<std::mutex> lock(parent->_mutex);
-    std::swap(parent->_snapshot, nextSnapshot);
+    std::lock_guard<std::mutex> lock(_mutex);
+    std::swap(_primarySnapshot, nextPrimary);
+    std::swap(_secondarySnapshot, nextSecondary);
 
     ++timestepNumber;
   }
@@ -125,22 +132,21 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
   double relTimeInMs = GetOffsetTimeInMS();
   double beatValue;
   unsigned audioLevel;
+  // Get the beat
   if (relTimeInMs - _lastOverridenBeatTime < 8000.0 && _overridenBeat != 0) {
-    // beatConfidence = 1.0;
     beatValue = _overridenBeat;
-    if (_beatFinder)
-      audioLevel = _beatFinder->GetAudioLevel();
-    else
-      audioLevel = 0;
   } else if (_beatFinder) {
     double beatConfidence;
     _beatFinder->GetBeatValue(beatValue, beatConfidence);
-    audioLevel = _beatFinder->GetAudioLevel();
   } else {
     beatValue = 0.0;
-    // beatConfidence = 0.0;
-    audioLevel = 0;
   }
+  
+  if (_beatFinder)
+    audioLevel = _beatFinder->GetAudioLevel();
+  else
+    audioLevel = 0;
+  
   const unsigned randomValue = _rndDistribution(_randomGenerator);
   Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel,
                 randomValue);
@@ -411,9 +417,12 @@ size_t Management::SourceValueIndex(const SourceValue *sourceValue) const {
   return NamedObject::FindIndex(_sourceValues, sourceValue);
 }
 
-ValueSnapshot Management::Snapshot() {
+ValueSnapshot Management::Snapshot(bool primary) {
   std::lock_guard<std::mutex> lock(_mutex);
-  return *_snapshot;
+  if(primary)
+    return *_primarySnapshot;
+  else
+    return *_secondarySnapshot;
 }
 
 /**

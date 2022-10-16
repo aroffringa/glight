@@ -8,25 +8,18 @@ namespace glight::theatre {
 
 class ValueSnapshot {
  public:
-  ValueSnapshot() {}
+  ValueSnapshot(bool primary, size_t universeCount) : primary_(primary)
+  { SetUniverseCount(universeCount); }
 
-  ValueSnapshot(size_t universeCount) { SetUniverseCount(universeCount); }
-
-  ValueSnapshot(const ValueSnapshot &source) {
-    for (const std::unique_ptr<ValueUniverseSnapshot> &snapshot :
-         source._universeValues)
-      _universeValues.emplace_back(
-          std::make_unique<ValueUniverseSnapshot>(*snapshot));
-  }
+  ValueSnapshot(const ValueSnapshot &source) :
+    _universeValues(copy(source._universeValues)),
+    primary_(source.primary_)
+  {}
 
   ValueSnapshot(ValueSnapshot &&source) = default;
 
   ValueSnapshot &operator=(const ValueSnapshot &rhs) {
-    _universeValues.clear();
-    _universeValues.reserve(rhs._universeValues.size());
-    for (const std::unique_ptr<ValueUniverseSnapshot> &snapshot :
-         rhs._universeValues)
-      _universeValues.emplace_back(new ValueUniverseSnapshot(*snapshot));
+    _universeValues = copy(rhs._universeValues);
     return *this;
   }
 
@@ -34,19 +27,16 @@ class ValueSnapshot {
 
   ~ValueSnapshot() {}
 
-  void Clear() { _universeValues.clear(); }
+  void Clear() {
+    _universeValues.clear();
+  }
 
   void SetUniverseCount(size_t count) {
-    while (count < _universeValues.size()) {
-      _universeValues.erase(--_universeValues.end());
-    }
-    while (count > _universeValues.size()) {
-      _universeValues.emplace_back(std::make_unique<ValueUniverseSnapshot>());
-    }
+    resize(_universeValues, count);
   }
 
   unsigned char GetValue(const DmxChannel &channel) const {
-    return _universeValues[channel.Universe()]->GetValue(channel.Channel());
+    return GetUniverseSnapshot(channel.Universe()).GetValue(channel.Channel());
   }
 
   ValueUniverseSnapshot &GetUniverseSnapshot(size_t index) const {
@@ -54,7 +44,30 @@ class ValueSnapshot {
   }
 
  private:
+  static std::vector<std::unique_ptr<ValueUniverseSnapshot>> copy(const std::vector<std::unique_ptr<ValueUniverseSnapshot>>& source) {
+    std::vector<std::unique_ptr<ValueUniverseSnapshot>> result;
+    result.reserve(source.size());
+    for (const std::unique_ptr<ValueUniverseSnapshot> &snapshot :
+         source) {
+      result.emplace_back(
+          std::make_unique<ValueUniverseSnapshot>(*snapshot));
+    }
+    return result;
+  }
+  
+  static void resize(std::vector<std::unique_ptr<ValueUniverseSnapshot>>& vec, size_t count) {
+    if (count < vec.size()) {
+      vec.resize(count);
+    }
+    else {
+      do {
+        vec.emplace_back(std::make_unique<ValueUniverseSnapshot>());
+      } while (count > vec.size());
+    }
+  }
+   
   std::vector<std::unique_ptr<ValueUniverseSnapshot>> _universeValues;
+  bool primary_;
 };
 
 }  // namespace glight::theatre

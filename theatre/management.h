@@ -105,7 +105,7 @@ class Management {
                                                           input_index);
   }
   size_t SourceValueIndex(const SourceValue *sourceValue) const;
-  ValueSnapshot Snapshot();
+  ValueSnapshot Snapshot(bool primary);
 
   double GetOffsetTimeInMS() const {
     const std::chrono::time_point<std::chrono::steady_clock> current_time =
@@ -145,13 +145,10 @@ class Management {
   void Recover(Management &other);
 
  private:
-  struct ManagementThread {
-    Management *parent;
-    void operator()();
-  };
-
   Management(const Management &forDryCopy,
              std::shared_ptr<BeatFinder> &beatFinder);
+  
+  void ThreadLoop();
 
   void getChannelValues(unsigned timestepNumber, unsigned *values,
                         unsigned universe);
@@ -183,7 +180,8 @@ class Management {
   std::atomic<double> _previousTime;
 
   std::unique_ptr<Theatre> _theatre;
-  std::unique_ptr<ValueSnapshot> _snapshot;
+  std::unique_ptr<ValueSnapshot> _primarySnapshot;
+  std::unique_ptr<ValueSnapshot> _secondarySnapshot;
   std::shared_ptr<BeatFinder> _beatFinder;
   std::unique_ptr<Show> _show;
 
