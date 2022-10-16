@@ -147,7 +147,7 @@ class Management {
  private:
   Management(const Management &forDryCopy,
              std::shared_ptr<BeatFinder> &beatFinder);
-  
+
   void ThreadLoop();
 
   void getChannelValues(unsigned timestepNumber, unsigned *values,
