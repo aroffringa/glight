@@ -123,7 +123,7 @@ void EffectPropertiesWindow::onInputSelected(
     theatre::SourceValue *sourceValue) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
   _effect->AddConnection(sourceValue->GetControllable(),
-                         sourceValue->Preset().InputIndex());
+                         sourceValue->InputIndex());
   if (_management->HasCycle()) {
     _effect->RemoveConnection(_effect->Connections().size() - 1);
     lock.unlock();

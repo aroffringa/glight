@@ -19,10 +19,13 @@ BOOST_AUTO_TEST_CASE(Add) {
   Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
   FixtureControl &control = management.AddFixtureControl(fixture);
   SourceValue &value = management.AddSourceValue(control, 0);
-  value.Preset().SetValue(ControlValue::Max());
+  value.A().SetValue(ControlValue::Max());
+  BOOST_CHECK_EQUAL(value.A().Value().UInt(), ControlValue::MaxUInt());
   PresetCollection &presetCollection = management.AddPresetCollection();
   presetCollection.SetFromCurrentSituation(management);
   BOOST_CHECK_EQUAL(presetCollection.PresetValues().size(), 1);
+  BOOST_CHECK_EQUAL(&presetCollection.PresetValues()[0]->GetControllable(),
+                    &control);
   BOOST_CHECK_EQUAL(presetCollection.PresetValues()[0]->Value().UInt(),
                     ControlValue::MaxUInt());
 }
@@ -35,7 +38,7 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   fixture.SetChannel(100);
   FixtureControl &fixtureControl = management.AddFixtureControl(fixture);
   SourceValue &value = management.AddSourceValue(fixtureControl, 0);
-  value.Preset().SetValue(ControlValue::Max());
+  value.A().SetValue(ControlValue::Max());
   PresetCollection &presetCollection = management.AddPresetCollection();
   presetCollection.SetFromCurrentSituation(management);
 

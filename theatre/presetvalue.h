@@ -52,7 +52,7 @@ class PresetValue {
 
   sigc::signal<void()> &SignalDelete() { return _signalDelete; }
 
-  std::string Title() const;
+  std::string Name() const;
 
   void Reconnect(Controllable &controllable, size_t inputIndex) {
     _controllable = &controllable;

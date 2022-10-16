@@ -258,17 +258,6 @@ void ParseTimeSequence(const Object &node, Management &management) {
         "nr of steps in time sequence doesn't match sequence size");
 }
 
-void ParsePresetValue(const Object &node, Management &management) {
-  size_t folderId = ToNum(node["folder"]).AsSize();
-  const std::string name = ToStr(node["controllable-ref"]);
-  Folder *folder = management.Folders()[folderId].get();
-  Controllable &controllable =
-      dynamic_cast<Controllable &>(folder->GetChild(name));
-  const size_t inputIndex = ToNum(node["input-index"]).AsSize();
-  SourceValue &value = management.AddSourceValue(controllable, inputIndex);
-  value.Preset().SetValue(ControlValue(ToNum(node["value"]).AsUInt()));
-}
-
 void ParseEffect(const Object &node, Management &management) {
   Effect::Type type = Effect::NameToType(ToStr(node["effect_type"]));
   std::unique_ptr<Effect> effect = Effect::Make(type);
@@ -321,15 +310,32 @@ void ParseControls(const Array &node, Management &management) {
       ParseChase(ToObj(control), management);
     else if (t == "time-sequence")
       ParseTimeSequence(ToObj(control), management);
-    else if (t == "preset-value")
-      ParsePresetValue(ToObj(control), management);
     else if (t == "effect")
       ParseEffect(ToObj(control), management);
   }
 }
 
+SingleSourceValue ParseSingleSourceValue(const Object &object) {
+  SingleSourceValue result;
+  result.SetValue(ControlValue(ToNum(object["value"]).AsUInt()));
+  result.SetTargetValue(ControlValue(ToNum(object["target-value"]).AsUInt()));
+  result.SetFadeSpeed(ControlValue(ToNum(object["fade-speed"]).AsDouble()));
+  return result;
+}
+
 void ParseSourceValues(const Array &node, Management &management) {
-  for (const Node &control : node) ParsePresetValue(ToObj(control), management);
+  for (const Node &element : node) {
+    const Object &object = ToObj(element);
+    size_t folderId = ToNum(object["folder"]).AsSize();
+    const std::string name = ToStr(object["controllable-ref"]);
+    Folder *folder = management.Folders()[folderId].get();
+    Controllable &controllable =
+        dynamic_cast<Controllable &>(folder->GetChild(name));
+    const size_t inputIndex = ToNum(object["input-index"]).AsSize();
+    SourceValue &value = management.AddSourceValue(controllable, inputIndex);
+    value.A() = ParseSingleSourceValue(ToObj(object["a"]));
+    value.B() = ParseSingleSourceValue(ToObj(object["b"]));
+  }
 }
 
 KeySceneItem &ParseKeySceneItem(const Object &node, Scene &scene) {

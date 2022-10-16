@@ -47,6 +47,9 @@ class Management {
   const std::vector<std::unique_ptr<SourceValue>> &SourceValues() const {
     return _sourceValues;
   }
+  std::vector<std::unique_ptr<SourceValue>> &SourceValues() {
+    return _sourceValues;
+  }
   const std::vector<std::unique_ptr<DmxDevice>> &Devices() const {
     return _devices;
   }

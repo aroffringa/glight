@@ -16,7 +16,7 @@ class Management;
 /**
  * @author Andre Offringa
  */
-class PresetCollection : public Controllable {
+class PresetCollection final : public Controllable {
  public:
   PresetCollection() : _inputValue(0) {}
   PresetCollection(const std::string &name)
@@ -24,24 +24,24 @@ class PresetCollection : public Controllable {
   ~PresetCollection() { Clear(); }
 
   void Clear() { _presetValues.clear(); }
-  inline void SetFromCurrentSituation(const Management &management);
+  inline void SetFromCurrentSituation(Management &management);
 
-  size_t NInputs() const final override { return 1; }
+  size_t NInputs() const override { return 1; }
 
-  ControlValue &InputValue(size_t) final override { return _inputValue; }
+  ControlValue &InputValue(size_t) override { return _inputValue; }
 
-  virtual FunctionType InputType(size_t) const final override {
+  virtual FunctionType InputType(size_t) const override {
     return FunctionType::Master;
   }
 
-  size_t NOutputs() const final override { return _presetValues.size(); }
+  size_t NOutputs() const override { return _presetValues.size(); }
 
-  std::pair<Controllable *, size_t> Output(size_t index) const final override {
+  std::pair<const Controllable *, size_t> Output(size_t index) const override {
     return std::make_pair(&_presetValues[index]->GetControllable(),
                           _presetValues[index]->InputIndex());
   }
 
-  void Mix(const Timing &timing) final override {
+  void Mix(const Timing &timing) override {
     unsigned leftHand = _inputValue.UInt();
     for (const std::unique_ptr<PresetValue> &pv : _presetValues) {
       unsigned rightHand = pv->Value().UInt();
@@ -83,13 +83,16 @@ class PresetCollection : public Controllable {
 
 namespace glight::theatre {
 
-void PresetCollection::SetFromCurrentSituation(const Management &management) {
+void PresetCollection::SetFromCurrentSituation(Management &management) {
   Clear();
-  const std::vector<std::unique_ptr<SourceValue>> &values =
-      management.SourceValues();
-  for (const std::unique_ptr<SourceValue> &sv : values) {
-    if (!sv->IsIgnorable() && (&sv->GetControllable()) != this)
-      _presetValues.emplace_back(new PresetValue(sv->Preset()));
+  std::vector<std::unique_ptr<SourceValue>> &values = management.SourceValues();
+  for (std::unique_ptr<SourceValue> &sv : values) {
+    if (!sv->A().IsIgnorable() && (&sv->GetControllable()) != this) {
+      std::unique_ptr<PresetValue> &value =
+          _presetValues.emplace_back(std::make_unique<PresetValue>(
+              sv->GetControllable(), sv->InputIndex()));
+      value->SetValue(sv->A().Value());
+    }
   }
 }
 

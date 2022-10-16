@@ -194,9 +194,8 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   theatre::TimeSequence &tSequence = _management->AddTimeSequence();
   tSequence.SetRepeatCount(0);
   size_t index = 0;
-  for (const std::pair<theatre::Controllable *, size_t> &item :
-       _chase->Sequence().List()) {
-    tSequence.AddStep(*item.first, item.second);
+  for (theatre::Input &input : _chase->Sequence().List()) {
+    tSequence.AddStep(*input.GetControllable(), input.InputIndex());
     theatre::TimeSequence::Step &step = tSequence.GetStep(index);
     if (_chase->Trigger().Type() == theatre::TriggerType::Delay)
       step.transition = _chase->Transition();
@@ -208,7 +207,7 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   theatre::Folder &folder = _chase->Parent();
   std::string name = _chase->Name();
   theatre::SourceValue *source = _management->GetSourceValue(*_chase, 0);
-  source->Preset().Reconnect(tSequence, 0);
+  source->Reconnect(tSequence, 0);
   _management->RemoveControllable(*_chase);
   tSequence.SetName(name);
   folder.Add(tSequence);

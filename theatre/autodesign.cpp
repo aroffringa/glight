@@ -26,21 +26,26 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
 
   for (size_t i = 0; i != control.NInputs(); ++i) {
     Color c = control.InputColor(i);
-    if (control.InputType(i) == FunctionType::Master && master != 0)
-      pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
+    SourceValue *sourceValue = management.GetSourceValue(control, i);
+    if (control.InputType(i) == FunctionType::Master && master != 0) {
+      pc.AddPresetValue(sourceValue->GetControllable(),
+                        sourceValue->InputIndex())
           .SetValue(master);
-    else if (c == Color::White()) {
+    } else if (c == Color::White()) {
       if (deduction.whiteFromRGB) {
         unsigned white = std::min(red, std::min(green, blue));
-        if (white != 0)
-          pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
+        if (white != 0) {
+          pc.AddPresetValue(sourceValue->GetControllable(),
+                            sourceValue->InputIndex())
               .SetValue(white);
+        }
       }
     } else if (c == Color::Amber()) {
       if (deduction.amberFromRGB) {
         unsigned amber = std::min(red / 2, green) * 2;
         if (amber != 0) {
-          pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
+          pc.AddPresetValue(sourceValue->GetControllable(),
+                            sourceValue->InputIndex())
               .SetValue(amber);
         }
       }
@@ -48,19 +53,23 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
       if (deduction.uvFromRGB) {
         unsigned uv = std::min(blue / 3, red) * 3;
         if (uv != 0) {
-          pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
+          pc.AddPresetValue(sourceValue->GetControllable(),
+                            sourceValue->InputIndex())
               .SetValue(uv);
         }
       }
     } else {
       if (c.Red() != 0 && red != 0)
-        pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
+        pc.AddPresetValue(sourceValue->GetControllable(),
+                          sourceValue->InputIndex())
             .SetValue(red);
       if (c.Green() != 0 && green != 0)
-        pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
+        pc.AddPresetValue(sourceValue->GetControllable(),
+                          sourceValue->InputIndex())
             .SetValue(green);
       if (c.Blue() != 0 && blue != 0)
-        pc.AddPresetValue(management.GetSourceValue(control, i)->Preset())
+        pc.AddPresetValue(sourceValue->GetControllable(),
+                          sourceValue->InputIndex())
             .SetValue(blue);
     }
   }
@@ -176,7 +185,7 @@ Chase &AutoDesign::MakeRunningLight(
   }
   if (runType == BackAndForthRun) {
     for (size_t i = 2; i < colors.size(); ++i)
-      seq.Add(*seq.List()[colors.size() - i].first, 0);
+      seq.Add(*seq.List()[colors.size() - i].GetControllable(), 0);
   }
   return chase;
 }
@@ -287,7 +296,7 @@ Chase &AutoDesign::MakeColorShift(
   }
   if (shiftType == BackAndForthShift) {
     for (size_t i = 2; i < frames; ++i)
-      seq.Add(*seq.List()[frames - i].first, 0);
+      seq.Add(*seq.List()[frames - i].GetControllable(), 0);
   }
   return chase;
 }

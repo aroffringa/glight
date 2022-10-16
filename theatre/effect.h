@@ -92,7 +92,8 @@ class Effect : public Controllable {
 
   size_t NOutputs() const final override { return _connections.size(); }
 
-  std::pair<Controllable *, size_t> Output(size_t index) const final override {
+  std::pair<const Controllable *, size_t> Output(
+      size_t index) const final override {
     return _connections[index];
   }
 

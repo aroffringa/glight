@@ -1,11 +1,8 @@
 #include "faderwidget.h"
 
-#include "../eventtransmitter.h"
-
 #include "../dialogs/inputselectdialog.h"
 
 #include "../../theatre/controllable.h"
-#include "../../theatre/management.h"
 #include "../../theatre/presetvalue.h"
 #include "../../theatre/sourcevalue.h"
 
@@ -15,17 +12,12 @@ using theatre::ControlValue;
 
 FaderWidget::FaderWidget(theatre::Management &management,
                          EventTransmitter &eventHub, char key)
-    : _scale(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
+    : ControlWidget(management, eventHub),
+      _scale(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
              (ControlValue::MaxUInt() + 1) / 100),
       _flashButton(std::string(1, key)),
       _nameLabel("<..>"),
-      _management(&management),
-      _eventHub(eventHub),
-      _sourceValue(nullptr),
       _holdUpdates(false) {
-  _updateConnection =
-      _eventHub.SignalUpdateControllables().connect([&]() { onUpdate(); });
-
   _scale.set_inverted(true);
   _scale.set_draw_value(false);
   _scale.set_vexpand(true);
@@ -62,8 +54,6 @@ FaderWidget::FaderWidget(theatre::Management &management,
   _box.show();
 }
 
-FaderWidget::~FaderWidget() { _updateConnection.disconnect(); }
-
 void FaderWidget::onOnButtonClicked() {
   if (!_holdUpdates) {
     _holdUpdates = true;
@@ -78,12 +68,12 @@ void FaderWidget::onOnButtonClicked() {
   }
 }
 
-bool FaderWidget::onFlashButtonPressed(GdkEventButton *event) {
+bool FaderWidget::onFlashButtonPressed(GdkEventButton *) {
   _scale.set_value(ControlValue::MaxUInt());
   return false;
 }
 
-bool FaderWidget::onFlashButtonReleased(GdkEventButton *event) {
+bool FaderWidget::onFlashButtonReleased(GdkEventButton *) {
   _scale.set_value(0);
   return false;
 }
@@ -99,54 +89,36 @@ void FaderWidget::onScaleChange() {
   }
 }
 
-bool FaderWidget::onNameLabelClicked(GdkEventButton *event) {
-  InputSelectDialog dialog(*_management, _eventHub);
+bool FaderWidget::onNameLabelClicked(GdkEventButton *) {
+  InputSelectDialog dialog(GetManagement(), GetEventHub());
   if (dialog.run() == Gtk::RESPONSE_OK) {
     Assign(dialog.SelectedInputPreset(), true);
   }
   return true;
 }
 
-void FaderWidget::Assign(theatre::SourceValue *item, bool moveFader) {
-  if (item != _sourceValue) {
-    _sourceValue = item;
-    if (_sourceValue != nullptr) {
-      _nameLabel.set_text(_sourceValue->Preset().Title());
-      if (moveFader) {
-        _scale.set_value(_sourceValue->Preset().Value().UInt());
-      } else
-        setValue(_scale.get_value());
+void FaderWidget::OnAssigned(bool moveFader) {
+  if (GetSourceValue() != nullptr) {
+    _nameLabel.set_text(GetSourceValue()->Name());
+    if (moveFader) {
+      _scale.set_value(GetSourceValue()->A().Value().UInt());
     } else {
-      _nameLabel.set_text("<..>");
-      if (moveFader) {
-        _scale.set_value(0);
-      } else
-        setValue(_scale.get_value());
+      setValue(_scale.get_value());
     }
-    SignalAssigned().emit();
-    if (moveFader) SignalValueChange().emit(_scale.get_value());
+  } else {
+    _nameLabel.set_text("<..>");
+    if (moveFader) {
+      _scale.set_value(0);
+    } else {
+      setValue(_scale.get_value());
+    }
   }
 }
 
 void FaderWidget::MoveSlider() {
-  if (_sourceValue != nullptr) {
-    _scale.set_value(_sourceValue->TargetValue());
+  if (GetSourceValue() != nullptr) {
+    _scale.set_value(GetSourceValue()->A().TargetValue());
     SignalValueChange().emit(_scale.get_value());
-  }
-}
-
-void FaderWidget::onUpdate() {
-  if (_sourceValue != nullptr) {
-    // The preset might be removed, if so update label
-    if (!_management->Contains(*_sourceValue)) {
-      _nameLabel.set_text("<..>");
-      _sourceValue = nullptr;
-      _scale.set_value(0.0);
-    }
-    // Only if not removed: if preset is renamed, update
-    else {
-      _nameLabel.set_text(_sourceValue->Preset().Title());
-    }
   }
 }
 
@@ -157,28 +129,5 @@ void FaderWidget::Toggle() {
 void FaderWidget::FullOn() { _scale.set_value(ControlValue::MaxUInt()); }
 
 void FaderWidget::FullOff() { _scale.set_value(0); }
-
-void FaderWidget::ChangeManagement(theatre::Management &management,
-                                   bool moveSliders) {
-  if (_sourceValue == nullptr) {
-    _management = &management;
-  } else {
-    std::string controllablePath = _sourceValue->GetControllable().FullPath();
-    size_t input = _sourceValue->Preset().InputIndex();
-    _management = &management;
-    theatre::Controllable *controllable = dynamic_cast<theatre::Controllable *>(
-        _management->GetObjectFromPathIfExists(controllablePath));
-    theatre::SourceValue *sv;
-    if (controllable)
-      sv = _management->GetSourceValue(*controllable, input);
-    else
-      sv = nullptr;
-    if (sv == nullptr)
-      Unassign();
-    else {
-      Assign(sv, moveSliders);
-    }
-  }
-}
 
 }  // namespace glight::gui

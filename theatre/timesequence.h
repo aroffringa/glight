@@ -13,7 +13,7 @@ namespace glight::theatre {
 /**
         @author Andre Offringa
 */
-class TimeSequence : public Controllable {
+class TimeSequence final : public Controllable {
  public:
   TimeSequence()
       : _inputValue(),
@@ -30,19 +30,19 @@ class TimeSequence : public Controllable {
     return std::unique_ptr<TimeSequence>(new TimeSequence(*this));
   }
 
-  size_t NInputs() const final override { return 1; }
+  size_t NInputs() const override { return 1; }
 
-  ControlValue &InputValue(size_t) final override { return _inputValue; }
+  ControlValue &InputValue(size_t) override { return _inputValue; }
 
-  virtual FunctionType InputType(size_t) const final override {
+  virtual FunctionType InputType(size_t) const override {
     return FunctionType::Master;
   }
 
-  size_t NOutputs() const final override { return _sequence.List().size(); }
+  size_t NOutputs() const override { return _sequence.List().size(); }
 
-  std::pair<Controllable *, size_t> Output(size_t index) const final override {
-    return std::make_pair(_sequence.List()[index].first,
-                          _sequence.List()[index].second);
+  std::pair<const Controllable *, size_t> Output(size_t index) const override {
+    return std::make_pair(_sequence.List()[index].GetControllable(),
+                          _sequence.List()[index].InputIndex());
   }
 
   size_t RepeatCount() const { return _repeatCount; }
@@ -54,7 +54,7 @@ class TimeSequence : public Controllable {
   bool Sustain() const { return _sustain; }
   void SetSustain(bool sustain) { _sustain = sustain; }
 
-  virtual void Mix(const Timing &timing) final override {
+  virtual void Mix(const Timing &timing) override {
     if (_inputValue || (_sustain && _activeValue)) {
       if (!_activeValue) {
         // Start the sequence
@@ -94,9 +94,8 @@ class TimeSequence : public Controllable {
             } break;
           }
           if (!_transitionTriggered) {
-            const std::pair<Controllable *, size_t> &input =
-                _sequence.List()[_stepNumber % _steps.size()];
-            input.first->MixInput(input.second, _activeValue);
+            Input &input = _sequence.List()[_stepNumber % _steps.size()];
+            input.GetControllable()->MixInput(input.InputIndex(), _activeValue);
           }
         }
         if (_transitionTriggered) {
@@ -108,16 +107,16 @@ class TimeSequence : public Controllable {
           } else {
             // Not there yet; transition to next state
             double transitionTime = timing.TimeInMS() - _stepStart.TimeInMS();
-            const std::pair<Controllable *, size_t>
-                &a = _sequence.List()[_stepNumber % _steps.size()],
-                &b = _sequence.List()[(_stepNumber + 1) % _steps.size()];
+            Input &a = _sequence.List()[_stepNumber % _steps.size()];
+            Input &b = _sequence.List()[(_stepNumber + 1) % _steps.size()];
             if (transitionTime >= activeStep.transition.LengthInMs()) {
               ++_stepNumber;
               _stepStart = timing;
               _transitionTriggered = false;
-              b.first->MixInput(b.second, _activeValue);
+              b.GetControllable()->MixInput(b.InputIndex(), _activeValue);
             } else {
-              activeStep.transition.Mix(*a.first, a.second, *b.first, b.second,
+              activeStep.transition.Mix(*a.GetControllable(), a.InputIndex(),
+                                        *b.GetControllable(), b.InputIndex(),
                                         transitionTime, _activeValue, timing);
             }
           }

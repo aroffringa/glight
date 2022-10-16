@@ -62,8 +62,8 @@ class FixtureControl : public Controllable {
 
   size_t NOutputs() const final override { return 0; }
 
-  std::pair<Controllable *, size_t> Output(size_t) const final override {
-    return std::pair<Controllable *, size_t>(nullptr, 0);
+  std::pair<const Controllable *, size_t> Output(size_t) const final override {
+    return std::pair<const Controllable *, size_t>(nullptr, 0);
   }
 
   void Mix(const class Timing &) final override {}

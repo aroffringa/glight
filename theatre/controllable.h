@@ -32,7 +32,15 @@ class Controllable : public FolderObject {
 
   virtual size_t NOutputs() const = 0;
 
-  virtual std::pair<Controllable *, size_t> Output(size_t index) const = 0;
+  virtual std::pair<const Controllable *, size_t> Output(
+      size_t index) const = 0;
+
+  std::pair<Controllable *, size_t> Output(size_t index) {
+    const std::pair<const Controllable *, size_t> output =
+        const_cast<const Controllable *>(this)->Output(index);
+    return std::make_pair(const_cast<Controllable *>(output.first),
+                          output.second);
+  }
 
   virtual Color InputColor([[maybe_unused]] size_t index) const {
     if (NOutputs() == 0)

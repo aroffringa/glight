@@ -13,25 +13,18 @@ namespace glight::gui {
 
 class EventTransmitter;
 
-class ToggleWidget : public ControlWidget {
+class ToggleWidget final : public ControlWidget {
  public:
   ToggleWidget(theatre::Management &management, EventTransmitter &eventHub,
                char key);
   ~ToggleWidget();
 
-  virtual void Toggle() final override;
-  virtual void FullOn() final override;
-  virtual void FullOff() final override;
-  virtual void Assign(theatre::SourceValue *item,
-                      bool moveFader) final override;
-  virtual void MoveSlider() final override;
-  virtual theatre::SourceValue *GetSourceValue() const final override {
-    return _sourceValue;
-  }
+  virtual void Toggle() override;
+  virtual void FullOn() override;
+  virtual void FullOff() override;
+  virtual void MoveSlider() override;
 
-  virtual void Limit(double value) final override;
-  virtual void ChangeManagement(theatre::Management &management,
-                                bool moveSliders) final override;
+  virtual void Limit(double value) override;
 
  private:
   Gtk::HBox _box;
@@ -42,12 +35,10 @@ class ToggleWidget : public ControlWidget {
   Gtk::Label _nameLabel;
 
   sigc::connection _updateConnection;
-  theatre::Management *_management;
-  EventTransmitter &_eventHub;
-  theatre::SourceValue *_sourceValue;
 
   bool _holdUpdates;
 
+  virtual void OnAssigned(bool moveFader) override;
   void onUpdate();
   void onOnButtonClicked();
   bool onNameLabelClicked(GdkEventButton *event);

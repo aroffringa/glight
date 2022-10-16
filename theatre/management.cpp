@@ -155,16 +155,15 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
   _show->Mix(values, universe, timing);
 
   // Reset all inputs
-  for (const std::unique_ptr<class SourceValue> &sv : _sourceValues) {
+  for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
     for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs();
          ++inputIndex) {
       sv->GetControllable().InputValue(inputIndex) = 0;
     }
   }
 
-  for (const std::unique_ptr<class SourceValue> &sv : _sourceValues)
-    sv->GetControllable().MixInput(sv->Preset().InputIndex(),
-                                   sv->Preset().Value());
+  for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
+    sv->GetControllable().MixInput(sv->InputIndex(), sv->A().Value());
 
   // Solve dependency graph of controllables
   std::vector<Controllable *> unorderedList, orderedList;
@@ -190,8 +189,8 @@ bool Management::HasCycle() const {
 }
 
 PresetCollection &Management::AddPresetCollection() {
-  _controllables.emplace_back(new PresetCollection());
-  return static_cast<PresetCollection &>(*_controllables.back());
+  return static_cast<PresetCollection &>(
+      *_controllables.emplace_back(std::make_unique<PresetCollection>()));
 }
 
 Folder &Management::AddFolder(Folder &parent, const std::string &name) {
@@ -403,7 +402,7 @@ SourceValue *Management::GetSourceValue(const Controllable &controllable,
                                         size_t inputIndex) {
   for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
     if (&sv->GetControllable() == &controllable &&
-        sv->Preset().InputIndex() == inputIndex)
+        sv->InputIndex() == inputIndex)
       return sv.get();
   return nullptr;
 }
@@ -489,11 +488,11 @@ void Management::dryCopyControllerDependency(const Management &forDryCopy,
       sequence = &timeSequence->Sequence();
       newSequence = &newTimeSequence.Sequence();
     }
-    for (const std::pair<Controllable *, size_t> &input : sequence->List()) {
-      size_t cIndex = forDryCopy.ControllableIndex(input.first);
+    for (const Input &input : sequence->List()) {
+      size_t cIndex = forDryCopy.ControllableIndex(input.GetControllable());
       if (_controllables[cIndex] == nullptr)
         dryCopyControllerDependency(forDryCopy, cIndex);
-      newSequence->Add(*_controllables[cIndex], input.second);
+      newSequence->Add(*_controllables[cIndex], input.InputIndex());
     }
     GetFolder(controllable->Parent().FullPath()).Add(*_controllables[index]);
   } else if (presetCollection) {
@@ -593,7 +592,7 @@ bool Management::topologicalSortVisit(Controllable &controllable,
 
 void Management::BlackOut() {
   for (std::unique_ptr<SourceValue> &sv : _sourceValues) {
-    sv->Set(0, 0.0);
+    sv->A().Set(0, 0.0);
   }
 }
 
@@ -604,8 +603,8 @@ void Management::Recover(Management &other) {
     FolderObject *object = GetObjectFromPathIfExists(path);
     Controllable *control = dynamic_cast<Controllable *>(object);
     if (control) {
-      SourceValue *value = GetSourceValue(*control, sv->Preset().InputIndex());
-      if (value) value->Preset().SetValue(sv->Preset().Value());
+      SourceValue *value = GetSourceValue(*control, sv->InputIndex());
+      if (value) value->A().SetValue(sv->A().Value());
     }
   }
 }

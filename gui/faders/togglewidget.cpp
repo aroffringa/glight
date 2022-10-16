@@ -13,15 +13,10 @@ namespace glight::gui {
 
 ToggleWidget::ToggleWidget(theatre::Management &management,
                            EventTransmitter &eventHub, char key)
-    : _flashButton(std::string(1, key)),
+    : ControlWidget(management, eventHub),
+      _flashButton(std::string(1, key)),
       _nameLabel("<..>"),
-      _management(&management),
-      _eventHub(eventHub),
-      _sourceValue(nullptr),
       _holdUpdates(false) {
-  _updateConnection =
-      _eventHub.SignalUpdateControllables().connect([&]() { onUpdate(); });
-
   _flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
   _flashButton.signal_button_press_event().connect(
       sigc::mem_fun(*this, &ToggleWidget::onFlashButtonPressed), false);
@@ -70,79 +65,60 @@ void ToggleWidget::onOnButtonClicked() {
   }
 }
 
-bool ToggleWidget::onFlashButtonPressed(GdkEventButton *event) {
+bool ToggleWidget::onFlashButtonPressed(GdkEventButton *) {
   _onCheckButton.set_active(true);
   return false;
 }
 
-bool ToggleWidget::onFlashButtonReleased(GdkEventButton *event) {
+bool ToggleWidget::onFlashButtonReleased(GdkEventButton *) {
   _onCheckButton.set_active(false);
   return false;
 }
 
-bool ToggleWidget::onNameLabelClicked(GdkEventButton *event) {
-  InputSelectDialog dialog(*_management, _eventHub);
+bool ToggleWidget::onNameLabelClicked(GdkEventButton *) {
+  InputSelectDialog dialog(GetManagement(), GetEventHub());
   if (dialog.run() == Gtk::RESPONSE_OK) {
     Assign(dialog.SelectedInputPreset(), true);
   }
   return true;
 }
 
-void ToggleWidget::Assign(theatre::SourceValue *item, bool moveFader) {
-  if (item != _sourceValue) {
-    _sourceValue = item;
-    if (_sourceValue != nullptr) {
-      _nameLabel.set_text(_sourceValue->Preset().Title());
-      if (moveFader) {
-        _onCheckButton.set_active(_sourceValue->Preset().Value().UInt() != 0);
-      } else {
-        if (_onCheckButton.get_active())
-          setValue(theatre::ControlValue::MaxUInt());
-        else
-          setValue(0);
-      }
-    } else {
-      _nameLabel.set_text("<..>");
-      if (moveFader) {
-        _onCheckButton.set_active(false);
-      } else {
-        if (_onCheckButton.get_active())
-          setValue(theatre::ControlValue::MaxUInt());
-        else
-          setValue(0);
-      }
-    }
-    SignalAssigned().emit();
+void ToggleWidget::OnAssigned(bool moveFader) {
+  if (GetSourceValue() != nullptr) {
+    _nameLabel.set_text(GetSourceValue()->Name());
     if (moveFader) {
-      unsigned value;
+      _onCheckButton.set_active(GetSourceValue()->A().Value().UInt() != 0);
+    } else {
       if (_onCheckButton.get_active())
-        value = theatre::ControlValue::MaxUInt();
+        setValue(theatre::ControlValue::MaxUInt());
       else
-        value = 0;
-      SignalValueChange().emit(value);
+        setValue(0);
     }
+  } else {
+    _nameLabel.set_text("<..>");
+    if (moveFader) {
+      _onCheckButton.set_active(false);
+    } else {
+      if (_onCheckButton.get_active())
+        setValue(theatre::ControlValue::MaxUInt());
+      else
+        setValue(0);
+    }
+  }
+  if (moveFader) {
+    unsigned value;
+    if (_onCheckButton.get_active())
+      value = theatre::ControlValue::MaxUInt();
+    else
+      value = 0;
+    SignalValueChange().emit(value);
   }
 }
 
 void ToggleWidget::MoveSlider() {
-  if (_sourceValue != nullptr) {
-    _onCheckButton.set_active(_sourceValue->TargetValue() != 0);
-    SignalValueChange().emit(_sourceValue->TargetValue());
-  }
-}
-
-void ToggleWidget::onUpdate() {
-  if (_sourceValue != nullptr) {
-    // The preset might be removed, if so update label
-    if (!_management->Contains(*_sourceValue)) {
-      _nameLabel.set_text("<..>");
-      _sourceValue = nullptr;
-      _onCheckButton.set_active(false);
-    }
-    // Only if not removed: if preset is renamed, update
-    else {
-      _nameLabel.set_text(_sourceValue->Preset().Title());
-    }
+  if (GetSourceValue() != nullptr) {
+    _onCheckButton.set_active(GetSourceValue()->A().TargetValue() != 0);
+    SignalValueChange().emit(GetSourceValue()->A().TargetValue());
   }
 }
 
@@ -153,25 +129,6 @@ void ToggleWidget::Toggle() {
 void ToggleWidget::FullOn() { _onCheckButton.set_active(true); }
 
 void ToggleWidget::FullOff() { _onCheckButton.set_active(false); }
-
-void ToggleWidget::ChangeManagement(theatre::Management &management,
-                                    bool moveSliders) {
-  if (_sourceValue == nullptr) {
-    _management = &management;
-  } else {
-    std::string controllablePath = _sourceValue->GetControllable().FullPath();
-    size_t input = _sourceValue->Preset().InputIndex();
-    _management = &management;
-    theatre::Controllable &controllable = static_cast<theatre::Controllable &>(
-        _management->GetObjectFromPath(controllablePath));
-    theatre::SourceValue *sv = _management->GetSourceValue(controllable, input);
-    if (sv == nullptr)
-      Unassign();
-    else {
-      Assign(sv, moveSliders);
-    }
-  }
-}
 
 void ToggleWidget::Limit(double value) {
   if (value < theatre::ControlValue::MaxUInt())
