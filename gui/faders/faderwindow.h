@@ -67,21 +67,25 @@ class FaderWindow : public Gtk::Window {
   void initializeWidgets();
   void initializeMenu();
 
-  void onAddFaderClicked() { addControl(false, false); }
+  void onAddFaderClicked() { addControlInLayout(false, false); }
   void onAdd5FadersClicked() {
-    for (size_t i = 0; i != 5; ++i) addControl(false, false);
+    for (size_t i = 0; i != 5; ++i) addControlInLayout(false, false);
   }
   void onAdd5ToggleControlsClicked() {
-    for (size_t i = 0; i != 5; ++i) addControl(true, false);
+    for (size_t i = 0; i != 5; ++i) addControlInLayout(true, false);
   }
-  void onAddToggleClicked() { addControl(true, false); }
-  void onAddToggleColumnClicked() { addControl(true, true); }
+  void onAddToggleClicked() { addControlInLayout(true, false); }
+  void onAddToggleColumnClicked() { addControlInLayout(true, true); }
   void removeFader();
   void onRemoveFaderClicked() {
-    if (!_controls.empty()) removeFader();
+    if (!_controlsA.empty()) removeFader();
   }
   void onRemove5FadersClicked() {
     for (size_t i = 0; i != 5; ++i) onRemoveFaderClicked();
+  }
+  void onLayoutChanged() {
+    RecursionLock::Token token(_recursionLock);
+    loadState();
   }
   void onAssignClicked();
   void onAssignChasesClicked();
@@ -100,7 +104,12 @@ class FaderWindow : public Gtk::Window {
     return true;
   }
 
-  void addControl(bool isToggle, bool newToggleColumn);
+  void addControl(bool isToggle, bool newToggleColumn, bool isPrimary);
+  void addControlInLayout(bool isToggle, bool newToggleColumn) {
+    addControl(isToggle, newToggleColumn, true);
+    if (_miDualLayout.get_active())
+      addControl(isToggle, newToggleColumn, false);
+  }
 
   void loadState();
   size_t getFadeInSpeed() const;
@@ -114,11 +123,11 @@ class FaderWindow : public Gtk::Window {
   Gtk::Grid _controlGrid;
   Gtk::MenuButton _menuButton;
 
-  Gtk::ImageMenuItem _miName;
   Gtk::Image _miNameImage;
-  Gtk::Menu _popupMenu, _fadeInMenu, _fadeOutMenu;
+  Gtk::Menu _popupMenu, _layoutMenu, _fadeInMenu, _fadeOutMenu;
+  Gtk::MenuItem _miLayout, _miFadeIn, _miFadeOut;
+  Gtk::ImageMenuItem _miName;
   Gtk::CheckMenuItem _miSolo;
-  Gtk::MenuItem _miFadeIn, _miFadeOut;
   Gtk::RadioMenuItem _miFadeInOption[11], _miFadeOutOption[11];
   Gtk::SeparatorMenuItem _miSep1;
   Gtk::MenuItem _miAssign, _miAssignChases, _miClear;
@@ -127,8 +136,15 @@ class FaderWindow : public Gtk::Window {
       _miAdd5ToggleButtons, _miAddToggleColumn, _miRemoveFader,
       _miRemove5Faders;
 
-  std::vector<std::unique_ptr<ControlWidget>> _controls;
-  std::vector<Gtk::VBox> _toggleColumns;
+  // Layout menu
+  Gtk::RadioMenuItem _miSimpleLayout;
+  Gtk::RadioMenuItem _miDryModeLayout;
+  Gtk::RadioMenuItem _miDualLayout;
+
+  std::vector<std::unique_ptr<ControlWidget>> _controlsA;
+  std::vector<std::unique_ptr<ControlWidget>> _controlsB;
+  std::vector<Gtk::VBox> _toggleColumnsA;
+  std::vector<Gtk::VBox> _toggleColumnsB;
   EventTransmitter &_eventHub;
   GUIState &_guiState;
   FaderSetupState *_state;
