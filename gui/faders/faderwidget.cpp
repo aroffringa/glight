@@ -11,8 +11,8 @@ namespace glight::gui {
 using theatre::ControlValue;
 
 FaderWidget::FaderWidget(theatre::Management &management,
-                         EventTransmitter &eventHub, char key)
-    : ControlWidget(management, eventHub),
+                         EventTransmitter &eventHub, ControlMode mode, char key)
+    : ControlWidget(management, eventHub, mode),
       _scale(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
              (ControlValue::MaxUInt() + 1) / 100),
       _flashButton(std::string(1, key)),
@@ -101,7 +101,7 @@ void FaderWidget::OnAssigned(bool moveFader) {
   if (GetSourceValue() != nullptr) {
     _nameLabel.set_text(GetSourceValue()->Name());
     if (moveFader) {
-      _scale.set_value(GetSourceValue()->A().Value().UInt());
+      _scale.set_value(GetSingleSourceValue().Value().UInt());
     } else {
       setValue(_scale.get_value());
     }
@@ -117,7 +117,7 @@ void FaderWidget::OnAssigned(bool moveFader) {
 
 void FaderWidget::MoveSlider() {
   if (GetSourceValue() != nullptr) {
-    _scale.set_value(GetSourceValue()->A().TargetValue());
+    _scale.set_value(GetSingleSourceValue().TargetValue());
     SignalValueChange().emit(_scale.get_value());
   }
 }

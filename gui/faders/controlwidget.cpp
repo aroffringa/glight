@@ -9,8 +9,9 @@
 namespace glight::gui {
 
 ControlWidget::ControlWidget(theatre::Management &management,
-                             EventTransmitter &eventHub)
-    : _management(&management),
+                             EventTransmitter &eventHub, ControlMode mode)
+    : _mode(mode),
+      _management(&management),
       _eventHub(eventHub),
       _updateConnection(_eventHub.SignalUpdateControllables().connect(
           [&]() { OnTheatreUpdate(); })) {}
@@ -22,16 +23,17 @@ void ControlWidget::Assign(theatre::SourceValue *item, bool moveFader) {
     _sourceValue = item;
     OnAssigned(moveFader);
     SignalAssigned().emit();
-    if (moveFader) SignalValueChange().emit(_sourceValue->A().Value().UInt());
+    if (moveFader)
+      SignalValueChange().emit(GetSingleSourceValue().Value().UInt());
   }
 }
 
 void ControlWidget::setValue(unsigned target) {
-  if (GetSourceValue() != nullptr) {
-    const unsigned sourceValue = GetSourceValue()->A().Value();
+  if (_sourceValue != nullptr) {
+    const unsigned sourceValue = GetSingleSourceValue().Value();
     const double fadeSpeed =
         (target > sourceValue) ? _fadeUpSpeed : _fadeDownSpeed;
-    GetSourceValue()->A().Set(target, fadeSpeed);
+    GetSingleSourceValue().Set(target, fadeSpeed);
   }
 }
 
@@ -73,6 +75,10 @@ void ControlWidget::ChangeManagement(theatre::Management &management,
       Assign(sv, moveSliders);
     }
   }
+}
+
+theatre::SingleSourceValue &ControlWidget::GetSingleSourceValue() {
+  return _mode == ControlMode::Primary ? _sourceValue->A() : _sourceValue->B();
 }
 
 }  // namespace glight::gui

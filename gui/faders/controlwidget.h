@@ -11,6 +11,8 @@ namespace glight::gui {
 
 class EventTransmitter;
 
+enum class ControlMode { Primary, Secondary };
+
 /**
  * @author Andre Offringa
  * Base class for GUI controls that allow switching presets, and that
@@ -18,7 +20,8 @@ class EventTransmitter;
  */
 class ControlWidget : public Gtk::Bin {
  public:
-  ControlWidget(theatre::Management &management, EventTransmitter &eventHub);
+  ControlWidget(theatre::Management &management, EventTransmitter &eventHub,
+                ControlMode mode);
   ~ControlWidget();
 
   /**
@@ -59,7 +62,7 @@ class ControlWidget : public Gtk::Bin {
   sigc::signal<void> &SignalAssigned() { return _signalAssigned; }
 
   theatre::SourceValue *GetSourceValue() const { return _sourceValue; }
-  void Unassign() { Assign(nullptr, false); }
+  void Unassign() { Assign(nullptr, true); }
   void SetFadeUpSpeed(double fadePerSecond) { _fadeUpSpeed = fadePerSecond; }
   void SetFadeDownSpeed(double fadePerSecond) {
     _fadeDownSpeed = fadePerSecond;
@@ -87,10 +90,12 @@ class ControlWidget : public Gtk::Bin {
 
   EventTransmitter &GetEventHub() { return _eventHub; }
   theatre::Management &GetManagement() { return *_management; }
+  theatre::SingleSourceValue &GetSingleSourceValue();
 
  private:
   void OnTheatreUpdate();
 
+  ControlMode _mode;
   theatre::SourceValue *_sourceValue = nullptr;
   theatre::Management *_management;
   EventTransmitter &_eventHub;

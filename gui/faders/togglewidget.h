@@ -16,8 +16,7 @@ class EventTransmitter;
 class ToggleWidget final : public ControlWidget {
  public:
   ToggleWidget(theatre::Management &management, EventTransmitter &eventHub,
-               char key);
-  ~ToggleWidget();
+               ControlMode mode, char key);
 
   virtual void Toggle() override;
   virtual void FullOn() override;
@@ -34,12 +33,9 @@ class ToggleWidget final : public ControlWidget {
   Gtk::EventBox _eventBox;
   Gtk::Label _nameLabel;
 
-  sigc::connection _updateConnection;
-
   bool _holdUpdates;
 
   virtual void OnAssigned(bool moveFader) override;
-  void onUpdate();
   void onOnButtonClicked();
   bool onNameLabelClicked(GdkEventButton *event);
   bool onFlashButtonPressed(GdkEventButton *event);

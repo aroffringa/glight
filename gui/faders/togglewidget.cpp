@@ -12,8 +12,9 @@
 namespace glight::gui {
 
 ToggleWidget::ToggleWidget(theatre::Management &management,
-                           EventTransmitter &eventHub, char key)
-    : ControlWidget(management, eventHub),
+                           EventTransmitter &eventHub, ControlMode mode,
+                           char key)
+    : ControlWidget(management, eventHub, mode),
       _flashButton(std::string(1, key)),
       _nameLabel("<..>"),
       _holdUpdates(false) {
@@ -50,8 +51,6 @@ ToggleWidget::ToggleWidget(theatre::Management &management,
   _box.show();
 }
 
-ToggleWidget::~ToggleWidget() { _updateConnection.disconnect(); }
-
 void ToggleWidget::onOnButtonClicked() {
   if (!_holdUpdates) {
     unsigned value;
@@ -87,7 +86,7 @@ void ToggleWidget::OnAssigned(bool moveFader) {
   if (GetSourceValue() != nullptr) {
     _nameLabel.set_text(GetSourceValue()->Name());
     if (moveFader) {
-      _onCheckButton.set_active(GetSourceValue()->A().Value().UInt() != 0);
+      _onCheckButton.set_active(GetSingleSourceValue().Value().UInt() != 0);
     } else {
       if (_onCheckButton.get_active())
         setValue(theatre::ControlValue::MaxUInt());
@@ -117,8 +116,8 @@ void ToggleWidget::OnAssigned(bool moveFader) {
 
 void ToggleWidget::MoveSlider() {
   if (GetSourceValue() != nullptr) {
-    _onCheckButton.set_active(GetSourceValue()->A().TargetValue() != 0);
-    SignalValueChange().emit(GetSourceValue()->A().TargetValue());
+    _onCheckButton.set_active(GetSingleSourceValue().TargetValue() != 0);
+    SignalValueChange().emit(GetSingleSourceValue().TargetValue());
   }
 }
 

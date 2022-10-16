@@ -220,11 +220,15 @@ void FaderWindow::addControl(bool isToggle, bool newToggleColumn,
 
   Gtk::Widget *nameLabel;
   std::unique_ptr<ControlWidget> control;
+  const ControlMode controlMode =
+      isPrimary ? ControlMode::Primary : ControlMode::Secondary;
   if (isToggle) {
-    control = std::make_unique<ToggleWidget>(*_management, _eventHub, key);
+    control = std::make_unique<ToggleWidget>(*_management, _eventHub,
+                                             controlMode, key);
     nameLabel = nullptr;
   } else {
-    control = std::make_unique<FaderWidget>(*_management, _eventHub, key);
+    control = std::make_unique<FaderWidget>(*_management, _eventHub,
+                                            controlMode, key);
     nameLabel = &static_cast<FaderWidget *>(control.get())->NameLabel();
   }
 
@@ -248,9 +252,11 @@ void FaderWindow::addControl(bool isToggle, bool newToggleColumn,
   } else {
     _controlGrid.attach(*control, hpos * 2 + 1, vpos, 2, 1);
 
-    nameLabel->set_hexpand(true);
-    const bool even = controls.size() % 2 == 0;
-    _controlGrid.attach(*nameLabel, hpos * 2, even ? 1 : 2, 4, 1);
+    if (isPrimary) {
+      nameLabel->set_hexpand(true);
+      const bool even = controls.size() % 2 == 0;
+      _controlGrid.attach(*nameLabel, hpos * 2, even ? 1 : 2, 4, 1);
+    }
   }
 
   control->show();

@@ -19,7 +19,7 @@ namespace glight::gui {
 class FaderWidget final : public ControlWidget {
  public:
   FaderWidget(theatre::Management &management, EventTransmitter &eventHub,
-              char key);
+              ControlMode mode, char key);
 
   void Toggle() override;
   void FullOn() override;
