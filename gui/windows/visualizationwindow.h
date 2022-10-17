@@ -59,8 +59,8 @@ class VisualizationWindow : public Gtk::Window {
   Gtk::CheckMenuItem _miFullscreen;
   Gtk::Menu _symbolMenu, _dryModeStyleMenu;
   std::vector<Gtk::MenuItem> _miSymbols;
-  Gtk::RadioMenuItem _miDMSPrimary, _miDMSSecondary, _miDMSVertical, _miDMSHorizontal,
-      _miDMSShadow;
+  Gtk::RadioMenuItem _miDMSPrimary, _miDMSSecondary, _miDMSVertical,
+      _miDMSHorizontal, _miDMSShadow;
 
   void inializeContextMenu();
   void initialize();
@@ -73,7 +73,7 @@ class VisualizationWindow : public Gtk::Window {
     double timeSince;
   };
   void drawManagement(const Cairo::RefPtr<Cairo::Context> &cairo,
-                      const theatre::ValueSnapshot& snapshot,
+                      const theatre::ValueSnapshot &snapshot,
                       const DrawStyle &style);
   void onTheatreChanged();
   bool onButtonPress(GdkEventButton *event);
@@ -112,8 +112,7 @@ class VisualizationWindow : public Gtk::Window {
   void onGlobalSelectionChanged();
 
   double scale(double width, double height) const;
-  double invScale(double width,
-                  double height) {
+  double invScale(double width, double height) {
     const double sc = scale(width, height);
     if (sc == 0.0)
       return 1.0;

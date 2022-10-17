@@ -133,7 +133,7 @@ class Management {
   }
 
   void BlackOut();
-  
+
  private:
   void ThreadLoop();
 

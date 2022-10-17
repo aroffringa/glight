@@ -154,8 +154,7 @@ bool VisualizationWindow::onExpose(
   return true;
 }
 
-double VisualizationWindow::scale(double width,
-                                  double height) const {
+double VisualizationWindow::scale(double width, double height) const {
   const theatre::Theatre &theatre = _management->GetTheatre();
   theatre::Position extend = theatre.Extend();
   if (extend.X() == 0.0 || extend.Y() == 0.0)
@@ -165,8 +164,8 @@ double VisualizationWindow::scale(double width,
 }
 
 void VisualizationWindow::drawManagement(
-    const Cairo::RefPtr<Cairo::Context> &cairo, const theatre::ValueSnapshot& snapshot,
-    const DrawStyle &style) {
+    const Cairo::RefPtr<Cairo::Context> &cairo,
+    const theatre::ValueSnapshot &snapshot, const DrawStyle &style) {
   const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
       _management->GetTheatre().Fixtures();
   cairo->save();
@@ -325,7 +324,7 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
     double height;
     if (_miDMSPrimary.get_active())
       height = _drawingArea.get_height();
-    else // TODO other dry mode styles
+    else  // TODO other dry mode styles
       height = _drawingArea.get_height() / 2.0;
     const double sc = invScale(_drawingArea.get_width(), height);
     const theatre::Position pos = theatre::Position(event->x, event->y) * sc;
@@ -371,8 +370,8 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
 
 bool VisualizationWindow::onButtonRelease(GdkEventButton *event) {
   if (event->button == 1) {
-    const double sc = invScale(_drawingArea.get_width(),
-                         _drawingArea.get_height());
+    const double sc =
+        invScale(_drawingArea.get_width(), _drawingArea.get_height());
     if (_dragType == DragFixture) {
       _draggingStart = theatre::Position(event->x, event->y) * sc;
     } else if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
@@ -389,8 +388,8 @@ bool VisualizationWindow::onMotion(GdkEventMotion *event) {
   if (_dragType != NotDragging) {
     const double width = _drawingArea.get_width();
     const double height = _drawingArea.get_height();
-    const theatre::Position pos = theatre::Position(event->x, event->y) /
-                            scale(width, height);
+    const theatre::Position pos =
+        theatre::Position(event->x, event->y) / scale(width, height);
     switch (_dragType) {
       case NotDragging:
         break;
