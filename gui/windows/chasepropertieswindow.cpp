@@ -32,8 +32,6 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
       _chase(&chase),
       _management(&management),
       _eventHub(eventHub) {
-  _eventHub.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &ChasePropertiesWindow::onChangeManagement));
   _eventHub.SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &ChasePropertiesWindow::onUpdateControllables));
 

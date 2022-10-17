@@ -92,10 +92,6 @@ class ObjectList : public Gtk::ScrolledWindow {
                       const theatre::FolderObject *selectedObj);
   bool selectObject(const theatre::FolderObject &object,
                     const Gtk::TreeModel::Children &children);
-  void changeManagement(theatre::Management &management) {
-    _management = &management;
-    fillList();
-  }
   void constructContextMenu();
   void constructFolderMenu(Gtk::Menu &menu, theatre::Folder &folder);
   void onMoveSelected(theatre::Folder *destination);

@@ -50,23 +50,4 @@ void FaderState::onPresetValueDeleted() {
   _sourceValue = nullptr;
 }
 
-void FaderSetupState::ChangeManagement(Management &management) {
-  for (FaderState &fader : faders) {
-    if (fader.GetSourceValue() != nullptr) {
-      const Controllable *oldControllable =
-          &fader.GetSourceValue()->GetControllable();
-      size_t inputIndex = fader.GetSourceValue()->InputIndex();
-      Controllable *newControllable = dynamic_cast<Controllable *>(
-          management.GetObjectFromPathIfExists(oldControllable->FullPath()));
-      if (newControllable) {
-        SourceValue *source =
-            management.GetSourceValue(*newControllable, inputIndex);
-        fader.SetSourceValue(source);
-      } else {
-        fader.SetNoSourceValue();
-      }
-    }
-  }
-}
-
 }  // namespace glight::gui

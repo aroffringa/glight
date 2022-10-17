@@ -68,8 +68,6 @@ class FaderSetupState {
     return false;
   }
 
-  void ChangeManagement(theatre::Management &management);
-
   std::vector<FaderState> faders;
 };
 
@@ -100,11 +98,6 @@ class GUIState {
       if (fader->IsAssigned(s)) return true;
     }
     return false;
-  }
-
-  void ChangeManagement(theatre::Management &management) {
-    for (std::unique_ptr<FaderSetupState> &fader : _faderSetups)
-      fader->ChangeManagement(management);
   }
 
  private:

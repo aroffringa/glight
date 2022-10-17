@@ -29,24 +29,9 @@ class VisualizationWindow : public Gtk::Window {
 
   void Update() { queue_draw(); }
 
-  void SetDryMode(theatre::Management *dryManagement) {
-    _dryManagement = dryManagement;
-    Update();
-  }
-  void SetRealMode() {
-    _dryManagement = nullptr;
-    Update();
-  }
-  void MakeDryModeReal() {
-    _management = _dryManagement;
-    _dryManagement = nullptr;
-    Update();
-  }
-
  private:
   Gtk::DrawingArea _drawingArea;
   theatre::Management *_management;
-  theatre::Management *_dryManagement;
   EventTransmitter *_eventTransmitter;
   FixtureSelection *_globalSelection;
   sigc::connection _globalSelectionConnection;
@@ -74,7 +59,7 @@ class VisualizationWindow : public Gtk::Window {
   Gtk::CheckMenuItem _miFullscreen;
   Gtk::Menu _symbolMenu, _dryModeStyleMenu;
   std::vector<Gtk::MenuItem> _miSymbols;
-  Gtk::RadioMenuItem _miDMSSingle, _miDMSVertical, _miDMSHorizontal,
+  Gtk::RadioMenuItem _miDMSPrimary, _miDMSSecondary, _miDMSVertical, _miDMSHorizontal,
       _miDMSShadow;
 
   void inializeContextMenu();
@@ -88,7 +73,8 @@ class VisualizationWindow : public Gtk::Window {
     double timeSince;
   };
   void drawManagement(const Cairo::RefPtr<Cairo::Context> &cairo,
-                      theatre::Management &management, const DrawStyle &style);
+                      const theatre::ValueSnapshot& snapshot,
+                      const DrawStyle &style);
   void onTheatreChanged();
   bool onButtonPress(GdkEventButton *event);
   bool onButtonRelease(GdkEventButton *event);
@@ -125,10 +111,10 @@ class VisualizationWindow : public Gtk::Window {
   void onSetSymbol(theatre::FixtureSymbol::Symbol symbol);
   void onGlobalSelectionChanged();
 
-  double scale(theatre::Management &management, double width, double height);
-  double invScale(theatre::Management &management, double width,
+  double scale(double width, double height) const;
+  double invScale(double width,
                   double height) {
-    double sc = scale(management, width, height);
+    const double sc = scale(width, height);
     if (sc == 0.0)
       return 1.0;
     else

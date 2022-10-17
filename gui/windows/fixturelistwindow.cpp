@@ -31,8 +31,6 @@ FixtureListWindow::FixtureListWindow(EventTransmitter *eventHub,
   set_title("Glight - fixtures");
   set_size_request(200, 400);
 
-  _changeManagementConnection = _eventHub->SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &FixtureListWindow::onChangeManagement));
   _updateControllablesConnection =
       _eventHub->SignalUpdateControllables().connect(
           [&]() { FixtureListWindow::update(); });

@@ -37,10 +37,6 @@ class CreateChaseDialog : public Gtk::Dialog {
   void onCreateChaseButtonClicked();
   void onSelectedObjectChanged();
 
-  void changeManagement(theatre::Management &management) {
-    _management = &management;
-  }
-
   Gtk::VPaned _paned;
 
   Gtk::Frame _listFrame;

@@ -64,11 +64,6 @@ DesignWizard::DesignWizard(theatre::Management &management,
       _incBackwardReturnRB("Backward and return"),
       _nextButton("Next"),
       _currentPage(Page1_SelFixtures) {
-  _eventHub.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &DesignWizard::onManagementChange));
-  _eventHub.SignalUpdateControllables().connect(
-      sigc::mem_fun(*this, &DesignWizard::fillFixturesList));
-
   initPage1();
   initPage2();
   initPage3_1RunningLight();

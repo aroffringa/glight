@@ -485,14 +485,6 @@ void FaderWindow::onChangeUpSpeed() {
     cw->SetFadeUpSpeed(speed);
 }
 
-void FaderWindow::ChangeManagement(theatre::Management &management,
-                                   bool moveSliders) {
-  _management = &management;
-  for (std::unique_ptr<ControlWidget> &cw : _controlsA) {
-    cw->ChangeManagement(management, moveSliders);
-  }
-}
-
 size_t FaderWindow::getFadeInSpeed() const {
   for (size_t i = 0; i != 11; ++i)
     if (_miFadeInOption[i].get_active()) return i;

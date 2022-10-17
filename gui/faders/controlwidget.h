@@ -67,7 +67,6 @@ class ControlWidget : public Gtk::Bin {
   void SetFadeDownSpeed(double fadePerSecond) {
     _fadeDownSpeed = fadePerSecond;
   }
-  void ChangeManagement(theatre::Management &management, bool moveSliders);
 
   static double MAX_SCALE_VALUE();
 

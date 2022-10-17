@@ -65,16 +65,16 @@ void BeatFinder::open() {
   snd_pcm_sw_params_free(sw_params);
 
   snd_pcm_prepare(_handle);
-  unsigned readAtATime = _alsaPeriodSize;
+  const unsigned readAtATime = _alsaPeriodSize;
 
   // Initial libaubio
   fvec_t *tempo_out = new_fvec(2);
-  uint hop_size = period_size;
-  char method[] = "default";
+  const uint hop_size = period_size;
+  const char method[] = "default";
   aubio_tempo_t *tempo =
       new_aubio_tempo(method, hop_size * 2, hop_size, samplerate);
   fvec_t *ibuf = new_fvec(hop_size);
-  smpl_t silence_threshold = -30.;
+  const smpl_t silence_threshold = -30.;
   uint_t is_silence = 0;
 
   std::vector<int16_t> alsaBuffer(hop_size * 2);
@@ -97,15 +97,11 @@ void BeatFinder::open() {
     // uint16_t localAudioLevel = 0;
     uint32_t audioRMS = 0;
     for (size_t i = 0; i != hop_size; ++i) {
-      int16_t l = alsaBuffer[i * 2], r = alsaBuffer[i * 2 + 1];
+      int16_t l = alsaBuffer[i * 2];
+      int16_t r = alsaBuffer[i * 2 + 1];
 
       smpl_t s = smpl_t(l) + smpl_t(r);
       fvec_set_sample(ibuf, s, i);
-
-      // if(unsigned(std::abs(l)) > localAudioLevel)
-      //	localAudioLevel = std::abs(l);
-      // if(unsigned(std::abs(r)) > localAudioLevel)
-      //	localAudioLevel = std::abs(r);
 
       l = l / 2;  // create headroom for multiplication
       r = r / 2;  // (-2^15 x 2^15 wouldn't fit in a int32_t)
@@ -113,15 +109,13 @@ void BeatFinder::open() {
       audioRMS += uint32_t(int32_t(r) * int32_t(r)) >> 8;
     }
     _audioLevel = audioRMS / (2 * hop_size);
-    //_audioLevel = std::min<uint32_t>(localAudioLevel*2,
-    // std::numeric_limits<uint16_t>::max());
     aubio_tempo_do(tempo, ibuf, tempo_out);
-    smpl_t is_beat = fvec_get_sample(tempo_out, 0);
+    const smpl_t is_beat = fvec_get_sample(tempo_out, 0);
     if (silence_threshold != -90)
       is_silence = aubio_silence_detection(ibuf, silence_threshold);
 
     if (is_beat && !is_silence) {
-      smpl_t confidence = aubio_tempo_get_confidence(tempo);
+      const smpl_t confidence = aubio_tempo_get_confidence(tempo);
       if (confidence > _minimumConfidence) {
         Beat beat = _beat;  // atomic load
         beat.confidence = confidence;

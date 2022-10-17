@@ -106,6 +106,8 @@ class Management {
   }
   size_t SourceValueIndex(const SourceValue *sourceValue) const;
   ValueSnapshot Snapshot(bool primary);
+  ValueSnapshot PrimarySnapshot();
+  ValueSnapshot SecondarySnapshot();
 
   double GetOffsetTimeInMS() const {
     const std::chrono::time_point<std::chrono::steady_clock> current_time =
@@ -115,16 +117,6 @@ class Management {
   }
   const Show &GetShow() const { return *_show; }
   Show &GetShow() { return *_show; }
-
-  std::unique_ptr<Management> MakeDryMode();
-
-  /**
-   * Swap DMX devices of two managements.
-   *
-   * This can be called while running, and is e.g. useful for switching from dry
-   * mode.
-   */
-  void SwapDevices(Management &source);
 
   const Folder &RootFolder() const { return *_rootFolder; }
   Folder &RootFolder() { return *_rootFolder; }
@@ -141,22 +133,14 @@ class Management {
   }
 
   void BlackOut();
-
-  void Recover(Management &other);
-
+  
  private:
-  Management(const Management &forDryCopy,
-             std::shared_ptr<BeatFinder> &beatFinder);
-
   void ThreadLoop();
 
   void getChannelValues(unsigned timestepNumber, unsigned *values,
                         unsigned universe);
   void removeControllable(
       std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr);
-
-  void dryCopyControllerDependency(const Management &forDryCopy, size_t index);
-  void dryCopyEffectDependency(const Management &forDryCopy, size_t index);
 
   void abortAllDevices();
 

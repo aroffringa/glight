@@ -36,9 +36,6 @@ ObjectListFrame::ObjectListFrame(theatre::Management &management,
       _management(&management),
       _parentWindow(parentWindow),
       _nameFrame(management, parentWindow) {
-  _parentWindow.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &ObjectListFrame::changeManagement));
-
   initPresetsPart();
 
   pack1(_objectListFrame);

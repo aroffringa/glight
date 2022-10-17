@@ -33,9 +33,6 @@ class EffectPropertiesWindow : public PropertiesWindow {
   void onRemoveConnectionClicked();
   void onSelectedConnectionChanged();
   void onInputSelected(theatre::SourceValue *preset);
-  void onChangeManagement(theatre::Management &management) {
-    _management = &management;
-  }
   void onUpdateControllables();
 
   Gtk::Label _titleLabel;

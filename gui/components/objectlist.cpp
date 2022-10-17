@@ -23,9 +23,6 @@ ObjectList::ObjectList(theatre::Management &management,
       _showTypeColumn(false),
       _openFolder(&management.RootFolder()),
       _listView(*this) {
-  _eventHub.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &ObjectList::changeManagement));
-
   _eventHub.SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &ObjectList::fillList));
 

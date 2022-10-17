@@ -44,10 +44,6 @@ class FolderCombo : public Gtk::ComboBox {
                       const theatre::Folder *selectedObj);
   bool selectObject(const theatre::Folder &object,
                     const Gtk::TreeModel::Children &children);
-  void changeManagement(theatre::Management &management) {
-    _management = &management;
-    fillList();
-  }
 
   sigc::signal<void()> _signalSelectionChange;
   RecursionLock _avoidRecursion;

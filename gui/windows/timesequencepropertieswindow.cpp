@@ -33,8 +33,6 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
       _timeSequence(&timeSequence),
       _management(&management),
       _eventHub(eventHub) {
-  _changeManagementConnection = eventHub.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onChangeManagement));
   _updateControllablesConnection =
       eventHub.SignalUpdateControllables().connect(sigc::mem_fun(
           *this, &TimeSequencePropertiesWindow::onUpdateControllables));

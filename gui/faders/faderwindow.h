@@ -51,16 +51,6 @@ class FaderWindow : public Gtk::Window {
   bool IsAssigned(theatre::SourceValue *presetValue);
   size_t KeyRowIndex() const { return _keyRowIndex; }
 
-  /**
-   * Associates all faders to a different management instance.
-   *
-   * Faders will be assigned to the presets of the new management instance, by
-   * looking up the preset by Id. This method is e.g. used for switching between
-   * dry and real mode. Faders that are assigned to a preset with an Id that
-   * does not correspond to a preset in the new instance are unassigned.
-   */
-  void ChangeManagement(theatre::Management &management, bool moveSliders);
-
   FaderSetupState *State() { return _state; }
 
  private:

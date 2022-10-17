@@ -41,9 +41,6 @@ class ChasePropertiesWindow : public PropertiesWindow {
   void onSyncCountChanged();
   void onBeatSpeedChanged();
 
-  void onChangeManagement(theatre::Management &management) {
-    _management = &management;
-  }
   void onUpdateControllables();
   void onToTimeSequenceClicked();
 

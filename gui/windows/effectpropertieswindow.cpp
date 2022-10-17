@@ -30,8 +30,6 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
   set_title("glight - " + effect.Name());
   set_size_request(650, 250);
 
-  parentWindow.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &EffectPropertiesWindow::onChangeManagement));
   parentWindow.SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &EffectPropertiesWindow::onUpdateControllables));
 

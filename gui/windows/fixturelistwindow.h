@@ -32,10 +32,6 @@ class FixtureListWindow : public Gtk::Window {
   ~FixtureListWindow();
 
  private:
-  void onChangeManagement(theatre::Management &management) {
-    _management = &management;
-    fillFixturesList();
-  }
   void update() { fillFixturesList(); }
   void fillFixturesList();
   void onNewButtonClicked();

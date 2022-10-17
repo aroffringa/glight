@@ -43,10 +43,6 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
 
   GUIState &State() { return _state; }
 
-  sigc::signal<void(theatre::Management &)> &SignalChangeManagement()
-      final override {
-    return _signalChangeManagement;
-  }
   sigc::signal<void()> &SignalUpdateControllables() final override {
     return _signalUpdateControllables;
   }
@@ -87,11 +83,6 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   void onMIImportClicked();
   void onMIQuitClicked();
 
-  void updateDryModeState();
-  void onMIDryModeClicked();
-  void onMICancelDryModeClicked();
-  void onMISwapModesClicked();
-  void onMIRecoverClicked();
   void onMIBlackOutAndDryMode();
   void onMIBlackOut();
   void onMIProtectBlackOut();
@@ -103,9 +94,6 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   void onFaderWindowSelected(Gtk::CheckMenuItem &menuItem,
                              FaderSetupState &state);
   FaderWindow *getFaderWindow(FaderSetupState &state);
-
-  void changeManagement(theatre::Management *newManagement,
-                        bool moveControlSliders);
 
   size_t nextControlKeyRow() const;
 
@@ -131,18 +119,12 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   GUIState _state;
   FixtureSelection _fixtureSelection;
 
-  sigc::signal<void(theatre::Management &)> _signalChangeManagement;
   sigc::signal<void()> _signalUpdateControllables;
 
   Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
 
   Gtk::MenuItem _miFile, _miDesign, _miWindow;
   Gtk::ImageMenuItem _miNew, _miOpen, _miSave, _miImport, _miQuit;
-  Gtk::CheckMenuItem _miDryMode;
-  Gtk::MenuItem _miCancelDryMode;
-  Gtk::MenuItem _miSwapModes;
-  Gtk::MenuItem _miRecover;
-  Gtk::MenuItem _miBlackOutAndDryMode;
   Gtk::MenuItem _miBlackOut;
   Gtk::CheckMenuItem _miProtectBlackout;
   Gtk::SeparatorMenuItem _miDesignSep1, _miDesignSep2;

@@ -47,10 +47,6 @@ class PresetCollectionWindow : public PropertiesWindow {
   void onAddPreset();
   void onRemovePreset();
   void onControlValueChanged();
-
-  void onChangeManagement(theatre::Management &management) {
-    _management = &management;
-  }
   void onUpdateControllables();
   void setPresetSensitive(bool sensitive);
   bool selectedPresetIndex(size_t &index);
@@ -87,7 +83,7 @@ class PresetCollectionWindow : public PropertiesWindow {
   theatre::PresetCollection *_presetCollection;
   theatre::Management *_management;
   EventTransmitter &_eventHub;
-  sigc::connection _changeManagementConnection, _updateControllablesConnection;
+  sigc::connection _updateControllablesConnection;
 };
 
 }  // namespace glight::gui

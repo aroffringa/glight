@@ -54,29 +54,6 @@ void ControlWidget::OnTheatreUpdate() {
   }
 }
 
-void ControlWidget::ChangeManagement(theatre::Management &management,
-                                     bool moveSliders) {
-  if (_sourceValue == nullptr) {
-    _management = &management;
-  } else {
-    std::string controllablePath = _sourceValue->GetControllable().FullPath();
-    size_t input = _sourceValue->InputIndex();
-    _management = &management;
-    theatre::Controllable *controllable = dynamic_cast<theatre::Controllable *>(
-        _management->GetObjectFromPathIfExists(controllablePath));
-    theatre::SourceValue *sv;
-    if (controllable)
-      sv = _management->GetSourceValue(*controllable, input);
-    else
-      sv = nullptr;
-    if (sv == nullptr)
-      Unassign();
-    else {
-      Assign(sv, moveSliders);
-    }
-  }
-}
-
 theatre::SingleSourceValue &ControlWidget::GetSingleSourceValue() {
   return _mode == ControlMode::Primary ? _sourceValue->A() : _sourceValue->B();
 }

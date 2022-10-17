@@ -51,10 +51,6 @@ class DesignWizard : public Gtk::Window {
   };
 
   void fillFixturesList();
-  void onManagementChange(theatre::Management &newManagement) {
-    _management = &newManagement;
-    fillFixturesList();
-  }
   void onNextClicked();
   void initPage1();
   void initPage2();

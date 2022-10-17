@@ -25,9 +25,6 @@ CreateChaseDialog::CreateChaseDialog(theatre::Management &management,
       _management(&management),
       _parentWindow(parentWindow),
       _newChase(nullptr) {
-  _parentWindow.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &CreateChaseDialog::changeManagement));
-
   set_size_request(600, 400);
 
   initListPart();

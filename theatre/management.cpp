@@ -416,162 +416,21 @@ size_t Management::SourceValueIndex(const SourceValue *sourceValue) const {
   return NamedObject::FindIndex(_sourceValues, sourceValue);
 }
 
-ValueSnapshot Management::Snapshot(bool primary) {
+ValueSnapshot Management::PrimarySnapshot() {
   std::lock_guard<std::mutex> lock(_mutex);
+  return *_primarySnapshot;
+}
+
+ValueSnapshot Management::SecondarySnapshot() {
+  std::lock_guard<std::mutex> lock(_mutex);
+  return *_primarySnapshot;
+}
+
+ValueSnapshot Management::Snapshot(bool primary) {
   if (primary)
-    return *_primarySnapshot;
+    return PrimarySnapshot();
   else
-    return *_secondarySnapshot;
-}
-
-/**
- * Copy constructor for making a dry mode copy.
- */
-Management::Management(const Management &forDryCopy,
-                       std::shared_ptr<class BeatFinder> &beatFinder)
-    : _thread(),
-      _isQuitting(false),
-      _createTime(forDryCopy._createTime),
-      _rndDistribution(0, ControlValue::MaxUInt() + 1),
-      _overridenBeat(forDryCopy._overridenBeat.load()),
-      _lastOverridenBeatTime(forDryCopy._lastOverridenBeatTime.load()),
-      _theatre(new class Theatre(*forDryCopy._theatre)),
-      _beatFinder(beatFinder) {
-  for (size_t i = 0; i != forDryCopy._devices.size(); ++i)
-    _devices.emplace_back(new DummyDevice());
-
-  _snapshot.reset(new ValueSnapshot(*forDryCopy._snapshot));
-  _show.reset(new class Show(*this));  // TODO For now we don't copy the show
-
-  _rootFolder = forDryCopy._rootFolder->CopyHierarchy(_folders);
-
-  // fixturetypes are not placed in a folder by theatre: do so now
-  for (const std::unique_ptr<FixtureType> &ft : _theatre->FixtureTypes())
-    _rootFolder->Add(*ft);
-
-  // The controllables can have dependencies to other controllables, hence
-  // dependencies need to be resolved and copied first.
-  _controllables.resize(forDryCopy._controllables.size());
-  _sourceValues.resize(forDryCopy._sourceValues.size());
-  for (size_t i = 0; i != forDryCopy._controllables.size(); ++i) {
-    if (_controllables[i] == nullptr)  // not already resolved?
-      dryCopyControllerDependency(forDryCopy, i);
-  }
-  for (size_t i = 0; i != forDryCopy._sourceValues.size(); ++i) {
-    if (_sourceValues[i] == nullptr) {
-      size_t cIndex = forDryCopy.ControllableIndex(
-          &forDryCopy._sourceValues[i]->GetControllable());
-      _sourceValues[i] = std::make_unique<SourceValue>(
-          *forDryCopy._sourceValues[i], *_controllables[cIndex]);
-    }
-  }
-}
-
-void Management::dryCopyControllerDependency(const Management &forDryCopy,
-                                             size_t index) {
-  Controllable *controllable = forDryCopy._controllables[index].get();
-  FixtureControl *fc = dynamic_cast<FixtureControl *>(controllable);
-  const Chase *chase = dynamic_cast<const Chase *>(controllable);
-  const TimeSequence *timeSequence =
-      dynamic_cast<const TimeSequence *>(controllable);
-  const PresetCollection *presetCollection =
-      dynamic_cast<const PresetCollection *>(controllable);
-  const Effect *effect = dynamic_cast<const Effect *>(controllable);
-  if (fc) {
-    Fixture &fixture = _theatre->GetFixture(fc->Fixture().Name());
-    _controllables[index].reset(new FixtureControl(fixture));
-    GetFolder(fc->Parent().FullPath()).Add(*_controllables[index]);
-  } else if (chase || timeSequence) {
-    const Sequence *sequence;
-    Sequence *newSequence;
-    if (chase) {
-      _controllables[index] = chase->CopyWithoutSequence();
-      Chase &newChase = static_cast<Chase &>(*_controllables[index]);
-      sequence = &chase->Sequence();
-      newSequence = &newChase.Sequence();
-    } else {
-      _controllables[index] = timeSequence->CopyWithoutSequence();
-      TimeSequence &newTimeSequence =
-          static_cast<TimeSequence &>(*_controllables[index]);
-      sequence = &timeSequence->Sequence();
-      newSequence = &newTimeSequence.Sequence();
-    }
-    for (const Input &input : sequence->List()) {
-      size_t cIndex = forDryCopy.ControllableIndex(input.GetControllable());
-      if (_controllables[cIndex] == nullptr)
-        dryCopyControllerDependency(forDryCopy, cIndex);
-      newSequence->Add(*_controllables[cIndex], input.InputIndex());
-    }
-    GetFolder(controllable->Parent().FullPath()).Add(*_controllables[index]);
-  } else if (presetCollection) {
-    _controllables[index].reset(new PresetCollection(presetCollection->Name()));
-    PresetCollection &pc =
-        static_cast<PresetCollection &>(*_controllables[index]);
-    for (const std::unique_ptr<PresetValue> &value :
-         presetCollection->PresetValues()) {
-      // This preset is owned by the preset collection, not by management.
-      size_t cIndex = forDryCopy.ControllableIndex(&value->GetControllable());
-      if (_controllables[cIndex] == nullptr)
-        dryCopyControllerDependency(forDryCopy, cIndex);
-      pc.AddPresetValue(*value, *_controllables[cIndex]);
-    }
-    GetFolder(presetCollection->Parent().FullPath()).Add(pc);
-  } else if (effect) {
-    size_t eIndex = forDryCopy.ControllableIndex(effect);
-    dryCopyEffectDependency(forDryCopy, eIndex);
-  } else
-    throw std::runtime_error("Unknown controllable in manager");
-}
-
-void Management::dryCopyEffectDependency(const Management &forDryCopy,
-                                         size_t index) {
-  const Effect *effect =
-      static_cast<const Effect *>(forDryCopy._controllables[index].get());
-  _controllables[index] = effect->Copy();
-  GetFolder(effect->Parent().FullPath()).Add(*_controllables[index]);
-  for (const std::pair<Controllable *, size_t> &c : effect->Connections()) {
-    size_t cIndex = forDryCopy.ControllableIndex(c.first);
-    if (_controllables[cIndex] == nullptr)
-      dryCopyControllerDependency(forDryCopy, cIndex);
-    static_cast<Effect &>(*_controllables[index])
-        .AddConnection(*_controllables[cIndex], c.second);
-  }
-}
-
-std::unique_ptr<Management> Management::MakeDryMode() {
-  std::lock_guard<std::mutex> guard(_mutex);
-  std::unique_ptr<Management> dryMode(new Management(*this, _beatFinder));
-  return dryMode;
-}
-
-void Management::SwapDevices(Management &source) {
-  bool sourceRunning = source._thread != nullptr,
-       thisRunning = _thread != nullptr;
-  if (thisRunning) {
-    _isQuitting = true;
-    abortAllDevices();
-    _thread->join();
-    _thread.reset();
-  }
-  if (sourceRunning) {
-    source._isQuitting = true;
-    source.abortAllDevices();
-    source._thread->join();
-    source._thread.reset();
-  }
-
-  std::unique_lock<std::mutex> guard(_mutex);
-#ifndef NDEBUG
-  if (source._devices.size() != _devices.size())
-    throw std::runtime_error(
-        "Something went wrong: device lists were not of "
-        "same size in call to SwapDevices()");
-#endif
-  std::swap(source._devices, _devices);
-  guard.unlock();
-
-  if (sourceRunning) source.Run();
-  if (thisRunning) Run();
+    return SecondarySnapshot();
 }
 
 bool Management::topologicalSort(const std::vector<Controllable *> &input,
@@ -601,19 +460,6 @@ bool Management::topologicalSortVisit(Controllable &controllable,
 void Management::BlackOut() {
   for (std::unique_ptr<SourceValue> &sv : _sourceValues) {
     sv->A().Set(0, 0.0);
-  }
-}
-
-void Management::Recover(Management &other) {
-  std::scoped_lock<std::mutex, std::mutex> lock(other._mutex, _mutex);
-  for (const std::unique_ptr<SourceValue> &sv : other._sourceValues) {
-    std::string path = sv->GetControllable().FullPath();
-    FolderObject *object = GetObjectFromPathIfExists(path);
-    Controllable *control = dynamic_cast<Controllable *>(object);
-    if (control) {
-      SourceValue *value = GetSourceValue(*control, sv->InputIndex());
-      if (value) value->A().SetValue(sv->A().Value());
-    }
   }
 }
 
