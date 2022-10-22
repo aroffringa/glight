@@ -20,7 +20,7 @@ namespace glight::theatre {
  * limits respectively. By setting C and D to max, the decreasing part can be
  * remove.
  */
-class ThresholdEffect : public Effect {
+class ThresholdEffect final : public Effect {
  public:
   ThresholdEffect()
       : Effect(1),
@@ -49,8 +49,8 @@ class ThresholdEffect : public Effect {
   }
 
  protected:
-  virtual void mix(const ControlValue *values,
-                   const class Timing &timing) final override {
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) override {
     ControlValue thresholded;
     if (values[0].UInt() < _lowerEndLimit) {
       if (values[0].UInt() <= _lowerStartLimit)

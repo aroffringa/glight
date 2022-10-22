@@ -41,7 +41,7 @@ class PresetCollection final : public Controllable {
                           _presetValues[index]->InputIndex());
   }
 
-  void Mix(const Timing &timing) override {
+  void Mix(const Timing &timing, bool primary) override {
     unsigned leftHand = _inputValue.UInt();
     for (const std::unique_ptr<PresetValue> &pv : _presetValues) {
       unsigned rightHand = pv->Value().UInt();

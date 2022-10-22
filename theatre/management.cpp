@@ -128,7 +128,7 @@ void Management::abortAllDevices() {
 
 void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
                                   unsigned universe, bool primary) {
-  double relTimeInMs = GetOffsetTimeInMS();
+  const double relTimeInMs = GetOffsetTimeInMS();
   double beatValue;
   unsigned audioLevel;
   // Get the beat
@@ -185,7 +185,7 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
 
   for (auto c = orderedList.rbegin(); c != orderedList.rend(); ++c) {
     Controllable *controllable = *c;
-    controllable->Mix(timing);
+    controllable->Mix(timing, primary);
     if (FixtureControl *fc = dynamic_cast<FixtureControl *>(controllable)) {
       fc->MixChannels(values, universe);
     }

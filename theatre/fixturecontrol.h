@@ -6,7 +6,7 @@
 
 namespace glight::theatre {
 
-class FixtureControl : public Controllable {
+class FixtureControl final : public Controllable {
  public:
   FixtureControl(class Fixture &fixture)
       : Controllable(fixture.Name()),
@@ -17,17 +17,15 @@ class FixtureControl : public Controllable {
     return *_fixture;
   }
 
-  size_t NInputs() const final override { return _fixture->Functions().size(); }
+  size_t NInputs() const override { return _fixture->Functions().size(); }
 
-  ControlValue &InputValue(size_t index) final override {
-    return _values[index];
-  }
+  ControlValue &InputValue(size_t index) override { return _values[index]; }
 
-  virtual FunctionType InputType(size_t index) const final override {
+  virtual FunctionType InputType(size_t index) const override {
     return _fixture->Functions()[index]->Type();
   }
 
-  virtual Color InputColor(size_t index) const final override {
+  virtual Color InputColor(size_t index) const override {
     switch (InputType(index)) {
       case FunctionType::ColorMacro:
       case FunctionType::Effect:
@@ -60,13 +58,13 @@ class FixtureControl : public Controllable {
     return Color::Black();
   }
 
-  size_t NOutputs() const final override { return 0; }
+  size_t NOutputs() const override { return 0; }
 
-  std::pair<const Controllable *, size_t> Output(size_t) const final override {
+  std::pair<const Controllable *, size_t> Output(size_t) const override {
     return std::pair<const Controllable *, size_t>(nullptr, 0);
   }
 
-  void Mix(const class Timing &) final override {}
+  void Mix(const Timing &, bool) override {}
 
   void MixChannels(unsigned *channelValues, unsigned universe) {
     for (size_t i = 0; i != _fixture->Functions().size(); ++i) {

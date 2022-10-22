@@ -1,19 +1,25 @@
 #ifndef DELAY_EFFECT_H
 #define DELAY_EFFECT_H
 
+#include <array>
+#include <vector>
+
 #include "../effect.h"
 #include "../timing.h"
 
 namespace glight::theatre {
 
-class DelayEffect : public Effect {
+class DelayEffect final : public Effect {
  public:
   DelayEffect()
       : Effect(1),
-        _previousTimestep(0),
-        _buffer(2, std::pair<double, ControlValue>(0.0, 0)),
-        _bufferReadPos(0),
-        _bufferWritePos(0),
+        _previousTimestep{0, 0},
+        _buffer{std::vector<std::pair<double, ControlValue>>(
+                    2, std::pair<double, ControlValue>(0.0, 0)),
+                std::vector<std::pair<double, ControlValue>>(
+                    2, std::pair<double, ControlValue>(0.0, 0))},
+        _bufferReadPos{0, 0},
+        _bufferWritePos{0, 0},
         _delayInMS(100.0) {}
 
   virtual Effect::Type GetType() const override { return DelayType; }
@@ -22,43 +28,46 @@ class DelayEffect : public Effect {
   void SetDelayInMS(double delayInMS) { _delayInMS = delayInMS; }
 
  protected:
-  virtual void mix(const ControlValue *values,
-                   const Timing &timing) final override {
-    if (_previousTimestep == timing.TimestepNumber()) {
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) override {
+    std::vector<std::pair<double, ControlValue>> &buffer = _buffer[primary];
+    if (_previousTimestep[primary] == timing.TimestepNumber()) {
       unsigned prevWritePos =
-          (_bufferWritePos + _buffer.size() - 1) % _buffer.size();
-      _buffer[prevWritePos].second.Set(
-          ControlValue::Mix(_buffer[prevWritePos].second.UInt(),
+          (_bufferWritePos[primary] + buffer.size() - 1) % buffer.size();
+      buffer[prevWritePos].second.Set(
+          ControlValue::Mix(buffer[prevWritePos].second.UInt(),
                             values[0].UInt(), MixStyle::Default));
     } else {
-      _previousTimestep = timing.TimestepNumber();
-      _buffer[_bufferWritePos].first = timing.TimeInMS();
-      _buffer[_bufferWritePos].second = values[0];
-      _bufferWritePos = (_bufferWritePos + 1) % _buffer.size();
-      if (_bufferWritePos == _bufferReadPos) {
+      _previousTimestep[primary] = timing.TimestepNumber();
+      buffer[_bufferWritePos[primary]].first = timing.TimeInMS();
+      buffer[_bufferWritePos[primary]].second = values[0];
+      _bufferWritePos[primary] = (_bufferWritePos[primary] + 1) % buffer.size();
+      if (_bufferWritePos[primary] == _bufferReadPos[primary]) {
         // Increase size of circular buffer
-        size_t n = _buffer.size();
-        _bufferReadPos += n;
-        _buffer.resize(_buffer.size() * 2);
-        std::copy_backward(_buffer.begin() + _bufferWritePos,
-                           _buffer.begin() + n,
-                           _buffer.begin() + _bufferReadPos);
+        size_t n = buffer.size();
+        _bufferReadPos[primary] += n;
+        buffer.resize(buffer.size() * 2);
+        std::copy_backward(buffer.begin() + _bufferWritePos[primary],
+                           buffer.begin() + n,
+                           buffer.begin() + _bufferReadPos[primary]);
       }
-      while (_bufferReadPos != _bufferWritePos &&
-             _buffer[_bufferReadPos].first + _delayInMS < timing.TimeInMS()) {
-        _bufferReadPos = (_bufferReadPos + 1) % _buffer.size();
+      while (_bufferReadPos[primary] != _bufferWritePos[primary] &&
+             buffer[_bufferReadPos[primary]].first + _delayInMS <
+                 timing.TimeInMS()) {
+        _bufferReadPos[primary] = (_bufferReadPos[primary] + 1) % buffer.size();
       }
     }
     for (const std::pair<Controllable *, size_t> &connection : Connections()) {
       connection.first->MixInput(connection.second,
-                                 _buffer[_bufferReadPos].second);
+                                 buffer[_bufferReadPos[primary]].second);
     }
   }
 
  private:
-  unsigned _previousTimestep;
-  std::vector<std::pair<double, ControlValue>> _buffer;
-  size_t _bufferReadPos, _bufferWritePos;
+  unsigned _previousTimestep[2];
+  std::array<std::vector<std::pair<double, ControlValue>>, 2> _buffer;
+  size_t _bufferReadPos[2];
+  size_t _bufferWritePos[2];
 
   double _delayInMS;
 };

@@ -12,8 +12,8 @@ class MusicActivationEffect final : public Effect {
  public:
   MusicActivationEffect()
       : Effect(1),
-        _lastBeatValue(0.0),
-        _lastBeatTime(0.0),
+        _lastBeatValue{0.0, 0.0},
+        _lastBeatTime{0.0, 0.0},
         _offDelay(2000)  // two seconds
   {}
 
@@ -26,13 +26,13 @@ class MusicActivationEffect final : public Effect {
   void SetOffDelay(unsigned offDelay) { _offDelay = offDelay; }
 
  protected:
-  virtual void mix(const ControlValue *values,
-                   const Timing &timing) final override {
-    if (_lastBeatValue != timing.BeatValue()) {
-      _lastBeatValue = timing.BeatValue();
-      _lastBeatTime = timing.TimeInMS();
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) override {
+    if (_lastBeatValue[primary] != timing.BeatValue()) {
+      _lastBeatValue[primary] = timing.BeatValue();
+      _lastBeatTime[primary] = timing.TimeInMS();
     }
-    double timePassed = timing.TimeInMS() - _lastBeatTime;
+    const double timePassed = timing.TimeInMS() - _lastBeatTime[primary];
     if (timePassed < _offDelay) {
       for (const std::pair<Controllable *, size_t> &connection : Connections())
         connection.first->MixInput(connection.second, values[0]);
@@ -40,8 +40,8 @@ class MusicActivationEffect final : public Effect {
   }
 
  private:
-  double _lastBeatValue;
-  double _lastBeatTime;
+  double _lastBeatValue[2];
+  double _lastBeatTime[2];
 
   unsigned _offDelay;
 };

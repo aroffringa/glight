@@ -10,6 +10,8 @@
 
 namespace glight::theatre {
 
+class Timing;
+
 /**
  * A Controllable has a number of inputs and optionally some outputs
  * that this controllable controls.
@@ -64,7 +66,7 @@ class Controllable : public FolderObject {
    * Before this function is called, all input values that this
    * controllable depends on have been set.
    */
-  virtual void Mix(const class Timing &timing) = 0;
+  virtual void Mix(const Timing &timing, bool primary) = 0;
 
   std::string InputName(size_t index) const {
     if (NInputs() == 1)
@@ -77,8 +79,8 @@ class Controllable : public FolderObject {
    * Sets the value at the controllables input.
    */
   void MixInput(size_t index, const ControlValue &value) {
-    unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(), value.UInt(),
-                                        MixStyle::Default);
+    const unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(),
+                                              value.UInt(), MixStyle::Default);
     InputValue(index) = ControlValue(mixVal);
   }
 

@@ -7,7 +7,7 @@
 
 namespace glight::theatre {
 
-class CurveEffect : public Effect {
+class CurveEffect final : public Effect {
  public:
   enum Function {
     Linear,
@@ -30,8 +30,8 @@ class CurveEffect : public Effect {
   void SetFunction(enum Function f) { _function = f; }
 
  protected:
-  virtual void mix(const ControlValue *values,
-                   const class Timing &timing) final override {
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) override {
     unsigned value = values[0].UInt();
     switch (_function) {
       case Linear:

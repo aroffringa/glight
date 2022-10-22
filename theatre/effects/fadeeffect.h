@@ -6,16 +6,16 @@
 
 namespace glight::theatre {
 
-class FadeEffect : public Effect {
+class FadeEffect final : public Effect {
  public:
   FadeEffect()
       : Effect(1),
-        _fadingValue(0),
+        _fadingValue{0, 0},
+        _previousTime{0.0, 0.0},
+        _sustainTimer{0.0, 0.0},
         _fadeUpSpeed(1.0),
         _fadeDownSpeed(1.0),
-        _sustain(0.0),
-        _previousTime(0.0),
-        _sustainTimer(0.0) {}
+        _sustain(0.0) {}
 
   virtual Effect::Type GetType() const override { return FadeType; }
 
@@ -37,55 +37,56 @@ class FadeEffect : public Effect {
   void SetSustain(double sustainMS) { _sustain = 1e-3 * sustainMS; }
 
  protected:
-  virtual void mix(const ControlValue *values,
-                   const Timing &timing) final override {
-    double timePassed = 0.001 * (timing.TimeInMS() - _previousTime);
-    _previousTime = timing.TimeInMS();
-    unsigned targetValue = values[0].UInt();
-    if (targetValue != _fadingValue) {
-      if (targetValue > _fadingValue) {
-        _sustainTimer = _sustain;
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) override {
+    double timePassed = 0.001 * (timing.TimeInMS() - _previousTime[primary]);
+    _previousTime[primary] = timing.TimeInMS();
+    const unsigned targetValue = values[0].UInt();
+    if (targetValue != _fadingValue[primary]) {
+      if (targetValue > _fadingValue[primary]) {
+        _sustainTimer[primary] = _sustain;
         if (_fadeUpSpeed == 0.0)
-          _fadingValue = targetValue;
+          _fadingValue[primary] = targetValue;
         else {
           unsigned stepSize = unsigned(std::min<double>(
               timePassed * _fadeUpSpeed * double(ControlValue::MaxUInt()),
               double(ControlValue::MaxUInt())));
-          if (_fadingValue + stepSize > targetValue)
-            _fadingValue = targetValue;
+          if (_fadingValue[primary] + stepSize > targetValue)
+            _fadingValue[primary] = targetValue;
           else
-            _fadingValue += stepSize;
+            _fadingValue[primary] += stepSize;
         }
       } else {
-        if (_sustainTimer > timePassed)
-          _sustainTimer -= timePassed;
+        if (_sustainTimer[primary] > timePassed)
+          _sustainTimer[primary] -= timePassed;
         else {
-          timePassed -= _sustainTimer;
-          _sustainTimer = 0.0;
+          timePassed -= _sustainTimer[primary];
+          _sustainTimer[primary] = 0.0;
           if (_fadeDownSpeed == 0.0)
-            _fadingValue = targetValue;
+            _fadingValue[primary] = targetValue;
           else {
             unsigned stepSize = unsigned(std::min<double>(
                 timePassed * _fadeDownSpeed * double(ControlValue::MaxUInt()),
                 double(ControlValue::MaxUInt())));
-            if (targetValue + stepSize > _fadingValue)
-              _fadingValue = targetValue;
+            if (targetValue + stepSize > _fadingValue[primary])
+              _fadingValue[primary] = targetValue;
             else
-              _fadingValue -= stepSize;
+              _fadingValue[primary] -= stepSize;
           }
         }
       }
     }
-    if (_fadingValue != 0) {
-      setConnectedInputs(ControlValue(_fadingValue));
+    if (_fadingValue[primary] != 0) {
+      setConnectedInputs(ControlValue(_fadingValue[primary]));
     }
   }
 
  private:
-  unsigned _fadingValue;
+  unsigned _fadingValue[2];
+  double _previousTime[2], _sustainTimer[2];
+
   double _fadeUpSpeed, _fadeDownSpeed;
   double _sustain;
-  double _previousTime, _sustainTimer;
 };
 
 }  // namespace glight::theatre

@@ -32,7 +32,7 @@ class Chase final : public Controllable {
                                                    input.InputIndex());
   }
 
-  virtual void Mix(const Timing &timing) override {
+  virtual void Mix(const Timing &timing, bool primary) override {
     // Slowly drive the phase offset back to zero.
     if (_phaseOffset != 0.0) {
       if (_phaseOffset > 8.0)

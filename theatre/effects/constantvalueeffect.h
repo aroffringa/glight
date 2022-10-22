@@ -5,7 +5,7 @@
 
 namespace glight::theatre {
 
-class ConstantValueEffect : public Effect {
+class ConstantValueEffect final : public Effect {
  public:
   ConstantValueEffect()
       : Effect(0),
@@ -18,8 +18,8 @@ class ConstantValueEffect : public Effect {
   void SetValue(unsigned value) { _value = value; }
 
  protected:
-  virtual void mix(const ControlValue *values,
-                   const class Timing &timing) final override {
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) override {
     setConnectedInputs(ControlValue(_value));
   }
 
