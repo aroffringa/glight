@@ -487,8 +487,7 @@ void FaderWindow::loadState() {
                         ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
                         (ControlValue::MaxUInt() + 1) / 100);
     _leftBox.pack_start(*_crossFader, true, true);
-    _crossFader->set_value(ControlValue::MaxUInt());
-    _crossFader->set_inverted(true);
+    _crossFader->set_value(0);
     _crossFader->set_draw_value(false);
     _crossFader->set_has_origin(false);
     _crossFader->set_vexpand(true);
@@ -543,6 +542,13 @@ void FaderWindow::ReloadValues() {
   }
 }
 
-void FaderWindow::onCrossFadeChange() {}
+void FaderWindow::onCrossFadeChange() {
+  for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
+    glight::theatre::SourceValue* source = cw->GetSourceValue();
+    if(source) {
+      source->CrossFader().Set(_crossFader->get_value(), 0.0);
+    }
+  }
+}
 
 }  // namespace glight::gui

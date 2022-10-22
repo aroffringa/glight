@@ -74,21 +74,16 @@ class SourceValue {
    * of a controllable.
    */
   SourceValue(Controllable& controllable, size_t input_index)
-      : input_(controllable, input_index), a_(), b_() {}
-
-  /**
-   * Copy constructor that copies the source but associates it with the given
-   * controllable.
-   */
-  SourceValue(const SourceValue& source, Controllable& controllable)
-      : input_(controllable, source.input_.InputIndex()),
-        a_(source.a_),
-        b_(source.b_) {}
+      : input_(controllable, input_index), a_(), b_(), cross_fader_() {}
 
   SingleSourceValue& A() { return a_; }
-  SingleSourceValue& B() { return b_; }
   const SingleSourceValue& A() const { return a_; }
+  
+  SingleSourceValue& B() { return b_; }
   const SingleSourceValue& B() const { return b_; }
+
+  SingleSourceValue& CrossFader() { return cross_fader_; }
+  const SingleSourceValue& CrossFader() const { return cross_fader_; }
 
   const Controllable& GetControllable() const {
     return *input_.GetControllable();
@@ -104,12 +99,20 @@ class SourceValue {
   void ApplyFade(double time_passed) {
     a_.ApplyFade(time_passed);
     b_.ApplyFade(time_passed);
+    cross_fader_.ApplyFade(time_passed);
   }
-
+  unsigned PrimaryValue() const {
+    return (a_.Value() * Invert(cross_fader_.Value())).UInt() + (b_.Value() * cross_fader_.Value()).UInt();
+  }
+  unsigned SecondaryValue() const {
+    return (b_.Value() * Invert(cross_fader_.Value())).UInt() + (a_.Value() * cross_fader_.Value()).UInt();
+  }
+  
  private:
   Input input_;
   SingleSourceValue a_;
   SingleSourceValue b_;
+  SingleSourceValue cross_fader_;
   sigc::signal<void()> signal_delete_;
 };
 

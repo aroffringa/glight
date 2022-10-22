@@ -169,10 +169,10 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
 
   if (primary) {
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-      sv->GetControllable().MixInput(sv->InputIndex(), sv->A().Value());
+      sv->GetControllable().MixInput(sv->InputIndex(), sv->PrimaryValue());
   } else {
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-      sv->GetControllable().MixInput(sv->InputIndex(), sv->B().Value());
+      sv->GetControllable().MixInput(sv->InputIndex(), sv->SecondaryValue());
   }
 
   // Solve dependency graph of controllables
@@ -466,6 +466,7 @@ bool Management::topologicalSortVisit(Controllable &controllable,
 void Management::BlackOut() {
   for (std::unique_ptr<SourceValue> &sv : _sourceValues) {
     sv->A().Set(0, 0.0);
+    sv->B().Set(0, 0.0);
   }
 }
 

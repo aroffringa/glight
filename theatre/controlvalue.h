@@ -75,6 +75,16 @@ class ControlValue {
   unsigned int _value;
 };
 
+inline ControlValue operator*(const ControlValue& lhs, const ControlValue& rhs)
+{
+  return ControlValue(ControlValue::MultiplyValues(lhs.UInt(), rhs.UInt()));
+}
+
+inline ControlValue Invert(const ControlValue& v)
+{
+  return ControlValue(ControlValue::MaxUInt() - std::min(v.UInt(), ControlValue::MaxUInt()));
+}
+
 }  // namespace glight::theatre
 
 #endif
