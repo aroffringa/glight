@@ -16,7 +16,7 @@
 #include <glibmm/main.h>
 
 namespace glight::gui {
-  
+
 using theatre::ControlValue;
 
 namespace {
@@ -481,10 +481,11 @@ void FaderWindow::loadState() {
   _lowerColumns.clear();
   _upperControls.clear();
   _lowerControls.clear();
-  
-  if(_miDualLayout.get_active()) {
-    _crossFader.emplace(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
-             (ControlValue::MaxUInt() + 1) / 100);
+
+  if (_miDualLayout.get_active()) {
+    _crossFader.emplace(0,
+                        ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
+                        (ControlValue::MaxUInt() + 1) / 100);
     _leftBox.pack_start(*_crossFader, true, true);
     _crossFader->set_value(ControlValue::MaxUInt());
     _crossFader->set_inverted(true);
@@ -542,8 +543,6 @@ void FaderWindow::ReloadValues() {
   }
 }
 
-void FaderWindow::onCrossFadeChange() {
-  
-}
+void FaderWindow::onCrossFadeChange() {}
 
 }  // namespace glight::gui
