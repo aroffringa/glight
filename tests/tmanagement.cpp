@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
   FixtureControl &control =
       management.AddFixtureControl(fixture, management.RootFolder());
   SourceValue &value = management.AddSourceValue(control, 0);
-  value.Preset().SetValue(ControlValue::Max());
+  value.A().SetValue(ControlValue::Max());
 
   management.RemoveFixtureType(fixtureType);
   BOOST_CHECK(management.GetTheatre().FixtureTypes().empty());

@@ -27,8 +27,6 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   set_title("Glight - fixture types");
   set_size_request(200, 400);
 
-  change_management_connection_ = event_hub_->SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &FixtureTypesWindow::onChangeManagement));
   update_controllables_connection_ =
       event_hub_->SignalUpdateControllables().connect(
           [&]() { FixtureTypesWindow::update(); });

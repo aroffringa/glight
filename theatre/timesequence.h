@@ -1,6 +1,8 @@
 #ifndef THEATRE_TIME_SEQUENCE_H_
 #define THEATRE_TIME_SEQUENCE_H_
 
+#include <array>
+
 #include "controllable.h"
 #include "controlvalue.h"
 #include "sequence.h"
@@ -10,17 +12,14 @@
 
 namespace glight::theatre {
 
-/**
-        @author Andre Offringa
-*/
-class TimeSequence : public Controllable {
+class TimeSequence final : public Controllable {
  public:
   TimeSequence()
       : _inputValue(),
-        _activeValue(0),
+        _activeValue{0, 0},
         _stepStart(),
-        _stepNumber(0),
-        _transitionTriggered(false),
+        _stepNumber{0, 0},
+        _transitionTriggered{false, false},
         _sequence(),
         _steps(),
         _sustain(false),
@@ -30,19 +29,19 @@ class TimeSequence : public Controllable {
     return std::unique_ptr<TimeSequence>(new TimeSequence(*this));
   }
 
-  size_t NInputs() const final override { return 1; }
+  size_t NInputs() const override { return 1; }
 
-  ControlValue &InputValue(size_t) final override { return _inputValue; }
+  ControlValue &InputValue(size_t) override { return _inputValue; }
 
-  virtual FunctionType InputType(size_t) const final override {
+  virtual FunctionType InputType(size_t) const override {
     return FunctionType::Master;
   }
 
-  size_t NOutputs() const final override { return _sequence.List().size(); }
+  size_t NOutputs() const override { return _sequence.List().size(); }
 
-  std::pair<Controllable *, size_t> Output(size_t index) const final override {
-    return std::make_pair(_sequence.List()[index].first,
-                          _sequence.List()[index].second);
+  std::pair<const Controllable *, size_t> Output(size_t index) const override {
+    return std::make_pair(_sequence.List()[index].GetControllable(),
+                          _sequence.List()[index].InputIndex());
   }
 
   size_t RepeatCount() const { return _repeatCount; }
@@ -54,79 +53,84 @@ class TimeSequence : public Controllable {
   bool Sustain() const { return _sustain; }
   void SetSustain(bool sustain) { _sustain = sustain; }
 
-  virtual void Mix(const Timing &timing) final override {
-    if (_inputValue || (_sustain && _activeValue)) {
-      if (!_activeValue) {
+  virtual void Mix(const Timing &timing, bool primary) override {
+    ControlValue &activeValue = _activeValue[primary];
+    Timing &stepStart = _stepStart[primary];
+    size_t &stepNumber = _stepNumber[primary];
+    bool &transitionTriggered = _transitionTriggered[primary];
+    if (_inputValue || (_sustain && activeValue)) {
+      if (!activeValue) {
         // Start the sequence
-        _stepNumber = 0;
-        _stepStart = timing;
-        _transitionTriggered = false;
+        stepNumber = 0;
+        stepStart = timing;
+        transitionTriggered = false;
       }
-      if (_repeatCount == 0 || _stepNumber < _repeatCount * _steps.size()) {
+      if (_repeatCount == 0 || stepNumber < _repeatCount * _steps.size()) {
         if (_sustain)
-          _activeValue = std::max(_activeValue.UInt(), _inputValue.UInt());
+          activeValue = std::max(activeValue.UInt(), _inputValue.UInt());
         else
-          _activeValue = _inputValue;
-        const Step &activeStep = _steps[_stepNumber % _steps.size()];
-        if (!_transitionTriggered) {
+          activeValue = _inputValue;
+        const Step &activeStep = _steps[stepNumber % _steps.size()];
+        if (!transitionTriggered) {
           switch (activeStep.trigger.Type()) {
             case TriggerType::Delay: {
-              double timePassed = timing.TimeInMS() - _stepStart.TimeInMS();
+              const double timePassed =
+                  timing.TimeInMS() - stepStart.TimeInMS();
               if (timePassed >= activeStep.trigger.DelayInMs()) {
-                _transitionTriggered = true;
-                _stepStart = timing;
+                transitionTriggered = true;
+                stepStart = timing;
               }
             } break;
             case TriggerType::Sync: {
-              size_t syncsPassed =
-                  timing.TimestepNumber() - _stepStart.TimestepNumber();
+              const size_t syncsPassed =
+                  timing.TimestepNumber() - stepStart.TimestepNumber();
               if (syncsPassed >= activeStep.trigger.DelayInSyncs()) {
-                _transitionTriggered = true;
-                _stepStart = timing;
+                transitionTriggered = true;
+                stepStart = timing;
               }
             } break;
             case TriggerType::Beat: {
-              size_t beatsPassed = timing.BeatValue() - _stepStart.BeatValue();
+              const size_t beatsPassed =
+                  timing.BeatValue() - stepStart.BeatValue();
               if (beatsPassed >= activeStep.trigger.DelayInBeats()) {
-                _transitionTriggered = true;
-                _stepStart = timing;
+                transitionTriggered = true;
+                stepStart = timing;
               }
             } break;
           }
-          if (!_transitionTriggered) {
-            const std::pair<Controllable *, size_t> &input =
-                _sequence.List()[_stepNumber % _steps.size()];
-            input.first->MixInput(input.second, _activeValue);
+          if (!transitionTriggered) {
+            Input &input = _sequence.List()[stepNumber % _steps.size()];
+            input.GetControllable()->MixInput(input.InputIndex(), activeValue);
           }
         }
-        if (_transitionTriggered) {
+        if (transitionTriggered) {
           // Are we in the final step?
           if (_repeatCount != 0 &&
-              _stepNumber + 1 >= _repeatCount * _steps.size()) {
-            ++_stepNumber;
-            _activeValue = _inputValue;
+              stepNumber + 1 >= _repeatCount * _steps.size()) {
+            ++stepNumber;
+            activeValue = _inputValue;
           } else {
             // Not there yet; transition to next state
-            double transitionTime = timing.TimeInMS() - _stepStart.TimeInMS();
-            const std::pair<Controllable *, size_t>
-                &a = _sequence.List()[_stepNumber % _steps.size()],
-                &b = _sequence.List()[(_stepNumber + 1) % _steps.size()];
+            double transitionTime = timing.TimeInMS() - stepStart.TimeInMS();
+            Input &a = _sequence.List()[stepNumber % _steps.size()];
+            Input &b = _sequence.List()[(stepNumber + 1) % _steps.size()];
             if (transitionTime >= activeStep.transition.LengthInMs()) {
-              ++_stepNumber;
-              _stepStart = timing;
-              _transitionTriggered = false;
-              b.first->MixInput(b.second, _activeValue);
+              ++stepNumber;
+              stepStart = timing;
+              transitionTriggered = false;
+              b.GetControllable()->MixInput(b.InputIndex(), activeValue);
             } else {
-              activeStep.transition.Mix(*a.first, a.second, *b.first, b.second,
-                                        transitionTime, _activeValue, timing);
+              activeStep.transition.Mix(*a.GetControllable(), a.InputIndex(),
+                                        *b.GetControllable(), b.InputIndex(),
+                                        transitionTime, activeValue, timing);
             }
           }
         }
       } else {
-        _activeValue = _inputValue;
+        activeValue = _inputValue;
       }
     } else {
-      _activeValue = 0;
+      activeValue = 0;
     }
   }
 
@@ -177,10 +181,10 @@ class TimeSequence : public Controllable {
         _repeatCount(timeSequence._repeatCount) {}
 
   ControlValue _inputValue;
-  ControlValue _activeValue;
-  Timing _stepStart;
-  size_t _stepNumber;
-  bool _transitionTriggered;
+  std::array<ControlValue, 2> _activeValue;
+  std::array<Timing, 2> _stepStart;
+  std::array<size_t, 2> _stepNumber;
+  std::array<bool, 2> _transitionTriggered;
 
   class Sequence _sequence;
   std::vector<Step> _steps;

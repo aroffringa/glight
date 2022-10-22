@@ -26,8 +26,8 @@ class FaderState {
 
   FaderState &operator=(const FaderState &rhs);
 
-  ~FaderState() { _presetValueDeletedConnection.disconnect(); }
-  void SetSourceValue(theatre::SourceValue *presetValue);
+  ~FaderState() { _sourceValueDeletedConnection.disconnect(); }
+  void SetSourceValue(theatre::SourceValue *value);
   void SetNoSourceValue() { SetSourceValue(nullptr); }
   void SetIsToggleButton(bool isToggle) { _isToggleButton = isToggle; }
   void SetNewToggleButtonColumn(bool newColumn) {
@@ -44,7 +44,7 @@ class FaderState {
   theatre::SourceValue *_sourceValue;
   bool _isToggleButton;
   bool _newToggleButtonColumn;
-  sigc::connection _presetValueDeletedConnection;
+  sigc::connection _sourceValueDeletedConnection;
 };
 
 class FaderSetupState {
@@ -67,8 +67,6 @@ class FaderSetupState {
       if (p == fader.GetSourceValue()) return true;
     return false;
   }
-
-  void ChangeManagement(theatre::Management &management);
 
   std::vector<FaderState> faders;
 };
@@ -100,11 +98,6 @@ class GUIState {
       if (fader->IsAssigned(s)) return true;
     }
     return false;
-  }
-
-  void ChangeManagement(theatre::Management &management) {
-    for (std::unique_ptr<FaderSetupState> &fader : _faderSetups)
-      fader->ChangeManagement(management);
   }
 
  private:

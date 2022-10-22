@@ -25,9 +25,6 @@ CreateChaseDialog::CreateChaseDialog(theatre::Management &management,
       _management(&management),
       _parentWindow(parentWindow),
       _newChase(nullptr) {
-  _parentWindow.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &CreateChaseDialog::changeManagement));
-
   set_size_request(600, 400);
 
   initListPart();
@@ -111,7 +108,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
     _newChase->SetName(folder.GetAvailableName("Chase"));
     folder.Add(*_newChase);
 
-    theatre::Sequence &sequence = _newChase->Sequence();
+    theatre::Sequence &sequence = _newChase->GetSequence();
     Gtk::TreeModel::Children children = _newChaseListModel->children();
     for (Gtk::TreeModel::Children::const_iterator i = children.begin();
          i != children.end(); ++i) {

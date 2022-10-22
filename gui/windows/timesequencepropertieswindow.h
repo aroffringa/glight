@@ -59,9 +59,6 @@ class TimeSequencePropertiesWindow : public PropertiesWindow {
   void onSyncCountChanged();
   void onBeatSpeedChanged();
 
-  void onChangeManagement(theatre::Management &management) {
-    _management = &management;
-  }
   void onUpdateControllables();
   void setStepSensitive(bool sensitive);
   theatre::TimeSequence::Step *selectedStep();

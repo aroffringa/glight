@@ -17,6 +17,67 @@
 
 namespace glight::gui {
 
+using theatre::ControlValue;
+
+namespace {
+double MapSliderToSpeed(int sliderVal) {
+  switch (sliderVal) {
+    default:
+    case 0:
+      return 0.0;
+    case 1:
+      return 10.0;
+    case 2:
+      return 5.0;
+    case 3:
+      return 3.5;
+    case 4:
+      return 2.0;
+    case 5:
+      return 1.0;
+    case 6:
+      return 0.5;
+    case 7:
+      return 0.33;
+    case 8:
+      return 0.25;
+    case 9:
+      return 0.16;
+    case 10:
+      return 0.1;
+  }
+}
+
+std::string SpeedLabel(int value) {
+  switch (value) {
+    default:
+    case 0:
+      return "Direct";
+    case 1:
+      return "0.1 (Fastest)";
+    case 2:
+      return "0.2s";
+    case 3:
+      return "0.3s";
+    case 4:
+      return "0.5s";
+    case 5:
+      return "1s";
+    case 6:
+      return "2s";
+    case 7:
+      return "3s";
+    case 8:
+      return "4s";
+    case 9:
+      return "6s";
+    case 10:
+      return "10s (Slowest)";
+  }
+}
+
+}  // namespace
+
 const char FaderWindow::_keyRowsUpper[3][10] = {
     {'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?'},
     {'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':'},
@@ -31,10 +92,11 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
     : _management(&management),
       _keyRowIndex(keyRowIndex),
       _menuButton(),
-      _miName("Set name..."),
-      _miSolo("Solo"),
+      _miLayout("Layout"),
       _miFadeIn("Fade in"),
       _miFadeOut("Fade out"),
+      _miName("Set name..."),
+      _miSolo("Solo"),
       _miAssign("Assign"),
       _miAssignChases("Assign to chases"),
       _miClear("Clear"),
@@ -45,6 +107,10 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
       _miAddToggleColumn("Add toggle column"),
       _miRemoveFader("Remove 1"),
       _miRemove5Faders("Remove 5"),
+      // Layout menu
+      _miPrimaryLayout("Primary"),
+      _miSecondaryLayout("Secondary"),
+      _miDualLayout("Dual"),
       _eventHub(eventHub),
       _guiState(guiState),
       _state(nullptr) {
@@ -94,7 +160,7 @@ void FaderWindow::initializeWidgets() {
   _menuButton.set_tooltip_text("Open options menu");
   _menuButton.set_menu(_popupMenu);
   _leftBox.pack_start(_menuButton, false, false, 5);
-  _hBox.pack_start(_leftBox);
+  _hBox.pack_start(_leftBox, false, false);
 
   _controlGrid.set_column_spacing(3);
   _hBox.pack_start(_controlGrid, true, true);
@@ -104,23 +170,28 @@ void FaderWindow::initializeWidgets() {
 }
 
 void FaderWindow::initializeMenu() {
-  _miNameImage.set_from_icon_name("user-bookmarks",
-                                  Gtk::BuiltinIconSize::ICON_SIZE_MENU);
-  _miName.set_image(_miNameImage);
-  _miName.signal_activate().connect([&]() { onSetNameClicked(); });
-  _popupMenu.append(_miName);
-
-  _miSolo.signal_activate().connect([&]() { onSoloToggled(); });
-  _popupMenu.append(_miSolo);
+  Gtk::RadioMenuItem::Group layoutGroup;
+  _miPrimaryLayout.set_active(true);
+  _miPrimaryLayout.set_group(layoutGroup);
+  _miPrimaryLayout.signal_activate().connect([&]() { onLayoutChanged(); });
+  _layoutMenu.append(_miPrimaryLayout);
+  _miSecondaryLayout.set_group(layoutGroup);
+  _miSecondaryLayout.signal_activate().connect([&]() { onLayoutChanged(); });
+  _layoutMenu.append(_miSecondaryLayout);
+  _miDualLayout.set_group(layoutGroup);
+  _miDualLayout.signal_activate().connect([&]() { onLayoutChanged(); });
+  _layoutMenu.append(_miDualLayout);
+  _miLayout.set_submenu(_layoutMenu);
+  _popupMenu.append(_miLayout);
 
   Gtk::RadioMenuItem::Group fadeInGroup, fadeOutGroup;
   for (size_t i = 0; i != 11; ++i) {
-    _miFadeInOption[i].set_label(speedLabel(i));
+    _miFadeInOption[i].set_label(SpeedLabel(i));
     _miFadeInOption[i].set_group(fadeInGroup);
     _miFadeInOption[i].signal_activate().connect([&]() { onChangeUpSpeed(); });
     _fadeInMenu.append(_miFadeInOption[i]);
 
-    _miFadeOutOption[i].set_label(speedLabel(i));
+    _miFadeOutOption[i].set_label(SpeedLabel(i));
     _miFadeOutOption[i].set_group(fadeOutGroup);
     _miFadeOutOption[i].signal_activate().connect(
         [&]() { onChangeDownSpeed(); });
@@ -137,13 +208,22 @@ void FaderWindow::initializeMenu() {
 
   _popupMenu.append(_miSep1);
 
+  _miNameImage.set_from_icon_name("user-bookmarks",
+                                  Gtk::BuiltinIconSize::ICON_SIZE_MENU);
+  _miName.set_image(_miNameImage);
+  _miName.signal_activate().connect([&]() { onSetNameClicked(); });
+  _popupMenu.append(_miName);
+
+  _miSolo.signal_activate().connect([&]() { onSoloToggled(); });
+  _popupMenu.append(_miSolo);
+
   _miAssign.signal_activate().connect([&]() { onAssignClicked(); });
   _popupMenu.append(_miAssign);
 
   _miAssignChases.signal_activate().connect([&]() { onAssignChasesClicked(); });
   _popupMenu.append(_miAssignChases);
 
-  _miClear.signal_activate().connect([&]() { onClearClicked(); });
+  _miClear.signal_activate().connect([&]() { unassign(); });
   _popupMenu.append(_miClear);
 
   _popupMenu.append(_miSep2);
@@ -183,96 +263,117 @@ bool FaderWindow::onResize(GdkEventConfigure *event) {
   return false;
 }
 
-void FaderWindow::addControl(bool isToggle, bool newToggleColumn) {
-  if (_toggleColumns.empty()) newToggleColumn = true;
+void FaderWindow::addControl(bool isToggle, bool newToggleColumn,
+                             bool isUpper) {
+  std::vector<std::unique_ptr<ControlWidget>> &controls =
+      isUpper ? _upperControls : _lowerControls;
+  std::vector<Gtk::VBox> &column = isUpper ? _upperColumns : _lowerColumns;
+  if (column.empty()) newToggleColumn = true;
   if (_recursionLock.IsFirst()) {
     _state->faders.emplace_back();
     FaderState &state = _state->faders.back();
     state.SetIsToggleButton(isToggle);
     state.SetNewToggleButtonColumn(newToggleColumn);
   }
-  bool hasKey = _controls.size() < 10 && _keyRowIndex < 3;
-  char key = hasKey ? _keyRowsLower[_keyRowIndex][_controls.size()] : ' ';
+  const bool hasKey = _upperControls.size() < 10 && _keyRowIndex < 3 && isUpper;
+  const char key =
+      hasKey ? _keyRowsLower[_keyRowIndex][_upperControls.size()] : ' ';
 
   Gtk::Widget *nameLabel;
   std::unique_ptr<ControlWidget> control;
+  const bool isSecondary = !isUpper || _miSecondaryLayout.get_active();
+  const ControlMode controlMode =
+      isSecondary ? ControlMode::Secondary : ControlMode::Primary;
   if (isToggle) {
-    control.reset(new ToggleWidget(*_management, _eventHub, key));
+    control = std::make_unique<ToggleWidget>(*_management, _eventHub,
+                                             controlMode, key);
     nameLabel = nullptr;
   } else {
-    control.reset(new FaderWidget(*_management, _eventHub, key));
+    control = std::make_unique<FaderWidget>(*_management, _eventHub,
+                                            controlMode, key);
     nameLabel = &static_cast<FaderWidget *>(control.get())->NameLabel();
   }
 
-  control->SetFadeDownSpeed(mapSliderToSpeed(getFadeOutSpeed()));
-  control->SetFadeUpSpeed(mapSliderToSpeed(getFadeInSpeed()));
-  size_t controlIndex = _controls.size();
+  control->SetFadeDownSpeed(MapSliderToSpeed(getFadeOutSpeed()));
+  control->SetFadeUpSpeed(MapSliderToSpeed(getFadeInSpeed()));
+  const size_t controlIndex = controls.size();
   control->SignalValueChange().connect(
       sigc::bind(sigc::mem_fun(*this, &FaderWindow::onControlValueChanged),
                  control.get()));
   control->SignalAssigned().connect(sigc::bind(
       sigc::mem_fun(*this, &FaderWindow::onControlAssigned), controlIndex));
 
+  const size_t vpos = isUpper ? 0 : 3;
+  const size_t hpos = controls.size() + column.size();
   if (isToggle) {
     if (newToggleColumn) {
-      _toggleColumns.emplace_back();
-      unsigned hpos = _controls.size() + _toggleColumns.size();
-      _controlGrid.attach(_toggleColumns.back(), hpos * 2 + 1, 0, 2, 1);
-      _toggleColumns.back().show();
+      _controlGrid.attach(column.emplace_back(), hpos * 2 + 1, vpos, 2, 1);
+      column.back().show();
     }
-    _toggleColumns.back().pack_start(*control);
+    column.back().pack_start(*control);
   } else {
-    unsigned hpos = _controls.size() + _toggleColumns.size();
-    _controlGrid.attach(*control, hpos * 2 + 1, 0, 2, 1);
+    _controlGrid.attach(*control, hpos * 2 + 1, vpos, 2, 1);
 
-    nameLabel->set_hexpand(true);
-    bool even = _controls.size() % 2 == 0;
-    _controlGrid.attach(*nameLabel, hpos * 2, even ? 1 : 2, 4, 1);
+    if (isUpper) {
+      nameLabel->set_hexpand(true);
+      const bool even = controls.size() % 2 == 0;
+      _controlGrid.attach(*nameLabel, hpos * 2, even ? 1 : 2, 4, 1);
+    }
   }
 
   control->show();
-  _controls.emplace_back(std::move(control));
+  controls.emplace_back(std::move(control));
 }
 
 void FaderWindow::removeFader() {
   FaderState &state = _state->faders.back();
-  if (state.IsToggleButton() && state.NewToggleButtonColumn())
-    _toggleColumns.pop_back();
-  _controls.pop_back();
+  const bool hasLower = _miDualLayout.get_active();
+  if (state.IsToggleButton() && state.NewToggleButtonColumn()) {
+    _upperColumns.pop_back();
+    if (hasLower) _lowerColumns.pop_back();
+  }
+  _upperControls.pop_back();
+  if (hasLower) _lowerControls.pop_back();
   _state->faders.pop_back();
 }
 
 void FaderWindow::onAssignClicked() {
-  for (std::unique_ptr<ControlWidget> &c : _controls) c->Unassign();
-  size_t n = _management->SourceValues().size();
-  if (!_controls.empty()) {
+  unassign();
+  const bool hasLower = _miDualLayout.get_active();
+  if (!_upperControls.empty()) {
     size_t controlIndex = 0;
+    const size_t n = _management->SourceValues().size();
     for (size_t i = 0; i != n; ++i) {
-      theatre::SourceValue *sv = _management->SourceValues()[i].get();
-      if (!_guiState.IsAssigned(sv)) {
-        _controls[controlIndex]->Assign(sv, true);
+      theatre::SourceValue *source = _management->SourceValues()[i].get();
+      if (!_guiState.IsAssigned(source)) {
+        _upperControls[controlIndex]->Assign(source, true);
+        if (hasLower) _lowerControls[controlIndex]->Assign(source, true);
         ++controlIndex;
-        if (controlIndex == _controls.size()) break;
+        if (controlIndex == _upperControls.size()) break;
       }
     }
   }
 }
 
-void FaderWindow::onClearClicked() {
-  for (std::unique_ptr<ControlWidget> &c : _controls) c->Unassign();
+void FaderWindow::unassign() {
+  for (std::unique_ptr<ControlWidget> &c : _upperControls) c->Unassign();
+  for (std::unique_ptr<ControlWidget> &c : _lowerControls) c->Unassign();
 }
 
 void FaderWindow::onAssignChasesClicked() {
-  if (!_controls.empty()) {
+  unassign();
+  const bool hasLower = _miDualLayout.get_active();
+  if (!_upperControls.empty()) {
     size_t controlIndex = 0;
     for (size_t i = 0; i != _management->SourceValues().size(); ++i) {
       theatre::SourceValue *sv = _management->SourceValues()[i].get();
       theatre::Chase *c =
           dynamic_cast<theatre::Chase *>(&sv->GetControllable());
       if (c != nullptr) {
-        _controls[controlIndex]->Assign(sv, true);
+        _upperControls[controlIndex]->Assign(sv, true);
+        if (hasLower) _lowerControls[controlIndex]->Assign(sv, true);
         ++controlIndex;
-        if (controlIndex == _controls.size()) break;
+        if (controlIndex == _upperControls.size()) break;
       }
     }
   }
@@ -292,10 +393,14 @@ void FaderWindow::onControlValueChanged(double newValue,
     // change to other faders.
     if (_recursionLock.IsFirst()) {
       RecursionLock::Token token(_recursionLock);
-      double limitValue = ControlWidget::MAX_SCALE_VALUE() - newValue -
-                          ControlWidget::MAX_SCALE_VALUE() * 0.01;
-      if (limitValue < 0.0) limitValue = 0.0;
-      for (std::unique_ptr<ControlWidget> &c : _controls) {
+      const double inverse = ControlWidget::MAX_SCALE_VALUE() - newValue -
+                             ControlWidget::MAX_SCALE_VALUE() * 0.01;
+      const double limitValue = std::max(0.0, inverse);
+      const bool isLower = widget->GetMode() == ControlMode::Secondary &&
+                           _miDualLayout.get_active();
+      std::vector<std::unique_ptr<glight::gui::ControlWidget>> &controls =
+          isLower ? _lowerControls : _upperControls;
+      for (std::unique_ptr<ControlWidget> &c : controls) {
         if (c.get() != widget) c->Limit(limitValue);
       }
     }
@@ -303,9 +408,14 @@ void FaderWindow::onControlValueChanged(double newValue,
 }
 
 void FaderWindow::onControlAssigned(size_t widgetIndex) {
-  if (_recursionLock.IsFirst())
-    _state->faders[widgetIndex].SetSourceValue(
-        _controls[widgetIndex]->GetSourceValue());
+  if (_recursionLock.IsFirst()) {
+    theatre::SourceValue *source =
+        _upperControls[widgetIndex]->GetSourceValue();
+    _state->faders[widgetIndex].SetSourceValue(source);
+    if (_miDualLayout.get_active()) {
+      _lowerControls[widgetIndex]->Assign(source, true);
+    }
+  }
 }
 
 bool FaderWindow::HandleKeyDown(char key) {
@@ -313,13 +423,13 @@ bool FaderWindow::HandleKeyDown(char key) {
 
   for (unsigned i = 0; i < 10; ++i) {
     if (_keyRowsUpper[_keyRowIndex][i] == key) {
-      if (i < _controls.size()) {
-        _controls[i]->FullOn();
+      if (i < _upperControls.size()) {
+        _upperControls[i]->FullOn();
       }
       return true;
     } else if ((_keyRowsLower[_keyRowIndex][i]) == key) {
-      if (i < _controls.size()) {
-        _controls[i]->Toggle();
+      if (i < _upperControls.size()) {
+        _upperControls[i]->Toggle();
       }
       return true;
     }
@@ -332,8 +442,8 @@ bool FaderWindow::HandleKeyUp(char key) {
 
   for (unsigned i = 0; i < 10; ++i) {
     if (_keyRowsUpper[_keyRowIndex][i] == key) {
-      if (i < _controls.size()) {
-        _controls[i]->FullOff();
+      if (i < _upperControls.size()) {
+        _upperControls[i]->FullOff();
       }
       return true;
     }
@@ -341,8 +451,8 @@ bool FaderWindow::HandleKeyUp(char key) {
   return false;
 }
 
-bool FaderWindow::IsAssigned(theatre::SourceValue *sourceValue) {
-  for (std::unique_ptr<ControlWidget> &c : _controls) {
+bool FaderWindow::IsAssigned(theatre::SourceValue *sourceValue) const {
+  for (const std::unique_ptr<ControlWidget> &c : _upperControls) {
     if (c->GetSourceValue() == sourceValue) return true;
   }
   return false;
@@ -366,97 +476,52 @@ void FaderWindow::loadState() {
   _miSolo.set_active(_state->isSolo);
   _miFadeInOption[_state->fadeInSpeed].set_active(true);
   _miFadeOutOption[_state->fadeOutSpeed].set_active(true);
+  _crossFader.reset();
+  _upperColumns.clear();
+  _lowerColumns.clear();
+  _upperControls.clear();
+  _lowerControls.clear();
 
-  _toggleColumns.clear();
-  _controls.clear();
+  if (_miDualLayout.get_active()) {
+    _crossFader.emplace(0,
+                        ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
+                        (ControlValue::MaxUInt() + 1) / 100);
+    _leftBox.pack_start(*_crossFader, true, true);
+    _crossFader->set_value(0);
+    _crossFader->set_draw_value(false);
+    _crossFader->set_has_origin(false);
+    _crossFader->set_vexpand(true);
+    _crossFader->signal_value_changed().connect(
+        sigc::mem_fun(*this, &FaderWindow::onCrossFadeChange));
+    _crossFader->show();
+  }
   for (FaderState &state : _state->faders) {
-    addControl(state.IsToggleButton(), state.NewToggleButtonColumn());
+    addControlInLayout(state.IsToggleButton(), state.NewToggleButtonColumn());
   }
 
   resize(_state->width, _state->height);
 
-  for (size_t i = 0; i != _state->faders.size(); ++i)
-    _controls[i]->Assign(_state->faders[i].GetSourceValue(), true);
-}
-
-double FaderWindow::mapSliderToSpeed(int sliderVal) {
-  switch (sliderVal) {
-    default:
-    case 0:
-      return 0.0;
-    case 1:
-      return 10.0;
-    case 2:
-      return 5.0;
-    case 3:
-      return 3.5;
-    case 4:
-      return 2.0;
-    case 5:
-      return 1.0;
-    case 6:
-      return 0.5;
-    case 7:
-      return 0.33;
-    case 8:
-      return 0.25;
-    case 9:
-      return 0.16;
-    case 10:
-      return 0.1;
-  }
-}
-
-std::string FaderWindow::speedLabel(int value) {
-  switch (value) {
-    default:
-    case 0:
-      return "Direct";
-    case 1:
-      return "0.1 (Fastest)";
-    case 2:
-      return "0.2s";
-    case 3:
-      return "0.3s";
-    case 4:
-      return "0.5s";
-    case 5:
-      return "1s";
-    case 6:
-      return "2s";
-    case 7:
-      return "3s";
-    case 8:
-      return "4s";
-    case 9:
-      return "6s";
-    case 10:
-      return "10s (Slowest)";
+  for (size_t i = 0; i != _state->faders.size(); ++i) {
+    _upperControls[i]->Assign(_state->faders[i].GetSourceValue(), true);
+    if (_miDualLayout.get_active())
+      _lowerControls[i]->Assign(_state->faders[i].GetSourceValue(), true);
   }
 }
 
 void FaderWindow::onChangeDownSpeed() {
   _state->fadeOutSpeed = getFadeOutSpeed();
-  double speed = mapSliderToSpeed(_state->fadeOutSpeed);
+  const double speed = MapSliderToSpeed(_state->fadeOutSpeed);
 
-  for (std::unique_ptr<ControlWidget> &cw : _controls)
+  for (std::unique_ptr<ControlWidget> &cw : _upperControls)
     cw->SetFadeDownSpeed(speed);
 }
 
 void FaderWindow::onChangeUpSpeed() {
   _state->fadeInSpeed = getFadeInSpeed();
-  double speed = mapSliderToSpeed(_state->fadeInSpeed);
+  const double speed = MapSliderToSpeed(_state->fadeInSpeed);
 
-  for (std::unique_ptr<ControlWidget> &cw : _controls)
+  for (std::unique_ptr<ControlWidget> &cw : _upperControls)
     cw->SetFadeUpSpeed(speed);
-}
-
-void FaderWindow::ChangeManagement(theatre::Management &management,
-                                   bool moveSliders) {
-  _management = &management;
-  for (std::unique_ptr<ControlWidget> &cw : _controls) {
-    cw->ChangeManagement(management, moveSliders);
-  }
 }
 
 size_t FaderWindow::getFadeInSpeed() const {
@@ -472,8 +537,17 @@ size_t FaderWindow::getFadeOutSpeed() const {
 }
 
 void FaderWindow::ReloadValues() {
-  for (std::unique_ptr<ControlWidget> &cw : _controls) {
+  for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
     cw->MoveSlider();
+  }
+}
+
+void FaderWindow::onCrossFadeChange() {
+  for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
+    glight::theatre::SourceValue *source = cw->GetSourceValue();
+    if (source) {
+      source->CrossFader().Set(_crossFader->get_value(), 0.0);
+    }
   }
 }
 

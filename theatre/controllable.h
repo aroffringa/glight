@@ -10,6 +10,8 @@
 
 namespace glight::theatre {
 
+class Timing;
+
 /**
  * A Controllable has a number of inputs and optionally some outputs
  * that this controllable controls.
@@ -32,7 +34,15 @@ class Controllable : public FolderObject {
 
   virtual size_t NOutputs() const = 0;
 
-  virtual std::pair<Controllable *, size_t> Output(size_t index) const = 0;
+  virtual std::pair<const Controllable *, size_t> Output(
+      size_t index) const = 0;
+
+  std::pair<Controllable *, size_t> Output(size_t index) {
+    const std::pair<const Controllable *, size_t> output =
+        const_cast<const Controllable *>(this)->Output(index);
+    return std::make_pair(const_cast<Controllable *>(output.first),
+                          output.second);
+  }
 
   virtual Color InputColor([[maybe_unused]] size_t index) const {
     if (NOutputs() == 0)
@@ -56,7 +66,7 @@ class Controllable : public FolderObject {
    * Before this function is called, all input values that this
    * controllable depends on have been set.
    */
-  virtual void Mix(const class Timing &timing) = 0;
+  virtual void Mix(const Timing &timing, bool primary) = 0;
 
   std::string InputName(size_t index) const {
     if (NInputs() == 1)
@@ -65,9 +75,12 @@ class Controllable : public FolderObject {
       return Name() + " (" + AbbreviatedFunctionType(InputType(index)) + ")";
   }
 
+  /**
+   * Sets the value at the controllables input.
+   */
   void MixInput(size_t index, const ControlValue &value) {
-    unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(), value.UInt(),
-                                        MixStyle::Default);
+    const unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(),
+                                              value.UInt(), MixStyle::Default);
     InputValue(index) = ControlValue(mixVal);
   }
 

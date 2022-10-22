@@ -41,7 +41,7 @@ void FillManagement(Management &management) {
   fc.SetName("Control for RGBW fixture");
   management.AddSourceValue(fc, 0);
   management.AddSourceValue(fc, 1);
-  management.AddSourceValue(fc, 2).Preset().SetValue(ControlValue::MaxUInt());
+  management.AddSourceValue(fc, 2).A().SetValue(ControlValue::MaxUInt());
   management.AddSourceValue(fc, 3);
   BOOST_CHECK_EQUAL(
       &management.GetFixtureControl(*management.GetTheatre().Fixtures()[0]),
@@ -53,7 +53,7 @@ void FillManagement(Management &management) {
   subFolder.Add(a);
   a.AddPresetValue(fc, 0).SetValue(ControlValue::MaxUInt() / 2);
   a.AddPresetValue(fc, 3).SetValue(ControlValue::MaxUInt());
-  management.AddSourceValue(a, 0).Preset().SetValue(42);
+  management.AddSourceValue(a, 0).A().SetValue(42);
 
   PresetCollection &b = management.AddPresetCollection();
   b.SetName("Second preset collection");
@@ -65,8 +65,8 @@ void FillManagement(Management &management) {
   Chase &chase = management.AddChase();
   chase.SetName("A chase");
   subFolder.Add(chase);
-  chase.Sequence().Add(a, 0);
-  chase.Sequence().Add(b, 0);
+  chase.GetSequence().Add(a, 0);
+  chase.GetSequence().Add(b, 0);
   management.AddSourceValue(chase, 0);
 
   TimeSequence &timeSequence = management.AddTimeSequence();
@@ -155,15 +155,14 @@ void CheckEqual(const Management &a, const Management &b) {
       &a.GetObjectFromPath(
           "The root folder/A subfolder/Control for RGBW fixture"));
 
-  BOOST_CHECK_EQUAL(
-      a.GetSourceValue(a_fixture_control, 0)->Preset().Value().UInt(), 0);
-  BOOST_CHECK_EQUAL(
-      a.GetSourceValue(a_fixture_control, 1)->Preset().Value().UInt(), 0);
-  BOOST_CHECK_EQUAL(
-      a.GetSourceValue(a_fixture_control, 2)->Preset().Value().UInt(),
-      ControlValue::MaxUInt());
-  BOOST_CHECK_EQUAL(
-      a.GetSourceValue(a_fixture_control, 3)->Preset().Value().UInt(), 0);
+  BOOST_CHECK_EQUAL(a.GetSourceValue(a_fixture_control, 0)->A().Value().UInt(),
+                    0);
+  BOOST_CHECK_EQUAL(a.GetSourceValue(a_fixture_control, 1)->A().Value().UInt(),
+                    0);
+  BOOST_CHECK_EQUAL(a.GetSourceValue(a_fixture_control, 2)->A().Value().UInt(),
+                    ControlValue::MaxUInt());
+  BOOST_CHECK_EQUAL(a.GetSourceValue(a_fixture_control, 3)->A().Value().UInt(),
+                    0);
 
   const PresetCollection &readCollection =
       static_cast<const PresetCollection &>(a.GetObjectFromPath(
@@ -184,16 +183,16 @@ void CheckEqual(const Management &a, const Management &b) {
   BOOST_CHECK_NE(a.GetSourceValue(readCollection, 0), nullptr);
   BOOST_CHECK_EQUAL(&a.GetSourceValue(readCollection, 0)->GetControllable(),
                     &readCollection);
-  BOOST_CHECK_EQUAL(a.GetSourceValue(readCollection, 0)->Preset().InputIndex(),
-                    0);
-  BOOST_CHECK_EQUAL(
-      a.GetSourceValue(readCollection, 0)->Preset().Value().UInt(), 42);
+  BOOST_CHECK_EQUAL(a.GetSourceValue(readCollection, 0)->InputIndex(), 0);
+  BOOST_CHECK_EQUAL(a.GetSourceValue(readCollection, 0)->A().Value().UInt(),
+                    42);
 
   const Chase &readChase = static_cast<const Chase &>(
       a.GetObjectFromPath("The root folder/A subfolder/A chase"));
-  BOOST_CHECK_EQUAL(readChase.Sequence().Size(), 2);
-  BOOST_CHECK_EQUAL(readChase.Sequence().List()[0].first, &readCollection);
-  BOOST_CHECK_EQUAL(readChase.Sequence().List()[0].second, 0);
+  BOOST_CHECK_EQUAL(readChase.GetSequence().Size(), 2);
+  BOOST_CHECK_EQUAL(readChase.GetSequence().List()[0].GetControllable(),
+                    &readCollection);
+  BOOST_CHECK_EQUAL(readChase.GetSequence().List()[0].InputIndex(), 0);
 
   const AudioLevelEffect *readEffect = dynamic_cast<const AudioLevelEffect *>(
       &a.GetObjectFromPath("The root folder/Effect folder/An audio effect"));

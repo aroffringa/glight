@@ -182,11 +182,6 @@ void SceneFrame::Update() {
   updateAudioWidgetKeys();
 }
 
-void SceneFrame::ChangeManagement(theatre::Management &management) {
-  _management = &management;
-  Update();
-}
-
 void SceneFrame::createSceneItemsList() {
   _sceneItemsListModel = Gtk::ListStore::create(_sceneItemsListColumns);
 

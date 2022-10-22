@@ -13,35 +13,27 @@
 
 namespace glight::gui {
 
-class EventTransmitter;
-
 /**
  * @author Andre Offringa
  */
 class FaderWidget final : public ControlWidget {
  public:
   FaderWidget(theatre::Management &management, EventTransmitter &eventHub,
-              char key);
-  ~FaderWidget();
+              ControlMode mode, char key);
 
   void Toggle() override;
   void FullOn() override;
   void FullOff() override;
-  void Assign(theatre::SourceValue *item, bool moveFader) override;
+  void OnAssigned(bool moveFader) override;
   void MoveSlider() override;
-  theatre::SourceValue *GetSourceValue() const override { return _sourceValue; }
 
   void Limit(double value) override {
     if (_scale.get_value() > value) _scale.set_value(value);
   }
 
-  void ChangeManagement(theatre::Management &management,
-                        bool moveSliders) override;
-
   Gtk::Widget &NameLabel() { return _eventBox; }
 
  private:
-  void onUpdate();
   void onScaleChange();
   void onOnButtonClicked();
   bool onNameLabelClicked(GdkEventButton *event);
@@ -54,11 +46,6 @@ class FaderWidget final : public ControlWidget {
   Gtk::CheckButton _onCheckButton;
   Gtk::EventBox _eventBox;
   Gtk::Label _nameLabel;
-
-  sigc::connection _updateConnection;
-  theatre::Management *_management;
-  EventTransmitter &_eventHub;
-  theatre::SourceValue *_sourceValue;
 
   bool _holdUpdates;
 };

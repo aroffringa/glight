@@ -30,8 +30,6 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
   set_title("glight - " + effect.Name());
   set_size_request(650, 250);
 
-  parentWindow.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &EffectPropertiesWindow::onChangeManagement));
   parentWindow.SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &EffectPropertiesWindow::onUpdateControllables));
 
@@ -123,7 +121,7 @@ void EffectPropertiesWindow::onInputSelected(
     theatre::SourceValue *sourceValue) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
   _effect->AddConnection(sourceValue->GetControllable(),
-                         sourceValue->Preset().InputIndex());
+                         sourceValue->InputIndex());
   if (_management->HasCycle()) {
     _effect->RemoveConnection(_effect->Connections().size() - 1);
     lock.unlock();

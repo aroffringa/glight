@@ -44,11 +44,6 @@ class ObjectListFrame : public Gtk::VPaned {
   void onObjectActivated(theatre::FolderObject &object);
   void onNewEffectMenuClicked(enum theatre::Effect::Type effectType);
 
-  void changeManagement(theatre::Management &management) {
-    _nameFrame.ChangeManagement(management);
-    _management = &management;
-  }
-
   Gtk::Frame _objectListFrame;
   ObjectBrowser _list;
 

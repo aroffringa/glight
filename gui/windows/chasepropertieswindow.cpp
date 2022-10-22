@@ -32,8 +32,6 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
       _chase(&chase),
       _management(&management),
       _eventHub(eventHub) {
-  _eventHub.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &ChasePropertiesWindow::onChangeManagement));
   _eventHub.SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &ChasePropertiesWindow::onUpdateControllables));
 
@@ -107,11 +105,11 @@ theatre::FolderObject &ChasePropertiesWindow::GetObject() { return GetChase(); }
 void ChasePropertiesWindow::onTriggerTypeChanged() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   if (_delayTriggerCheckButton.get_active())
-    _chase->Trigger().SetType(theatre::TriggerType::Delay);
+    _chase->GetTrigger().SetType(theatre::TriggerType::Delay);
   else if (_synchronizedTriggerCheckButton.get_active())
-    _chase->Trigger().SetType(theatre::TriggerType::Sync);
+    _chase->GetTrigger().SetType(theatre::TriggerType::Sync);
   else
-    _chase->Trigger().SetType(theatre::TriggerType::Beat);
+    _chase->GetTrigger().SetType(theatre::TriggerType::Beat);
 }
 
 void ChasePropertiesWindow::onTriggerSpeedChanged(double newValue) {
@@ -143,27 +141,27 @@ void ChasePropertiesWindow::onTransitionSpeedChanged(double newValue) {
 void ChasePropertiesWindow::onTransitionTypeChanged(
     theatre::TransitionType type) {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  _chase->Transition().SetType(type);
+  _chase->GetTransition().SetType(type);
 }
 
 void ChasePropertiesWindow::onSyncCountChanged() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  _chase->Trigger().SetDelayInSyncs(_synchronizationsCount.get_value());
+  _chase->GetTrigger().SetDelayInSyncs(_synchronizationsCount.get_value());
 }
 
 void ChasePropertiesWindow::onBeatSpeedChanged() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  _chase->Trigger().SetDelayInBeats(_beatSpeed.get_value());
+  _chase->GetTrigger().SetDelayInBeats(_beatSpeed.get_value());
 }
 
 void ChasePropertiesWindow::loadChaseInfo(theatre::Chase &chase) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  theatre::TriggerType triggerType = chase.Trigger().Type();
-  theatre::TransitionType transitionType = chase.Transition().Type();
-  double triggerSpeed = chase.Trigger().DelayInMs();
-  double transitionSpeed = chase.Transition().LengthInMs();
-  double beatSpeed = chase.Trigger().DelayInBeats();
-  double syncSpeed = chase.Trigger().DelayInSyncs();
+  theatre::TriggerType triggerType = chase.GetTrigger().Type();
+  theatre::TransitionType transitionType = chase.GetTransition().Type();
+  double triggerSpeed = chase.GetTrigger().DelayInMs();
+  double transitionSpeed = chase.GetTransition().LengthInMs();
+  double beatSpeed = chase.GetTrigger().DelayInBeats();
+  double syncSpeed = chase.GetTrigger().DelayInSyncs();
   lock.unlock();
   _triggerDuration.SetValue(triggerSpeed);
   _transitionDuration.SetValue(transitionSpeed);
@@ -194,21 +192,20 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   theatre::TimeSequence &tSequence = _management->AddTimeSequence();
   tSequence.SetRepeatCount(0);
   size_t index = 0;
-  for (const std::pair<theatre::Controllable *, size_t> &item :
-       _chase->Sequence().List()) {
-    tSequence.AddStep(*item.first, item.second);
+  for (theatre::Input &input : _chase->GetSequence().List()) {
+    tSequence.AddStep(*input.GetControllable(), input.InputIndex());
     theatre::TimeSequence::Step &step = tSequence.GetStep(index);
-    if (_chase->Trigger().Type() == theatre::TriggerType::Delay)
-      step.transition = _chase->Transition();
+    if (_chase->GetTrigger().Type() == theatre::TriggerType::Delay)
+      step.transition = _chase->GetTransition();
     else
       step.transition.SetLengthInMs(0);
-    step.trigger = _chase->Trigger();
+    step.trigger = _chase->GetTrigger();
     ++index;
   }
   theatre::Folder &folder = _chase->Parent();
   std::string name = _chase->Name();
   theatre::SourceValue *source = _management->GetSourceValue(*_chase, 0);
-  source->Preset().Reconnect(tSequence, 0);
+  source->Reconnect(tSequence, 0);
   _management->RemoveControllable(*_chase);
   tSequence.SetName(name);
   folder.Add(tSequence);

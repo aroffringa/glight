@@ -33,8 +33,6 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
       _timeSequence(&timeSequence),
       _management(&management),
       _eventHub(eventHub) {
-  _changeManagementConnection = eventHub.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onChangeManagement));
   _updateControllablesConnection =
       eventHub.SignalUpdateControllables().connect(sigc::mem_fun(
           *this, &TimeSequencePropertiesWindow::onUpdateControllables));
@@ -177,9 +175,9 @@ void TimeSequencePropertiesWindow::fillStepsList() {
   for (size_t i = 0; i != _timeSequence->Size(); ++i) {
     Gtk::TreeModel::iterator iter = _stepsStore->append();
     Gtk::TreeModel::Row row = *iter;
-    std::pair<theatre::Controllable *, size_t> input =
-        _timeSequence->Sequence().List()[i];
-    row[_stepsListColumns._title] = input.first->InputName(input.second);
+    theatre::Input &input = _timeSequence->Sequence().List()[i];
+    row[_stepsListColumns._title] =
+        input.GetControllable()->InputName(input.InputIndex());
     row[_stepsListColumns._trigger] =
         _timeSequence->GetStep(i).trigger.ToString();
     row[_stepsListColumns._step] = i;

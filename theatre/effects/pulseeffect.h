@@ -7,19 +7,19 @@
 
 namespace glight::theatre {
 
-class PulseEffect : public Effect {
+class PulseEffect final : public Effect {
  public:
   PulseEffect()
       : Effect(1),
-        _isActive(false),
-        _startTime(0),
+        _isActive{false, false},
+        _startTime{0.0, 0.0},
         _repeat(false),
         _attack(300),
         _hold(200),
         _release(300),
         _sleep(200) {}
 
-  virtual Effect::Type GetType() const final override { return PulseType; }
+  virtual Effect::Type GetType() const override { return PulseType; }
 
   unsigned Attack() const { return _attack; }
   void SetAttack(unsigned attack) { _attack = attack; }
@@ -37,16 +37,16 @@ class PulseEffect : public Effect {
   void SetRepeat(bool repeat) { _repeat = repeat; }
 
  protected:
-  virtual void mix(const ControlValue *values,
-                   const Timing &timing) final override {
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) override {
     if (values[0].UInt() == 0) {
-      _isActive = false;
+      _isActive[primary] = false;
     } else {
-      if (!_isActive) {
-        _startTime = timing.TimeInMS();
-        _isActive = true;
+      if (!_isActive[primary]) {
+        _startTime[primary] = timing.TimeInMS();
+        _isActive[primary] = true;
       }
-      double pos = timing.TimeInMS() - _startTime;
+      double pos = timing.TimeInMS() - _startTime[primary];
       size_t cycleDuration = _attack + _hold + _release + _sleep;
       if (_repeat || pos < cycleDuration) {
         pos = std::fmod(pos, cycleDuration);
@@ -84,8 +84,8 @@ class PulseEffect : public Effect {
   }
 
  private:
-  bool _isActive;
-  double _startTime;
+  bool _isActive[2];
+  double _startTime[2];
 
   bool _repeat;
   // all in ms.

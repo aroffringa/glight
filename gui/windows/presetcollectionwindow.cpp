@@ -20,8 +20,6 @@ PresetCollectionWindow::PresetCollectionWindow(
       _presetCollection(&presetCollection),
       _management(&management),
       _eventHub(eventHub) {
-  _changeManagementConnection = eventHub.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &PresetCollectionWindow::onChangeManagement));
   _updateControllablesConnection = eventHub.SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &PresetCollectionWindow::onUpdateControllables));
 
@@ -82,7 +80,6 @@ PresetCollectionWindow::PresetCollectionWindow(
 }
 
 PresetCollectionWindow::~PresetCollectionWindow() {
-  _changeManagementConnection.disconnect();
   _updateControllablesConnection.disconnect();
 }
 

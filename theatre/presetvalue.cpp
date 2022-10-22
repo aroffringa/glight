@@ -4,7 +4,7 @@
 
 namespace glight::theatre {
 
-std::string PresetValue::Title() const {
+std::string PresetValue::Name() const {
   return _controllable->InputName(_inputIndex);
 }
 

@@ -7,7 +7,7 @@
 
 namespace glight::theatre {
 
-class InvertEffect : public Effect {
+class InvertEffect final : public Effect {
  public:
   InvertEffect()
       : Effect(2),
@@ -20,8 +20,8 @@ class InvertEffect : public Effect {
   void SetOffThreshold(unsigned offThreshold) { _offThreshold = offThreshold; }
 
  protected:
-  virtual void mix(const ControlValue *values,
-                   const class Timing &timing) final override {
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) override {
     unsigned inverted = ControlValue::MaxUInt() - values[0].UInt();
     if (inverted < _offThreshold) inverted = ControlValue::Zero();
     ControlValue value =

@@ -9,6 +9,10 @@
 
 namespace glight::gui {
 
+class EventTransmitter;
+
+enum class ControlMode { Primary, Secondary };
+
 /**
  * @author Andre Offringa
  * Base class for GUI controls that allow switching presets, and that
@@ -16,7 +20,9 @@ namespace glight::gui {
  */
 class ControlWidget : public Gtk::Bin {
  public:
-  ControlWidget() {}
+  ControlWidget(theatre::Management &management, EventTransmitter &eventHub,
+                ControlMode mode);
+  ~ControlWidget();
 
   /**
    * Toggle this fader. When the fader is off, it should
@@ -41,32 +47,33 @@ class ControlWidget : public Gtk::Bin {
 
   /**
    * Link this control to the given source. If moveFader is true,
-   * the control will change its state to reflact the value of the
+   * the control will change its state to reflect the value of the
    * source's value.
    */
-  virtual void Assign(theatre::SourceValue *item, bool moveFader) = 0;
+  void Assign(theatre::SourceValue *item, bool moveFader);
 
   /**
-   * Resyncs the fader with the preset value.
+   * Resyncs the fader with the source value.
    */
   virtual void MoveSlider() = 0;
-  virtual theatre::SourceValue *GetSourceValue() const = 0;
   virtual void Limit(double value) = 0;
-  virtual void ChangeManagement(theatre::Management &management,
-                                bool moveSliders) = 0;
 
   sigc::signal<void, double> &SignalValueChange() { return _signalValueChange; }
   sigc::signal<void> &SignalAssigned() { return _signalAssigned; }
 
-  void Unassign() { Assign(nullptr, false); }
+  theatre::SourceValue *GetSourceValue() const { return _sourceValue; }
+  void Unassign() { Assign(nullptr, true); }
   void SetFadeUpSpeed(double fadePerSecond) { _fadeUpSpeed = fadePerSecond; }
   void SetFadeDownSpeed(double fadePerSecond) {
     _fadeDownSpeed = fadePerSecond;
   }
+  ControlMode GetMode() const { return _mode; }
 
   static double MAX_SCALE_VALUE();
 
  protected:
+  virtual void OnAssigned(bool moveFader) = 0;
+
   double _fadeUpSpeed, _fadeDownSpeed;
 
   /**
@@ -81,7 +88,18 @@ class ControlWidget : public Gtk::Bin {
    */
   void setImmediateValue(unsigned target);
 
+  EventTransmitter &GetEventHub() { return _eventHub; }
+  theatre::Management &GetManagement() { return *_management; }
+  theatre::SingleSourceValue &GetSingleSourceValue();
+
  private:
+  void OnTheatreUpdate();
+
+  ControlMode _mode;
+  theatre::SourceValue *_sourceValue = nullptr;
+  theatre::Management *_management;
+  EventTransmitter &_eventHub;
+  sigc::connection _updateConnection;
   sigc::signal<void, double> _signalValueChange;
   sigc::signal<void> _signalAssigned;
 };

@@ -4,35 +4,35 @@
 #include <utility>
 #include <vector>
 
+#include "input.h"
+
 namespace glight::theatre {
 
-/**
-        @author Andre Offringa
-*/
+class Controllable;
+
 class Sequence {
  public:
   Sequence() = default;
 
-  size_t Size() const { return _list.size(); }
+  size_t Size() const { return list_.size(); }
 
-  void Add(class Controllable &controllable, size_t inputIndex) {
-    _list.emplace_back(&controllable, inputIndex);
+  void Add(Controllable &controllable, size_t inputIndex) {
+    list_.emplace_back(controllable, inputIndex);
   }
 
-  void Remove(size_t index) { _list.erase(_list.begin() + index); }
+  void Remove(size_t index) { list_.erase(list_.begin() + index); }
 
-  const std::vector<std::pair<class Controllable *, size_t>> &List() const {
-    return _list;
-  }
+  const std::vector<Input> &List() const { return list_; }
+  std::vector<Input> &List() { return list_; }
 
-  bool IsUsing(class Controllable &object) const {
-    for (const std::pair<class Controllable *, size_t> &input : _list)
-      if (input.first == &object) return true;
+  bool IsUsing(Controllable &object) const {
+    for (const Input &input : list_)
+      if (input.GetControllable() == &object) return true;
     return false;
   }
 
  private:
-  std::vector<std::pair<class Controllable *, size_t>> _list;
+  std::vector<Input> list_;
 };
 
 }  // namespace glight::theatre

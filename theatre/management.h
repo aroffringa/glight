@@ -47,6 +47,9 @@ class Management {
   const std::vector<std::unique_ptr<SourceValue>> &SourceValues() const {
     return _sourceValues;
   }
+  std::vector<std::unique_ptr<SourceValue>> &SourceValues() {
+    return _sourceValues;
+  }
   const std::vector<std::unique_ptr<DmxDevice>> &Devices() const {
     return _devices;
   }
@@ -102,7 +105,9 @@ class Management {
                                                           input_index);
   }
   size_t SourceValueIndex(const SourceValue *sourceValue) const;
-  ValueSnapshot Snapshot();
+  ValueSnapshot Snapshot(bool primary);
+  ValueSnapshot PrimarySnapshot();
+  ValueSnapshot SecondarySnapshot();
 
   double GetOffsetTimeInMS() const {
     const std::chrono::time_point<std::chrono::steady_clock> current_time =
@@ -112,16 +117,6 @@ class Management {
   }
   const Show &GetShow() const { return *_show; }
   Show &GetShow() { return *_show; }
-
-  std::unique_ptr<Management> MakeDryMode();
-
-  /**
-   * Swap DMX devices of two managements.
-   *
-   * This can be called while running, and is e.g. useful for switching from dry
-   * mode.
-   */
-  void SwapDevices(Management &source);
 
   const Folder &RootFolder() const { return *_rootFolder; }
   Folder &RootFolder() { return *_rootFolder; }
@@ -139,24 +134,13 @@ class Management {
 
   void BlackOut();
 
-  void Recover(Management &other);
-
  private:
-  struct ManagementThread {
-    Management *parent;
-    void operator()();
-  };
-
-  Management(const Management &forDryCopy,
-             std::shared_ptr<BeatFinder> &beatFinder);
+  void ThreadLoop();
 
   void getChannelValues(unsigned timestepNumber, unsigned *values,
-                        unsigned universe);
+                        unsigned universe, bool primary);
   void removeControllable(
       std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr);
-
-  void dryCopyControllerDependency(const Management &forDryCopy, size_t index);
-  void dryCopyEffectDependency(const Management &forDryCopy, size_t index);
 
   void abortAllDevices();
 
@@ -180,7 +164,8 @@ class Management {
   std::atomic<double> _previousTime;
 
   std::unique_ptr<Theatre> _theatre;
-  std::unique_ptr<ValueSnapshot> _snapshot;
+  std::unique_ptr<ValueSnapshot> _primarySnapshot;
+  std::unique_ptr<ValueSnapshot> _secondarySnapshot;
   std::shared_ptr<BeatFinder> _beatFinder;
   std::unique_ptr<Show> _show;
 

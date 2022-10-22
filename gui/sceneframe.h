@@ -41,7 +41,6 @@ class SceneFrame : public Gtk::Frame {
     _audioWidget.SetNoScene();
     _selectedScene = nullptr;
   }
-  void ChangeManagement(theatre::Management &management);
 
  private:
   theatre::Management *_management;

@@ -12,29 +12,27 @@ namespace glight::theatre {
 /**
         @author Andre Offringa
 */
-class Chase : public Controllable {
+class Chase final : public Controllable {
  public:
   Chase() : _phaseOffset(0.0) {}
 
-  std::unique_ptr<Chase> CopyWithoutSequence() const {
-    return std::unique_ptr<Chase>(new Chase(*this));
-  }
+  size_t NInputs() const override { return 1; }
 
-  size_t NInputs() const final override { return 1; }
+  ControlValue &InputValue(size_t) override { return _inputValue; }
 
-  ControlValue &InputValue(size_t) final override { return _inputValue; }
-
-  virtual FunctionType InputType(size_t) const final override {
+  virtual FunctionType InputType(size_t) const override {
     return FunctionType::Master;
   }
 
-  size_t NOutputs() const final override { return _sequence.List().size(); }
+  size_t NOutputs() const override { return _sequence.List().size(); }
 
-  std::pair<Controllable *, size_t> Output(size_t index) const final override {
-    return _sequence.List()[index];
+  std::pair<const Controllable *, size_t> Output(size_t index) const override {
+    const Input &input = _sequence.List()[index];
+    return std::pair<const Controllable *, size_t>(input.GetControllable(),
+                                                   input.InputIndex());
   }
 
-  virtual void Mix(const Timing &timing) final override {
+  virtual void Mix(const Timing &timing, bool primary) override {
     // Slowly drive the phase offset back to zero.
     if (_phaseOffset != 0.0) {
       if (_phaseOffset > 8.0)
@@ -57,20 +55,14 @@ class Chase : public Controllable {
     }
   }
 
-  const class Transition &Transition() const { return _transition; }
-  class Transition &Transition() {
-    return _transition;
-  }
+  const Transition &GetTransition() const { return _transition; }
+  Transition &GetTransition() { return _transition; }
 
-  const class Trigger &Trigger() const { return _trigger; }
-  class Trigger &Trigger() {
-    return _trigger;
-  }
+  const Trigger &GetTrigger() const { return _trigger; }
+  Trigger &GetTrigger() { return _trigger; }
 
-  const class Sequence &Sequence() const { return _sequence; }
-  class Sequence &Sequence() {
-    return _sequence;
-  }
+  const Sequence &GetSequence() const { return _sequence; }
+  Sequence &GetSequence() { return _sequence; }
 
   void ShiftDelayTrigger(double triggerTime, double transitionTime,
                          double currentTime) {
@@ -110,28 +102,19 @@ class Chase : public Controllable {
   void ResetPhaseOffset() { _phaseOffset = 0.0; }
 
  private:
-  /**
-   * Copy constructor for dry copy
-   */
-  Chase(const Chase &chase)
-      : Controllable(chase),
-        _trigger(chase._trigger),
-        _transition(chase._transition),
-        _phaseOffset(chase._phaseOffset) {}
-
   void mixBeatChase(const Timing &timing) {
     double timeInMs = timing.BeatValue();
     unsigned step =
         (unsigned)fmod(timeInMs / _trigger.DelayInBeats(), _sequence.Size());
-    _sequence.List()[step].first->MixInput(_sequence.List()[step].second,
-                                           _inputValue);
+    _sequence.List()[step].GetControllable()->MixInput(
+        _sequence.List()[step].InputIndex(), _inputValue);
   }
 
   void mixSyncedChase(const Timing &timing) {
     unsigned step =
         (timing.TimestepNumber() / _trigger.DelayInSyncs()) % _sequence.Size();
-    _sequence.List()[step].first->MixInput(_sequence.List()[step].second,
-                                           _inputValue);
+    _sequence.List()[step].GetControllable()->MixInput(
+        _sequence.List()[step].InputIndex(), _inputValue);
   }
 
   void mixDelayChase(const Timing &timing) {
@@ -141,24 +124,25 @@ class Chase : public Controllable {
     unsigned step = (unsigned)fmod(timeInMs / totalDuration, _sequence.Size());
     if (phase < _trigger.DelayInMs()) {
       // We are not in a transition, just mix the corresponding controllable
-      _sequence.List()[step].first->MixInput(_sequence.List()[step].second,
-                                             _inputValue);
+      _sequence.List()[step].GetControllable()->MixInput(
+          _sequence.List()[step].InputIndex(), _inputValue);
     } else {
       // We are in a transition
       double transitionTime = phase - _trigger.DelayInMs();
-      Controllable &first = *_sequence.List()[step].first,
-                   &second =
-                       *_sequence.List()[(step + 1) % _sequence.Size()].first;
-      _transition.Mix(first, _sequence.List()[step].second, second,
-                      _sequence.List()[(step + 1) % _sequence.Size()].second,
-                      transitionTime, _inputValue, timing);
+      Controllable &first = *_sequence.List()[step].GetControllable();
+      Controllable &second =
+          *_sequence.List()[(step + 1) % _sequence.Size()].GetControllable();
+      _transition.Mix(
+          first, _sequence.List()[step].InputIndex(), second,
+          _sequence.List()[(step + 1) % _sequence.Size()].InputIndex(),
+          transitionTime, _inputValue, timing);
     }
   }
 
   ControlValue _inputValue;
-  class Sequence _sequence;
-  class Trigger _trigger;
-  class Transition _transition;
+  Sequence _sequence;
+  Trigger _trigger;
+  Transition _transition;
   double _phaseOffset;
 };
 

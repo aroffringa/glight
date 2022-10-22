@@ -8,12 +8,12 @@
 
 namespace glight::theatre {
 
-class RandomSelectEffect : public Effect {
+class RandomSelectEffect final : public Effect {
  public:
   RandomSelectEffect()
       : Effect(1),
-        _active(false),
-        _startTime(0.0),
+        _active{false, false},
+        _startTime{0.0, 0.0},
         _delay(10000.0),
         _count(1){};
 
@@ -26,38 +26,41 @@ class RandomSelectEffect : public Effect {
   void SetCount(size_t count) { _count = count; }
 
  private:
-  virtual void mix(const ControlValue *values,
-                   const class Timing &timing) final override {
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) final override {
     size_t count = std::min(_count, Connections().size());
     if (values[0] && count != 0) {
-      if (Connections().size() != _activeConnections.size()) {
-        _activeConnections.resize(Connections().size());
-        for (size_t i = 0; i != _activeConnections.size(); ++i)
-          _activeConnections[i] = i;
-        std::shuffle(_activeConnections.begin(), _activeConnections.end(),
+      std::vector<size_t> &activeConnections = _activeConnections[primary];
+      if (Connections().size() != activeConnections.size()) {
+        activeConnections.resize(Connections().size());
+        for (size_t i = 0; i != activeConnections.size(); ++i)
+          activeConnections[i] = i;
+        std::shuffle(activeConnections.begin(), activeConnections.end(),
                      timing.RNG());
       }
-      if (!_active || timing.TimeInMS() - _startTime > _delay) {
-        _active = true;
-        _startTime = timing.TimeInMS();
-        std::shuffle(_activeConnections.begin(), _activeConnections.end(),
+      if (!_active[primary] ||
+          timing.TimeInMS() - _startTime[primary] > _delay) {
+        _active[primary] = true;
+        _startTime[primary] = timing.TimeInMS();
+        std::shuffle(activeConnections.begin(), activeConnections.end(),
                      timing.RNG());
       }
       for (size_t i = 0; i != count; ++i) {
-        if (_activeConnections[i] < Connections().size()) {
+        if (activeConnections[i] < Connections().size()) {
           const std::pair<Controllable *, size_t> &connection =
-              Connections()[_activeConnections[i]];
+              Connections()[activeConnections[i]];
           connection.first->MixInput(connection.second, values[0].UInt());
         }
       }
     } else {
-      _active = false;
+      _active[primary] = false;
     }
   }
 
-  bool _active;
-  std::vector<size_t> _activeConnections;
-  double _startTime;
+  bool _active[2];
+  std::array<std::vector<size_t>, 2> _activeConnections;
+  double _startTime[2];
+
   double _delay;
   size_t _count;
 };

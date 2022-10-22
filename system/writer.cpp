@@ -168,6 +168,30 @@ void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
   state.writer.EndObject();
 }
 
+void writeSingleSourceValue(WriteState &state,
+                            const SingleSourceValue &singleSourceValue) {
+  state.writer.Number("value", singleSourceValue.Value().UInt());
+  state.writer.Number("target-value", singleSourceValue.TargetValue());
+  state.writer.Number("fade-speed", singleSourceValue.FadeSpeed());
+}
+
+void writeSourceValue(WriteState &state, const SourceValue &sourceValue) {
+  writeControllable(state, sourceValue.GetControllable());
+
+  state.writer.StartObject();
+  state.writer.String("controllable-ref", sourceValue.GetControllable().Name());
+  state.writer.Number("input-index", sourceValue.InputIndex());
+  state.writer.Number("folder",
+                      state.folderIds[&sourceValue.GetControllable().Parent()]);
+  state.writer.StartObject("a");
+  writeSingleSourceValue(state, sourceValue.A());
+  state.writer.EndObject();
+  state.writer.StartObject("b");
+  writeSingleSourceValue(state, sourceValue.B());
+  state.writer.EndObject();
+  state.writer.EndObject();
+}
+
 void writePresetValue(WriteState &state, const PresetValue &presetValue) {
   writeControllable(state, presetValue.GetControllable());
 
@@ -224,11 +248,12 @@ void writeTransition(WriteState &state, const Transition &transition) {
 void writeSequence(WriteState &state, const Sequence &sequence) {
   state.writer.StartObject("sequence");
   state.writer.StartArray("inputs");
-  for (const std::pair<Controllable *, size_t> &input : sequence.List()) {
+  for (const Input &input : sequence.List()) {
     state.writer.StartObject();
-    state.writer.Number("input-index", input.second);
-    state.writer.Number("folder", state.folderIds[&input.first->Parent()]);
-    state.writer.String("name", input.first->Name());
+    state.writer.Number("input-index", input.InputIndex());
+    state.writer.Number("folder",
+                        state.folderIds[&input.GetControllable()->Parent()]);
+    state.writer.String("name", input.GetControllable()->Name());
     state.writer.EndObject();
   }
   state.writer.EndArray();
@@ -236,25 +261,23 @@ void writeSequence(WriteState &state, const Sequence &sequence) {
 }
 
 void writeChase(WriteState &state, const Chase &chase) {
-  const std::vector<std::pair<Controllable *, size_t>> &list =
-      chase.Sequence().List();
-  for (const std::pair<Controllable *, size_t> &input : list)
-    writeControllable(state, *input.first);
+  const std::vector<Input> &list = chase.GetSequence().List();
+  for (const Input &input : list)
+    writeControllable(state, *input.GetControllable());
 
   state.writer.StartObject();
   state.writer.String("type", "chase");
   writeFolderAttributes(state, chase);
-  writeTrigger(state, chase.Trigger());
-  writeTransition(state, chase.Transition());
-  writeSequence(state, chase.Sequence());
+  writeTrigger(state, chase.GetTrigger());
+  writeTransition(state, chase.GetTransition());
+  writeSequence(state, chase.GetSequence());
   state.writer.EndObject();
 }
 
 void writeTimeSequence(WriteState &state, const TimeSequence &timeSequence) {
-  const std::vector<std::pair<Controllable *, size_t>> &list =
-      timeSequence.Sequence().List();
-  for (const std::pair<Controllable *, size_t> &input : list)
-    writeControllable(state, *input.first);
+  const std::vector<Input> &list = timeSequence.Sequence().List();
+  for (const Input &input : list)
+    writeControllable(state, *input.GetControllable());
 
   state.writer.StartObject();
   state.writer.String("type", "time-sequence");
@@ -418,8 +441,7 @@ void writeFaderState(WriteState &state, const gui::FaderSetupState &guiState) {
     if (fader.IsToggleButton())
       state.writer.Boolean("new-toggle-column", fader.NewToggleButtonColumn());
     if (fader.GetSourceValue() != nullptr) {
-      state.writer.Number("input-index",
-                          fader.GetSourceValue()->Preset().InputIndex());
+      state.writer.Number("input-index", fader.GetSourceValue()->InputIndex());
       state.writer.Number(
           "folder",
           state.folderIds[&fader.GetSourceValue()->GetControllable().Parent()]);
@@ -477,7 +499,7 @@ void writeGlightShow(WriteState &state) {
 
   state.writer.StartArray("source-values");
   for (const std::unique_ptr<SourceValue> &sv : sourceValues)
-    writePresetValue(state, sv->Preset());
+    writeSourceValue(state, *sv);
   state.writer.EndArray();  // source_values
 
   state.writer.StartArray("scenes");

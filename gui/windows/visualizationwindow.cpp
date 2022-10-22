@@ -22,7 +22,6 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
                                          FixtureSelection *fixtureSelection,
                                          ShowWindow *showWindow)
     : _management(management),
-      _dryManagement(nullptr),
       _eventTransmitter(eventTransmitter),
       _globalSelection(fixtureSelection),
       _showWindow(showWindow),
@@ -39,7 +38,8 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
       _miRemove("Remove"),
       _miDesign("Design..."),
       _miFullscreen("Fullscreen"),
-      _miDMSSingle("Single"),
+      _miDMSPrimary("Primary"),
+      _miDMSSecondary("Secondary"),
       _miDMSVertical("Vertical"),
       _miDMSHorizontal("Horizontal"),
       _miDMSShadow("Shadow") {
@@ -84,12 +84,14 @@ void VisualizationWindow::inializeContextMenu() {
   _popupMenu.add(_miSymbolMenu);
 
   Gtk::RadioMenuItem::Group dryModeStyleGroup;
-  _miDMSSingle.set_group(dryModeStyleGroup);
-  _dryModeStyleMenu.add(_miDMSSingle);
+  _miDMSPrimary.set_group(dryModeStyleGroup);
+  _miDMSPrimary.set_active(true);
+  _dryModeStyleMenu.add(_miDMSPrimary);
+  _miDMSSecondary.set_group(dryModeStyleGroup);
+  _dryModeStyleMenu.add(_miDMSSecondary);
   _miDMSHorizontal.set_group(dryModeStyleGroup);
   _dryModeStyleMenu.add(_miDMSHorizontal);
   _miDMSVertical.set_group(dryModeStyleGroup);
-  _miDMSVertical.set_active(true);
   _dryModeStyleMenu.add(_miDMSVertical);
   _miDMSShadow.set_group(dryModeStyleGroup);
   _dryModeStyleMenu.add(_miDMSShadow);
@@ -153,9 +155,8 @@ bool VisualizationWindow::onExpose(
   return true;
 }
 
-double VisualizationWindow::scale(theatre::Management &management, double width,
-                                  double height) {
-  const theatre::Theatre &theatre = management.GetTheatre();
+double VisualizationWindow::scale(double width, double height) const {
+  const theatre::Theatre &theatre = _management->GetTheatre();
   theatre::Position extend = theatre.Extend();
   if (extend.X() == 0.0 || extend.Y() == 0.0)
     return 1.0;
@@ -164,13 +165,12 @@ double VisualizationWindow::scale(theatre::Management &management, double width,
 }
 
 void VisualizationWindow::drawManagement(
-    const Cairo::RefPtr<Cairo::Context> &cairo, theatre::Management &management,
-    const DrawStyle &style) {
-  const theatre::ValueSnapshot snapshot = management.Snapshot();
+    const Cairo::RefPtr<Cairo::Context> &cairo,
+    const theatre::ValueSnapshot &snapshot, const DrawStyle &style) {
   const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
-      management.GetTheatre().Fixtures();
+      _management->GetTheatre().Fixtures();
   cairo->save();
-  double sc = scale(management, style.width, style.height);
+  double sc = scale(style.width, style.height);
   cairo->scale(sc, sc);
 
   _fixtureStates.resize(fixtures.size());
@@ -249,7 +249,8 @@ void VisualizationWindow::drawManagement(
 }
 
 void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
-  size_t width = _drawingArea.get_width(), height = _drawingArea.get_height();
+  const size_t width = _drawingArea.get_width();
+  const size_t height = _drawingArea.get_height();
 
   cairo->set_source_rgba(0, 0, 0, 1);
   cairo->rectangle(0, 0, width, height);
@@ -264,33 +265,33 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
                   .height = height,
                   .timeSince = time - previousTime};
   previousTime = time;
-  if (_dryManagement == nullptr) {
-    drawManagement(cairo, *_management, style);
+  if (_miDMSPrimary.get_active()) {
+    drawManagement(cairo, _management->PrimarySnapshot(), style);
   } else if (_miDMSHorizontal.get_active()) {
     style.xOffset = 0;
     style.width = width / 2;
-    drawManagement(cairo, *_management, style);
+    drawManagement(cairo, _management->PrimarySnapshot(), style);
     style.xOffset = style.width;
     style.width = width - style.width;
-    drawManagement(cairo, *_dryManagement, style);
+    drawManagement(cairo, _management->SecondarySnapshot(), style);
   } else if (_miDMSVertical.get_active()) {
     style.yOffset = 0;
     style.height = height / 2;
-    drawManagement(cairo, *_management, style);
+    drawManagement(cairo, _management->PrimarySnapshot(), style);
     style.yOffset = style.height;
     style.height = height - style.height;
-    drawManagement(cairo, *_dryManagement, style);
+    drawManagement(cairo, _management->SecondarySnapshot(), style);
   } else if (_miDMSShadow.get_active()) {
     style.xOffset = width * 1 / 100;
     style.yOffset = height * 1 / 100;
     style.width = width * 99 / 100;
     style.height = height * 99 / 100;
-    drawManagement(cairo, *_management, style);
+    drawManagement(cairo, _management->PrimarySnapshot(), style);
     style.xOffset = 0;
     style.yOffset = 0;
-    drawManagement(cairo, *_dryManagement, style);
-  } else {  // Single
-    drawManagement(cairo, *_dryManagement, style);
+    drawManagement(cairo, _management->SecondarySnapshot(), style);
+  } else {  // Secondary
+    drawManagement(cairo, _management->SecondarySnapshot(), style);
   }
 }
 
@@ -318,17 +319,17 @@ theatre::Fixture *VisualizationWindow::fixtureAt(
 }
 
 bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
-  if ((!_dryManagement && event->button == 1) || event->button == 3) {
-    bool shift =
+  if (event->button == 1 || event->button == 3) {
+    const bool shift =
         (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK)) ==
         GDK_SHIFT_MASK;
     double height;
-    if (_dryManagement == nullptr)
+    if (_miDMSPrimary.get_active())
       height = _drawingArea.get_height();
-    else
+    else  // TODO other dry mode styles
       height = _drawingArea.get_height() / 2.0;
-    double sc = invScale(*_management, _drawingArea.get_width(), height);
-    theatre::Position pos = theatre::Position(event->x, event->y) * sc;
+    const double sc = invScale(_drawingArea.get_width(), height);
+    const theatre::Position pos = theatre::Position(event->x, event->y) * sc;
     theatre::Fixture *selectedFixture = fixtureAt(*_management, pos);
     if (!shift) {
       if (selectedFixture) {
@@ -370,9 +371,9 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
 }
 
 bool VisualizationWindow::onButtonRelease(GdkEventButton *event) {
-  if (event->button == 1 && !_dryManagement) {
-    double sc = invScale(*_management, _drawingArea.get_width(),
-                         _drawingArea.get_height());
+  if (event->button == 1) {
+    const double sc =
+        invScale(_drawingArea.get_width(), _drawingArea.get_height());
     if (_dragType == DragFixture) {
       _draggingStart = theatre::Position(event->x, event->y) * sc;
     } else if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
@@ -386,11 +387,11 @@ bool VisualizationWindow::onButtonRelease(GdkEventButton *event) {
 }
 
 bool VisualizationWindow::onMotion(GdkEventMotion *event) {
-  if (_dragType != NotDragging && !_dryManagement) {
-    double width = _drawingArea.get_width();
-    double height = _drawingArea.get_height();
-    theatre::Position pos = theatre::Position(event->x, event->y) /
-                            scale(*_management, width, height);
+  if (_dragType != NotDragging) {
+    const double width = _drawingArea.get_width();
+    const double height = _drawingArea.get_height();
+    const theatre::Position pos =
+        theatre::Position(event->x, event->y) / scale(width, height);
     switch (_dragType) {
       case NotDragging:
         break;

@@ -8,7 +8,7 @@
 
 namespace glight::theatre {
 
-class FluorescentStartEffect : public Effect {
+class FluorescentStartEffect final : public Effect {
  public:
   FluorescentStartEffect()
       : Effect(1),
@@ -40,14 +40,15 @@ class FluorescentStartEffect : public Effect {
   }
 
  private:
-  virtual void mix(const ControlValue *values,
-                   const class Timing &timing) final override {
+  virtual void mix(const ControlValue *values, const Timing &timing,
+                   bool primary) override {
+    std::vector<ConnectionInfo> &primary_data = _data[primary];
     if (values[0]) {
-      size_t count = _independentOutputs ? Connections().size() : 1;
-      _data.resize(count);
+      const size_t count = _independentOutputs ? Connections().size() : 1;
+      primary_data.resize(count);
 
       for (size_t i = 0; i != count; ++i) {
-        ConnectionInfo &data = _data[i];
+        ConnectionInfo &data = primary_data[i];
         bool nextState =
             (data._state != std::numeric_limits<unsigned>::max()) &&
             ((data._state == 0) || (data._nextStateTime < timing.TimeInMS()));
@@ -81,7 +82,7 @@ class FluorescentStartEffect : public Effect {
         }
       }
     } else {
-      _data.clear();
+      primary_data.clear();
     }
   }
 
@@ -93,7 +94,7 @@ class FluorescentStartEffect : public Effect {
     unsigned _state;
   };
 
-  std::vector<ConnectionInfo> _data;
+  std::array<std::vector<ConnectionInfo>, 2> _data;
   double _averageDuration, _stdDeviation, _flashDuration;
   size_t _glowValue;
   bool _independentOutputs;

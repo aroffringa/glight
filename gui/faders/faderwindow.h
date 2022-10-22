@@ -16,6 +16,7 @@
 #include <gtkmm/window.h>
 
 #include <chrono>
+#include <optional>
 
 #include "../../theatre/forwards.h"
 
@@ -48,18 +49,8 @@ class FaderWindow : public Gtk::Window {
 
   bool HandleKeyDown(char key);
   bool HandleKeyUp(char key);
-  bool IsAssigned(theatre::SourceValue *presetValue);
+  bool IsAssigned(theatre::SourceValue *presetValue) const;
   size_t KeyRowIndex() const { return _keyRowIndex; }
-
-  /**
-   * Associates all faders to a different management instance.
-   *
-   * Faders will be assigned to the presets of the new management instance, by
-   * looking up the preset by Id. This method is e.g. used for switching between
-   * dry and real mode. Faders that are assigned to a preset with an Id that
-   * does not correspond to a preset in the new instance are unassigned.
-   */
-  void ChangeManagement(theatre::Management &management, bool moveSliders);
 
   FaderSetupState *State() { return _state; }
 
@@ -67,41 +58,48 @@ class FaderWindow : public Gtk::Window {
   void initializeWidgets();
   void initializeMenu();
 
-  void onAddFaderClicked() { addControl(false, false); }
+  void onAddFaderClicked() { addControlInLayout(false, false); }
   void onAdd5FadersClicked() {
-    for (size_t i = 0; i != 5; ++i) addControl(false, false);
+    for (size_t i = 0; i != 5; ++i) addControlInLayout(false, false);
   }
   void onAdd5ToggleControlsClicked() {
-    for (size_t i = 0; i != 5; ++i) addControl(true, false);
+    for (size_t i = 0; i != 5; ++i) addControlInLayout(true, false);
   }
-  void onAddToggleClicked() { addControl(true, false); }
-  void onAddToggleColumnClicked() { addControl(true, true); }
+  void onAddToggleClicked() { addControlInLayout(true, false); }
+  void onAddToggleColumnClicked() { addControlInLayout(true, true); }
   void removeFader();
   void onRemoveFaderClicked() {
-    if (!_controls.empty()) removeFader();
+    if (!_upperControls.empty()) removeFader();
   }
   void onRemove5FadersClicked() {
     for (size_t i = 0; i != 5; ++i) onRemoveFaderClicked();
   }
+  void onLayoutChanged() {
+    RecursionLock::Token token(_recursionLock);
+    loadState();
+  }
   void onAssignClicked();
   void onAssignChasesClicked();
-  void onClearClicked();
+  void unassign();
   void onSoloToggled();
   void onSetNameClicked();
   void onControlValueChanged(double newValue, ControlWidget *widget);
   void onControlAssigned(size_t widgetIndex);
   bool onResize(GdkEventConfigure *event);
-  double mapSliderToSpeed(int sliderVal);
-  std::string speedLabel(int value);
   void onChangeUpSpeed();
   void onChangeDownSpeed();
   bool onTimeout() {
     ReloadValues();
     return true;
   }
+  void onCrossFadeChange();
 
-  void addControl(bool isToggle, bool newToggleColumn);
-
+  void addControl(bool isToggle, bool newToggleColumn, bool isPrimary);
+  void addControlInLayout(bool isToggle, bool newToggleColumn) {
+    addControl(isToggle, newToggleColumn, true);
+    if (_miDualLayout.get_active())
+      addControl(isToggle, newToggleColumn, false);
+  }
   void loadState();
   size_t getFadeInSpeed() const;
   size_t getFadeOutSpeed() const;
@@ -114,11 +112,11 @@ class FaderWindow : public Gtk::Window {
   Gtk::Grid _controlGrid;
   Gtk::MenuButton _menuButton;
 
-  Gtk::ImageMenuItem _miName;
   Gtk::Image _miNameImage;
-  Gtk::Menu _popupMenu, _fadeInMenu, _fadeOutMenu;
+  Gtk::Menu _popupMenu, _layoutMenu, _fadeInMenu, _fadeOutMenu;
+  Gtk::MenuItem _miLayout, _miFadeIn, _miFadeOut;
+  Gtk::ImageMenuItem _miName;
   Gtk::CheckMenuItem _miSolo;
-  Gtk::MenuItem _miFadeIn, _miFadeOut;
   Gtk::RadioMenuItem _miFadeInOption[11], _miFadeOutOption[11];
   Gtk::SeparatorMenuItem _miSep1;
   Gtk::MenuItem _miAssign, _miAssignChases, _miClear;
@@ -127,13 +125,21 @@ class FaderWindow : public Gtk::Window {
       _miAdd5ToggleButtons, _miAddToggleColumn, _miRemoveFader,
       _miRemove5Faders;
 
-  std::vector<std::unique_ptr<ControlWidget>> _controls;
-  std::vector<Gtk::VBox> _toggleColumns;
+  // Layout menu
+  Gtk::RadioMenuItem _miPrimaryLayout;
+  Gtk::RadioMenuItem _miSecondaryLayout;
+  Gtk::RadioMenuItem _miDualLayout;
+
+  std::vector<std::unique_ptr<ControlWidget>> _upperControls;
+  std::vector<std::unique_ptr<ControlWidget>> _lowerControls;
+  std::vector<Gtk::VBox> _upperColumns;
+  std::vector<Gtk::VBox> _lowerColumns;
   EventTransmitter &_eventHub;
   GUIState &_guiState;
   FaderSetupState *_state;
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;
+  std::optional<Gtk::VScale> _crossFader;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
 };
 

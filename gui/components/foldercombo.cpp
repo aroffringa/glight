@@ -16,9 +16,6 @@ using theatre::FolderObject;
 FolderCombo::FolderCombo(theatre::Management &management,
                          EventTransmitter &eventHub)
     : Gtk::ComboBox(false), _management(&management), _eventHub(eventHub) {
-  _eventHub.SignalChangeManagement().connect(
-      sigc::mem_fun(*this, &FolderCombo::changeManagement));
-
   _eventHub.SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &FolderCombo::fillList));
 

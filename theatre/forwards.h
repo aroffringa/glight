@@ -22,9 +22,11 @@ class PropertySet;
 class Scene;
 class SceneItem;
 class Show;
+class SingleSourceValue;
 class SourceValue;
 class Theatre;
 class TimeSequence;
+class ValueSnapshot;
 
 }  // namespace glight::theatre
 
