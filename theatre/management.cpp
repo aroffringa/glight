@@ -167,11 +167,10 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
     }
   }
 
-  if(primary) {
+  if (primary) {
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
       sv->GetControllable().MixInput(sv->InputIndex(), sv->A().Value());
-  }
-  else {
+  } else {
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
       sv->GetControllable().MixInput(sv->InputIndex(), sv->B().Value());
   }

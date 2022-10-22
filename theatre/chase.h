@@ -56,19 +56,13 @@ class Chase final : public Controllable {
   }
 
   const Transition &GetTransition() const { return _transition; }
-  Transition &GetTransition() {
-    return _transition;
-  }
+  Transition &GetTransition() { return _transition; }
 
   const Trigger &GetTrigger() const { return _trigger; }
-  Trigger &GetTrigger() {
-    return _trigger;
-  }
+  Trigger &GetTrigger() { return _trigger; }
 
   const Sequence &GetSequence() const { return _sequence; }
-  Sequence &GetSequence() {
-    return _sequence;
-  }
+  Sequence &GetSequence() { return _sequence; }
 
   void ShiftDelayTrigger(double triggerTime, double transitionTime,
                          double currentTime) {
