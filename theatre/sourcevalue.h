@@ -78,7 +78,7 @@ class SourceValue {
 
   SingleSourceValue& A() { return a_; }
   const SingleSourceValue& A() const { return a_; }
-  
+
   SingleSourceValue& B() { return b_; }
   const SingleSourceValue& B() const { return b_; }
 
@@ -102,12 +102,14 @@ class SourceValue {
     cross_fader_.ApplyFade(time_passed);
   }
   unsigned PrimaryValue() const {
-    return (a_.Value() * Invert(cross_fader_.Value())).UInt() + (b_.Value() * cross_fader_.Value()).UInt();
+    return (a_.Value() * Invert(cross_fader_.Value())).UInt() +
+           (b_.Value() * cross_fader_.Value()).UInt();
   }
   unsigned SecondaryValue() const {
-    return (b_.Value() * Invert(cross_fader_.Value())).UInt() + (a_.Value() * cross_fader_.Value()).UInt();
+    return (b_.Value() * Invert(cross_fader_.Value())).UInt() +
+           (a_.Value() * cross_fader_.Value()).UInt();
   }
-  
+
  private:
   Input input_;
   SingleSourceValue a_;

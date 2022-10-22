@@ -544,8 +544,8 @@ void FaderWindow::ReloadValues() {
 
 void FaderWindow::onCrossFadeChange() {
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
-    glight::theatre::SourceValue* source = cw->GetSourceValue();
-    if(source) {
+    glight::theatre::SourceValue *source = cw->GetSourceValue();
+    if (source) {
       source->CrossFader().Set(_crossFader->get_value(), 0.0);
     }
   }
