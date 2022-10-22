@@ -47,7 +47,7 @@ class ControlWidget : public Gtk::Bin {
 
   /**
    * Link this control to the given source. If moveFader is true,
-   * the control will change its state to reflact the value of the
+   * the control will change its state to reflect the value of the
    * source's value.
    */
   void Assign(theatre::SourceValue *item, bool moveFader);
@@ -67,6 +67,7 @@ class ControlWidget : public Gtk::Bin {
   void SetFadeDownSpeed(double fadePerSecond) {
     _fadeDownSpeed = fadePerSecond;
   }
+  ControlMode GetMode() const { return _mode; }
 
   static double MAX_SCALE_VALUE();
 

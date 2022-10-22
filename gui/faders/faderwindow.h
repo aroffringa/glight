@@ -48,7 +48,7 @@ class FaderWindow : public Gtk::Window {
 
   bool HandleKeyDown(char key);
   bool HandleKeyUp(char key);
-  bool IsAssigned(theatre::SourceValue *presetValue);
+  bool IsAssigned(theatre::SourceValue *presetValue) const;
   size_t KeyRowIndex() const { return _keyRowIndex; }
 
   FaderSetupState *State() { return _state; }
@@ -68,7 +68,7 @@ class FaderWindow : public Gtk::Window {
   void onAddToggleColumnClicked() { addControlInLayout(true, true); }
   void removeFader();
   void onRemoveFaderClicked() {
-    if (!_controlsA.empty()) removeFader();
+    if (!_upperControls.empty()) removeFader();
   }
   void onRemove5FadersClicked() {
     for (size_t i = 0; i != 5; ++i) onRemoveFaderClicked();
@@ -79,14 +79,12 @@ class FaderWindow : public Gtk::Window {
   }
   void onAssignClicked();
   void onAssignChasesClicked();
-  void onClearClicked();
+  void unassign();
   void onSoloToggled();
   void onSetNameClicked();
   void onControlValueChanged(double newValue, ControlWidget *widget);
   void onControlAssigned(size_t widgetIndex);
   bool onResize(GdkEventConfigure *event);
-  double mapSliderToSpeed(int sliderVal);
-  std::string speedLabel(int value);
   void onChangeUpSpeed();
   void onChangeDownSpeed();
   bool onTimeout() {
@@ -100,7 +98,6 @@ class FaderWindow : public Gtk::Window {
     if (_miDualLayout.get_active())
       addControl(isToggle, newToggleColumn, false);
   }
-
   void loadState();
   size_t getFadeInSpeed() const;
   size_t getFadeOutSpeed() const;
@@ -127,14 +124,14 @@ class FaderWindow : public Gtk::Window {
       _miRemove5Faders;
 
   // Layout menu
-  Gtk::RadioMenuItem _miSimpleLayout;
-  Gtk::RadioMenuItem _miDryModeLayout;
+  Gtk::RadioMenuItem _miPrimaryLayout;
+  Gtk::RadioMenuItem _miSecondaryLayout;
   Gtk::RadioMenuItem _miDualLayout;
 
-  std::vector<std::unique_ptr<ControlWidget>> _controlsA;
-  std::vector<std::unique_ptr<ControlWidget>> _controlsB;
-  std::vector<Gtk::VBox> _toggleColumnsA;
-  std::vector<Gtk::VBox> _toggleColumnsB;
+  std::vector<std::unique_ptr<ControlWidget>> _upperControls;
+  std::vector<std::unique_ptr<ControlWidget>> _lowerControls;
+  std::vector<Gtk::VBox> _upperColumns;
+  std::vector<Gtk::VBox> _lowerColumns;
   EventTransmitter &_eventHub;
   GUIState &_guiState;
   FaderSetupState *_state;
