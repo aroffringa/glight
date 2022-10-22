@@ -108,7 +108,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
     _newChase->SetName(folder.GetAvailableName("Chase"));
     folder.Add(*_newChase);
 
-    theatre::Sequence &sequence = _newChase->Sequence();
+    theatre::Sequence &sequence = _newChase->GetSequence();
     Gtk::TreeModel::Children children = _newChaseListModel->children();
     for (Gtk::TreeModel::Children::const_iterator i = children.begin();
          i != children.end(); ++i) {

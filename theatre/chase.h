@@ -16,10 +16,6 @@ class Chase final : public Controllable {
  public:
   Chase() : _phaseOffset(0.0) {}
 
-  std::unique_ptr<Chase> CopyWithoutSequence() const {
-    return std::unique_ptr<Chase>(new Chase(*this));
-  }
-
   size_t NInputs() const override { return 1; }
 
   ControlValue &InputValue(size_t) override { return _inputValue; }
@@ -59,18 +55,18 @@ class Chase final : public Controllable {
     }
   }
 
-  const class Transition &Transition() const { return _transition; }
-  class Transition &Transition() {
+  const Transition &GetTransition() const { return _transition; }
+  Transition &GetTransition() {
     return _transition;
   }
 
-  const class Trigger &Trigger() const { return _trigger; }
-  class Trigger &Trigger() {
+  const Trigger &GetTrigger() const { return _trigger; }
+  Trigger &GetTrigger() {
     return _trigger;
   }
 
-  const class Sequence &Sequence() const { return _sequence; }
-  class Sequence &Sequence() {
+  const Sequence &GetSequence() const { return _sequence; }
+  Sequence &GetSequence() {
     return _sequence;
   }
 
@@ -112,15 +108,6 @@ class Chase final : public Controllable {
   void ResetPhaseOffset() { _phaseOffset = 0.0; }
 
  private:
-  /**
-   * Copy constructor for dry copy
-   */
-  Chase(const Chase &chase)
-      : Controllable(chase),
-        _trigger(chase._trigger),
-        _transition(chase._transition),
-        _phaseOffset(chase._phaseOffset) {}
-
   void mixBeatChase(const Timing &timing) {
     double timeInMs = timing.BeatValue();
     unsigned step =
@@ -159,9 +146,9 @@ class Chase final : public Controllable {
   }
 
   ControlValue _inputValue;
-  class Sequence _sequence;
-  class Trigger _trigger;
-  class Transition _transition;
+  Sequence _sequence;
+  Trigger _trigger;
+  Transition _transition;
   double _phaseOffset;
 };
 

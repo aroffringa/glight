@@ -138,7 +138,7 @@ class Management {
   void ThreadLoop();
 
   void getChannelValues(unsigned timestepNumber, unsigned *values,
-                        unsigned universe);
+                        unsigned universe, bool primary);
   void removeControllable(
       std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr);
 

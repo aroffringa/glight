@@ -261,16 +261,16 @@ void writeSequence(WriteState &state, const Sequence &sequence) {
 }
 
 void writeChase(WriteState &state, const Chase &chase) {
-  const std::vector<Input> &list = chase.Sequence().List();
+  const std::vector<Input> &list = chase.GetSequence().List();
   for (const Input &input : list)
     writeControllable(state, *input.GetControllable());
 
   state.writer.StartObject();
   state.writer.String("type", "chase");
   writeFolderAttributes(state, chase);
-  writeTrigger(state, chase.Trigger());
-  writeTransition(state, chase.Transition());
-  writeSequence(state, chase.Sequence());
+  writeTrigger(state, chase.GetTrigger());
+  writeTransition(state, chase.GetTransition());
+  writeSequence(state, chase.GetSequence());
   state.writer.EndObject();
 }
 

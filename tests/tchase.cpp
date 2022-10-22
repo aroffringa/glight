@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(remove_indirect) {
   pcB.SetFromCurrentSituation(management);
   Chase &chase = management.AddChase();
   chase.SetName("chase");
-  Sequence &sequence = chase.Sequence();
+  Sequence &sequence = chase.GetSequence();
   root.Add(chase);
   sequence.Add(pcA, 0);
   sequence.Add(pcB, 0);

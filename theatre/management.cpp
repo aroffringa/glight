@@ -92,7 +92,7 @@ void Management::ThreadLoop() {
 
         std::fill_n(values, 512, 0);
 
-        getChannelValues(timestepNumber, values, universe);
+        getChannelValues(timestepNumber, values, universe, is_primary);
 
         for (unsigned i = 0; i < 512; ++i) {
           unsigned val = (values[i] >> 16);
@@ -127,7 +127,7 @@ void Management::abortAllDevices() {
 }
 
 void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
-                                  unsigned universe) {
+                                  unsigned universe, bool primary) {
   double relTimeInMs = GetOffsetTimeInMS();
   double beatValue;
   unsigned audioLevel;
@@ -167,13 +167,20 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
     }
   }
 
-  for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-    sv->GetControllable().MixInput(sv->InputIndex(), sv->A().Value());
+  if(primary) {
+    for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
+      sv->GetControllable().MixInput(sv->InputIndex(), sv->A().Value());
+  }
+  else {
+    for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
+      sv->GetControllable().MixInput(sv->InputIndex(), sv->B().Value());
+  }
 
   // Solve dependency graph of controllables
-  std::vector<Controllable *> unorderedList, orderedList;
+  std::vector<Controllable *> unorderedList;
   for (const std::unique_ptr<Controllable> &c : _controllables)
     unorderedList.emplace_back(c.get());
+  std::vector<Controllable *> orderedList;
   if (!topologicalSort(unorderedList, orderedList))
     throw std::runtime_error("Cycle in dependencies");
 
@@ -423,7 +430,7 @@ ValueSnapshot Management::PrimarySnapshot() {
 
 ValueSnapshot Management::SecondarySnapshot() {
   std::lock_guard<std::mutex> lock(_mutex);
-  return *_primarySnapshot;
+  return *_secondarySnapshot;
 }
 
 ValueSnapshot Management::Snapshot(bool primary) {

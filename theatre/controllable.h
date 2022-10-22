@@ -73,6 +73,9 @@ class Controllable : public FolderObject {
       return Name() + " (" + AbbreviatedFunctionType(InputType(index)) + ")";
   }
 
+  /**
+   * Sets the value at the controllables input.
+   */
   void MixInput(size_t index, const ControlValue &value) {
     unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(), value.UInt(),
                                         MixStyle::Default);

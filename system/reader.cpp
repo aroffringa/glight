@@ -233,9 +233,9 @@ void ParseTransition(const Object &node, Transition &transition) {
 void ParseChase(const Object &node, Management &management) {
   Chase &chase = management.AddChase();
   ParseFolderAttr(node, chase, management);
-  ParseTrigger(ToObj(node["trigger"]), chase.Trigger());
-  ParseTransition(ToObj(node["transition"]), chase.Transition());
-  ParseSequence(ToObj(node["sequence"]), chase.Sequence(), management);
+  ParseTrigger(ToObj(node["trigger"]), chase.GetTrigger());
+  ParseTransition(ToObj(node["transition"]), chase.GetTransition());
+  ParseSequence(ToObj(node["sequence"]), chase.GetSequence(), management);
 }
 
 void ParseTimeSequence(const Object &node, Management &management) {

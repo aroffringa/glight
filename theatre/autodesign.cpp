@@ -115,7 +115,7 @@ Chase &AutoDesign::MakeRunningLight(
   chase.SetName(destination.GetAvailableName("Runchase"));
   destination.Add(chase);
   management.AddSourceValue(chase, 0);
-  Sequence &seq = chase.Sequence();
+  Sequence &seq = chase.GetSequence();
   size_t frames;
   if (runType == InwardRun || runType == OutwardRun)
     frames = (colors.size() + 1) / 2;
@@ -199,7 +199,7 @@ Chase &AutoDesign::MakeColorVariation(
   chase.SetName(destination.GetAvailableName("Colorvar"));
   destination.Add(chase);
   management.AddSourceValue(chase, 0);
-  Sequence &seq = chase.Sequence();
+  Sequence &seq = chase.GetSequence();
   std::random_device rd;
   std::mt19937 rnd(rd());
   std::normal_distribution<double> distribution(0.0, variation);
@@ -236,7 +236,7 @@ Chase &AutoDesign::MakeColorShift(
   chase.SetName(destination.GetAvailableName("Colourshift"));
   destination.Add(chase);
   management.AddSourceValue(chase, 0);
-  Sequence &seq = chase.Sequence();
+  Sequence &seq = chase.GetSequence();
   size_t frames = colors.size();
   std::vector<std::vector<size_t>> pos(frames);
   std::random_device rd;
@@ -381,7 +381,7 @@ Chase &AutoDesign::MakeIncreasingChase(
   chase.SetName(destination.GetAvailableName("Increasing chase"));
   destination.Add(chase);
   management.AddSourceValue(chase, 0);
-  Sequence &seq = chase.Sequence();
+  Sequence &seq = chase.GetSequence();
 
   size_t nFix = controllables.size();
   for (size_t frameIndex = 0; frameIndex != nFix * 2; ++frameIndex) {

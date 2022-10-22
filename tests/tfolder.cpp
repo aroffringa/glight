@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE(RemoveFolder) {
   Chase &c = management.AddChase();
   c.SetName("c");
   folder.Add(c);
-  c.Sequence().Add(control, 0);
+  c.GetSequence().Add(control, 0);
 
   ts1.AddStep(c, 0);
 

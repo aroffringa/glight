@@ -38,7 +38,8 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
       _miRemove("Remove"),
       _miDesign("Design..."),
       _miFullscreen("Fullscreen"),
-      _miDMSSecondary("Single"),
+      _miDMSPrimary("Primary"),
+      _miDMSSecondary("Secondary"),
       _miDMSVertical("Vertical"),
       _miDMSHorizontal("Horizontal"),
       _miDMSShadow("Shadow") {
@@ -84,13 +85,13 @@ void VisualizationWindow::inializeContextMenu() {
 
   Gtk::RadioMenuItem::Group dryModeStyleGroup;
   _miDMSPrimary.set_group(dryModeStyleGroup);
+  _miDMSPrimary.set_active(true);
   _dryModeStyleMenu.add(_miDMSPrimary);
   _miDMSSecondary.set_group(dryModeStyleGroup);
   _dryModeStyleMenu.add(_miDMSSecondary);
   _miDMSHorizontal.set_group(dryModeStyleGroup);
   _dryModeStyleMenu.add(_miDMSHorizontal);
   _miDMSVertical.set_group(dryModeStyleGroup);
-  _miDMSVertical.set_active(true);
   _dryModeStyleMenu.add(_miDMSVertical);
   _miDMSShadow.set_group(dryModeStyleGroup);
   _dryModeStyleMenu.add(_miDMSShadow);
@@ -248,7 +249,8 @@ void VisualizationWindow::drawManagement(
 }
 
 void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
-  size_t width = _drawingArea.get_width(), height = _drawingArea.get_height();
+  const size_t width = _drawingArea.get_width();
+  const size_t height = _drawingArea.get_height();
 
   cairo->set_source_rgba(0, 0, 0, 1);
   cairo->rectangle(0, 0, width, height);
