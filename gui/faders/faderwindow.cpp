@@ -16,6 +16,9 @@
 #include <glibmm/main.h>
 
 namespace glight::gui {
+  
+using theatre::ControlValue;
+
 namespace {
 double MapSliderToSpeed(int sliderVal) {
   switch (sliderVal) {
@@ -157,7 +160,7 @@ void FaderWindow::initializeWidgets() {
   _menuButton.set_tooltip_text("Open options menu");
   _menuButton.set_menu(_popupMenu);
   _leftBox.pack_start(_menuButton, false, false, 5);
-  _hBox.pack_start(_leftBox);
+  _hBox.pack_start(_leftBox, false, false);
 
   _controlGrid.set_column_spacing(3);
   _hBox.pack_start(_controlGrid, true, true);
@@ -473,11 +476,25 @@ void FaderWindow::loadState() {
   _miSolo.set_active(_state->isSolo);
   _miFadeInOption[_state->fadeInSpeed].set_active(true);
   _miFadeOutOption[_state->fadeOutSpeed].set_active(true);
-
+  _crossFader.reset();
   _upperColumns.clear();
   _lowerColumns.clear();
   _upperControls.clear();
   _lowerControls.clear();
+  
+  if(_miDualLayout.get_active()) {
+    _crossFader.emplace(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
+             (ControlValue::MaxUInt() + 1) / 100);
+    _leftBox.pack_start(*_crossFader, true, true);
+    _crossFader->set_value(ControlValue::MaxUInt());
+    _crossFader->set_inverted(true);
+    _crossFader->set_draw_value(false);
+    _crossFader->set_has_origin(false);
+    _crossFader->set_vexpand(true);
+    _crossFader->signal_value_changed().connect(
+        sigc::mem_fun(*this, &FaderWindow::onCrossFadeChange));
+    _crossFader->show();
+  }
   for (FaderState &state : _state->faders) {
     addControlInLayout(state.IsToggleButton(), state.NewToggleButtonColumn());
   }
@@ -523,6 +540,10 @@ void FaderWindow::ReloadValues() {
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
     cw->MoveSlider();
   }
+}
+
+void FaderWindow::onCrossFadeChange() {
+  
 }
 
 }  // namespace glight::gui

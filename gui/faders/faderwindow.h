@@ -16,6 +16,7 @@
 #include <gtkmm/window.h>
 
 #include <chrono>
+#include <optional>
 
 #include "../../theatre/forwards.h"
 
@@ -91,6 +92,7 @@ class FaderWindow : public Gtk::Window {
     ReloadValues();
     return true;
   }
+  void onCrossFadeChange();
 
   void addControl(bool isToggle, bool newToggleColumn, bool isPrimary);
   void addControlInLayout(bool isToggle, bool newToggleColumn) {
@@ -137,6 +139,7 @@ class FaderWindow : public Gtk::Window {
   FaderSetupState *_state;
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;
+  std::optional<Gtk::VScale> _crossFader;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
 };
 
