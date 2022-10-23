@@ -41,7 +41,7 @@ void FillManagement(Management &management) {
   fc.SetName("Control for RGBW fixture");
   management.AddSourceValue(fc, 0);
   management.AddSourceValue(fc, 1);
-  management.AddSourceValue(fc, 2).A().SetValue(ControlValue::MaxUInt());
+  management.AddSourceValue(fc, 2).A().SetValue(ControlValue::Max());
   management.AddSourceValue(fc, 3);
   BOOST_CHECK_EQUAL(
       &management.GetFixtureControl(*management.GetTheatre().Fixtures()[0]),
@@ -51,15 +51,15 @@ void FillManagement(Management &management) {
   PresetCollection &a = management.AddPresetCollection();
   a.SetName("A preset collection");
   subFolder.Add(a);
-  a.AddPresetValue(fc, 0).SetValue(ControlValue::MaxUInt() / 2);
-  a.AddPresetValue(fc, 3).SetValue(ControlValue::MaxUInt());
-  management.AddSourceValue(a, 0).A().SetValue(42);
+  a.AddPresetValue(fc, 0).SetValue(ControlValue::Max() / 2);
+  a.AddPresetValue(fc, 3).SetValue(ControlValue::Max());
+  management.AddSourceValue(a, 0).A().SetValue(ControlValue(42));
 
   PresetCollection &b = management.AddPresetCollection();
   b.SetName("Second preset collection");
   subFolder.Add(b);
-  b.AddPresetValue(fc, 0).SetValue(12);
-  b.AddPresetValue(fc, 3).SetValue(13);
+  b.AddPresetValue(fc, 0).SetValue(ControlValue(12));
+  b.AddPresetValue(fc, 3).SetValue(ControlValue(13));
   management.AddSourceValue(b, 0);
 
   Chase &chase = management.AddChase();

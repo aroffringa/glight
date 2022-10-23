@@ -77,10 +77,10 @@ class FluorescentStartEffect final : public Effect {
         if (_independentOutputs) {
           Connections()[i].first->MixInput(
               Connections()[i].second,
-              ControlValue::MultiplyValues(values[0].UInt(), value));
+              values[0] * ControlValue(value));
         } else {
           setConnectedInputs(
-              ControlValue::MultiplyValues(values[0].UInt(), value));
+              values[0] * ControlValue(value));
         }
       }
     } else {

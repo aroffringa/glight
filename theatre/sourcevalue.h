@@ -37,7 +37,7 @@ class SingleSourceValue {
             fading_value -= step_size;
         }
       }
-      value_ = fading_value;
+      value_ = ControlValue(fading_value);
     }
   }
 
@@ -45,7 +45,7 @@ class SingleSourceValue {
     target_value_ = target_value;
     fade_speed_ = fade_speed;
     if (fade_speed == 0.0) {
-      value_ = target_value;
+      value_ = ControlValue(target_value);
     }
   }
 
@@ -59,7 +59,7 @@ class SingleSourceValue {
   unsigned TargetValue() const { return target_value_; }
 
  private:
-  ControlValue value_ = 0;
+  ControlValue value_ = ControlValue(0u);
   double fade_speed_ = 0.0;
   unsigned target_value_ = 0;
 };

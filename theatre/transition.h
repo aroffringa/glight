@@ -84,8 +84,8 @@ class Transition {
         unsigned secondRatioValue =
             (unsigned)((transitionTime / _lengthInMs) * 256.0);
         unsigned firstRatioValue = 255 - secondRatioValue;
-        first.MixInput(firstInput, (value.UInt() * firstRatioValue) >> 8);
-        second.MixInput(secondInput, (value.UInt() * secondRatioValue) >> 8);
+        first.MixInput(firstInput, ControlValue((value.UInt() * firstRatioValue) >> 8));
+        second.MixInput(secondInput, ControlValue((value.UInt() * secondRatioValue) >> 8));
       } break;
       case TransitionType::FadeThroughBlack: {
         unsigned ratio = (unsigned)((transitionTime / _lengthInMs) * 512.0);
@@ -110,12 +110,12 @@ class Transition {
       case TransitionType::FadeFromBlack: {
         unsigned ratioValue =
             (unsigned)((transitionTime / _lengthInMs) * 256.0);
-        second.MixInput(secondInput, (value.UInt() * ratioValue) >> 8);
+        second.MixInput(secondInput, ControlValue((value.UInt() * ratioValue) >> 8));
       } break;
       case TransitionType::FadeToBlack: {
         unsigned ratioValue =
             255 - (unsigned)((transitionTime / _lengthInMs) * 256.0);
-        first.MixInput(secondInput, (value.UInt() * ratioValue) >> 8);
+        first.MixInput(secondInput, ControlValue((value.UInt() * ratioValue) >> 8));
       } break;
     }
   }

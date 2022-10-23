@@ -52,11 +52,11 @@ class FlickerEffect final : public Effect {
         for (size_t i = 0; i != Connections().size(); ++i) {
           Connections()[i].first->MixInput(
               Connections()[i].second,
-              ControlValue::MultiplyValues(values[0].UInt(), value[i]));
+              values[0] * ControlValue(value[i]));
         }
       } else {
         setConnectedInputs(
-            ControlValue::MultiplyValues(values[0].UInt(), value[0]));
+            values[0] * ControlValue(value[0]));
       }
     }
   }

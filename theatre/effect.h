@@ -16,7 +16,7 @@ namespace glight::theatre {
 
 class Effect : public Controllable {
  public:
-  Effect(size_t nInputs) : _inputValues(nInputs, 0) {}
+  Effect(size_t nInputs) : _inputValues(nInputs, ControlValue()) {}
 
   virtual ~Effect() {
     while (!_connections.empty()) {

@@ -13,7 +13,7 @@ namespace glight::theatre {
 class ControlValue {
  public:
   constexpr ControlValue() : _value(0) {}
-  constexpr ControlValue(unsigned value) : _value(value) {}
+  constexpr explicit ControlValue(unsigned value) : _value(value) {}
   constexpr ControlValue(const ControlValue& source) = default;
 
   constexpr explicit operator bool() const { return _value != 0; }
@@ -82,11 +82,26 @@ inline ControlValue operator*(const ControlValue& lhs,
   return ControlValue(ControlValue::MultiplyValues(lhs.UInt(), rhs.UInt()));
 }
 
+
+inline ControlValue operator/(const ControlValue& lhs,
+                              unsigned factor) {
+  return ControlValue(lhs.UInt() / factor);
+}
+
 inline ControlValue Invert(const ControlValue& v) {
   return ControlValue(ControlValue::MaxUInt() -
                       std::min(v.UInt(), ControlValue::MaxUInt()));
 }
 
+inline ControlValue Max(const ControlValue& a, const ControlValue& b) {
+  return ControlValue(std::max(a.UInt(), b.UInt()));
+}
+
+inline ControlValue Mix(const ControlValue& firstValue, const ControlValue& secondValue,
+                    MixStyle mixStyle) {
+  return ControlValue(ControlValue::Mix(firstValue.UInt(), secondValue.UInt(), mixStyle));
+}
+  
 }  // namespace glight::theatre
 
 #endif

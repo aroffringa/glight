@@ -30,7 +30,7 @@ class ControlSceneItem : public SceneItem {
                    const Timing &timing) {
     double ratio = (timing.TimeInMS() - OffsetInMS()) / DurationInMS();
     _controllable.MixInput(_input,
-                           (unsigned int)(_startValue.UInt() * (1.0 - ratio) +
+                           ControlValue(_startValue.UInt() * (1.0 - ratio) +
                                           _endValue.UInt() * ratio));
   }
   class Controllable &Controllable() const {
