@@ -13,10 +13,10 @@ enum class EffectType {
   ConstantValue,
   Curve,
   Delay,
+  Dispenser,
   Fade,
   Flicker,
   FluorescentStart,
-  Hub,
   Invert,
   MusicActivation,
   Pulse,
@@ -35,14 +35,14 @@ inline std::string EffectTypeToName(EffectType type) {
       return "Curve";
     case ET::Delay:
       return "Delay";
+    case ET::Dispenser:
+      return "Dispenser";
     case ET::Fade:
       return "Fade";
     case ET::Flicker:
       return "Flicker";
     case ET::FluorescentStart:
       return "Fluorescent start";
-    case ET::Hub:
-      return "Hub";
     case ET::Invert:
       return "Invert";
     case ET::MusicActivation:
@@ -67,6 +67,8 @@ inline EffectType NameToEffectType(const std::string &name) {
     return ET::Curve;
   else if (name == "Delay")
     return ET::Delay;
+  else if (name == "Dispenser")
+    return ET::Dispenser;
   else if (name == "Fade")
     return ET::Fade;
   else if (name == "Flicker")
@@ -89,18 +91,12 @@ inline EffectType NameToEffectType(const std::string &name) {
 
 inline std::vector<EffectType> GetEffectTypes() {
   using ET = EffectType;
-  return std::vector<ET>{ET::AudioLevel,
-                         ET::ConstantValue,
-                         ET::Curve,
-                         ET::Delay,
-                         ET::Fade,
-                         ET::Flicker,
-                         ET::FluorescentStart,
-                         ET::Hub,
-                         ET::Invert,
-                         ET::MusicActivation,
-                         ET::Pulse,
-                         ET::RandomSelect,
+  return std::vector<ET>{ET::AudioLevel, ET::ConstantValue,
+                         ET::Curve,      ET::Delay,
+                         ET::Dispenser,  ET::Fade,
+                         ET::Flicker,    ET::FluorescentStart,
+                         ET::Invert,     ET::MusicActivation,
+                         ET::Pulse,      ET::RandomSelect,
                          ET::Threshold};
 }
 

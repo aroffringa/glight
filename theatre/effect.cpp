@@ -4,6 +4,7 @@
 #include "effects/constantvalueeffect.h"
 #include "effects/curveeffect.h"
 #include "effects/delayeffect.h"
+#include "effects/dispensereffect.h"
 #include "effects/fadeeffect.h"
 #include "effects/flickereffect.h"
 #include "effects/fluorescentstarteffect.h"
@@ -29,6 +30,8 @@ std::unique_ptr<Effect> Effect::Make(EffectType type) {
       return up(new CurveEffect());
     case ET::Delay:
       return up(new DelayEffect());
+    case ET::Dispenser:
+      return up(new DispenserEffect());
     case ET::Fade:
       return up(new FadeEffect());
     case ET::Flicker:
