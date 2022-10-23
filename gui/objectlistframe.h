@@ -42,7 +42,7 @@ class ObjectListFrame : public Gtk::VPaned {
   void onDeletePresetButtonClicked();
   void onSelectedObjectChanged();
   void onObjectActivated(theatre::FolderObject &object);
-  void onNewEffectMenuClicked(enum theatre::Effect::Type effectType);
+  void onNewEffectMenuClicked(theatre::EffectType effectType);
 
   Gtk::Frame _objectListFrame;
   ObjectBrowser _list;

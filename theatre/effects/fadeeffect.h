@@ -17,7 +17,7 @@ class FadeEffect final : public Effect {
         _fadeDownSpeed(1.0),
         _sustain(0.0) {}
 
-  virtual Effect::Type GetType() const override { return FadeType; }
+  virtual EffectType GetType() const override { return EffectType::Fade; }
 
   double FadeUpDuration() const {
     return _fadeUpSpeed == 0.0 ? 0.0 : 1.0e3 / _fadeUpSpeed;

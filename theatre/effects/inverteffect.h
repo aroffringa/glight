@@ -14,7 +14,7 @@ class InvertEffect final : public Effect {
         _offThreshold(ControlValue::MaxUInt() * 2 / 100)  // 2 %
   {}
 
-  virtual Effect::Type GetType() const override { return InvertType; }
+  virtual EffectType GetType() const override { return EffectType::Invert; }
 
   unsigned OffThreshold() const { return _offThreshold; }
   void SetOffThreshold(unsigned offThreshold) { _offThreshold = offThreshold; }

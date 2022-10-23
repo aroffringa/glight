@@ -27,7 +27,7 @@ class SourceValue;
 class Theatre;
 class TimeSequence;
 class ValueSnapshot;
-
+enum class EffectType;
 }  // namespace glight::theatre
 
 #endif

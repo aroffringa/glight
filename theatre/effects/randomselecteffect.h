@@ -17,7 +17,9 @@ class RandomSelectEffect final : public Effect {
         _delay(10000.0),
         _count(1){};
 
-  virtual Effect::Type GetType() const override { return RandomSelectType; }
+  virtual EffectType GetType() const override {
+    return EffectType::RandomSelect;
+  }
 
   double Delay() const { return _delay; }
   void SetDelay(double delay) { _delay = delay; }

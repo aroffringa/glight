@@ -17,8 +17,8 @@ class MusicActivationEffect final : public Effect {
         _offDelay(2000)  // two seconds
   {}
 
-  virtual Effect::Type GetType() const final override {
-    return MusicActivationType;
+  virtual EffectType GetType() const override {
+    return EffectType::MusicActivation;
   }
 
   unsigned OffDelay() const { return _offDelay; }

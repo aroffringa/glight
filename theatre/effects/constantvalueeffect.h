@@ -12,7 +12,9 @@ class ConstantValueEffect final : public Effect {
         _value(ControlValue::MaxUInt())  // 2 %
   {}
 
-  virtual Effect::Type GetType() const override { return ConstantValueType; }
+  virtual EffectType GetType() const override {
+    return EffectType::ConstantValue;
+  }
 
   unsigned Value() const { return _value; }
   void SetValue(unsigned value) { _value = value; }

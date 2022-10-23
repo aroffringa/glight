@@ -24,7 +24,7 @@ class CurveEffect final : public Effect {
         _function(Exponential)  // 2 %
   {}
 
-  virtual Effect::Type GetType() const override { return CurveType; }
+  virtual EffectType GetType() const override { return EffectType::Curve; }
 
   enum Function GetFunction() const { return _function; }
   void SetFunction(enum Function f) { _function = f; }

@@ -19,7 +19,7 @@ class PulseEffect final : public Effect {
         _release(300),
         _sleep(200) {}
 
-  virtual Effect::Type GetType() const override { return PulseType; }
+  virtual EffectType GetType() const override { return EffectType::Pulse; }
 
   unsigned Attack() const { return _attack; }
   void SetAttack(unsigned attack) { _attack = attack; }

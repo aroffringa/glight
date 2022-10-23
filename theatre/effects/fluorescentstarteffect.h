@@ -18,7 +18,9 @@ class FluorescentStartEffect final : public Effect {
         _glowValue(ControlValue::MaxUInt() / 5),  // 20%
         _independentOutputs(true){};
 
-  virtual Effect::Type GetType() const override { return FluorescentStartType; }
+  virtual EffectType GetType() const override {
+    return EffectType::FluorescentStart;
+  }
 
   double AverageDuration() const { return _averageDuration; }
   void SetAverageDuration(double avgDuration) {

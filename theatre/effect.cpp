@@ -17,109 +17,116 @@
 
 namespace glight::theatre {
 
-std::unique_ptr<Effect> Effect::Make(Effect::Type type) {
+std::unique_ptr<Effect> Effect::Make(EffectType type) {
   using up = std::unique_ptr<Effect>;
+  using ET = EffectType;
   switch (type) {
-    case AudioLevelType:
+    case ET::AudioLevel:
       return up(new AudioLevelEffect());
-    case ConstantValueType:
+    case ET::ConstantValue:
       return up(new ConstantValueEffect());
-    case CurveType:
+    case ET::Curve:
       return up(new CurveEffect());
-    case DelayType:
+    case ET::Delay:
       return up(new DelayEffect());
-    case FadeType:
+    case ET::Fade:
       return up(new FadeEffect());
-    case FlickerType:
+    case ET::Flicker:
       return up(new FlickerEffect());
-    case FluorescentStartType:
+    case ET::FluorescentStart:
       return up(new FluorescentStartEffect());
-    case InvertType:
+    case ET::Invert:
       return up(new InvertEffect());
-    case MusicActivationType:
+    case ET::MusicActivation:
       return up(new MusicActivationEffect());
-    case PulseType:
+    case ET::Pulse:
       return up(new PulseEffect());
-    case RandomSelectType:
+    case ET::RandomSelect:
       return up(new RandomSelectEffect());
-    case ThresholdType:
+    case ET::Threshold:
       return up(new ThresholdEffect());
   }
   return nullptr;
 }
 
-std::string Effect::TypeToName(Effect::Type type) {
+std::string Effect::TypeToName(EffectType type) {
+  using ET = EffectType;
   switch (type) {
-    case AudioLevelType:
+    case ET::AudioLevel:
       return "Audiolevel";
-    case ConstantValueType:
+    case ET::ConstantValue:
       return "Constant value";
-    case CurveType:
+    case ET::Curve:
       return "Curve";
-    case DelayType:
+    case ET::Delay:
       return "Delay";
-    case FadeType:
+    case ET::Fade:
       return "Fade";
-    case FlickerType:
+    case ET::Flicker:
       return "Flicker";
-    case FluorescentStartType:
+    case ET::FluorescentStart:
       return "Fluorescent start";
-    case InvertType:
+    case ET::Hub:
+      return "Hub";
+    case ET::Invert:
       return "Invert";
-    case MusicActivationType:
+    case ET::MusicActivation:
       return "Music activation";
-    case PulseType:
+    case ET::Pulse:
       return "Pulse";
-    case RandomSelectType:
+    case ET::RandomSelect:
       return "Random select";
-    case ThresholdType:
+    case ET::Threshold:
       return "Threshold";
   }
   return std::string();
 }
 
-Effect::Type Effect::NameToType(const std::string &name) {
+EffectType Effect::NameToType(const std::string &name) {
+  using ET = EffectType;
   if (name == "Audiolevel")
-    return AudioLevelType;
+    return ET::AudioLevel;
   else if (name == "Constant value")
-    return ConstantValueType;
+    return ET::ConstantValue;
   else if (name == "Curve")
-    return CurveType;
+    return ET::Curve;
   else if (name == "Delay")
-    return DelayType;
+    return ET::Delay;
   else if (name == "Fade")
-    return FadeType;
+    return ET::Fade;
   else if (name == "Flicker")
-    return FlickerType;
+    return ET::Flicker;
   else if (name == "Fluorescent start")
-    return FluorescentStartType;
+    return ET::FluorescentStart;
   else if (name == "Invert")
-    return InvertType;
+    return ET::Invert;
   else if (name == "Music activation")
-    return MusicActivationType;
+    return ET::MusicActivation;
   else if (name == "Pulse")
-    return PulseType;
+    return ET::Pulse;
   else if (name == "Random select")
-    return RandomSelectType;
+    return ET::RandomSelect;
   else if (name == "Threshold")
-    return ThresholdType;
+    return ET::Threshold;
   else
     throw std::runtime_error("Unknown effect type");
 }
 
-std::vector<Effect::Type> Effect::GetTypes() {
-  return std::vector<Effect::Type>{AudioLevelType,
-                                   ConstantValueType,
-                                   CurveType,
-                                   DelayType,
-                                   FadeType,
-                                   FlickerType,
-                                   FluorescentStartType,
-                                   InvertType,
-                                   MusicActivationType,
-                                   PulseType,
-                                   RandomSelectType,
-                                   ThresholdType};
+std::vector<EffectType> Effect::GetTypes() {
+  using ET = EffectType;
+  return std::vector<ET>{ET::AudioLevel,
+                         ET::ConstantValue,
+                         ET::Curve,
+                         ET::Delay,
+                         ET::Fade,
+                         ET::Flicker,
+                         ET::FluorescentStart,
+                         ET::Hub,
+                         ET::Invert,
+                         ET::MusicActivation,
+                         ET::Pulse,
+                         ET::RandomSelect,
+                         ET::Threshold};
 }
 
 std::unique_ptr<Effect> Effect::Copy() const {

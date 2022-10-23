@@ -13,23 +13,24 @@
 
 namespace glight::theatre {
 
+enum class EffectType {
+  AudioLevel,
+  ConstantValue,
+  Curve,
+  Delay,
+  Fade,
+  Flicker,
+  FluorescentStart,
+  Hub,
+  Invert,
+  MusicActivation,
+  Pulse,
+  RandomSelect,
+  Threshold
+};
+
 class Effect : public Controllable {
  public:
-  enum Type {
-    AudioLevelType,
-    ConstantValueType,
-    CurveType,
-    DelayType,
-    FadeType,
-    FlickerType,
-    FluorescentStartType,
-    InvertType,
-    MusicActivationType,
-    PulseType,
-    RandomSelectType,
-    ThresholdType
-  };
-
   Effect(size_t nInputs) : _inputValues(nInputs, 0) {}
 
   virtual ~Effect() {
@@ -38,15 +39,15 @@ class Effect : public Controllable {
     }
   }
 
-  virtual Type GetType() const = 0;
+  virtual EffectType GetType() const = 0;
 
-  static std::unique_ptr<Effect> Make(Type type);
+  static std::unique_ptr<Effect> Make(EffectType type);
 
-  static std::string TypeToName(Type type);
+  static std::string TypeToName(EffectType type);
 
-  static Type NameToType(const std::string &name);
+  static EffectType NameToType(const std::string &name);
 
-  static std::vector<Type> GetTypes();
+  static std::vector<EffectType> GetTypes();
 
   void AddConnection(Controllable &controllable, size_t input) {
     _connections.emplace_back(&controllable, input);
