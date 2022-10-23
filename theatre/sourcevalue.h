@@ -109,6 +109,17 @@ class SourceValue {
     return (b_.Value() * Invert(cross_fader_.Value())).UInt() +
            (a_.Value() * cross_fader_.Value()).UInt();
   }
+  /**
+   * Swap a and b and flip the cross fader.
+   * This won't change the mix output.
+   */
+  void Swap() {
+    std::swap(a_, b_);
+    cross_fader_.SetValue(Invert(cross_fader_.Value()));
+    cross_fader_.SetTargetValue(
+        ControlValue::Invert(cross_fader_.TargetValue()));
+    cross_fader_.SetFadeSpeed(-cross_fader_.FadeSpeed());
+  }
 
  private:
   Input input_;

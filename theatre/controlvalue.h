@@ -16,13 +16,15 @@ class ControlValue {
   constexpr ControlValue(unsigned value) : _value(value) {}
   constexpr ControlValue(const ControlValue& source) = default;
 
-  constexpr operator bool() const { return _value != 0; }
+  constexpr explicit operator bool() const { return _value != 0; }
 
   constexpr unsigned int UInt() const { return _value; }
 
   constexpr static ControlValue Zero() { return ControlValue(0); }
   constexpr static ControlValue Max() { return ControlValue((1 << 24) - 1); }
   constexpr static unsigned MaxUInt() { return (1 << 24) - 1; }
+
+  constexpr static unsigned Invert(unsigned value) { return MaxUInt() - value; }
 
   static unsigned Mix(unsigned firstValue, unsigned secondValue,
                       MixStyle mixStyle) {
