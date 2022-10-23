@@ -50,13 +50,11 @@ class FlickerEffect final : public Effect {
 
       if (_independentOutputs) {
         for (size_t i = 0; i != Connections().size(); ++i) {
-          Connections()[i].first->MixInput(
-              Connections()[i].second,
-              values[0] * ControlValue(value[i]));
+          Connections()[i].first->MixInput(Connections()[i].second,
+                                           values[0] * ControlValue(value[i]));
         }
       } else {
-        setConnectedInputs(
-            values[0] * ControlValue(value[0]));
+        setConnectedInputs(values[0] * ControlValue(value[0]));
       }
     }
   }

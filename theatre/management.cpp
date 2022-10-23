@@ -169,10 +169,12 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
 
   if (primary) {
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-      sv->GetControllable().MixInput(sv->InputIndex(), ControlValue(sv->PrimaryValue()));
+      sv->GetControllable().MixInput(sv->InputIndex(),
+                                     ControlValue(sv->PrimaryValue()));
   } else {
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-      sv->GetControllable().MixInput(sv->InputIndex(), ControlValue(sv->SecondaryValue()));
+      sv->GetControllable().MixInput(sv->InputIndex(),
+                                     ControlValue(sv->SecondaryValue()));
   }
 
   // Solve dependency graph of controllables

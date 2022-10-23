@@ -82,9 +82,7 @@ inline ControlValue operator*(const ControlValue& lhs,
   return ControlValue(ControlValue::MultiplyValues(lhs.UInt(), rhs.UInt()));
 }
 
-
-inline ControlValue operator/(const ControlValue& lhs,
-                              unsigned factor) {
+inline ControlValue operator/(const ControlValue& lhs, unsigned factor) {
   return ControlValue(lhs.UInt() / factor);
 }
 
@@ -97,11 +95,12 @@ inline ControlValue Max(const ControlValue& a, const ControlValue& b) {
   return ControlValue(std::max(a.UInt(), b.UInt()));
 }
 
-inline ControlValue Mix(const ControlValue& firstValue, const ControlValue& secondValue,
-                    MixStyle mixStyle) {
-  return ControlValue(ControlValue::Mix(firstValue.UInt(), secondValue.UInt(), mixStyle));
+inline ControlValue Mix(const ControlValue& firstValue,
+                        const ControlValue& secondValue, MixStyle mixStyle) {
+  return ControlValue(
+      ControlValue::Mix(firstValue.UInt(), secondValue.UInt(), mixStyle));
 }
-  
+
 }  // namespace glight::theatre
 
 #endif
