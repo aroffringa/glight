@@ -30,14 +30,14 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
     if (control.InputType(i) == FunctionType::Master && master != 0) {
       pc.AddPresetValue(sourceValue->GetControllable(),
                         sourceValue->InputIndex())
-          .SetValue(master);
+          .SetValue(ControlValue(master));
     } else if (c == Color::White()) {
       if (deduction.whiteFromRGB) {
         unsigned white = std::min(red, std::min(green, blue));
         if (white != 0) {
           pc.AddPresetValue(sourceValue->GetControllable(),
                             sourceValue->InputIndex())
-              .SetValue(white);
+              .SetValue(ControlValue(white));
         }
       }
     } else if (c == Color::Amber()) {
@@ -46,7 +46,7 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
         if (amber != 0) {
           pc.AddPresetValue(sourceValue->GetControllable(),
                             sourceValue->InputIndex())
-              .SetValue(amber);
+              .SetValue(ControlValue(amber));
         }
       }
     } else if (c == Color::UV()) {
@@ -55,22 +55,22 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
         if (uv != 0) {
           pc.AddPresetValue(sourceValue->GetControllable(),
                             sourceValue->InputIndex())
-              .SetValue(uv);
+              .SetValue(ControlValue(uv));
         }
       }
     } else {
       if (c.Red() != 0 && red != 0)
         pc.AddPresetValue(sourceValue->GetControllable(),
                           sourceValue->InputIndex())
-            .SetValue(red);
+            .SetValue(ControlValue(red));
       if (c.Green() != 0 && green != 0)
         pc.AddPresetValue(sourceValue->GetControllable(),
                           sourceValue->InputIndex())
-            .SetValue(green);
+            .SetValue(ControlValue(green));
       if (c.Blue() != 0 && blue != 0)
         pc.AddPresetValue(sourceValue->GetControllable(),
                           sourceValue->InputIndex())
-            .SetValue(blue);
+            .SetValue(ControlValue(blue));
     }
   }
 }

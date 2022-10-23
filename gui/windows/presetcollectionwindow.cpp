@@ -154,7 +154,7 @@ void PresetCollectionWindow::onAddPreset() {
           false, Gtk::MESSAGE_ERROR);
       dialog.run();
     } else {
-      preset.SetValue(theatre::ControlValue::MaxUInt());
+      preset.SetValue(theatre::ControlValue::Max());
       lock.unlock();
       fillPresetsList();
       selectPreset(_presetCollection->Size() - 1);

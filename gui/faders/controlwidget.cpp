@@ -35,7 +35,7 @@ void ControlWidget::Assign(theatre::SourceValue *item, bool moveFader) {
 
 void ControlWidget::setValue(unsigned target) {
   if (_sourceValue != nullptr) {
-    const unsigned sourceValue = GetSingleSourceValue().Value();
+    const unsigned sourceValue = GetSingleSourceValue().Value().UInt();
     const double fadeSpeed =
         (target > sourceValue) ? _fadeUpSpeed : _fadeDownSpeed;
     GetSingleSourceValue().Set(target, fadeSpeed);

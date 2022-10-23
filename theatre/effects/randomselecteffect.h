@@ -51,7 +51,7 @@ class RandomSelectEffect final : public Effect {
         if (activeConnections[i] < Connections().size()) {
           const std::pair<Controllable *, size_t> &connection =
               Connections()[activeConnections[i]];
-          connection.first->MixInput(connection.second, values[0].UInt());
+          connection.first->MixInput(connection.second, values[0]);
         }
       }
     } else {

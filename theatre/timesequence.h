@@ -16,7 +16,7 @@ class TimeSequence final : public Controllable {
  public:
   TimeSequence()
       : _inputValue(),
-        _activeValue{0, 0},
+        _activeValue{ControlValue(), ControlValue()},
         _stepStart(),
         _stepNumber{0, 0},
         _transitionTriggered{false, false},
@@ -67,7 +67,7 @@ class TimeSequence final : public Controllable {
       }
       if (_repeatCount == 0 || stepNumber < _repeatCount * _steps.size()) {
         if (_sustain)
-          activeValue = std::max(activeValue.UInt(), _inputValue.UInt());
+          activeValue = Max(activeValue, _inputValue);
         else
           activeValue = _inputValue;
         const Step &activeStep = _steps[stepNumber % _steps.size()];
@@ -130,7 +130,7 @@ class TimeSequence final : public Controllable {
         activeValue = _inputValue;
       }
     } else {
-      activeValue = 0;
+      activeValue = ControlValue(0);
     }
   }
 

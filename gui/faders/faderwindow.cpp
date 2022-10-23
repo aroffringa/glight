@@ -478,12 +478,19 @@ void FaderWindow::loadState() {
   _miFadeInOption[_state->fadeInSpeed].set_active(true);
   _miFadeOutOption[_state->fadeOutSpeed].set_active(true);
   _crossFader.reset();
+  _flipCrossFaderButton.reset();
   _upperColumns.clear();
   _lowerColumns.clear();
   _upperControls.clear();
   _lowerControls.clear();
 
   if (_miDualLayout.get_active()) {
+    _flipCrossFaderButton.emplace();
+    _flipCrossFaderButton->set_image_from_icon_name("object-flip-vertical");
+    _flipCrossFaderButton->signal_clicked().connect(
+        [&]() { onCrossFaderFlipped(); });
+    _leftBox.pack_start(*_flipCrossFaderButton, false, false);
+    _flipCrossFaderButton->show();
     _crossFader.emplace(0,
                         ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
                         (ControlValue::MaxUInt() + 1) / 100);
@@ -493,7 +500,7 @@ void FaderWindow::loadState() {
     _crossFader->set_has_origin(false);
     _crossFader->set_vexpand(true);
     _crossFader->signal_value_changed().connect(
-        sigc::mem_fun(*this, &FaderWindow::onCrossFadeChange));
+        sigc::mem_fun(*this, &FaderWindow::onCrossFaderChange));
     _crossFader->show();
   }
   for (FaderState &state : _state->faders) {
@@ -538,16 +545,38 @@ size_t FaderWindow::getFadeOutSpeed() const {
 }
 
 void FaderWindow::ReloadValues() {
+  theatre::SourceValue *assigned_source_value = nullptr;
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
     cw->MoveSlider();
+    if (theatre::SourceValue *sv = cw->GetSourceValue(); sv) {
+      assigned_source_value = sv;
+    }
+  }
+  for (std::unique_ptr<ControlWidget> &cw : _lowerControls) {
+    cw->MoveSlider();
+  }
+  if (_crossFader && assigned_source_value) {
+    _crossFader->set_value(assigned_source_value->CrossFader().Value().UInt());
   }
 }
 
-void FaderWindow::onCrossFadeChange() {
+void FaderWindow::onCrossFaderChange() {
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
     glight::theatre::SourceValue *source = cw->GetSourceValue();
     if (source) {
       source->CrossFader().Set(_crossFader->get_value(), 0.0);
+    }
+  }
+}
+
+void FaderWindow::onCrossFaderFlipped() {
+  RecursionLock::Token token(_recursionLock);
+
+  for (size_t i = 0; i != _upperControls.size(); ++i) {
+    glight::gui::ControlWidget &upper = *_upperControls[i];
+    theatre::SourceValue *source = upper.GetSourceValue();
+    if (source) {
+      source->Swap();
     }
   }
 }
