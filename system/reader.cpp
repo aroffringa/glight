@@ -318,8 +318,8 @@ void ParseControls(const Array &node, Management &management) {
 SingleSourceValue ParseSingleSourceValue(const Object &object) {
   SingleSourceValue result;
   result.SetValue(ControlValue(ToNum(object["value"]).AsUInt()));
-  result.SetTargetValue(ControlValue(ToNum(object["target-value"]).AsUInt()));
-  result.SetFadeSpeed(ControlValue(ToNum(object["fade-speed"]).AsDouble()));
+  result.SetTargetValue(ToNum(object["target-value"]).AsUInt());
+  result.SetFadeSpeed(ToNum(object["fade-speed"]).AsDouble());
   return result;
 }
 

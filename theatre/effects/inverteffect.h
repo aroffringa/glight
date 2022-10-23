@@ -23,7 +23,7 @@ class InvertEffect final : public Effect {
   virtual void mix(const ControlValue *values, const Timing &timing,
                    bool primary) override {
     unsigned inverted = ControlValue::MaxUInt() - values[0].UInt();
-    if (inverted < _offThreshold) inverted = ControlValue::Zero();
+    if (inverted < _offThreshold) inverted = 0;
     ControlValue value =
         ControlValue::Mix(values[1].UInt(), inverted, MixStyle::Multiply);
     for (const std::pair<Controllable *, size_t> &connection : Connections())
