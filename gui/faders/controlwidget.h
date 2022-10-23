@@ -81,12 +81,12 @@ class ControlWidget : public Gtk::Bin {
    * begins a fade if the corresponding fade up/down speed
    * are set.
    */
-  void setValue(unsigned target);
+  void setTargetValue(unsigned target);
 
   /**
    * Sets the value, skipping any requested fade.
    */
-  void setImmediateValue(unsigned target);
+  void setImmediateValue(unsigned value);
 
   EventTransmitter &GetEventHub() { return _eventHub; }
   theatre::Management &GetManagement() { return *_management; }

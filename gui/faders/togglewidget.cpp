@@ -59,7 +59,7 @@ void ToggleWidget::onOnButtonClicked() {
     else
       value = 0;
 
-    setValue(value);
+    setTargetValue(value);
     SignalValueChange().emit(value);
   }
 }
@@ -89,9 +89,9 @@ void ToggleWidget::OnAssigned(bool moveFader) {
       _onCheckButton.set_active(GetSingleSourceValue().Value().UInt() != 0);
     } else {
       if (_onCheckButton.get_active())
-        setValue(theatre::ControlValue::MaxUInt());
+        setTargetValue(theatre::ControlValue::MaxUInt());
       else
-        setValue(0);
+        setTargetValue(0);
     }
   } else {
     _nameLabel.set_text("<..>");
@@ -99,9 +99,9 @@ void ToggleWidget::OnAssigned(bool moveFader) {
       _onCheckButton.set_active(false);
     } else {
       if (_onCheckButton.get_active())
-        setValue(theatre::ControlValue::MaxUInt());
+        setTargetValue(theatre::ControlValue::MaxUInt());
       else
-        setValue(0);
+        setTargetValue(0);
     }
   }
   if (moveFader) {

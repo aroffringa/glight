@@ -39,9 +39,13 @@ class FaderWidget final : public ControlWidget {
   bool onNameLabelClicked(GdkEventButton *event);
   bool onFlashButtonPressed(GdkEventButton *event);
   bool onFlashButtonReleased(GdkEventButton *event);
+  void onFadeUp();
+  void onFadeDown();
 
   Gtk::VBox _box;
+  Gtk::Button _fadeUpButton;
   Gtk::VScale _scale;
+  Gtk::Button _fadeDownButton;
   Gtk::Button _flashButton;
   Gtk::CheckButton _onCheckButton;
   Gtk::EventBox _eventBox;

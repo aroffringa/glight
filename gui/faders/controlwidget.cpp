@@ -33,12 +33,18 @@ void ControlWidget::Assign(theatre::SourceValue *item, bool moveFader) {
   }
 }
 
-void ControlWidget::setValue(unsigned target) {
+void ControlWidget::setTargetValue(unsigned target) {
   if (_sourceValue != nullptr) {
     const unsigned sourceValue = GetSingleSourceValue().Value().UInt();
     const double fadeSpeed =
         (target > sourceValue) ? _fadeUpSpeed : _fadeDownSpeed;
     GetSingleSourceValue().Set(target, fadeSpeed);
+  }
+}
+
+void ControlWidget::setImmediateValue(unsigned value) {
+  if (_sourceValue != nullptr) {
+    GetSingleSourceValue().Set(value, 0);
   }
 }
 
