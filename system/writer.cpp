@@ -305,7 +305,7 @@ void writeEffect(WriteState &state, const Effect &effect) {
     state.writer.StartObject();
     state.writer.String("type", "effect");
     writeFolderAttributes(state, effect);
-    state.writer.String("effect_type", effect.TypeToName(effect.GetType()));
+    state.writer.String("effect_type", EffectTypeToName(effect.GetType()));
     std::unique_ptr<PropertySet> ps = PropertySet::Make(effect);
 
     // the number and name of the effect controls are implied from the

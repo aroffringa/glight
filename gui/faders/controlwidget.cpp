@@ -23,8 +23,13 @@ void ControlWidget::Assign(theatre::SourceValue *item, bool moveFader) {
     _sourceValue = item;
     OnAssigned(moveFader);
     SignalAssigned().emit();
-    if (moveFader)
-      SignalValueChange().emit(GetSingleSourceValue().Value().UInt());
+    if (moveFader) {
+      if (item) {
+        SignalValueChange().emit(GetSingleSourceValue().Value().UInt());
+      }
+    } else {
+      SignalValueChange().emit(0);
+    }
   }
 }
 

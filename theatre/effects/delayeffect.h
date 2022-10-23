@@ -22,7 +22,7 @@ class DelayEffect final : public Effect {
         _bufferWritePos{0, 0},
         _delayInMS(100.0) {}
 
-  virtual Effect::Type GetType() const override { return DelayType; }
+  virtual EffectType GetType() const override { return EffectType::Delay; }
 
   double DelayInMS() const { return _delayInMS; }
   void SetDelayInMS(double delayInMS) { _delayInMS = delayInMS; }

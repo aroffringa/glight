@@ -17,7 +17,7 @@ class AudioLevelEffect final : public Effect {
         _decaySpeed(((1 << 24) - 1) / 300)  // fully decay in 300 ms
   {}
 
-  virtual Effect::Type GetType() const final override { return AudioLevelType; }
+  virtual EffectType GetType() const override { return EffectType::AudioLevel; }
 
   unsigned DecaySpeed() const { return _decaySpeed; }
 

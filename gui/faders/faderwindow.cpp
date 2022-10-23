@@ -300,8 +300,9 @@ void FaderWindow::addControl(bool isToggle, bool newToggleColumn,
   control->SignalValueChange().connect(
       sigc::bind(sigc::mem_fun(*this, &FaderWindow::onControlValueChanged),
                  control.get()));
-  control->SignalAssigned().connect(sigc::bind(
-      sigc::mem_fun(*this, &FaderWindow::onControlAssigned), controlIndex));
+  if (isUpper)
+    control->SignalAssigned().connect(sigc::bind(
+        sigc::mem_fun(*this, &FaderWindow::onControlAssigned), controlIndex));
 
   const size_t vpos = isUpper ? 0 : 3;
   const size_t hpos = controls.size() + column.size();
@@ -356,8 +357,8 @@ void FaderWindow::onAssignClicked() {
 }
 
 void FaderWindow::unassign() {
-  for (std::unique_ptr<ControlWidget> &c : _upperControls) c->Unassign();
   for (std::unique_ptr<ControlWidget> &c : _lowerControls) c->Unassign();
+  for (std::unique_ptr<ControlWidget> &c : _upperControls) c->Unassign();
 }
 
 void FaderWindow::onAssignChasesClicked() {

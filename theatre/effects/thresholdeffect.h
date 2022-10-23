@@ -29,7 +29,7 @@ class ThresholdEffect final : public Effect {
         _upperStartLimit(ControlValue::MaxUInt()),
         _upperEndLimit(ControlValue::MaxUInt()) {}
 
-  virtual Effect::Type GetType() const override { return ThresholdType; }
+  virtual EffectType GetType() const override { return EffectType::Threshold; }
 
   unsigned LowerStartLimit() const { return _lowerStartLimit; }
   unsigned LowerEndLimit() const { return _lowerEndLimit; }

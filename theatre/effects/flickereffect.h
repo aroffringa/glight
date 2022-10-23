@@ -16,7 +16,7 @@ class FlickerEffect final : public Effect {
         _speed(ControlValue::MaxUInt() / 200.0),
         _independentOutputs(true){};
 
-  virtual Effect::Type GetType() const override { return FlickerType; }
+  virtual EffectType GetType() const override { return EffectType::Flicker; }
 
   unsigned Speed() const { return _speed; }
   void SetSpeed(unsigned speed) { _speed = speed; }

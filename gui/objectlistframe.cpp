@@ -20,6 +20,8 @@
 
 namespace glight::gui {
 
+using theatre::Effect;
+using theatre::EffectType;
 using theatre::Folder;
 using theatre::FolderObject;
 
@@ -131,16 +133,14 @@ void ObjectListFrame::onNewTimeSequenceButtonClicked() {
 }
 
 bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
-  using theatre::Effect;
   if (event->button == 1) {
     _popupEffectMenuItems.clear();
     _popupEffectMenu.reset(new Gtk::Menu());
 
-    std::vector<enum Effect::Type> fxtypes = Effect::GetTypes();
-    for (enum Effect::Type t : fxtypes) {
-      std::unique_ptr<Gtk::MenuItem> mi(
-          new Gtk::MenuItem(Effect::TypeToName(t)));
-      mi->signal_activate().connect(sigc::bind<enum Effect::Type>(
+    std::vector<EffectType> fxtypes = theatre::GetEffectTypes();
+    for (EffectType t : fxtypes) {
+      std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(EffectTypeToName(t)));
+      mi->signal_activate().connect(sigc::bind<EffectType>(
           sigc::mem_fun(*this, &ObjectListFrame::onNewEffectMenuClicked), t));
       _popupEffectMenu->append(*mi);
       _popupEffectMenuItems.emplace_back(std::move(mi));
@@ -154,11 +154,10 @@ bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
 }
 
 void ObjectListFrame::onNewEffectMenuClicked(
-    enum theatre::Effect::Type effectType) {
-  using theatre::Effect;
+    enum theatre::EffectType effectType) {
   std::unique_ptr<Effect> effect(Effect::Make(effectType));
   Folder &parent = _list.SelectedFolder();
-  effect->SetName(parent.GetAvailableName(Effect::TypeToName(effectType)));
+  effect->SetName(parent.GetAvailableName(EffectTypeToName(effectType)));
   Effect *added = &_management->AddEffect(std::move(effect), parent);
   for (size_t i = 0; i != added->NInputs(); ++i)
     _management->AddSourceValue(*added, i);

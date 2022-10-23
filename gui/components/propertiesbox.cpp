@@ -38,7 +38,7 @@ void PropertiesBox::fillProperties() {
   _rows.clear();
   _typeLabel.set_text(
       _propertySet->Object().Name() + " (" +
-      theatre::Effect::TypeToName(
+      theatre::EffectTypeToName(
           static_cast<theatre::Effect &>(_propertySet->Object()).GetType()) +
       ")");
   for (Property &property : *_propertySet) {
