@@ -137,10 +137,9 @@ bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
     _popupEffectMenuItems.clear();
     _popupEffectMenu.reset(new Gtk::Menu());
 
-    std::vector<EffectType> fxtypes = Effect::GetTypes();
+    std::vector<EffectType> fxtypes = theatre::GetEffectTypes();
     for (EffectType t : fxtypes) {
-      std::unique_ptr<Gtk::MenuItem> mi(
-          new Gtk::MenuItem(Effect::TypeToName(t)));
+      std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(EffectTypeToName(t)));
       mi->signal_activate().connect(sigc::bind<EffectType>(
           sigc::mem_fun(*this, &ObjectListFrame::onNewEffectMenuClicked), t));
       _popupEffectMenu->append(*mi);
@@ -158,7 +157,7 @@ void ObjectListFrame::onNewEffectMenuClicked(
     enum theatre::EffectType effectType) {
   std::unique_ptr<Effect> effect(Effect::Make(effectType));
   Folder &parent = _list.SelectedFolder();
-  effect->SetName(parent.GetAvailableName(Effect::TypeToName(effectType)));
+  effect->SetName(parent.GetAvailableName(EffectTypeToName(effectType)));
   Effect *added = &_management->AddEffect(std::move(effect), parent);
   for (size_t i = 0; i != added->NInputs(); ++i)
     _management->AddSourceValue(*added, i);

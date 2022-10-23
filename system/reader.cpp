@@ -259,7 +259,7 @@ void ParseTimeSequence(const Object &node, Management &management) {
 }
 
 void ParseEffect(const Object &node, Management &management) {
-  EffectType type = Effect::NameToType(ToStr(node["effect_type"]));
+  EffectType type = NameToEffectType(ToStr(node["effect_type"]));
   std::unique_ptr<Effect> effect = Effect::Make(type);
   ParseFolderAttr(node, *effect, management);
   Effect *effectPtr = &management.AddEffect(std::move(effect));

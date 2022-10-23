@@ -1,6 +1,7 @@
 #ifndef THEATRE_EFFECT_H_
 #define THEATRE_EFFECT_H_
 
+#include "effecttype.h"
 #include "folderobject.h"
 
 #include "../theatre/controllable.h"
@@ -12,22 +13,6 @@
 #include <vector>
 
 namespace glight::theatre {
-
-enum class EffectType {
-  AudioLevel,
-  ConstantValue,
-  Curve,
-  Delay,
-  Fade,
-  Flicker,
-  FluorescentStart,
-  Hub,
-  Invert,
-  MusicActivation,
-  Pulse,
-  RandomSelect,
-  Threshold
-};
 
 class Effect : public Controllable {
  public:
@@ -42,12 +27,6 @@ class Effect : public Controllable {
   virtual EffectType GetType() const = 0;
 
   static std::unique_ptr<Effect> Make(EffectType type);
-
-  static std::string TypeToName(EffectType type);
-
-  static EffectType NameToType(const std::string &name);
-
-  static std::vector<EffectType> GetTypes();
 
   void AddConnection(Controllable &controllable, size_t input) {
     _connections.emplace_back(&controllable, input);

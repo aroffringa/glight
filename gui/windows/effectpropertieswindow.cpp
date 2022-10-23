@@ -18,7 +18,7 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
     : PropertiesWindow(),
 
       _titleLabel("Effect " + effect.Name() + " (" +
-                  effect.TypeToName(effect.GetType()) + ")"),
+                  EffectTypeToName(effect.GetType()) + ")"),
       _connectionsFrame("Connections"),
       _propertiesFrame("Properties"),
       _addConnectionButton(Gtk::Stock::ADD),
