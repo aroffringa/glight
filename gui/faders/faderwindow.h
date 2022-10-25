@@ -93,7 +93,8 @@ class FaderWindow : public Gtk::Window {
     return true;
   }
   void onCrossFaderChange();
-  void onCrossFaderFlipped();
+  void onRunCrossFader();
+  void FlipCrossFader();
 
   void addControl(bool isToggle, bool newToggleColumn, bool isPrimary);
   void addControlInLayout(bool isToggle, bool newToggleColumn) {
@@ -140,7 +141,7 @@ class FaderWindow : public Gtk::Window {
   FaderSetupState *_state;
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;
-  std::optional<Gtk::Button> _flipCrossFaderButton;
+  std::optional<Gtk::Button> _activateCrossFaderButton;
   std::optional<Gtk::VScale> _crossFader;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
 };

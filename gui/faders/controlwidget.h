@@ -74,8 +74,6 @@ class ControlWidget : public Gtk::Bin {
  protected:
   virtual void OnAssigned(bool moveFader) = 0;
 
-  double _fadeUpSpeed, _fadeDownSpeed;
-
   /**
    * Set the value after a fader change. This function
    * begins a fade if the corresponding fade up/down speed
@@ -95,6 +93,7 @@ class ControlWidget : public Gtk::Bin {
  private:
   void OnTheatreUpdate();
 
+  double _fadeUpSpeed, _fadeDownSpeed;
   ControlMode _mode;
   theatre::SourceValue *_sourceValue = nullptr;
   theatre::Management *_management;
