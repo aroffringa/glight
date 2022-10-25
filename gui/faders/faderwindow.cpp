@@ -478,19 +478,19 @@ void FaderWindow::loadState() {
   _miFadeInOption[_state->fadeInSpeed].set_active(true);
   _miFadeOutOption[_state->fadeOutSpeed].set_active(true);
   _crossFader.reset();
-  _flipCrossFaderButton.reset();
+  _activateCrossFaderButton.reset();
   _upperColumns.clear();
   _lowerColumns.clear();
   _upperControls.clear();
   _lowerControls.clear();
 
   if (_miDualLayout.get_active()) {
-    _flipCrossFaderButton.emplace();
-    _flipCrossFaderButton->set_image_from_icon_name("object-flip-vertical");
-    _flipCrossFaderButton->signal_clicked().connect(
-        [&]() { onCrossFaderFlipped(); });
-    _leftBox.pack_start(*_flipCrossFaderButton, false, false);
-    _flipCrossFaderButton->show();
+    _activateCrossFaderButton.emplace();
+    _activateCrossFaderButton->set_image_from_icon_name("media-playback-start");
+    _activateCrossFaderButton->signal_clicked().connect(
+        [&]() { onRunCrossFader(); });
+    _leftBox.pack_start(*_activateCrossFaderButton, false, false);
+    _activateCrossFaderButton->show();
     _crossFader.emplace(0,
                         ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
                         (ControlValue::MaxUInt() + 1) / 100);
@@ -556,20 +556,23 @@ void FaderWindow::ReloadValues() {
     cw->MoveSlider();
   }
   if (_crossFader && assigned_source_value) {
+    RecursionLock::Token token(_recursionLock);
     _crossFader->set_value(assigned_source_value->CrossFader().Value().UInt());
   }
 }
 
 void FaderWindow::onCrossFaderChange() {
-  for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
-    glight::theatre::SourceValue *source = cw->GetSourceValue();
-    if (source) {
-      source->CrossFader().Set(_crossFader->get_value(), 0.0);
+  if (_recursionLock.IsFirst()) {
+    for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
+      glight::theatre::SourceValue *source = cw->GetSourceValue();
+      if (source) {
+        source->CrossFader().Set(_crossFader->get_value(), 0.0);
+      }
     }
   }
 }
 
-void FaderWindow::onCrossFaderFlipped() {
+void FaderWindow::FlipCrossFader() {
   RecursionLock::Token token(_recursionLock);
 
   for (size_t i = 0; i != _upperControls.size(); ++i) {
@@ -577,6 +580,16 @@ void FaderWindow::onCrossFaderFlipped() {
     theatre::SourceValue *source = upper.GetSourceValue();
     if (source) {
       source->Swap();
+    }
+  }
+}
+
+void FaderWindow::onRunCrossFader() {
+  if (_crossFader->get_value() < ControlValue::MaxUInt() / 2) FlipCrossFader();
+  for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
+    glight::theatre::SourceValue *source = cw->GetSourceValue();
+    if (source) {
+      source->CrossFader().Set(0.0, MapSliderToSpeed(getFadeInSpeed()));
     }
   }
 }

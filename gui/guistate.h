@@ -49,18 +49,16 @@ class FaderState {
 
 class FaderSetupState {
  public:
-  FaderSetupState()
-      : isActive(false),
-        isSolo(false),
-        fadeInSpeed(0),
-        fadeOutSpeed(0),
-        width(0),
-        height(0) {}
+  FaderSetupState() = default;
+
   std::string name;
-  bool isActive;
-  bool isSolo;
-  size_t fadeInSpeed, fadeOutSpeed;
-  size_t width, height;
+  bool isActive = false;
+  bool isSolo = false;
+  // 0 (fastest) -- 10 (slowest)
+  size_t fadeInSpeed = 7;
+  size_t fadeOutSpeed = 7;
+  size_t width = 0;
+  size_t height = 0;
 
   bool IsAssigned(const theatre::SourceValue *p) const {
     for (const class FaderState &fader : faders)
