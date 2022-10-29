@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(Add) {
   Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
   FixtureControl &control = management.AddFixtureControl(fixture);
   BOOST_CHECK_EQUAL(&management.GetFixtureControl(fixture), &control);
-  BOOST_CHECK_EQUAL(&control.Fixture(), &fixture);
+  BOOST_CHECK_EQUAL(&control.GetFixture(), &fixture);
   BOOST_CHECK_EQUAL(control.NInputs(), 3);
   BOOST_CHECK(control.InputColor(0) == Color(255, 0, 0));
   BOOST_CHECK(control.InputColor(1) == Color(0, 255, 0));

@@ -306,7 +306,7 @@ FixtureControl &Management::GetFixtureControl(const Fixture &fixture) {
   for (const std::unique_ptr<Controllable> &contr : _controllables) {
     FixtureControl *fc = dynamic_cast<FixtureControl *>(contr.get());
     if (fc) {
-      if (&fc->Fixture() == &fixture) return *fc;
+      if (&fc->GetFixture() == &fixture) return *fc;
     }
   }
   throw std::runtime_error("GetFixtureControl() : Fixture control not found");

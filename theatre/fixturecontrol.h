@@ -8,14 +8,12 @@ namespace glight::theatre {
 
 class FixtureControl final : public Controllable {
  public:
-  FixtureControl(class Fixture &fixture)
+  FixtureControl(Fixture &fixture)
       : Controllable(fixture.Name()),
         _fixture(&fixture),
         _values(fixture.Functions().size()) {}
 
-  class Fixture &Fixture() const {
-    return *_fixture;
-  }
+  Fixture &GetFixture() const { return *_fixture; }
 
   size_t NInputs() const override { return _fixture->Functions().size(); }
 
@@ -58,9 +56,9 @@ class FixtureControl final : public Controllable {
     }
     return Color::Black();
   }
-  
+
   virtual std::vector<Color> InputColors(size_t index) const override {
-    return { InputColor(index) };
+    return {InputColor(index)};
   }
 
   size_t NOutputs() const override { return 0; }
@@ -80,7 +78,7 @@ class FixtureControl final : public Controllable {
   }
 
  private:
-  class Fixture *_fixture;
+  Fixture *_fixture;
   std::vector<ControlValue> _values;
 };
 

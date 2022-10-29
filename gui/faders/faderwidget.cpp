@@ -7,6 +7,8 @@
 #include "../../theatre/presetvalue.h"
 #include "../../theatre/sourcevalue.h"
 
+#include "../../system/uniquewithoutordering.h"
+
 namespace glight::gui {
 
 using theatre::ControlValue;
@@ -113,7 +115,7 @@ bool FaderWidget::onNameLabelClicked(GdkEventButton *) {
 }
 
 void FaderWidget::OnAssigned(bool moveFader) {
-  const theatre::SourceValue* source = GetSourceValue();
+  const theatre::SourceValue *source = GetSourceValue();
   if (source) {
     _nameLabel.set_text(GetSourceValue()->Name());
     if (moveFader) {
@@ -121,9 +123,11 @@ void FaderWidget::OnAssigned(bool moveFader) {
     } else {
       setImmediateValue(_scale.get_value());
     }
-    
-    const theatre::Controllable* controllable = &source->GetControllable();
-    _onCheckButton.SetColors(controllable->InputColors(source->InputIndex()));
+
+    const theatre::Controllable *controllable = &source->GetControllable();
+    const std::vector<theatre::Color> colors =
+        controllable->InputColors(source->InputIndex());
+    _onCheckButton.SetColors(UniqueWithoutOrdering(colors));
   } else {
     _nameLabel.set_text("<..>");
     _onCheckButton.SetColors({});

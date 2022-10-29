@@ -225,7 +225,7 @@ void writeFixtureControl(WriteState &state, const FixtureControl &control) {
   state.writer.StartObject();
   state.writer.String("type", "fixture-control");
   writeFolderAttributes(state, control);
-  state.writer.String("fixture-ref", control.Fixture().Name());
+  state.writer.String("fixture-ref", control.GetFixture().Name());
   state.writer.EndObject();
 }
 
