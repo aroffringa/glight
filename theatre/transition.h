@@ -10,6 +10,8 @@ enum class TransitionType {
   None,
   Fade,
   FadeThroughBlack,
+  Random,
+  Stepped,
   Erratic,
   Black,
   FadeFromBlack,
@@ -25,6 +27,10 @@ inline std::string ToString(TransitionType mix_style) {
       return "fade";
     case TransitionType::FadeThroughBlack:
       return "fade_through_black";
+    case TransitionType::Random:
+      return "random";
+    case TransitionType::Stepped:
+      return "stepped";
     case TransitionType::Erratic:
       return "erratic";
     case TransitionType::Black:
@@ -41,6 +47,8 @@ inline TransitionType GetTransitionType(const std::string &str) {
     return TransitionType::Fade;
   else if (str == "fade_through_black")
     return TransitionType::FadeThroughBlack;
+  else if (str == "stepped")
+    return TransitionType::Stepped;
   else if (str == "erratic")
     return TransitionType::Erratic;
   else if (str == "black")
@@ -81,16 +89,17 @@ class Transition {
           second.MixInput(secondInput, value);
         break;
       case TransitionType::Fade: {
-        unsigned secondRatioValue =
+        const unsigned secondRatioValue =
             (unsigned)((transitionTime / _lengthInMs) * 256.0);
-        unsigned firstRatioValue = 255 - secondRatioValue;
+        const unsigned firstRatioValue = 255 - secondRatioValue;
         first.MixInput(firstInput,
                        ControlValue((value.UInt() * firstRatioValue) >> 8));
         second.MixInput(secondInput,
                         ControlValue((value.UInt() * secondRatioValue) >> 8));
       } break;
       case TransitionType::FadeThroughBlack: {
-        unsigned ratio = (unsigned)((transitionTime / _lengthInMs) * 512.0);
+        const unsigned ratio =
+            (unsigned)((transitionTime / _lengthInMs) * 512.0);
         if (ratio < 256) {
           ControlValue firstValue((value.UInt() * (255 - ratio)) >> 8);
           first.MixInput(firstInput, firstValue);
@@ -99,6 +108,28 @@ class Transition {
           second.MixInput(secondInput, secondValue);
         }
       } break;
+      case TransitionType::Stepped: {
+        unsigned secondRatioValue =
+            (unsigned)((transitionTime / _lengthInMs) * 256.0);
+        secondRatioValue = (secondRatioValue / 51) * 51;
+        const unsigned firstRatioValue = 255 - secondRatioValue;
+        first.MixInput(firstInput,
+                       ControlValue((value.UInt() * firstRatioValue) >> 8));
+        second.MixInput(secondInput,
+                        ControlValue((value.UInt() * secondRatioValue) >> 8));
+      } break;
+      case TransitionType::Random: {
+        const unsigned ratio = (unsigned)((transitionTime / _lengthInMs) * 256);
+        const unsigned upper_bound = std::min(255u, ratio * 2u);
+        const unsigned lower_bound = std::max(ratio * 2u, 256u) - 256u;
+        const unsigned secondRatioValue =
+            timing.DrawRandomValue(upper_bound - lower_bound) + lower_bound;
+        const unsigned firstRatioValue = 255 - secondRatioValue;
+        first.MixInput(firstInput,
+                       ControlValue((value.UInt() * firstRatioValue) >> 8));
+        second.MixInput(secondInput,
+                        ControlValue((value.UInt() * secondRatioValue) >> 8));
+      }
       case TransitionType::Erratic: {
         unsigned ratio = (unsigned)((transitionTime / _lengthInMs) *
                                     ControlValue::MaxUInt());
