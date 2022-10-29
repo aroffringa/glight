@@ -31,6 +31,10 @@ class Color {
   constexpr unsigned char Green() const { return green_; }
   constexpr unsigned char Blue() const { return blue_; }
 
+  constexpr double RedRatio() const { return red_/255.0; }
+  constexpr double GreenRatio() const { return green_/255.0; }
+  constexpr double BlueRatio() const { return blue_/255.0; }
+
   constexpr static Color Gray(unsigned char intensity) {
     return Color(intensity, intensity, intensity);
   }

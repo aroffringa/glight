@@ -25,7 +25,10 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
   if (red != 0 || green != 0 || blue != 0) master = (1 << 24) - 1;
 
   for (size_t i = 0; i != control.NInputs(); ++i) {
-    Color c = control.InputColor(i);
+    std::vector<Color> colors = control.InputColors(i);
+    Color c = Color::Black();
+    if(!colors.empty())
+      c = colors[0];
     SourceValue *sourceValue = management.GetSourceValue(control, i);
     if (control.InputType(i) == FunctionType::Master && master != 0) {
       pc.AddPresetValue(sourceValue->GetControllable(),

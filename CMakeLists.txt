@@ -45,6 +45,7 @@ set(GUIFILES
   gui/components/colorsequencewidget.cpp
   gui/components/durationinput.cpp
   gui/components/foldercombo.cpp
+  gui/components/iconbutton.cpp
   gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp
   gui/dialogs/inputselectdialog.cpp
