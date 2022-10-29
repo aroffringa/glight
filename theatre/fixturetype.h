@@ -192,6 +192,7 @@ class FixtureType : public FolderObject {
     functions_ = std::move(functions);
     UpdateFunctions();
   }
+  unsigned ColorScalingValue() const { return scaling_value_; }
 
  private:
   void UpdateFunctions();

@@ -9,6 +9,8 @@
 #include <gtkmm/label.h>
 #include <gtkmm/scale.h>
 
+#include "../components/iconbutton.h"
+
 #include "../../theatre/forwards.h"
 
 namespace glight::gui {
@@ -47,7 +49,7 @@ class FaderWidget final : public ControlWidget {
   Gtk::VScale _scale;
   Gtk::Button _fadeDownButton;
   Gtk::Button _flashButton;
-  Gtk::CheckButton _onCheckButton;
+  IconButton _onCheckButton;
   Gtk::EventBox _eventBox;
   Gtk::Label _nameLabel;
 

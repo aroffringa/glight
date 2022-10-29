@@ -31,6 +31,10 @@ class Color {
   constexpr unsigned char Green() const { return green_; }
   constexpr unsigned char Blue() const { return blue_; }
 
+  constexpr double RedRatio() const { return red_ / 255.0; }
+  constexpr double GreenRatio() const { return green_ / 255.0; }
+  constexpr double BlueRatio() const { return blue_ / 255.0; }
+
   constexpr static Color Gray(unsigned char intensity) {
     return Color(intensity, intensity, intensity);
   }
@@ -76,6 +80,19 @@ inline Color operator*(unsigned char lhs, const Color &rhs) {
 inline bool operator==(const Color &lhs, const Color &rhs) {
   return lhs.Red() == rhs.Red() && lhs.Green() == rhs.Green() &&
          lhs.Blue() == rhs.Blue();
+}
+
+inline bool operator<(const Color &lhs, const Color &rhs) {
+  if (lhs.Red() < rhs.Red())
+    return true;
+  else if (lhs.Red() > rhs.Red())
+    return false;
+  else if (lhs.Green() < rhs.Green())
+    return true;
+  else if (lhs.Green() > rhs.Green())
+    return false;
+  else
+    return lhs.Blue() < rhs.Blue();
 }
 
 }  // namespace glight::theatre

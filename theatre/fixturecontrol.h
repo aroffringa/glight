@@ -8,14 +8,12 @@ namespace glight::theatre {
 
 class FixtureControl final : public Controllable {
  public:
-  FixtureControl(class Fixture &fixture)
+  FixtureControl(Fixture &fixture)
       : Controllable(fixture.Name()),
         _fixture(&fixture),
         _values(fixture.Functions().size()) {}
 
-  class Fixture &Fixture() const {
-    return *_fixture;
-  }
+  Fixture &GetFixture() const { return *_fixture; }
 
   size_t NInputs() const override { return _fixture->Functions().size(); }
 
@@ -25,37 +23,42 @@ class FixtureControl final : public Controllable {
     return _fixture->Functions()[index]->Type();
   }
 
-  virtual Color InputColor(size_t index) const override {
+  Color InputColor(size_t index) const {
+    using FT = FunctionType;
     switch (InputType(index)) {
-      case FunctionType::ColorMacro:
-      case FunctionType::Effect:
-      case FunctionType::Master:
-      case FunctionType::Pan:
-      case FunctionType::Pulse:
-      case FunctionType::Rotation:
-      case FunctionType::Strobe:
-      case FunctionType::Tilt:
-      case FunctionType::Unknown:
-      case FunctionType::White:
+      case FT::ColorMacro:
+      case FT::Effect:
+      case FT::Master:
+      case FT::Pan:
+      case FT::Pulse:
+      case FT::Rotation:
+      case FT::Strobe:
+      case FT::Tilt:
+      case FT::Unknown:
+      case FT::White:
         return Color::White();
-      case FunctionType::Red:
+      case FT::Red:
         return Color::RedC();
-      case FunctionType::Green:
+      case FT::Green:
         return Color::GreenC();
-      case FunctionType::Blue:
+      case FT::Blue:
         return Color::BlueC();
-      case FunctionType::Amber:
+      case FT::Amber:
         return Color::Amber();
-      case FunctionType::UV:
+      case FT::UV:
         return Color::UV();
-      case FunctionType::Lime:
+      case FT::Lime:
         return Color::Lime();
-      case FunctionType::ColdWhite:
+      case FT::ColdWhite:
         return Color::ColdWhite();
-      case FunctionType::WarmWhite:
+      case FT::WarmWhite:
         return Color::WarmWhite();
     }
     return Color::Black();
+  }
+
+  virtual std::vector<Color> InputColors(size_t index) const override {
+    return {InputColor(index)};
   }
 
   size_t NOutputs() const override { return 0; }
@@ -75,7 +78,7 @@ class FixtureControl final : public Controllable {
   }
 
  private:
-  class Fixture *_fixture;
+  Fixture *_fixture;
   std::vector<ControlValue> _values;
 };
 

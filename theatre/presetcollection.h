@@ -30,6 +30,8 @@ class PresetCollection final : public Controllable {
 
   ControlValue &InputValue(size_t) override { return _inputValue; }
 
+  std::vector<Color> InputColors(size_t) const;
+
   virtual FunctionType InputType(size_t) const override {
     return FunctionType::Master;
   }

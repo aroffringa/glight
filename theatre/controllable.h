@@ -44,21 +44,16 @@ class Controllable : public FolderObject {
                           output.second);
   }
 
-  virtual Color InputColor([[maybe_unused]] size_t index) const {
-    if (NOutputs() == 0)
-      return Color::Black();
-    else {
-      // Return the average colour that it connects to
-      unsigned r = 0, g = 0, b = 0;
-      for (size_t o = 0; o != NOutputs(); ++o) {
-        auto output = Output(o);
-        Color c = output.first->InputColor(output.second);
-        r += c.Red();
-        g += c.Green();
-        b += c.Blue();
-      }
-      return Color(r / NOutputs(), g / NOutputs(), b / NOutputs());
+  virtual std::vector<Color> InputColors([[maybe_unused]] size_t index) const {
+    // Return the colours that it connects to
+    std::vector<Color> colors;
+    colors.reserve(NOutputs());
+    for (size_t o = 0; o != NOutputs(); ++o) {
+      const auto output = Output(o);
+      const std::vector<Color> c = output.first->InputColors(output.second);
+      colors.insert(colors.end(), c.begin(), c.end());
     }
+    return colors;
   }
 
   /**

@@ -45,6 +45,7 @@ set(GUIFILES
   gui/components/colorsequencewidget.cpp
   gui/components/durationinput.cpp
   gui/components/foldercombo.cpp
+  gui/components/iconbutton.cpp
   gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp
   gui/dialogs/inputselectdialog.cpp
@@ -83,6 +84,7 @@ set(THEATREFILES
   theatre/folderobject.cpp
   theatre/management.cpp
   theatre/oladevice.cpp
+  theatre/presetcollection.cpp
   theatre/presetvalue.cpp
   theatre/scene.cpp
   theatre/show.cpp
@@ -126,6 +128,7 @@ if(Boost_FOUND)
     tests/topenfixturereader.cpp
     tests/tpresetcollection.cpp
     tests/tpresetvalue.cpp
+    tests/tuniquewithoutordering.cpp
     )
   target_link_directories(runtests PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})

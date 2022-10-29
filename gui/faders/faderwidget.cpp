@@ -3,8 +3,11 @@
 #include "../dialogs/inputselectdialog.h"
 
 #include "../../theatre/controllable.h"
+#include "../../theatre/fixturecontrol.h"
 #include "../../theatre/presetvalue.h"
 #include "../../theatre/sourcevalue.h"
+
+#include "../../system/uniquewithoutordering.h"
 
 namespace glight::gui {
 
@@ -50,7 +53,7 @@ FaderWidget::FaderWidget(theatre::Management &management,
   }
 
   _onCheckButton.set_halign(Gtk::ALIGN_CENTER);
-  _onCheckButton.signal_clicked().connect(
+  _onCheckButton.SignalClicked().connect(
       sigc::mem_fun(*this, &FaderWidget::onOnButtonClicked));
   _box.pack_start(_onCheckButton, false, false, 0);
   _onCheckButton.show();
@@ -71,7 +74,7 @@ FaderWidget::FaderWidget(theatre::Management &management,
 void FaderWidget::onOnButtonClicked() {
   if (!_holdUpdates) {
     _holdUpdates = true;
-    if (_onCheckButton.get_active())
+    if (_onCheckButton.GetActive())
       _scale.set_value(ControlValue::MaxUInt());
     else
       _scale.set_value(0);
@@ -95,7 +98,7 @@ bool FaderWidget::onFlashButtonReleased(GdkEventButton *) {
 void FaderWidget::onScaleChange() {
   if (!_holdUpdates) {
     _holdUpdates = true;
-    _onCheckButton.set_active(_scale.get_value() != 0);
+    _onCheckButton.SetActive(_scale.get_value() != 0);
     _holdUpdates = false;
 
     setImmediateValue(_scale.get_value());
@@ -112,15 +115,22 @@ bool FaderWidget::onNameLabelClicked(GdkEventButton *) {
 }
 
 void FaderWidget::OnAssigned(bool moveFader) {
-  if (GetSourceValue() != nullptr) {
+  const theatre::SourceValue *source = GetSourceValue();
+  if (source) {
     _nameLabel.set_text(GetSourceValue()->Name());
     if (moveFader) {
       _scale.set_value(GetSingleSourceValue().Value().UInt());
     } else {
       setImmediateValue(_scale.get_value());
     }
+
+    const theatre::Controllable *controllable = &source->GetControllable();
+    const std::vector<theatre::Color> colors =
+        controllable->InputColors(source->InputIndex());
+    _onCheckButton.SetColors(UniqueWithoutOrdering(colors));
   } else {
     _nameLabel.set_text("<..>");
+    _onCheckButton.SetColors({});
     if (moveFader) {
       _scale.set_value(0);
     } else {
@@ -135,14 +145,14 @@ void FaderWidget::MoveSlider() {
     _holdUpdates = true;
     const unsigned value = GetSingleSourceValue().Value().UInt();
     _scale.set_value(value);
-    _onCheckButton.set_active(value != 0);
+    _onCheckButton.SetActive(value != 0);
     _holdUpdates = hold;
     SignalValueChange().emit(_scale.get_value());
   }
 }
 
 void FaderWidget::Toggle() {
-  _onCheckButton.set_active(!_onCheckButton.get_active());
+  _onCheckButton.SetActive(!_onCheckButton.GetActive());
 }
 
 void FaderWidget::FullOn() { _scale.set_value(ControlValue::MaxUInt()); }
