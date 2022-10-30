@@ -79,7 +79,7 @@ void BeatFinder::open() {
   _beat = Beat(0.0, 0.0);
   _audioLevel = 0;
   uint16_t nAudioLevels = 0;
-  
+
   std::cout << "period_size = " << period_size << '\n';
 
   while (!_isStopping) {
@@ -91,7 +91,7 @@ void BeatFinder::open() {
       std::cout << "ERROR:" << snd_strerror(rc) << '\n';
       break;
     } else {
-      if (rc != (int) period_size)
+      if (rc != (int)period_size)
         std::cout << "Only " << rc << " frames were read in snd_pcm_readi().\n";
     }
     // uint16_t localAudioLevel = 0;
@@ -110,7 +110,7 @@ void BeatFinder::open() {
     }
     _audioLevelAccumulator += audioRMS / (2 * period_size);
     ++nAudioLevels;
-    if(nAudioLevels > hopsPerAudioLevel) {
+    if (nAudioLevels > hopsPerAudioLevel) {
       _audioLevel = _audioLevelAccumulator / hopsPerAudioLevel;
       nAudioLevels = 0;
       _audioLevelAccumulator = 0;

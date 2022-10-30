@@ -94,13 +94,12 @@ inline EffectType NameToEffectType(const std::string &name) {
 
 inline std::vector<EffectType> GetEffectTypes() {
   using ET = EffectType;
-  return std::vector<ET>{ET::AudioLevel, ET::ColorControl, ET::ConstantValue,
-                         ET::Curve,      ET::Delay,
-                         ET::Dispenser,  ET::Fade,
-                         ET::Flicker,    ET::FluorescentStart,
-                         ET::Invert,     ET::MusicActivation,
-                         ET::Pulse,      ET::RandomSelect,
-                         ET::Threshold};
+  return std::vector<ET>{
+      ET::AudioLevel,   ET::ColorControl,    ET::ConstantValue,
+      ET::Curve,        ET::Delay,           ET::Dispenser,
+      ET::Fade,         ET::Flicker,         ET::FluorescentStart,
+      ET::Invert,       ET::MusicActivation, ET::Pulse,
+      ET::RandomSelect, ET::Threshold};
 }
 
 }  // namespace glight::theatre

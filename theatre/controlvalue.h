@@ -77,8 +77,7 @@ class ControlValue {
   unsigned int _value;
 };
 
-inline bool operator==(const ControlValue& lhs,
-                              const ControlValue& rhs) {
+inline bool operator==(const ControlValue& lhs, const ControlValue& rhs) {
   return lhs.UInt() == rhs.UInt();
 }
 
@@ -91,14 +90,14 @@ inline ControlValue operator/(const ControlValue& lhs, unsigned factor) {
   return ControlValue(lhs.UInt() / factor);
 }
 
-template<class... Pack>
+template <class... Pack>
 inline ControlValue Min(const ControlValue& first, const ControlValue& second) {
   return ControlValue(std::min(first.UInt(), second.UInt()));
 }
 
-
-template<class... Pack>
-inline ControlValue Min(const ControlValue& first, const ControlValue& second, Pack... third) {
+template <class... Pack>
+inline ControlValue Min(const ControlValue& first, const ControlValue& second,
+                        Pack... third) {
   return ControlValue(std::min(first.UInt(), Min(second, third...).UInt()));
 }
 

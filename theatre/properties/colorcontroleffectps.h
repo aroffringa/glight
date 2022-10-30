@@ -9,18 +9,18 @@ namespace glight::theatre {
 
 class ColorControlEffectPS final : public PropertySet {
  public:
-  ColorControlEffectPS() {  }
+  ColorControlEffectPS() {}
 
  protected:
   void setControlValue(FolderObject &object, size_t index,
-                               unsigned value) const override {
-  }
+                       unsigned value) const override {}
 
   unsigned getControlValue(const FolderObject &object,
-                                   size_t index) const override {  return 0; }
+                           size_t index) const override {
+    return 0;
+  }
 };
 
 }  // namespace glight::theatre
 
 #endif
-
