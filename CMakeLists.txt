@@ -116,6 +116,7 @@ if(Boost_FOUND)
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
     tests/tchase.cpp
+    tests/tcontrolvalue.cpp
     tests/tfileformat.cpp
     tests/tfixturecontrol.cpp
     tests/tfixturefunction.cpp
