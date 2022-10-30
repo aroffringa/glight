@@ -13,6 +13,8 @@ class SingleSourceValue {
   SingleSourceValue() = default;
   SingleSourceValue(const SingleSourceValue& source) = default;
 
+  SingleSourceValue& operator=(const SingleSourceValue& source) = default;
+
   bool IsIgnorable() const { return !value_; }
 
   void ApplyFade(double time_passed) {
