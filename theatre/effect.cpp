@@ -1,6 +1,7 @@
 #include "effect.h"
 
 #include "effects/audioleveleffect.h"
+#include "effects/colorcontroleffect.h"
 #include "effects/constantvalueeffect.h"
 #include "effects/curveeffect.h"
 #include "effects/delayeffect.h"
@@ -24,6 +25,8 @@ std::unique_ptr<Effect> Effect::Make(EffectType type) {
   switch (type) {
     case ET::AudioLevel:
       return up(new AudioLevelEffect());
+    case ET::ColorControl:
+      return up(new ColorControlEffect());
     case ET::ConstantValue:
       return up(new ConstantValueEffect());
     case ET::Curve:

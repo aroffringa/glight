@@ -60,7 +60,7 @@ class Effect : public Controllable {
 
   std::unique_ptr<Effect> Copy() const;
 
-  size_t NInputs() const final override { return _inputValues.size(); }
+  size_t NInputs() const override { return _inputValues.size(); }
 
   ControlValue &InputValue(size_t index) final override {
     return _inputValues[index];

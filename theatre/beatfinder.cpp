@@ -12,9 +12,6 @@ namespace glight::theatre {
 void BeatFinder::open() {
   if (_isOpen) throw AlsaError("Alsa was opened twice");
 
-  snd_pcm_uframes_t buffer_size = _alsaBufferSize;
-  snd_pcm_uframes_t period_size = _alsaPeriodSize;
-
   // Open PCM device for capture.
   int rc = snd_pcm_open(&_handle, "pulse", SND_PCM_STREAM_CAPTURE, 0);
   if (rc < 0) throw AlsaError(snd_strerror(rc));
@@ -36,9 +33,10 @@ void BeatFinder::open() {
   snd_pcm_hw_params_set_format(_handle, hw_params, SND_PCM_FORMAT_S16_LE);
   snd_pcm_hw_params_set_channels(_handle, hw_params, 2);
   snd_pcm_hw_params_set_rate_near(_handle, hw_params, &samplerate, &dir);
-  buffer_size = 16 * 1024;
+  snd_pcm_uframes_t buffer_size = 16 * 1024;
   snd_pcm_hw_params_set_buffer_size_near(_handle, hw_params, &buffer_size);
   snd_pcm_hw_params_get_buffer_size(hw_params, &buffer_size);
+  snd_pcm_uframes_t period_size = _alsaPeriodSize;
   snd_pcm_hw_params_get_period_size(hw_params, &period_size, nullptr);
 
   _alsaBufferSize = buffer_size;
@@ -65,25 +63,27 @@ void BeatFinder::open() {
   snd_pcm_sw_params_free(sw_params);
 
   snd_pcm_prepare(_handle);
-  const unsigned readAtATime = _alsaPeriodSize;
 
   // Initial libaubio
   fvec_t *tempo_out = new_fvec(2);
-  const uint hop_size = period_size;
+  const unsigned hopsPerAudioLevel = 10;
   const char method[] = "default";
   aubio_tempo_t *tempo =
-      new_aubio_tempo(method, hop_size * 2, hop_size, samplerate);
-  fvec_t *ibuf = new_fvec(hop_size);
+      new_aubio_tempo(method, period_size * 2, period_size, samplerate);
+  fvec_t *ibuf = new_fvec(period_size);
   const smpl_t silence_threshold = -30.;
   uint_t is_silence = 0;
 
-  std::vector<int16_t> alsaBuffer(hop_size * 2);
+  std::vector<int16_t> alsaBuffer(period_size * 2);
 
   _beat = Beat(0.0, 0.0);
   _audioLevel = 0;
+  uint16_t nAudioLevels = 0;
+  
+  std::cout << "period_size = " << period_size << '\n';
 
   while (!_isStopping) {
-    rc = snd_pcm_readi(_handle, alsaBuffer.data(), readAtATime);
+    rc = snd_pcm_readi(_handle, alsaBuffer.data(), period_size);
     if (rc == -EPIPE) {
       std::cout << "Buffer overrun!\n";
       snd_pcm_prepare(_handle);
@@ -91,12 +91,12 @@ void BeatFinder::open() {
       std::cout << "ERROR:" << snd_strerror(rc) << '\n';
       break;
     } else {
-      if (rc != (int)readAtATime)
+      if (rc != (int) period_size)
         std::cout << "Only " << rc << " frames were read in snd_pcm_readi().\n";
     }
     // uint16_t localAudioLevel = 0;
     uint32_t audioRMS = 0;
-    for (size_t i = 0; i != hop_size; ++i) {
+    for (size_t i = 0; i != period_size; ++i) {
       int16_t l = alsaBuffer[i * 2];
       int16_t r = alsaBuffer[i * 2 + 1];
 
@@ -108,7 +108,13 @@ void BeatFinder::open() {
       audioRMS += uint32_t(int32_t(l) * int32_t(l)) >> 8;
       audioRMS += uint32_t(int32_t(r) * int32_t(r)) >> 8;
     }
-    _audioLevel = audioRMS / (2 * hop_size);
+    _audioLevelAccumulator += audioRMS / (2 * period_size);
+    ++nAudioLevels;
+    if(nAudioLevels > hopsPerAudioLevel) {
+      _audioLevel = _audioLevelAccumulator / hopsPerAudioLevel;
+      nAudioLevels = 0;
+      _audioLevelAccumulator = 0;
+    }
     aubio_tempo_do(tempo, ibuf, tempo_out);
     const smpl_t is_beat = fvec_get_sample(tempo_out, 0);
     if (silence_threshold != -90)
