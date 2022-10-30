@@ -487,10 +487,13 @@ void FaderWindow::loadState() {
   if (_miDualLayout.get_active()) {
     _activateCrossFaderButton.emplace();
     _activateCrossFaderButton->set_image_from_icon_name("media-playback-start");
+    _activateCrossFaderButton->set_tooltip_text(
+        "Activate fading of the cross-fader to swap the top and bottom faders");
     _activateCrossFaderButton->signal_clicked().connect(
         [&]() { onRunCrossFader(); });
     _leftBox.pack_start(*_activateCrossFaderButton, false, false);
     _activateCrossFaderButton->show();
+
     _crossFader.emplace(0,
                         ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
                         (ControlValue::MaxUInt() + 1) / 100);
@@ -502,6 +505,15 @@ void FaderWindow::loadState() {
     _crossFader->signal_value_changed().connect(
         sigc::mem_fun(*this, &FaderWindow::onCrossFaderChange));
     _crossFader->show();
+
+    _assignTopToBottom.emplace();
+    _assignTopToBottom->set_image_from_icon_name("go-jump");
+    _assignTopToBottom->set_tooltip_text(
+        "Assign values from top faders to bottom faders");
+    _assignTopToBottom->signal_clicked().connect(
+        [&]() { onAssignTopToBottom(); });
+    _leftBox.pack_start(*_assignTopToBottom, false, false);
+    _assignTopToBottom->show();
   }
   for (FaderState &state : _state->faders) {
     addControlInLayout(state.IsToggleButton(), state.NewToggleButtonColumn());
@@ -590,6 +602,17 @@ void FaderWindow::onRunCrossFader() {
     glight::theatre::SourceValue *source = cw->GetSourceValue();
     if (source) {
       source->CrossFader().Set(0.0, MapSliderToSpeed(getFadeInSpeed()));
+    }
+  }
+}
+
+void FaderWindow::onAssignTopToBottom() {
+  const size_t n = std::min(_upperControls.size(), _lowerControls.size());
+  for (size_t i = 0; i != n; ++i) {
+    glight::theatre::SourceValue *value = _upperControls[i]->GetSourceValue();
+    if (value) {
+      value->B() = value->A();
+      _lowerControls[i]->MoveSlider();
     }
   }
 }

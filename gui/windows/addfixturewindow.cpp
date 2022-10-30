@@ -83,8 +83,12 @@ void AddFixtureWindow::fillStock() {
     Gtk::TreeModel::iterator iter = type_model_->append();
     (*iter)[type_columns_.type_str_] = item.first;
     (*iter)[type_columns_.type_] = &item.second;
+    if (item.first ==
+        FixtureType::StockName(theatre::StockFixture::RGBLight3Ch)) {
+      _typeCombo.set_active(iter);
+    }
   }
-  _typeCombo.set_active(0);
+  if (!_typeCombo.get_active()) _typeCombo.set_active(0);
   _addButton.set_sensitive(true);
 }
 
