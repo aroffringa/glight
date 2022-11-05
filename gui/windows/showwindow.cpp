@@ -127,9 +127,9 @@ void ShowWindow::EmitUpdate() {
   _signalUpdateControllables();
 }
 
-void ShowWindow::addFaderWindow(FaderSetupState *stateOrNull) {
+void ShowWindow::addFaderWindow(FaderSetState *stateOrNull) {
   if (stateOrNull == nullptr) {
-    for (std::unique_ptr<FaderSetupState> &setup : _state.FaderSetups()) {
+    for (std::unique_ptr<FaderSetState> &setup : _state.FaderSets()) {
       if (!setup->isActive) {
         stateOrNull = setup.get();
         break;
@@ -354,7 +354,7 @@ void ShowWindow::OpenFile(const std::string &filename) {
                  "faders.\n";
     addFaderWindow();
   } else {
-    for (const std::unique_ptr<FaderSetupState> &state : _state.FaderSetups()) {
+    for (const std::unique_ptr<FaderSetState> &state : _state.FaderSets()) {
       if (state->isActive) {
         // Currently it is not displayed, so to avoid the control window doing
         // the wrong thing, isActive is set to false and will be set to true by
@@ -462,7 +462,7 @@ void ShowWindow::onFaderWindowHidden(FaderWindow *window) {
 void ShowWindow::onFaderListChange() {
   _miFaderWindows.clear();
 
-  for (const std::unique_ptr<FaderSetupState> &state : _state.FaderSetups()) {
+  for (const std::unique_ptr<FaderSetState> &state : _state.FaderSets()) {
     _miFaderWindows.emplace_back(state->name);
     _miFaderWindows.back().set_active(state->isActive);
     _miFaderWindows.back().signal_toggled().connect(
@@ -472,7 +472,7 @@ void ShowWindow::onFaderListChange() {
   }
 }
 
-FaderWindow *ShowWindow::getFaderWindow(FaderSetupState &state) {
+FaderWindow *ShowWindow::getFaderWindow(FaderSetState &state) {
   for (const std::unique_ptr<FaderWindow> &window : _faderWindows) {
     if (window->State() == &state) return window.get();
   }
@@ -480,7 +480,7 @@ FaderWindow *ShowWindow::getFaderWindow(FaderSetupState &state) {
 }
 
 void ShowWindow::onFaderWindowSelected(Gtk::CheckMenuItem &menuItem,
-                                       FaderSetupState &state) {
+                                       FaderSetState &state) {
   FaderWindow *window = getFaderWindow(state);
   if (window) {
     window->hide();

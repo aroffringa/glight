@@ -64,7 +64,7 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
    * If stateOrNull is nullptr, the first inactive state is selected, or
    * if no states are inactive, a new state is created.
    */
-  void addFaderWindow(FaderSetupState *stateOrNull = nullptr);
+  void addFaderWindow(FaderSetState *stateOrNull = nullptr);
 
   void increaseManualBeat(int val);
   bool onKeyDown(GdkEventKey *event);
@@ -92,8 +92,8 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   void onFaderWindowHidden(FaderWindow *window);
   void onFaderListChange();
   void onFaderWindowSelected(Gtk::CheckMenuItem &menuItem,
-                             FaderSetupState &state);
-  FaderWindow *getFaderWindow(FaderSetupState &state);
+                             FaderSetState &state);
+  FaderWindow *getFaderWindow(FaderSetState &state);
 
   size_t nextControlKeyRow() const;
 

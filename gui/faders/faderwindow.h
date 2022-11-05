@@ -26,7 +26,7 @@ namespace glight::gui {
 
 class ControlWidget;
 class EventTransmitter;
-class FaderSetupState;
+class FaderSetState;
 class GUIState;
 
 class FaderWindow : public Gtk::Window {
@@ -40,7 +40,7 @@ class FaderWindow : public Gtk::Window {
   ~FaderWindow();
 
   void LoadNew();
-  void LoadState(FaderSetupState *state);
+  void LoadState(FaderSetState *state);
 
   /**
    * Set all sliders to the preset values
@@ -52,7 +52,7 @@ class FaderWindow : public Gtk::Window {
   bool IsAssigned(theatre::SourceValue *presetValue) const;
   size_t KeyRowIndex() const { return _keyRowIndex; }
 
-  FaderSetupState *State() { return _state; }
+  FaderSetState *State() { return _state; }
 
  private:
   void initializeWidgets();
@@ -74,10 +74,7 @@ class FaderWindow : public Gtk::Window {
   void onRemove5FadersClicked() {
     for (size_t i = 0; i != 5; ++i) onRemoveFaderClicked();
   }
-  void onLayoutChanged() {
-    RecursionLock::Token token(_recursionLock);
-    loadState();
-  }
+  void onLayoutChanged();
   void onAssignClicked();
   void onAssignChasesClicked();
   void unassign();
@@ -139,7 +136,7 @@ class FaderWindow : public Gtk::Window {
   std::vector<Gtk::VBox> _lowerColumns;
   EventTransmitter &_eventHub;
   GUIState &_guiState;
-  FaderSetupState *_state;
+  FaderSetState *_state;
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];

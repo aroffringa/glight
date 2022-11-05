@@ -47,10 +47,34 @@ class FaderState {
   sigc::connection _sourceValueDeletedConnection;
 };
 
-class FaderSetupState {
- public:
-  FaderSetupState() = default;
+enum class FaderSetMode { Primary, Secondary, Dual };
 
+inline std::string ToString(FaderSetMode mode) {
+  switch (mode) {
+    case FaderSetMode::Primary:
+      return "primary";
+    case FaderSetMode::Secondary:
+      return "secondary";
+    case FaderSetMode::Dual:
+      return "dual";
+  }
+  return {};
+}
+
+inline FaderSetMode ToFaderSetMode(const std::string &mode_str) {
+  if (mode_str == "secondary")
+    return FaderSetMode::Secondary;
+  else if (mode_str == "dual")
+    return FaderSetMode::Dual;
+  else
+    return FaderSetMode::Primary;  // also the default
+}
+
+class FaderSetState {
+ public:
+  FaderSetState() = default;
+
+  FaderSetMode mode = FaderSetMode::Primary;
   std::string name;
   bool isActive = false;
   bool isSolo = false;
@@ -71,10 +95,10 @@ class FaderSetupState {
 
 class GUIState {
  public:
-  std::vector<std::unique_ptr<FaderSetupState>> &FaderSetups() {
+  std::vector<std::unique_ptr<FaderSetState>> &FaderSets() {
     return _faderSetups;
   }
-  const std::vector<std::unique_ptr<FaderSetupState>> &FaderSetups() const {
+  const std::vector<std::unique_ptr<FaderSetState>> &FaderSetups() const {
     return _faderSetups;
   }
 
@@ -92,7 +116,7 @@ class GUIState {
   bool Empty() const { return _faderSetups.empty(); }
 
   bool IsAssigned(const theatre::SourceValue *s) const {
-    for (const std::unique_ptr<FaderSetupState> &fader : _faderSetups) {
+    for (const std::unique_ptr<FaderSetState> &fader : _faderSetups) {
       if (fader->IsAssigned(s)) return true;
     }
     return false;
@@ -100,7 +124,7 @@ class GUIState {
 
  private:
   sigc::signal<void()> _faderSetupSignalChange;
-  std::vector<std::unique_ptr<FaderSetupState>> _faderSetups;
+  std::vector<std::unique_ptr<FaderSetState>> _faderSetups;
 };
 
 }  // namespace glight::gui
