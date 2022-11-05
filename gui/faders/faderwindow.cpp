@@ -125,10 +125,9 @@ FaderWindow::~FaderWindow() {
 }
 
 void FaderWindow::LoadNew() {
-  _guiState.FaderSetups().emplace_back(std::make_unique<FaderSetupState>());
-  _state = _guiState.FaderSetups().back().get();
+  _guiState.FaderSets().emplace_back(std::make_unique<FaderSetState>());
+  _state = _guiState.FaderSets().back().get();
   _state->name = "Unnamed fader setup";
-  _state->isActive = true;
   for (size_t i = 0; i != 10; ++i) _state->faders.emplace_back();
 
   _state->width = std::max(100, get_width());
@@ -137,7 +136,7 @@ void FaderWindow::LoadNew() {
   loadState();
 }
 
-void FaderWindow::LoadState(FaderSetupState *state) {
+void FaderWindow::LoadState(FaderSetState *state) {
   _state = state;
   _state->isActive = true;
   RecursionLock::Token token(_recursionLock);
@@ -475,6 +474,17 @@ void FaderWindow::onSetNameClicked() {
 
 void FaderWindow::loadState() {
   _miSolo.set_active(_state->isSolo);
+  switch (_state->mode) {
+    case FaderSetMode::Primary:
+      _miPrimaryLayout.set_active(true);
+      break;
+    case FaderSetMode::Secondary:
+      _miSecondaryLayout.set_active(true);
+      break;
+    case FaderSetMode::Dual:
+      _miDualLayout.set_active(true);
+      break;
+  }
   _miFadeInOption[_state->fadeInSpeed].set_active(true);
   _miFadeOutOption[_state->fadeOutSpeed].set_active(true);
   _crossFader.reset();
@@ -614,6 +624,19 @@ void FaderWindow::onAssignTopToBottom() {
       value->B() = value->A();
       _lowerControls[i]->MoveSlider();
     }
+  }
+}
+
+void FaderWindow::onLayoutChanged() {
+  if (_recursionLock.IsFirst()) {
+    RecursionLock::Token token(_recursionLock);
+    if (_miPrimaryLayout.get_active())
+      _state->mode = FaderSetMode::Primary;
+    else if (_miSecondaryLayout.get_active())
+      _state->mode = FaderSetMode::Secondary;
+    else  // if(_miDualLayout.get_active())
+      _state->mode = FaderSetMode::Dual;
+    loadState();
   }
 }
 

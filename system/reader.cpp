@@ -383,7 +383,7 @@ void ParseScenes(const json::Array &node, Management &management) {
   }
 }
 
-void ParseGUIPresetRef(const Object &node, gui::FaderSetupState &fader,
+void ParseGUIPresetRef(const Object &node, gui::FaderSetState &fader,
                        Management &management) {
   if (node.children.count("name")) {
     const size_t input = ToNum(node["input-index"]).AsSize();
@@ -402,21 +402,22 @@ void ParseGUIPresetRef(const Object &node, gui::FaderSetupState &fader,
     state.SetNewToggleButtonColumn(ToBool(node["new-toggle-column"]));
 }
 
-void ParseGUIFaders(const Object &node, gui::GUIState &guiState,
-                    Management &management) {
-  guiState.FaderSetups().emplace_back(std::make_unique<gui::FaderSetupState>());
-  gui::FaderSetupState &fader = *guiState.FaderSetups().back().get();
-  fader.name = ToStr(node["name"]);
-  fader.isActive = ToBool(node["active"]);
-  fader.isSolo = ToBool(node["solo"]);
-  fader.fadeInSpeed = ToNum(node["fade-in"]).AsSize();
-  fader.fadeOutSpeed = ToNum(node["fade-out"]).AsSize();
-  fader.width = ToNum(node["width"]).AsSize();
-  fader.height = ToNum(node["height"]).AsSize();
+void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,
+                      Management &management) {
+  guiState.FaderSets().emplace_back(std::make_unique<gui::FaderSetState>());
+  gui::FaderSetState &fader_set = *guiState.FaderSets().back().get();
+  fader_set.name = ToStr(node["name"]);
+  fader_set.isActive = ToBool(node["active"]);
+  fader_set.isSolo = ToBool(node["solo"]);
+  fader_set.mode = gui::ToFaderSetMode(ToStr(node["mode"]));
+  fader_set.fadeInSpeed = ToNum(node["fade-in"]).AsSize();
+  fader_set.fadeOutSpeed = ToNum(node["fade-out"]).AsSize();
+  fader_set.width = ToNum(node["width"]).AsSize();
+  fader_set.height = ToNum(node["height"]).AsSize();
   const Array &faders = ToArr(node["faders"]);
   for (const Node &item : faders) {
     const Object &fader_node = ToObj(item);
-    ParseGUIPresetRef(fader_node, fader, management);
+    ParseGUIPresetRef(fader_node, fader_set, management);
   }
 }
 
@@ -425,7 +426,7 @@ void ParseGUI(const Object &node, gui::GUIState &guiState,
   const Array &states = ToArr(node["states"]);
   for (const Node &item : states) {
     const Object &state_node = ToObj(item);
-    ParseGUIFaders(state_node, guiState, management);
+    ParseGuiFaderSet(state_node, guiState, management);
   }
 }
 

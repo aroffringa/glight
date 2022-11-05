@@ -103,6 +103,7 @@ void IconButton::Draw(const Cairo::RefPtr<Cairo::Context>& cairo) {
     if (active_) {
       cairo->set_line_width(2.0 / scale);
       DrawActiveBorder(cairo, 2.0 / scale);
+      DrawCross(cairo);
     }
     DrawCircleBorder(cairo, entered_, active_);
     cairo->restore();

@@ -425,11 +425,12 @@ void writeScene(WriteState &state, const Scene &scene) {
   state.writer.EndObject();
 }
 
-void writeFaderState(WriteState &state, const gui::FaderSetupState &guiState) {
+void writeFaderState(WriteState &state, const gui::FaderSetState &guiState) {
   state.writer.StartObject();
   state.writer.String("name", guiState.name);
   state.writer.Boolean("active", guiState.isActive);
   state.writer.Boolean("solo", guiState.isSolo);
+  state.writer.String("mode", ToString(guiState.mode));
   state.writer.Number("fade-in", guiState.fadeInSpeed);
   state.writer.Number("fade-out", guiState.fadeOutSpeed);
   state.writer.Number("width", guiState.width);
@@ -456,8 +457,8 @@ void writeFaderState(WriteState &state, const gui::FaderSetupState &guiState) {
 
 void writeGUIState(WriteState &state) {
   state.writer.StartArray("states");
-  for (const std::unique_ptr<gui::FaderSetupState> &fState :
-       state.guiState->FaderSetups())
+  for (const std::unique_ptr<gui::FaderSetState> &fState :
+       state.guiState->FaderSets())
     writeFaderState(state, *fState);
   state.writer.EndArray();  // states
 }

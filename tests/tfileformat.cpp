@@ -213,10 +213,10 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   FillManagement(write_management);
 
   glight::gui::GUIState guiState;
-  std::vector<std::unique_ptr<glight::gui::FaderSetupState>> &setups =
-      guiState.FaderSetups();
-  std::unique_ptr<glight::gui::FaderSetupState> &setup =
-      setups.emplace_back(std::make_unique<glight::gui::FaderSetupState>());
+  std::vector<std::unique_ptr<glight::gui::FaderSetState>> &setups =
+      guiState.FaderSets();
+  std::unique_ptr<glight::gui::FaderSetState> &setup =
+      setups.emplace_back(std::make_unique<glight::gui::FaderSetState>());
   setup->name = "testfader";
   glight::gui::FaderState &state = setup->faders.emplace_back();
   state.SetSourceValue(write_management.SourceValues()[0].get());
