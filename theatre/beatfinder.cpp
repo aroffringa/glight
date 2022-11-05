@@ -80,8 +80,6 @@ void BeatFinder::open() {
   _audioLevel = 0;
   uint16_t nAudioLevels = 0;
 
-  std::cout << "period_size = " << period_size << '\n';
-
   while (!_isStopping) {
     rc = snd_pcm_readi(_handle, alsaBuffer.data(), period_size);
     if (rc == -EPIPE) {
