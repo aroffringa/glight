@@ -129,6 +129,7 @@ if(Boost_FOUND)
     tests/topenfixturereader.cpp
     tests/tpresetcollection.cpp
     tests/tpresetvalue.cpp
+    tests/ttheatre.cpp
     tests/tuniquewithoutordering.cpp
     )
   target_link_directories(runtests PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})

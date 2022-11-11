@@ -127,8 +127,9 @@ void ParseFixtureTypeFunctions(const json::Array &node,
 void ParseFixtureTypes(const json::Array &node, Management &management) {
   for (const Node &child : node) {
     const Object &ft_node = ToObj(child);
-    const std::string &class_name = ToStr(ft_node["fixture-class"]);
     FixtureType ft;
+    ft.SetShortName(ToStr(ft_node["short-name"]));
+    const std::string &class_name = ToStr(ft_node["fixture-class"]);
     ft.SetFixtureClass(FixtureType::NameToClass(class_name));
     FixtureType &new_type = management.GetTheatre().AddFixtureType(ft);
     if (management.RootFolder().GetChildIfExists(new_type.Name())) {

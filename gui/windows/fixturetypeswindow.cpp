@@ -20,6 +20,7 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
     : event_hub_(eventHub),
       management_(&management),
       name_label_("Name:"),
+      short_name_label_("Short name:"),
       class_label_("Class:"),
       new_button_("New"),
       remove_button_("Remove"),
@@ -55,14 +56,18 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   right_grid_.attach(name_entry_, 1, 0);
   name_entry_.set_hexpand(true);
 
-  right_grid_.attach(class_label_, 0, 1);
+  right_grid_.attach(short_name_label_, 0, 1);
+  right_grid_.attach(short_name_entry_, 1, 1);
+  short_name_entry_.set_hexpand(true);
+
+  right_grid_.attach(class_label_, 0, 2);
   const std::vector<theatre::FixtureClass> classes =
       theatre::FixtureType::GetClassList();
   for (theatre::FixtureClass c : classes)
     class_combo_.append(theatre::FixtureType::ClassName(c));
-  right_grid_.attach(class_combo_, 1, 1);
+  right_grid_.attach(class_combo_, 1, 2);
   class_combo_.set_hexpand(true);
-  right_grid_.attach(functions_frame_, 0, 2, 2, 1);
+  right_grid_.attach(functions_frame_, 0, 3, 2, 1);
   functions_frame_.set_vexpand(true);
   functions_frame_.set_hexpand(true);
 
@@ -162,6 +167,7 @@ void FixtureTypesWindow::onSaveClicked() {
     management_->RootFolder().Add(*type);
   }
   type->SetName(name_entry_.get_text());
+  type->SetShortName(short_name_entry_.get_text());
   type->SetFixtureClass(
       theatre::FixtureType::NameToClass(class_combo_.get_active_text()));
   type->SetFunctions(functions_frame_.GetFunctions());
@@ -192,6 +198,7 @@ void FixtureTypesWindow::onSelectionChanged() {
     right_grid_.set_sensitive(has_selection);
     if (type) {
       name_entry_.set_text(type->Name());
+      short_name_entry_.set_text(type->ShortName());
       class_combo_.set_active_text(
           theatre::FixtureType::ClassName(type->GetFixtureClass()));
       functions_frame_.SetFunctions(type->Functions());

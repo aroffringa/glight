@@ -10,23 +10,27 @@ FixtureType::FixtureType(StockFixture stock_fixture)
   switch (stock_fixture) {
     case StockFixture::Light1Ch:
       functions_.emplace_back(FunctionType::Master, 0, false, 0);
+      short_name_ = "Light";
       break;
     case StockFixture::RGBLight3Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
+      short_name_ = "RGB";
       break;
     case StockFixture::RGBLight4Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::Master, 3, false, 0);
+      short_name_ = "RGB";
       break;
     case StockFixture::RGBALight4Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::Amber, 3, false, 0);
+      short_name_ = "RGBA";
       break;
     case StockFixture::RGBALight5Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
@@ -34,18 +38,21 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::Amber, 3, false, 0);
       functions_.emplace_back(FunctionType::Master, 4, false, 0);
+      short_name_ = "RGBA";
       break;
     case StockFixture::RGBWLight4Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::White, 3, false, 0);
+      short_name_ = "RGBW";
       break;
     case StockFixture::RGBUVLight4Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::UV, 3, false, 0);
+      short_name_ = "RGBUV";
       break;
     case StockFixture::RGBAWLight5Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
@@ -53,6 +60,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::Amber, 3, false, 0);
       functions_.emplace_back(FunctionType::White, 4, false, 0);
+      short_name_ = "RGBAW";
       break;
     case StockFixture::RGBAWUVLight6Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
@@ -61,26 +69,31 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Amber, 3, false, 0);
       functions_.emplace_back(FunctionType::White, 4, false, 0);
       functions_.emplace_back(FunctionType::UV, 5, false, 0);
+      short_name_ = "RGBAWUV";
       break;
     case StockFixture::CWWW2Ch:
       functions_.emplace_back(FunctionType::ColdWhite, 0, false, 0);
       functions_.emplace_back(FunctionType::WarmWhite, 1, false, 0);
+      short_name_ = "CW/WW";
       break;
     case StockFixture::CWWW4Ch:
       functions_.emplace_back(FunctionType::Master, 0, false, 0);
       functions_.emplace_back(FunctionType::ColdWhite, 1, false, 0);
       functions_.emplace_back(FunctionType::WarmWhite, 2, false, 0);
       functions_.emplace_back(FunctionType::Strobe, 3, false, 0);
+      short_name_ = "CW/WW";
       break;
     case StockFixture::CWWWA3Ch:
       functions_.emplace_back(FunctionType::ColdWhite, 0, false, 0);
       functions_.emplace_back(FunctionType::WarmWhite, 1, false, 0);
       functions_.emplace_back(FunctionType::Amber, 2, false, 0);
+      short_name_ = "CW/WW/A";
       break;
     case StockFixture::UVLight3Ch:
       functions_.emplace_back(FunctionType::UV, 0, false, 0);
       functions_.emplace_back(FunctionType::Strobe, 1, false, 0);
       functions_.emplace_back(FunctionType::Pulse, 2, false, 0);
+      short_name_ = "UV";
       break;
     case StockFixture::H2ODMXPro: {
       functions_.emplace_back(FunctionType::Master, 0, false, 0);
@@ -94,6 +107,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       FixtureTypeFunction &macro =
           functions_.emplace_back(FunctionType::ColorMacro, 2, false, 0);
       SetH2OMacroParameters(macro.GetMacroParameters());
+      short_name_ = "H2O";
     } break;
     case StockFixture::AyraTDCSunrise: {
       functions_.emplace_back(FunctionType::Master, 0, false, 0);
@@ -109,6 +123,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       // [ 5 - 128 ) is static positioning
       ranges.emplace_back(128, 256, -max_speed, max_speed);
       functions_.emplace_back(FunctionType::ColorMacro, 6, false, 0);
+      short_name_ = "TDC Sunr";
     } break;
     case StockFixture::RGB_ADJ_6CH: {
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
@@ -119,6 +134,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       SetRgbAdj6chMacroParameters(macro.GetMacroParameters());
       functions_.emplace_back(FunctionType::Strobe, 4, false, 0);
       functions_.emplace_back(FunctionType::Pulse, 5, false, 0);
+      short_name_ = "ADJ RGB";
     } break;
     case StockFixture::RGB_ADJ_7CH: {
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
@@ -130,6 +146,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Strobe, 4, false, 0);
       functions_.emplace_back(FunctionType::Pulse, 5, false, 0);
       functions_.emplace_back(FunctionType::Master, 6, false, 0);
+      short_name_ = "ADJ RGB";
     } break;
     case StockFixture::BT_VINTAGE_5CH:
       functions_.emplace_back(FunctionType::White, 0, false, 0);
@@ -138,6 +155,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Green, 3, false, 1);
       functions_.emplace_back(FunctionType::Blue, 4, false, 1);
       class_ = FixtureClass::RingedPar;
+      short_name_ = "BTVint";
       break;
     case StockFixture::BT_VINTAGE_6CH:
       functions_.emplace_back(FunctionType::White, 0, false, 0);
@@ -147,6 +165,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Green, 4, false, 1);
       functions_.emplace_back(FunctionType::Blue, 5, false, 1);
       class_ = FixtureClass::RingedPar;
+      short_name_ = "BTVint";
       break;
     case StockFixture::BT_VINTAGE_7CH: {
       functions_.emplace_back(FunctionType::White, 0, false, 0);
@@ -159,11 +178,13 @@ FixtureType::FixtureType(StockFixture stock_fixture)
           functions_.emplace_back(FunctionType::ColorMacro, 6, false, 1);
       SetBTMacroParameters(macro.GetMacroParameters());
       class_ = FixtureClass::RingedPar;
+      short_name_ = "BTVint";
     } break;
     case StockFixture::RGBLight6Ch_16bit:
       functions_.emplace_back(FunctionType::Red, 0, true, 0);
       functions_.emplace_back(FunctionType::Green, 2, true, 0);
       functions_.emplace_back(FunctionType::Blue, 4, true, 0);
+      short_name_ = "RGB";
       break;
   }
   UpdateFunctions();

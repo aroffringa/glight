@@ -77,6 +77,8 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::Grid right_grid_;
   Gtk::Label name_label_;
   Gtk::Entry name_entry_;
+  Gtk::Label short_name_label_;
+  Gtk::Entry short_name_entry_;
   Gtk::Label class_label_;
   Gtk::ComboBoxText class_combo_;
 

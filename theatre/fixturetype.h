@@ -58,7 +58,7 @@ enum class FixtureClass {
  */
 class FixtureType : public FolderObject {
  public:
-  FixtureType() = default;
+  FixtureType() : FolderObject() { short_name_ = Name(); }
 
   FixtureType(StockFixture stock_fixture);
 
@@ -194,6 +194,9 @@ class FixtureType : public FolderObject {
   }
   unsigned ColorScalingValue() const { return scaling_value_; }
 
+  const std::string &ShortName() const { return short_name_; }
+  void SetShortName(const std::string &short_name) { short_name_ = short_name; }
+
  private:
   void UpdateFunctions();
 
@@ -204,6 +207,7 @@ class FixtureType : public FolderObject {
   FixtureClass class_ = FixtureClass::Par;
   std::vector<FixtureTypeFunction> functions_;
   unsigned scaling_value_;
+  std::string short_name_;
 };
 
 inline std::string FunctionSummary(const FixtureType &fixture_type) {
