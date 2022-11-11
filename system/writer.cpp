@@ -157,6 +157,7 @@ void writeFixtureTypeFunction(WriteState &state,
 void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
   state.writer.StartObject();
   writeFolderAttributes(state, fixtureType);
+  state.writer.String("short-name", fixtureType.ShortName());
   state.writer.String("fixture-class",
                       FixtureType::ClassName(fixtureType.GetFixtureClass()));
   state.writer.Number("shape-count", fixtureType.ShapeCount());

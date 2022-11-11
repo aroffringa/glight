@@ -26,15 +26,17 @@ void Theatre::Clear() {
 
 Fixture &Theatre::AddFixture(const FixtureType &type) {
   // Find free name
-  std::string name = "A";
+  std::string ext = "A";
+  std::string prefix = type.ShortName();
+  if (!prefix.empty()) prefix = prefix + " ";
   while (true) {
-    if (!FolderObject::Contains(_fixtures, name)) {
+    if (!FolderObject::Contains(_fixtures, prefix + ext)) {
       break;
     }
     bool ready = false;
     do {
-      for (size_t i = 0; i != name.size(); ++i) {
-        char &c = name[name.size() - i - 1];
+      for (size_t i = 0; i != ext.size(); ++i) {
+        char &c = ext[ext.size() - i - 1];
         if (c != 'Z') {
           ++c;
           ready = true;
@@ -45,12 +47,12 @@ Fixture &Theatre::AddFixture(const FixtureType &type) {
       }
       if (!ready) {
         // No name available with current string length, increase length
-        name.assign(name.size() + 1, 'A');
+        ext.assign(ext.size() + 1, 'A');
         ready = true;
       }
     } while (!ready);
   }
-  _fixtures.emplace_back(new Fixture(*this, type, name));
+  _fixtures.emplace_back(std::make_unique<Fixture>(*this, type, prefix + ext));
   Fixture &f = *_fixtures.back();
   NotifyDmxChange();
   return f;

@@ -27,12 +27,11 @@ Management::Management()
       _overridenBeat(0),
       _lastOverridenBeatTime(0.0),
 
-      _theatre(new class Theatre()),
-      _primarySnapshot(new ValueSnapshot(true, 0)),
-      _secondarySnapshot(new ValueSnapshot(false, 0)),
-      _show(new class Show(*this)) {
-  _folders.emplace_back(new Folder());
-  _rootFolder = _folders.back().get();
+      _theatre(std::make_unique<Theatre>()),
+      _primarySnapshot(std::make_unique<ValueSnapshot>(true, 0)),
+      _secondarySnapshot(std::make_unique<ValueSnapshot>(false, 0)),
+      _show(std::make_unique<Show>(*this)) {
+  _rootFolder = _folders.emplace_back(std::make_unique<Folder>()).get();
   _rootFolder->SetName("Root");
 }
 
@@ -46,7 +45,7 @@ Management::~Management() {
 }
 
 void Management::StartBeatFinder() {
-  _beatFinder.reset(new BeatFinder());
+  _beatFinder = std::make_unique<BeatFinder>();
   _beatFinder->Start();
 }
 
@@ -56,14 +55,13 @@ void Management::Clear() {
   _controllables.clear();
   _sourceValues.clear();
   _folders.clear();
-  _folders.emplace_back(new Folder());
-  _rootFolder = _folders.back().get();
+  _rootFolder = _folders.emplace_back(std::make_unique<Folder>()).get();
   _rootFolder->SetName("Root");
 
   _theatre->Clear();
 }
 
-void Management::AddDevice(std::unique_ptr<class DmxDevice> device) {
+void Management::AddDevice(std::unique_ptr<DmxDevice> device) {
   std::lock_guard<std::mutex> lock(_mutex);
   _devices.emplace_back(std::move(device));
   _primarySnapshot->SetUniverseCount(_devices.size());
@@ -73,7 +71,7 @@ void Management::AddDevice(std::unique_ptr<class DmxDevice> device) {
 void Management::Run() {
   if (_thread == nullptr) {
     _isQuitting = false;
-    _thread.reset(new std::thread([&]() { ThreadLoop(); }));
+    _thread = std::make_unique<std::thread>([&]() { ThreadLoop(); });
   } else
     throw std::runtime_error("Invalid call to Run(): already running");
 }
@@ -207,7 +205,7 @@ PresetCollection &Management::AddPresetCollection() {
 }
 
 Folder &Management::AddFolder(Folder &parent, const std::string &name) {
-  _folders.emplace_back(new Folder(name));
+  _folders.emplace_back(std::make_unique<Folder>(name));
   parent.Add(*_folders.back());
   return *_folders.back();
 }
