@@ -9,6 +9,8 @@
 #include "../../theatre/presetvalue.h"
 #include "../../theatre/sourcevalue.h"
 
+#include "../../system/uniquewithoutordering.h"
+
 namespace glight::gui {
 
 ToggleWidget::ToggleWidget(theatre::Management &management,
@@ -31,10 +33,10 @@ ToggleWidget::ToggleWidget(theatre::Management &management,
   _flashButtonBox.set_valign(Gtk::ALIGN_CENTER);
   _flashButtonBox.show();
 
-  _onCheckButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &ToggleWidget::onOnButtonClicked));
-  _box.pack_start(_onCheckButton, false, false, 3);
-  _onCheckButton.show();
+  _iconButton.SignalClicked().connect(
+      sigc::mem_fun(*this, &ToggleWidget::onIconClicked));
+  _box.pack_start(_iconButton, false, false, 3);
+  _iconButton.show();
 
   _nameLabel.set_halign(Gtk::ALIGN_START);
   _nameLabel.set_justify(Gtk::JUSTIFY_LEFT);
@@ -51,26 +53,26 @@ ToggleWidget::ToggleWidget(theatre::Management &management,
   _box.show();
 }
 
-void ToggleWidget::onOnButtonClicked() {
+void ToggleWidget::onIconClicked() {
   if (!_holdUpdates) {
     unsigned value;
-    if (_onCheckButton.get_active())
+    if (_iconButton.GetActive())
       value = theatre::ControlValue::MaxUInt();
     else
       value = 0;
 
-    setTargetValue(value);
+    setImmediateValue(value);
     SignalValueChange().emit(value);
   }
 }
 
 bool ToggleWidget::onFlashButtonPressed(GdkEventButton *) {
-  _onCheckButton.set_active(true);
+  _iconButton.SetActive(true);
   return false;
 }
 
 bool ToggleWidget::onFlashButtonReleased(GdkEventButton *) {
-  _onCheckButton.set_active(false);
+  _iconButton.SetActive(false);
   return false;
 }
 
@@ -85,20 +87,26 @@ bool ToggleWidget::onNameLabelClicked(GdkEventButton *) {
 void ToggleWidget::OnAssigned(bool moveFader) {
   if (GetSourceValue() != nullptr) {
     _nameLabel.set_text(GetSourceValue()->Name());
+    const theatre::Controllable *controllable =
+        &GetSourceValue()->GetControllable();
+    const std::vector<theatre::Color> colors =
+        controllable->InputColors(GetSourceValue()->InputIndex());
+    _iconButton.SetColors(UniqueWithoutOrdering(colors));
     if (moveFader) {
-      _onCheckButton.set_active(GetSingleSourceValue().Value().UInt() != 0);
+      _iconButton.SetActive(GetSingleSourceValue().Value().UInt() != 0);
     } else {
-      if (_onCheckButton.get_active())
+      if (_iconButton.GetActive())
         setTargetValue(theatre::ControlValue::MaxUInt());
       else
         setTargetValue(0);
     }
   } else {
     _nameLabel.set_text("<..>");
+    _iconButton.SetColors({});
     if (moveFader) {
-      _onCheckButton.set_active(false);
+      _iconButton.SetActive(false);
     } else {
-      if (_onCheckButton.get_active())
+      if (_iconButton.GetActive())
         setTargetValue(theatre::ControlValue::MaxUInt());
       else
         setTargetValue(0);
@@ -106,7 +114,7 @@ void ToggleWidget::OnAssigned(bool moveFader) {
   }
   if (moveFader) {
     unsigned value;
-    if (_onCheckButton.get_active())
+    if (_iconButton.GetActive())
       value = theatre::ControlValue::MaxUInt();
     else
       value = 0;
@@ -116,22 +124,20 @@ void ToggleWidget::OnAssigned(bool moveFader) {
 
 void ToggleWidget::MoveSlider() {
   if (GetSourceValue() != nullptr) {
-    _onCheckButton.set_active(GetSingleSourceValue().TargetValue() != 0);
-    SignalValueChange().emit(GetSingleSourceValue().TargetValue());
+    const unsigned target_value = GetSingleSourceValue().TargetValue();
+    _iconButton.SetActive(target_value != 0);
+    SignalValueChange().emit(target_value);
   }
 }
 
-void ToggleWidget::Toggle() {
-  _onCheckButton.set_active(!_onCheckButton.get_active());
-}
+void ToggleWidget::Toggle() { _iconButton.SetActive(!_iconButton.GetActive()); }
 
-void ToggleWidget::FullOn() { _onCheckButton.set_active(true); }
+void ToggleWidget::FullOn() { _iconButton.SetActive(true); }
 
-void ToggleWidget::FullOff() { _onCheckButton.set_active(false); }
+void ToggleWidget::FullOff() { _iconButton.SetActive(false); }
 
 void ToggleWidget::Limit(double value) {
-  if (value < theatre::ControlValue::MaxUInt())
-    _onCheckButton.set_active(false);
+  if (value < theatre::ControlValue::MaxUInt()) _iconButton.SetActive(false);
 }
 
 }  // namespace glight::gui
