@@ -7,6 +7,7 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
+#include <gtkmm/overlay.h>
 #include <gtkmm/scale.h>
 
 #include "../components/iconbutton.h"
@@ -33,9 +34,10 @@ class FaderWidget final : public ControlWidget {
     if (_scale.get_value() > value) _scale.set_value(value);
   }
 
-  Gtk::Widget &NameLabel() { return _eventBox; }
+  Gtk::Widget &NameLabel() { return _labelEventBox; }
 
  private:
+  void ShowFadeButtons(bool mouse_in);
   void onScaleChange();
   void onOnButtonClicked();
   bool onNameLabelClicked(GdkEventButton *event);
@@ -44,16 +46,19 @@ class FaderWidget final : public ControlWidget {
   void onFadeUp();
   void onFadeDown();
 
+  Gtk::EventBox _mouseInBox;
+  Gtk::Overlay _overlay;
   Gtk::VBox _box;
   Gtk::Button _fadeUpButton;
   Gtk::VScale _scale;
   Gtk::Button _fadeDownButton;
   Gtk::Button _flashButton;
   IconButton _onCheckButton;
-  Gtk::EventBox _eventBox;
+  Gtk::EventBox _labelEventBox;
   Gtk::Label _nameLabel;
 
-  bool _holdUpdates;
+  bool _mouseIn = false;
+  bool _holdUpdates = false;
 };
 
 }  // namespace glight::gui

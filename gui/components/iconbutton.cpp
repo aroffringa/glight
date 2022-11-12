@@ -124,7 +124,7 @@ bool IconButton::OnEnter(GdkEventCrossing* event) {
     entered_ = true;
     Update();
   }
-  return true;
+  return false;
 }
 
 bool IconButton::OnLeave(GdkEventCrossing* event) {
@@ -132,7 +132,7 @@ bool IconButton::OnLeave(GdkEventCrossing* event) {
     entered_ = false;
     Update();
   }
-  return true;
+  return false;
 }
 
 }  // namespace glight::gui
