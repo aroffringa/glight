@@ -3,6 +3,8 @@
 
 #include "controlwidget.h"
 
+#include "../components/iconbutton.h"
+
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
@@ -29,14 +31,14 @@ class ToggleWidget final : public ControlWidget {
   Gtk::HBox _box;
   Gtk::VBox _flashButtonBox;
   Gtk::Button _flashButton;
-  Gtk::CheckButton _onCheckButton;
+  IconButton _iconButton;
   Gtk::EventBox _eventBox;
   Gtk::Label _nameLabel;
 
   bool _holdUpdates;
 
   virtual void OnAssigned(bool moveFader) override;
-  void onOnButtonClicked();
+  void onIconClicked();
   bool onNameLabelClicked(GdkEventButton *event);
   bool onFlashButtonPressed(GdkEventButton *event);
   bool onFlashButtonReleased(GdkEventButton *event);
