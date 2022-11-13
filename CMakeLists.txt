@@ -39,6 +39,7 @@ set(GUIFILES
   gui/guistate.cpp
   gui/nameframe.cpp
   gui/objectlistframe.cpp
+  gui/renderengine.cpp
   gui/sceneframe.cpp
   gui/components/audiowidget.cpp
   gui/components/colorselectwidget.cpp
