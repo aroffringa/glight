@@ -64,10 +64,11 @@ class Fixture : public NamedObject {
   bool IsVisible() const { return _symbol != FixtureSymbol::Hidden; }
 
   double BeamAngle() const { return _beamAngle; }
-  void SetBeamAngle(double beam_angle) { _beamAngle = beam_angle; } 
-  
+  void SetBeamAngle(double beam_angle) { _beamAngle = beam_angle; }
+
   double Direction() const { return _direction; }
-  void SetDirection(double direction) { _direction = direction; } 
+  void SetDirection(double direction) { _direction = direction; }
+
  private:
   Theatre &_theatre;
   const FixtureType &_type;

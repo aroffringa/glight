@@ -174,34 +174,42 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
                   .timeSince = time - previousTime};
   previousTime = time;
   if (_miDMSPrimary.get_active()) {
-    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style, _selectedFixtures);
+    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                               _selectedFixtures);
   } else if (_miDMSHorizontal.get_active()) {
     style.xOffset = 0;
     style.width = width / 2;
-    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style, _selectedFixtures);
+    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                               _selectedFixtures);
     style.xOffset = style.width;
     style.width = width - style.width;
-    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style, _selectedFixtures);
+    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                               _selectedFixtures);
   } else if (_miDMSVertical.get_active()) {
     style.yOffset = 0;
     style.height = height / 2;
-    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style, _selectedFixtures);
+    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                               _selectedFixtures);
     style.yOffset = style.height;
     style.height = height - style.height;
-    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style, _selectedFixtures);
+    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                               _selectedFixtures);
   } else if (_miDMSShadow.get_active()) {
     style.xOffset = width * 1 / 100;
     style.yOffset = height * 1 / 100;
     style.width = width * 99 / 100;
     style.height = height * 99 / 100;
-    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style, _selectedFixtures);
+    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                               _selectedFixtures);
     style.xOffset = 0;
     style.yOffset = 0;
-    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style, _selectedFixtures);
+    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                               _selectedFixtures);
   } else {  // Secondary
-    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style, _selectedFixtures);
+    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                               _selectedFixtures);
   }
-  
+
   if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
     std::pair<double, double> size = _draggingTo - _draggingStart;
     cairo->rectangle(_draggingStart.X(), _draggingStart.Y(), size.first,
@@ -224,9 +232,9 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
       height = _drawingArea.get_height();
     else  // TODO other dry mode styles
       height = _drawingArea.get_height() / 2.0;
-    const theatre::Position pos = _renderEngine.MouseToPosition(event->x, event->y, _drawingArea.get_width(), height);
-    theatre::Fixture *selectedFixture =
-      _renderEngine.FixtureAt(pos);
+    const theatre::Position pos = _renderEngine.MouseToPosition(
+        event->x, event->y, _drawingArea.get_width(), height);
+    theatre::Fixture *selectedFixture = _renderEngine.FixtureAt(pos);
     if (!shift) {
       if (selectedFixture) {
         // Was a fixture clicked that was already selected? Then keep all
@@ -270,7 +278,9 @@ bool VisualizationWindow::onButtonRelease(GdkEventButton *event) {
   if (event->button == 1) {
     if (_dragType == DragFixture) {
       // TODO correct width/height for layout
-      _draggingStart = _renderEngine.MouseToPosition(event->x, event->y, _drawingArea.get_width(), _drawingArea.get_height());
+      _draggingStart = _renderEngine.MouseToPosition(event->x, event->y,
+                                                     _drawingArea.get_width(),
+                                                     _drawingArea.get_height());
     } else if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
     }
     _globalSelection->SetSelection(_selectedFixtures);
