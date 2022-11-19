@@ -1,6 +1,7 @@
 #include "visualizationwindow.h"
 
 #include "addfixturewindow.h"
+#include "fixtureproperties.h"
 #include "showwindow.h"
 
 #include "../designwizard.h"
@@ -39,6 +40,7 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
       _miRemove("Remove"),
       _miDesign("Design..."),
       _miFullscreen("Fullscreen"),
+      _miProperties("Properties"),
       _miDMSPrimary("Primary"),
       _miDMSSecondary("Secondary"),
       _miDMSVertical("Vertical"),
@@ -125,6 +127,9 @@ void VisualizationWindow::inializeContextMenu() {
 
   _miFullscreen.signal_activate().connect([&] { onFullscreen(); });
   _popupMenu.add(_miFullscreen);
+
+  _miProperties.signal_activate().connect([&] { onFixtureProperties(); });
+  _popupMenu.add(_miProperties);
 
   _popupMenu.show_all_children();
 }
@@ -242,9 +247,11 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
         if (std::find(_selectedFixtures.begin(), _selectedFixtures.end(),
                       selectedFixture) == _selectedFixtures.end()) {
           _selectedFixtures.assign(1, selectedFixture);
+          _globalSelection->SetSelection(_selectedFixtures);
         }
       } else {
         _selectedFixtures.clear();
+        _globalSelection->SetSelection(_selectedFixtures);
       }
     }
 
@@ -268,6 +275,7 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
       _miDistributeEvenly.set_sensitive(_selectedFixtures.size() >= 2);
       _miRemove.set_sensitive(_selectedFixtures.size() >= 1);
       _miSymbolMenu.set_sensitive(_selectedFixtures.size() >= 1);
+      _miProperties.set_sensitive(_selectedFixtures.size() >= 1);
       _popupMenu.popup(event->button, event->time);
     }
   }
@@ -450,6 +458,14 @@ void VisualizationWindow::onFullscreen() {
     fullscreen();
   else
     unfullscreen();
+}
+
+void VisualizationWindow::onFixtureProperties() {
+  if (!_propertiesWindow) {
+    _propertiesWindow = system::MakeDeletable<windows::FixtureProperties>(
+        *_eventTransmitter, *_management, *_globalSelection);
+  }
+  _propertiesWindow->present();
 }
 
 void VisualizationWindow::onSetSymbol(theatre::FixtureSymbol::Symbol symbol) {

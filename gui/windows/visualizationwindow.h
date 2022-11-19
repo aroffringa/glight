@@ -1,11 +1,13 @@
-#ifndef GUI_VISUALIZATIONWINDOW_H_
-#define GUI_VISUALIZATIONWINDOW_H_
+#ifndef GLIGHT_GUI_VISUALIZATION_WINDOW_H_
+#define GLIGHT_GUI_VISUALIZATION_WINDOW_H_
 
 #include "../../theatre/fixturesymbol.h"
 #include "../../theatre/forwards.h"
 #include "../../theatre/position.h"
 
 #include "../renderengine.h"
+
+#include "../../system/deletableptr.h"
 
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/checkmenuitem.h>
@@ -21,6 +23,10 @@ class EventTransmitter;
 class FixtureSelection;
 class ShowWindow;
 
+namespace windows {
+class FixtureProperties;
+}
+
 class VisualizationWindow : public Gtk::Window {
  public:
   VisualizationWindow(theatre::Management *management,
@@ -32,12 +38,17 @@ class VisualizationWindow : public Gtk::Window {
   void Update() { queue_draw(); }
 
  private:
+  VisualizationWindow(const VisualizationWindow &) = delete;
+  VisualizationWindow &operator=(const VisualizationWindow &) = delete;
+
   Gtk::DrawingArea _drawingArea;
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;
   FixtureSelection *_globalSelection;
   sigc::connection _globalSelectionConnection;
   ShowWindow *_showWindow;
+  system::DeletablePtr<glight::gui::windows::FixtureProperties>
+      _propertiesWindow;
   bool _isInitialized, _isTimerRunning;
   sigc::connection _timeoutConnection;
   enum DragType {
@@ -57,6 +68,7 @@ class VisualizationWindow : public Gtk::Window {
       _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miDesign;
   Gtk::CheckMenuItem _miFullscreen;
   Gtk::Menu _symbolMenu, _dryModeStyleMenu;
+  Gtk::MenuItem _miProperties;
   std::vector<Gtk::MenuItem> _miSymbols;
   Gtk::RadioMenuItem _miDMSPrimary, _miDMSSecondary, _miDMSVertical,
       _miDMSHorizontal, _miDMSShadow;
@@ -74,6 +86,7 @@ class VisualizationWindow : public Gtk::Window {
     return true;
   }
 
+  void onFixtureProperties();
   void onAlignHorizontally();
   void onAlignVertically();
   void onDistributeEvenly();

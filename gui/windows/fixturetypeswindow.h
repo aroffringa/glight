@@ -48,7 +48,6 @@ class FixtureTypesWindow : public Gtk::Window {
   EventTransmitter *event_hub_;
   theatre::Management *management_;
 
-  sigc::connection change_management_connection_;
   sigc::connection update_controllables_connection_;
   RecursionLock recursion_lock_;
 
@@ -81,6 +80,10 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::Entry short_name_entry_;
   Gtk::Label class_label_;
   Gtk::ComboBoxText class_combo_;
+  Gtk::Label beam_angle_label_;
+  Gtk::Entry beam_angle_entry_;
+  Gtk::Label brightness_label_;
+  Gtk::Entry brightness_entry_;
 
   FixtureTypeFunctionsFrame functions_frame_;
 

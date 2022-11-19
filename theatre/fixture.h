@@ -63,18 +63,18 @@ class Fixture : public NamedObject {
   void SetSymbol(FixtureSymbol symbol) { _symbol = symbol; }
   bool IsVisible() const { return _symbol != FixtureSymbol::Hidden; }
 
-  double BeamAngle() const { return _beamAngle; }
-  void SetBeamAngle(double beam_angle) { _beamAngle = beam_angle; }
-
   double Direction() const { return _direction; }
   void SetDirection(double direction) { _direction = direction; }
+
+  double Tilt() const { return _tilt; }
+  void SetTilt(double tilt) { _tilt = tilt; }
 
  private:
   Theatre &_theatre;
   const FixtureType &_type;
   Position _position;
-  double _beamAngle = 30.0 * M_PI / 180.0;
   double _direction = 0.0;
+  double _tilt = 0.0;
   FixtureSymbol _symbol;
   std::vector<std::unique_ptr<FixtureFunction>> _functions;
 };

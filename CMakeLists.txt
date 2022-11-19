@@ -58,6 +58,7 @@ set(GUIFILES
   gui/windows/chasepropertieswindow.cpp
   gui/windows/effectpropertieswindow.cpp
   gui/windows/fixturelistwindow.cpp
+  gui/windows/fixtureproperties.cpp
   gui/windows/fixturetypeswindow.cpp
   gui/windows/fixturetypefunctionsframe.cpp
   gui/windows/presetcollectionwindow.cpp
@@ -118,6 +119,7 @@ if(Boost_FOUND)
     tests/runtests.cpp 
     tests/tchase.cpp
     tests/tcontrolvalue.cpp
+    tests/tdeletableptr.cpp
     tests/tfileformat.cpp
     tests/tfixturecontrol.cpp
     tests/tfixturefunction.cpp

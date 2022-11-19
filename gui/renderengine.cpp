@@ -52,17 +52,16 @@ struct DrawData {
 };
 
 void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
-  size_t shape_count = fixture.Type().ShapeCount();
+  const glight::theatre::FixtureType &type = fixture.Type();
+  size_t shape_count = type.ShapeCount();
   for (size_t shape_index = 0; shape_index != shape_count; ++shape_index) {
     const theatre::Color c = fixture.GetColor(data.snapshot, shape_index);
     if (c != theatre::Color::Black()) {
-      const double direction_1 =
-          fixture.Direction() - fixture.BeamAngle() * 0.5;
-      const double direction_2 =
-          fixture.Direction() + fixture.BeamAngle() * 0.5;
+      const double direction_1 = fixture.Direction() - type.BeamAngle() * 0.5;
+      const double direction_2 = fixture.Direction() + type.BeamAngle() * 0.5;
       const double radius = GetRadius(fixture.Symbol().Value());
       const double beam_start_radius = radius * 1.2;
-      const double beam_end_radius = radius * 10;
+      const double beam_end_radius = radius * type.Brightness();
       const double x =
           fixture.GetPosition().X() + 0.5 + data.style.xOffset / data.scale;
       const double y =
