@@ -216,14 +216,7 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
   }
 
   if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
-    std::pair<double, double> size = _draggingTo - _draggingStart;
-    cairo->rectangle(_draggingStart.X(), _draggingStart.Y(), size.first,
-                     size.second);
-    cairo->set_source_rgba(0.2, 0.2, 1.0, 0.5);
-    cairo->fill_preserve();
-    cairo->set_source_rgba(0.5, 0.5, 1.0, 0.8);
-    cairo->set_line_width(2.0);
-    cairo->stroke();
+    _renderEngine.DrawSelectionRectangle(cairo, _draggingStart, _draggingTo);
   }
 }
 

@@ -32,6 +32,10 @@ class RenderEngine {
                     const DrawStyle &style,
                     const std::vector<theatre::Fixture *> &selected_fixtures);
 
+  void DrawSelectionRectangle(const Cairo::RefPtr<Cairo::Context> &cairo,
+                              const theatre::Position &from,
+                              const theatre::Position &to);
+
   theatre::Fixture *FixtureAt(const theatre::Position &position) const;
   theatre::Fixture *FixtureAt(double mouse_x, double mouse_y, double width,
                               double height) const {
@@ -43,6 +47,7 @@ class RenderEngine {
  private:
   const theatre::Management &management_;
   std::vector<FixtureState> state_;
+  double scale_;
 };
 
 }  // namespace glight::gui
