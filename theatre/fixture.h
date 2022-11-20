@@ -73,7 +73,7 @@ class Fixture : public NamedObject {
   Theatre &_theatre;
   const FixtureType &_type;
   Position _position;
-  double _direction = 0.0;
+  double _direction = 0.5 * M_PI;
   double _tilt = 0.0;
   FixtureSymbol _symbol;
   std::vector<std::unique_ptr<FixtureFunction>> _functions;
