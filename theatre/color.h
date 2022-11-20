@@ -82,6 +82,11 @@ inline bool operator==(const Color &lhs, const Color &rhs) {
          lhs.Blue() == rhs.Blue();
 }
 
+inline bool operator!=(const Color &lhs, const Color &rhs) {
+  return lhs.Red() != rhs.Red() || lhs.Green() != rhs.Green() ||
+         lhs.Blue() != rhs.Blue();
+}
+
 inline bool operator<(const Color &lhs, const Color &rhs) {
   if (lhs.Red() < rhs.Red())
     return true;

@@ -4,6 +4,8 @@
 #include "dmxchannel.h"
 #include "valueuniversesnapshot.h"
 
+#include <memory>
+
 namespace glight::theatre {
 
 class ValueSnapshot {

@@ -1,6 +1,7 @@
 #include "visualizationwindow.h"
 
 #include "addfixturewindow.h"
+#include "fixtureproperties.h"
 #include "showwindow.h"
 
 #include "../designwizard.h"
@@ -29,6 +30,7 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
       _isTimerRunning(false),
       _dragType(NotDragging),
       _selectedFixtures(),
+      _renderEngine(*management),
       _miSymbolMenu("Symbol"),
       _miDryModeStyle("Dry mode style"),
       _miAlignHorizontally("Align horizontally"),
@@ -38,6 +40,7 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
       _miRemove("Remove"),
       _miDesign("Design..."),
       _miFullscreen("Fullscreen"),
+      _miProperties("Properties"),
       _miDMSPrimary("Primary"),
       _miDMSSecondary("Secondary"),
       _miDMSVertical("Vertical"),
@@ -125,6 +128,9 @@ void VisualizationWindow::inializeContextMenu() {
   _miFullscreen.signal_activate().connect([&] { onFullscreen(); });
   _popupMenu.add(_miFullscreen);
 
+  _miProperties.signal_activate().connect([&] { onFixtureProperties(); });
+  _popupMenu.add(_miProperties);
+
   _popupMenu.show_all_children();
 }
 
@@ -155,99 +161,6 @@ bool VisualizationWindow::onExpose(
   return true;
 }
 
-double VisualizationWindow::scale(double width, double height) const {
-  const theatre::Theatre &theatre = _management->GetTheatre();
-  theatre::Position extend = theatre.Extend();
-  if (extend.X() == 0.0 || extend.Y() == 0.0)
-    return 1.0;
-  else
-    return std::min(width / extend.X(), height / extend.Y());
-}
-
-void VisualizationWindow::drawManagement(
-    const Cairo::RefPtr<Cairo::Context> &cairo,
-    const theatre::ValueSnapshot &snapshot, const DrawStyle &style) {
-  const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
-      _management->GetTheatre().Fixtures();
-  cairo->save();
-  double sc = scale(style.width, style.height);
-  cairo->scale(sc, sc);
-
-  _fixtureStates.resize(fixtures.size());
-  for (size_t fixtureIndex = 0; fixtureIndex != fixtures.size();
-       ++fixtureIndex) {
-    const theatre::Fixture &fixture = *fixtures[fixtureIndex];
-    FixtureState &state = _fixtureStates[fixtureIndex];
-    if (fixture.IsVisible()) {
-      size_t shapeCount = fixture.Type().ShapeCount();
-      for (size_t i = 0; i != shapeCount; ++i) {
-        const size_t shapeIndex = shapeCount - i - 1;
-        const Color c = fixture.GetColor(snapshot, shapeIndex);
-
-        cairo->set_source_rgb((double)c.Red() / 224.0 + 0.125,
-                              (double)c.Green() / 224.0 + 0.125,
-                              (double)c.Blue() / 224.0 + 0.125);
-
-        const double singleRadius = radius(fixture.Symbol().Value());
-        const double radius =
-            shapeCount == 1
-                ? singleRadius
-                : 0.33 + 0.07 * double(shapeIndex) / (shapeCount - 1);
-        const double x = fixture.GetPosition().X() + 0.5;
-        const double y = fixture.GetPosition().Y() + 0.5;
-        cairo->arc(x + style.xOffset / sc, y + style.yOffset / sc, radius, 0.0,
-                   2.0 * M_PI);
-        cairo->fill();
-
-        const int rotation = fixture.GetRotationSpeed(snapshot, shapeIndex);
-        if (rotation != 0) {
-          const double rotationDisp =
-              M_PI * double(rotation) * style.timeSince / (10.0 * (1 << 24));
-          state.rotation = std::fmod(rotationDisp + state.rotation, M_PI);
-          const double s = std::sin(state.rotation);
-          const double c = std::cos(state.rotation);
-          cairo->set_line_width(radius * 0.2);
-          cairo->set_source_rgb(0, 0, 0);
-          cairo->move_to(x + c * radius + style.xOffset / sc,
-                         y + s * radius + style.yOffset / sc);
-          cairo->line_to(x - c * radius + style.xOffset / sc,
-                         y - s * radius + style.yOffset / sc);
-          cairo->move_to(x + s * radius + style.xOffset / sc,
-                         y - c * radius + style.yOffset / sc);
-          cairo->line_to(x - s * radius + style.xOffset / sc,
-                         y + c * radius + style.yOffset / sc);
-          cairo->stroke();
-        }
-      }
-    }
-  }
-  cairo->set_source_rgb(0.2, 0.2, 1.0);
-  cairo->set_line_width(4.0 / sc);
-  for (const theatre::Fixture *f : _selectedFixtures) {
-    if (f->IsVisible()) {
-      double rad = radius(f->Symbol().Value());
-      double x = f->GetPosition().X() + 0.5;
-      double y = f->GetPosition().Y() + 0.5;
-      cairo->arc(x + style.xOffset / sc, y + style.yOffset / sc, rad, 0.0,
-                 2.0 * M_PI);
-      cairo->stroke();
-    }
-  }
-
-  if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
-    std::pair<double, double> size = _draggingTo - _draggingStart;
-    cairo->rectangle(_draggingStart.X(), _draggingStart.Y(), size.first,
-                     size.second);
-    cairo->set_source_rgba(0.2, 0.2, 1.0, 0.5);
-    cairo->fill_preserve();
-    cairo->set_source_rgba(0.5, 0.5, 1.0, 0.8);
-    cairo->set_line_width(2.0 / sc);
-    cairo->stroke();
-  }
-
-  cairo->restore();
-}
-
 void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
   const size_t width = _drawingArea.get_width();
   const size_t height = _drawingArea.get_height();
@@ -266,56 +179,45 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
                   .timeSince = time - previousTime};
   previousTime = time;
   if (_miDMSPrimary.get_active()) {
-    drawManagement(cairo, _management->PrimarySnapshot(), style);
+    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                               _selectedFixtures);
   } else if (_miDMSHorizontal.get_active()) {
     style.xOffset = 0;
     style.width = width / 2;
-    drawManagement(cairo, _management->PrimarySnapshot(), style);
+    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                               _selectedFixtures);
     style.xOffset = style.width;
     style.width = width - style.width;
-    drawManagement(cairo, _management->SecondarySnapshot(), style);
+    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                               _selectedFixtures);
   } else if (_miDMSVertical.get_active()) {
     style.yOffset = 0;
     style.height = height / 2;
-    drawManagement(cairo, _management->PrimarySnapshot(), style);
+    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                               _selectedFixtures);
     style.yOffset = style.height;
     style.height = height - style.height;
-    drawManagement(cairo, _management->SecondarySnapshot(), style);
+    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                               _selectedFixtures);
   } else if (_miDMSShadow.get_active()) {
     style.xOffset = width * 1 / 100;
     style.yOffset = height * 1 / 100;
     style.width = width * 99 / 100;
     style.height = height * 99 / 100;
-    drawManagement(cairo, _management->PrimarySnapshot(), style);
+    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                               _selectedFixtures);
     style.xOffset = 0;
     style.yOffset = 0;
-    drawManagement(cairo, _management->SecondarySnapshot(), style);
+    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                               _selectedFixtures);
   } else {  // Secondary
-    drawManagement(cairo, _management->SecondarySnapshot(), style);
+    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                               _selectedFixtures);
   }
-}
 
-theatre::Fixture *VisualizationWindow::fixtureAt(
-    theatre::Management &management, const theatre::Position &position) {
-  const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
-      management.GetTheatre().Fixtures();
-
-  theatre::Fixture *fix = nullptr;
-  double closest = std::numeric_limits<double>::max();
-  for (const std::unique_ptr<theatre::Fixture> &f : fixtures) {
-    if (f->IsVisible() &&
-        position.InsideRectangle(f->GetPosition(),
-                                 f->GetPosition().Add(1.0, 1.0))) {
-      double distanceSq =
-          position.SquaredDistance(f->GetPosition().Add(0.5, 0.5));
-      double radSq = radiusSq(f->Symbol().Value());
-      if (distanceSq <= radSq && distanceSq < closest) {
-        fix = f.get();
-        closest = distanceSq;
-      }
-    }
+  if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
+    _renderEngine.DrawSelectionRectangle(cairo, _draggingStart, _draggingTo);
   }
-  return fix;
 }
 
 bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
@@ -328,9 +230,9 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
       height = _drawingArea.get_height();
     else  // TODO other dry mode styles
       height = _drawingArea.get_height() / 2.0;
-    const double sc = invScale(_drawingArea.get_width(), height);
-    const theatre::Position pos = theatre::Position(event->x, event->y) * sc;
-    theatre::Fixture *selectedFixture = fixtureAt(*_management, pos);
+    const theatre::Position pos = _renderEngine.MouseToPosition(
+        event->x, event->y, _drawingArea.get_width(), height);
+    theatre::Fixture *selectedFixture = _renderEngine.FixtureAt(pos);
     if (!shift) {
       if (selectedFixture) {
         // Was a fixture clicked that was already selected? Then keep all
@@ -338,9 +240,11 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
         if (std::find(_selectedFixtures.begin(), _selectedFixtures.end(),
                       selectedFixture) == _selectedFixtures.end()) {
           _selectedFixtures.assign(1, selectedFixture);
+          _globalSelection->SetSelection(_selectedFixtures);
         }
       } else {
         _selectedFixtures.clear();
+        _globalSelection->SetSelection(_selectedFixtures);
       }
     }
 
@@ -364,6 +268,7 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
       _miDistributeEvenly.set_sensitive(_selectedFixtures.size() >= 2);
       _miRemove.set_sensitive(_selectedFixtures.size() >= 1);
       _miSymbolMenu.set_sensitive(_selectedFixtures.size() >= 1);
+      _miProperties.set_sensitive(_selectedFixtures.size() >= 1);
       _popupMenu.popup(event->button, event->time);
     }
   }
@@ -372,10 +277,11 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
 
 bool VisualizationWindow::onButtonRelease(GdkEventButton *event) {
   if (event->button == 1) {
-    const double sc =
-        invScale(_drawingArea.get_width(), _drawingArea.get_height());
     if (_dragType == DragFixture) {
-      _draggingStart = theatre::Position(event->x, event->y) * sc;
+      // TODO correct width/height for layout
+      _draggingStart = _renderEngine.MouseToPosition(event->x, event->y,
+                                                     _drawingArea.get_width(),
+                                                     _drawingArea.get_height());
     } else if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
     }
     _globalSelection->SetSelection(_selectedFixtures);
@@ -391,7 +297,7 @@ bool VisualizationWindow::onMotion(GdkEventMotion *event) {
     const double width = _drawingArea.get_width();
     const double height = _drawingArea.get_height();
     const theatre::Position pos =
-        theatre::Position(event->x, event->y) / scale(width, height);
+        _renderEngine.MouseToPosition(event->x, event->y, width, height);
     switch (_dragType) {
       case NotDragging:
         break;
@@ -545,6 +451,14 @@ void VisualizationWindow::onFullscreen() {
     fullscreen();
   else
     unfullscreen();
+}
+
+void VisualizationWindow::onFixtureProperties() {
+  if (!_propertiesWindow) {
+    _propertiesWindow = system::MakeDeletable<windows::FixtureProperties>(
+        *_eventTransmitter, *_management, *_globalSelection);
+  }
+  _propertiesWindow->present();
 }
 
 void VisualizationWindow::onSetSymbol(theatre::FixtureSymbol::Symbol symbol) {

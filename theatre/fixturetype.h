@@ -197,6 +197,23 @@ class FixtureType : public FolderObject {
   const std::string &ShortName() const { return short_name_; }
   void SetShortName(const std::string &short_name) { short_name_ = short_name; }
 
+  /**
+   * For a non-zoomable fixture, the static full-width half-maximum angle
+   * of the beam in radians. If the fixture can zoom, it returns the
+   * smallest angle that the beam can make. If the fixture has no beam, it will
+   * be zero.
+   */
+  double BeamAngle() const { return beam_angle_; }
+  void SetBeamAngle(double beam_angle) { beam_angle_ = beam_angle; }
+
+  /**
+   * Distance in meters that the beam can reach at the static beam angle.
+   * For a zoomable fixture, it is the reached distance when using the smallest
+   * angle.
+   */
+  double Brightness() const { return brightness_; }
+  void SetBrightness(double brightness) { brightness_ = brightness; }
+
  private:
   void UpdateFunctions();
 
@@ -208,6 +225,8 @@ class FixtureType : public FolderObject {
   std::vector<FixtureTypeFunction> functions_;
   unsigned scaling_value_;
   std::string short_name_;
+  double beam_angle_ = 30.0 * M_PI / 180.0;
+  double brightness_ = 10.0;
 };
 
 inline std::string FunctionSummary(const FixtureType &fixture_type) {

@@ -1,9 +1,13 @@
-#ifndef GUI_VISUALIZATIONWINDOW_H_
-#define GUI_VISUALIZATIONWINDOW_H_
+#ifndef GLIGHT_GUI_VISUALIZATION_WINDOW_H_
+#define GLIGHT_GUI_VISUALIZATION_WINDOW_H_
 
 #include "../../theatre/fixturesymbol.h"
 #include "../../theatre/forwards.h"
 #include "../../theatre/position.h"
+
+#include "../renderengine.h"
+
+#include "../../system/deletableptr.h"
 
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/checkmenuitem.h>
@@ -19,6 +23,10 @@ class EventTransmitter;
 class FixtureSelection;
 class ShowWindow;
 
+namespace windows {
+class FixtureProperties;
+}
+
 class VisualizationWindow : public Gtk::Window {
  public:
   VisualizationWindow(theatre::Management *management,
@@ -30,12 +38,17 @@ class VisualizationWindow : public Gtk::Window {
   void Update() { queue_draw(); }
 
  private:
+  VisualizationWindow(const VisualizationWindow &) = delete;
+  VisualizationWindow &operator=(const VisualizationWindow &) = delete;
+
   Gtk::DrawingArea _drawingArea;
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;
   FixtureSelection *_globalSelection;
   sigc::connection _globalSelectionConnection;
   ShowWindow *_showWindow;
+  system::DeletablePtr<glight::gui::windows::FixtureProperties>
+      _propertiesWindow;
   bool _isInitialized, _isTimerRunning;
   sigc::connection _timeoutConnection;
   enum DragType {
@@ -47,10 +60,7 @@ class VisualizationWindow : public Gtk::Window {
   std::vector<theatre::Fixture *> _selectedFixtures,
       _selectedFixturesBeforeDrag;
   theatre::Position _draggingStart, _draggingTo;
-  struct FixtureState {
-    double rotation = 0.0;
-  };
-  std::vector<FixtureState> _fixtureStates;
+  RenderEngine _renderEngine;
 
   Gtk::Menu _popupMenu;
   Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
@@ -58,6 +68,7 @@ class VisualizationWindow : public Gtk::Window {
       _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miDesign;
   Gtk::CheckMenuItem _miFullscreen;
   Gtk::Menu _symbolMenu, _dryModeStyleMenu;
+  Gtk::MenuItem _miProperties;
   std::vector<Gtk::MenuItem> _miSymbols;
   Gtk::RadioMenuItem _miDMSPrimary, _miDMSSecondary, _miDMSVertical,
       _miDMSHorizontal, _miDMSShadow;
@@ -65,16 +76,6 @@ class VisualizationWindow : public Gtk::Window {
   void inializeContextMenu();
   void initialize();
   void drawAll(const Cairo::RefPtr<Cairo::Context> &cairo);
-  struct DrawStyle {
-    size_t xOffset;
-    size_t yOffset;
-    size_t width;
-    size_t height;
-    double timeSince;
-  };
-  void drawManagement(const Cairo::RefPtr<Cairo::Context> &cairo,
-                      const theatre::ValueSnapshot &snapshot,
-                      const DrawStyle &style);
   void onTheatreChanged();
   bool onButtonPress(GdkEventButton *event);
   bool onButtonRelease(GdkEventButton *event);
@@ -84,23 +85,8 @@ class VisualizationWindow : public Gtk::Window {
     Update();
     return true;
   }
-  static double radius(theatre::FixtureSymbol::Symbol symbol) {
-    switch (symbol) {
-      case theatre::FixtureSymbol::Hidden:
-        return 0.0;
-      case theatre::FixtureSymbol::Small:
-        return 0.3;
-      case theatre::FixtureSymbol::Normal:
-        return 0.4;
-      case theatre::FixtureSymbol::Large:
-        return 0.5;
-    }
-    return 0.4;
-  }
-  static double radiusSq(theatre::FixtureSymbol::Symbol symbol) {
-    return radius(symbol) * radius(symbol);
-  }
 
+  void onFixtureProperties();
   void onAlignHorizontally();
   void onAlignVertically();
   void onDistributeEvenly();
@@ -111,16 +97,6 @@ class VisualizationWindow : public Gtk::Window {
   void onSetSymbol(theatre::FixtureSymbol::Symbol symbol);
   void onGlobalSelectionChanged();
 
-  double scale(double width, double height) const;
-  double invScale(double width, double height) {
-    const double sc = scale(width, height);
-    if (sc == 0.0)
-      return 1.0;
-    else
-      return 1.0 / sc;
-  }
-  theatre::Fixture *fixtureAt(theatre::Management &management,
-                              const theatre::Position &position);
   void selectFixtures(const theatre::Position &a, const theatre::Position &b);
   void addFixtures(const theatre::Position &a, const theatre::Position &b);
 };

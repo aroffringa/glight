@@ -13,6 +13,8 @@
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 
+#include <algorithm>
+
 namespace glight::gui {
 
 FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
@@ -22,6 +24,8 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
       name_label_("Name:"),
       short_name_label_("Short name:"),
       class_label_("Class:"),
+      beam_angle_label_("Beam angle:"),
+      brightness_label_("Brightness:"),
       new_button_("New"),
       remove_button_("Remove"),
       save_button_("Save") {
@@ -67,7 +71,14 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
     class_combo_.append(theatre::FixtureType::ClassName(c));
   right_grid_.attach(class_combo_, 1, 2);
   class_combo_.set_hexpand(true);
-  right_grid_.attach(functions_frame_, 0, 3, 2, 1);
+
+  right_grid_.attach(beam_angle_label_, 0, 3);
+  right_grid_.attach(beam_angle_entry_, 1, 3);
+
+  right_grid_.attach(brightness_label_, 0, 4);
+  right_grid_.attach(brightness_entry_, 1, 4);
+
+  right_grid_.attach(functions_frame_, 0, 5, 2, 1);
   functions_frame_.set_vexpand(true);
   functions_frame_.set_hexpand(true);
 
@@ -105,7 +116,6 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
 }
 
 FixtureTypesWindow::~FixtureTypesWindow() {
-  change_management_connection_.disconnect();
   update_controllables_connection_.disconnect();
 }
 
@@ -154,13 +164,9 @@ void FixtureTypesWindow::onRemoveClicked() {
 
 void FixtureTypesWindow::onSaveClicked() {
   theatre::FixtureType *type = getSelected();
+  bool is_used = false;
   if (type) {
-    if (management_->GetTheatre().IsUsed(*type)) {
-      Gtk::MessageDialog dialog(*this,
-                                "A used type can not be changed: first remove "
-                                "all fixtures of this type");
-      dialog.run();
-    }
+    is_used = management_->GetTheatre().IsUsed(*type);
   } else {
     theatre::FixtureType ft;
     type = &management_->GetTheatre().AddFixtureType(ft);
@@ -168,9 +174,15 @@ void FixtureTypesWindow::onSaveClicked() {
   }
   type->SetName(name_entry_.get_text());
   type->SetShortName(short_name_entry_.get_text());
-  type->SetFixtureClass(
-      theatre::FixtureType::NameToClass(class_combo_.get_active_text()));
-  type->SetFunctions(functions_frame_.GetFunctions());
+  const double beam_angle = std::atof(beam_angle_entry_.get_text().c_str());
+  type->SetBeamAngle(std::clamp(beam_angle, 0.0, 360.0) * M_PI / 180.0);
+  const double brightness = std::atof(brightness_entry_.get_text().c_str());
+  type->SetBrightness(std::clamp(brightness, 0.0, 100.0));
+  if (!is_used) {
+    type->SetFunctions(functions_frame_.GetFunctions());
+    type->SetFixtureClass(
+        theatre::FixtureType::NameToClass(class_combo_.get_active_text()));
+  }
   event_hub_->EmitUpdate();
 }
 
@@ -197,14 +209,26 @@ void FixtureTypesWindow::onSelectionChanged() {
     save_button_.set_sensitive(has_selection);
     right_grid_.set_sensitive(has_selection);
     if (type) {
+      const bool is_used = management_->GetTheatre().IsUsed(*type);
       name_entry_.set_text(type->Name());
       short_name_entry_.set_text(type->ShortName());
+      beam_angle_entry_.set_text(
+          std::to_string(type->BeamAngle() * 180.0 / M_PI));
+      brightness_entry_.set_text(std::to_string(type->Brightness()));
+      class_combo_.set_sensitive(is_used);
       class_combo_.set_active_text(
           theatre::FixtureType::ClassName(type->GetFixtureClass()));
+      functions_frame_.set_sensitive(is_used);
       functions_frame_.SetFunctions(type->Functions());
     } else {
+      name_entry_.set_text("");
+      short_name_entry_.set_text("");
+      beam_angle_entry_.set_text("30");
+      brightness_entry_.set_text("10");
+      class_combo_.set_sensitive(true);
       class_combo_.set_active_text(
           theatre::FixtureType::ClassName(theatre::FixtureClass::Par));
+      functions_frame_.set_sensitive(true);
       functions_frame_.SetFunctions({});
     }
   }
