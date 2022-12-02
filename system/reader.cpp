@@ -131,6 +131,8 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
     ft.SetShortName(ToStr(ft_node["short-name"]));
     const std::string &class_name = ToStr(ft_node["fixture-class"]);
     ft.SetFixtureClass(FixtureType::NameToClass(class_name));
+    ft.SetBeamAngle(ToNum(ft_node["beam-angle"]).AsDouble());
+    ft.SetBrightness(ToNum(ft_node["brightness"]).AsDouble());
     FixtureType &new_type = management.GetTheatre().AddFixtureType(ft);
     if (management.RootFolder().GetChildIfExists(new_type.Name())) {
       throw std::runtime_error("Error in file: fixture type listed twice");
@@ -163,6 +165,8 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     ParseNameAttr(f_node, fixture);
     fixture.GetPosition().X() = ToNum(f_node["position-x"]).AsDouble();
     fixture.GetPosition().Y() = ToNum(f_node["position-y"]).AsDouble();
+    fixture.SetDirection(ToNum(f_node["direction"]).AsDouble());
+    fixture.SetTilt(ToNum(f_node["tilt"]).AsDouble());
     fixture.SetSymbol(FixtureSymbol(ToStr(f_node["symbol"])));
     fixture.ClearFunctions();
 

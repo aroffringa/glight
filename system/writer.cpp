@@ -86,6 +86,8 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   state.writer.String("type", fixture.Type().Name());
   state.writer.Number("position-x", fixture.GetPosition().X());
   state.writer.Number("position-y", fixture.GetPosition().Y());
+  state.writer.Number("direction", fixture.Direction());
+  state.writer.Number("tilt", fixture.Tilt());
   state.writer.String("symbol", fixture.Symbol().Name());
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =
       fixture.Functions();
@@ -161,6 +163,8 @@ void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
   state.writer.String("fixture-class",
                       FixtureType::ClassName(fixtureType.GetFixtureClass()));
   state.writer.Number("shape-count", fixtureType.ShapeCount());
+  state.writer.Number("beam-angle", fixtureType.BeamAngle());
+  state.writer.Number("brightness", fixtureType.Brightness());
   state.writer.StartArray("functions");
   for (const FixtureTypeFunction &f : fixtureType.Functions()) {
     writeFixtureTypeFunction(state, f);
