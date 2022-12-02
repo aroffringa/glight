@@ -32,6 +32,49 @@ void ColorSelectWidget::onColorClicked() {
   dialog.set_transient_for(*_parent);
   dialog.set_rgba(color);
   dialog.set_use_alpha(false);
+  const std::vector<Gdk::RGBA> colors{
+    Gdk::RGBA("#FF0000"),
+    Gdk::RGBA("#FF4000"),
+    Gdk::RGBA("#FF8000"),
+    Gdk::RGBA("#FFC000"),
+    Gdk::RGBA("#FFFF00"),
+    Gdk::RGBA("#C0FF00"),
+    Gdk::RGBA("#80FF00"),
+    Gdk::RGBA("#00FF00"),
+    Gdk::RGBA("#00FF80"),
+    Gdk::RGBA("#00FFC0"), // 10
+    Gdk::RGBA("#FF0080"),
+    Gdk::RGBA("#FF00FF"),
+    Gdk::RGBA("#C000FF"),
+    Gdk::RGBA("#8000FF"),
+    Gdk::RGBA("#4000FF"),
+    Gdk::RGBA("#0000FF"),
+    Gdk::RGBA("#0040FF"),
+    Gdk::RGBA("#0080FF"),
+    Gdk::RGBA("#00C0FF"),
+    Gdk::RGBA("#00FFFF"), // 20
+    Gdk::RGBA("#FF8080"),
+    Gdk::RGBA("#FF80FF"),
+    Gdk::RGBA("#C080FF"),
+    Gdk::RGBA("#8080FF"),
+    Gdk::RGBA("#80C0FF"),
+    Gdk::RGBA("#80FFFF"),
+    Gdk::RGBA("#80FFC0"),
+    Gdk::RGBA("#80FF80"),
+    Gdk::RGBA("#C0FF80"),
+    Gdk::RGBA("#E0FF80"),
+    Gdk::RGBA("#FFFF80"),
+    Gdk::RGBA("#FFFFC0"),
+    Gdk::RGBA("#FFC0C0"),
+    Gdk::RGBA("#FFD4D4"), // warm white
+    Gdk::RGBA("#FFE2E2"),
+    Gdk::RGBA("#FFF0F0"),
+    Gdk::RGBA("#FFFFFF"), // white
+    Gdk::RGBA("#F0F0FF"),
+    Gdk::RGBA("#E2E2FF"),
+    Gdk::RGBA("#D4D4FF"), // cold white
+  };
+  dialog.add_palette(Gtk::Orientation::ORIENTATION_HORIZONTAL, 10, colors);
   const int result = dialog.run();
 
   // Handle the response:
