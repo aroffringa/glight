@@ -124,6 +124,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       ranges.emplace_back(128, 256, -max_speed, max_speed);
       functions_.emplace_back(FunctionType::ColorMacro, 6, false, 0);
       short_name_ = "TDC Sunr";
+      beam_angle_ = 2.0 * M_PI;
+      brightness_ = 1.0;
     } break;
     case StockFixture::RGB_ADJ_6CH: {
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
