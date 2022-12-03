@@ -15,7 +15,7 @@ class ConstantValueEffectPS final : public PropertySet {
 
  protected:
   virtual void setControlValue(FolderObject &object, size_t index,
-                               unsigned value) const final override {
+                               unsigned value) const override {
     ConstantValueEffect &cfx = static_cast<ConstantValueEffect &>(object);
     switch (index) {
       case 0:
@@ -25,7 +25,7 @@ class ConstantValueEffectPS final : public PropertySet {
   }
 
   virtual unsigned getControlValue(const FolderObject &object,
-                                   size_t index) const final override {
+                                   size_t index) const override {
     const ConstantValueEffect &cfx =
         static_cast<const ConstantValueEffect &>(object);
     switch (index) {

@@ -27,16 +27,31 @@ enum class FunctionType {
   Tilt,
   Effect,
   ColdWhite,
-  WarmWhite
+  WarmWhite,
+  ColorTemperature
 };
 
 inline std::vector<FunctionType> GetFunctionTypes() {
   using FT = FunctionType;
-  return std::vector<FunctionType>{
-      FT::Master, FT::Red,       FT::Green,    FT::Blue,       FT::White,
-      FT::Amber,  FT::UV,        FT::Lime,     FT::ColorMacro, FT::Strobe,
-      FT::Pulse,  FT::Rotation,  FT::Unknown,  FT::Pan,        FT::Tilt,
-      FT::Effect, FT::ColdWhite, FT::WarmWhite};
+  return std::vector<FunctionType>{FT::Master,
+                                   FT::Red,
+                                   FT::Green,
+                                   FT::Blue,
+                                   FT::White,
+                                   FT::Amber,
+                                   FT::UV,
+                                   FT::Lime,
+                                   FT::ColorMacro,
+                                   FT::Strobe,
+                                   FT::Pulse,
+                                   FT::Rotation,
+                                   FT::Unknown,
+                                   FT::Pan,
+                                   FT::Tilt,
+                                   FT::Effect,
+                                   FT::ColdWhite,
+                                   FT::WarmWhite,
+                                   FT::ColorTemperature};
 }
 
 inline const char* AbbreviatedFunctionType(FunctionType functionType) {
@@ -77,6 +92,8 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
       return "CW";
     case FunctionType::WarmWhite:
       return "WW";
+    case FunctionType::ColorTemperature:
+      return "T";
   }
   return nullptr;
 }
@@ -122,7 +139,10 @@ inline FunctionType GetFunctionType(const std::string& name) {
       if (name == "Strobe") return FunctionType::Strobe;
       break;
     case 'T':
-      if (name == "Tilt") return FunctionType::Tilt;
+      if (name == "Temperature")
+        return FunctionType::ColorTemperature;
+      else if (name == "Tilt")
+        return FunctionType::Tilt;
       break;
     case 'U':
       if (name == "UV") return FunctionType::UV;
@@ -143,6 +163,8 @@ inline std::string ToString(FunctionType functionType) {
       return "Amber";
     case FunctionType::Blue:
       return "Blue";
+    case FunctionType::ColorTemperature:
+      return "Color temperature";
     case FunctionType::ColdWhite:
       return "Cold white";
     case FunctionType::ColorMacro:
@@ -209,6 +231,8 @@ inline constexpr Color GetFunctionColor(FunctionType type) {
       return Color::ColdWhite();
     case FunctionType::WarmWhite:
       return Color::WarmWhite();
+    case FunctionType::ColorTemperature:
+      return Color::White();
   }
   return Color::Black();
 }

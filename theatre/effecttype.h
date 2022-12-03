@@ -11,6 +11,7 @@ namespace glight::theatre {
 enum class EffectType {
   AudioLevel,
   ColorControl,
+  ColorTemperature,
   ConstantValue,
   Curve,
   Delay,
@@ -32,6 +33,8 @@ inline std::string EffectTypeToName(EffectType type) {
       return "Audiolevel";
     case ET::ColorControl:
       return "Color control";
+    case ET::ColorTemperature:
+      return "Color temperature";
     case ET::ConstantValue:
       return "Constant value";
     case ET::Curve:
@@ -64,6 +67,10 @@ inline EffectType NameToEffectType(const std::string &name) {
   using ET = EffectType;
   if (name == "Audiolevel")
     return ET::AudioLevel;
+  else if (name == "Color control")
+    return ET::ColorControl;
+  else if (name == "Color temperature")
+    return ET::ColorTemperature;
   else if (name == "Constant value")
     return ET::ConstantValue;
   else if (name == "Curve")
@@ -94,12 +101,21 @@ inline EffectType NameToEffectType(const std::string &name) {
 
 inline std::vector<EffectType> GetEffectTypes() {
   using ET = EffectType;
-  return std::vector<ET>{
-      ET::AudioLevel,   ET::ColorControl,    ET::ConstantValue,
-      ET::Curve,        ET::Delay,           ET::Dispenser,
-      ET::Fade,         ET::Flicker,         ET::FluorescentStart,
-      ET::Invert,       ET::MusicActivation, ET::Pulse,
-      ET::RandomSelect, ET::Threshold};
+  return std::vector<ET>{ET::AudioLevel,
+                         ET::ColorControl,
+                         ET::ColorTemperature,
+                         ET::ConstantValue,
+                         ET::Curve,
+                         ET::Delay,
+                         ET::Dispenser,
+                         ET::Fade,
+                         ET::Flicker,
+                         ET::FluorescentStart,
+                         ET::Invert,
+                         ET::MusicActivation,
+                         ET::Pulse,
+                         ET::RandomSelect,
+                         ET::Threshold};
 }
 
 }  // namespace glight::theatre

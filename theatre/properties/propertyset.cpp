@@ -2,6 +2,7 @@
 
 #include "audioleveleffectps.h"
 #include "colorcontroleffectps.h"
+#include "colortemperatureeffectps.h"
 #include "constantvalueeffectps.h"
 #include "curveeffectps.h"
 #include "delayeffectps.h"
@@ -31,6 +32,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
   switch (effect->GetType()) {
     FXCASE(AudioLevel);
     FXCASE(ColorControl);
+    FXCASE(ColorTemperature);
     FXCASE(ConstantValue);
     FXCASE(Curve);
     FXCASE(Delay);
