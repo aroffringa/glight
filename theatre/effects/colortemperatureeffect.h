@@ -8,14 +8,12 @@ namespace glight::theatre {
 
 class ColorTemperatureEffect final : public Effect {
  public:
-  ColorTemperatureEffect() : Effect(1) {}
+  ColorTemperatureEffect() : Effect(2) {}
 
   EffectType GetType() const override { return EffectType::ColorTemperature; }
 
-  virtual size_t NInputs() const override { return 1; }
-
   virtual FunctionType InputType(size_t index) const override {
-    return FunctionType::ColorTemperature;
+    return index == 0 ? FunctionType::ColorTemperature : FunctionType::Master;
   }
 
   std::vector<Color> InputColors([[maybe_unused]] size_t index) const override {
@@ -47,20 +45,20 @@ class ColorTemperatureEffect final : public Effect {
         case FunctionType::Red:
           connection.first->MixInput(
               connection.second,
-              ControlValue(static_cast<int>(rgb.Red()) << 16));
+              ControlValue(static_cast<int>(rgb.Red()) << 16) * values[1]);
           break;
         case FunctionType::Green:
           connection.first->MixInput(
               connection.second,
-              ControlValue(static_cast<int>(rgb.Green()) << 16));
+              ControlValue(static_cast<int>(rgb.Green()) << 16) * values[1]);
           break;
         case FunctionType::Blue:
           connection.first->MixInput(
               connection.second,
-              ControlValue(static_cast<int>(rgb.Blue()) << 16));
+              ControlValue(static_cast<int>(rgb.Blue()) << 16) * values[1]);
           break;
         case FunctionType::White:
-          connection.first->MixInput(connection.second, ControlValue::Max());
+          connection.first->MixInput(connection.second, values[1]);
           break;
         case FunctionType::Amber:
           // TODO

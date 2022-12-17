@@ -7,11 +7,9 @@ namespace glight::theatre {
 
 class ColorControlEffect final : public Effect {
  public:
-  ColorControlEffect() : Effect(1) {}
+  ColorControlEffect() : Effect(4) {}
 
   EffectType GetType() const override { return EffectType::ColorControl; }
-
-  virtual size_t NInputs() const override { return 4; }
 
   virtual FunctionType InputType(size_t index) const override {
     switch (index) {
