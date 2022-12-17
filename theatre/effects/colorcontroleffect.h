@@ -95,6 +95,7 @@ class ColorControlEffect final : public Effect {
         } break;
         case FunctionType::Master:
         case FunctionType::ColorMacro:
+        case FunctionType::ColorTemperature:
         case FunctionType::Strobe:
         case FunctionType::Pulse:
         case FunctionType::Rotation:

@@ -48,22 +48,23 @@ void PropertiesBox::fillProperties() {
 
     switch (property.GetType()) {
       case Property::Boolean: {
-        std::unique_ptr<Gtk::CheckButton> button(
-            new Gtk::CheckButton(property.Description()));
+        std::unique_ptr<Gtk::CheckButton> button =
+            std::make_unique<Gtk::CheckButton>(property.Description());
         button->set_active(_propertySet->GetBool(property));
         row._widgets.emplace_back(std::move(button));
         _grid.attach(*row._widgets.back(), 0, rowIndex, 2, 1);
       } break;
       case Property::Choice: {
-        row._widgets.emplace_back(new Gtk::VBox());
+        row._widgets.emplace_back(std::make_unique<Gtk::VBox>());
         Gtk::VBox *box = static_cast<Gtk::VBox *>(row._widgets.back().get());
-        row._widgets.emplace_back(new Gtk::Label(property.Description()));
+        row._widgets.emplace_back(
+            std::make_unique<Gtk::Label>(property.Description()));
         box->pack_start(*row._widgets.back(), false, false);
         Gtk::RadioButton::Group group;
         std::string value = _propertySet->GetChoice(property);
         for (size_t i = 0; i != property.OptionCount(); ++i) {
-          std::unique_ptr<Gtk::RadioButton> button(
-              new Gtk::RadioButton(property.OptionDescription(i)));
+          std::unique_ptr<Gtk::RadioButton> button =
+              std::make_unique<Gtk::RadioButton>(property.OptionDescription(i));
           button->set_group(group);
           button->set_active(property.OptionName(i) == value);
           row._widgets.emplace_back(std::move(button));
@@ -77,32 +78,34 @@ void PropertiesBox::fillProperties() {
                   theatre::ControlValue::MaxUInt()) /
             10.0);
 
-        row._widgets.emplace_back(new Gtk::Label(property.Description()));
+        row._widgets.emplace_back(
+            std::make_unique<Gtk::Label>(property.Description()));
         _grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
 
-        Gtk::Entry *entry = new Gtk::Entry();
-        row._widgets.emplace_back(entry);
+        std::unique_ptr<Gtk::Entry> entry = std::make_unique<Gtk::Entry>();
         entry->set_text(entryText);
         _grid.attach(*entry, 1, rowIndex, 1, 1);
+        row._widgets.emplace_back(std::move(entry));
       } break;
       case Property::Duration: {
         double duration = _propertySet->GetDuration(property);
 
         row._widgets.emplace_back(
-            new DurationInput(property.Description(), duration));
+            std::make_unique<DurationInput>(property.Description(), duration));
         _grid.attach(*row._widgets.back(), 0, rowIndex, 2, 1);
       } break;
       case Property::Integer: {
         std::string entryText =
             std::to_string(_propertySet->GetInteger(property));
 
-        row._widgets.emplace_back(new Gtk::Label(property.Description()));
+        row._widgets.emplace_back(
+            std::make_unique<Gtk::Label>(property.Description()));
         _grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
 
-        Gtk::Entry *entry = new Gtk::Entry();
-        row._widgets.emplace_back(entry);
+        std::unique_ptr<Gtk::Entry> entry = std::make_unique<Gtk::Entry>();
         entry->set_text(entryText);
         _grid.attach(*entry, 1, rowIndex, 1, 1);
+        row._widgets.emplace_back(std::move(entry));
       } break;
     }
   }

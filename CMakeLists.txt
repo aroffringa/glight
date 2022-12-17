@@ -118,6 +118,7 @@ if(Boost_FOUND)
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
     tests/tchase.cpp
+    tests/tcolortemperature.cpp
     tests/tcontrolvalue.cpp
     tests/tdeletableptr.cpp
     tests/tfileformat.cpp

@@ -27,6 +27,7 @@ class FixtureControl final : public Controllable {
     using FT = FunctionType;
     switch (InputType(index)) {
       case FT::ColorMacro:
+      case FT::ColorTemperature:
       case FT::Effect:
       case FT::Master:
       case FT::Pan:
