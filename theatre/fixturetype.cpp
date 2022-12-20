@@ -124,7 +124,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       ranges.emplace_back(128, 256, -max_speed, max_speed);
       functions_.emplace_back(FunctionType::ColorMacro, 6, false, 0);
       short_name_ = "TDC Sunr";
-      beam_angle_ = 2.0 * M_PI;
+      min_beam_angle_ = 2.0 * M_PI;
       brightness_ = 1.0;
     } break;
     case StockFixture::RGB_ADJ_6CH: {
@@ -331,6 +331,20 @@ int FixtureType::GetRotationSpeed(const Fixture &fixture,
     }
   }
   return 0;
+}
+
+double FixtureType::GetZoom(const Fixture &fixture,
+                            const ValueSnapshot &snapshot,
+                            size_t shape_index) const {
+  for (size_t i = 0; i != functions_.size(); ++i) {
+    if (functions_[i].Shape() == shape_index &&
+        functions_[i].Type() == FunctionType::Zoom) {
+      const unsigned channel_value = fixture.Functions()[i]->GetValue(snapshot);
+      return (max_beam_angle_ - min_beam_angle_) * channel_value / 255 +
+             min_beam_angle_;
+    }
+  }
+  return min_beam_angle_;
 }
 
 }  // namespace glight::theatre

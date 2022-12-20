@@ -166,6 +166,9 @@ class FixtureType : public FolderObject {
   int GetRotationSpeed(const Fixture &fixture, const ValueSnapshot &snapshot,
                        size_t shapeIndex) const;
 
+  double GetZoom(const Fixture &fixture, const ValueSnapshot &snapshot,
+                 size_t shapeIndex) const;
+
   FixtureClass GetFixtureClass() const { return class_; }
 
   void SetFixtureClass(FixtureClass new_class) { class_ = new_class; }
@@ -203,8 +206,17 @@ class FixtureType : public FolderObject {
    * smallest angle that the beam can make. If the fixture has no beam, it will
    * be zero.
    */
-  double BeamAngle() const { return beam_angle_; }
-  void SetBeamAngle(double beam_angle) { beam_angle_ = beam_angle; }
+  double MinBeamAngle() const { return min_beam_angle_; }
+  void SetMinBeamAngle(double min_beam_angle) {
+    min_beam_angle_ = min_beam_angle;
+  }
+
+  double MaxBeamAngle() const { return max_beam_angle_; }
+  void SetMaxBeamAngle(double max_beam_angle) {
+    max_beam_angle_ = max_beam_angle;
+  }
+
+  bool CanZoom() const { return min_beam_angle_ != max_beam_angle_; }
 
   /**
    * Distance in meters that the beam can reach at the static beam angle.
@@ -225,7 +237,8 @@ class FixtureType : public FolderObject {
   std::vector<FixtureTypeFunction> functions_;
   unsigned scaling_value_;
   std::string short_name_;
-  double beam_angle_ = 30.0 * M_PI / 180.0;
+  double min_beam_angle_ = 30.0 * M_PI / 180.0;
+  double max_beam_angle_ = 30.0 * M_PI / 180.0;
   double brightness_ = 10.0;
 };
 

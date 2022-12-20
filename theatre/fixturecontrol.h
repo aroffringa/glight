@@ -35,6 +35,7 @@ class FixtureControl final : public Controllable {
       case FT::Rotation:
       case FT::Strobe:
       case FT::Tilt:
+      case FT::Zoom:
       case FT::Unknown:
       case FT::White:
         return Color::White();

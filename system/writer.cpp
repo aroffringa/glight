@@ -163,7 +163,7 @@ void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
   state.writer.String("fixture-class",
                       FixtureType::ClassName(fixtureType.GetFixtureClass()));
   state.writer.Number("shape-count", fixtureType.ShapeCount());
-  state.writer.Number("beam-angle", fixtureType.BeamAngle());
+  state.writer.Number("beam-angle", fixtureType.MinBeamAngle());
   state.writer.Number("brightness", fixtureType.Brightness());
   state.writer.StartArray("functions");
   for (const FixtureTypeFunction &f : fixtureType.Functions()) {
