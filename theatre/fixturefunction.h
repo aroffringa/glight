@@ -17,7 +17,7 @@ class Theatre;
 /**
  * @author Andre Offringa
  */
-class FixtureFunction : public NamedObject {
+class FixtureFunction final : public NamedObject {
  public:
   FixtureFunction(Theatre &theatre, FunctionType type, const std::string &name);
 

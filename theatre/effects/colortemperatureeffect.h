@@ -84,6 +84,7 @@ class ColorTemperatureEffect final : public Effect {
         case FunctionType::Unknown:
         case FunctionType::Pan:
         case FunctionType::Tilt:
+        case FunctionType::Zoom:
         case FunctionType::Effect:
           break;
       }

@@ -80,8 +80,10 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::Entry short_name_entry_;
   Gtk::Label class_label_;
   Gtk::ComboBoxText class_combo_;
-  Gtk::Label beam_angle_label_;
-  Gtk::Entry beam_angle_entry_;
+  Gtk::Label min_beam_angle_label_;
+  Gtk::Entry min_beam_angle_entry_;
+  Gtk::Label max_beam_angle_label_;
+  Gtk::Entry max_beam_angle_entry_;
   Gtk::Label brightness_label_;
   Gtk::Entry brightness_entry_;
 

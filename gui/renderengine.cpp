@@ -56,12 +56,17 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
   size_t shape_count = type.ShapeCount();
   for (size_t shape_index = 0; shape_index != shape_count; ++shape_index) {
     const theatre::Color c = fixture.GetColor(data.snapshot, shape_index);
-    if (c != theatre::Color::Black() && type.BeamAngle() > 0.0) {
-      const double direction_1 = fixture.Direction() - type.BeamAngle() * 0.5;
-      const double direction_2 = fixture.Direction() + type.BeamAngle() * 0.5;
+    if (c != theatre::Color::Black() && type.MinBeamAngle() > 0.0) {
+      const double beam_angle =
+          type.CanZoom() ? type.GetZoom(fixture, data.snapshot, shape_index)
+                         : type.MinBeamAngle();
+      const double direction_1 = fixture.Direction() - beam_angle * 0.5;
+      const double direction_2 = fixture.Direction() + beam_angle * 0.5;
       const double radius = GetRadius(fixture.Symbol().Value());
       const double beam_start_radius = radius * 1.2;
-      const double beam_end_radius = radius * (1.2 + type.Brightness());
+      const double beam_factor = type.MinBeamAngle() / beam_angle;
+      const double beam_end_radius =
+          radius * (1.2 + type.Brightness() * beam_factor);
       const double x =
           fixture.GetPosition().X() + 0.5 + data.style.xOffset / data.scale;
       const double y =
@@ -86,7 +91,7 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
                           y + sin_1 * beam_end_radius);
       // small optimization: don't draw an extra arc when the
       // beam is narrow
-      if (type.BeamAngle() > M_PI * 0.2) {
+      if (beam_angle > M_PI * 0.2) {
         data.cairo->arc(x, y, beam_end_radius, direction_1, direction_2);
       } else {
         data.cairo->line_to(x + cos_2 * beam_end_radius,

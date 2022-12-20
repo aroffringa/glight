@@ -133,6 +133,7 @@ if(Boost_FOUND)
     tests/tjsonwriter.cpp
     tests/tmanagement.cpp
     tests/topenfixturereader.cpp
+    tests/toptional_int.cpp
     tests/tpresetcollection.cpp
     tests/tpresetvalue.cpp
     tests/ttheatre.cpp

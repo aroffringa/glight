@@ -22,13 +22,14 @@ enum class FunctionType {
   Strobe,
   Pulse,
   Rotation,
-  Unknown,
   Pan,
   Tilt,
+  Zoom,
   Effect,
   ColdWhite,
   WarmWhite,
-  ColorTemperature
+  ColorTemperature,
+  Unknown
 };
 
 inline std::vector<FunctionType> GetFunctionTypes() {
@@ -45,13 +46,14 @@ inline std::vector<FunctionType> GetFunctionTypes() {
                                    FT::Strobe,
                                    FT::Pulse,
                                    FT::Rotation,
-                                   FT::Unknown,
                                    FT::Pan,
                                    FT::Tilt,
+                                   FT::Zoom,
                                    FT::Effect,
                                    FT::ColdWhite,
                                    FT::WarmWhite,
-                                   FT::ColorTemperature};
+                                   FT::ColorTemperature,
+                                   FT::Unknown};
 }
 
 inline const char* AbbreviatedFunctionType(FunctionType functionType) {
@@ -76,8 +78,6 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
       return "C";
     case FunctionType::Pulse:
       return "P";
-    case FunctionType::Unknown:
-      return "?";
     case FunctionType::Strobe:
       return "S";
     case FunctionType::Rotation:
@@ -86,6 +86,8 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
       return "PN";
     case FunctionType::Tilt:
       return "TL";
+    case FunctionType::Zoom:
+      return "Z";
     case FunctionType::Effect:
       return "E";
     case FunctionType::ColdWhite:
@@ -94,6 +96,8 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
       return "WW";
     case FunctionType::ColorTemperature:
       return "T";
+    case FunctionType::Unknown:
+      return "?";
   }
   return nullptr;
 }
@@ -153,6 +157,9 @@ inline FunctionType GetFunctionType(const std::string& name) {
       else if (name == "White")
         return FunctionType::White;
       break;
+    case 'Z':
+      if (name == "Zoom") return FunctionType::Zoom;
+      break;
   }
   throw std::runtime_error("Function type not found: " + name);
 }
@@ -197,6 +204,8 @@ inline std::string ToString(FunctionType functionType) {
       return "Warm white";
     case FunctionType::White:
       return "White";
+    case FunctionType::Zoom:
+      return "Zoom";
   }
   return "?";
 }
@@ -211,6 +220,7 @@ inline constexpr Color GetFunctionColor(FunctionType type) {
     case FunctionType::Pan:
     case FunctionType::Strobe:
     case FunctionType::Tilt:
+    case FunctionType::Zoom:
     case FunctionType::Unknown:
       return Color::Black();
     case FunctionType::Red:

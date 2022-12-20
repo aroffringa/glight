@@ -24,7 +24,8 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
       name_label_("Name:"),
       short_name_label_("Short name:"),
       class_label_("Class:"),
-      beam_angle_label_("Beam angle:"),
+      min_beam_angle_label_("Min beam angle:"),
+      max_beam_angle_label_("Max beam angle:"),
       brightness_label_("Brightness:"),
       new_button_("New"),
       remove_button_("Remove"),
@@ -72,13 +73,16 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   right_grid_.attach(class_combo_, 1, 2);
   class_combo_.set_hexpand(true);
 
-  right_grid_.attach(beam_angle_label_, 0, 3);
-  right_grid_.attach(beam_angle_entry_, 1, 3);
+  right_grid_.attach(min_beam_angle_label_, 0, 3);
+  right_grid_.attach(min_beam_angle_entry_, 1, 3);
 
-  right_grid_.attach(brightness_label_, 0, 4);
-  right_grid_.attach(brightness_entry_, 1, 4);
+  right_grid_.attach(max_beam_angle_label_, 0, 4);
+  right_grid_.attach(max_beam_angle_entry_, 1, 4);
 
-  right_grid_.attach(functions_frame_, 0, 5, 2, 1);
+  right_grid_.attach(brightness_label_, 0, 5);
+  right_grid_.attach(brightness_entry_, 1, 5);
+
+  right_grid_.attach(functions_frame_, 0, 6, 2, 1);
   functions_frame_.set_vexpand(true);
   functions_frame_.set_hexpand(true);
 
@@ -174,8 +178,12 @@ void FixtureTypesWindow::onSaveClicked() {
   }
   type->SetName(name_entry_.get_text());
   type->SetShortName(short_name_entry_.get_text());
-  const double beam_angle = std::atof(beam_angle_entry_.get_text().c_str());
-  type->SetBeamAngle(std::clamp(beam_angle, 0.0, 360.0) * M_PI / 180.0);
+  const double min_beam_angle =
+      std::atof(min_beam_angle_entry_.get_text().c_str());
+  type->SetMinBeamAngle(std::clamp(min_beam_angle, 0.0, 360.0) * M_PI / 180.0);
+  const double max_beam_angle =
+      std::atof(max_beam_angle_entry_.get_text().c_str());
+  type->SetMaxBeamAngle(std::clamp(max_beam_angle, 0.0, 360.0) * M_PI / 180.0);
   const double brightness = std::atof(brightness_entry_.get_text().c_str());
   type->SetBrightness(std::clamp(brightness, 0.0, 100.0));
   if (!is_used) {
@@ -212,8 +220,10 @@ void FixtureTypesWindow::onSelectionChanged() {
       const bool is_used = management_->GetTheatre().IsUsed(*type);
       name_entry_.set_text(type->Name());
       short_name_entry_.set_text(type->ShortName());
-      beam_angle_entry_.set_text(
-          std::to_string(type->BeamAngle() * 180.0 / M_PI));
+      min_beam_angle_entry_.set_text(
+          std::to_string(type->MinBeamAngle() * 180.0 / M_PI));
+      max_beam_angle_entry_.set_text(
+          std::to_string(type->MaxBeamAngle() * 180.0 / M_PI));
       brightness_entry_.set_text(std::to_string(type->Brightness()));
       class_combo_.set_sensitive(is_used);
       class_combo_.set_active_text(
@@ -223,7 +233,8 @@ void FixtureTypesWindow::onSelectionChanged() {
     } else {
       name_entry_.set_text("");
       short_name_entry_.set_text("");
-      beam_angle_entry_.set_text("30");
+      min_beam_angle_entry_.set_text("30");
+      max_beam_angle_entry_.set_text("30");
       brightness_entry_.set_text("10");
       class_combo_.set_sensitive(true);
       class_combo_.set_active_text(
