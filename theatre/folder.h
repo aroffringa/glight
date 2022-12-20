@@ -29,78 +29,6 @@ class Folder : public FolderObject {
     return copy;
   }
 
-  static void Move(FolderObject &object, Folder &destination) {
-    if (&destination != &object.Parent()) {
-      if (destination.GetChildIfExists(object.Name()))
-        throw std::runtime_error(
-            "Can't move object: the destination folder already contains an "
-            "object with the same name");
-      object._parent->Remove(object);
-
-      destination._objects.emplace_back(&object);
-      object._parent = &destination;
-    }
-  }
-
-  static std::string ParentPath(const std::string &path) {
-    auto separator = std::find(path.rbegin(), path.rend(), '/');
-    if (separator == path.rend())
-      return std::string();
-    else {
-      size_t nChar = path.size() - (separator - path.rbegin()) - 1;
-      return path.substr(0, nChar);
-    }
-  }
-
-  static std::string ParentPath(std::string &&path) {
-    auto separator = std::find(path.rbegin(), path.rend(), '/');
-    if (separator == path.rend())
-      return std::string();
-    else {
-      size_t nChar = path.size() - (separator - path.rbegin()) - 1;
-      path.resize(nChar);
-      return std::move(path);
-    }
-  }
-
-  static std::string LastName(const std::string &path) {
-    auto separator = std::find(path.rbegin(), path.rend(), '/');
-    if (separator == path.rend())
-      return path;
-    else {
-      size_t sepIndex = path.size() - (separator - path.rbegin());
-      return path.substr(sepIndex);
-    }
-  }
-
-  static std::string LastName(std::string &&path) {
-    auto separator = std::find(path.rbegin(), path.rend(), '/');
-    if (separator == path.rend())
-      return std::move(path);
-    else {
-      size_t sepIndex = path.size() - (separator - path.rbegin());
-      return std::move(path).substr(sepIndex);
-    }
-  }
-
-  static std::string RemoveRoot(const std::string &path) {
-    auto separator = std::find(path.begin(), path.end(), '/');
-    if (separator == path.end())
-      return std::string();
-    else {
-      return path.substr(separator - path.begin() + 1);
-    }
-  }
-
-  static std::string RemoveRoot(std::string &&path) {
-    auto separator = std::find(path.begin(), path.end(), '/');
-    if (separator == path.end())
-      return std::string();
-    else {
-      return std::move(path).substr(separator - path.begin() + 1);
-    }
-  }
-
   /**
    * This also sets the parent of the specified object to this.
    */
@@ -155,6 +83,9 @@ class Folder : public FolderObject {
       return followDown(std::move(path), 0);
   }
 
+  FolderObject *FollowRelPath(const std::string &path);
+  FolderObject *FollowRelPath(std::string &&path);
+
   FolderObject &GetChild(const std::string &name) {
     return FindNamedObject(_objects, name);
   }
@@ -171,23 +102,7 @@ class Folder : public FolderObject {
     return FindNamedObjectIfExists(_objects, name);
   }
 
-  FolderObject *FollowRelPath(const std::string &path) {
-    Folder *parentFolder = FollowDown(ParentPath(path));
-    if (parentFolder)
-      return parentFolder->GetChildIfExists(LastName(path));
-    else
-      return nullptr;
-  }
-
-  FolderObject *FollowRelPath(std::string &&path) {
-    Folder *parentFolder = FollowDown(ParentPath(path));
-    if (parentFolder)
-      return parentFolder->GetChildIfExists(LastName(std::move(path)));
-    else
-      return nullptr;
-  }
-
-  std::string GetAvailableName(std::string &&prefix) const {
+  std::string GetAvailableName(const std::string &prefix) const {
     bool nameAvailable;
     size_t nameNumber = 0;
     do {
@@ -200,7 +115,20 @@ class Folder : public FolderObject {
         }
       }
     } while (!nameAvailable);
-    return std::move(prefix) + std::to_string(nameNumber);
+    return prefix + std::to_string(nameNumber);
+  }
+
+  static void Move(FolderObject &object, Folder &destination) {
+    if (&destination != &object.Parent()) {
+      if (destination.GetChildIfExists(object.Name()))
+        throw std::runtime_error(
+            "Can't move object: the destination folder already contains an "
+            "object with the same name");
+      object._parent->Remove(object);
+
+      destination._objects.emplace_back(&object);
+      object._parent = &destination;
+    }
   }
 
  private:

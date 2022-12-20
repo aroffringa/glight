@@ -2,6 +2,7 @@
 #define GUI_CHASE_WIZARD_H_
 
 #include "components/colorsequencewidget.h"
+#include "components/foldercombo.h"
 #include "components/objectbrowser.h"
 
 #include "../theatre/autodesign.h"
@@ -29,11 +30,11 @@ class EventTransmitter;
 class DesignWizard : public Gtk::Window {
  public:
   DesignWizard(theatre::Management &management, EventTransmitter &hub,
-               const std::string &destinationPath);
+               const std::string &currentPath);
   ~DesignWizard();
 
-  void SetDestinationPath(const std::string &destinationPath) {
-    _destinationPath = destinationPath;
+  void SetCurrentPath(const std::string &currentPath) {
+    _currentPath = currentPath;
   }
 
   void Select(const std::vector<theatre::Fixture *> &fixtures);
@@ -60,7 +61,9 @@ class DesignWizard : public Gtk::Window {
   void initPage3_4VUMeter();
   void initPage3_5ColorPreset();
   void initPage3_6Increasing();
-  theatre::Folder &getFolder() const;
+  void initPage3Destination(const std::string &name);
+  theatre::Folder &getCurrentFolder() const;
+  theatre::Folder &makeDestinationFolder() const;
 
   // 1b
   void onAddControllable();
@@ -72,12 +75,11 @@ class DesignWizard : public Gtk::Window {
 
   EventTransmitter &_eventHub;
   theatre::Management *_management;
-  std::string _destinationPath;
+  std::string _currentPath;
 
   Gtk::VBox _mainBox;
   Gtk::VBox _vBoxPage1, _vBoxPage1a, _vBoxPage1b, _vBoxPage2, _vBoxPage2Type,
-      _vBoxPage2Deduction, _vBoxPage3_1, _vBoxPage3_2, _vBoxPage3_3,
-      _vBoxPage3_4, _vBoxPage3_5, _vBoxPage3_6;
+      _vBoxPage2Deduction;
   Gtk::Notebook _notebook;
   // 1a
   Gtk::Label _selectLabel;
@@ -92,28 +94,37 @@ class DesignWizard : public Gtk::Window {
   Gtk::Frame _typeFrameP2, _deductionFrameP2;
   Gtk::RadioButton _colorPresetBtn, _runningLightBtn, _singleColorBtn,
       _shiftColorsBtn, _increaseBtn, _vuMeterBtn;
-  Gtk::CheckButton _deduceWhite, _deduceAmber, _deduceUV;
+  Gtk::CheckButton _deduceWhite, _deduceAmber, _deduceUV, _deduceLime;
 
-  ColorSequenceWidget _colorsWidgetP3_1;
+  // Page 3 common widgets
+  Gtk::VBox _vBoxPage3;
+  ColorSequenceWidget _colorsWidgetP3;
+  Gtk::Label _parentLabel;
+  FolderCombo _parentFolderCombo;
+  Gtk::HBox _folderNameBox;
+  Gtk::CheckButton _newFolderCB;
+  Gtk::Entry _newFolderNameEntry;
+
+  // 3_1
   Gtk::RadioButton _increasingRunRB, _decreasingRunRB, _backAndForthRunRB,
       _inwardRunRB, _outwardRunRB, _randomRunRB;
 
-  ColorSequenceWidget _colorsWidgetP3_2;
+  // 3_2
   Gtk::Label _variationLabel;
   Gtk::Scale _variation;
 
-  ColorSequenceWidget _colorsWidgetP3_3;
+  // 3_3
   Gtk::RadioButton _shiftIncreasingRB, _shiftDecreasingRB, _shiftBackAndForthRB,
       _shiftRandomRB;
 
-  ColorSequenceWidget _colorsWidgetP3_4;
+  // 3_4
   Gtk::RadioButton _vuIncreasingRB, _vuDecreasingRB, _vuInwardRunRB,
       _vuOutwardRunRB;
 
-  ColorSequenceWidget _colorsWidgetP3_5;
+  // 3_5
   Gtk::CheckButton _eachFixtureSeparatelyCB;
 
-  ColorSequenceWidget _colorsWidgetP3_6;
+  // 3_6
   Gtk::RadioButton _incForwardRB, _incBackwardRB, _incForwardReturnRB,
       _incBackwardReturnRB;
 

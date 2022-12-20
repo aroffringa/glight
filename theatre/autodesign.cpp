@@ -19,9 +19,10 @@ namespace glight::theatre {
 void AutoDesign::addColorPresets(Management &management, Controllable &control,
                                  PresetCollection &pc, const Color &color,
                                  const ColorDeduction &deduction) {
-  unsigned red = color.Red() * ((1 << 24) - 1) / 255,
-           green = color.Green() * ((1 << 24) - 1) / 255,
-           blue = color.Blue() * ((1 << 24) - 1) / 255, master = 0;
+  unsigned red = color.Red() * ((1 << 24) - 1) / 255;
+  unsigned green = color.Green() * ((1 << 24) - 1) / 255;
+  unsigned blue = color.Blue() * ((1 << 24) - 1) / 255;
+  unsigned master = 0;
   if (red != 0 || green != 0 || blue != 0) master = (1 << 24) - 1;
 
   for (size_t i = 0; i != control.NInputs(); ++i) {
@@ -35,7 +36,7 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
           .SetValue(ControlValue(master));
     } else if (c == Color::White()) {
       if (deduction.whiteFromRGB) {
-        unsigned white = std::min(red, std::min(green, blue));
+        const unsigned white = std::min(red, std::min(green, blue));
         if (white != 0) {
           pc.AddPresetValue(sourceValue->GetControllable(),
                             sourceValue->InputIndex())
@@ -44,7 +45,7 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
       }
     } else if (c == Color::Amber()) {
       if (deduction.amberFromRGB) {
-        unsigned amber = std::min(red / 2, green) * 2;
+        const unsigned amber = std::min(red / 2, green) * 2;
         if (amber != 0) {
           pc.AddPresetValue(sourceValue->GetControllable(),
                             sourceValue->InputIndex())
@@ -53,11 +54,20 @@ void AutoDesign::addColorPresets(Management &management, Controllable &control,
       }
     } else if (c == Color::UV()) {
       if (deduction.uvFromRGB) {
-        unsigned uv = std::min(blue / 3, red) * 3;
+        const unsigned uv = std::min(blue / 3, red) * 3;
         if (uv != 0) {
           pc.AddPresetValue(sourceValue->GetControllable(),
                             sourceValue->InputIndex())
               .SetValue(ControlValue(uv));
+        }
+      }
+    } else if (c == Color::Lime()) {
+      if (deduction.limeFromRGB) {
+        const unsigned lime = std::min(green / 2, red) * 2;
+        if (lime != 0) {
+          pc.AddPresetValue(sourceValue->GetControllable(),
+                            sourceValue->InputIndex())
+              .SetValue(ControlValue(lime));
         }
       }
     } else {

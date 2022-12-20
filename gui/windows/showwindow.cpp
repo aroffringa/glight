@@ -512,7 +512,7 @@ std::string ShowWindow::Path() {
 void ShowWindow::onMIDesignWizardClicked() {
   if (!_designWizard || !_designWizard->is_visible())
     _designWizard.reset(new DesignWizard(*_management, *this, Path()));
-  _designWizard->SetDestinationPath(Path());
+  _designWizard->SetCurrentPath(Path());
   _designWizard->present();
 }
 

@@ -9,7 +9,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
     : FolderObject(StockName(stock_fixture)), class_(FixtureClass::Par) {
   switch (stock_fixture) {
     case StockFixture::Light1Ch:
-      functions_.emplace_back(FunctionType::Master, 0, false, 0);
+      functions_.emplace_back(FunctionType::White, 0, false, 0);
       short_name_ = "Light";
       break;
     case StockFixture::RGBLight3Ch:
