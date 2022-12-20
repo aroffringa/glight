@@ -16,7 +16,7 @@ class FolderCombo : public Gtk::ComboBox {
  public:
   FolderCombo(theatre::Management &management, EventTransmitter &eventHub);
 
-  theatre::Folder &Selection();
+  theatre::Folder &Selection() const;
 
   sigc::signal<void()> &SignalSelectionChange() {
     return _signalSelectionChange;

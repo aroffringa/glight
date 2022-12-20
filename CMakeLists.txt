@@ -83,6 +83,7 @@ set(THEATREFILES
   theatre/fixture.cpp
   theatre/fixturefunction.cpp
   theatre/fixturetype.cpp
+  theatre/folder.cpp
   theatre/folderobject.cpp
   theatre/management.cpp
   theatre/oladevice.cpp
@@ -127,6 +128,7 @@ if(Boost_FOUND)
     tests/tfixturetype.cpp
     tests/tfixturetypefunction.cpp
     tests/tfolder.cpp
+    tests/tfolderoperations.cpp
     tests/tjsonreader.cpp
     tests/tjsonwriter.cpp
     tests/tmanagement.cpp

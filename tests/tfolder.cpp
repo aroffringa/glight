@@ -1,6 +1,7 @@
 #include "../theatre/chase.h"
 #include "../theatre/fixturecontrol.h"
 #include "../theatre/folder.h"
+#include "../theatre/folderoperations.h"
 #include "../theatre/management.h"
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
@@ -58,53 +59,6 @@ BOOST_AUTO_TEST_CASE(FullPath) {
   BOOST_CHECK_EQUAL(c->FullPath(), "a/b/c");
 }
 
-BOOST_AUTO_TEST_CASE(ParentPath) {
-  BOOST_CHECK_EQUAL("", Folder::ParentPath(""));
-  BOOST_CHECK_EQUAL("", Folder::ParentPath("root"));
-  BOOST_CHECK_EQUAL("root", Folder::ParentPath("root/file"));
-  BOOST_CHECK_EQUAL("a/b", Folder::ParentPath("a/b/c"));
-  BOOST_CHECK_EQUAL("a/a and b", Folder::ParentPath("a/a and b/c"));
-  BOOST_CHECK_EQUAL("1/2/3", Folder::ParentPath("1/2/3/4"));
-  BOOST_CHECK_EQUAL("a", Folder::ParentPath(Folder::ParentPath("a/b/a")));
-}
-
-BOOST_AUTO_TEST_CASE(LastName) {
-  BOOST_CHECK_EQUAL("", Folder::LastName(""));
-  BOOST_CHECK_EQUAL("root", Folder::LastName("root"));
-  BOOST_CHECK_EQUAL("file", Folder::LastName("root/file"));
-  BOOST_CHECK_EQUAL("c", Folder::LastName("a/b/c"));
-  BOOST_CHECK_EQUAL("c", Folder::LastName("a/a and b/c"));
-  BOOST_CHECK_EQUAL("4", Folder::LastName("1/2/3/4"));
-  BOOST_CHECK_EQUAL("a", Folder::LastName(Folder::LastName("a/b/a")));
-}
-
-BOOST_AUTO_TEST_CASE(RemoveRoot_move) {
-  BOOST_CHECK_EQUAL("", Folder::RemoveRoot(""));
-  BOOST_CHECK_EQUAL("", Folder::RemoveRoot("root"));
-  BOOST_CHECK_EQUAL("file", Folder::RemoveRoot("root/file"));
-  BOOST_CHECK_EQUAL("b/c", Folder::RemoveRoot("a/b/c"));
-  BOOST_CHECK_EQUAL("a and b/c", Folder::RemoveRoot("a/a and b/c"));
-  BOOST_CHECK_EQUAL("2/3/4", Folder::RemoveRoot("1/2/3/4"));
-  BOOST_CHECK_EQUAL("b/a", Folder::RemoveRoot("a/b/a"));
-}
-
-BOOST_AUTO_TEST_CASE(RemoveRoot_ref) {
-  std::string path = "";
-  BOOST_CHECK_EQUAL("", Folder::RemoveRoot(path));
-  path = "root";
-  BOOST_CHECK_EQUAL("", Folder::RemoveRoot(path));
-  path = "root/file";
-  BOOST_CHECK_EQUAL("file", Folder::RemoveRoot(path));
-  path = "a/b/c";
-  BOOST_CHECK_EQUAL("b/c", Folder::RemoveRoot(path));
-  path = "a/a and b/c";
-  BOOST_CHECK_EQUAL("a and b/c", Folder::RemoveRoot(path));
-  path = "1/2/3/4";
-  BOOST_CHECK_EQUAL("2/3/4", Folder::RemoveRoot(path));
-  path = "a/b/a";
-  BOOST_CHECK_EQUAL("b/a", Folder::RemoveRoot(path));
-}
-
 BOOST_AUTO_TEST_CASE(FollowDown) {
   std::unique_ptr<Folder> a(new Folder("a"));
   std::unique_ptr<Folder> b(new Folder("b"));
@@ -126,9 +80,9 @@ BOOST_AUTO_TEST_CASE(FollowDown) {
   f1->Add(*f2);
   root->Add(*f1);
   BOOST_CHECK_EQUAL(
-      root->FollowDown(Folder::RemoveRoot("root/bert/carole/daniel")),
+      root->FollowDown(folders::RemoveRoot("root/bert/carole/daniel")),
       f3.get());
-  std::string notMoved = Folder::RemoveRoot("root/bert/carole/daniel");
+  std::string notMoved = folders::RemoveRoot("root/bert/carole/daniel");
   BOOST_CHECK_EQUAL(root->FollowDown(notMoved), f3.get());
 }
 

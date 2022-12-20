@@ -71,7 +71,7 @@ void FolderCombo::fillListFolder(const Folder &folder, size_t depth,
   }
 }
 
-Folder &FolderCombo::Selection() {
+Folder &FolderCombo::Selection() const {
   Gtk::TreeModel::iterator selected = get_active();
   return *(*selected)[_listColumns._folder];
 }

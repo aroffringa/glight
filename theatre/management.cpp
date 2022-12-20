@@ -8,6 +8,7 @@
 #include "effect.h"
 #include "fixturecontrol.h"
 #include "folder.h"
+#include "folderoperations.h"
 #include "presetcollection.h"
 #include "presetvalue.h"
 #include "sequence.h"
@@ -211,7 +212,7 @@ Folder &Management::AddFolder(Folder &parent, const std::string &name) {
 }
 
 Folder &Management::GetFolder(const std::string &path) {
-  return *_rootFolder->FollowDown(Folder::RemoveRoot(path));
+  return *_rootFolder->FollowDown(folders::RemoveRoot(path));
 }
 
 void Management::RemoveObject(FolderObject &object) {

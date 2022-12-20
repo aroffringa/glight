@@ -33,7 +33,7 @@ class AutoDesign {
   };
 
   struct ColorDeduction {
-    bool whiteFromRGB, amberFromRGB, uvFromRGB;
+    bool whiteFromRGB, amberFromRGB, uvFromRGB, limeFromRGB;
   };
 
   static class PresetCollection &MakeColorPreset(
