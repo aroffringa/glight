@@ -1,5 +1,7 @@
 #include "reorderwidget.h"
 
+#include <ranges>
+
 namespace glight::gui::components {
 
 ReorderWidget::ReorderWidget(theatre::Management& management,
@@ -14,10 +16,18 @@ ReorderWidget::ReorderWidget(theatre::Management& management,
   scrolled_window_.set_size_request(300, 400);
   pack_start(scrolled_window_);
 
-  button_box_.pack_start(up_button_);
-  button_box_.pack_start(down_button_);
-  button_box_.pack_start(remove_button_);
-  pack_start(button_box_);
+  button_box_.set_homogeneous(true);
+  button_box_.set_valign(Gtk::Align::ALIGN_CENTER);
+  up_button_.set_image_from_icon_name("go-up");
+  up_button_.signal_clicked().connect([&]() { MoveUp(); });
+  button_box_.pack_start(up_button_, false, false);
+  down_button_.set_image_from_icon_name("go-down");
+  down_button_.signal_clicked().connect([&]() { MoveDown(); });
+  button_box_.pack_start(down_button_, false, false);
+  remove_button_.set_image_from_icon_name("edit-delete");
+  remove_button_.signal_clicked().connect([&]() { Remove(); });
+  button_box_.pack_start(remove_button_, false, false);
+  pack_start(button_box_, false, false);
 
   show_all_children();
 }
@@ -40,6 +50,37 @@ std::vector<theatre::NamedObject*> ReorderWidget::GetList() const {
     list.emplace_back(row[columns_.object_]);
   }
   return list;
+}
+
+void ReorderWidget::MoveUp() {
+  std::vector<Gtk::TreeModel::Path> rows =
+      view_.get_selection()->get_selected_rows();
+  for (const Gtk::TreeModel::Path& row : rows) {
+    Gtk::TreeModel::iterator iter = model_->get_iter(row);
+    Gtk::TreeModel::iterator previous_iter = iter;
+    --previous_iter;
+    if (previous_iter) model_->iter_swap(iter, previous_iter);
+  }
+}
+
+void ReorderWidget::MoveDown() {
+  std::vector<Gtk::TreeModel::Path> rows =
+      view_.get_selection()->get_selected_rows();
+  std::ranges::reverse_view rev_view(rows);
+  for (const Gtk::TreeModel::Path& row : rev_view) {
+    Gtk::TreeModel::iterator iter = model_->get_iter(row);
+    Gtk::TreeModel::iterator next_iter = iter;
+    ++next_iter;
+    if (next_iter) model_->iter_swap(iter, next_iter);
+  }
+}
+
+void ReorderWidget::Remove() {
+  std::vector<Gtk::TreeModel::Path> rows =
+      view_.get_selection()->get_selected_rows();
+  for (const Gtk::TreeModel::Path& row : rows) {
+    model_->erase(model_->get_iter(row));
+  }
 }
 
 }  // namespace glight::gui::components

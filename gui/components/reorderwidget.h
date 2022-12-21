@@ -26,6 +26,9 @@ class ReorderWidget : public Gtk::HBox {
 
  private:
   void FillList();
+  void MoveUp();
+  void MoveDown();
+  void Remove();
 
   theatre::Management &management_;
   EventTransmitter &hub_;
