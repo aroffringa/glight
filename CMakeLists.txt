@@ -49,6 +49,7 @@ set(GUIFILES
   gui/components/iconbutton.cpp
   gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp
+  gui/components/reorderwidget.cpp
   gui/dialogs/inputselectdialog.cpp
   gui/faders/controlwidget.cpp
   gui/faders/faderwidget.cpp
