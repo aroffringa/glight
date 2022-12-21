@@ -19,7 +19,7 @@ if (NOT CMAKE_BUILD_TYPE EQUAL "DEBUG")
   add_compile_options(-DNDEBUG)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 set(CMAKE_CXX_EXTENSIONS NO)
 
@@ -49,6 +49,7 @@ set(GUIFILES
   gui/components/iconbutton.cpp
   gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp
+  gui/components/reorderwidget.cpp
   gui/dialogs/inputselectdialog.cpp
   gui/faders/controlwidget.cpp
   gui/faders/faderwidget.cpp
