@@ -29,16 +29,19 @@ class FixtureControl final : public Controllable {
       case FT::ColorMacro:
       case FT::ColorTemperature:
       case FT::Effect:
+      case FT::Lightness:
       case FT::Master:
       case FT::Pan:
       case FT::Pulse:
       case FT::Rotation:
+      case FT::Saturation:
       case FT::Strobe:
       case FT::Tilt:
       case FT::Zoom:
       case FT::Unknown:
       case FT::White:
         return Color::White();
+      case FT::Hue:
       case FT::Red:
         return Color::RedC();
       case FT::Green:

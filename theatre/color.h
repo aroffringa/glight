@@ -1,6 +1,8 @@
 #ifndef THEATRE_COLOR_H_
 #define THEATRE_COLOR_H_
 
+#include <cmath>
+
 namespace glight::theatre {
 
 class Color {
@@ -98,6 +100,58 @@ inline bool operator<(const Color &lhs, const Color &rhs) {
     return false;
   else
     return lhs.Blue() < rhs.Blue();
+}
+
+/**
+ * @param h hue, value in the range 0 and 360.
+ * @param s saturation, value in the 0-1.
+ * @param l lightness, value in the range 0-1.
+ */
+inline void HslToRgb(double h, double s, double l, double &r, double &g,
+                     double &b) {
+  const double d = s * (1.0 - std::fabs(2.0 * l - 1.0));
+  const double m = 255.0 * (l - 0.5 * d);
+  const double x = d * (1.0 - std::fabs(std::fmod((h / 60.0), 2.0) - 1.0));
+  if (0 <= h && h < 60.0) {
+    r = 255.0 * d + m;
+    g = 255.0 * x + m;
+    b = m;
+  } else if (60 <= h && h < 120) {
+    r = 255.0 * x + m;
+    g = 255.0 * d + m;
+    b = m;
+  } else if (120 <= h && h < 180.0) {
+    r = m;
+    g = 255.0 * d + m;
+    b = 255.0 * x + m;
+  } else if (180 <= h && h < 240.0) {
+    r = m;
+    g = 255.0 * x + m;
+    b = 255.0 * d + m;
+  } else if (240 <= h && h < 300.0) {
+    r = 255.0 * x + m;
+    g = m;
+    b = 255.0 * d + m;
+  } else if (300 <= h && h <= 360.0) {
+    r = 255.0 * d + m;
+    g = m;
+    b = 255.0 * x + m;
+  } else {
+    r = 0.0;
+    g = 0.0;
+    b = 0.0;
+  }
+}
+
+inline double ColorDistance(double r1, double g1, double b1, double r2,
+                            double g2, double b2) {
+  // from https://www.compuphase.com/cmetric.htm
+  const double rmean = (r1 + r2) * 0.5;
+  const double r = r1 - r2;
+  const double g = g1 - g2;
+  const double b = b1 - b2;
+  return std::sqrt((((512.0 + rmean) * r * r) / 256.0) + 4.0 * g * g +
+                   (((767.0 - rmean) * b * b) / 256.0));
 }
 
 }  // namespace glight::theatre

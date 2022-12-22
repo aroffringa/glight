@@ -86,6 +86,9 @@ class ColorTemperatureEffect final : public Effect {
         case FunctionType::Tilt:
         case FunctionType::Zoom:
         case FunctionType::Effect:
+        case FunctionType::Hue:
+        case FunctionType::Saturation:
+        case FunctionType::Lightness:
           break;
       }
     }

@@ -1,6 +1,7 @@
 #ifndef THEATRE_COLOR_CONTROL_EFFECT_H_
 #define THEATRE_COLOR_CONTROL_EFFECT_H_
 
+#include "../colordeduction.h"
 #include "../effect.h"
 
 namespace glight::theatre {
@@ -57,38 +58,27 @@ class ColorControlEffect final : public Effect {
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::White: {
-          const ControlValue white = Min(values[1], values[2], values[3]);
-          const ControlValue v = values[0] * white;
+          const ControlValue v = values[0] * DeduceWhite(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::Amber: {
-          const unsigned amber =
-              std::min(values[1].UInt() / 2, values[2].UInt()) * 2;
-          const ControlValue v = values[0] * ControlValue(amber);
+          const ControlValue v = values[0] * DeduceAmber(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::UV: {
-          const unsigned uv =
-              std::min(values[3].UInt() / 3, values[1].UInt()) * 3;
-          const ControlValue v = values[0] * ControlValue(uv);
+          const ControlValue v = values[0] * DeduceUv(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::Lime: {
-          const unsigned lime =
-              std::min(values[2].UInt() / 2, values[1].UInt()) * 2;
-          const ControlValue v = values[0] * ControlValue(lime);
+          const ControlValue v = values[0] * DeduceLime(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::ColdWhite: {
-          const unsigned rg = std::min(values[1].UInt(), values[2].UInt());
-          const unsigned cw = std::min(rg * 64, values[3].UInt() * 57) / 64;
-          const ControlValue v = values[0] * ControlValue(cw);
+          const ControlValue v = values[0] * DeduceColdWhite(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::WarmWhite: {
-          const unsigned gb = std::min(values[2].UInt(), values[3].UInt());
-          const unsigned ww = std::min(gb * 64, values[1].UInt() * 57) / 64;
-          const ControlValue v = values[0] * ControlValue(ww);
+          const ControlValue v = values[0] * DeduceWarmWhite(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::Master:
@@ -101,6 +91,9 @@ class ColorControlEffect final : public Effect {
         case FunctionType::Pan:
         case FunctionType::Tilt:
         case FunctionType::Zoom:
+        case FunctionType::Hue:
+        case FunctionType::Saturation:
+        case FunctionType::Lightness:
         case FunctionType::Effect:
           break;
       }

@@ -19,6 +19,7 @@ enum class EffectType {
   Fade,
   Flicker,
   FluorescentStart,
+  HueSaturationLightness,
   Invert,
   MusicActivation,
   Pulse,
@@ -49,6 +50,8 @@ inline std::string EffectTypeToName(EffectType type) {
       return "Flicker";
     case ET::FluorescentStart:
       return "Fluorescent start";
+    case ET::HueSaturationLightness:
+      return "Hue saturation lightness";
     case ET::Invert:
       return "Invert";
     case ET::MusicActivation:
@@ -85,6 +88,8 @@ inline EffectType NameToEffectType(const std::string &name) {
     return ET::Flicker;
   else if (name == "Fluorescent start")
     return ET::FluorescentStart;
+  else if (name == "Hue saturation lightness")
+    return ET::HueSaturationLightness;
   else if (name == "Invert")
     return ET::Invert;
   else if (name == "Music activation")
@@ -111,6 +116,7 @@ inline std::vector<EffectType> GetEffectTypes() {
                          ET::Fade,
                          ET::Flicker,
                          ET::FluorescentStart,
+                         ET::HueSaturationLightness,
                          ET::Invert,
                          ET::MusicActivation,
                          ET::Pulse,
