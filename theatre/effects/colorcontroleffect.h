@@ -58,27 +58,33 @@ class ColorControlEffect final : public Effect {
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::White: {
-          const ControlValue v = values[0] * DeduceWhite(values[1], values[2], values[3]);
+          const ControlValue v =
+              values[0] * DeduceWhite(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::Amber: {
-          const ControlValue v = values[0] * DeduceAmber(values[1], values[2], values[3]);
+          const ControlValue v =
+              values[0] * DeduceAmber(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::UV: {
-          const ControlValue v = values[0] * DeduceUv(values[1], values[2], values[3]);
+          const ControlValue v =
+              values[0] * DeduceUv(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::Lime: {
-          const ControlValue v = values[0] * DeduceLime(values[1], values[2], values[3]);
+          const ControlValue v =
+              values[0] * DeduceLime(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::ColdWhite: {
-          const ControlValue v = values[0] * DeduceColdWhite(values[1], values[2], values[3]);
+          const ControlValue v =
+              values[0] * DeduceColdWhite(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::WarmWhite: {
-          const ControlValue v = values[0] * DeduceWarmWhite(values[1], values[2], values[3]);
+          const ControlValue v =
+              values[0] * DeduceWarmWhite(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
         case FunctionType::Master:
