@@ -10,6 +10,7 @@
 #include "fadeeffectps.h"
 #include "flickereffectps.h"
 #include "fluorescentstarteffectps.h"
+#include "hue_saturation_lightness_ps.h"
 #include "inverteffectps.h"
 #include "musicactivationeffectps.h"
 #include "pulseeffectps.h"
@@ -40,6 +41,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
     FXCASE(Fade);
     FXCASE(Flicker);
     FXCASE(FluorescentStart);
+    FXCASE(HueSaturationLightness);
     FXCASE(Invert);
     FXCASE(MusicActivation);
     FXCASE(Pulse);

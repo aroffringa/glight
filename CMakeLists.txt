@@ -93,10 +93,16 @@ set(THEATREFILES
   theatre/scene.cpp
   theatre/show.cpp
   theatre/theatre.cpp
+  theatre/effects/hue_saturation_lightness_effect.cpp
   theatre/properties/propertyset.cpp)
+  
+set(EXTERNALFILES
+  external/hsluv/hsluv.c)
+
+include_directories(external/hsluv)
 
 add_library(glight-object OBJECT
-  ${GUIFILES} ${SYSTEMFILES} ${THEATREFILES})
+  ${GUIFILES} ${SYSTEMFILES} ${THEATREFILES} ${EXTERNALFILES})
 
 add_executable(glight $<TARGET_OBJECTS:glight-object> glight.cpp)
 

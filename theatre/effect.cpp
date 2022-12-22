@@ -10,6 +10,7 @@
 #include "effects/fadeeffect.h"
 #include "effects/flickereffect.h"
 #include "effects/fluorescentstarteffect.h"
+#include "effects/hue_saturation_lightness_effect.h"
 #include "effects/inverteffect.h"
 #include "effects/musicactivationeffect.h"
 #include "effects/pulseeffect.h"
@@ -44,6 +45,8 @@ std::unique_ptr<Effect> Effect::Make(EffectType type) {
       return up(new FlickerEffect());
     case ET::FluorescentStart:
       return up(new FluorescentStartEffect());
+    case ET::HueSaturationLightness:
+      return up(new HueSaturationLightnessEffect());
     case ET::Invert:
       return up(new InvertEffect());
     case ET::MusicActivation:
@@ -60,8 +63,8 @@ std::unique_ptr<Effect> Effect::Make(EffectType type) {
 
 std::unique_ptr<Effect> Effect::Copy() const {
   std::unique_ptr<Effect> copy = Make(GetType());
-  std::unique_ptr<PropertySet> psSrc = PropertySet::Make(*this),
-                               psDest = PropertySet::Make(*copy);
+  std::unique_ptr<PropertySet> psSrc = PropertySet::Make(*this);
+  std::unique_ptr<PropertySet> psDest = PropertySet::Make(*copy);
   for (size_t i = 0; i != psSrc->size(); ++i) {
     psDest->AssignProperty((*psDest)[i], (*psSrc)[i], *psSrc);
   }

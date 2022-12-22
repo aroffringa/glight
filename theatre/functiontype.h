@@ -29,6 +29,9 @@ enum class FunctionType {
   ColdWhite,
   WarmWhite,
   ColorTemperature,
+  Hue,
+  Saturation,
+  Lightness,
   Unknown
 };
 
@@ -53,49 +56,58 @@ inline std::vector<FunctionType> GetFunctionTypes() {
                                    FT::ColdWhite,
                                    FT::WarmWhite,
                                    FT::ColorTemperature,
+                                   FT::Hue,
+                                   FT::Saturation,
+                                   FT::Lightness,
                                    FT::Unknown};
 }
 
 inline const char* AbbreviatedFunctionType(FunctionType functionType) {
   switch (functionType) {
+    case FunctionType::Amber:
+      return "A";
+    case FunctionType::Blue:
+      return "B";
+    case FunctionType::ColdWhite:
+      return "CW";
+    case FunctionType::ColorMacro:
+      return "C";
+    case FunctionType::ColorTemperature:
+      return "T";
+    case FunctionType::Effect:
+      return "E";
+    case FunctionType::Green:
+      return "G";
+    case FunctionType::Hue:
+      return "H";
+    case FunctionType::Lime:
+      return "L";
+    case FunctionType::Lightness:
+      return "LI";
     case FunctionType::Master:
       return "M";
     case FunctionType::Red:
       return "R";
-    case FunctionType::Green:
-      return "G";
-    case FunctionType::Blue:
-      return "B";
-    case FunctionType::White:
-      return "W";
-    case FunctionType::Amber:
-      return "A";
     case FunctionType::UV:
       return "U";
-    case FunctionType::Lime:
-      return "L";
-    case FunctionType::ColorMacro:
-      return "C";
-    case FunctionType::Pulse:
-      return "P";
-    case FunctionType::Strobe:
-      return "S";
-    case FunctionType::Rotation:
-      return "O";
+    case FunctionType::WarmWhite:
+      return "WW";
+    case FunctionType::White:
+      return "W";
     case FunctionType::Pan:
       return "PN";
+    case FunctionType::Pulse:
+      return "P";
+    case FunctionType::Rotation:
+      return "O";
+    case FunctionType::Saturation:
+      return "SA";
+    case FunctionType::Strobe:
+      return "S";
     case FunctionType::Tilt:
       return "TL";
     case FunctionType::Zoom:
       return "Z";
-    case FunctionType::Effect:
-      return "E";
-    case FunctionType::ColdWhite:
-      return "CW";
-    case FunctionType::WarmWhite:
-      return "WW";
-    case FunctionType::ColorTemperature:
-      return "T";
     case FunctionType::Unknown:
       return "?";
   }
@@ -123,7 +135,11 @@ inline FunctionType GetFunctionType(const std::string& name) {
     case 'G':
       if (name == "Green") return FunctionType::Green;
       break;
+    case 'H':
+      if (name == "Hue") return FunctionType::Hue;
+      break;
     case 'L':
+      if (name == "Lightness") return FunctionType::Lightness;
       if (name == "Lime") return FunctionType::Lime;
       break;
     case 'M':
@@ -140,6 +156,7 @@ inline FunctionType GetFunctionType(const std::string& name) {
       if (name == "Rotation") return FunctionType::Rotation;
       break;
     case 'S':
+      if (name == "Saturation") return FunctionType::Saturation;
       if (name == "Strobe") return FunctionType::Strobe;
       break;
     case 'T':
@@ -180,6 +197,10 @@ inline std::string ToString(FunctionType functionType) {
       return "Effect";
     case FunctionType::Green:
       return "Green";
+    case FunctionType::Hue:
+      return "Hue";
+    case FunctionType::Lightness:
+      return "Lightness";
     case FunctionType::Lime:
       return "Lime";
     case FunctionType::Master:
@@ -192,6 +213,8 @@ inline std::string ToString(FunctionType functionType) {
       return "Red";
     case FunctionType::Rotation:
       return "Rotation";
+    case FunctionType::Saturation:
+      return "Saturation";
     case FunctionType::Strobe:
       return "Strobe";
     case FunctionType::Tilt:
@@ -214,16 +237,19 @@ inline constexpr Color GetFunctionColor(FunctionType type) {
   switch (type) {
     case FunctionType::ColorMacro:
     case FunctionType::Effect:
+    case FunctionType::Lightness:
     case FunctionType::Master:
     case FunctionType::Pulse:
     case FunctionType::Rotation:
     case FunctionType::Pan:
+    case FunctionType::Saturation:
     case FunctionType::Strobe:
     case FunctionType::Tilt:
     case FunctionType::Zoom:
     case FunctionType::Unknown:
       return Color::Black();
     case FunctionType::Red:
+    case FunctionType::Hue:
       return Color::RedC();
     case FunctionType::Green:
       return Color::GreenC();

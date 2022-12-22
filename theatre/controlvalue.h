@@ -22,6 +22,9 @@ class ControlValue {
 
   constexpr static ControlValue Zero() { return ControlValue(0); }
   constexpr static ControlValue Max() { return ControlValue((1 << 24) - 1); }
+  constexpr static ControlValue FromRatio(double ratio) {
+    return ControlValue(static_cast<unsigned>(ratio * MaxUInt()));
+  }
   constexpr static unsigned MaxUInt() { return (1 << 24) - 1; }
 
   constexpr static unsigned Invert(unsigned value) { return MaxUInt() - value; }
