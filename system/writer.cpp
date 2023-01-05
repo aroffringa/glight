@@ -10,6 +10,7 @@
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
 #include "../theatre/fixturefunction.h"
+#include "../theatre/fixturegroup.h"
 #include "../theatre/folder.h"
 #include "../theatre/presetvalue.h"
 #include "../theatre/show.h"
@@ -96,6 +97,20 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
     writeFixtureFunction(state, *ff);
   state.writer.EndArray();   // functions
   state.writer.EndObject();  // fixture
+}
+
+void writeFixtureGroup(WriteState &state, const FixtureGroup &group) {
+  state.writer.StartObject();
+  writeFolderAttributes(state, group);
+  const std::vector<Fixture *> fixtures = group.Fixtures();
+  state.writer.StartArray("fixtures");
+  for (const Fixture *fixture : fixtures) {
+    // TODO fixture should become a FolderObject and this should be the full
+    // path
+    state.writer.String(fixture->Name());
+  }
+  state.writer.EndArray();   // fixtures
+  state.writer.EndObject();  // fixture-group
 }
 
 void witeMacroParameters(WriteState &state, const MacroParameters &pars) {
@@ -491,6 +506,13 @@ void writeGlightShow(WriteState &state) {
   state.writer.EndArray();  // fixtures
 
   state.writer.EndObject();  // theatre
+
+  state.writer.StartArray("fixture-groups");
+  const std::vector<std::unique_ptr<FixtureGroup>> &groups =
+      state.management.FixtureGroups();
+  for (const std::unique_ptr<FixtureGroup> &f : groups)
+    writeFixtureGroup(state, *f);
+  state.writer.EndArray();  // fixture-groups
 
   state.writer.StartArray("controls");
 

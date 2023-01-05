@@ -1,5 +1,8 @@
 #include "reorderwidget.h"
 
+#include "../../theatre/fixture.h"
+#include "../../theatre/fixturetype.h"
+
 #include <ranges>
 
 namespace glight::gui::components {
@@ -9,7 +12,7 @@ ReorderWidget::ReorderWidget(theatre::Management& management,
     : management_(management), hub_(hub) {
   model_ = Gtk::ListStore::create(columns_);
   view_.set_model(model_);
-  view_.append_column("Fixture", columns_.title_);
+  SetColumns();
   view_.set_rubber_banding(true);
   view_.get_selection()->set_mode(Gtk::SelectionMode::SELECTION_MULTIPLE);
   scrolled_window_.add(view_);
@@ -32,15 +35,16 @@ ReorderWidget::ReorderWidget(theatre::Management& management,
   show_all_children();
 }
 
-void ReorderWidget::SetList(const std::vector<theatre::NamedObject*>& objects) {
-  model_->clear();
-
-  for (theatre::NamedObject* object : objects) {
-    Gtk::TreeModel::iterator iter = model_->append();
-    Gtk::TreeModel::Row row = *iter;
-    row[columns_.title_] = object->Name();
-    row[columns_.object_] = object;
+void ReorderWidget::Append(theatre::NamedObject& object) {
+  Gtk::TreeModel::iterator iter = model_->append();
+  Gtk::TreeModel::Row row = *iter;
+  row[columns_.title_] = object.Name();
+  if (theatre::Fixture* fixture = dynamic_cast<theatre::Fixture*>(&object);
+      fixture) {
+    row[columns_.type_] = fixture->Type().Name();
   }
+  row[columns_.object_] = &object;
+  signal_changed_();
 }
 
 std::vector<theatre::NamedObject*> ReorderWidget::GetList() const {
@@ -61,6 +65,7 @@ void ReorderWidget::MoveUp() {
     --previous_iter;
     if (previous_iter) model_->iter_swap(iter, previous_iter);
   }
+  signal_changed_();
 }
 
 void ReorderWidget::MoveDown() {
@@ -73,6 +78,7 @@ void ReorderWidget::MoveDown() {
     ++next_iter;
     if (next_iter) model_->iter_swap(iter, next_iter);
   }
+  signal_changed_();
 }
 
 void ReorderWidget::Remove() {
@@ -81,6 +87,13 @@ void ReorderWidget::Remove() {
   for (const Gtk::TreeModel::Path& row : rows) {
     model_->erase(model_->get_iter(row));
   }
+  signal_changed_();
+}
+
+void ReorderWidget::SetColumns() {
+  view_.remove_all_columns();
+  view_.append_column("Fixture", columns_.title_);
+  if (show_type_column_) view_.append_column("Type", columns_.type_);
 }
 
 }  // namespace glight::gui::components

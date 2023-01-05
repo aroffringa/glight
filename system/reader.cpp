@@ -10,6 +10,7 @@
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
 #include "../theatre/fixturefunction.h"
+#include "../theatre/fixturegroup.h"
 #include "../theatre/folder.h"
 #include "../theatre/presetvalue.h"
 #include "../theatre/scene.h"
@@ -173,6 +174,20 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     const Array &functions = ToArr(f_node["functions"]);
     for (const Node &f : functions) {
       ParseFixtureFunction(ToObj(f), fixture);
+    }
+  }
+}
+
+void ParseFixtureGroups(const json::Array &node, Management &management) {
+  for (const Node &child : node) {
+    const Object &f_node = ToObj(child);
+    FixtureGroup &group = management.AddFixtureGroup();
+    ParseFolderAttr(f_node, group, management);
+
+    const Array &fixtures = ToArr(f_node["fixtures"]);
+    for (const Node &f : fixtures) {
+      Fixture &fixture = management.GetTheatre().GetFixture(ToStr(f));
+      group.Insert(fixture);
     }
   }
 }
@@ -388,7 +403,7 @@ void ParseScenes(const json::Array &node, Management &management) {
   }
 }
 
-void ParseGUIPresetRef(const Object &node, gui::FaderSetState &fader,
+void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
                        Management &management) {
   if (node.children.count("name")) {
     const size_t input = ToNum(node["input-index"]).AsSize();
@@ -422,11 +437,11 @@ void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,
   const Array &faders = ToArr(node["faders"]);
   for (const Node &item : faders) {
     const Object &fader_node = ToObj(item);
-    ParseGUIPresetRef(fader_node, fader_set, management);
+    ParseGuiPresetRef(fader_node, fader_set, management);
   }
 }
 
-void ParseGUI(const Object &node, gui::GUIState &guiState,
+void ParseGui(const Object &node, gui::GUIState &guiState,
               Management &management) {
   const Array &states = ToArr(node["states"]);
   for (const Node &item : states) {
@@ -439,13 +454,14 @@ void parseGlightShow(const Object &node, Management &management,
                      gui::GUIState *guiState) {
   ParseFolders(ToArr(node["folders"]), management);
   ParseTheatre(ToObj(node["theatre"]), management);
+  ParseFixtureGroups(ToArr(node["fixture-groups"]), management);
   ParseControls(ToArr(node["controls"]), management);
   ParseSourceValues(ToArr(node["source-values"]), management);
   ParseScenes(ToArr(node["scenes"]), management);
   if (guiState != nullptr) {
     const auto &gui = node.children.find("gui");
     if (gui != node.children.end())
-      ParseGUI(ToObj(*gui->second), *guiState, management);
+      ParseGui(ToObj(*gui->second), *guiState, management);
   }
 }
 

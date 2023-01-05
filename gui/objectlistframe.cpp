@@ -6,11 +6,13 @@
 
 #include "windows/chasepropertieswindow.h"
 #include "windows/effectpropertieswindow.h"
+#include "windows/groupwindow.h"
 #include "windows/presetcollectionwindow.h"
 #include "windows/showwindow.h"
 #include "windows/timesequencepropertieswindow.h"
 
 #include "../theatre/chase.h"
+#include "../theatre/fixturegroup.h"
 #include "../theatre/folder.h"
 #include "../theatre/management.h"
 #include "../theatre/presetcollection.h"
@@ -83,7 +85,9 @@ void ObjectListFrame::initPresetsPart() {
   _list.SignalSelectionChange().connect(
       sigc::mem_fun(this, &ObjectListFrame::onSelectedObjectChanged));
   _list.SignalObjectActivated().connect(
-      sigc::mem_fun(this, &ObjectListFrame::onObjectActivated));
+      [&](glight::theatre::FolderObject &object) {
+        ObjectListFrame::OpenPropertiesWindow(object);
+      });
   _list.SetDisplayType(ObjectListType::AllExceptFixtures);
   _list.SetShowTypeColumn(true);
   _presetsHBox.pack_start(_list);
@@ -114,7 +118,7 @@ void ObjectListFrame::onNewChaseButtonClicked() {
   CreateChaseDialog dialog(*_management, _parentWindow);
   if (dialog.run() == Gtk::RESPONSE_OK) {
     _list.SelectObject(dialog.CreatedChase());
-    onObjectActivated(dialog.CreatedChase());
+    OpenPropertiesWindow(dialog.CreatedChase());
   }
 }
 
@@ -129,7 +133,7 @@ void ObjectListFrame::onNewTimeSequenceButtonClicked() {
 
   _parentWindow.EmitUpdate();
   _list.SelectObject(tSequence);
-  onObjectActivated(tSequence);
+  OpenPropertiesWindow(tSequence);
 }
 
 bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
@@ -163,7 +167,7 @@ void ObjectListFrame::onNewEffectMenuClicked(
     _management->AddSourceValue(*added, i);
   _parentWindow.EmitUpdate();
   _list.SelectObject(*added);
-  onObjectActivated(*added);
+  OpenPropertiesWindow(*added);
 }
 
 void ObjectListFrame::onNewFolderButtonClicked() {
@@ -201,44 +205,46 @@ void ObjectListFrame::onSelectedObjectChanged() {
   }
 }
 
-void ObjectListFrame::onObjectActivated(FolderObject &object) {
+PropertiesWindow &ObjectListFrame::OpenPropertiesWindow(FolderObject &object) {
   PropertiesWindow *window = _windowList.GetOpenWindow(object);
   if (window) {
     window->present();
   } else {
-    theatre::PresetCollection *presetCollection =
-        dynamic_cast<theatre::PresetCollection *>(&object);
-    if (presetCollection) {
-      std::unique_ptr<PresetCollectionWindow> newWindow(
-          new PresetCollectionWindow(*presetCollection, *_management,
-                                     _parentWindow));
-      newWindow->present();
-      _windowList.Add(std::move(newWindow));
+    using theatre::Chase;
+    using theatre::Effect;
+    using theatre::FixtureGroup;
+    using theatre::PresetCollection;
+    using theatre::TimeSequence;
+    std::unique_ptr<PropertiesWindow> new_window;
+    if (Chase *chase = dynamic_cast<Chase *>(&object); chase) {
+      new_window = std::make_unique<ChasePropertiesWindow>(*chase, *_management,
+                                                           _parentWindow);
+    } else if (theatre::Effect *effect =
+                   dynamic_cast<theatre::Effect *>(&object);
+               effect) {
+      new_window = std::make_unique<EffectPropertiesWindow>(
+          *effect, *_management, _parentWindow);
+    } else if (theatre::FixtureGroup *group =
+                   dynamic_cast<theatre::FixtureGroup *>(&object);
+               group) {
+      new_window = std::make_unique<windows::GroupWindow>(*group, *_management,
+                                                          _parentWindow);
+    } else if (PresetCollection *presetCollection =
+                   dynamic_cast<PresetCollection *>(&object);
+               presetCollection) {
+      new_window = std::make_unique<PresetCollectionWindow>(
+          *presetCollection, *_management, _parentWindow);
+    } else if (TimeSequence *timeSequence =
+                   dynamic_cast<TimeSequence *>(&object);
+               timeSequence) {
+      new_window = std::make_unique<TimeSequencePropertiesWindow>(
+          *timeSequence, *_management, _parentWindow);
     }
-    theatre::Chase *chase = dynamic_cast<theatre::Chase *>(&object);
-    if (chase) {
-      std::unique_ptr<ChasePropertiesWindow> newWindow(
-          new ChasePropertiesWindow(*chase, *_management, _parentWindow));
-      newWindow->present();
-      _windowList.Add(std::move(newWindow));
-    }
-    theatre::TimeSequence *timeSequence =
-        dynamic_cast<theatre::TimeSequence *>(&object);
-    if (timeSequence) {
-      std::unique_ptr<TimeSequencePropertiesWindow> newWindow(
-          new TimeSequencePropertiesWindow(*timeSequence, *_management,
-                                           _parentWindow));
-      newWindow->present();
-      _windowList.Add(std::move(newWindow));
-    }
-    theatre::Effect *effect = dynamic_cast<theatre::Effect *>(&object);
-    if (effect) {
-      std::unique_ptr<EffectPropertiesWindow> newWindow(
-          new EffectPropertiesWindow(*effect, *_management, _parentWindow));
-      newWindow->present();
-      _windowList.Add(std::move(newWindow));
-    }
+    new_window->present();
+    window = new_window.get();
+    _windowList.Add(std::move(new_window));
   }
+  return *window;
 }
 
 }  // namespace glight::gui

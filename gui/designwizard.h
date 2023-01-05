@@ -2,6 +2,7 @@
 #define GUI_CHASE_WIZARD_H_
 
 #include "components/colorsequencewidget.h"
+#include "components/fixturelist.h"
 #include "components/foldercombo.h"
 #include "components/objectbrowser.h"
 #include "components/reorderwidget.h"
@@ -30,15 +31,16 @@ class EventTransmitter;
 
 class DesignWizard : public Gtk::Window {
  public:
-  DesignWizard(theatre::Management &management, EventTransmitter &hub,
-               const std::string &currentPath);
+  DesignWizard(theatre::Management &management, EventTransmitter &hub);
   ~DesignWizard();
 
   void SetCurrentPath(const std::string &currentPath) {
     _currentPath = currentPath;
   }
 
-  void Select(const std::vector<theatre::Fixture *> &fixtures);
+  void Select(const std::vector<theatre::Fixture *> &fixtures) {
+    _fixtureList.Select(fixtures);
+  }
 
  private:
   enum Page {
@@ -53,7 +55,6 @@ class DesignWizard : public Gtk::Window {
     Page4_6_Increasing
   };
 
-  void fillFixturesList();
   void onNextClicked();
   void initPage1();
   void initPage2();
@@ -76,16 +77,16 @@ class DesignWizard : public Gtk::Window {
   theatre::AutoDesign::ColorDeduction colorDeduction() const;
 
   EventTransmitter &_eventHub;
-  theatre::Management *_management;
+  theatre::Management &_management;
   std::string _currentPath;
 
   Gtk::VBox _mainBox;
   Gtk::VBox _vBoxPage1, _vBoxPage1a, _vBoxPage1b;
   Gtk::Notebook _notebook;
+  std::vector<theatre::Controllable *> _selectedControllables;
   // 1a
   Gtk::Label _selectLabel;
-  Gtk::TreeView _fixturesListView;
-  std::vector<theatre::Controllable *> _selectedControllables;
+  components::FixtureList _fixtureList;
   // 1b
   ObjectBrowser _objectBrowser;
   Gtk::HBox _controllableButtonBox;
@@ -137,19 +138,6 @@ class DesignWizard : public Gtk::Window {
   Gtk::ButtonBox _buttonBox;
   Gtk::Button _nextButton;
   Page _currentPage;
-
-  Glib::RefPtr<Gtk::ListStore> _fixturesListModel;
-  struct FixturesListColumns : public Gtk::TreeModelColumnRecord {
-    FixturesListColumns() {
-      add(_title);
-      add(_type);
-      add(_fixture);
-    }
-
-    Gtk::TreeModelColumn<Glib::ustring> _title, _type;
-    Gtk::TreeModelColumn<theatre::Fixture *> _fixture;
-  } _fixturesListColumns;
-  Gtk::ScrolledWindow _fixturesScrolledWindow;
 
   Glib::RefPtr<Gtk::ListStore> _controllablesListModel;
   struct ControllablesListColumns : public Gtk::TreeModelColumnRecord {

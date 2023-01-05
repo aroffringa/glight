@@ -11,6 +11,7 @@ class DmxDevice;
 class Effect;
 class Fixture;
 class FixtureControl;
+class FixtureGroup;
 class FixtureType;
 class Folder;
 class FolderObject;

@@ -10,9 +10,6 @@
 
 namespace glight::theatre {
 
-class Fixture;
-class FixtureType;
-
 /**
  * @author Andre Offringa
  */

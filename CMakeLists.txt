@@ -45,6 +45,7 @@ set(GUIFILES
   gui/components/colorselectwidget.cpp
   gui/components/colorsequencewidget.cpp
   gui/components/durationinput.cpp
+  gui/components/fixturelist.cpp
   gui/components/foldercombo.cpp
   gui/components/iconbutton.cpp
   gui/components/objectlist.cpp
@@ -62,6 +63,7 @@ set(GUIFILES
   gui/windows/fixtureproperties.cpp
   gui/windows/fixturetypeswindow.cpp
   gui/windows/fixturetypefunctionsframe.cpp
+  gui/windows/groupwindow.cpp
   gui/windows/presetcollectionwindow.cpp
   gui/windows/showwindow.cpp
   gui/windows/timesequencepropertieswindow.cpp
@@ -132,6 +134,7 @@ if(Boost_FOUND)
     tests/tfileformat.cpp
     tests/tfixturecontrol.cpp
     tests/tfixturefunction.cpp
+    tests/tfixturegroup.cpp
     tests/tfixturetype.cpp
     tests/tfixturetypefunction.cpp
     tests/tfolder.cpp

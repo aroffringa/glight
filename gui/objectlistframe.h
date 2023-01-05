@@ -30,6 +30,7 @@ class ObjectListFrame : public Gtk::VPaned {
 
   theatre::Folder &SelectedFolder() { return _list.SelectedFolder(); }
   void OpenFolder(const theatre::Folder &folder) { _list.OpenFolder(folder); }
+  PropertiesWindow &OpenPropertiesWindow(theatre::FolderObject &object);
 
  private:
   void initPresetsPart();
@@ -41,7 +42,6 @@ class ObjectListFrame : public Gtk::VPaned {
   void onNewFolderButtonClicked();
   void onDeletePresetButtonClicked();
   void onSelectedObjectChanged();
-  void onObjectActivated(theatre::FolderObject &object);
   void onNewEffectMenuClicked(theatre::EffectType effectType);
 
   Gtk::Frame _objectListFrame;
