@@ -41,6 +41,9 @@ class Management {
   const std::vector<std::unique_ptr<Folder>> &Folders() const {
     return _folders;
   }
+  const std::vector<std::unique_ptr<FixtureGroup>> &FixtureGroups() const {
+    return _groups;
+  }
   const std::vector<std::unique_ptr<Controllable>> &Controllables() const {
     return _controllables;
   }
@@ -72,8 +75,12 @@ class Management {
     return const_cast<Management &>(*this).GetFixtureControl(fixture);
   }
 
+  FixtureGroup &AddFixtureGroup();
+  FixtureGroup &AddFixtureGroup(const Folder &parent, const std::string &name);
+
   void RemoveFixture(const Fixture &fixture);
-  void RemoveFixtureType(const FixtureType &fixture);
+  void RemoveFixtureType(const FixtureType &type);
+  void RemoveFixtureGroup(const FixtureGroup &group);
 
   SourceValue &AddSourceValue(Controllable &controllable, size_t inputIndex);
 
@@ -172,6 +179,7 @@ class Management {
   Folder *_rootFolder;
   std::vector<std::unique_ptr<Folder>> _folders;
   std::vector<std::unique_ptr<Controllable>> _controllables;
+  std::vector<std::unique_ptr<FixtureGroup>> _groups;
   std::vector<std::unique_ptr<SourceValue>> _sourceValues;
   std::vector<std::unique_ptr<DmxDevice>> _devices;
 };

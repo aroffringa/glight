@@ -27,8 +27,8 @@ class FixtureSelection;
  */
 class FixtureListWindow : public Gtk::Window {
  public:
-  FixtureListWindow(EventTransmitter *eventHub, theatre::Management &management,
-                    FixtureSelection *globalSelection);
+  FixtureListWindow(EventTransmitter &eventHub, theatre::Management &management,
+                    FixtureSelection &globalSelection);
   ~FixtureListWindow();
 
  private:
@@ -45,9 +45,9 @@ class FixtureListWindow : public Gtk::Window {
   void onSelectionChanged();
   void onGlobalSelectionChange();
 
-  EventTransmitter *_eventHub;
-  theatre::Management *_management;
-  FixtureSelection *_globalSelection;
+  EventTransmitter &_eventHub;
+  theatre::Management &_management;
+  FixtureSelection &_globalSelection;
 
   sigc::connection _changeManagementConnection, _updateControllablesConnection,
       _globalSelectionConnection;

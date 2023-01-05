@@ -1,6 +1,7 @@
 #include "../theatre/chase.h"
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
+#include "../theatre/fixturegroup.h"
 #include "../theatre/folder.h"
 #include "../theatre/management.h"
 #include "../theatre/presetcollection.h"
@@ -32,6 +33,9 @@ void FillManagement(Management &management) {
   // Use the AyraTDCSunrise fixture to test rotation parameters:
   root.Add(
       management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise));
+
+  // Make a group with the two fixtures
+  management.AddFixtureGroup(root, "Ayra and ADJ");
 
   FixtureType &ft =
       management.GetTheatre().AddFixtureType(StockFixture::RGBWLight4Ch);
@@ -142,8 +146,8 @@ void CheckEqual(const Management &a, const Management &b) {
     }
   }
 
-  BOOST_CHECK_EQUAL(a.GetTheatre().Fixtures().size(),
-                    b.GetTheatre().Fixtures().size());
+  BOOST_REQUIRE_EQUAL(a.GetTheatre().Fixtures().size(),
+                      b.GetTheatre().Fixtures().size());
 
   const Fixture &a_fixture = *a.GetTheatre().Fixtures()[0];
   const FixtureControl &a_fixture_control = a.GetFixtureControl(a_fixture);
@@ -163,6 +167,17 @@ void CheckEqual(const Management &a, const Management &b) {
                     ControlValue::MaxUInt());
   BOOST_CHECK_EQUAL(a.GetSourceValue(a_fixture_control, 3)->A().Value().UInt(),
                     0);
+
+  BOOST_REQUIRE_EQUAL(a.FixtureGroups().size(), b.FixtureGroups().size());
+  for (size_t i = 0; i != a.FixtureGroups().size(); ++i) {
+    BOOST_CHECK_EQUAL(a.FixtureGroups()[i]->Size(),
+                      b.FixtureGroups()[i]->Size());
+    std::vector<Fixture *> fixtures = a.FixtureGroups()[i]->Fixtures();
+    for (const Fixture *fixture_a : fixtures) {
+      Fixture &fixture_b = b.GetTheatre().GetFixture(fixture_a->Name());
+      BOOST_CHECK(b.FixtureGroups()[i]->Contains(fixture_b));
+    }
+  }
 
   const PresetCollection &readCollection =
       static_cast<const PresetCollection &>(a.GetObjectFromPath(

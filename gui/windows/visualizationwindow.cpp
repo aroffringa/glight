@@ -9,6 +9,7 @@
 
 #include "../../theatre/dmxdevice.h"
 #include "../../theatre/fixture.h"
+#include "../../theatre/fixturegroup.h"
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 #include "../../theatre/valuesnapshot.h"
@@ -38,6 +39,7 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
       _miDistributeEvenly("Distribute evenly"),
       _miAdd("Add..."),
       _miRemove("Remove"),
+      _miGroup("Group..."),
       _miDesign("Design..."),
       _miFullscreen("Fullscreen"),
       _miProperties("Properties"),
@@ -119,6 +121,9 @@ void VisualizationWindow::inializeContextMenu() {
 
   _miRemove.signal_activate().connect([&] { onRemoveFixtures(); });
   _popupMenu.add(_miRemove);
+
+  _miGroup.signal_activate().connect([&] { onGroupFixtures(); });
+  _popupMenu.add(_miGroup);
 
   _miDesign.signal_activate().connect([&] { onDesignFixtures(); });
   _popupMenu.add(_miDesign);
@@ -438,10 +443,23 @@ void VisualizationWindow::onRemoveFixtures() {
   _eventTransmitter->EmitUpdate();
 }
 
+void VisualizationWindow::onGroupFixtures() {
+  std::unique_lock lock(_management->Mutex());
+  theatre::Folder &parent = _showWindow->SelectedFolder();
+  const std::string name = parent.GetAvailableName("group");
+  theatre::FixtureGroup &group = _management->AddFixtureGroup(parent, name);
+  for (theatre::Fixture *fixture : _selectedFixtures) {
+    group.Insert(*fixture);
+  }
+  lock.unlock();
+  _eventTransmitter->EmitUpdate();
+  _showWindow->OpenPropertiesWindow(group);
+}
+
 void VisualizationWindow::onDesignFixtures() {
   std::unique_ptr<DesignWizard> &designWizard = _showWindow->GetDesignWizard();
-  designWizard.reset(
-      new DesignWizard(*_management, *_eventTransmitter, _showWindow->Path()));
+  designWizard.reset(new DesignWizard(*_management, *_eventTransmitter));
+  designWizard->SetCurrentPath(_showWindow->SelectedFolder().FullPath());
   designWizard->Select(_selectedFixtures);
   designWizard->present();
 }

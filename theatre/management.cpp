@@ -7,6 +7,7 @@
 #include "dummydevice.h"
 #include "effect.h"
 #include "fixturecontrol.h"
+#include "fixturegroup.h"
 #include "folder.h"
 #include "folderoperations.h"
 #include "presetcollection.h"
@@ -216,17 +217,15 @@ Folder &Management::GetFolder(const std::string &path) {
 }
 
 void Management::RemoveObject(FolderObject &object) {
-  Folder *folder = dynamic_cast<Folder *>(&object);
-  if (folder)
+  if (Folder *folder = dynamic_cast<Folder *>(&object); folder)
     RemoveFolder(*folder);
-  else {
-    Controllable *controllable = dynamic_cast<Controllable *>(&object);
-    if (controllable)
-      RemoveControllable(*controllable);
-    else
-      throw std::runtime_error("Can not remove unknown object " +
-                               object.Name());
-  }
+  else if (FixtureGroup *group = dynamic_cast<FixtureGroup *>(&object); group)
+    RemoveFixtureGroup(*group);
+  else if (Controllable *controllable = dynamic_cast<Controllable *>(&object);
+           controllable)
+    RemoveControllable(*controllable);
+  else
+    throw std::runtime_error("Can not remove unknown object " + object.Name());
 }
 
 void Management::RemoveFolder(Folder &folder) {
@@ -339,6 +338,29 @@ void Management::RemoveFixtureType(const FixtureType &fixtureType) {
   }
 }
 
+FixtureGroup &Management::AddFixtureGroup() {
+  return *_groups.emplace_back(std::make_unique<FixtureGroup>());
+}
+
+FixtureGroup &Management::AddFixtureGroup(const Folder &parent,
+                                          const std::string &name) {
+  FixtureGroup &group =
+      *_groups.emplace_back(std::make_unique<FixtureGroup>(name));
+  const_cast<Folder &>(parent).Add(group);
+  return group;
+}
+
+void Management::RemoveFixtureGroup(const FixtureGroup &group) {
+  for (std::vector<std::unique_ptr<FixtureGroup>>::iterator i = _groups.begin();
+       i != _groups.end(); ++i) {
+    if (i->get() == &group) {
+      _groups.erase(i);
+      return;
+    }
+  }
+  assert(false);
+}
+
 SourceValue &Management::AddSourceValue(Controllable &controllable,
                                         size_t inputIndex) {
   _sourceValues.emplace_back(
@@ -355,6 +377,7 @@ void Management::RemoveSourceValue(SourceValue &sourceValue) {
       return;
     }
   }
+  assert(false);
 }
 
 bool Management::Contains(SourceValue &sourceValue) const {

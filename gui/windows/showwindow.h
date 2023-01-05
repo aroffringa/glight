@@ -28,6 +28,7 @@ class FaderWindow;
 class FixtureListWindow;
 class FixtureTypesWindow;
 class ObjectListFrame;
+class PropertiesWindow;
 class SceneFrame;
 class VisualizationWindow;
 
@@ -51,9 +52,11 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
 
   void OpenFile(const std::string &filename);
 
-  std::string Path();
+  theatre::Folder &SelectedFolder() const;
 
   std::unique_ptr<DesignWizard> &GetDesignWizard() { return _designWizard; }
+
+  PropertiesWindow &OpenPropertiesWindow(theatre::FolderObject &object);
 
  private:
   void onFixtureListButtonClicked();

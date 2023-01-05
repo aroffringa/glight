@@ -17,12 +17,12 @@ namespace glight::gui {
 using theatre::AutoDesign;
 
 DesignWizard::DesignWizard(theatre::Management &management,
-                           EventTransmitter &hub,
-                           const std::string &currentPath)
+                           EventTransmitter &hub)
     : _eventHub(hub),
-      _management(&management),
-      _currentPath(currentPath),
+      _management(management),
+      _currentPath(),
       _selectLabel("Select fixtures:"),
+      _fixtureList(management, hub),
       _objectBrowser(management, hub),
 
       _reorderWidget(management, hub),
@@ -89,17 +89,7 @@ void DesignWizard::initPage1() {
   _notebook.append_page(_vBoxPage1a, "Fixtures");
   _vBoxPage1a.pack_start(_selectLabel);
 
-  _fixturesListModel = Gtk::ListStore::create(_fixturesListColumns);
-  _fixturesListView.set_model(_fixturesListModel);
-  _fixturesListView.append_column("Fixture", _fixturesListColumns._title);
-  _fixturesListView.append_column("Type", _fixturesListColumns._type);
-  _fixturesListView.set_rubber_banding(true);
-  _fixturesListView.get_selection()->set_mode(
-      Gtk::SelectionMode::SELECTION_MULTIPLE);
-  fillFixturesList();
-  _fixturesScrolledWindow.add(_fixturesListView);
-  _fixturesScrolledWindow.set_size_request(300, 400);
-  _vBoxPage1a.pack_start(_fixturesScrolledWindow);
+  _vBoxPage1a.pack_start(_fixtureList);
 
   _notebook.append_page(_vBoxPage1b, "Any controllables");
 
@@ -126,8 +116,8 @@ void DesignWizard::initPage1() {
   _controllablesListModel = Gtk::ListStore::create(_controllablesListColumns);
   _controllablesListView.set_model(_controllablesListModel);
   _controllablesListView.append_column("Controllable",
-                                       _fixturesListColumns._title);
-  _controllablesListView.append_column("Path", _fixturesListColumns._type);
+                                       _controllablesListColumns._title);
+  _controllablesListView.append_column("Path", _controllablesListColumns._path);
   _controllablesListView.set_rubber_banding(true);
   _controllablesListView.get_selection()->set_mode(
       Gtk::SelectionMode::SELECTION_MULTIPLE);
@@ -255,41 +245,13 @@ void DesignWizard::initPage4Destination(const std::string &name) {
   _vBoxPage4.pack_start(_folderNameBox, false, false);
 }
 
-void DesignWizard::fillFixturesList() {
-  _fixturesListModel->clear();
-
-  std::lock_guard<std::mutex> lock(_management->Mutex());
-  const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
-      _management->GetTheatre().Fixtures();
-  for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
-    Gtk::TreeModel::iterator iter = _fixturesListModel->append();
-    Gtk::TreeModel::Row row = *iter;
-    row[_fixturesListColumns._title] = fixture->Name();
-    row[_fixturesListColumns._type] = fixture->Type().Name();
-    row[_fixturesListColumns._fixture] = fixture.get();
-  }
-}
-
-void DesignWizard::Select(const std::vector<theatre::Fixture *> &fixtures) {
-  _fixturesListView.get_selection()->unselect_all();
-  Gtk::TreeModel::iterator iter;
-  Gtk::TreeModel::Children children = _fixturesListModel->children();
-  for (auto &child : children) {
-    const theatre::Fixture *fixture =
-        child.get_value(_fixturesListColumns._fixture);
-    const auto iter = std::find(fixtures.begin(), fixtures.end(), fixture);
-    if (iter != fixtures.end())
-      _fixturesListView.get_selection()->select(child);
-  }
-}
-
 theatre::Folder &DesignWizard::getCurrentFolder() const {
   theatre::Folder *folder = dynamic_cast<theatre::Folder *>(
-      _management->GetObjectFromPathIfExists(_currentPath));
+      _management.GetObjectFromPathIfExists(_currentPath));
   if (folder)
     return *folder;
   else
-    return _management->RootFolder();
+    return _management.RootFolder();
 }
 
 void DesignWizard::onNextClicked() {
@@ -297,14 +259,11 @@ void DesignWizard::onNextClicked() {
     case Page1_SelFixtures: {
       _selectedControllables.clear();
       if (_notebook.get_current_page() == 0) {
-        Glib::RefPtr<Gtk::TreeSelection> selection =
-            _fixturesListView.get_selection();
-        auto selected = selection->get_selected_rows();
-        for (auto &row : selected) {
-          theatre::Fixture *fixture = (*_fixturesListModel->get_iter(
-              row))[_fixturesListColumns._fixture];
+        for (std::vector<theatre::Fixture *> fixtures =
+                 _fixtureList.Selection();
+             theatre::Fixture * fixture : fixtures) {
           _selectedControllables.emplace_back(
-              &_management->GetFixtureControl(*fixture));
+              &_management.GetFixtureControl(*fixture));
         }
       } else {
         for (auto &iter : _controllablesListModel->children()) {
@@ -398,14 +357,14 @@ void DesignWizard::onNextClicked() {
       else  // if(_randomRunRB.get_active())
         runType = AutoDesign::RandomRun;
       AutoDesign::MakeRunningLight(
-          *_management, makeDestinationFolder(), _selectedControllables,
+          _management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetColors(), colorDeduction(), runType);
       _eventHub.EmitUpdate();
       hide();
     } break;
 
     case Page4_2_SingleColor:
-      AutoDesign::MakeColorVariation(*_management, makeDestinationFolder(),
+      AutoDesign::MakeColorVariation(_management, makeDestinationFolder(),
                                      _selectedControllables,
                                      _colorsWidgetP4.GetColors(),
                                      colorDeduction(), _variation.get_value());
@@ -424,7 +383,7 @@ void DesignWizard::onNextClicked() {
       else
         shiftType = AutoDesign::RandomShift;
       AutoDesign::MakeColorShift(
-          *_management, makeDestinationFolder(), _selectedControllables,
+          _management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetColors(), colorDeduction(), shiftType);
       _eventHub.EmitUpdate();
       hide();
@@ -441,7 +400,7 @@ void DesignWizard::onNextClicked() {
       else  // if(_vuOutwardRunRB.get_active())
         direction = AutoDesign::VUOutward;
       AutoDesign::MakeVUMeter(
-          *_management, makeDestinationFolder(), _selectedControllables,
+          _management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetColors(), colorDeduction(), direction);
       _eventHub.EmitUpdate();
       hide();
@@ -450,11 +409,11 @@ void DesignWizard::onNextClicked() {
     case Page4_5_ColorPreset: {
       if (_eachFixtureSeparatelyCB.get_active())
         AutoDesign::MakeColorPresetPerFixture(
-            *_management, makeDestinationFolder(), _selectedControllables,
+            _management, makeDestinationFolder(), _selectedControllables,
             _colorsWidgetP4.GetColors(), colorDeduction());
       else
         AutoDesign::MakeColorPreset(
-            *_management, makeDestinationFolder(), _selectedControllables,
+            _management, makeDestinationFolder(), _selectedControllables,
             _colorsWidgetP4.GetColors(), colorDeduction());
       _eventHub.EmitUpdate();
       hide();
@@ -471,7 +430,7 @@ void DesignWizard::onNextClicked() {
       else  // if(_incBackwardReturnRB.get_active())
         incType = AutoDesign::IncBackwardReturn;
       AutoDesign::MakeIncreasingChase(
-          *_management, makeDestinationFolder(), _selectedControllables,
+          _management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetColors(), colorDeduction(), incType);
       _eventHub.EmitUpdate();
       hide();
@@ -528,7 +487,7 @@ theatre::Folder &DesignWizard::makeDestinationFolder() const {
   theatre::Folder *folder = &_parentFolderCombo.Selection();
   if (_newFolderCB.get_active()) {
     const std::string new_name = _newFolderNameEntry.get_text();
-    folder = &_management->AddFolder(*folder, new_name);
+    folder = &_management.AddFolder(*folder, new_name);
   }
   return *folder;
 }

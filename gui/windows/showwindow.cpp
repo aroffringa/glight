@@ -62,8 +62,8 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
 
   _management->Run();
 
-  _fixtureListWindow.reset(
-      new FixtureListWindow(this, *_management, &_fixtureSelection));
+  _fixtureListWindow = std::make_unique<glight::gui::FixtureListWindow>(
+      *this, *_management, _fixtureSelection);
   _fixtureListWindow->signal_key_press_event().connect(
       sigc::mem_fun(*this, &ShowWindow::onKeyDown));
   _fixtureListWindow->signal_key_release_event().connect(
@@ -505,14 +505,15 @@ size_t ShowWindow::nextControlKeyRow() const {
   throw std::runtime_error("Error in nextControlKeyRow()");
 }
 
-std::string ShowWindow::Path() {
-  return _objectListFrame->SelectedFolder().FullPath();
+theatre::Folder &ShowWindow::SelectedFolder() const {
+  return _objectListFrame->SelectedFolder();
 }
 
 void ShowWindow::onMIDesignWizardClicked() {
-  if (!_designWizard || !_designWizard->is_visible())
-    _designWizard.reset(new DesignWizard(*_management, *this, Path()));
-  _designWizard->SetCurrentPath(Path());
+  if (!_designWizard || !_designWizard->is_visible()) {
+    _designWizard.reset(new DesignWizard(*_management, *this));
+  }
+  _designWizard->SetCurrentPath(SelectedFolder().FullPath());
   _designWizard->present();
 }
 
@@ -534,6 +535,11 @@ void ShowWindow::onHideFixtureTypes() {
 
 void ShowWindow::onHideVisualizationWindow() {
   _miVisualizationWindow.set_active(false);
+}
+
+PropertiesWindow &ShowWindow::OpenPropertiesWindow(
+    theatre::FolderObject &object) {
+  return _objectListFrame->OpenPropertiesWindow(object);
 }
 
 }  // namespace glight::gui

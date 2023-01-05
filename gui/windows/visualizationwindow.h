@@ -65,7 +65,8 @@ class VisualizationWindow : public Gtk::Window {
   Gtk::Menu _popupMenu;
   Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
   Gtk::MenuItem _miSymbolMenu, _miDryModeStyle, _miAlignHorizontally,
-      _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miDesign;
+      _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miGroup,
+      _miDesign;
   Gtk::CheckMenuItem _miFullscreen;
   Gtk::Menu _symbolMenu, _dryModeStyleMenu;
   Gtk::MenuItem _miProperties;
@@ -92,6 +93,7 @@ class VisualizationWindow : public Gtk::Window {
   void onDistributeEvenly();
   void onAddFixtures();
   void onRemoveFixtures();
+  void onGroupFixtures();
   void onDesignFixtures();
   void onFullscreen();
   void onSetSymbol(theatre::FixtureSymbol::Symbol symbol);

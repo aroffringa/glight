@@ -61,8 +61,9 @@ class ObjectList : public Gtk::ScrolledWindow {
  private:
   theatre::Management *_management;
   EventTransmitter &_eventHub;
-  enum ObjectListType _displayType;
-  bool _showTypeColumn;
+  enum ObjectListType _displayType = ObjectListType::AllExceptFixtures;
+  bool _showFixtureGroups = true;
+  bool _showTypeColumn = false;
   theatre::Folder *_openFolder;
 
   class TreeViewWithMenu : public Gtk::TreeView {

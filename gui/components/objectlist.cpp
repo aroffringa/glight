@@ -5,6 +5,7 @@
 #include "../../theatre/chase.h"
 #include "../../theatre/effect.h"
 #include "../../theatre/fixturecontrol.h"
+#include "../../theatre/fixturegroup.h"
 #include "../../theatre/folder.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetcollection.h"
@@ -19,8 +20,6 @@ ObjectList::ObjectList(theatre::Management &management,
                        EventTransmitter &eventHub)
     : _management(&management),
       _eventHub(eventHub),
-      _displayType(ObjectListType::AllExceptFixtures),
-      _showTypeColumn(false),
       _openFolder(&management.RootFolder()),
       _listView(*this) {
   _eventHub.SignalUpdateControllables().connect(
@@ -112,9 +111,12 @@ void ObjectList::fillListFolder(const Folder &folder,
         showEffects ? dynamic_cast<theatre::Effect *>(obj) : nullptr;
     theatre::FixtureControl *fixtureControl =
         showFixtures ? dynamic_cast<theatre::FixtureControl *>(obj) : nullptr;
+    theatre::FixtureGroup *fixtureGroup =
+        _showFixtureGroups ? dynamic_cast<theatre::FixtureGroup *>(obj)
+                           : nullptr;
 
     if (childFolder || presetCollection || chase || timeSequence || effect ||
-        fixtureControl) {
+        fixtureControl || fixtureGroup) {
       Gtk::TreeModel::iterator iter = _listModel->append();
       Gtk::TreeModel::Row childRow = *iter;
       if (chase)
@@ -129,6 +131,8 @@ void ObjectList::fillListFolder(const Folder &folder,
         childRow[_listColumns._type] = "E";
       else if (fixtureControl)
         childRow[_listColumns._type] = "L";
+      else if (fixtureGroup)
+        childRow[_listColumns._type] = "G";
       childRow[_listColumns._title] = obj->Name();
       childRow[_listColumns._object] = obj;
       if (obj == selectedObj) {
