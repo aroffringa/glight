@@ -354,6 +354,7 @@ void Management::RemoveFixtureGroup(const FixtureGroup &group) {
   for (std::vector<std::unique_ptr<FixtureGroup>>::iterator i = _groups.begin();
        i != _groups.end(); ++i) {
     if (i->get() == &group) {
+      i->get()->Parent().Remove(**i);
       _groups.erase(i);
       return;
     }

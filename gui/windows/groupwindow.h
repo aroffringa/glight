@@ -10,10 +10,11 @@
 
 namespace glight::gui::windows {
 
-class GroupWindow : public PropertiesWindow {
+class GroupWindow final : public PropertiesWindow {
  public:
   GroupWindow(theatre::FixtureGroup &group, theatre::Management &management,
               EventTransmitter &hub);
+  ~GroupWindow();
 
   theatre::FolderObject &GetObject() override;
 
@@ -29,6 +30,7 @@ class GroupWindow : public PropertiesWindow {
   components::ReorderWidget reorder_widget_;
   theatre::Management &management_;
   EventTransmitter &hub_;
+  sigc::connection group_deleted_connection_;
 };
 
 }  // namespace glight::gui::windows
