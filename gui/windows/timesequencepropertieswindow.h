@@ -32,14 +32,14 @@ class EventTransmitter;
 /**
  * @author Andre Offringa
  */
-class TimeSequencePropertiesWindow : public PropertiesWindow {
+class TimeSequencePropertiesWindow final : public PropertiesWindow {
  public:
   TimeSequencePropertiesWindow(theatre::TimeSequence &timeSequence,
                                theatre::Management &management,
                                EventTransmitter &eventHub);
   ~TimeSequencePropertiesWindow();
 
-  theatre::FolderObject &GetObject() final override;
+  theatre::FolderObject &GetObject() override;
   theatre::TimeSequence &GetTimeSequence() { return *_timeSequence; }
 
  private:
