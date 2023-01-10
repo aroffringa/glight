@@ -10,26 +10,28 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/toolbar.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
-#include "components/audiowidget.h"
+#include "../components/audiowidget.h"
 
-#include "../theatre/forwards.h"
-#include "../theatre/keysceneitem.h"
+#include "../../theatre/forwards.h"
+#include "../../theatre/keysceneitem.h"
 
-#include "nameframe.h"
+#include "../nameframe.h"
 
 namespace glight::gui {
 
+class EventTransmitter;
 class ShowWindow;
 
-class SceneFrame : public Gtk::Frame {
+class SceneWindow : public Gtk::Window {
  public:
-  SceneFrame(theatre::Management &management, ShowWindow &parentWindow);
-  ~SceneFrame();
+  SceneWindow(theatre::Management &management, ShowWindow &parentWindow,
+              EventTransmitter &eventHub);
+  ~SceneWindow();
 
-  void Update();
   bool HandleKeyDown(char key);
   void SetSelectedScene(theatre::Scene &scene) {
     _selectedScene = &scene;
@@ -43,8 +45,8 @@ class SceneFrame : public Gtk::Frame {
   }
 
  private:
-  theatre::Management *_management;
-  theatre::Show *_show;
+  theatre::Management &_management;
+  EventTransmitter &_eventHub;
 
   struct SceneItemsListColumns : public Gtk::TreeModelColumnRecord {
     SceneItemsListColumns() {
@@ -73,6 +75,17 @@ class SceneFrame : public Gtk::Frame {
     Gtk::TreeModelColumn<theatre::Controllable *> _controllable;
   } _controllablesListColumns;
 
+  template <typename SigType>
+  void addTool(Gtk::ToolButton &tool, const char *label, const char *tooltip,
+               const char *icon, const SigType &sig) {
+    tool.set_label(label);
+    tool.set_tooltip_text(tooltip);
+    tool.set_icon_name(icon);
+    tool.signal_clicked().connect(sig);
+    _toolbar.append(tool);
+  }
+  Gtk::ToolButton new_scene_tb_;
+  Gtk::Toolbar _toolbar;
   AudioWidget _audioWidget;
   Gtk::Label _clickIsLabel;
   Gtk::RadioButton _clickIsSelectButton, _clickIsSetStartButton,
@@ -100,6 +113,7 @@ class SceneFrame : public Gtk::Frame {
   Gtk::Button _createTransitionItemButton;
   Gtk::VScale _startScale, _endScale;
 
+  sigc::connection _updateConnection;
   sigc::connection _timeoutConnection;
 
   std::string _audioFile;
@@ -108,6 +122,9 @@ class SceneFrame : public Gtk::Frame {
 
   theatre::Scene *_selectedScene;
   bool _isUpdating;
+
+  bool NewScene();
+  void Update();
 
   void createSceneItemsList();
   void createControllablesList1();

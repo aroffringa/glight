@@ -3,10 +3,10 @@
 #include "fixturelistwindow.h"
 #include "fixturetypeswindow.h"
 #include "visualizationwindow.h"
+#include "scenewindow.h"
 
 #include "../designwizard.h"
 #include "../objectlistframe.h"
-#include "../sceneframe.h"
 
 #include "../faders/faderwindow.h"
 
@@ -47,7 +47,8 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
       _miFixtureTypesWindow("Fixture types"),
       _miFaderWindowMenu("Fader windows"),
       _miNewFaderWindow("New"),
-      _miVisualizationWindow("Visualization") {
+      _miVisualizationWindow("Visualization"),
+      _miSceneWindow("Scene") {
   set_title("Glight - show");
   set_default_icon_name("glight");
 
@@ -92,12 +93,8 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
   addFaderWindow();
 
   _objectListFrame = std::make_unique<ObjectListFrame>(*_management, *this);
-  _sceneFrame = std::make_unique<SceneFrame>(*_management, *this);
 
-  _notebook.append_page(*_objectListFrame, "Objects");
-  _notebook.append_page(*_sceneFrame, "Timeline");
-
-  _box.pack_start(_notebook);
+  _box.pack_start(*_objectListFrame);
 
   add(_box);
   _box.show_all();
@@ -112,7 +109,7 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
 ShowWindow::~ShowWindow() {
   _menuFile.detach();
 
-  _sceneFrame.reset();
+  _sceneWindow.reset();
   _visualizationWindow.reset();
   _fixtureListWindow.reset();
   _fixtureTypesWindow.reset();
@@ -122,10 +119,7 @@ ShowWindow::~ShowWindow() {
   _management.reset();
 }
 
-void ShowWindow::EmitUpdate() {
-  _sceneFrame->Update();
-  _signalUpdateControllables();
-}
+void ShowWindow::EmitUpdate() { _signalUpdateControllables(); }
 
 void ShowWindow::addFaderWindow(FaderSetState *stateOrNull) {
   if (stateOrNull == nullptr) {
@@ -198,7 +192,7 @@ bool ShowWindow::onKeyDown(GdkEventKey *event) {
   } else if (event->keyval == GDK_KEY_BackSpace) {
     // black out
   } else {
-    if (_sceneFrame->HandleKeyDown(event->keyval)) return true;
+    if (_sceneWindow->HandleKeyDown(event->keyval)) return true;
     bool handled = false;
     for (std::unique_ptr<FaderWindow> &cw : _faderWindows)
       if (!handled) handled = cw->HandleKeyDown(event->keyval);
@@ -297,8 +291,12 @@ void ShowWindow::createMenu() {
 
   _miVisualizationWindow.set_active(false);
   _miVisualizationWindow.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onVisualizationWindowButtonClicked));
+      [&]() { onVisualizationWindowButtonClicked(); });
   _menuWindow.append(_miVisualizationWindow);
+
+  _miSceneWindow.set_active(false);
+  _miSceneWindow.signal_activate().connect([&]() { onSceneWindowClicked(); });
+  _menuWindow.append(_miSceneWindow);
 
   _miWindow.set_submenu(_menuWindow);
   _menuBar.append(_miWindow);
@@ -323,6 +321,7 @@ void ShowWindow::onMINewClicked() {
     std::unique_lock<std::mutex> lock(_management->Mutex());
     _management->Clear();
     _faderWindows.clear();
+    _sceneWindow.reset();
     _state.Clear();
     lock.unlock();
 
@@ -337,13 +336,9 @@ void ShowWindow::OpenFile(const std::string &filename) {
   _management->Clear();
   _faderWindows.clear();
   _state.Clear();
+  _sceneWindow.reset();
 
   system::Read(filename, *_management, &_state);
-
-  if (_management->GetShow().Scenes().size() != 0)
-    _sceneFrame->SetSelectedScene(*_management->GetShow().Scenes()[0]);
-  else
-    _sceneFrame->SetNoSelectedScene();
 
   lock.unlock();
 
@@ -541,5 +536,18 @@ PropertiesWindow &ShowWindow::OpenPropertiesWindow(
     theatre::FolderObject &object) {
   return _objectListFrame->OpenPropertiesWindow(object);
 }
+
+void ShowWindow::onSceneWindowClicked() {
+  const bool show = _miSceneWindow.get_active();
+  if (show) {
+    _sceneWindow = std::make_unique<SceneWindow>(*_management, *this, *this);
+    _sceneWindow->present();
+    _sceneWindow->signal_hide().connect([&]() { onHideSceneWindow(); });
+  } else {
+    _sceneWindow->hide();
+  }
+}
+
+void ShowWindow::onHideSceneWindow() { _miSceneWindow.set_active(false); }
 
 }  // namespace glight::gui

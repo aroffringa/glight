@@ -41,7 +41,7 @@ inline KeySceneLevel GetKeySceneLevel(const std::string &str) {
 /**
  * @author Andre Offringa
  */
-class KeySceneItem : public SceneItem {
+class KeySceneItem final : public SceneItem {
  public:
   KeySceneItem() : _level(Key) {}
   ~KeySceneItem() {}
@@ -49,7 +49,7 @@ class KeySceneItem : public SceneItem {
   KeySceneLevel Level() const { return _level; }
   void SetLevel(KeySceneLevel level) { _level = level; }
 
-  virtual std::string Description() const {
+  std::string Description() const override {
     switch (_level) {
       case Key:
       default:
@@ -64,8 +64,8 @@ class KeySceneItem : public SceneItem {
         return "-=SECTION=-";
     }
   }
-  virtual void Mix(unsigned *channelValues, unsigned universe,
-                   const class Timing &timing) {}
+  void Mix(unsigned *channelValues, unsigned universe,
+           const class Timing &timing) override {}
 
  private:
   KeySceneLevel _level;

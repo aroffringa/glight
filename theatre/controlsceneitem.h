@@ -8,37 +8,34 @@
 
 namespace glight::theatre {
 
-/**
-        @author Andre Offringa
-*/
-class ControlSceneItem : public SceneItem {
+class ControlSceneItem final : public SceneItem {
  public:
-  ControlSceneItem(class Controllable &controllable, size_t input)
+  ControlSceneItem(Controllable &controllable, size_t input)
       : _controllable(controllable),
         _input(input),
         _startValue(ControlValue::Max()),
         _endValue(ControlValue::Max()) {}
   ~ControlSceneItem() {}
+
   ControlValue &StartValue() { return _startValue; }
   const ControlValue &StartValue() const { return _startValue; }
 
   ControlValue &EndValue() { return _endValue; }
   const ControlValue &EndValue() const { return _endValue; }
 
-  virtual std::string Description() const { return _controllable.Name(); }
-  virtual void Mix(unsigned *channelValues, unsigned universe,
-                   const Timing &timing) {
-    double ratio = (timing.TimeInMS() - OffsetInMS()) / DurationInMS();
-    _controllable.MixInput(_input,
-                           ControlValue(_startValue.UInt() * (1.0 - ratio) +
-                                        _endValue.UInt() * ratio));
+  std::string Description() const override { return _controllable.Name(); }
+  void Mix(unsigned *channelValues, unsigned universe,
+           const Timing &timing) override {
+    const double ratio = (timing.TimeInMS() - OffsetInMS()) / DurationInMS();
+    const ControlValue value(_startValue.UInt() * (1.0 - ratio) +
+                             _endValue.UInt() * ratio);
+    // std::cout << "mix: " << value. << "!\n";
+    _controllable.MixInput(_input, value);
   }
-  class Controllable &Controllable() const {
-    return _controllable;
-  }
+  Controllable &GetControllable() const { return _controllable; }
 
  private:
-  class Controllable &_controllable;
+  Controllable &_controllable;
   size_t _input;
   ControlValue _startValue, _endValue;
 };

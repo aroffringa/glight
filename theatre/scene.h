@@ -65,9 +65,8 @@ class Scene : public Startable, private system::SyncListener {
                      globalTiming.TimestepRandomValue());
     skipTo(relTimeInMs);
 
-    for (std::vector<SceneItem *>::const_iterator i = _startedItems.begin();
-         i != _startedItems.end(); ++i) {
-      (*i)->Mix(channelValues, universe, relTiming);
+    for (SceneItem *scene_item : _startedItems) {
+      scene_item->Mix(channelValues, universe, relTiming);
     }
   }
   void Remove(SceneItem *item) { _items.erase(find(item)); }
@@ -137,7 +136,7 @@ class Scene : public Startable, private system::SyncListener {
       _startedItems.push_back(_nextStartedItem->second.get());
       ++_nextStartedItem;
     }
-    // "End" all items which duration has passed.
+    // "End" all items which duration have passed.
     for (std::vector<SceneItem *>::iterator i = _startedItems.begin();
          i != _startedItems.end(); ++i) {
       if ((*i)->OffsetInMS() + (*i)->DurationInMS() < offsetInMS) {

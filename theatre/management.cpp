@@ -157,8 +157,6 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
 
   std::lock_guard<std::mutex> lock(_mutex);
 
-  _show->Mix(values, universe, timing);
-
   // Reset all inputs
   for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
     for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs();
@@ -166,6 +164,8 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
       sv->GetControllable().InputValue(inputIndex) = ControlValue(0);
     }
   }
+
+  _show->Mix(values, universe, timing);
 
   if (primary) {
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
