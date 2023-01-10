@@ -393,12 +393,12 @@ void ParseSceneItem(const Object &node, Scene &scene, Management &management) {
 void ParseScenes(const json::Array &node, Management &management) {
   for (const Node &item : node) {
     const Object &scene_node = ToObj(item);
-    Scene *scene = management.GetShow().AddScene(false);
-    ParseFolderAttr(scene_node, *scene, management);
-    scene->SetAudioFile(ToStr(scene_node["audio-file"]));
+    Scene &scene = management.GetShow().AddScene(false);
+    ParseFolderAttr(scene_node, scene, management);
+    scene.SetAudioFile(ToStr(scene_node["audio-file"]));
     const Array &items = ToArr(scene_node["items"]);
     for (const Node &item_node : items) {
-      ParseSceneItem(ToObj(item_node), *scene, management);
+      ParseSceneItem(ToObj(item_node), scene, management);
     }
   }
 }

@@ -29,7 +29,7 @@ class FixtureListWindow;
 class FixtureTypesWindow;
 class ObjectListFrame;
 class PropertiesWindow;
-class SceneFrame;
+class SceneWindow;
 class VisualizationWindow;
 
 /**
@@ -97,6 +97,8 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   void onFaderWindowSelected(Gtk::CheckMenuItem &menuItem,
                              FaderSetState &state);
   FaderWindow *getFaderWindow(FaderSetState &state);
+  void onSceneWindowClicked();
+  void onHideSceneWindow();
 
   size_t nextControlKeyRow() const;
 
@@ -117,7 +119,7 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   std::unique_ptr<theatre::Management> _backgroundManagement;
 
   std::unique_ptr<ObjectListFrame> _objectListFrame;
-  std::unique_ptr<SceneFrame> _sceneFrame;
+  std::unique_ptr<SceneWindow> _sceneWindow;
 
   GUIState _state;
   FixtureSelection _fixtureSelection;
@@ -139,9 +141,9 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   Gtk::SeparatorMenuItem _miFaderWindowSeperator;
   std::vector<Gtk::CheckMenuItem> _miFaderWindows;
   Gtk::CheckMenuItem _miVisualizationWindow;
+  Gtk::CheckMenuItem _miSceneWindow;
 
   Gtk::MenuBar _menuBar;
-  Gtk::Notebook _notebook;
 };
 
 }  // namespace glight::gui

@@ -9,6 +9,7 @@
 namespace glight::theatre {
 
 class Management;
+class Timing;
 
 /**
  * @author Andre Offringa
@@ -20,23 +21,20 @@ class Show {
 
   void Clear();
 
-  Scene *AddScene(bool in_folder);
+  Scene &AddScene(bool in_folder);
 
-  void StartScene(double _timeInMS, Scene *scene) {
-    if (!isRunning(scene)) _runningScenes.push_back(scene);
-    scene->Start(_timeInMS);
+  void StartScene(double _timeInMS, Scene &scene) {
+    if (!isRunning(&scene)) _runningScenes.push_back(&scene);
+    scene.Start(_timeInMS);
   }
-  void StopScene(Scene *scene) {
-    if (isRunning(scene)) {
-      removeScene(_runningScenes, scene);
+  void StopScene(Scene &scene) {
+    if (isRunning(&scene)) {
+      removeRunningScene(_runningScenes, &scene);
     }
-    scene->Stop();
+    scene.Stop();
   }
-  void Mix(unsigned *channelValues, unsigned universe,
-           const class Timing &timing);
-  const std::vector<std::unique_ptr<class Scene>> &Scenes() const {
-    return _scenes;
-  }
+  void Mix(unsigned *channelValues, unsigned universe, const Timing &timing);
+  const std::vector<std::unique_ptr<Scene>> &Scenes() const { return _scenes; }
 
  private:
   bool isRunning(Scene *scene) const {
@@ -44,7 +42,8 @@ class Show {
       if (scene == rScene) return true;
     return false;
   }
-  void removeScene(std::vector<Scene *> &container, Scene *scene) const {
+
+  void removeRunningScene(std::vector<Scene *> &container, Scene *scene) const {
     for (std::vector<Scene *>::iterator i = container.begin();
          i != container.end(); ++i) {
       if (*i == scene) {

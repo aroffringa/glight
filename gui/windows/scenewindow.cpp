@@ -2,23 +2,26 @@
 #include <sstream>
 
 #include <gtkmm/filechooserdialog.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
 #include <glibmm/main.h>
 
-#include "../theatre/management.h"
-#include "../theatre/scene.h"
-#include "../theatre/show.h"
+#include "../../theatre/folder.h"
+#include "../../theatre/management.h"
+#include "../../theatre/scene.h"
+#include "../../theatre/show.h"
 
-#include "sceneframe.h"
+#include "../eventtransmitter.h"
+
+#include "scenewindow.h"
 
 namespace glight::gui {
 
-SceneFrame::SceneFrame(theatre::Management &management,
-                       ShowWindow &parentWindow)
-    : Gtk::Frame("Scene"),
-      _management(&management),
-      _show(&_management->GetShow()),
+SceneWindow::SceneWindow(theatre::Management &management,
+                         ShowWindow &parentWindow, EventTransmitter &eventHub)
+    : _management(management),
+      _eventHub(eventHub),
       _audioWidget(),
       _clickIsLabel("Click is: "),
       _clickIsSelectButton("select"),
@@ -43,146 +46,128 @@ SceneFrame::SceneFrame(theatre::Management &management,
       _nameFrame(management, parentWindow),
       _selectedScene(nullptr),
       _isUpdating(false) {
+  addTool(new_scene_tb_, "New scene", "Adds a new scene to the current show",
+          "document-new", [&]() { NewScene(); });
+  _vBox.pack_start(_toolbar, false, false);
+
   _audioWidget.SignalClicked().connect(
-      sigc::mem_fun(*this, &SceneFrame::onAudioWidgetClicked));
+      sigc::mem_fun(*this, &SceneWindow::onAudioWidgetClicked));
   _vBox.pack_start(_audioWidget);
-  _audioWidget.show();
 
   _audioBox.pack_start(_clickIsLabel, false, false);
-  _clickIsLabel.show();
 
   Gtk::RadioButtonGroup clickIsGroup;
   _clickIsSelectButton.set_group(clickIsGroup);
   _audioBox.pack_start(_clickIsSelectButton, false, false);
-  _clickIsSelectButton.show();
 
   _clickIsSetStartButton.set_group(clickIsGroup);
   _audioBox.pack_start(_clickIsSetStartButton, false, false);
-  _clickIsSetStartButton.show();
 
   _clickIsSetEndButton.set_group(clickIsGroup);
   _audioBox.pack_start(_clickIsSetEndButton, false, false);
-  _clickIsSetEndButton.show();
 
   _clickIsAddKeyButton.set_group(clickIsGroup);
   _audioBox.pack_start(_clickIsAddKeyButton, false, false);
-  _clickIsAddKeyButton.show();
 
   _clickIsAddItemButton.set_group(clickIsGroup);
   _audioBox.pack_start(_clickIsAddItemButton, false, false);
-  _clickIsAddItemButton.show();
 
   _audioBox.pack_start(_audioLabel);
-  _audioLabel.show();
 
   _changeAudioButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneFrame::onChangeAudioButtonPressed));
+      sigc::mem_fun(*this, &SceneWindow::onChangeAudioButtonPressed));
   _audioBox.pack_start(_changeAudioButton, false, false, 5);
-  _changeAudioButton.show();
 
   _vBox.pack_start(_audioBox, false, false);
-  _audioBox.show();
 
   createSceneItemsList();
 
   createControllablesList1();
 
   _startButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneFrame::onStartButtonPressed));
+      sigc::mem_fun(*this, &SceneWindow::onStartButtonPressed));
   _sceneItemUButtonBox.pack_start(_startButton);
-  _startButton.show();
 
   _startSelectionButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneFrame::onStartSelectionButtonPressed));
+      sigc::mem_fun(*this, &SceneWindow::onStartSelectionButtonPressed));
   _sceneItemUButtonBox.pack_start(_startSelectionButton);
-  _startSelectionButton.show();
 
   _stopButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneFrame::onStopButtonPressed));
+      sigc::mem_fun(*this, &SceneWindow::onStopButtonPressed));
   _sceneItemUButtonBox.pack_start(_stopButton);
-  _stopButton.show();
 
   _key1Button.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneFrame::onKey1ButtonPressed));
+      sigc::mem_fun(*this, &SceneWindow::onKey1ButtonPressed));
   _sceneItemUButtonBox.pack_start(_key1Button);
-  _key1Button.show();
 
   _createControlItemButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneFrame::onCreateControlItemButtonPressed));
+      sigc::mem_fun(*this, &SceneWindow::onCreateControlItemButtonPressed));
   _createControlItemButton.set_sensitive(false);
   _sceneItemUButtonBox.pack_start(_createControlItemButton);
-  _createControlItemButton.show();
 
   _setEndTimeButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneFrame::onSetEndTimeButtonPressed));
+      sigc::mem_fun(*this, &SceneWindow::onSetEndTimeButtonPressed));
   _setEndTimeButton.set_sensitive(false);
   _sceneItemUButtonBox.pack_start(_setEndTimeButton);
-  _setEndTimeButton.show();
 
   _removeButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneFrame::onRemoveButtonPressed));
+      sigc::mem_fun(*this, &SceneWindow::onRemoveButtonPressed));
   _removeButton.set_sensitive(false);
   _sceneItemUButtonBox.pack_start(_removeButton);
-  _removeButton.show();
 
   _sceneItemBox.pack_start(_sceneItemUButtonBox, false, false, 2);
-  _sceneItemUButtonBox.show();
 
   _startScale.set_inverted(true);
   _startScale.set_draw_value(false);
   _startScale.set_sensitive(false);
   _startScale.signal_value_changed().connect(
-      sigc::mem_fun(*this, &SceneFrame::onScalesChanged));
+      sigc::mem_fun(*this, &SceneWindow::onScalesChanged));
   _scalesBox.pack_start(_startScale);
-  _startScale.show();
 
   _endScale.set_inverted(true);
   _endScale.set_draw_value(false);
   _endScale.set_sensitive(false);
   _endScale.signal_value_changed().connect(
-      sigc::mem_fun(*this, &SceneFrame::onScalesChanged));
+      sigc::mem_fun(*this, &SceneWindow::onScalesChanged));
   _scalesBox.pack_start(_endScale);
-  _endScale.show();
 
   _sceneItemBox.pack_start(_scalesBox);
-  _scalesBox.show();
 
   createControllablesList2();
 
   _hBox.pack_start(_sceneItemBox, false, false, 2);
-  _sceneItemBox.show();
 
   _vBox.pack_start(_hBox);
-  _hBox.show();
 
   add(_vBox);
-  _vBox.show();
+  show_all_children();
+
+  if (_management.GetShow().Scenes().size() != 0)
+    SetSelectedScene(*_management.GetShow().Scenes()[0]);
+  else
+    SetNoSelectedScene();
 
   _timeoutConnection = Glib::signal_timeout().connect(
-      sigc::mem_fun(*this, &SceneFrame::onTimeout), 20);
+      sigc::mem_fun(*this, &SceneWindow::onTimeout), 20);
+
+  _updateConnection =
+      eventHub.SignalUpdateControllables().connect([&]() { Update(); });
+  Update();
 }
 
-SceneFrame::~SceneFrame() { _timeoutConnection.disconnect(); }
+SceneWindow::~SceneWindow() {
+  _timeoutConnection.disconnect();
+  _updateConnection.disconnect();
+}
 
-void SceneFrame::Update() {
-  if (&_management->GetShow() != _show) {
-    _show = &_management->GetShow();
-    _selectedScene = nullptr;
-  }
-  // For testing
-  if (_show->Scenes().empty())
-    _selectedScene = _show->AddScene(true);
-  else
-    _selectedScene = _show->Scenes()[0].get();
-  _audioWidget.SetScene(*_selectedScene);
-
-  // fillControllablesList();
+void SceneWindow::Update() {
+  fillControllablesList();
   fillSceneItemList();
   updateAudio();
   updateAudioWidgetKeys();
 }
 
-void SceneFrame::createSceneItemsList() {
+void SceneWindow::createSceneItemsList() {
   _sceneItemsListModel = Gtk::ListStore::create(_sceneItemsListColumns);
 
   _sceneItemsListView.set_model(_sceneItemsListModel);
@@ -197,7 +182,7 @@ void SceneFrame::createSceneItemsList() {
                                     _sceneItemsListColumns._description);
   _sceneItemsListView.get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
   _sceneItemsListView.get_selection()->signal_changed().connect(
-      sigc::mem_fun(*this, &SceneFrame::onSelectedSceneItemChanged));
+      sigc::mem_fun(*this, &SceneWindow::onSelectedSceneItemChanged));
   _sceneItemsListView.set_rubber_banding(true);
   _listScrolledWindow.add(_sceneItemsListView);
   _sceneItemsListView.show();
@@ -207,7 +192,7 @@ void SceneFrame::createSceneItemsList() {
   _listScrolledWindow.show();
 }
 
-void SceneFrame::createControllablesList1() {
+void SceneWindow::createControllablesList1() {
   _controllablesListModel = Gtk::ListStore::create(_controllablesListColumns);
 
   _controllables1ComboBox.set_model(_controllablesListModel);
@@ -217,7 +202,7 @@ void SceneFrame::createControllablesList1() {
   _controllables1ComboBox.show();
 }
 
-void SceneFrame::createControllablesList2() {
+void SceneWindow::createControllablesList2() {
   _controllables2ComboBox.set_model(_controllablesListModel);
   _controllables2ComboBox.pack_start(_controllablesListColumns._text);
 
@@ -225,11 +210,11 @@ void SceneFrame::createControllablesList2() {
   _controllables2ComboBox.show();
 }
 
-void SceneFrame::fillSceneItemList() {
+void SceneWindow::fillSceneItemList() {
   _sceneItemsListModel->clear();
 
   if (_selectedScene != nullptr) {
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    std::unique_lock<std::mutex> lock(_management.Mutex());
     const std::multimap<double, std::unique_ptr<theatre::SceneItem>> &items =
         _selectedScene->SceneItems();
     for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>>
@@ -245,8 +230,8 @@ void SceneFrame::fillSceneItemList() {
   }
 }
 
-void SceneFrame::setSceneItemListRow(theatre::SceneItem *sceneItem,
-                                     Gtk::TreeModel::Row row) {
+void SceneWindow::setSceneItemListRow(theatre::SceneItem *sceneItem,
+                                      Gtk::TreeModel::Row row) {
   std::stringstream startTimeStr;
   startTimeStr << (round(sceneItem->OffsetInMS() / 10.0) / 100.0);
   row[_sceneItemsListColumns._startTime] = startTimeStr.str();
@@ -271,11 +256,11 @@ void SceneFrame::setSceneItemListRow(theatre::SceneItem *sceneItem,
   row[_sceneItemsListColumns._item] = sceneItem;
 }
 
-void SceneFrame::updateSelectedSceneItems() {
+void SceneWindow::updateSelectedSceneItems() {
   Glib::RefPtr<Gtk::TreeSelection> selection =
       _sceneItemsListView.get_selection();
   std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(_management.Mutex());
   for (std::vector<Gtk::TreeModel::Path>::iterator pathPtr = pathHandle.begin();
        pathPtr != pathHandle.end(); ++pathPtr) {
     Gtk::TreeModel::iterator iter = _sceneItemsListModel->get_iter(*pathPtr);
@@ -285,12 +270,12 @@ void SceneFrame::updateSelectedSceneItems() {
   }
 }
 
-void SceneFrame::fillControllablesList() {
+void SceneWindow::fillControllablesList() {
   _controllablesListModel->clear();
 
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(_management.Mutex());
   const std::vector<std::unique_ptr<theatre::Controllable>> &controllable =
-      _management->Controllables();
+      _management.Controllables();
   for (const std::unique_ptr<theatre::Controllable> &contr : controllable) {
     Gtk::TreeModel::iterator iter = _controllablesListModel->append();
     Gtk::TreeModel::Row row = *iter;
@@ -299,33 +284,35 @@ void SceneFrame::fillControllablesList() {
   }
 }
 
-void SceneFrame::onStartButtonPressed() {
+void SceneWindow::onStartButtonPressed() {
   if (_selectedScene != nullptr) {
-    std::lock_guard<std::mutex> lock(_management->Mutex());
+    std::lock_guard<std::mutex> lock(_management.Mutex());
     _selectedScene->SetStartOffset(0.0);
-    _show->StartScene(_management->GetOffsetTimeInMS(), _selectedScene);
+    _management.GetShow().StartScene(_management.GetOffsetTimeInMS(),
+                                     *_selectedScene);
   }
 }
 
-void SceneFrame::onStartSelectionButtonPressed() {
+void SceneWindow::onStartSelectionButtonPressed() {
   if (_selectedScene != nullptr) {
-    std::lock_guard<std::mutex> lock(_management->Mutex());
+    std::lock_guard<std::mutex> lock(_management.Mutex());
     _selectedScene->SetStartOffset(_audioWidget.Position());
-    _show->StartScene(_management->GetOffsetTimeInMS(), _selectedScene);
+    _management.GetShow().StartScene(_management.GetOffsetTimeInMS(),
+                                     *_selectedScene);
   }
 }
 
-void SceneFrame::onStopButtonPressed() {
+void SceneWindow::onStopButtonPressed() {
   if (_selectedScene != nullptr) {
-    std::lock_guard<std::mutex> lock(_management->Mutex());
-    _show->StopScene(_selectedScene);
+    std::lock_guard<std::mutex> lock(_management.Mutex());
+    _management.GetShow().StopScene(*_selectedScene);
   }
 }
 
-void SceneFrame::addKey(theatre::KeySceneLevel level) {
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+void SceneWindow::addKey(theatre::KeySceneLevel level) {
+  std::unique_lock<std::mutex> lock(_management.Mutex());
   theatre::KeySceneItem *key = _selectedScene->AddKeySceneItem(
-      _management->GetOffsetTimeInMS() - _selectedScene->StartTimeInMS());
+      _management.GetOffsetTimeInMS() - _selectedScene->StartTimeInMS());
   key->SetLevel(level);
   lock.unlock();
 
@@ -333,9 +320,9 @@ void SceneFrame::addKey(theatre::KeySceneLevel level) {
   updateAudioWidgetKeys();
 }
 
-void SceneFrame::onKey1ButtonPressed() { addKey(theatre::KeySceneLevel::Key); }
+void SceneWindow::onKey1ButtonPressed() { addKey(theatre::KeySceneLevel::Key); }
 
-void SceneFrame::onCreateControlItemButtonPressed() {
+void SceneWindow::onCreateControlItemButtonPressed() {
   Gtk::TreeModel::iterator activeControllable =
       _controllables1ComboBox.get_active();
   if (activeControllable) {
@@ -345,7 +332,7 @@ void SceneFrame::onCreateControlItemButtonPressed() {
         _sceneItemsListView.get_selection();
     std::vector<Gtk::TreeModel::Path> pathHandle =
         selection->get_selected_rows();
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    std::unique_lock<std::mutex> lock(_management.Mutex());
     for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
              pathHandle.begin();
          pathPtr != pathHandle.end(); ++pathPtr) {
@@ -375,7 +362,7 @@ void SceneFrame::onCreateControlItemButtonPressed() {
   }
 }
 
-void SceneFrame::onSelectedSceneItemChanged() {
+void SceneWindow::onSelectedSceneItemChanged() {
   if (!_isUpdating) {
     switch (selectedSceneItemCount()) {
       case 0:
@@ -391,7 +378,7 @@ void SceneFrame::onSelectedSceneItemChanged() {
         _removeButton.set_sensitive(true);
         _startScale.set_sensitive(true);
         _endScale.set_sensitive(true);
-        std::unique_lock<std::mutex> lock(_management->Mutex());
+        std::unique_lock<std::mutex> lock(_management.Mutex());
         theatre::SceneItem *item = selectedItem();
         theatre::ControlSceneItem *csi =
             dynamic_cast<theatre::ControlSceneItem *>(item);
@@ -414,11 +401,11 @@ void SceneFrame::onSelectedSceneItemChanged() {
   }
 }
 
-void SceneFrame::onSetEndTimeButtonPressed() {
+void SceneWindow::onSetEndTimeButtonPressed() {
   Glib::RefPtr<Gtk::TreeSelection> selection =
       _sceneItemsListView.get_selection();
   std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+  std::unique_lock<std::mutex> lock(_management.Mutex());
   for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
            pathHandle.begin();
        pathPtr != pathHandle.end(); ++pathPtr) {
@@ -439,12 +426,12 @@ void SceneFrame::onSetEndTimeButtonPressed() {
   updateSelectedSceneItems();
 }
 
-void SceneFrame::onRemoveButtonPressed() {
+void SceneWindow::onRemoveButtonPressed() {
   _isUpdating = true;
   Glib::RefPtr<Gtk::TreeSelection> selection =
       _sceneItemsListView.get_selection();
   std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+  std::unique_lock<std::mutex> lock(_management.Mutex());
   for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
            pathHandle.begin();
        pathPtr != pathHandle.end(); ++pathPtr) {
@@ -459,7 +446,7 @@ void SceneFrame::onRemoveButtonPressed() {
   onSelectedSceneItemChanged();
 }
 
-bool SceneFrame::HandleKeyDown(char key) {
+bool SceneWindow::HandleKeyDown(char key) {
   using theatre::KeySceneLevel;
   switch (key) {
     case '=':
@@ -484,14 +471,14 @@ bool SceneFrame::HandleKeyDown(char key) {
   return false;
 }
 
-void SceneFrame::onScalesChanged() {
+void SceneWindow::onScalesChanged() {
   if (!_isUpdating) {
     _isUpdating = true;
     Glib::RefPtr<Gtk::TreeSelection> selection =
         _sceneItemsListView.get_selection();
     std::vector<Gtk::TreeModel::Path> pathHandle =
         selection->get_selected_rows();
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    std::unique_lock<std::mutex> lock(_management.Mutex());
     for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
              pathHandle.begin();
          pathPtr != pathHandle.end(); ++pathPtr) {
@@ -510,45 +497,47 @@ void SceneFrame::onScalesChanged() {
   }
 }
 
-void SceneFrame::onChangeAudioButtonPressed() {
-  Gtk::FileChooserDialog dialog("Open audio file",
-                                Gtk::FILE_CHOOSER_ACTION_OPEN);
+void SceneWindow::onChangeAudioButtonPressed() {
+  if (_selectedScene) {
+    Gtk::FileChooserDialog dialog("Open audio file",
+                                  Gtk::FILE_CHOOSER_ACTION_OPEN);
 
-  dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-  dialog.add_button("Open", Gtk::RESPONSE_OK);
+    dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+    dialog.add_button("Open", Gtk::RESPONSE_OK);
 
-  Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
-  filter->set_name("Flac audio file");
-  filter->add_pattern("*.flac");
-  filter->add_mime_type("audio/flac");
-  dialog.add_filter(filter);
+    Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
+    filter->set_name("Flac audio file");
+    filter->add_pattern("*.flac");
+    filter->add_mime_type("audio/flac");
+    dialog.add_filter(filter);
 
-  int result = dialog.run();
-  if (result == Gtk::RESPONSE_OK) {
-    _selectedScene->SetAudioFile(dialog.get_filename());
-    updateAudio();
+    int result = dialog.run();
+    if (result == Gtk::RESPONSE_OK) {
+      _selectedScene->SetAudioFile(dialog.get_filename());
+      updateAudio();
+    }
   }
 }
 
-bool SceneFrame::onTimeout() {
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+bool SceneWindow::onTimeout() {
+  std::unique_lock<std::mutex> lock(_management.Mutex());
   if (_selectedScene != nullptr && _selectedScene->IsPlaying()) {
     double pos =
-        _management->GetOffsetTimeInMS() - _selectedScene->StartTimeInMS();
+        _management.GetOffsetTimeInMS() - _selectedScene->StartTimeInMS();
     lock.unlock();
     _audioWidget.SetPosition(pos);
   }
   return true;
 }
 
-void SceneFrame::onAudioWidgetClicked(double timeInMS) {
+void SceneWindow::onAudioWidgetClicked(double timeInMS) {
   if (_clickIsSetStartButton.get_active()) {
     _isUpdating = true;
     Glib::RefPtr<Gtk::TreeSelection> selection =
         _sceneItemsListView.get_selection();
     std::vector<Gtk::TreeModel::Path> pathHandle =
         selection->get_selected_rows();
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    std::unique_lock<std::mutex> lock(_management.Mutex());
     for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
              pathHandle.begin();
          pathPtr != pathHandle.end(); ++pathPtr) {
@@ -568,7 +557,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS) {
         _sceneItemsListView.get_selection();
     std::vector<Gtk::TreeModel::Path> pathHandle =
         selection->get_selected_rows();
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    std::unique_lock<std::mutex> lock(_management.Mutex());
     for (std::vector<Gtk::TreeModel::Path>::const_iterator pathPtr =
              pathHandle.begin();
          pathPtr != pathHandle.end(); ++pathPtr) {
@@ -585,7 +574,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS) {
   else if (_clickIsAddKeyButton.get_active()) {
     _isUpdating = true;
 
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    std::unique_lock<std::mutex> lock(_management.Mutex());
     theatre::KeySceneItem *item = _selectedScene->AddKeySceneItem(timeInMS);
     item->SetLevel(theatre::KeySceneLevel::Key);
     lock.unlock();
@@ -600,7 +589,7 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS) {
     if (activeControllable) {
       _isUpdating = true;
 
-      std::unique_lock<std::mutex> lock(_management->Mutex());
+      std::unique_lock<std::mutex> lock(_management.Mutex());
       theatre::ControlSceneItem *item = _selectedScene->AddControlSceneItem(
           timeInMS,
           *(*activeControllable)[_controllablesListColumns._controllable], 0);
@@ -616,8 +605,8 @@ void SceneFrame::onAudioWidgetClicked(double timeInMS) {
     _audioWidget.SetPosition(timeInMS);
 }
 
-void SceneFrame::updateAudio() {
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+void SceneWindow::updateAudio() {
+  std::unique_lock<std::mutex> lock(_management.Mutex());
   if (_selectedScene != nullptr && _selectedScene->AudioFile() != _audioFile) {
     _audioFile = _selectedScene->AudioFile();
     lock.unlock();
@@ -633,8 +622,30 @@ void SceneFrame::updateAudio() {
   }
 }
 
-void SceneFrame::updateAudioWidgetKeys() {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+bool SceneWindow::NewScene() {
+  Gtk::MessageDialog dialog(*this, "Name fader setup", false,
+                            Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
+  Gtk::Entry entry;
+  dialog.get_vbox()->pack_start(entry, Gtk::PACK_SHRINK);
+  dialog.get_vbox()->show_all_children();
+  dialog.set_secondary_text("Name of new scene:");
+  int result = dialog.run();
+  if (result == Gtk::RESPONSE_OK) {
+    glight::theatre::Scene &scene = _management.GetShow().AddScene(true);
+    if (!scene.Parent().GetChildIfExists(entry.get_text())) {
+      scene.SetName(entry.get_text());
+    }
+    _selectedScene = &scene;
+    _audioWidget.SetScene(*_selectedScene);
+    _eventHub.EmitUpdate();
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void SceneWindow::updateAudioWidgetKeys() {
+  std::lock_guard<std::mutex> lock(_management.Mutex());
   _audioWidget.UpdateKeys();
 }
 

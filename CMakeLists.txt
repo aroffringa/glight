@@ -40,7 +40,6 @@ set(GUIFILES
   gui/nameframe.cpp
   gui/objectlistframe.cpp
   gui/renderengine.cpp
-  gui/sceneframe.cpp
   gui/components/audiowidget.cpp
   gui/components/colorselectwidget.cpp
   gui/components/colorsequencewidget.cpp
@@ -65,6 +64,7 @@ set(GUIFILES
   gui/windows/fixturetypefunctionsframe.cpp
   gui/windows/groupwindow.cpp
   gui/windows/presetcollectionwindow.cpp
+  gui/windows/scenewindow.cpp
   gui/windows/showwindow.cpp
   gui/windows/timesequencepropertieswindow.cpp
   gui/windows/visualizationwindow.cpp)

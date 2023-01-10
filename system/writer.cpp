@@ -405,8 +405,9 @@ void writeControlSceneItem(WriteState &state, const ControlSceneItem &item) {
   state.writer.String("type", "control");
   state.writer.Number("start-value", item.StartValue().UInt());
   state.writer.Number("end-value", item.EndValue().UInt());
-  state.writer.String("controllable-ref", item.Controllable().Name());
-  state.writer.Number("folder", state.folderIds[&item.Controllable().Parent()]);
+  state.writer.String("controllable-ref", item.GetControllable().Name());
+  state.writer.Number("folder",
+                      state.folderIds[&item.GetControllable().Parent()]);
 }
 
 void writeSceneItem(WriteState &state, const SceneItem &item) {
