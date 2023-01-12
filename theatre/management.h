@@ -94,6 +94,8 @@ class Management {
   Effect &AddEffect(std::unique_ptr<Effect> effect);
   Effect &AddEffect(std::unique_ptr<Effect> effect, Folder &folder);
 
+  Scene &AddScene(bool in_folder);
+
   std::mutex &Mutex() { return _mutex; }
 
   FolderObject &GetObjectFromPath(const std::string &path);
@@ -122,8 +124,6 @@ class Management {
     const std::chrono::duration<double> d = current_time - _createTime;
     return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
   }
-  const Show &GetShow() const { return *_show; }
-  Show &GetShow() { return *_show; }
 
   const Folder &RootFolder() const { return *_rootFolder; }
   Folder &RootFolder() { return *_rootFolder; }
@@ -174,7 +174,6 @@ class Management {
   std::unique_ptr<ValueSnapshot> _primarySnapshot;
   std::unique_ptr<ValueSnapshot> _secondarySnapshot;
   std::shared_ptr<BeatFinder> _beatFinder;
-  std::unique_ptr<Show> _show;
 
   Folder *_rootFolder;
   std::vector<std::unique_ptr<Folder>> _folders;

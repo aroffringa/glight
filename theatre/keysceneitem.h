@@ -64,8 +64,8 @@ class KeySceneItem final : public SceneItem {
         return "-=SECTION=-";
     }
   }
-  void Mix(unsigned *channelValues, unsigned universe,
-           const class Timing &timing) override {}
+
+  void Mix(const Timing &timing, bool primary) override{};
 
  private:
   KeySceneLevel _level;

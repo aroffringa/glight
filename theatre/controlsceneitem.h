@@ -24,15 +24,14 @@ class ControlSceneItem final : public SceneItem {
   const ControlValue &EndValue() const { return _endValue; }
 
   std::string Description() const override { return _controllable.Name(); }
-  void Mix(unsigned *channelValues, unsigned universe,
-           const Timing &timing) override {
+  void Mix(const Timing &timing, bool primary) override {
     const double ratio = (timing.TimeInMS() - OffsetInMS()) / DurationInMS();
     const ControlValue value(_startValue.UInt() * (1.0 - ratio) +
                              _endValue.UInt() * ratio);
-    // std::cout << "mix: " << value. << "!\n";
     _controllable.MixInput(_input, value);
   }
   Controllable &GetControllable() const { return _controllable; }
+  size_t GetInput() const { return _input; }
 
  private:
   Controllable &_controllable;

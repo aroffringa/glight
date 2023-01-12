@@ -1,15 +1,15 @@
 #ifndef THEATRE_SCENE_H_
 #define THEATRE_SCENE_H_
 
+#include <algorithm>
+#include <set>
 #include <map>
-
 #include <mutex>
 
 #include "../system/audioplayer.h"
 
 #include "controlsceneitem.h"
 #include "keysceneitem.h"
-#include "startable.h"
 
 namespace glight::theatre {
 
@@ -18,64 +18,20 @@ class Management;
 /**
  * @author Andre Offringa
  */
-class Scene : public Startable, private system::SyncListener {
+class Scene : public Controllable, private system::SyncListener {
  public:
   Scene(Management &management);
-
   ~Scene();
 
-  ControlSceneItem *AddControlSceneItem(double offsetInMS,
-                                        Controllable &controllable,
-                                        size_t input) {
-    std::unique_ptr<ControlSceneItem> item =
-        std::make_unique<ControlSceneItem>(controllable, input);
-    item->SetOffsetInMS(offsetInMS);
-    ControlSceneItem *result = item.get();
-    _items.emplace(offsetInMS, std::move(item));
+  void Start(double timeInMS) {
+    _startTimeInMS = timeInMS;
     resetCurrentOffset();
-    return result;
+    Stop();
+    _startTimeInMS = _startTimeInMS - _startOffset;
+    _isPlaying = true;
+    if (_hasAudio) _audioPlayer->Play();
   }
-  KeySceneItem *AddKeySceneItem(double offsetInMS) {
-    std::unique_ptr<KeySceneItem> item = std::make_unique<KeySceneItem>();
-    item->SetOffsetInMS(offsetInMS);
-    KeySceneItem *result = item.get();
-    _items.emplace(offsetInMS, std::move(item));
-    resetCurrentOffset();
-    return result;
-  }
-  void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS) {
-    _items.erase(find(item));
-    item->SetOffsetInMS(newOffsetInMS);
-    _items.insert(std::pair<double, SceneItem *>(newOffsetInMS, item));
-    resetCurrentOffset();
-  }
-  bool HasEnd(double globalTimeInMS) {
-    double relTimeInMs = globalTimeInMS - StartTimeInMS();
-    skipTo(relTimeInMs);
-    return _nextStartedItem == _items.end() && _startedItems.empty();
-  }
-  const std::multimap<double, std::unique_ptr<SceneItem>> &SceneItems() const {
-    return _items;
-  }
-  void Mix(unsigned *channelValues, unsigned universe,
-           const Timing &globalTiming) {
-    double relTimeInMs = globalTiming.TimeInMS() - StartTimeInMS();
-    Timing relTiming(relTimeInMs, globalTiming.TimestepNumber(),
-                     globalTiming.BeatValue(), globalTiming.AudioLevel(),
-                     globalTiming.TimestepRandomValue());
-    skipTo(relTimeInMs);
 
-    for (SceneItem *scene_item : _startedItems) {
-      scene_item->Mix(channelValues, universe, relTiming);
-    }
-  }
-  void Remove(SceneItem *item) { _items.erase(find(item)); }
-  void SetStartOffset(double offsetInMS) {
-    if (offsetInMS != _startOffset) {
-      _startOffset = offsetInMS;
-      initPlayer();
-    }
-  }
   void Stop() {
     if (_isPlaying) {
       _audioPlayer.reset();
@@ -86,6 +42,102 @@ class Scene : public Startable, private system::SyncListener {
       if (_audioPlayer == nullptr) initPlayer();
     }
   }
+
+  bool HasEnd(double globalTimeInMS) {
+    const double relTimeInMs = globalTimeInMS - StartTimeInMS();
+    skipTo(relTimeInMs);
+    return _nextStartedItem == _items.end() && _startedItems.empty();
+  }
+
+  double StartTimeInMS() const { return _startTimeInMS; }
+
+  bool IsPlaying() const { return _isPlaying; }
+
+  ControlSceneItem *AddControlSceneItem(double offsetInMS,
+                                        Controllable &controllable,
+                                        size_t input) {
+    std::unique_ptr<ControlSceneItem> item =
+        std::make_unique<ControlSceneItem>(controllable, input);
+    item->SetOffsetInMS(offsetInMS);
+    ControlSceneItem *result = item.get();
+    _items.emplace(offsetInMS, std::move(item));
+    resetCurrentOffset();
+    std::pair<const Controllable *, size_t> value(&controllable, input);
+    if (std::find(controllables_.begin(), controllables_.end(), value) ==
+        controllables_.end()) {
+      controllables_.emplace_back(value);
+    }
+    return result;
+  }
+
+  KeySceneItem *AddKeySceneItem(double offsetInMS) {
+    std::unique_ptr<KeySceneItem> item = std::make_unique<KeySceneItem>();
+    item->SetOffsetInMS(offsetInMS);
+    KeySceneItem *result = item.get();
+    _items.emplace(offsetInMS, std::move(item));
+    resetCurrentOffset();
+    return result;
+  }
+
+  void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS) {
+    _items.erase(find(item));
+    item->SetOffsetInMS(newOffsetInMS);
+    _items.insert(std::pair<double, SceneItem *>(newOffsetInMS, item));
+    resetCurrentOffset();
+  }
+
+  const std::multimap<double, std::unique_ptr<SceneItem>> &SceneItems() const {
+    return _items;
+  }
+
+  size_t NInputs() const override { return 1; }
+
+  ControlValue &InputValue(size_t) override { return input_value_; }
+
+  FunctionType InputType(size_t) const override { return FunctionType::Master; }
+
+  size_t NOutputs() const override { return controllables_.size(); }
+
+  std::pair<const Controllable *, size_t> Output(size_t index) const override {
+    return controllables_[index];
+  }
+
+  void Mix(const Timing &timing, bool primary) override {
+    const double relTimeInMs = timing.TimeInMS() - StartTimeInMS();
+    const Timing relTiming(relTimeInMs, timing.TimestepNumber(),
+                           timing.BeatValue(), timing.AudioLevel(),
+                           timing.TimestepRandomValue());
+    skipTo(relTimeInMs);
+
+    for (SceneItem *scene_item : _startedItems) {
+      scene_item->Mix(relTiming, primary);
+    }
+  }
+
+  void Remove(SceneItem *item) {
+    std::multimap<double, std::unique_ptr<SceneItem>>::iterator iter =
+        find(item);
+    // Make sure the object is deleted only at the end of this function:
+    std::unique_ptr<SceneItem> owned_item = std::move(iter->second);
+    _items.erase(iter);
+    if (ControlSceneItem *c_item = dynamic_cast<ControlSceneItem *>(item);
+        c_item) {
+      RecalculateControllables();
+    }
+  }
+
+  /**
+   * Allows skipping part of the scene and starting the scene at a later point.
+   * This is e.g. used to start a scene from the selected point in the scene
+   * window.
+   */
+  void SetStartOffset(double offsetInMS) {
+    if (offsetInMS != _startOffset) {
+      _startOffset = offsetInMS;
+      initPlayer();
+    }
+  }
+
   bool HasAudio() const { return _hasAudio; }
   const std::string &AudioFile() const { return _audioFilename; }
   void SetNoAudioFile() {
@@ -98,7 +150,6 @@ class Scene : public Startable, private system::SyncListener {
     _hasAudio = true;
     initPlayer();
   }
-  bool IsPlaying() const { return _isPlaying; }
 
  protected:
   void initPlayer() {
@@ -117,17 +168,12 @@ class Scene : public Startable, private system::SyncListener {
       }
     }
   }
+
   void resetCurrentOffset() {
     _nextStartedItem = _items.begin();
     _startedItems.clear();
   }
-  void onStart() {
-    resetCurrentOffset();
-    Stop();
-    setStartTimeInMS(StartTimeInMS() - _startOffset);
-    _isPlaying = true;
-    if (_hasAudio) _audioPlayer->Play();
-  }
+
   void skipTo(double offsetInMS) {
     if (_currentOffset > offsetInMS) resetCurrentOffset();
     // "Start" all items that have started since the last tick
@@ -148,6 +194,7 @@ class Scene : public Startable, private system::SyncListener {
     }
     _currentOffset = offsetInMS;
   }
+
   std::multimap<double, std::unique_ptr<SceneItem>>::iterator find(
       SceneItem *item) {
     for (std::multimap<double, std::unique_ptr<SceneItem>>::iterator i =
@@ -160,10 +207,29 @@ class Scene : public Startable, private system::SyncListener {
     return _items.end();
   }
 
+  void RecalculateControllables() {
+    std::set<std::pair<const Controllable *, size_t>> controllables;
+    for (const std::pair<const double, std::unique_ptr<SceneItem>> &item :
+         _items) {
+      if (ControlSceneItem *c_item =
+              dynamic_cast<ControlSceneItem *>(item.second.get());
+          c_item) {
+        controllables.emplace(
+            std::make_pair(&c_item->GetControllable(), c_item->GetInput()));
+      }
+    }
+    controllables_.assign(controllables.begin(), controllables.end());
+  }
+
  private:
   Management &_management;
   std::mutex &_mutex;
+  ControlValue input_value_;
   std::vector<SceneItem *> _startedItems;
+  /**
+   * Set of controllables that is used in this scene.
+   */
+  std::vector<std::pair<const Controllable *, size_t>> controllables_;
   std::multimap<double, std::unique_ptr<SceneItem>> _items;
   std::multimap<double, std::unique_ptr<SceneItem>>::iterator _nextStartedItem;
   double _currentOffset, _startOffset;
@@ -171,8 +237,9 @@ class Scene : public Startable, private system::SyncListener {
   std::unique_ptr<system::AudioPlayer> _audioPlayer;
   bool _hasAudio, _isPlaying;
   std::string _audioFilename;
+  double _startTimeInMS;
 
-  virtual void OnSyncUpdate(double offsetInMS);
+  void OnSyncUpdate(double offsetInMS) override;
 };
 
 }  // namespace glight::theatre

@@ -3,10 +3,12 @@
 
 namespace glight::theatre {
 
+class Timing;
+
 class SceneItem {
  public:
   SceneItem() : _offsetInMS(0.0), _durationInMS(0.0) {}
-  virtual ~SceneItem() {}
+  virtual ~SceneItem() = default;
 
   double OffsetInMS() const { return _offsetInMS; }
   double DurationInMS() const { return _durationInMS; }
@@ -16,8 +18,7 @@ class SceneItem {
 
   virtual std::string Description() const = 0;
 
-  virtual void Mix(unsigned *channelValues, unsigned universe,
-                   const class Timing &timing) = 0;
+  virtual void Mix(const Timing &timing, bool primary) = 0;
 
  private:
   double _offsetInMS;

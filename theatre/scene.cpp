@@ -7,6 +7,8 @@ namespace glight::theatre {
 Scene::Scene(Management &management)
     : _management(management),
       _mutex(management.Mutex()),
+      _items(),
+      _nextStartedItem(_items.begin()),
       _currentOffset(0.0),
       _startOffset(0.0),
       _decoder(),
@@ -24,8 +26,8 @@ void Scene::OnSyncUpdate(double offsetInMS) {
   // bias = currentTime - StartTimeInMS() - offsetInMS;
 
   // We only adjust 5%, to avoid large steps
-  setStartTimeInMS(StartTimeInMS() +
-                   (currentTime - StartTimeInMS() - offsetInMS) * 0.05);
+  _startTimeInMS =
+      StartTimeInMS() + (currentTime - StartTimeInMS() - offsetInMS) * 0.05;
 }
 
 }  // namespace glight::theatre
