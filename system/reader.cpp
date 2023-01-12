@@ -14,7 +14,6 @@
 #include "../theatre/folder.h"
 #include "../theatre/presetvalue.h"
 #include "../theatre/scene.h"
-#include "../theatre/show.h"
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
@@ -319,45 +318,6 @@ void ParseEffect(const Object &node, Management &management) {
   }
 }
 
-void ParseControls(const Array &node, Management &management) {
-  for (const Node &control : node) {
-    const std::string &t = ToStr(ToObj(control)["type"]);
-    if (t == "fixture-control")
-      ParseFixtureControl(ToObj(control), management);
-    else if (t == "preset-collection")
-      ParsePresetCollection(ToObj(control), management);
-    else if (t == "chase")
-      ParseChase(ToObj(control), management);
-    else if (t == "time-sequence")
-      ParseTimeSequence(ToObj(control), management);
-    else if (t == "effect")
-      ParseEffect(ToObj(control), management);
-  }
-}
-
-SingleSourceValue ParseSingleSourceValue(const Object &object) {
-  SingleSourceValue result;
-  result.SetValue(ControlValue(ToNum(object["value"]).AsUInt()));
-  result.SetTargetValue(ToNum(object["target-value"]).AsUInt());
-  result.SetFadeSpeed(ToNum(object["fade-speed"]).AsDouble());
-  return result;
-}
-
-void ParseSourceValues(const Array &node, Management &management) {
-  for (const Node &element : node) {
-    const Object &object = ToObj(element);
-    size_t folderId = ToNum(object["folder"]).AsSize();
-    const std::string name = ToStr(object["controllable-ref"]);
-    Folder *folder = management.Folders()[folderId].get();
-    Controllable &controllable =
-        dynamic_cast<Controllable &>(folder->GetChild(name));
-    const size_t inputIndex = ToNum(object["input-index"]).AsSize();
-    SourceValue &value = management.AddSourceValue(controllable, inputIndex);
-    value.A() = ParseSingleSourceValue(ToObj(object["a"]));
-    value.B() = ParseSingleSourceValue(ToObj(object["b"]));
-  }
-}
-
 KeySceneItem &ParseKeySceneItem(const Object &node, Scene &scene) {
   KeySceneItem *item = scene.AddKeySceneItem(ToNum(node["offset"]).AsDouble());
   item->SetLevel(GetKeySceneLevel(ToStr(node["level"])));
@@ -390,16 +350,54 @@ void ParseSceneItem(const Object &node, Scene &scene, Management &management) {
   item->SetDurationInMS(ToNum(node["duration"]).AsDouble());
 }
 
-void ParseScenes(const json::Array &node, Management &management) {
-  for (const Node &item : node) {
-    const Object &scene_node = ToObj(item);
-    Scene &scene = management.GetShow().AddScene(false);
-    ParseFolderAttr(scene_node, scene, management);
-    scene.SetAudioFile(ToStr(scene_node["audio-file"]));
-    const Array &items = ToArr(scene_node["items"]);
-    for (const Node &item_node : items) {
-      ParseSceneItem(ToObj(item_node), scene, management);
-    }
+void ParseScene(const Object &scene_node, Management &management) {
+  Scene &scene = management.AddScene(false);
+  ParseFolderAttr(scene_node, scene, management);
+  scene.SetAudioFile(ToStr(scene_node["audio-file"]));
+  const Array &items = ToArr(scene_node["items"]);
+  for (const Node &item_node : items) {
+    ParseSceneItem(ToObj(item_node), scene, management);
+  }
+}
+
+void ParseControls(const Array &node, Management &management) {
+  for (const Node &control : node) {
+    const std::string &t = ToStr(ToObj(control)["type"]);
+    if (t == "fixture-control")
+      ParseFixtureControl(ToObj(control), management);
+    else if (t == "preset-collection")
+      ParsePresetCollection(ToObj(control), management);
+    else if (t == "chase")
+      ParseChase(ToObj(control), management);
+    else if (t == "time-sequence")
+      ParseTimeSequence(ToObj(control), management);
+    else if (t == "effect")
+      ParseEffect(ToObj(control), management);
+    else if (t == "scene")
+      ParseScene(ToObj(control), management);
+  }
+}
+
+SingleSourceValue ParseSingleSourceValue(const Object &object) {
+  SingleSourceValue result;
+  result.SetValue(ControlValue(ToNum(object["value"]).AsUInt()));
+  result.SetTargetValue(ToNum(object["target-value"]).AsUInt());
+  result.SetFadeSpeed(ToNum(object["fade-speed"]).AsDouble());
+  return result;
+}
+
+void ParseSourceValues(const Array &node, Management &management) {
+  for (const Node &element : node) {
+    const Object &object = ToObj(element);
+    size_t folderId = ToNum(object["folder"]).AsSize();
+    const std::string name = ToStr(object["controllable-ref"]);
+    Folder *folder = management.Folders()[folderId].get();
+    Controllable &controllable =
+        dynamic_cast<Controllable &>(folder->GetChild(name));
+    const size_t inputIndex = ToNum(object["input-index"]).AsSize();
+    SourceValue &value = management.AddSourceValue(controllable, inputIndex);
+    value.A() = ParseSingleSourceValue(ToObj(object["a"]));
+    value.B() = ParseSingleSourceValue(ToObj(object["b"]));
   }
 }
 
@@ -457,7 +455,6 @@ void parseGlightShow(const Object &node, Management &management,
   ParseFixtureGroups(ToArr(node["fixture-groups"]), management);
   ParseControls(ToArr(node["controls"]), management);
   ParseSourceValues(ToArr(node["source-values"]), management);
-  ParseScenes(ToArr(node["scenes"]), management);
   if (guiState != nullptr) {
     const auto &gui = node.children.find("gui");
     if (gui != node.children.end())

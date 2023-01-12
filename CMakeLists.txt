@@ -93,7 +93,6 @@ set(THEATREFILES
   theatre/presetcollection.cpp
   theatre/presetvalue.cpp
   theatre/scene.cpp
-  theatre/show.cpp
   theatre/theatre.cpp
   theatre/effects/hue_saturation_lightness_effect.cpp
   theatre/properties/propertyset.cpp)

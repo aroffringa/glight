@@ -13,7 +13,7 @@
 #include "presetcollection.h"
 #include "presetvalue.h"
 #include "sequence.h"
-#include "show.h"
+#include "scene.h"
 #include "sourcevalue.h"
 #include "theatre.h"
 #include "timesequence.h"
@@ -31,8 +31,7 @@ Management::Management()
 
       _theatre(std::make_unique<Theatre>()),
       _primarySnapshot(std::make_unique<ValueSnapshot>(true, 0)),
-      _secondarySnapshot(std::make_unique<ValueSnapshot>(false, 0)),
-      _show(std::make_unique<Show>(*this)) {
+      _secondarySnapshot(std::make_unique<ValueSnapshot>(false, 0)) {
   _rootFolder = _folders.emplace_back(std::make_unique<Folder>()).get();
   _rootFolder->SetName("Root");
 }
@@ -52,8 +51,6 @@ void Management::StartBeatFinder() {
 }
 
 void Management::Clear() {
-  _show->Clear();
-
   _controllables.clear();
   _sourceValues.clear();
   _folders.clear();
@@ -164,8 +161,6 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
       sv->GetControllable().InputValue(inputIndex) = ControlValue(0);
     }
   }
-
-  _show->Mix(values, universe, timing);
 
   if (primary) {
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
@@ -407,6 +402,16 @@ Effect &Management::AddEffect(std::unique_ptr<Effect> effect, Folder &folder) {
   Effect &newEffect = AddEffect(std::move(effect));
   folder.Add(newEffect);
   return newEffect;
+}
+
+Scene &Management::AddScene(bool in_folder) {
+  std::unique_ptr<Controllable> &result =
+      _controllables.emplace_back(std::make_unique<Scene>(*this));
+  if (in_folder) {
+    result->SetName(_rootFolder->GetAvailableName("scene"));
+    _rootFolder->Add(*result);
+  }
+  return static_cast<Scene &>(*result);
 }
 
 FolderObject *Management::GetObjectFromPathIfExists(

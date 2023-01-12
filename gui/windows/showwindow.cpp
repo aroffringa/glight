@@ -14,7 +14,6 @@
 #include "../../theatre/fixture.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetcollection.h"
-#include "../../theatre/show.h"
 #include "../../theatre/theatre.h"
 
 #include "../../system/openfixturereader.h"

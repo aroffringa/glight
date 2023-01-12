@@ -5,6 +5,7 @@
 #include "../theatre/folder.h"
 #include "../theatre/management.h"
 #include "../theatre/presetcollection.h"
+#include "../theatre/scene.h"
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
@@ -87,6 +88,9 @@ void FillManagement(Management &management) {
   effectFolder.Add(effect);
   effect.AddConnection(a, 0);
   effect.AddConnection(fc, 1);
+
+  Scene &scene = management.AddScene(true);
+  scene.SetName("Ukrain");
 
   BOOST_CHECK(!management.HasCycle());
 }

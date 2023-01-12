@@ -85,6 +85,7 @@ class SceneWindow : public Gtk::Window {
     _toolbar.append(tool);
   }
   Gtk::ToolButton new_scene_tb_;
+  Gtk::ToolButton load_scene_tb_;
   Gtk::Toolbar _toolbar;
   AudioWidget _audioWidget;
   Gtk::Label _clickIsLabel;
@@ -124,6 +125,7 @@ class SceneWindow : public Gtk::Window {
   bool _isUpdating;
 
   bool NewScene();
+  void LoadScene();
   void Update();
 
   void createSceneItemsList();

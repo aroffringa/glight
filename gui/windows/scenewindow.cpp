@@ -10,11 +10,26 @@
 #include "../../theatre/folder.h"
 #include "../../theatre/management.h"
 #include "../../theatre/scene.h"
-#include "../../theatre/show.h"
 
 #include "../eventtransmitter.h"
 
 #include "scenewindow.h"
+
+using glight::theatre::Controllable;
+using glight::theatre::Scene;
+
+namespace {
+Scene *FirstScene(glight::theatre::Management &management) {
+  for (const std::unique_ptr<Controllable> &controllable :
+       management.Controllables()) {
+    if (Scene *scene = dynamic_cast<Scene *>(controllable.get()); scene) {
+      return scene;
+    }
+  }
+  return nullptr;
+}
+
+}  // namespace
 
 namespace glight::gui {
 
@@ -48,6 +63,8 @@ SceneWindow::SceneWindow(theatre::Management &management,
       _isUpdating(false) {
   addTool(new_scene_tb_, "New scene", "Adds a new scene to the current show",
           "document-new", [&]() { NewScene(); });
+  addTool(load_scene_tb_, "Load scene", "Load an existing scene",
+          "document-open", [&]() { LoadScene(); });
   _vBox.pack_start(_toolbar, false, false);
 
   _audioWidget.SignalClicked().connect(
@@ -142,17 +159,18 @@ SceneWindow::SceneWindow(theatre::Management &management,
   add(_vBox);
   show_all_children();
 
-  if (_management.GetShow().Scenes().size() != 0)
-    SetSelectedScene(*_management.GetShow().Scenes()[0]);
-  else
-    SetNoSelectedScene();
-
   _timeoutConnection = Glib::signal_timeout().connect(
       sigc::mem_fun(*this, &SceneWindow::onTimeout), 20);
 
   _updateConnection =
       eventHub.SignalUpdateControllables().connect([&]() { Update(); });
   Update();
+
+  if (Scene *first_scene = FirstScene(_management); first_scene)
+    SetSelectedScene(*first_scene);
+  else {
+    NewScene();
+  }
 }
 
 SceneWindow::~SceneWindow() {
@@ -288,8 +306,7 @@ void SceneWindow::onStartButtonPressed() {
   if (_selectedScene != nullptr) {
     std::lock_guard<std::mutex> lock(_management.Mutex());
     _selectedScene->SetStartOffset(0.0);
-    _management.GetShow().StartScene(_management.GetOffsetTimeInMS(),
-                                     *_selectedScene);
+    _selectedScene->Start(_management.GetOffsetTimeInMS());
   }
 }
 
@@ -297,15 +314,14 @@ void SceneWindow::onStartSelectionButtonPressed() {
   if (_selectedScene != nullptr) {
     std::lock_guard<std::mutex> lock(_management.Mutex());
     _selectedScene->SetStartOffset(_audioWidget.Position());
-    _management.GetShow().StartScene(_management.GetOffsetTimeInMS(),
-                                     *_selectedScene);
+    _selectedScene->Start(_management.GetOffsetTimeInMS());
   }
 }
 
 void SceneWindow::onStopButtonPressed() {
   if (_selectedScene != nullptr) {
     std::lock_guard<std::mutex> lock(_management.Mutex());
-    _management.GetShow().StopScene(*_selectedScene);
+    _selectedScene->Stop();
   }
 }
 
@@ -631,18 +647,19 @@ bool SceneWindow::NewScene() {
   dialog.set_secondary_text("Name of new scene:");
   int result = dialog.run();
   if (result == Gtk::RESPONSE_OK) {
-    glight::theatre::Scene &scene = _management.GetShow().AddScene(true);
+    glight::theatre::Scene &scene = _management.AddScene(true);
     if (!scene.Parent().GetChildIfExists(entry.get_text())) {
       scene.SetName(entry.get_text());
     }
-    _selectedScene = &scene;
-    _audioWidget.SetScene(*_selectedScene);
+    SetSelectedScene(scene);
     _eventHub.EmitUpdate();
     return true;
   } else {
     return false;
   }
 }
+
+void SceneWindow::LoadScene() {}
 
 void SceneWindow::updateAudioWidgetKeys() {
   std::lock_guard<std::mutex> lock(_management.Mutex());

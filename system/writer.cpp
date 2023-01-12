@@ -13,7 +13,9 @@
 #include "../theatre/fixturegroup.h"
 #include "../theatre/folder.h"
 #include "../theatre/presetvalue.h"
-#include "../theatre/show.h"
+#include "../theatre/controlsceneitem.h"
+#include "../theatre/keysceneitem.h"
+#include "../theatre/scene.h"
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
@@ -369,33 +371,6 @@ void writeEffect(WriteState &state, const Effect &effect) {
   }
 }
 
-void writeControllable(WriteState &state, const Controllable &controllable) {
-  if (state.controllablesWritten.count(&controllable) == 0) {
-    const FixtureControl *fixtureControl =
-        dynamic_cast<const FixtureControl *>(&controllable);
-    const Chase *chase = dynamic_cast<const Chase *>(&controllable);
-    const TimeSequence *tSequence =
-        dynamic_cast<const TimeSequence *>(&controllable);
-    const PresetCollection *presetCollection =
-        dynamic_cast<const PresetCollection *>(&controllable);
-    const Effect *effect = dynamic_cast<const Effect *>(&controllable);
-
-    if (fixtureControl)
-      writeFixtureControl(state, *fixtureControl);
-    else if (chase)
-      writeChase(state, *chase);
-    else if (tSequence)
-      writeTimeSequence(state, *tSequence);
-    else if (presetCollection)
-      writePresetCollection(state, *presetCollection);
-    else if (effect)
-      writeEffect(state, *effect);
-    else
-      throw std::runtime_error("Unknown controllable");
-  }
-  state.controllablesWritten.insert(&controllable);
-}
-
 void writeKeySceneItem(WriteState &state, const KeySceneItem &item) {
   state.writer.String("type", "key");
   state.writer.String("level", ToString(item.Level()));
@@ -431,6 +406,7 @@ void writeSceneItem(WriteState &state, const SceneItem &item) {
 void writeScene(WriteState &state, const Scene &scene) {
   state.writer.StartObject();
 
+  state.writer.String("type", "scene");
   writeFolderAttributes(state, scene);
   state.writer.String("audio-file", scene.AudioFile());
 
@@ -444,6 +420,35 @@ void writeScene(WriteState &state, const Scene &scene) {
   state.writer.EndArray();  // items
 
   state.writer.EndObject();
+}
+
+void writeControllable(WriteState &state, const Controllable &controllable) {
+  if (state.controllablesWritten.count(&controllable) == 0) {
+    if (const FixtureControl *fixtureControl =
+            dynamic_cast<const FixtureControl *>(&controllable);
+        fixtureControl)
+      writeFixtureControl(state, *fixtureControl);
+    else if (const Chase *chase = dynamic_cast<const Chase *>(&controllable);
+             chase)
+      writeChase(state, *chase);
+    else if (const TimeSequence *tSequence =
+                 dynamic_cast<const TimeSequence *>(&controllable);
+             tSequence)
+      writeTimeSequence(state, *tSequence);
+    else if (const PresetCollection *presetCollection =
+                 dynamic_cast<const PresetCollection *>(&controllable);
+             presetCollection)
+      writePresetCollection(state, *presetCollection);
+    else if (const Effect *effect = dynamic_cast<const Effect *>(&controllable);
+             effect)
+      writeEffect(state, *effect);
+    else if (const Scene *scene = dynamic_cast<const Scene *>(&controllable);
+             scene)
+      writeScene(state, *scene);
+    else
+      throw std::runtime_error("Unknown controllable");
+  }
+  state.controllablesWritten.insert(&controllable);
 }
 
 void writeFaderState(WriteState &state, const gui::FaderSetState &guiState) {
@@ -530,15 +535,6 @@ void writeGlightShow(WriteState &state) {
   for (const std::unique_ptr<SourceValue> &sv : sourceValues)
     writeSourceValue(state, *sv);
   state.writer.EndArray();  // source_values
-
-  state.writer.StartArray("scenes");
-
-  Show &show = state.management.GetShow();
-
-  const std::vector<std::unique_ptr<Scene>> &scenes = show.Scenes();
-  for (const std::unique_ptr<Scene> &scene : scenes) writeScene(state, *scene);
-
-  state.writer.EndArray();  // scenes
 
   if (state.guiState != nullptr) {
     state.writer.StartObject("gui");
