@@ -9,6 +9,7 @@ namespace glight::gui {
 
 class EventTransmitter {
  public:
+  virtual ~EventTransmitter() = default;
   virtual void EmitUpdate() = 0;
 
   virtual sigc::signal<void()> &SignalUpdateControllables() = 0;

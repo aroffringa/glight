@@ -17,7 +17,7 @@ namespace glight::gui {
 
 class FaderState {
  public:
-  explicit FaderState(theatre::SourceValue *pv);
+  explicit FaderState(theatre::SourceValue *sourceValue);
   FaderState()
       : _sourceValue(nullptr),
         _isToggleButton(false),

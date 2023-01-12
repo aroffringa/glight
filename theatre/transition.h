@@ -129,7 +129,7 @@ class Transition {
                        ControlValue((value.UInt() * firstRatioValue) >> 8));
         second.MixInput(secondInput,
                         ControlValue((value.UInt() * secondRatioValue) >> 8));
-      }
+      } break;
       case TransitionType::Erratic: {
         unsigned ratio = (unsigned)((transitionTime / _lengthInMs) *
                                     ControlValue::MaxUInt());
@@ -137,7 +137,7 @@ class Transition {
           first.MixInput(firstInput, value);
         else
           second.MixInput(secondInput, value);
-      }
+      } break;
       case TransitionType::Black:
         break;
       case TransitionType::FadeFromBlack: {

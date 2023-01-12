@@ -17,6 +17,8 @@ class PropertySet {
   using iterator = std::vector<Property>::iterator;
   using const_iterator = std::vector<Property>::const_iterator;
 
+  virtual ~PropertySet() = default;
+  
   iterator begin() { return _properties.begin(); }
   const_iterator begin() const { return _properties.begin(); }
 

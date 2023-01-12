@@ -130,7 +130,7 @@ void DrawFixture(const DrawData &data, const theatre::Fixture &fixture,
 
     if (rotation != 0) {
       const double rotationDisp =
-          M_PI * double(rotation) * data.style.timeSince / (10.0 * (1 << 24));
+          M_PI * double(rotation) * data.style.timeSince / (10.0 * (1u << 24u));
       fixture_state.rotation =
           std::fmod(rotationDisp + fixture_state.rotation, M_PI);
       const double s = std::sin(fixture_state.rotation);
@@ -158,7 +158,7 @@ RenderEngine::RenderEngine(const theatre::Management &management)
 void RenderEngine::DrawSnapshot(
     const Cairo::RefPtr<Cairo::Context> &cairo,
     const theatre::ValueSnapshot &snapshot, const DrawStyle &style,
-    const std::vector<theatre::Fixture *> &selectedFixtures) {
+    const std::vector<theatre::Fixture *> &selected_fixtures) {
   const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
       management_.GetTheatre().Fixtures();
   cairo->save();
@@ -187,7 +187,7 @@ void RenderEngine::DrawSnapshot(
 
   cairo->set_source_rgb(0.2, 0.2, 1.0);
   cairo->set_line_width(4.0 / scale_);
-  for (const theatre::Fixture *f : selectedFixtures) {
+  for (const theatre::Fixture *f : selected_fixtures) {
     if (f->IsVisible()) {
       double rad = GetRadius(f->Symbol().Value());
       double x = f->GetPosition().X() + 0.5;
@@ -203,7 +203,7 @@ void RenderEngine::DrawSnapshot(
 
 void RenderEngine::DrawSelectionRectangle(
     const Cairo::RefPtr<Cairo::Context> &cairo, const theatre::Position &from,
-    const theatre::Position &to) {
+    const theatre::Position &to) const {
   const std::pair<double, double> size = to - from;
   cairo->save();
   cairo->scale(scale_, scale_);

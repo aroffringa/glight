@@ -14,7 +14,35 @@ find_package(Threads REQUIRED)
 find_library(AUBIO_LIBRARY NAMES aubio)
 find_path(AUBIO_INCLUDE_DIR NAMES aubio/aubio.h)
 
-add_compile_options(-O3 -Wall -Wzero-as-null-pointer-constant -march=native)
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*,-llvmlibc*,\
+  -fuchsia-default-arguments-calls,\
+  -cppcoreguidelines-avoid-magic-numbers,\
+  -readability-magic-numbers,\
+  -readability-implicit-bool-conversion,\
+  -hicpp-use-auto,\
+  -modernize-use-auto,\
+  -google-readability-braces-around-statements,\
+  -hicpp-braces-around-statements,\
+  -readability-braces-around-statements,\
+  -modernize-use-trailing-return-type,\
+  -readability-identifier-length,\
+  -llvm-else-after-return,\
+  -readability-else-after-return,\
+  -altera-id-dependent-backward-branch")
+add_compile_options(
+  -DNDEBUG
+  -O3
+  -Wall
+  -Wvla
+  -Wzero-as-null-pointer-constant
+  -Wnon-virtual-dtor
+  -Wduplicated-branches
+  -Wundef
+  -Wvla
+  -Wpointer-arith
+  -Wextra
+  -Wno-unused-parameter
+  -march=native)
 if (NOT CMAKE_BUILD_TYPE EQUAL "DEBUG")
   add_compile_options(-DNDEBUG)
 endif()

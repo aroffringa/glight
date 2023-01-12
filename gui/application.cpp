@@ -11,14 +11,12 @@
 
 namespace glight::gui {
 
-Application::Application() {}
-
-void Application::Run(int argc, char *argv[]) {
+void Run(int argc, char *argv[]) {
   Gtk::Main kit(argc, argv);
   std::unique_ptr<theatre::DmxDevice> device;
   bool isOpen = false;
   try {
-    device.reset(new theatre::OLADevice());
+    device = std::make_unique<theatre::OLADevice>();
     device->Open();
     isOpen = device->IsOpen();
   } catch (std::exception &e) {
@@ -26,7 +24,7 @@ void Application::Run(int argc, char *argv[]) {
   }
   if (!isOpen) {
     std::cerr << "DMX device not working, switching to dummy device.\n";
-    device.reset(new theatre::DummyDevice());
+    device = std::make_unique<theatre::DummyDevice>();
   }
   ShowWindow window(std::move(device));
   if (argc > 1) {

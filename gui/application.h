@@ -1,16 +1,9 @@
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#ifndef APPLICATION_H_
+#define APPLICATION_H_
 
 namespace glight::gui {
 
-/**
- * @author Andre Offringa
- */
-class Application {
- public:
-  Application();
-  void Run(int argc, char *argv[]);
-};
+void Run(int argc, char *argv[]);
 
 }  // namespace glight::gui
 

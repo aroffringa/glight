@@ -110,9 +110,8 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
 
     theatre::Sequence &sequence = _newChase->GetSequence();
     Gtk::TreeModel::Children children = _newChaseListModel->children();
-    for (Gtk::TreeModel::Children::const_iterator i = children.begin();
-         i != children.end(); ++i) {
-      theatre::Controllable *object = (*i)[_newChaseListColumns._controllable];
+    for (const Gtk::TreeRow& row : children) {
+      theatre::Controllable *object = row[_newChaseListColumns._controllable];
       sequence.Add(*object, 0);
     }
 

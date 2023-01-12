@@ -139,11 +139,11 @@ void ObjectListFrame::onNewTimeSequenceButtonClicked() {
 bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
   if (event->button == 1) {
     _popupEffectMenuItems.clear();
-    _popupEffectMenu.reset(new Gtk::Menu());
+    _popupEffectMenu = std::make_unique<Gtk::Menu>();
 
     std::vector<EffectType> fxtypes = theatre::GetEffectTypes();
     for (EffectType t : fxtypes) {
-      std::unique_ptr<Gtk::MenuItem> mi(new Gtk::MenuItem(EffectTypeToName(t)));
+      std::unique_ptr<Gtk::MenuItem> mi = std::make_unique<Gtk::MenuItem>(EffectTypeToName(t));
       mi->signal_activate().connect(sigc::bind<EffectType>(
           sigc::mem_fun(*this, &ObjectListFrame::onNewEffectMenuClicked), t));
       _popupEffectMenu->append(*mi);
