@@ -143,7 +143,8 @@ bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
 
     std::vector<EffectType> fxtypes = theatre::GetEffectTypes();
     for (EffectType t : fxtypes) {
-      std::unique_ptr<Gtk::MenuItem> mi = std::make_unique<Gtk::MenuItem>(EffectTypeToName(t));
+      std::unique_ptr<Gtk::MenuItem> mi =
+          std::make_unique<Gtk::MenuItem>(EffectTypeToName(t));
       mi->signal_activate().connect(sigc::bind<EffectType>(
           sigc::mem_fun(*this, &ObjectListFrame::onNewEffectMenuClicked), t));
       _popupEffectMenu->append(*mi);
