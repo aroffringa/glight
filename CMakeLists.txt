@@ -14,7 +14,8 @@ find_package(Threads REQUIRED)
 find_library(AUBIO_LIBRARY NAMES aubio)
 find_path(AUBIO_INCLUDE_DIR NAMES aubio/aubio.h)
 
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*,-llvmlibc*,\
+if(False)
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy;--fix-errors;-checks=*,-llvmlibc*,\
   -fuchsia-default-arguments-calls,\
   -cppcoreguidelines-avoid-magic-numbers,\
   -readability-magic-numbers,\
@@ -29,6 +30,8 @@ set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*,-llvmlibc*,\
   -llvm-else-after-return,\
   -readability-else-after-return,\
   -altera-id-dependent-backward-branch")
+endif()
+  
 add_compile_options(
   -DNDEBUG
   -O3

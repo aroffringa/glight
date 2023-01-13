@@ -74,12 +74,12 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
       Cairo::RefPtr<Cairo::RadialGradient> gradient =
           Cairo::RadialGradient::create(x, y, beam_start_radius, x, y,
                                         beam_end_radius);
-      gradient->add_color_stop_rgba(0.0, (double)c.Red() / 255.0,
-                                    (double)c.Green() / 255.0,
-                                    (double)c.Blue() / 255.0, 0.5);
-      gradient->add_color_stop_rgba(1.0, (double)c.Red() / 255.0,
-                                    (double)c.Green() / 255.0,
-                                    (double)c.Blue() / 255.0, 0.0);
+      gradient->add_color_stop_rgba(0.0, static_cast<double>(c.Red()) / 255.0,
+                                    static_cast<double>(c.Green()) / 255.0,
+                                    static_cast<double>(c.Blue()) / 255.0, 0.5);
+      gradient->add_color_stop_rgba(1.0, static_cast<double>(c.Red()) / 255.0,
+                                    static_cast<double>(c.Green()) / 255.0,
+                                    static_cast<double>(c.Blue()) / 255.0, 0.0);
       data.cairo->set_source(gradient);
       const double cos_1 = std::cos(direction_1);
       const double sin_1 = std::sin(direction_1);
@@ -111,14 +111,14 @@ void DrawFixture(const DrawData &data, const theatre::Fixture &fixture,
     const size_t shapeIndex = shapeCount - i - 1;
     const theatre::Color c = fixture.GetColor(data.snapshot, shapeIndex);
 
-    data.cairo->set_source_rgb((double)c.Red() / 224.0 + 0.125,
-                               (double)c.Green() / 224.0 + 0.125,
-                               (double)c.Blue() / 224.0 + 0.125);
+    data.cairo->set_source_rgb(static_cast<double>(c.Red()) / 224.0 + 0.125,
+                               static_cast<double>(c.Green()) / 224.0 + 0.125,
+                               static_cast<double>(c.Blue()) / 224.0 + 0.125);
 
     const double singleRadius = GetRadius(fixture.Symbol().Value());
     const double radius =
         shapeCount == 1 ? singleRadius
-                        : 0.33 + 0.07 * double(shapeIndex) / (shapeCount - 1);
+                        : 0.33 + 0.07 * static_cast<double>(shapeIndex) / (shapeCount - 1);
     const double x =
         fixture.GetPosition().X() + 0.5 + data.style.xOffset / data.scale;
     const double y =
@@ -130,7 +130,7 @@ void DrawFixture(const DrawData &data, const theatre::Fixture &fixture,
 
     if (rotation != 0) {
       const double rotationDisp =
-          M_PI * double(rotation) * data.style.timeSince / (10.0 * (1u << 24u));
+          M_PI * static_cast<double>(rotation) * data.style.timeSince / (10.0 * (1U << 24U));
       fixture_state.rotation =
           std::fmod(rotationDisp + fixture_state.rotation, M_PI);
       const double s = std::sin(fixture_state.rotation);
@@ -167,11 +167,9 @@ void RenderEngine::DrawSnapshot(
 
   const DrawData draw_data{cairo, snapshot, style, scale_};
 
-  for (size_t fixtureIndex = 0; fixtureIndex != fixtures.size();
-       ++fixtureIndex) {
-    const theatre::Fixture &fixture = *fixtures[fixtureIndex];
-    if (fixture.IsVisible()) {
-      DrawFixtureBeam(draw_data, fixture);
+  for (const std::unique_ptr<theatre::Fixture>& fixture : fixtures) {
+    if (fixture->IsVisible()) {
+      DrawFixtureBeam(draw_data, *fixture);
     }
   }
 

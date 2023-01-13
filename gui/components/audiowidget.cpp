@@ -28,7 +28,7 @@ AudioWidget::AudioWidget()
   signal_draw().connect(sigc::mem_fun(*this, &AudioWidget::onExpose));
 }
 
-AudioWidget::~AudioWidget() {}
+AudioWidget::~AudioWidget() = default;
 
 void AudioWidget::SetAudioData(system::FlacDecoder &decoder) {
   _audioDataMax.clear();
@@ -56,26 +56,26 @@ void AudioWidget::initialize() {
   }
 }
 
-void AudioWidget::draw(const Cairo::RefPtr<Cairo::Context> &context) {
+void AudioWidget::draw(Glib::RefPtr<Gdk::Pixbuf>& buffer) {
   int renderWidth = _width;
-  if (renderWidth > (int)DataSize()) renderWidth = DataSize();
+  if (renderWidth > static_cast<int>(DataSize())) renderWidth = DataSize();
   _renderStartPosition = _centerPosition - renderWidth / 2;
   if (_renderStartPosition < 0) _renderStartPosition = 0;
-  if (_renderStartPosition + renderWidth / 2 > (int)DataSize())
+  if (_renderStartPosition + renderWidth / 2 > static_cast<int>(DataSize()))
     _renderStartPosition = DataSize() - renderWidth / 2;
 
-  if (_buffer) {
-    guint8 *data = _buffer->get_pixels();
-    size_t rowStride = _buffer->get_rowstride();
+  if (buffer) {
+    guint8 *data = buffer->get_pixels();
+    size_t rowStride = buffer->get_rowstride();
     for (int x = 0; x < renderWidth; ++x) {
       int xDataPos = x + _renderStartPosition;
       guint8 *xa = data + x * 3;
-      int yStart = (_height / 2) - (_audioDataMax[xDataPos] * _height) / 65536,
-          yStd1 =
-              (_height / 2) - (_audioDataStdDev[xDataPos] * _height) / 65536,
-          yStd2 =
-              (_audioDataStdDev[xDataPos] * _height) / 65536 + (_height / 2),
-          yEnd = (_height / 2) - (_audioDataMin[xDataPos] * _height) / 65536;
+      int yStart = (_height / 2) - (_audioDataMax[xDataPos] * _height) / 65536;
+      int yStd1 =
+              (_height / 2) - (_audioDataStdDev[xDataPos] * _height) / 65536;
+      int yStd2 =
+              (_audioDataStdDev[xDataPos] * _height) / 65536 + (_height / 2);
+      int yEnd = (_height / 2) - (_audioDataMin[xDataPos] * _height) / 65536;
       if (yStd1 > _height / 2) yStd1 = _height / 2;
       if (yStart > yStd1) yStart = yStd1;
       if (yStd1 < 0) yStd1 = 0;
@@ -87,14 +87,14 @@ void AudioWidget::draw(const Cairo::RefPtr<Cairo::Context> &context) {
         setColor(xa + rowStride * y, 255, 255, 255);
       for (int y = yStart; y < yStd1; ++y)
         setColor(xa + rowStride * y, 0, 0, 255);
-      for (int y = yStd1; y < (int)(_height / 2); ++y)
+      for (int y = yStd1; y < _height / 2; ++y)
         setColor(xa + rowStride * y, 0, 0, 127);
-      setColor(xa + rowStride * (int)(_height / 2), 0, 0, 0);
+      setColor(xa + rowStride * (_height / 2), 0, 0, 0);
       for (int y = _height / 2 + 1; y < yStd2; ++y)
         setColor(xa + rowStride * y, 0, 0, 127);
       for (int y = yStd2; y < yEnd; ++y)
         setColor(xa + rowStride * y, 0, 0, 255);
-      for (int y = yEnd; y < (int)_height; ++y)
+      for (int y = yEnd; y < _height; ++y)
         setColor(xa + rowStride * y, 255, 255, 255);
     }
     verticalLine(data, rowStride, _centerPosition - _renderStartPosition - 1,
@@ -135,9 +135,9 @@ void AudioWidget::bufferToScreen(const Cairo::RefPtr<Cairo::Context> &context) {
 
 bool AudioWidget::onButtonPressed(GdkEventButton *event) {
   int position = (event->x + _renderStartPosition);
-  if (position >= (int)DataSize()) position = DataSize() - 1;
+  if (position >= static_cast<int>(DataSize())) position = DataSize() - 1;
   if (position < 0) position = 0;
-  _signalClicked.emit((double)position * _chunkSize / (44.100 * 4.0));
+  _signalClicked.emit(static_cast<double>(position) * _chunkSize / (44.100 * 4.0));
   return true;
 }
 
@@ -153,11 +153,11 @@ void AudioWidget::UpdateKeys() {
       theatre::KeySceneItem *key = dynamic_cast<theatre::KeySceneItem *>(item);
       if (key != nullptr)
         _keys.insert(std::pair<int, KeyType>(
-            (int)round(item->OffsetInMS() * 44.100 * 4.0 / _chunkSize),
+            static_cast<int>(round(item->OffsetInMS() * 44.100 * 4.0 / _chunkSize)),
             KeyStart));
       else
         _keys.insert(std::pair<int, KeyType>(
-            (int)round(item->OffsetInMS() * 44.100 * 4.0 / _chunkSize),
+            static_cast<int>(round(item->OffsetInMS() * 44.100 * 4.0 / _chunkSize)),
             ItemStart));
     }
   }

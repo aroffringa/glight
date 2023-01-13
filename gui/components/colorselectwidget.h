@@ -36,7 +36,7 @@ class ColorSelectWidget : public Gtk::HBox {
   sigc::signal<void()> _signalColorChanged;
 
   void onColorClicked();
-  bool onColorAreaDraw(const Cairo::RefPtr<Cairo::Context> &cr);
+  bool onColorAreaDraw(const Cairo::RefPtr<Cairo::Context> &cr) const;
 };
 
 }  // namespace glight::gui

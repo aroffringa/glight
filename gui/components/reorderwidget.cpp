@@ -37,7 +37,7 @@ ReorderWidget::ReorderWidget(theatre::Management& management,
 
 void ReorderWidget::Append(theatre::NamedObject& object) {
   Gtk::TreeModel::iterator iter = model_->append();
-  Gtk::TreeModel::Row row = *iter;
+  const Gtk::TreeModel::Row& row = *iter;
   row[columns_.title_] = object.Name();
   if (theatre::Fixture* fixture = dynamic_cast<theatre::Fixture*>(&object);
       fixture) {

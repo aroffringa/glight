@@ -9,7 +9,7 @@ const double DurationInput::values[NVALUES] = {
     1000.0, 1500.0,  2000.0,  2500.0,  3000.0,  4000.0,   5000.0,
     7500.0, 10000.0, 15000.0, 30000.0, 60000.0, 120000.0, 300000.0};
 
-DurationInput::DurationInput(double value) : _label(), _scale(0, NVALUES, 1) {
+DurationInput::DurationInput(double value) :  _scale(0, NVALUES, 1) {
   initialize(value);
 }
 

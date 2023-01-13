@@ -68,7 +68,7 @@ void ColorSelectWidget::onColorClicked() {
 }
 
 bool ColorSelectWidget::onColorAreaDraw(
-    const Cairo::RefPtr<Cairo::Context> &cr) {
+    const Cairo::RefPtr<Cairo::Context> &cr) const {
   cr->set_source_rgb(_colorR, _colorG, _colorB);
   cr->paint();
   return true;
