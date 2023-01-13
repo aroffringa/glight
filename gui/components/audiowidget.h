@@ -57,7 +57,7 @@ class AudioWidget : public Gtk::DrawingArea {
   std::map<int, enum KeyType> _keys;
 
   void initialize();
-  void draw(Glib::RefPtr<Gdk::Pixbuf>& buffer);
+  void draw(Glib::RefPtr<Gdk::Pixbuf> &buffer);
   void bufferToScreen(const Cairo::RefPtr<Cairo::Context> &context);
   bool onExpose(const Cairo::RefPtr<Cairo::Context> &context) {
     if ((_width != get_width() || _height != get_height()) && _height > 0 &&

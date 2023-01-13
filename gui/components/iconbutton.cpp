@@ -26,7 +26,8 @@ void DrawCirclePart(const Cairo::RefPtr<Cairo::Context>& cairo,
   cairo->fill();
 }
 
-void DrawCircleBorder(const Cairo::RefPtr<Cairo::Context>& cairo, bool entered) {
+void DrawCircleBorder(const Cairo::RefPtr<Cairo::Context>& cairo,
+                      bool entered) {
   cairo->arc(0.0, 0.0, 1.0, 0, 2.0 * M_PI);
   if (entered) {
     cairo->set_source_rgb(0.5, 0.5, 0.5);
@@ -102,16 +103,16 @@ void IconButton::Draw(const Cairo::RefPtr<Cairo::Context>& cairo) {
   }
 }
 
-bool IconButton::OnPress(GdkEventButton*  /*event*/) { return true; }
+bool IconButton::OnPress(GdkEventButton* /*event*/) { return true; }
 
-bool IconButton::OnRelease(GdkEventButton*  /*event*/) {
+bool IconButton::OnRelease(GdkEventButton* /*event*/) {
   active_ = !active_;
   signal_clicked_();
   Update();
   return true;
 }
 
-bool IconButton::OnEnter(GdkEventCrossing*  /*event*/) {
+bool IconButton::OnEnter(GdkEventCrossing* /*event*/) {
   if (!entered_) {
     entered_ = true;
     Update();
@@ -119,7 +120,7 @@ bool IconButton::OnEnter(GdkEventCrossing*  /*event*/) {
   return false;
 }
 
-bool IconButton::OnLeave(GdkEventCrossing*  /*event*/) {
+bool IconButton::OnLeave(GdkEventCrossing* /*event*/) {
   if (entered_) {
     entered_ = false;
     Update();

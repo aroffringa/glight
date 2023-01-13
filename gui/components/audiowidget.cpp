@@ -56,7 +56,7 @@ void AudioWidget::initialize() {
   }
 }
 
-void AudioWidget::draw(Glib::RefPtr<Gdk::Pixbuf>& buffer) {
+void AudioWidget::draw(Glib::RefPtr<Gdk::Pixbuf> &buffer) {
   int renderWidth = _width;
   if (renderWidth > static_cast<int>(DataSize())) renderWidth = DataSize();
   _renderStartPosition = _centerPosition - renderWidth / 2;
@@ -72,9 +72,9 @@ void AudioWidget::draw(Glib::RefPtr<Gdk::Pixbuf>& buffer) {
       guint8 *xa = data + x * 3;
       int yStart = (_height / 2) - (_audioDataMax[xDataPos] * _height) / 65536;
       int yStd1 =
-              (_height / 2) - (_audioDataStdDev[xDataPos] * _height) / 65536;
+          (_height / 2) - (_audioDataStdDev[xDataPos] * _height) / 65536;
       int yStd2 =
-              (_audioDataStdDev[xDataPos] * _height) / 65536 + (_height / 2);
+          (_audioDataStdDev[xDataPos] * _height) / 65536 + (_height / 2);
       int yEnd = (_height / 2) - (_audioDataMin[xDataPos] * _height) / 65536;
       if (yStd1 > _height / 2) yStd1 = _height / 2;
       if (yStart > yStd1) yStart = yStd1;
@@ -137,7 +137,8 @@ bool AudioWidget::onButtonPressed(GdkEventButton *event) {
   int position = (event->x + _renderStartPosition);
   if (position >= static_cast<int>(DataSize())) position = DataSize() - 1;
   if (position < 0) position = 0;
-  _signalClicked.emit(static_cast<double>(position) * _chunkSize / (44.100 * 4.0));
+  _signalClicked.emit(static_cast<double>(position) * _chunkSize /
+                      (44.100 * 4.0));
   return true;
 }
 
@@ -153,11 +154,13 @@ void AudioWidget::UpdateKeys() {
       theatre::KeySceneItem *key = dynamic_cast<theatre::KeySceneItem *>(item);
       if (key != nullptr)
         _keys.insert(std::pair<int, KeyType>(
-            static_cast<int>(round(item->OffsetInMS() * 44.100 * 4.0 / _chunkSize)),
+            static_cast<int>(
+                round(item->OffsetInMS() * 44.100 * 4.0 / _chunkSize)),
             KeyStart));
       else
         _keys.insert(std::pair<int, KeyType>(
-            static_cast<int>(round(item->OffsetInMS() * 44.100 * 4.0 / _chunkSize)),
+            static_cast<int>(
+                round(item->OffsetInMS() * 44.100 * 4.0 / _chunkSize)),
             ItemStart));
     }
   }

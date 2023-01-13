@@ -21,7 +21,7 @@ DesignWizard::DesignWizard(theatre::Management &management,
                            EventTransmitter &hub)
     : _eventHub(hub),
       _management(management),
-      
+
       _selectLabel("Select fixtures:"),
       _fixtureList(management, hub),
       _objectBrowser(management, hub),
@@ -444,7 +444,7 @@ void DesignWizard::addControllable(theatre::FolderObject &object) {
       dynamic_cast<theatre::Controllable *>(&object);
   if (controllable) {
     Gtk::TreeModel::iterator iter = _controllablesListModel->append();
-    const Gtk::TreeModel::Row& row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     if (iter) {
       row[_controllablesListColumns._controllable] = controllable;
       row[_controllablesListColumns._title] = controllable->Name();
@@ -462,7 +462,7 @@ void DesignWizard::onRemoveControllable() {
   std::vector<Gtk::TreeModel::Path> iter =
       _controllablesListView.get_selection()->get_selected_rows();
 
-  for (Gtk::TreeModel::Path& elementIter : std::ranges::reverse_view(iter))
+  for (Gtk::TreeModel::Path &elementIter : std::ranges::reverse_view(iter))
     _controllablesListModel->erase(
         _controllablesListModel->get_iter(elementIter));
 }

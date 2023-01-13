@@ -117,8 +117,9 @@ void DrawFixture(const DrawData &data, const theatre::Fixture &fixture,
 
     const double singleRadius = GetRadius(fixture.Symbol().Value());
     const double radius =
-        shapeCount == 1 ? singleRadius
-                        : 0.33 + 0.07 * static_cast<double>(shapeIndex) / (shapeCount - 1);
+        shapeCount == 1
+            ? singleRadius
+            : 0.33 + 0.07 * static_cast<double>(shapeIndex) / (shapeCount - 1);
     const double x =
         fixture.GetPosition().X() + 0.5 + data.style.xOffset / data.scale;
     const double y =
@@ -129,8 +130,8 @@ void DrawFixture(const DrawData &data, const theatre::Fixture &fixture,
     const int rotation = fixture.GetRotationSpeed(data.snapshot, shapeIndex);
 
     if (rotation != 0) {
-      const double rotationDisp =
-          M_PI * static_cast<double>(rotation) * data.style.timeSince / (10.0 * (1U << 24U));
+      const double rotationDisp = M_PI * static_cast<double>(rotation) *
+                                  data.style.timeSince / (10.0 * (1U << 24U));
       fixture_state.rotation =
           std::fmod(rotationDisp + fixture_state.rotation, M_PI);
       const double s = std::sin(fixture_state.rotation);
@@ -167,7 +168,7 @@ void RenderEngine::DrawSnapshot(
 
   const DrawData draw_data{cairo, snapshot, style, scale_};
 
-  for (const std::unique_ptr<theatre::Fixture>& fixture : fixtures) {
+  for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
     if (fixture->IsVisible()) {
       DrawFixtureBeam(draw_data, *fixture);
     }

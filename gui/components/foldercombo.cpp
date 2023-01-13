@@ -41,7 +41,7 @@ void FolderCombo::fillList() {
   std::unique_lock<std::mutex> lock(_management->Mutex());
 
   Gtk::TreeModel::iterator iter = _listModel->append();
-  const Gtk::TreeModel::Row& row = *iter;
+  const Gtk::TreeModel::Row &row = *iter;
   row[_listColumns._title] = _management->RootFolder().Name();
   row[_listColumns._folder] = &_management->RootFolder();
   if (selectedObj == &_management->RootFolder()) set_active(iter);
@@ -60,7 +60,7 @@ void FolderCombo::fillListFolder(const Folder &folder, size_t depth,
     Folder *childFolder = dynamic_cast<Folder *>(obj);
     if (childFolder) {
       Gtk::TreeModel::iterator iter = _listModel->append();
-      const Gtk::TreeModel::Row& childRow = *iter;
+      const Gtk::TreeModel::Row &childRow = *iter;
       childRow[_listColumns._title] = std::string(depth * 3, ' ') + obj->Name();
       childRow[_listColumns._folder] = childFolder;
       if (obj == selectedObj) {
