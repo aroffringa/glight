@@ -95,10 +95,9 @@ FixtureTypeFunctionsFrame::GetFunctions() const {
 void FixtureTypeFunctionsFrame::SetFunctions(
     const std::vector<theatre::FixtureTypeFunction> &functions) {
   functions_model_->clear();
-  for (size_t i = 0; i != functions.size(); ++i) {
+  for (const theatre::FixtureTypeFunction& f : functions) {
     Gtk::TreeModel::iterator iter = functions_model_->append();
-    Gtk::TreeModel::Row row = *iter;
-    const theatre::FixtureTypeFunction &f = functions[i];
+    const Gtk::TreeModel::Row& row = *iter;
     row[functions_columns_.dmx_offset_] = f.DmxOffset();
     row[functions_columns_.is_16_bit_] = f.Is16Bit();
     row[functions_columns_.function_type_] = f.Type();
@@ -117,7 +116,7 @@ void FixtureTypeFunctionsFrame::onAdd() {
   }
 
   Gtk::TreeModel::iterator iter = functions_model_->append();
-  Gtk::TreeModel::Row row = *iter;
+  const Gtk::TreeModel::Row& row = *iter;
   row[functions_columns_.dmx_offset_] = dmx_offset;
   row[functions_columns_.is_16_bit_] = false;
   row[functions_columns_.function_type_] = theatre::FunctionType::White;

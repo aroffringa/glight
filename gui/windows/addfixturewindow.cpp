@@ -18,7 +18,7 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
       project_button_("Project"),
       _typeLabel("Type:"),
       _countLabel("Count:"),
-      _countEntry(),
+      
       _decCountButton("-"),
       _incCountButton("+"),
       _cancelButton("Cancel"),
@@ -121,7 +121,7 @@ void AddFixtureWindow::onAdd() {
       _management->RootFolder().Add(*project_type);
     }
 
-    for (size_t fixIter = 0; fixIter != size_t(count); ++fixIter) {
+    for (size_t fixIter = 0; fixIter != static_cast<size_t>(count); ++fixIter) {
       const theatre::Position position =
           _management->GetTheatre().GetFreePosition();
       theatre::Fixture &fixture =

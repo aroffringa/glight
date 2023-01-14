@@ -91,7 +91,7 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
                          theatre::Management &management, size_t keyRowIndex)
     : _management(&management),
       _keyRowIndex(keyRowIndex),
-      _menuButton(),
+      
       _miLayout("Layout"),
       _miFadeIn("Fade in"),
       _miFadeOut("Fade out"),
@@ -183,7 +183,8 @@ void FaderWindow::initializeMenu() {
   _miLayout.set_submenu(_layoutMenu);
   _popupMenu.append(_miLayout);
 
-  Gtk::RadioMenuItem::Group fadeInGroup, fadeOutGroup;
+  Gtk::RadioMenuItem::Group fadeInGroup;
+  Gtk::RadioMenuItem::Group fadeOutGroup;
   for (size_t i = 0; i != 11; ++i) {
     _miFadeInOption[i].set_label(SpeedLabel(i));
     _miFadeInOption[i].set_group(fadeInGroup);
@@ -254,7 +255,7 @@ void FaderWindow::initializeMenu() {
   _popupMenu.show_all_children();
 }
 
-bool FaderWindow::onResize(GdkEventConfigure *event) {
+bool FaderWindow::onResize(GdkEventConfigure * /*event*/) {
   if (_recursionLock.IsFirst()) {
     _state->height = get_height();
     _state->width = get_width();
@@ -278,7 +279,7 @@ void FaderWindow::addControl(bool isToggle, bool newToggleColumn,
   const char key =
       hasKey ? _keyRowsLower[_keyRowIndex][_upperControls.size()] : ' ';
 
-  Gtk::Widget *nameLabel;
+  Gtk::Widget *nameLabel = nullptr;
   std::unique_ptr<ControlWidget> control;
   const bool isSecondary = !isUpper || _miSecondaryLayout.get_active();
   const ControlMode controlMode =
@@ -365,13 +366,12 @@ void FaderWindow::onAssignChasesClicked() {
   const bool hasLower = _miDualLayout.get_active();
   if (!_upperControls.empty()) {
     size_t controlIndex = 0;
-    for (size_t i = 0; i != _management->SourceValues().size(); ++i) {
-      theatre::SourceValue *sv = _management->SourceValues()[i].get();
+    for (const std::unique_ptr<theatre::SourceValue> &sv : _management->SourceValues()) {
       theatre::Chase *c =
           dynamic_cast<theatre::Chase *>(&sv->GetControllable());
       if (c != nullptr) {
-        _upperControls[controlIndex]->Assign(sv, true);
-        if (hasLower) _lowerControls[controlIndex]->Assign(sv, true);
+        _upperControls[controlIndex]->Assign(sv.get(), true);
+        if (hasLower) _lowerControls[controlIndex]->Assign(sv.get(), true);
         ++controlIndex;
         if (controlIndex == _upperControls.size()) break;
       }
@@ -597,9 +597,8 @@ void FaderWindow::onCrossFaderChange() {
 void FaderWindow::FlipCrossFader() {
   RecursionLock::Token token(_recursionLock);
 
-  for (size_t i = 0; i != _upperControls.size(); ++i) {
-    glight::gui::ControlWidget &upper = *_upperControls[i];
-    theatre::SourceValue *source = upper.GetSourceValue();
+  for (const std::unique_ptr<glight::gui::ControlWidget>& upper : _upperControls) {
+    theatre::SourceValue *source = upper->GetSourceValue();
     if (source) {
       source->Swap();
     }

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <memory>
 
 #include <unistd.h>
 
@@ -18,8 +19,8 @@ void OLADevice::Open() {
   ola::InitLogging(ola::OLA_LOG_WARN, ola::OLA_LOG_STDERR);
   _buffer.Blackout();  // Set all channels to 0
 
-  _client.reset(new ola::client::StreamingClient(
-      (ola::client::StreamingClient::Options())));
+  _client = std::make_unique<ola::client::StreamingClient>(
+      (ola::client::StreamingClient::Options()));
 
   // Setup the client, this connects to the server
   if (!_client->Setup()) {

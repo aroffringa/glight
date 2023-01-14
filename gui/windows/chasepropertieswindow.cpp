@@ -98,7 +98,7 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
   loadChaseInfo(chase);
 }
 
-ChasePropertiesWindow::~ChasePropertiesWindow() {}
+ChasePropertiesWindow::~ChasePropertiesWindow() = default;
 
 theatre::FolderObject &ChasePropertiesWindow::GetObject() { return GetChase(); }
 

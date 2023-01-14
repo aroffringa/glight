@@ -12,7 +12,7 @@ FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type,
       _is16Bit(false) {}
 
 FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type)
-    : NamedObject(),
+    : 
       _theatre(theatre),
       _type(type),
       _firstChannel(0, 0),

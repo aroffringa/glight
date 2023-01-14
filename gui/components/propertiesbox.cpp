@@ -135,7 +135,7 @@ void PropertiesBox::onApplyClicked() {
         std::string entryText =
             static_cast<Gtk::Entry *>(rowIter->_widgets[1].get())->get_text();
         _propertySet->SetControlValue(
-            property, unsigned(std::atof(entryText.c_str()) *
+            property, static_cast<unsigned>(std::atof(entryText.c_str()) *
                                theatre::ControlValue::MaxUInt() / 100.0));
       } break;
       case Property::Duration: {

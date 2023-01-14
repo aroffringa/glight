@@ -459,10 +459,10 @@ void DesignWizard::onAddControllable() {
 }
 
 void DesignWizard::onRemoveControllable() {
-  std::vector<Gtk::TreeModel::Path> iter =
+  std::vector<Gtk::TreeModel::Path> rows =
       _controllablesListView.get_selection()->get_selected_rows();
 
-  for (Gtk::TreeModel::Path &elementIter : std::ranges::reverse_view(iter))
+  for (Gtk::TreeModel::Path &elementIter : std::ranges::reverse_view(rows))
     _controllablesListModel->erase(
         _controllablesListModel->get_iter(elementIter));
 }

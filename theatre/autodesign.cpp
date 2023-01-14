@@ -215,22 +215,21 @@ Chase &AutoDesign::MakeColorVariation(
   std::random_device rd;
   std::mt19937 rnd(rd());
   std::normal_distribution<double> distribution(0.0, variation);
-  for (size_t chaseIndex = 0; chaseIndex != colors.size(); ++chaseIndex) {
+  for (const Color& color : colors) {
     PresetCollection &pc = management.AddPresetCollection();
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc);
     for (Controllable *c : controllables) {
-      double redVar = round(distribution(rnd)),
-             greenVar = round(distribution(rnd)),
-             blueVar = round(distribution(rnd));
-      Color color = colors[chaseIndex];
+      const double redVar = round(distribution(rnd));
+      const double greenVar = round(distribution(rnd));
+      const double blueVar = round(distribution(rnd));
       Color randomizedColor(
           std::max<double>(0.0,
-                           std::min<double>(double(color.Red()) + redVar, 255)),
+                           std::min<double>(static_cast<double>(color.Red()) + redVar, 255)),
           std::max<double>(
-              0.0, std::min<double>(double(color.Green()) + greenVar, 255)),
+              0.0, std::min<double>(static_cast<double>(color.Green()) + greenVar, 255)),
           std::max<double>(
-              0.0, std::min<double>(double(color.Blue()) + blueVar, 255)));
+              0.0, std::min<double>(static_cast<double>(color.Blue()) + blueVar, 255)));
       addColorPresets(management, *c, pc, randomizedColor, deduction);
     }
     seq.Add(pc, 0);
@@ -256,7 +255,7 @@ Chase &AutoDesign::MakeColorShift(
   for (size_t frameIndex = 0; frameIndex != frames; ++frameIndex) {
     if (shiftType == RandomShift) {
       pos[frameIndex].resize(frames);
-      bool duplicate;
+      bool duplicate = false;
       do {
         for (size_t i = 0; i != pos[frameIndex].size(); ++i)
           pos[frameIndex][i] = i;
@@ -327,7 +326,7 @@ Controllable &AutoDesign::MakeVUMeter(
       management.AddEffect(std::move(audioLevel), destination);
   for (size_t inp = 0; inp != newAudioLevel.NInputs(); ++inp)
     management.AddSourceValue(newAudioLevel, inp);
-  size_t nLevels;
+  size_t nLevels = 0;
   if (direction == VUInward || direction == VUOutward)
     nLevels = (controllables.size() + 1) / 2;
   else
@@ -397,7 +396,8 @@ Chase &AutoDesign::MakeIncreasingChase(
 
   size_t nFix = controllables.size();
   for (size_t frameIndex = 0; frameIndex != nFix * 2; ++frameIndex) {
-    size_t startFixture = 0, endFixture = 0;
+    size_t startFixture = 0;
+    size_t endFixture = 0;
     if (frameIndex < controllables.size())  // building up
     {
       switch (incType) {

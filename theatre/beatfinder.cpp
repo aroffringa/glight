@@ -18,7 +18,7 @@ void BeatFinder::open() {
   _isOpen = true;
 
   // Get default hardware parameters
-  snd_pcm_hw_params_t *hw_params;
+  snd_pcm_hw_params_t *hw_params = nullptr;
   snd_pcm_hw_params_malloc(&hw_params);
   snd_pcm_hw_params_any(_handle, hw_params);
 
@@ -49,7 +49,7 @@ void BeatFinder::open() {
   snd_pcm_hw_params_free(hw_params);
 
   // Get the software parameters
-  snd_pcm_sw_params_t *sw_params;
+  snd_pcm_sw_params_t *sw_params = nullptr;
   snd_pcm_sw_params_malloc(&sw_params);
   snd_pcm_sw_params_current(_handle, sw_params);
 
@@ -89,7 +89,7 @@ void BeatFinder::open() {
       std::cout << "ERROR:" << snd_strerror(rc) << '\n';
       break;
     } else {
-      if (rc != (int)period_size)
+      if (rc != static_cast<int>(period_size))
         std::cout << "Only " << rc << " frames were read in snd_pcm_readi().\n";
     }
     // uint16_t localAudioLevel = 0;
@@ -98,13 +98,13 @@ void BeatFinder::open() {
       int16_t l = alsaBuffer[i * 2];
       int16_t r = alsaBuffer[i * 2 + 1];
 
-      smpl_t s = smpl_t(l) + smpl_t(r);
+      smpl_t s = static_cast<smpl_t>(l) + static_cast<smpl_t>(r);
       fvec_set_sample(ibuf, s, i);
 
       l = l / 2;  // create headroom for multiplication
       r = r / 2;  // (-2^15 x 2^15 wouldn't fit in a int32_t)
-      audioRMS += uint32_t(int32_t(l) * int32_t(l)) >> 8;
-      audioRMS += uint32_t(int32_t(r) * int32_t(r)) >> 8;
+      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(l) * static_cast<int32_t>(l)) >> 8;
+      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(r) * static_cast<int32_t>(r)) >> 8;
     }
     _audioLevelAccumulator += audioRMS / (2 * period_size);
     ++nAudioLevels;

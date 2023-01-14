@@ -2,8 +2,8 @@
 
 #include "fixturelistwindow.h"
 #include "fixturetypeswindow.h"
-#include "visualizationwindow.h"
 #include "scenewindow.h"
+#include "visualizationwindow.h"
 
 #include "../designwizard.h"
 #include "../objectlistframe.h"
@@ -27,6 +27,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <memory>
 
 namespace glight::gui {
 
@@ -70,15 +71,15 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
       sigc::mem_fun(*this, &ShowWindow::onKeyUp));
   _fixtureListWindow->signal_hide().connect([&]() { onHideFixtureList(); });
 
-  _fixtureTypesWindow.reset(new FixtureTypesWindow(this, *_management));
+  _fixtureTypesWindow = std::make_unique<FixtureTypesWindow>(this, *_management);
   _fixtureTypesWindow->signal_key_press_event().connect(
       sigc::mem_fun(*this, &ShowWindow::onKeyDown));
   _fixtureTypesWindow->signal_key_release_event().connect(
       sigc::mem_fun(*this, &ShowWindow::onKeyUp));
   _fixtureTypesWindow->signal_hide().connect([&]() { onHideFixtureTypes(); });
 
-  _visualizationWindow.reset(new VisualizationWindow(_management.get(), this,
-                                                     &_fixtureSelection, this));
+  _visualizationWindow = std::make_unique<VisualizationWindow>(_management.get(), this,
+                                                     &_fixtureSelection, this);
   _visualizationWindow->signal_key_press_event().connect(
       sigc::mem_fun(*this, &ShowWindow::onKeyDown));
   _visualizationWindow->signal_key_release_event().connect(
@@ -207,7 +208,7 @@ bool ShowWindow::onKeyUp(GdkEventKey *event) {
   return handled;
 }
 
-bool ShowWindow::onDelete(GdkEventAny *) {
+bool ShowWindow::onDelete(GdkEventAny * /*unused*/) {
   if (_management->IsEmpty())
     return false;
   else {
@@ -473,7 +474,7 @@ FaderWindow *ShowWindow::getFaderWindow(FaderSetState &state) {
   return nullptr;
 }
 
-void ShowWindow::onFaderWindowSelected(Gtk::CheckMenuItem &menuItem,
+void ShowWindow::onFaderWindowSelected(Gtk::CheckMenuItem & /*menuItem*/,
                                        FaderSetState &state) {
   FaderWindow *window = getFaderWindow(state);
   if (window) {
@@ -505,7 +506,7 @@ theatre::Folder &ShowWindow::SelectedFolder() const {
 
 void ShowWindow::onMIDesignWizardClicked() {
   if (!_designWizard || !_designWizard->is_visible()) {
-    _designWizard.reset(new DesignWizard(*_management, *this));
+    _designWizard = std::make_unique<DesignWizard>(*_management, *this);
   }
   _designWizard->SetCurrentPath(SelectedFolder().FullPath());
   _designWizard->present();

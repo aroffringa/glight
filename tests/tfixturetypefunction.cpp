@@ -26,9 +26,9 @@ BOOST_AUTO_TEST_CASE(range_function) {
   BOOST_CHECK_EQUAL(f.GetRotationParameters().GetSpeed(0), 0);
   BOOST_CHECK_EQUAL(details::GetParameterRange(1, ranges), nullptr);
   BOOST_CHECK_EQUAL(f.GetRotationParameters().GetSpeed(1), 0);
-  BOOST_CHECK_EQUAL(details::GetParameterRange(10, ranges), &ranges[0]);
+  BOOST_CHECK_EQUAL(details::GetParameterRange(10, ranges), ranges.data());
   BOOST_CHECK_EQUAL(f.GetRotationParameters().GetSpeed(10), 0);
-  BOOST_CHECK_EQUAL(details::GetParameterRange(11, ranges), &ranges[0]);
+  BOOST_CHECK_EQUAL(details::GetParameterRange(11, ranges), ranges.data());
   BOOST_CHECK_EQUAL(f.GetRotationParameters().GetSpeed(11), 1000);
   BOOST_CHECK_EQUAL(details::GetParameterRange(110, ranges), &ranges[1]);
   BOOST_CHECK_EQUAL(f.GetRotationParameters().GetSpeed(110), 100000);

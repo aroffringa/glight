@@ -131,7 +131,7 @@ void FixtureTypesWindow::fillList() {
       management_->GetTheatre().FixtureTypes();
   for (const std::unique_ptr<theatre::FixtureType> &type : types) {
     Gtk::TreeModel::iterator iter = list_model_->append();
-    Gtk::TreeModel::Row row = *iter;
+    const Gtk::TreeModel::Row& row = *iter;
     row[list_columns_.fixture_type_] = type.get();
     row[list_columns_.name_] = type->Name();
     row[list_columns_.functions_] = FunctionSummary(*type);
@@ -146,7 +146,7 @@ void FixtureTypesWindow::onNewButtonClicked() {
     if (row[list_columns_.fixture_type_] == nullptr) return;
   }
   Gtk::TreeModel::iterator iter = list_model_->append();
-  Gtk::TreeModel::Row row = *iter;
+  const Gtk::TreeModel::Row& row = *iter;
   row[list_columns_.fixture_type_] = nullptr;
   row[list_columns_.name_] = {};
   row[list_columns_.functions_] = {};
