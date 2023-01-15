@@ -23,26 +23,6 @@ class Scene : public Controllable, private system::SyncListener {
   Scene(Management &management);
   ~Scene();
 
-  void Start(double timeInMS) {
-    _startTimeInMS = timeInMS;
-    resetCurrentOffset();
-    Stop();
-    _startTimeInMS = _startTimeInMS - _startOffset;
-    _isPlaying = true;
-    if (_hasAudio) _audioPlayer->Play();
-  }
-
-  void Stop() {
-    if (_isPlaying) {
-      _audioPlayer.reset();
-      _decoder.reset();
-      _isPlaying = false;
-      initPlayer();
-    } else {
-      if (_audioPlayer == nullptr) initPlayer();
-    }
-  }
-
   bool HasEnd(double globalTimeInMS) {
     const double relTimeInMs = globalTimeInMS - StartTimeInMS();
     skipTo(relTimeInMs);
@@ -103,14 +83,19 @@ class Scene : public Controllable, private system::SyncListener {
   }
 
   void Mix(const Timing &timing, bool primary) override {
-    const double relTimeInMs = timing.TimeInMS() - StartTimeInMS();
-    const Timing relTiming(relTimeInMs, timing.TimestepNumber(),
-                           timing.BeatValue(), timing.AudioLevel(),
-                           timing.TimestepRandomValue());
-    skipTo(relTimeInMs);
+    if (InputValue(0)) {
+      if (primary && !_isPlaying) Start(timing.TimeInMS());
+      const double relTimeInMs = timing.TimeInMS() - StartTimeInMS();
+      const Timing relTiming(relTimeInMs, timing.TimestepNumber(),
+                             timing.BeatValue(), timing.AudioLevel(),
+                             timing.TimestepRandomValue());
+      skipTo(relTimeInMs);
 
-    for (SceneItem *scene_item : _startedItems) {
-      scene_item->Mix(relTiming, primary);
+      for (SceneItem *scene_item : _startedItems) {
+        scene_item->Mix(relTiming, primary);
+      }
+    } else if (primary && _isPlaying) {
+      Stop();
     }
   }
 
@@ -152,6 +137,27 @@ class Scene : public Controllable, private system::SyncListener {
   }
 
  protected:
+  void Start(double timeInMS) {
+    _startTimeInMS = timeInMS;
+    resetCurrentOffset();
+    Stop();
+    _startTimeInMS = _startTimeInMS - _startOffset;
+    _isPlaying = true;
+    if (_hasAudio) _audioPlayer->Play();
+  }
+
+  void Stop() {
+    if (_isPlaying) {
+      _audioPlayer.reset();
+      _decoder.reset();
+      _isPlaying = false;
+      _startOffset = 0.0;
+      initPlayer();
+    } else {
+      if (_audioPlayer == nullptr) initPlayer();
+    }
+  }
+
   void initPlayer() {
     if (_hasAudio) {
       try {
@@ -163,7 +169,7 @@ class Scene : public Controllable, private system::SyncListener {
         _audioPlayer->Seek(_startOffset);
       } catch (std::exception &e) {
         std::cout << "Could not open player for filename " << _audioFilename
-                  << std::endl;
+                  << '\n';
         _hasAudio = false;
       }
     }

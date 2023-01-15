@@ -90,10 +90,6 @@ void FlacDecoder::metadata_callback(const ::FLAC__StreamMetadata *metadata) {
     unsigned sample_rate = metadata->data.stream_info.sample_rate;
     unsigned channels = metadata->data.stream_info.channels;
     unsigned bps = metadata->data.stream_info.bits_per_sample;
-
-    std::cout << "sample rate    : " << sample_rate
-              << "\nchannels       : " << channels
-              << "\nbits per sample: " << bps << std::endl;
   }
 }
 
