@@ -6,15 +6,15 @@
 
 #include "../theatre/chase.h"
 #include "../theatre/controllable.h"
+#include "../theatre/controlsceneitem.h"
 #include "../theatre/effect.h"
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
 #include "../theatre/fixturefunction.h"
 #include "../theatre/fixturegroup.h"
 #include "../theatre/folder.h"
-#include "../theatre/presetvalue.h"
-#include "../theatre/controlsceneitem.h"
 #include "../theatre/keysceneitem.h"
+#include "../theatre/presetvalue.h"
 #include "../theatre/scene.h"
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
@@ -27,7 +27,7 @@ namespace {
 using namespace glight::theatre;
 
 struct WriteState {
-  WriteState(Management &management_) : management(management_) {}
+  explicit WriteState(Management &management_) : management(management_) {}
   json::JsonWriter writer;
   std::set<const Controllable *> controllablesWritten;
   std::map<const Folder *, size_t> folderIds;
@@ -320,7 +320,7 @@ void writeTimeSequence(WriteState &state, const TimeSequence &timeSequence) {
 }
 
 void writeEffect(WriteState &state, const Effect &effect) {
-  if (state.controllablesWritten.count(&effect) == 0) {
+  if (!state.controllablesWritten.contains(&effect)) {
     for (const std::pair<Controllable *, size_t> &c : effect.Connections())
       writeControllable(state, *c.first);
 
@@ -423,7 +423,7 @@ void writeScene(WriteState &state, const Scene &scene) {
 }
 
 void writeControllable(WriteState &state, const Controllable &controllable) {
-  if (state.controllablesWritten.count(&controllable) == 0) {
+  if (!state.controllablesWritten.contains(&controllable)) {
     if (const FixtureControl *fixtureControl =
             dynamic_cast<const FixtureControl *>(&controllable);
         fixtureControl)

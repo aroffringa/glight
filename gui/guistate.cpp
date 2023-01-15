@@ -6,8 +6,6 @@
 
 namespace glight::gui {
 
-using theatre::Controllable;
-using theatre::Management;
 using theatre::SourceValue;
 
 FaderState::FaderState(SourceValue *sourceValue)

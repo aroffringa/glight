@@ -1,5 +1,9 @@
 #include "management.h"
 
+#include <cmath>
+
+#include <ranges>
+
 #include "beatfinder.h"
 #include "chase.h"
 #include "controllable.h"
@@ -12,8 +16,8 @@
 #include "folderoperations.h"
 #include "presetcollection.h"
 #include "presetvalue.h"
-#include "sequence.h"
 #include "scene.h"
+#include "sequence.h"
 #include "sourcevalue.h"
 #include "theatre.h"
 #include "timesequence.h"
@@ -22,8 +26,7 @@
 namespace glight::theatre {
 
 Management::Management()
-    : _thread(),
-      _isQuitting(false),
+    : _isQuitting(false),
       _createTime(std::chrono::steady_clock::now()),
       _rndDistribution(0, ControlValue::MaxUInt() + 1),
       _overridenBeat(0),
@@ -126,13 +129,13 @@ void Management::abortAllDevices() {
 void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
                                   unsigned universe, bool primary) {
   const double relTimeInMs = GetOffsetTimeInMS();
-  double beatValue;
-  unsigned audioLevel;
+  double beatValue = 0.0;
+  unsigned audioLevel = 0;
   // Get the beat
   if (relTimeInMs - _lastOverridenBeatTime < 8000.0 && _overridenBeat != 0) {
     beatValue = _overridenBeat;
   } else if (_beatFinder) {
-    double beatConfidence;
+    double beatConfidence = 0.0;
     _beatFinder->GetBeatValue(beatValue, beatConfidence);
   } else {
     beatValue = 0.0;
@@ -180,8 +183,7 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
   if (!topologicalSort(unorderedList, orderedList))
     throw std::runtime_error("Cycle in dependencies");
 
-  for (auto c = orderedList.rbegin(); c != orderedList.rend(); ++c) {
-    Controllable *controllable = *c;
+  for (Controllable *controllable : std::ranges::reverse_view(orderedList)) {
     controllable->Mix(timing, primary);
     if (FixtureControl *fc = dynamic_cast<FixtureControl *>(controllable)) {
       fc->MixChannels(values, universe);
@@ -190,7 +192,8 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
 }
 
 bool Management::HasCycle() const {
-  std::vector<Controllable *> unorderedList, orderedList;
+  std::vector<Controllable *> unorderedList;
+  std::vector<Controllable *> orderedList;
   for (const std::unique_ptr<Controllable> &c : _controllables)
     unorderedList.emplace_back(c.get());
   return !topologicalSort(unorderedList, orderedList);
@@ -258,7 +261,7 @@ void Management::removeControllable(
                      });
   _sourceValues.erase(result, _sourceValues.end());
 
-  controllable->Parent().Remove(*controllable.get());
+  controllable->Parent().Remove(*controllable);
 
   std::vector<std::unique_ptr<Controllable>>::iterator i =
       _controllables.begin();
@@ -427,7 +430,7 @@ FolderObject *Management::GetObjectFromPathIfExists(
   return nullptr;
 }
 
-FolderObject &Management::GetObjectFromPath(const std::string &path) {
+FolderObject &Management::GetObjectFromPath(const std::string &path) const {
   FolderObject *result = GetObjectFromPathIfExists(path);
   if (result)
     return *result;

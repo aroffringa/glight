@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(depth) {
 }
 
 BOOST_AUTO_TEST_CASE(root) {
-  std::string path = "";
+  std::string path;
   BOOST_CHECK_EQUAL("", Root(path));
   path = "root";
   BOOST_CHECK_EQUAL("root", Root(path));
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(root) {
 }
 
 BOOST_AUTO_TEST_CASE(remove_root) {
-  std::string path = "";
+  std::string path;
   BOOST_CHECK_EQUAL("", RemoveRoot(path));
   path = "root";
   BOOST_CHECK_EQUAL("", RemoveRoot(path));

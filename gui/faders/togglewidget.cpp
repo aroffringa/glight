@@ -66,17 +66,17 @@ void ToggleWidget::onIconClicked() {
   }
 }
 
-bool ToggleWidget::onFlashButtonPressed(GdkEventButton *) {
+bool ToggleWidget::onFlashButtonPressed(GdkEventButton * /*unused*/) {
   _iconButton.SetActive(true);
   return false;
 }
 
-bool ToggleWidget::onFlashButtonReleased(GdkEventButton *) {
+bool ToggleWidget::onFlashButtonReleased(GdkEventButton * /*unused*/) {
   _iconButton.SetActive(false);
   return false;
 }
 
-bool ToggleWidget::onNameLabelClicked(GdkEventButton *) {
+bool ToggleWidget::onNameLabelClicked(GdkEventButton * /*unused*/) {
   InputSelectDialog dialog(GetManagement(), GetEventHub());
   if (dialog.run() == Gtk::RESPONSE_OK) {
     Assign(dialog.SelectedInputPreset(), true);

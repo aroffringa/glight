@@ -10,12 +10,16 @@ using theatre::ControlValue;
 
 namespace {
 std::vector<double> MakeTable() {
-  double pr = 0, pg = 0, pb = 0;
+  double pr = 0;
+  double pg = 0;
+  double pb = 0;
   double sum_distance = 0.0;
   HslToRgb(0, 1.0, 0.5, pr, pg, pb);
   std::vector<double> table;
   for (size_t h = 0; h != 361; ++h) {
-    double r, g, b;
+    double r;
+    double g;
+    double b;
     HslToRgb(h, 1.0, 0.5, r, g, b);
     const double distance = ColorDistance(r, g, b, pr, pg, pb);
     sum_distance += distance;
@@ -53,14 +57,18 @@ std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(
     ControlValue h, ControlValue s, ControlValue l) {
   switch (color_space_) {
     case HslColorSpace::LinearHsl: {
-      double r, g, b;
+      double r;
+      double g;
+      double b;
       HslToRgb(360.0 * h.Ratio(), s.Ratio(), l.Ratio(), r, g, b);
       return std::array<ControlValue, 3>{ControlValue::FromRatio(r / 255.0),
                                          ControlValue::FromRatio(g / 255.0),
                                          ControlValue::FromRatio(b / 255.0)};
     }
     case HslColorSpace::HslUv: {
-      double r, g, b;
+      double r;
+      double g;
+      double b;
       hsluv2rgb(360.0 * h.Ratio(), 100.0 * s.Ratio(), 100.0 * l.Ratio(), &r, &g,
                 &b);
       return std::array<ControlValue, 3>{ControlValue::FromRatio(r),
@@ -69,7 +77,9 @@ std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(
     }
     default:
     case HslColorSpace::CorrectedHsl: {
-      double r, g, b;
+      double r;
+      double g;
+      double b;
       const double h_deg = std::clamp(0.0, 360.0 * h.Ratio(), 360.0);
       const double h_index_lo = std::floor(h_deg);
       const double h_lo = inverted_table_[h_index_lo];
@@ -85,7 +95,8 @@ std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(
 }
 
 void HueSaturationLightnessEffect::mix(const ControlValue *values,
-                                       const Timing &, bool) {
+                                       const Timing & /*timing*/,
+                                       bool /*primary*/) {
   // TODO cache
   std::array<ControlValue, 3> rgb = Convert(values[0], values[1], values[2]);
   for (const std::pair<Controllable *, size_t> &connection : Connections()) {

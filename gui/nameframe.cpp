@@ -34,7 +34,7 @@ NameFrame::NameFrame(theatre::Management &management, ShowWindow &showWindow)
   update();
 }
 
-NameFrame::~NameFrame() {}
+NameFrame::~NameFrame() = default;
 
 void NameFrame::update() {
   if (_namedObject == nullptr) {

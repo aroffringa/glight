@@ -65,14 +65,12 @@ DeletablePtr<T> MakeDeletable(Args&&... args) {
 }
 
 template <typename T1, typename T2>
-const bool operator==(const DeletablePtr<T1>& a,
-                      const DeletablePtr<T2>& b) noexcept {
+bool operator==(const DeletablePtr<T1>& a, const DeletablePtr<T2>& b) noexcept {
   return a.Get() == b.Get();
 }
 
 template <typename T1, typename T2>
-const bool operator!=(const DeletablePtr<T1>& a,
-                      const DeletablePtr<T2>& b) noexcept {
+bool operator!=(const DeletablePtr<T1>& a, const DeletablePtr<T2>& b) noexcept {
   return a.Get() != b.Get();
 }
 

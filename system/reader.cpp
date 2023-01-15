@@ -27,9 +27,7 @@ namespace {
 using namespace glight::theatre;
 
 using json::Array;
-using json::Boolean;
 using json::Node;
-using json::Number;
 using json::Object;
 using json::String;
 
@@ -38,7 +36,7 @@ void ParseNameAttr(const Object &node, NamedObject &object) {
 }
 
 void ParseFolderAttr(const Object &node, FolderObject &object,
-                     Management &management, bool hasFolder = true) {
+                     Management &management, bool hasFolder) {
   if (hasFolder) {
     size_t parent = ToNum(node["parent"]).AsSize();
     if (parent >= management.Folders().size())
@@ -46,6 +44,11 @@ void ParseFolderAttr(const Object &node, FolderObject &object,
     management.Folders()[parent]->Add(object);
   }
   ParseNameAttr(node, object);
+}
+
+void ParseFolderAttr(const Object &node, FolderObject &object,
+                     Management &management) {
+  ParseFolderAttr(node, object, management, true);
 }
 
 void ParseFolders(const Array &node, Management &management) {
@@ -403,7 +406,7 @@ void ParseSourceValues(const Array &node, Management &management) {
 
 void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
                        Management &management) {
-  if (node.children.count("name")) {
+  if (node.children.contains("name")) {
     const size_t input = ToNum(node["input-index"]).AsSize();
     const size_t folderId = ToNum(node["folder"]).AsSize();
     const std::string name = ToStr(node["name"]);

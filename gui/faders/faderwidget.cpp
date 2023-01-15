@@ -107,12 +107,12 @@ void FaderWidget::onOnButtonClicked() {
   }
 }
 
-bool FaderWidget::onFlashButtonPressed(GdkEventButton *) {
+bool FaderWidget::onFlashButtonPressed(GdkEventButton * /*unused*/) {
   _scale.set_value(ControlValue::MaxUInt());
   return false;
 }
 
-bool FaderWidget::onFlashButtonReleased(GdkEventButton *) {
+bool FaderWidget::onFlashButtonReleased(GdkEventButton * /*unused*/) {
   _scale.set_value(0);
   return false;
 }
@@ -133,7 +133,7 @@ void FaderWidget::onScaleChange() {
   }
 }
 
-bool FaderWidget::onNameLabelClicked(GdkEventButton *) {
+bool FaderWidget::onNameLabelClicked(GdkEventButton * /*unused*/) {
   InputSelectDialog dialog(GetManagement(), GetEventHub());
   if (dialog.run() == Gtk::RESPONSE_OK) {
     Assign(dialog.SelectedInputPreset(), true);

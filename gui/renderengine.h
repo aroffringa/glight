@@ -34,7 +34,7 @@ class RenderEngine {
 
   void DrawSelectionRectangle(const Cairo::RefPtr<Cairo::Context> &cairo,
                               const theatre::Position &from,
-                              const theatre::Position &to);
+                              const theatre::Position &to) const;
 
   theatre::Fixture *FixtureAt(const theatre::Position &position) const;
   theatre::Fixture *FixtureAt(double mouse_x, double mouse_y, double width,
@@ -47,7 +47,7 @@ class RenderEngine {
  private:
   const theatre::Management &management_;
   std::vector<FixtureState> state_;
-  double scale_;
+  double scale_ = 1.0;
 };
 
 }  // namespace glight::gui

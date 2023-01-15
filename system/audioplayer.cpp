@@ -12,7 +12,7 @@ void AudioPlayer::open() {
   snd_pcm_uframes_t buffer_size = _alsaBufferSize;
   snd_pcm_uframes_t period_size = _alsaPeriodSize;
 
-  void **hints;
+  void **hints = nullptr;
   if (snd_device_name_hint(-1, "pcm", &hints) < 0)
     throw AlsaError("snd_device_name_hint() returned error");
   size_t hi = 0;
@@ -32,7 +32,7 @@ void AudioPlayer::open() {
   _isOpen = true;
 
   // Get default hardware parameters
-  snd_pcm_hw_params_t *hw_params;
+  snd_pcm_hw_params_t *hw_params = nullptr;
   snd_pcm_hw_params_malloc(&hw_params);
   snd_pcm_hw_params_any(_handle, hw_params);
 
@@ -64,7 +64,7 @@ void AudioPlayer::open() {
   snd_pcm_hw_params_free(hw_params);
 
   // Get the software parameters
-  snd_pcm_sw_params_t *sw_params;
+  snd_pcm_sw_params_t *sw_params = nullptr;
   snd_pcm_sw_params_malloc(&sw_params);
   snd_pcm_sw_params_current(_handle, sw_params);
 
@@ -86,7 +86,8 @@ void AudioPlayer::open() {
     _decoder.GetSamples(_alsaBuffer, readSize);
 
     if (position > buffer_size)
-      _syncListener->OnSyncUpdate((double)(position - buffer_size) / 44.100);
+      _syncListener->OnSyncUpdate(static_cast<double>(position - buffer_size) /
+                                  44.100);
     else
       _syncListener->OnSyncUpdate(0.0);
 
@@ -97,7 +98,7 @@ void AudioPlayer::open() {
     } else if (rc < 0) {
       std::cout << "ERROR:" << snd_strerror(rc) << '\n';
       break;
-    } else if (rc != (int)writeAtATime)
+    } else if (rc != static_cast<int>(writeAtATime))
       std::cout << "Only " << rc
                 << " frames were written in snd_pcm_writei().\n";
 

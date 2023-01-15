@@ -95,7 +95,7 @@ void FixtureListWindow::fillFixturesList() {
       _management.GetTheatre().Fixtures();
   for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = _fixturesListModel->append();
-    Gtk::TreeModel::Row row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     row[_fixturesListColumns._title] = fixture->Name();
     row[_fixturesListColumns._type] = fixture->Type().Name();
     row[_fixturesListColumns._channels] = getChannelString(*fixture);
@@ -229,7 +229,7 @@ void FixtureListWindow::onGlobalSelectionChange() {
     RecursionLock::Token token(_recursionLock);
     _fixturesListView.get_selection()->unselect_all();
     if (!_globalSelection.Selection().empty()) {
-      for (auto &child : _fixturesListModel->children()) {
+      for (const auto &child : _fixturesListModel->children()) {
         if (child[_fixturesListColumns._fixture] ==
             _globalSelection.Selection().front()) {
           _fixturesListView.get_selection()->select(child);

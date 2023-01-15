@@ -6,13 +6,13 @@ namespace glight::json {
 namespace {
 
 std::unique_ptr<Node> ParseValue(std::istream& stream);
-std::unique_ptr<Node> ParseValue(std::istream& stream, const char token,
+std::unique_ptr<Node> ParseValue(std::istream& stream, char token,
                                  const std::string& data);
 
 void SkipWhitespace(std::istream& stream) {
   std::istream::int_type c = stream.peek();
   while (c == '\n' || c == '\r' || c == ' ' || c == '\t') {
-    char ignored;
+    char ignored = 0;
     stream.read(&ignored, 1);
     c = stream.peek();
   }
@@ -20,7 +20,7 @@ void SkipWhitespace(std::istream& stream) {
 
 char NextToken(std::istream& stream, std::string& data) {
   SkipWhitespace(stream);
-  char c;
+  char c = 0;
   stream.read(&c, 1);
   if (!stream) {
     data = std::string();
@@ -155,7 +155,7 @@ std::unique_ptr<Node> ParseValue(std::istream& stream) {
 namespace details {
 bool ReadString(std::istream& stream, std::string& data) {
   std::ostringstream str;
-  char c;
+  char c = 0;
   do {
     stream.read(&c, 1);
     if (!stream) {
@@ -228,7 +228,7 @@ bool ReadNumber(char first, std::istream& stream, std::string& data) {
   else
     return false;
 
-  std::istream::int_type c;
+  std::istream::int_type c = 0;
   do {
     c = stream.peek();
     if (c == '0') {

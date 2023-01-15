@@ -98,10 +98,7 @@ class Management {
 
   std::mutex &Mutex() { return _mutex; }
 
-  FolderObject &GetObjectFromPath(const std::string &path);
-  const FolderObject &GetObjectFromPath(const std::string &path) const {
-    return const_cast<Management &>(*this).GetObjectFromPath(path);
-  }
+  FolderObject &GetObjectFromPath(const std::string &path) const;
 
   FolderObject *GetObjectFromPathIfExists(const std::string &path) const;
   size_t ControllableIndex(const Controllable *controllable) const;

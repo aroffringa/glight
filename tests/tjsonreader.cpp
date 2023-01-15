@@ -7,8 +7,7 @@
 using namespace glight::json;
 
 namespace {
-void Check(const char* input, bool expected_result,
-           const char* output = nullptr) {
+void Check(const char* input, bool expected_result, const char* output) {
   std::istringstream stream(input + 1);
   std::string output_string;
   const bool result = details::ReadNumber(input[0], stream, output_string);
@@ -17,6 +16,14 @@ void Check(const char* input, bool expected_result,
   if (result && expected_result) {
     BOOST_CHECK_EQUAL(output_string, output);
   }
+}
+
+void Check(const char* input, bool expected_result) {
+  std::istringstream stream(input + 1);
+  std::string output_string;
+  const bool result = details::ReadNumber(input[0], stream, output_string);
+  BOOST_TEST_INFO("input=\"" << input << "\"");
+  BOOST_TEST(result == expected_result);
 }
 
 void SCheck(const char* input, bool expected_result, const char* output) {
@@ -73,10 +80,10 @@ BOOST_AUTO_TEST_CASE(read_string) {
   SCheck("\"", true, "");
   SCheck("Hi!\"\t", true, "Hi!");
   SCheck("This has spaces\" ", true, "This has spaces");
-  SCheck("\\\" <- quotes\"", true, "\" <- quotes");
+  SCheck(R"(\" <- quotes")", true, "\" <- quotes");
   SCheck("Line 1\\nNewline\"\n", true, "Line 1\nNewline");
   SCheck("Unicode: — André\"}", true, "Unicode: — André");
-  SCheck("Escapes:\\\"\\n\\r\\b\\\\\\/\\f\\tend.\"]", true,
+  SCheck(R"(Escapes:\"\n\r\b\\\/\f\tend."])", true,
          "Escapes:\"\n\r\b\\/\f\tend.");
   SCheck("This: \\x wrong escape", false, "This: ");
 }

@@ -15,7 +15,6 @@ PresetCollectionWindow::PresetCollectionWindow(
       _inputSelector(management, eventHub),
 
       _controlValueLabel("Value:"),
-      _controlValueEntry(),
 
       _presetCollection(&presetCollection),
       _management(&management),
@@ -118,7 +117,7 @@ void PresetCollectionWindow::fillPresetsList() {
     const std::unique_ptr<theatre::PresetValue> &pValue =
         _presetCollection->PresetValues()[i];
     Gtk::TreeModel::iterator iter = _presetsStore->append();
-    Gtk::TreeModel::Row row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     row[_presetListColumns._control] =
         pValue->GetControllable().InputName(pValue->InputIndex());
     std::ostringstream str;
@@ -177,7 +176,7 @@ void PresetCollectionWindow::onRemovePreset() {
 
 void PresetCollectionWindow::onSelectedPresetChanged() {
   if (_recursionLock.IsFirst()) {
-    size_t index;
+    size_t index = 0;
     if (selectedPresetIndex(index)) {
       loadPreset(index);
       setPresetSensitive(true);
@@ -211,7 +210,7 @@ void PresetCollectionWindow::onUpdateControllables() {
 
 void PresetCollectionWindow::onControlValueChanged() {
   std::unique_lock<std::mutex> lock(_management->Mutex());
-  size_t index;
+  size_t index = 0;
   if (selectedPresetIndex(index)) {
     double percentage = std::atof(_controlValueEntry.get_text().c_str());
     if (percentage >= 0.0 && percentage <= 100.0) {

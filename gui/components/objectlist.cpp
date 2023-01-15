@@ -118,7 +118,7 @@ void ObjectList::fillListFolder(const Folder &folder,
     if (childFolder || presetCollection || chase || timeSequence || effect ||
         fixtureControl || fixtureGroup) {
       Gtk::TreeModel::iterator iter = _listModel->append();
-      Gtk::TreeModel::Row childRow = *iter;
+      const Gtk::TreeModel::Row &childRow = *iter;
       if (chase)
         childRow[_listColumns._type] = "C";
       else if (timeSequence)
@@ -245,7 +245,8 @@ bool ObjectList::TreeViewWithMenu::on_button_press_event(
 
   if ((button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3)) {
     _parent.constructContextMenu();
-    _parent._contextMenu.popup_at_pointer((GdkEvent *)button_event);
+    _parent._contextMenu.popup_at_pointer(
+        reinterpret_cast<GdkEvent *>(button_event));
   }
 
   return result;

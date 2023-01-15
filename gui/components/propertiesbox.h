@@ -33,7 +33,7 @@ class PropertiesBox : public Gtk::VBox {
     std::vector<std::unique_ptr<Gtk::Widget>> _widgets;
   };
 
-  theatre::PropertySet *_propertySet;
+  theatre::PropertySet *_propertySet = nullptr;
   std::vector<PropertyRow> _rows;
   Gtk::Label _typeLabel;
   Gtk::Grid _grid;

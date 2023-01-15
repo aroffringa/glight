@@ -11,6 +11,7 @@
 #include "../theatre/theatre.h"
 
 #include <memory>
+#include <ranges>
 
 namespace glight::gui {
 
@@ -20,7 +21,7 @@ DesignWizard::DesignWizard(theatre::Management &management,
                            EventTransmitter &hub)
     : _eventHub(hub),
       _management(management),
-      _currentPath(),
+
       _selectLabel("Select fixtures:"),
       _fixtureList(management, hub),
       _objectBrowser(management, hub),
@@ -81,7 +82,7 @@ DesignWizard::DesignWizard(theatre::Management &management,
   _mainBox.show();
 }
 
-DesignWizard::~DesignWizard() {}
+DesignWizard::~DesignWizard() = default;
 
 void DesignWizard::initPage1() {
   _vBoxPage1.pack_start(_notebook);
@@ -266,7 +267,7 @@ void DesignWizard::onNextClicked() {
               &_management.GetFixtureControl(*fixture));
         }
       } else {
-        for (auto &iter : _controllablesListModel->children()) {
+        for (const auto &iter : _controllablesListModel->children()) {
           _selectedControllables.emplace_back(
               (*iter)[_controllablesListColumns._controllable]);
         }
@@ -443,7 +444,7 @@ void DesignWizard::addControllable(theatre::FolderObject &object) {
       dynamic_cast<theatre::Controllable *>(&object);
   if (controllable) {
     Gtk::TreeModel::iterator iter = _controllablesListModel->append();
-    Gtk::TreeModel::Row row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     if (iter) {
       row[_controllablesListColumns._controllable] = controllable;
       row[_controllablesListColumns._title] = controllable->Name();
@@ -458,14 +459,12 @@ void DesignWizard::onAddControllable() {
 }
 
 void DesignWizard::onRemoveControllable() {
-  std::vector<Gtk::TreeModel::Path> iter =
+  std::vector<Gtk::TreeModel::Path> rows =
       _controllablesListView.get_selection()->get_selected_rows();
 
-  for (std::vector<Gtk::TreeModel::Path>::reverse_iterator elementIter =
-           iter.rbegin();
-       elementIter != iter.rend(); ++elementIter)
+  for (Gtk::TreeModel::Path &elementIter : std::ranges::reverse_view(rows))
     _controllablesListModel->erase(
-        _controllablesListModel->get_iter(*elementIter));
+        _controllablesListModel->get_iter(elementIter));
 }
 
 void DesignWizard::onControllableSelected() {

@@ -27,7 +27,7 @@ void FixtureList::Fill() {
       management_.GetTheatre().Fixtures();
   for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = model_->append();
-    Gtk::TreeModel::Row row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     row[columns_.title_] = fixture->Name();
     row[columns_.type_] = fixture->Type().Name();
     row[columns_.fixture_] = fixture.get();
@@ -38,7 +38,7 @@ void FixtureList::Select(const std::vector<theatre::Fixture *> &fixtures) {
   view_.get_selection()->unselect_all();
   Gtk::TreeModel::iterator iter;
   Gtk::TreeModel::Children children = model_->children();
-  for (auto &child : children) {
+  for (const auto &child : children) {
     const theatre::Fixture *fixture = child.get_value(columns_.fixture_);
     const auto iter = std::find(fixtures.begin(), fixtures.end(), fixture);
     if (iter != fixtures.end()) view_.get_selection()->select(child);

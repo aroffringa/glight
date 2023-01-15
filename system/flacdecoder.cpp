@@ -33,13 +33,17 @@ FLAC__StreamDecoderWriteStatus FlacDecoder::write_callback(
       writeBuffer = _buffer[actWriteBuffer];
       _writePos = 0;
     }
-    writeBuffer[_writePos] = ((FLAC__int16)buffer[0][i]);  // left channel
+    writeBuffer[_writePos] =
+        (static_cast<FLAC__int16>(buffer[0][i]));  // left channel
     ++_writePos;
-    writeBuffer[_writePos] = ((FLAC__int16)buffer[0][i]) >> 8;  // left channel
+    writeBuffer[_writePos] =
+        (static_cast<FLAC__int16>(buffer[0][i])) >> 8;  // left channel
     ++_writePos;
-    writeBuffer[_writePos] = ((FLAC__int16)buffer[1][i]);  // right channel
+    writeBuffer[_writePos] =
+        (static_cast<FLAC__int16>(buffer[1][i]));  // right channel
     ++_writePos;
-    writeBuffer[_writePos] = ((FLAC__int16)buffer[1][i]) >> 8;  // right channel
+    writeBuffer[_writePos] =
+        (static_cast<FLAC__int16>(buffer[1][i])) >> 8;  // right channel
     ++_writePos;
   }
   return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
@@ -76,7 +80,7 @@ void FlacDecoder::GetSamples(unsigned char *buffer, size_t &count) {
   }
 }
 
-void FlacDecoder::error_callback(FLAC__StreamDecoderErrorStatus status) {
+void FlacDecoder::error_callback(FLAC__StreamDecoderErrorStatus /*status*/) {
   std::cout << "Decoder reported an error" << std::endl;
 }
 

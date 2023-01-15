@@ -167,16 +167,16 @@ Position Theatre::GetFreePosition() const {
     }
   }
   for (size_t i = 0; i != n; ++i) {
-    if (available[i]) return Position(i % rowLength, i / rowLength);
+    if (available[i]) return {i % rowLength, i / rowLength};
   }
-  return Position(n % rowLength, n / rowLength);
+  return {n % rowLength, n / rowLength};
 }
 
 Position Theatre::Extend() const {
   Position extend;
   for (const std::unique_ptr<class Fixture> &fixture : _fixtures) {
-    double right = fixture->GetPosition().X() + 1.0,
-           bottom = fixture->GetPosition().Y() + 1.0;
+    const double right = fixture->GetPosition().X() + 1.0;
+    const double bottom = fixture->GetPosition().Y() + 1.0;
     if (right > extend.X()) extend.X() = right;
     if (bottom > extend.Y()) extend.Y() = bottom;
   }

@@ -133,7 +133,7 @@ class SceneWindow : public Gtk::Window {
   void createControllablesList2();
   void fillSceneItemList();
   void setSceneItemListRow(theatre::SceneItem *sceneItem,
-                           Gtk::TreeModel::Row row);
+                           const Gtk::TreeModel::Row &row) const;
   void updateSelectedSceneItems();
   void fillControllablesList();
   void addKey(theatre::KeySceneLevel level);

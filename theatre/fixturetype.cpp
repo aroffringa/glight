@@ -6,7 +6,7 @@
 namespace glight::theatre {
 
 FixtureType::FixtureType(StockFixture stock_fixture)
-    : FolderObject(StockName(stock_fixture)), class_(FixtureClass::Par) {
+    : FolderObject(StockName(stock_fixture)) {
   switch (stock_fixture) {
     case StockFixture::Light1Ch:
       functions_.emplace_back(FunctionType::White, 0, false, 0);
@@ -281,7 +281,7 @@ void FixtureType::UpdateFunctions() {
     max_values[2] += c.Blue();
   }
   scaling_value_ = std::max(std::max(max_values[0], max_values[1]),
-                            std::max(max_values[2], 1u));
+                            std::max(max_values[2], 1U));
 }
 
 Color FixtureType::GetColor(const Fixture &fixture,

@@ -174,7 +174,7 @@ void TimeSequencePropertiesWindow::fillStepsList() {
   _stepsStore->clear();
   for (size_t i = 0; i != _timeSequence->Size(); ++i) {
     Gtk::TreeModel::iterator iter = _stepsStore->append();
-    Gtk::TreeModel::Row row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     theatre::Input &input = _timeSequence->Sequence().List()[i];
     row[_stepsListColumns._title] =
         input.GetControllable()->InputName(input.InputIndex());

@@ -16,6 +16,9 @@
 
 #include <glibmm/main.h>
 #include <gtkmm/main.h>
+#include <cmath>
+
+#include <memory>
 
 namespace glight::gui {
 
@@ -30,7 +33,7 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
       _isInitialized(false),
       _isTimerRunning(false),
       _dragType(NotDragging),
-      _selectedFixtures(),
+
       _renderEngine(*management),
       _miSymbolMenu("Symbol"),
       _miDryModeStyle("Dry mode style"),
@@ -271,9 +274,9 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
       _miAlignHorizontally.set_sensitive(_selectedFixtures.size() >= 2);
       _miAlignVertically.set_sensitive(_selectedFixtures.size() >= 2);
       _miDistributeEvenly.set_sensitive(_selectedFixtures.size() >= 2);
-      _miRemove.set_sensitive(_selectedFixtures.size() >= 1);
-      _miSymbolMenu.set_sensitive(_selectedFixtures.size() >= 1);
-      _miProperties.set_sensitive(_selectedFixtures.size() >= 1);
+      _miRemove.set_sensitive(!_selectedFixtures.empty());
+      _miSymbolMenu.set_sensitive(!_selectedFixtures.empty());
+      _miProperties.set_sensitive(!_selectedFixtures.empty());
       _popupMenu.popup(event->button, event->time);
     }
   }
@@ -328,7 +331,10 @@ bool VisualizationWindow::onMotion(GdkEventMotion *event) {
 void VisualizationWindow::selectFixtures(const theatre::Position &a,
                                          const theatre::Position &b) {
   _selectedFixtures.clear();
-  double x1 = a.X(), y1 = a.Y(), x2 = b.X(), y2 = b.Y();
+  double x1 = a.X();
+  double y1 = a.Y();
+  double x2 = b.X();
+  double y2 = b.Y();
   if (x1 > x2) std::swap(x1, x2);
   if (y1 > y2) std::swap(y1, y2);
   theatre::Position first(x1 - 0.1, y1 - 0.1);
@@ -407,7 +413,9 @@ void VisualizationWindow::onDistributeEvenly() {
                   return a->GetPosition().Y() < b->GetPosition().Y();
                 });
       for (size_t i = 0; i != list.size(); ++i) {
-        double y = double(i) / double(list.size() - 1) * (bottom - top) + top;
+        double y = static_cast<double>(i) /
+                       static_cast<double>(list.size() - 1) * (bottom - top) +
+                   top;
         list[i]->GetPosition().Y() = y;
       }
     } else {
@@ -420,7 +428,8 @@ void VisualizationWindow::onDistributeEvenly() {
       top = list.front()->GetPosition().Y();
       bottom = list.back()->GetPosition().Y();
       for (size_t i = 0; i != list.size(); ++i) {
-        double r = double(i) / double(list.size() - 1);
+        double r =
+            static_cast<double>(i) / static_cast<double>(list.size() - 1);
         double x = r * (right - left) + left;
         double y = r * (bottom - top) + top;
         list[i]->GetPosition() = theatre::Position(x, y);
@@ -458,7 +467,8 @@ void VisualizationWindow::onGroupFixtures() {
 
 void VisualizationWindow::onDesignFixtures() {
   std::unique_ptr<DesignWizard> &designWizard = _showWindow->GetDesignWizard();
-  designWizard.reset(new DesignWizard(*_management, *_eventTransmitter));
+  designWizard =
+      std::make_unique<DesignWizard>(*_management, *_eventTransmitter);
   designWizard->SetCurrentPath(_showWindow->SelectedFolder().FullPath());
   designWizard->Select(_selectedFixtures);
   designWizard->present();

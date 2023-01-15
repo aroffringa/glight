@@ -32,7 +32,7 @@ class IconButton : public Gtk::DrawingArea {
  private:
   void Draw(const Cairo::RefPtr<Cairo::Context>& cairo);
   void Update() { queue_draw(); }
-  bool OnPress(GdkEventButton* event);
+  static bool OnPress(GdkEventButton* event);
   bool OnRelease(GdkEventButton* event);
   bool OnEnter(GdkEventCrossing* event);
   bool OnLeave(GdkEventCrossing* event);
