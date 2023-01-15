@@ -9,6 +9,7 @@
 #include "../../theatre/folder.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetcollection.h"
+#include "../../theatre/scene.h"
 #include "../../theatre/timesequence.h"
 
 namespace glight::gui {
@@ -114,9 +115,11 @@ void ObjectList::fillListFolder(const Folder &folder,
     theatre::FixtureGroup *fixtureGroup =
         _showFixtureGroups ? dynamic_cast<theatre::FixtureGroup *>(obj)
                            : nullptr;
+    theatre::Scene *scene =
+        almostAll ? dynamic_cast<theatre::Scene *>(obj) : nullptr;
 
     if (childFolder || presetCollection || chase || timeSequence || effect ||
-        fixtureControl || fixtureGroup) {
+        fixtureControl || fixtureGroup || scene) {
       Gtk::TreeModel::iterator iter = _listModel->append();
       const Gtk::TreeModel::Row &childRow = *iter;
       if (chase)
@@ -133,6 +136,8 @@ void ObjectList::fillListFolder(const Folder &folder,
         childRow[_listColumns._type] = "L";
       else if (fixtureGroup)
         childRow[_listColumns._type] = "G";
+      else if (scene)
+        childRow[_listColumns._type] = "S";
       childRow[_listColumns._title] = obj->Name();
       childRow[_listColumns._object] = obj;
       if (obj == selectedObj) {

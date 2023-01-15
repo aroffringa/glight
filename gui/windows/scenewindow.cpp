@@ -10,6 +10,7 @@
 #include "../../theatre/folder.h"
 #include "../../theatre/management.h"
 #include "../../theatre/scene.h"
+#include "../../theatre/sourcevalue.h"
 
 #include "../eventtransmitter.h"
 
@@ -60,6 +61,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
                 theatre::ControlValue::MaxUInt() / 100.0),
       _nameFrame(management, parentWindow),
       _selectedScene(nullptr),
+      _sourceValue(nullptr),
       _isUpdating(false) {
   addTool(new_scene_tb_, "New scene", "Adds a new scene to the current show",
           "document-new", [&]() { NewScene(); });
@@ -305,7 +307,7 @@ void SceneWindow::onStartButtonPressed() {
   if (_selectedScene != nullptr) {
     std::lock_guard<std::mutex> lock(_management.Mutex());
     _selectedScene->SetStartOffset(0.0);
-    _selectedScene->Start(_management.GetOffsetTimeInMS());
+    _sourceValue->A().Set(theatre::ControlValue::MaxUInt(), 0);
   }
 }
 
@@ -313,14 +315,14 @@ void SceneWindow::onStartSelectionButtonPressed() {
   if (_selectedScene != nullptr) {
     std::lock_guard<std::mutex> lock(_management.Mutex());
     _selectedScene->SetStartOffset(_audioWidget.Position());
-    _selectedScene->Start(_management.GetOffsetTimeInMS());
+    _sourceValue->A().Set(theatre::ControlValue::MaxUInt(), 0);
   }
 }
 
 void SceneWindow::onStopButtonPressed() {
   if (_selectedScene != nullptr) {
     std::lock_guard<std::mutex> lock(_management.Mutex());
-    _selectedScene->Stop();
+    _sourceValue->A().Set(0, 0);
   }
 }
 
@@ -485,6 +487,20 @@ bool SceneWindow::HandleKeyDown(char key) {
   return false;
 }
 
+void SceneWindow::SetSelectedScene(theatre::Scene &scene) {
+  _selectedScene = &scene;
+  _sourceValue = _management.GetSourceValue(scene, 0);
+  _audioWidget.SetScene(scene);
+  set_sensitive(true);
+}
+
+void SceneWindow::SetNoSelectedScene() {
+  set_sensitive(false);
+  _audioWidget.SetNoScene();
+  _selectedScene = nullptr;
+  _sourceValue = nullptr;
+}
+
 void SceneWindow::onScalesChanged() {
   if (!_isUpdating) {
     _isUpdating = true;
@@ -643,6 +659,7 @@ bool SceneWindow::NewScene() {
     if (!scene.Parent().GetChildIfExists(entry.get_text())) {
       scene.SetName(entry.get_text());
     }
+    _sourceValue = &_management.AddSourceValue(scene, 0);
     SetSelectedScene(scene);
     _eventHub.EmitUpdate();
     return true;

@@ -48,9 +48,7 @@ class FlacDecoder : private FLAC::Decoder::File {
     _bufferReady[1] = false;
     DecodeThread decodeThreadFunc(*this);
     _decodeThread.reset(new std::thread(decodeThreadFunc));
-    std::cout << "Thread started." << std::endl;
     waitForReadReady(0);
-    std::cout << "waitForReadReady(0) returned." << std::endl;
   }
   void Seek(double offsetInMS) {
     if (!seek_absolute((FLAC__uint64)(44.1000 * offsetInMS)))
@@ -64,10 +62,7 @@ class FlacDecoder : private FLAC::Decoder::File {
    public:
     FlacDecoder &_decoder;
     DecodeThread(FlacDecoder &decoder) : _decoder(decoder) {}
-    void operator()() {
-      _decoder.open();
-      std::cout << "Decode thread finished." << std::endl;
-    }
+    void operator()() { _decoder.open(); }
   };
   bool _isOpen;
   bool _hasMore;

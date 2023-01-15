@@ -33,16 +33,8 @@ class SceneWindow : public Gtk::Window {
   ~SceneWindow();
 
   bool HandleKeyDown(char key);
-  void SetSelectedScene(theatre::Scene &scene) {
-    _selectedScene = &scene;
-    _audioWidget.SetScene(scene);
-    set_sensitive(true);
-  }
-  void SetNoSelectedScene() {
-    set_sensitive(false);
-    _audioWidget.SetNoScene();
-    _selectedScene = nullptr;
-  }
+  void SetSelectedScene(theatre::Scene &scene);
+  void SetNoSelectedScene();
 
  private:
   theatre::Management &_management;
@@ -122,6 +114,7 @@ class SceneWindow : public Gtk::Window {
   NameFrame _nameFrame;
 
   theatre::Scene *_selectedScene;
+  theatre::SourceValue *_sourceValue;
   bool _isUpdating;
 
   bool NewScene();
