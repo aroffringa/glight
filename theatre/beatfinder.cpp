@@ -103,8 +103,12 @@ void BeatFinder::open() {
 
       l = l / 2;  // create headroom for multiplication
       r = r / 2;  // (-2^15 x 2^15 wouldn't fit in a int32_t)
-      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(l) * static_cast<int32_t>(l)) >> 8;
-      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(r) * static_cast<int32_t>(r)) >> 8;
+      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(l) *
+                                        static_cast<int32_t>(l)) >>
+                  8;
+      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(r) *
+                                        static_cast<int32_t>(r)) >>
+                  8;
     }
     _audioLevelAccumulator += audioRMS / (2 * period_size);
     ++nAudioLevels;

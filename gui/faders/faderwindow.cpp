@@ -91,7 +91,7 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
                          theatre::Management &management, size_t keyRowIndex)
     : _management(&management),
       _keyRowIndex(keyRowIndex),
-      
+
       _miLayout("Layout"),
       _miFadeIn("Fade in"),
       _miFadeOut("Fade out"),
@@ -366,7 +366,8 @@ void FaderWindow::onAssignChasesClicked() {
   const bool hasLower = _miDualLayout.get_active();
   if (!_upperControls.empty()) {
     size_t controlIndex = 0;
-    for (const std::unique_ptr<theatre::SourceValue> &sv : _management->SourceValues()) {
+    for (const std::unique_ptr<theatre::SourceValue> &sv :
+         _management->SourceValues()) {
       theatre::Chase *c =
           dynamic_cast<theatre::Chase *>(&sv->GetControllable());
       if (c != nullptr) {
@@ -597,7 +598,8 @@ void FaderWindow::onCrossFaderChange() {
 void FaderWindow::FlipCrossFader() {
   RecursionLock::Token token(_recursionLock);
 
-  for (const std::unique_ptr<glight::gui::ControlWidget>& upper : _upperControls) {
+  for (const std::unique_ptr<glight::gui::ControlWidget> &upper :
+       _upperControls) {
     theatre::SourceValue *source = upper->GetSourceValue();
     if (source) {
       source->Swap();

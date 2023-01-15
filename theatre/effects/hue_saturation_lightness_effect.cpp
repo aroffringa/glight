@@ -95,7 +95,8 @@ std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(
 }
 
 void HueSaturationLightnessEffect::mix(const ControlValue *values,
-                                       const Timing & /*timing*/, bool /*primary*/) {
+                                       const Timing & /*timing*/,
+                                       bool /*primary*/) {
   // TODO cache
   std::array<ControlValue, 3> rgb = Convert(values[0], values[1], values[2]);
   for (const std::pair<Controllable *, size_t> &connection : Connections()) {

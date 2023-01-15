@@ -37,7 +37,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
                          ShowWindow &parentWindow, EventTransmitter &eventHub)
     : _management(management),
       _eventHub(eventHub),
-      
+
       _clickIsLabel("Click is: "),
       _clickIsSelectButton("select"),
       _clickIsSetStartButton("set start"),
@@ -238,7 +238,7 @@ void SceneWindow::fillSceneItemList() {
     for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>>
              &item : items) {
       Gtk::TreeModel::iterator iter = _sceneItemsListModel->append();
-      const Gtk::TreeRow& row = *iter;
+      const Gtk::TreeRow &row = *iter;
       setSceneItemListRow(item.second.get(), row);
     }
     lock.unlock();
@@ -249,7 +249,7 @@ void SceneWindow::fillSceneItemList() {
 }
 
 void SceneWindow::setSceneItemListRow(theatre::SceneItem *sceneItem,
-                                      const Gtk::TreeModel::Row& row) const {
+                                      const Gtk::TreeModel::Row &row) const {
   std::stringstream startTimeStr;
   startTimeStr << (round(sceneItem->OffsetInMS() / 10.0) / 100.0);
   row[_sceneItemsListColumns._startTime] = startTimeStr.str();
@@ -279,9 +279,9 @@ void SceneWindow::updateSelectedSceneItems() {
       _sceneItemsListView.get_selection();
   std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
   std::lock_guard<std::mutex> lock(_management.Mutex());
-  for (Gtk::TreeModel::Path& path : pathHandle) {
+  for (Gtk::TreeModel::Path &path : pathHandle) {
     Gtk::TreeModel::iterator iter = _sceneItemsListModel->get_iter(path);
-    const Gtk::TreeModel::Row& row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     theatre::SceneItem *item = row[_sceneItemsListColumns._item];
     setSceneItemListRow(item, row);
   }
@@ -295,7 +295,7 @@ void SceneWindow::fillControllablesList() {
       _management.Controllables();
   for (const std::unique_ptr<theatre::Controllable> &contr : controllable) {
     Gtk::TreeModel::iterator iter = _controllablesListModel->append();
-    const Gtk::TreeModel::Row& row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     row[_controllablesListColumns._text] = contr->Name();
     row[_controllablesListColumns._controllable] = contr.get();
   }
@@ -426,7 +426,7 @@ void SceneWindow::onSetEndTimeButtonPressed() {
            pathHandle.begin();
        pathPtr != pathHandle.end(); ++pathPtr) {
     theatre::SceneItem *selItem = (*_sceneItemsListModel->get_iter(
-                           *pathPtr))[_sceneItemsListColumns._item];
+        *pathPtr))[_sceneItemsListColumns._item];
     theatre::SceneItem *nextItem = nullptr;
     std::vector<Gtk::TreeModel::Path>::const_iterator nextPtr = pathPtr;
     ++nextPtr;
@@ -448,9 +448,9 @@ void SceneWindow::onRemoveButtonPressed() {
       _sceneItemsListView.get_selection();
   std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
   std::unique_lock<std::mutex> lock(_management.Mutex());
-  for (const Gtk::TreeModel::Path& path : pathHandle) {
-    theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
-        path))[_sceneItemsListColumns._item];
+  for (const Gtk::TreeModel::Path &path : pathHandle) {
+    theatre::SceneItem *item =
+        (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
     _selectedScene->Remove(item);
   }
   lock.unlock();
@@ -493,9 +493,9 @@ void SceneWindow::onScalesChanged() {
     std::vector<Gtk::TreeModel::Path> pathHandle =
         selection->get_selected_rows();
     std::unique_lock<std::mutex> lock(_management.Mutex());
-    for (const Gtk::TreeModel::Path& path : pathHandle) {
-      theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
-          path))[_sceneItemsListColumns._item];
+    for (const Gtk::TreeModel::Path &path : pathHandle) {
+      theatre::SceneItem *item =
+          (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
       theatre::ControlSceneItem *csi =
           dynamic_cast<theatre::ControlSceneItem *>(item);
       if (csi != nullptr) {
@@ -550,9 +550,9 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     std::vector<Gtk::TreeModel::Path> pathHandle =
         selection->get_selected_rows();
     std::unique_lock<std::mutex> lock(_management.Mutex());
-    for (const Gtk::TreeModel::Path& path : pathHandle) {
-      theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
-          path))[_sceneItemsListColumns._item];
+    for (const Gtk::TreeModel::Path &path : pathHandle) {
+      theatre::SceneItem *item =
+          (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
       _selectedScene->ChangeSceneItemStartTime(item, timeInMS);
     }
     lock.unlock();
@@ -568,9 +568,9 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     std::vector<Gtk::TreeModel::Path> pathHandle =
         selection->get_selected_rows();
     std::unique_lock<std::mutex> lock(_management.Mutex());
-    for (const Gtk::TreeModel::Path& path : pathHandle) {
-      theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
-          path))[_sceneItemsListColumns._item];
+    for (const Gtk::TreeModel::Path &path : pathHandle) {
+      theatre::SceneItem *item =
+          (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
       item->SetDurationInMS(timeInMS - item->OffsetInMS());
     }
     lock.unlock();

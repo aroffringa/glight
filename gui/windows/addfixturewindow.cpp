@@ -18,7 +18,7 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
       project_button_("Project"),
       _typeLabel("Type:"),
       _countLabel("Count:"),
-      
+
       _decCountButton("-"),
       _incCountButton("+"),
       _cancelButton("Cancel"),

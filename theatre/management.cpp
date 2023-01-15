@@ -26,8 +26,7 @@
 namespace glight::theatre {
 
 Management::Management()
-    : 
-      _isQuitting(false),
+    : _isQuitting(false),
       _createTime(std::chrono::steady_clock::now()),
       _rndDistribution(0, ControlValue::MaxUInt() + 1),
       _overridenBeat(0),
@@ -184,7 +183,7 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
   if (!topologicalSort(unorderedList, orderedList))
     throw std::runtime_error("Cycle in dependencies");
 
-  for (Controllable* controllable : std::ranges::reverse_view(orderedList)) {
+  for (Controllable *controllable : std::ranges::reverse_view(orderedList)) {
     controllable->Mix(timing, primary);
     if (FixtureControl *fc = dynamic_cast<FixtureControl *>(controllable)) {
       fc->MixChannels(values, universe);

@@ -215,7 +215,7 @@ Chase &AutoDesign::MakeColorVariation(
   std::random_device rd;
   std::mt19937 rnd(rd());
   std::normal_distribution<double> distribution(0.0, variation);
-  for (const Color& color : colors) {
+  for (const Color &color : colors) {
     PresetCollection &pc = management.AddPresetCollection();
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc);
@@ -224,12 +224,15 @@ Chase &AutoDesign::MakeColorVariation(
       const double greenVar = round(distribution(rnd));
       const double blueVar = round(distribution(rnd));
       Color randomizedColor(
-          std::max<double>(0.0,
-                           std::min<double>(static_cast<double>(color.Red()) + redVar, 255)),
           std::max<double>(
-              0.0, std::min<double>(static_cast<double>(color.Green()) + greenVar, 255)),
+              0.0,
+              std::min<double>(static_cast<double>(color.Red()) + redVar, 255)),
           std::max<double>(
-              0.0, std::min<double>(static_cast<double>(color.Blue()) + blueVar, 255)));
+              0.0, std::min<double>(
+                       static_cast<double>(color.Green()) + greenVar, 255)),
+          std::max<double>(
+              0.0, std::min<double>(static_cast<double>(color.Blue()) + blueVar,
+                                    255)));
       addColorPresets(management, *c, pc, randomizedColor, deduction);
     }
     seq.Add(pc, 0);

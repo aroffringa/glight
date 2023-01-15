@@ -71,15 +71,16 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
       sigc::mem_fun(*this, &ShowWindow::onKeyUp));
   _fixtureListWindow->signal_hide().connect([&]() { onHideFixtureList(); });
 
-  _fixtureTypesWindow = std::make_unique<FixtureTypesWindow>(this, *_management);
+  _fixtureTypesWindow =
+      std::make_unique<FixtureTypesWindow>(this, *_management);
   _fixtureTypesWindow->signal_key_press_event().connect(
       sigc::mem_fun(*this, &ShowWindow::onKeyDown));
   _fixtureTypesWindow->signal_key_release_event().connect(
       sigc::mem_fun(*this, &ShowWindow::onKeyUp));
   _fixtureTypesWindow->signal_hide().connect([&]() { onHideFixtureTypes(); });
 
-  _visualizationWindow = std::make_unique<VisualizationWindow>(_management.get(), this,
-                                                     &_fixtureSelection, this);
+  _visualizationWindow = std::make_unique<VisualizationWindow>(
+      _management.get(), this, &_fixtureSelection, this);
   _visualizationWindow->signal_key_press_event().connect(
       sigc::mem_fun(*this, &ShowWindow::onKeyDown));
   _visualizationWindow->signal_key_release_event().connect(

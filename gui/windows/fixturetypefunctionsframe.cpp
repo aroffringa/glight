@@ -82,7 +82,7 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
 std::vector<theatre::FixtureTypeFunction>
 FixtureTypeFunctionsFrame::GetFunctions() const {
   std::vector<theatre::FixtureTypeFunction> functions;
-  for (const Gtk::TreeRow &child : functions_model_->children()) {
+  for (const Gtk::TreeRow& child : functions_model_->children()) {
     const size_t dmx_offset = child[functions_columns_.dmx_offset_];
     const theatre::FunctionType type = child[functions_columns_.function_type_];
     const bool is_16_bit = child[functions_columns_.is_16_bit_];
@@ -93,7 +93,7 @@ FixtureTypeFunctionsFrame::GetFunctions() const {
 }
 
 void FixtureTypeFunctionsFrame::SetFunctions(
-    const std::vector<theatre::FixtureTypeFunction> &functions) {
+    const std::vector<theatre::FixtureTypeFunction>& functions) {
   functions_model_->clear();
   for (const theatre::FixtureTypeFunction& f : functions) {
     Gtk::TreeModel::iterator iter = functions_model_->append();

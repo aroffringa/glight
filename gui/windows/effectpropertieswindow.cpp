@@ -84,7 +84,7 @@ void EffectPropertiesWindow::fillConnectionsList() {
   std::lock_guard<std::mutex> lock(_management->Mutex());
   for (size_t index = 0; index != _effect->Connections().size(); ++index) {
     Gtk::TreeModel::iterator iter = _connectionsListModel->append();
-    const Gtk::TreeModel::Row& row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     row[_connectionsListColumns._title] =
         _effect->Connections()[index].first->InputName(
             _effect->Connections()[index].second);

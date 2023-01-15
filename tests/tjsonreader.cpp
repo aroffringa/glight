@@ -7,8 +7,7 @@
 using namespace glight::json;
 
 namespace {
-void Check(const char* input, bool expected_result,
-           const char* output) {
+void Check(const char* input, bool expected_result, const char* output) {
   std::istringstream stream(input + 1);
   std::string output_string;
   const bool result = details::ReadNumber(input[0], stream, output_string);
@@ -26,7 +25,6 @@ void Check(const char* input, bool expected_result) {
   BOOST_TEST_INFO("input=\"" << input << "\"");
   BOOST_TEST(result == expected_result);
 }
-
 
 void SCheck(const char* input, bool expected_result, const char* output) {
   std::istringstream stream(input);

@@ -33,7 +33,7 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
       _isInitialized(false),
       _isTimerRunning(false),
       _dragType(NotDragging),
-      
+
       _renderEngine(*management),
       _miSymbolMenu("Symbol"),
       _miDryModeStyle("Dry mode style"),
@@ -413,7 +413,9 @@ void VisualizationWindow::onDistributeEvenly() {
                   return a->GetPosition().Y() < b->GetPosition().Y();
                 });
       for (size_t i = 0; i != list.size(); ++i) {
-        double y = static_cast<double>(i) / static_cast<double>(list.size() - 1) * (bottom - top) + top;
+        double y = static_cast<double>(i) /
+                       static_cast<double>(list.size() - 1) * (bottom - top) +
+                   top;
         list[i]->GetPosition().Y() = y;
       }
     } else {
@@ -426,7 +428,8 @@ void VisualizationWindow::onDistributeEvenly() {
       top = list.front()->GetPosition().Y();
       bottom = list.back()->GetPosition().Y();
       for (size_t i = 0; i != list.size(); ++i) {
-        double r = static_cast<double>(i) / static_cast<double>(list.size() - 1);
+        double r =
+            static_cast<double>(i) / static_cast<double>(list.size() - 1);
         double x = r * (right - left) + left;
         double y = r * (bottom - top) + top;
         list[i]->GetPosition() = theatre::Position(x, y);
@@ -464,7 +467,8 @@ void VisualizationWindow::onGroupFixtures() {
 
 void VisualizationWindow::onDesignFixtures() {
   std::unique_ptr<DesignWizard> &designWizard = _showWindow->GetDesignWizard();
-  designWizard = std::make_unique<DesignWizard>(*_management, *_eventTransmitter);
+  designWizard =
+      std::make_unique<DesignWizard>(*_management, *_eventTransmitter);
   designWizard->SetCurrentPath(_showWindow->SelectedFolder().FullPath());
   designWizard->Select(_selectedFixtures);
   designWizard->present();

@@ -95,7 +95,7 @@ void FixtureListWindow::fillFixturesList() {
       _management.GetTheatre().Fixtures();
   for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = _fixturesListModel->append();
-    const Gtk::TreeModel::Row& row = *iter;
+    const Gtk::TreeModel::Row &row = *iter;
     row[_fixturesListColumns._title] = fixture->Name();
     row[_fixturesListColumns._type] = fixture->Type().Name();
     row[_fixturesListColumns._channels] = getChannelString(*fixture);

@@ -26,9 +26,12 @@ std::vector<Color> PresetCollection::InputColors(size_t /*index*/) const {
       const Color color =
           GetFunctionColor(fixture_control->InputType(preset->InputIndex()));
       FixtureColorSum& sum = fixture_sum[fixture_control];
-      sum.red += color.Red() * value.UInt() / glight::theatre::ControlValue::MaxUInt();
-      sum.green += color.Green() * value.UInt() / glight::theatre::ControlValue::MaxUInt();
-      sum.blue += color.Blue() * value.UInt() / glight::theatre::ControlValue::MaxUInt();
+      sum.red +=
+          color.Red() * value.UInt() / glight::theatre::ControlValue::MaxUInt();
+      sum.green += color.Green() * value.UInt() /
+                   glight::theatre::ControlValue::MaxUInt();
+      sum.blue += color.Blue() * value.UInt() /
+                  glight::theatre::ControlValue::MaxUInt();
       sum.n = fixture_control->GetFixture().Type().ColorScalingValue();
     } else {
       const std::vector<Color> colors =

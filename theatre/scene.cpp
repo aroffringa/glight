@@ -7,11 +7,11 @@ namespace glight::theatre {
 Scene::Scene(Management &management)
     : _management(management),
       _mutex(management.Mutex()),
-      
+
       _nextStartedItem(_items.begin()),
       _currentOffset(0.0),
       _startOffset(0.0),
-      
+
       _hasAudio(false),
       _isPlaying(false) {
   initPlayer();

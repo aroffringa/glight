@@ -86,7 +86,8 @@ void AudioPlayer::open() {
     _decoder.GetSamples(_alsaBuffer, readSize);
 
     if (position > buffer_size)
-      _syncListener->OnSyncUpdate(static_cast<double>(position - buffer_size) / 44.100);
+      _syncListener->OnSyncUpdate(static_cast<double>(position - buffer_size) /
+                                  44.100);
     else
       _syncListener->OnSyncUpdate(0.0);
 
