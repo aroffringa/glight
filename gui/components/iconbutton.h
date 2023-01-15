@@ -13,12 +13,13 @@ class IconButton : public Gtk::DrawingArea {
  public:
   IconButton();
 
-  sigc::signal<void()>& SignalClicked() { return signal_clicked_; }
+  sigc::signal<void()>& SignalChanged() { return signal_changed_; }
   bool GetActive() const { return active_; }
   void SetActive(bool active) {
     if (active != active_) {
       active_ = active;
       Update();
+      signal_changed_();
     }
   }
 
@@ -39,7 +40,7 @@ class IconButton : public Gtk::DrawingArea {
 
   bool active_ = false;
   bool entered_ = false;
-  sigc::signal<void()> signal_clicked_;
+  sigc::signal<void()> signal_changed_;
   std::vector<theatre::Color> colors_;
 };
 

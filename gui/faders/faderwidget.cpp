@@ -76,7 +76,7 @@ FaderWidget::FaderWidget(theatre::Management &management,
   }
 
   _onCheckButton.set_halign(Gtk::ALIGN_CENTER);
-  _onCheckButton.SignalClicked().connect(
+  _onCheckButton.SignalChanged().connect(
       sigc::mem_fun(*this, &FaderWidget::onOnButtonClicked));
   _box.pack_start(_onCheckButton, false, false, 0);
   _onCheckButton.show();
