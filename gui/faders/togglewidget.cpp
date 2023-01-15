@@ -33,7 +33,7 @@ ToggleWidget::ToggleWidget(theatre::Management &management,
   _flashButtonBox.set_valign(Gtk::ALIGN_CENTER);
   _flashButtonBox.show();
 
-  _iconButton.SignalClicked().connect(
+  _iconButton.SignalChanged().connect(
       sigc::mem_fun(*this, &ToggleWidget::onIconClicked));
   _box.pack_start(_iconButton, false, false, 3);
   _iconButton.show();

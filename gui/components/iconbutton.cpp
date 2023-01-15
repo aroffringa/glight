@@ -107,7 +107,7 @@ bool IconButton::OnPress(GdkEventButton* /*event*/) { return true; }
 
 bool IconButton::OnRelease(GdkEventButton* /*event*/) {
   active_ = !active_;
-  signal_clicked_();
+  signal_changed_();
   Update();
   return true;
 }
