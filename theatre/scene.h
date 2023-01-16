@@ -60,9 +60,10 @@ class Scene : public Controllable, private system::SyncListener {
   }
 
   void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS) {
-    _items.erase(find(item));
-    item->SetOffsetInMS(newOffsetInMS);
-    _items.insert(std::pair<double, SceneItem *>(newOffsetInMS, item));
+    ItemMap::node_type node = _items.extract(find(item));
+    node.mapped()->SetOffsetInMS(newOffsetInMS);
+    node.key() = newOffsetInMS;
+    _items.insert(std::move(node));
     resetCurrentOffset();
   }
 
@@ -236,8 +237,9 @@ class Scene : public Controllable, private system::SyncListener {
    * Set of controllables that is used in this scene.
    */
   std::vector<std::pair<const Controllable *, size_t>> controllables_;
-  std::multimap<double, std::unique_ptr<SceneItem>> _items;
-  std::multimap<double, std::unique_ptr<SceneItem>>::iterator _nextStartedItem;
+  using ItemMap = std::multimap<double, std::unique_ptr<SceneItem>>;
+  ItemMap _items;
+  ItemMap::iterator _nextStartedItem;
   double _currentOffset, _startOffset;
   std::unique_ptr<system::FlacDecoder> _decoder;
   std::unique_ptr<system::AudioPlayer> _audioPlayer;

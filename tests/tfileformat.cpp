@@ -90,7 +90,11 @@ void FillManagement(Management &management) {
   effect.AddConnection(fc, 1);
 
   Scene &scene = management.AddScene(true);
-  scene.SetName("Ukrain");
+  scene.SetName("Almost a movie");
+  scene.SetAudioFile("A flac music file.flac");
+  glight::theatre::KeySceneItem *key = scene.AddKeySceneItem(250.0);
+  key->SetDurationInMS(500.0);
+  key->SetLevel(KeySceneLevel::Beat);
 
   BOOST_CHECK(!management.HasCycle());
 }
@@ -221,6 +225,23 @@ void CheckEqual(const Management &a, const Management &b) {
   BOOST_CHECK_EQUAL(readEffect->Connections()[0].second, 0);
   BOOST_CHECK_EQUAL(readEffect->Connections()[1].first, &a_fixture_control);
   BOOST_CHECK_EQUAL(readEffect->Connections()[1].second, 1);
+
+  BOOST_REQUIRE_EQUAL(a.Controllables().size(), b.Controllables().size());
+  for (size_t controllable_index = 0;
+       controllable_index != a.Controllables().size(); ++controllable_index) {
+    const Controllable &controllable_a = *a.Controllables()[controllable_index];
+    const Controllable &controllable_b = *b.Controllables()[controllable_index];
+    BOOST_CHECK_EQUAL(controllable_a.FullPath(), controllable_b.FullPath());
+    BOOST_CHECK_EQUAL(controllable_a.NInputs(), controllable_b.NInputs());
+    BOOST_CHECK_EQUAL(controllable_a.NOutputs(), controllable_b.NOutputs());
+    if (const Scene *scene_a = dynamic_cast<const Scene *>(&controllable_a);
+        scene_a) {
+      const Scene *scene_b = dynamic_cast<const Scene *>(&controllable_b);
+      BOOST_CHECK(scene_b);
+      BOOST_CHECK_EQUAL(scene_a->SceneItems().size(),
+                        scene_b->SceneItems().size());
+    }
+  }
 }
 
 }  // namespace
