@@ -85,12 +85,12 @@ void FlacDecoder::error_callback(FLAC__StreamDecoderErrorStatus /*status*/) {
 }
 
 void FlacDecoder::metadata_callback(const ::FLAC__StreamMetadata *metadata) {
-  if (metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
+  /*if (metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
     // unsigned total_samples = metadata->data.stream_info.total_samples;
-    unsigned sample_rate = metadata->data.stream_info.sample_rate;
-    unsigned channels = metadata->data.stream_info.channels;
-    unsigned bps = metadata->data.stream_info.bits_per_sample;
-  }
+    // unsigned sample_rate = metadata->data.stream_info.sample_rate;
+    // unsigned channels = metadata->data.stream_info.channels;
+    // unsigned bps = metadata->data.stream_info.bits_per_sample;
+  }*/
 }
 
 }  // namespace glight::system

@@ -176,6 +176,7 @@ if(Boost_FOUND)
     tests/toptional_int.cpp
     tests/tpresetcollection.cpp
     tests/tpresetvalue.cpp
+    tests/tscene.cpp
     tests/ttheatre.cpp
     tests/tuniquewithoutordering.cpp
     )

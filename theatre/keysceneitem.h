@@ -7,7 +7,7 @@
 
 namespace glight::theatre {
 
-enum KeySceneLevel { Key, Beat, Highlight, Measure, Section };
+enum class KeySceneLevel { Key, Beat, Highlight, Measure, Section };
 
 inline std::string ToString(KeySceneLevel level) {
   switch (level) {
@@ -43,7 +43,7 @@ inline KeySceneLevel GetKeySceneLevel(const std::string &str) {
  */
 class KeySceneItem final : public SceneItem {
  public:
-  KeySceneItem() : _level(Key) {}
+  KeySceneItem() : _level(KeySceneLevel::Key) {}
   ~KeySceneItem() {}
 
   KeySceneLevel Level() const { return _level; }
@@ -51,16 +51,16 @@ class KeySceneItem final : public SceneItem {
 
   std::string Description() const override {
     switch (_level) {
-      case Key:
+      case KeySceneLevel::Key:
       default:
         return "key";
-      case Beat:
+      case KeySceneLevel::Beat:
         return "beat";
-      case Highlight:
+      case KeySceneLevel::Highlight:
         return "highlight";
-      case Measure:
+      case KeySceneLevel::Measure:
         return "-measure-";
-      case Section:
+      case KeySceneLevel::Section:
         return "-=SECTION=-";
     }
   }
