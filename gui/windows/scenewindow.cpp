@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include <sstream>
 
 #include <gtkmm/filechooserdialog.h>

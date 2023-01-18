@@ -45,8 +45,7 @@ class AudioPlayer : private SyncListener {
   void Play() {
     _decoder.Start();
 
-    AlsaThread alsaThreadFunc(*this);
-    _alsaThread.reset(new std::thread(alsaThreadFunc));
+    _alsaThread.reset(new std::thread([&]() { open(); }));
   }
   void Seek(double offsetInMS) {
     _decoder.Seek(offsetInMS);
@@ -55,13 +54,6 @@ class AudioPlayer : private SyncListener {
   void SetSyncListener(SyncListener &listener) { _syncListener = &listener; }
 
  private:
-  struct AlsaThread {
-   public:
-    AudioPlayer &_player;
-    AlsaThread(AudioPlayer &player) : _player(player) {}
-    void operator()() { _player.open(); }
-  };
-
   unsigned char _alsaBuffer[1024 * 64 * 4];
   snd_pcm_t *_handle;
   unsigned _alsaPeriodSize;
