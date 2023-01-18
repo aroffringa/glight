@@ -2,6 +2,8 @@
 
 #include "management.h"
 
+#include <iostream>
+
 namespace glight::theatre {
 
 Scene::Scene(Management &management)
@@ -27,6 +29,23 @@ void Scene::OnSyncUpdate(double offsetInMS) {
   // We only adjust 5%, to avoid large steps
   _startTimeInMS =
       StartTimeInMS() + (currentTime - StartTimeInMS() - offsetInMS) * 0.05;
+}
+
+void Scene::initPlayer() {
+  if (_hasAudio) {
+    try {
+      _audioPlayer.reset();
+      _decoder.reset();
+      _decoder = std::make_unique<system::FlacDecoder>(_audioFilename);
+      _audioPlayer = std::make_unique<system::AudioPlayer>(*_decoder);
+      _audioPlayer->SetSyncListener(*this);
+      _audioPlayer->Seek(_startOffset);
+    } catch (std::exception &e) {
+      std::cout << "Could not open player for filename " << _audioFilename
+                << '\n';
+      _hasAudio = false;
+    }
+  }
 }
 
 }  // namespace glight::theatre

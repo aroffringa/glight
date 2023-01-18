@@ -159,22 +159,7 @@ class Scene : public Controllable, private system::SyncListener {
     }
   }
 
-  void initPlayer() {
-    if (_hasAudio) {
-      try {
-        _audioPlayer.reset();
-        _decoder.reset();
-        _decoder = std::make_unique<system::FlacDecoder>(_audioFilename);
-        _audioPlayer = std::make_unique<system::AudioPlayer>(*_decoder);
-        _audioPlayer->SetSyncListener(*this);
-        _audioPlayer->Seek(_startOffset);
-      } catch (std::exception &e) {
-        std::cout << "Could not open player for filename " << _audioFilename
-                  << '\n';
-        _hasAudio = false;
-      }
-    }
-  }
+  void initPlayer();
 
   void resetCurrentOffset() {
     _nextStartedItem = _items.begin();
