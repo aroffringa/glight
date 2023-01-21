@@ -21,6 +21,7 @@ class AudioWidget : public Gtk::DrawingArea {
   AudioWidget();
   ~AudioWidget();
 
+  void ClearAudioData();
   void SetAudioData(system::FlacDecoder &decoder);
   void SetPosition(double offsetInMS) {
     _centerPosition = (offsetInMS * 44.100 * 4.0) / _chunkSize;
@@ -31,7 +32,7 @@ class AudioWidget : public Gtk::DrawingArea {
     return _centerPosition * _chunkSize / (44.100 * 4.0);
   }
   void SetScene(theatre::Scene &scene) { _scene = &scene; }
-  void SetNoScene() { _scene = nullptr; }
+  void SetNoScene();
   sigc::signal<void, double> SignalClicked() { return _signalClicked; }
   size_t DataSize() const { return _audioDataMax.size(); }
 

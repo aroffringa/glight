@@ -15,6 +15,8 @@
 
 #include "../eventtransmitter.h"
 
+#include "../dialogs/sceneselect.h"
+
 #include "scenewindow.h"
 
 using glight::theatre::Controllable;
@@ -64,6 +66,8 @@ SceneWindow::SceneWindow(theatre::Management &management,
       _selectedScene(nullptr),
       _sourceValue(nullptr),
       _isUpdating(false) {
+  set_default_size(500, 500);
+
   addTool(new_scene_tb_, "New scene", "Adds a new scene to the current show",
           "document-new", [&]() { NewScene(); });
   addTool(load_scene_tb_, "Load scene", "Load an existing scene",
@@ -492,6 +496,7 @@ void SceneWindow::SetSelectedScene(theatre::Scene &scene) {
   _selectedScene = &scene;
   _sourceValue = _management.GetSourceValue(scene, 0);
   _audioWidget.SetScene(scene);
+  updateAudio();
   set_sensitive(true);
 }
 
@@ -635,15 +640,22 @@ void SceneWindow::updateAudio() {
   if (_selectedScene != nullptr && _selectedScene->AudioFile() != _audioFile) {
     _audioFile = _selectedScene->AudioFile();
     lock.unlock();
-    _audioLabel.set_text(std::string("Audio file: ") + _audioFile);
-    try {
-      system::FlacDecoder decoder(_audioFile);
-      std::cout << "Starting decoder" << std::endl;
-      decoder.Start();
-      _audioWidget.SetAudioData(decoder);
-    } catch (std::exception &e) {
-      std::cout << e.what() << '\n';
-    }
+    std::string short_title;
+    if (_audioFile.size() > 20)
+      short_title = "..." + _audioFile.substr(_audioFile.size() - 17);
+    else
+      short_title = _audioFile;
+    _audioLabel.set_text(std::string("Audio file: ") + short_title);
+    if (_audioFile.empty())
+      _audioWidget.ClearAudioData();
+    else
+      try {
+        system::FlacDecoder decoder(_audioFile);
+        decoder.Start();
+        _audioWidget.SetAudioData(decoder);
+      } catch (std::exception &e) {
+        std::cout << e.what() << '\n';
+      }
   }
 }
 
@@ -669,7 +681,14 @@ bool SceneWindow::NewScene() {
   }
 }
 
-void SceneWindow::LoadScene() {}
+void SceneWindow::LoadScene() {
+  dialogs::SceneSelect dialog(_management, _eventHub);
+  if (dialog.run() == Gtk::RESPONSE_OK) {
+    Scene &scene = *dialog.GetScene();
+    _sourceValue = &_management.AddSourceValue(scene, 0);
+    SetSelectedScene(scene);
+  }
+}
 
 void SceneWindow::updateAudioWidgetKeys() {
   std::lock_guard<std::mutex> lock(_management.Mutex());

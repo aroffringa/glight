@@ -30,6 +30,19 @@ AudioWidget::AudioWidget()
 
 AudioWidget::~AudioWidget() = default;
 
+void AudioWidget::ClearAudioData() {
+  _audioDataMax.clear();
+  _audioDataMin.clear();
+  _audioDataStdDev.clear();
+  _isUpToDate = false;
+  queue_draw();
+}
+
+void AudioWidget::SetNoScene() {
+  _scene = nullptr;
+  ClearAudioData();
+}
+
 void AudioWidget::SetAudioData(system::FlacDecoder &decoder) {
   _audioDataMax.clear();
   _audioDataMin.clear();
