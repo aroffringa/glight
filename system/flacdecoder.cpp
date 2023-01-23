@@ -14,7 +14,12 @@ void FlacDecoder::open() {
 
 void FlacDecoder::close() {
   _lane.write_end();
-  while (!_lane.empty()) _lane.discard(_lane.capacity());
+  // The writer might still be waiting because the lane is full.
+  // Therefore, discard any remaining data to let the writer finish.
+  // Once the writer has written it's last bit and the lane is empty,
+  // the discard function will return 0.
+  while (_lane.discard(_lane.capacity()) != 0)
+    ;  // empty on purpose
   if (_decodeThread.joinable()) _decodeThread.join();
   _isOpen = false;
 }

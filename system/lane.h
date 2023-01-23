@@ -476,8 +476,6 @@ class Lane {
         immediate_write(elements, write_size);
         n -= write_size;
       }
-      while (n != 0)
-        ;
     }
   }
 

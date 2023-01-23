@@ -82,7 +82,6 @@ FixtureListWindow::FixtureListWindow(EventTransmitter &eventHub,
 }
 
 FixtureListWindow::~FixtureListWindow() {
-  _changeManagementConnection.disconnect();
   _updateControllablesConnection.disconnect();
   _globalSelectionConnection.disconnect();
 }

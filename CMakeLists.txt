@@ -82,6 +82,7 @@ set(GUIFILES
   gui/components/propertiesbox.cpp
   gui/components/reorderwidget.cpp
   gui/dialogs/inputselectdialog.cpp
+  gui/dialogs/sceneselect.cpp
   gui/faders/controlwidget.cpp
   gui/faders/faderwidget.cpp
   gui/faders/faderwindow.cpp

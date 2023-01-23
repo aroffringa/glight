@@ -6,7 +6,7 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treemodel.h>
+#include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
@@ -49,8 +49,8 @@ class FixtureListWindow : public Gtk::Window {
   theatre::Management &_management;
   FixtureSelection &_globalSelection;
 
-  sigc::connection _changeManagementConnection, _updateControllablesConnection,
-      _globalSelectionConnection;
+  sigc::connection _updateControllablesConnection;
+  sigc::connection _globalSelectionConnection;
   RecursionLock _recursionLock;
 
   Gtk::TreeView _fixturesListView;

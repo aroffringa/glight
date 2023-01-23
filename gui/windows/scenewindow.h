@@ -10,7 +10,9 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/separatortoolitem.h>
 #include <gtkmm/toolbar.h>
+#include <gtkmm/toolbutton.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
@@ -78,6 +80,14 @@ class SceneWindow : public Gtk::Window {
   }
   Gtk::ToolButton new_scene_tb_;
   Gtk::ToolButton load_scene_tb_;
+  Gtk::SeparatorToolItem separator1_;
+  Gtk::ToolButton rewind_tb_;
+  Gtk::ToolButton pause_tb_;
+  Gtk::ToolButton start_tb_;
+  Gtk::ToolButton seek_backward_tb_;
+  Gtk::ToolButton seek_forward_tb_;
+  Gtk::ToolButton change_audio_tb_;
+
   Gtk::Toolbar _toolbar;
   AudioWidget _audioWidget;
   Gtk::Label _clickIsLabel;
@@ -90,15 +100,11 @@ class SceneWindow : public Gtk::Window {
   Gtk::HBox _hBox;
   Gtk::HBox _audioBox;
   Gtk::Label _audioLabel;
-  Gtk::Button _changeAudioButton;
   Gtk::ScrolledWindow _listScrolledWindow;
   Gtk::VBox _sceneItemBox;
   Gtk::HBox _scalesBox;
   Gtk::VButtonBox _sceneItemUButtonBox;
 
-  Gtk::Button _startButton;
-  Gtk::Button _startSelectionButton;
-  Gtk::Button _stopButton;
   Gtk::Button _key1Button;
   Gtk::Button _createControlItemButton;
   Gtk::Button _setEndTimeButton;
@@ -131,10 +137,13 @@ class SceneWindow : public Gtk::Window {
   void fillControllablesList();
   void addKey(theatre::KeySceneLevel level);
 
-  void onChangeAudioButtonPressed();
-  void onStartButtonPressed();
-  void onStartSelectionButtonPressed();
-  void onStopButtonPressed();
+  void Rewind();
+  void StopPlayback();
+  void StartPlayback();
+  void SeekBackward();
+  void SeekForward();
+  void ChangeAudio();
+
   void onKey1ButtonPressed();
   void onCreateControlItemButtonPressed();
   void onSelectedSceneItemChanged();
@@ -145,7 +154,7 @@ class SceneWindow : public Gtk::Window {
   void onAudioWidgetClicked(double timeInMS);
 
   void updateAudio();
-  void updateAudioWidgetKeys();
+  void UpdateAudioWidgetKeys();
 
   size_t selectedSceneItemCount() const {
     return _sceneItemsListView.get_selection()->count_selected_rows();
