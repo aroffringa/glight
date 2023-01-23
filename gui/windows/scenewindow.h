@@ -87,7 +87,7 @@ class SceneWindow : public Gtk::Window {
   Gtk::ToolButton seek_backward_tb_;
   Gtk::ToolButton seek_forward_tb_;
   Gtk::ToolButton change_audio_tb_;
-  
+
   Gtk::Toolbar _toolbar;
   AudioWidget _audioWidget;
   Gtk::Label _clickIsLabel;
@@ -136,14 +136,14 @@ class SceneWindow : public Gtk::Window {
   void updateSelectedSceneItems();
   void fillControllablesList();
   void addKey(theatre::KeySceneLevel level);
-  
+
   void Rewind();
   void StopPlayback();
   void StartPlayback();
   void SeekBackward();
   void SeekForward();
   void ChangeAudio();
-  
+
   void onKey1ButtonPressed();
   void onCreateControlItemButtonPressed();
   void onSelectedSceneItemChanged();

@@ -68,20 +68,20 @@ SceneWindow::SceneWindow(theatre::Management &management,
           "document-new", [&]() { NewScene(); });
   addTool(load_scene_tb_, "Load scene", "Load an existing scene",
           "document-open", [&]() { LoadScene(); });
-  
+
   _toolbar.append(separator1_);
-  addTool(rewind_tb_, "Rewind", "Skip to start",
-          "media-skip-backward", [&]() { Rewind(); });
+  addTool(rewind_tb_, "Rewind", "Skip to start", "media-skip-backward",
+          [&]() { Rewind(); });
   addTool(start_tb_, "Play", "Start from the current position",
           "media-playback-start", [&]() { StartPlayback(); });
-  addTool(change_audio_tb_, "Change audio", "Select an audio file for this scene",
-          "media-eject", [&]() { ChangeAudio(); });
+  addTool(change_audio_tb_, "Change audio",
+          "Select an audio file for this scene", "media-eject",
+          [&]() { ChangeAudio(); });
   addTool(seek_backward_tb_, "Seek backward", "Jump half a screen backward",
           "media-seek-backward", [&]() { SeekBackward(); });
   addTool(seek_forward_tb_, "Forward", "Jump half a screen forward",
           "media-seek-forward", [&]() { SeekForward(); });
-  
-  
+
   _vBox.pack_start(_toolbar, false, false);
 
   _audioWidget.SignalClicked().connect(
@@ -319,13 +319,12 @@ void SceneWindow::StopPlayback() {
 void SceneWindow::StartPlayback() {
   if (_selectedScene != nullptr) {
     bool start = !_sourceValue->A().Value();
-    if(start) {
+    if (start) {
       start_tb_.set_icon_name("media-playback-pause");
       std::lock_guard<std::mutex> lock(_management.Mutex());
       _selectedScene->SetStartOffset(_audioWidget.Position());
       _sourceValue->A().Set(theatre::ControlValue::MaxUInt(), 0);
-    }
-    else {
+    } else {
       StopPlayback();
     }
   }
@@ -335,7 +334,8 @@ void SceneWindow::SeekBackward() {
   if (_selectedScene != nullptr) {
     StopPlayback();
     std::lock_guard<std::mutex> lock(_management.Mutex());
-    _audioWidget.SetPosition(std::max(3000.0, _audioWidget.Position()) - 3000.0);
+    _audioWidget.SetPosition(std::max(3000.0, _audioWidget.Position()) -
+                             3000.0);
   }
 }
 

@@ -65,9 +65,8 @@ AudioWidget::AudioWidget()
       _height(0),
       _isUpToDate(false),
       _chunkBuffer(kChunkSize) {
-        
   set_size_request(50, 50);
-  
+
   add_events(Gdk::BUTTON_PRESS_MASK);
 
   signal_button_press_event().connect(
