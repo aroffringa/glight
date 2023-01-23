@@ -49,10 +49,6 @@ SceneWindow::SceneWindow(theatre::Management &management,
       _clickIsAddKeyButton("add key"),
       _clickIsAddItemButton("add item"),
       _audioLabel("Audio file: -"),
-      _changeAudioButton("Change"),
-      _startButton(Gtk::Stock::MEDIA_PLAY),
-      _startSelectionButton("Play selection"),
-      _stopButton(Gtk::Stock::MEDIA_STOP),
       _key1Button("Key-1"),
       _createControlItemButton(Gtk::Stock::ADD),
       _setEndTimeButton("Set end time"),
@@ -72,6 +68,20 @@ SceneWindow::SceneWindow(theatre::Management &management,
           "document-new", [&]() { NewScene(); });
   addTool(load_scene_tb_, "Load scene", "Load an existing scene",
           "document-open", [&]() { LoadScene(); });
+  
+  _toolbar.append(separator1_);
+  addTool(rewind_tb_, "Rewind", "Skip to start",
+          "media-skip-backward", [&]() { Rewind(); });
+  addTool(start_tb_, "Play", "Start from the current position",
+          "media-playback-start", [&]() { StartPlayback(); });
+  addTool(change_audio_tb_, "Change audio", "Select an audio file for this scene",
+          "media-eject", [&]() { ChangeAudio(); });
+  addTool(seek_backward_tb_, "Seek backward", "Jump half a screen backward",
+          "media-seek-backward", [&]() { SeekBackward(); });
+  addTool(seek_forward_tb_, "Forward", "Jump half a screen forward",
+          "media-seek-forward", [&]() { SeekForward(); });
+  
+  
   _vBox.pack_start(_toolbar, false, false);
 
   _audioWidget.SignalClicked().connect(
@@ -98,27 +108,11 @@ SceneWindow::SceneWindow(theatre::Management &management,
 
   _audioBox.pack_start(_audioLabel);
 
-  _changeAudioButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneWindow::onChangeAudioButtonPressed));
-  _audioBox.pack_start(_changeAudioButton, false, false, 5);
-
   _vBox.pack_start(_audioBox, false, false);
 
   createSceneItemsList();
 
   createControllablesList1();
-
-  _startButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneWindow::onStartButtonPressed));
-  _sceneItemUButtonBox.pack_start(_startButton);
-
-  _startSelectionButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneWindow::onStartSelectionButtonPressed));
-  _sceneItemUButtonBox.pack_start(_startSelectionButton);
-
-  _stopButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneWindow::onStopButtonPressed));
-  _sceneItemUButtonBox.pack_start(_stopButton);
 
   _key1Button.signal_clicked().connect(
       sigc::mem_fun(*this, &SceneWindow::onKey1ButtonPressed));
@@ -189,7 +183,7 @@ void SceneWindow::Update() {
   fillControllablesList();
   fillSceneItemList();
   updateAudio();
-  updateAudioWidgetKeys();
+  UpdateAudioWidgetKeys();
 }
 
 void SceneWindow::createSceneItemsList() {
@@ -308,26 +302,48 @@ void SceneWindow::fillControllablesList() {
   }
 }
 
-void SceneWindow::onStartButtonPressed() {
+void SceneWindow::Rewind() {
   if (_selectedScene != nullptr) {
+    StopPlayback();
     std::lock_guard<std::mutex> lock(_management.Mutex());
-    _selectedScene->SetStartOffset(0.0);
-    _sourceValue->A().Set(theatre::ControlValue::MaxUInt(), 0);
+    _audioWidget.SetPosition(0);
   }
 }
 
-void SceneWindow::onStartSelectionButtonPressed() {
+void SceneWindow::StopPlayback() {
+  start_tb_.set_icon_name("media-playback-start");
+  std::lock_guard<std::mutex> lock(_management.Mutex());
+  _sourceValue->A().Set(0, 0);
+}
+
+void SceneWindow::StartPlayback() {
   if (_selectedScene != nullptr) {
-    std::lock_guard<std::mutex> lock(_management.Mutex());
-    _selectedScene->SetStartOffset(_audioWidget.Position());
-    _sourceValue->A().Set(theatre::ControlValue::MaxUInt(), 0);
+    bool start = !_sourceValue->A().Value();
+    if(start) {
+      start_tb_.set_icon_name("media-playback-pause");
+      std::lock_guard<std::mutex> lock(_management.Mutex());
+      _selectedScene->SetStartOffset(_audioWidget.Position());
+      _sourceValue->A().Set(theatre::ControlValue::MaxUInt(), 0);
+    }
+    else {
+      StopPlayback();
+    }
   }
 }
 
-void SceneWindow::onStopButtonPressed() {
+void SceneWindow::SeekBackward() {
   if (_selectedScene != nullptr) {
+    StopPlayback();
     std::lock_guard<std::mutex> lock(_management.Mutex());
-    _sourceValue->A().Set(0, 0);
+    _audioWidget.SetPosition(std::max(3000.0, _audioWidget.Position()) - 3000.0);
+  }
+}
+
+void SceneWindow::SeekForward() {
+  if (_selectedScene != nullptr) {
+    StopPlayback();
+    std::lock_guard<std::mutex> lock(_management.Mutex());
+    _audioWidget.SetPosition(_audioWidget.Position() + 3000.0);
   }
 }
 
@@ -339,7 +355,7 @@ void SceneWindow::addKey(theatre::KeySceneLevel level) {
   lock.unlock();
 
   fillSceneItemList();
-  updateAudioWidgetKeys();
+  UpdateAudioWidgetKeys();
 }
 
 void SceneWindow::onKey1ButtonPressed() { addKey(theatre::KeySceneLevel::Key); }
@@ -378,7 +394,7 @@ void SceneWindow::onCreateControlItemButtonPressed() {
     lock.unlock();
 
     fillSceneItemList();
-    updateAudioWidgetKeys();
+    UpdateAudioWidgetKeys();
     _isUpdating = false;
     onSelectedSceneItemChanged();
   }
@@ -445,7 +461,7 @@ void SceneWindow::onSetEndTimeButtonPressed() {
   }
   lock.unlock();
 
-  updateAudioWidgetKeys();
+  UpdateAudioWidgetKeys();
   updateSelectedSceneItems();
 }
 
@@ -462,7 +478,7 @@ void SceneWindow::onRemoveButtonPressed() {
   }
   lock.unlock();
   fillSceneItemList();
-  updateAudioWidgetKeys();
+  UpdateAudioWidgetKeys();
   _isUpdating = false;
   onSelectedSceneItemChanged();
 }
@@ -471,7 +487,7 @@ bool SceneWindow::HandleKeyDown(char key) {
   using theatre::KeySceneLevel;
   switch (key) {
     case '=':
-      onStartButtonPressed();
+      StartPlayback();
       return true;
     case '1':
       addKey(KeySceneLevel::Section);
@@ -495,16 +511,17 @@ bool SceneWindow::HandleKeyDown(char key) {
 void SceneWindow::SetSelectedScene(theatre::Scene &scene) {
   _selectedScene = &scene;
   _sourceValue = _management.GetSourceValue(scene, 0);
-  _audioWidget.SetScene(scene);
   updateAudio();
+  UpdateAudioWidgetKeys();
   set_sensitive(true);
 }
 
 void SceneWindow::SetNoSelectedScene() {
   set_sensitive(false);
-  _audioWidget.SetNoScene();
   _selectedScene = nullptr;
   _sourceValue = nullptr;
+  _audioWidget.SetNoScene();
+  updateAudio();
 }
 
 void SceneWindow::onScalesChanged() {
@@ -531,7 +548,7 @@ void SceneWindow::onScalesChanged() {
   }
 }
 
-void SceneWindow::onChangeAudioButtonPressed() {
+void SceneWindow::ChangeAudio() {
   if (_selectedScene) {
     Gtk::FileChooserDialog dialog("Open audio file",
                                   Gtk::FILE_CHOOSER_ACTION_OPEN);
@@ -580,7 +597,7 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     lock.unlock();
     _isUpdating = false;
     updateSelectedSceneItems();
-    updateAudioWidgetKeys();
+    UpdateAudioWidgetKeys();
   }
 
   else if (_clickIsSetEndButton.get_active()) {
@@ -598,7 +615,7 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     lock.unlock();
     _isUpdating = false;
     updateSelectedSceneItems();
-    updateAudioWidgetKeys();
+    UpdateAudioWidgetKeys();
   }
 
   else if (_clickIsAddKeyButton.get_active()) {
@@ -610,7 +627,7 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     lock.unlock();
 
     fillSceneItemList();
-    updateAudioWidgetKeys();
+    UpdateAudioWidgetKeys();
     _isUpdating = false;
     onSelectedSceneItemChanged();
   } else if (_clickIsAddItemButton.get_active()) {
@@ -627,7 +644,7 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
       lock.unlock();
 
       fillSceneItemList();
-      updateAudioWidgetKeys();
+      UpdateAudioWidgetKeys();
       _isUpdating = false;
       onSelectedSceneItemChanged();
     }
@@ -683,16 +700,20 @@ bool SceneWindow::NewScene() {
 
 void SceneWindow::LoadScene() {
   dialogs::SceneSelect dialog(_management, _eventHub);
+  dialog.SetSelection(*_selectedScene);
   if (dialog.run() == Gtk::RESPONSE_OK) {
-    Scene &scene = *dialog.GetScene();
+    Scene &scene = *dialog.GetSelection();
     _sourceValue = &_management.AddSourceValue(scene, 0);
     SetSelectedScene(scene);
   }
 }
 
-void SceneWindow::updateAudioWidgetKeys() {
+void SceneWindow::UpdateAudioWidgetKeys() {
   std::lock_guard<std::mutex> lock(_management.Mutex());
-  _audioWidget.UpdateKeys();
+  if (_selectedScene)
+    _audioWidget.SetScene(*_selectedScene);
+  else
+    _audioWidget.SetNoScene();
 }
 
 }  // namespace glight::gui
