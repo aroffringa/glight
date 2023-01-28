@@ -41,15 +41,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
                          ShowWindow &parentWindow, EventTransmitter &eventHub)
     : _management(management),
       _eventHub(eventHub),
-
-      _clickIsLabel("Click is: "),
-      _clickIsSelectButton("select"),
-      _clickIsSetStartButton("set start"),
-      _clickIsSetEndButton("set end"),
-      _clickIsAddKeyButton("add key"),
-      _clickIsAddItemButton("add item"),
       _audioLabel("Audio file: -"),
-      _key1Button("Key-1"),
       _createControlItemButton(Gtk::Stock::ADD),
       _setEndTimeButton("Set end time"),
       _removeButton(Gtk::Stock::REMOVE),
@@ -74,13 +66,26 @@ SceneWindow::SceneWindow(theatre::Management &management,
           [&]() { Rewind(); });
   addTool(start_tb_, "Play", "Start from the current position",
           "media-playback-start", [&]() { StartPlayback(); });
-  addTool(change_audio_tb_, "Change audio",
-          "Select an audio file for this scene", "media-eject",
-          [&]() { ChangeAudio(); });
   addTool(seek_backward_tb_, "Seek backward", "Jump half a screen backward",
           "media-seek-backward", [&]() { SeekBackward(); });
   addTool(seek_forward_tb_, "Forward", "Jump half a screen forward",
           "media-seek-forward", [&]() { SeekForward(); });
+  addTool(change_audio_tb_, "Change audio",
+          "Select an audio file for this scene", "media-eject",
+          [&]() { ChangeAudio(); });
+  _toolbar.append(separator2_);
+  
+  Gtk::RadioToolButton::Group group;
+  addTool(move_cursor_tb_, "Move cursor", "Clicking the audio will move the cursor", "start-here", [&]() { });
+  move_cursor_tb_.set_group(group);
+  addTool(set_start_tb_, "Set start time", "Clicking the audio will change the start time of the selection", "go-first", [&]() { });
+  set_start_tb_.set_group(group);
+  addTool(set_end_tb_, "Set end time", "Clicking the audio will change the end time of the selection", "go-last", [&]() { });
+  set_end_tb_.set_group(group);
+  addTool(add_key_tb_, "Add key", "Clicking the audio will add a key", "starred", [&]() { });
+  add_key_tb_.set_group(group);
+  addTool(add_item_tb_, "Add item", "Clicking the audio will add an item", "list-add", [&]() { });
+  add_item_tb_.set_group(group);
 
   _vBox.pack_start(_toolbar, false, false);
 
@@ -88,23 +93,8 @@ SceneWindow::SceneWindow(theatre::Management &management,
       sigc::mem_fun(*this, &SceneWindow::onAudioWidgetClicked));
   _vBox.pack_start(_audioWidget);
 
-  _audioBox.pack_start(_clickIsLabel, false, false);
 
   Gtk::RadioButtonGroup clickIsGroup;
-  _clickIsSelectButton.set_group(clickIsGroup);
-  _audioBox.pack_start(_clickIsSelectButton, false, false);
-
-  _clickIsSetStartButton.set_group(clickIsGroup);
-  _audioBox.pack_start(_clickIsSetStartButton, false, false);
-
-  _clickIsSetEndButton.set_group(clickIsGroup);
-  _audioBox.pack_start(_clickIsSetEndButton, false, false);
-
-  _clickIsAddKeyButton.set_group(clickIsGroup);
-  _audioBox.pack_start(_clickIsAddKeyButton, false, false);
-
-  _clickIsAddItemButton.set_group(clickIsGroup);
-  _audioBox.pack_start(_clickIsAddItemButton, false, false);
 
   _audioBox.pack_start(_audioLabel);
 
@@ -113,10 +103,6 @@ SceneWindow::SceneWindow(theatre::Management &management,
   createSceneItemsList();
 
   createControllablesList1();
-
-  _key1Button.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneWindow::onKey1ButtonPressed));
-  _sceneItemUButtonBox.pack_start(_key1Button);
 
   _createControlItemButton.signal_clicked().connect(
       sigc::mem_fun(*this, &SceneWindow::onCreateControlItemButtonPressed));
@@ -358,8 +344,6 @@ void SceneWindow::addKey(theatre::KeySceneLevel level) {
   UpdateAudioWidgetKeys();
 }
 
-void SceneWindow::onKey1ButtonPressed() { addKey(theatre::KeySceneLevel::Key); }
-
 void SceneWindow::onCreateControlItemButtonPressed() {
   Gtk::TreeModel::iterator activeControllable =
       _controllables1ComboBox.get_active();
@@ -582,7 +566,7 @@ bool SceneWindow::onTimeout() {
 }
 
 void SceneWindow::onAudioWidgetClicked(double timeInMS) {
-  if (_clickIsSetStartButton.get_active()) {
+  if (set_start_tb_.get_active()) {
     _isUpdating = true;
     Glib::RefPtr<Gtk::TreeSelection> selection =
         _sceneItemsListView.get_selection();
@@ -600,7 +584,7 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     UpdateAudioWidgetKeys();
   }
 
-  else if (_clickIsSetEndButton.get_active()) {
+  else if (set_end_tb_.get_active()) {
     _isUpdating = true;
     Glib::RefPtr<Gtk::TreeSelection> selection =
         _sceneItemsListView.get_selection();
@@ -618,7 +602,7 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     UpdateAudioWidgetKeys();
   }
 
-  else if (_clickIsAddKeyButton.get_active()) {
+  else if (add_key_tb_.get_active()) {
     _isUpdating = true;
 
     std::unique_lock<std::mutex> lock(_management.Mutex());
@@ -630,7 +614,7 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     UpdateAudioWidgetKeys();
     _isUpdating = false;
     onSelectedSceneItemChanged();
-  } else if (_clickIsAddItemButton.get_active()) {
+  } else if (add_item_tb_.get_active()) {
     Gtk::TreeModel::iterator activeControllable =
         _controllables1ComboBox.get_active();
     if (activeControllable) {

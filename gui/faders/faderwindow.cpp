@@ -495,7 +495,9 @@ void FaderWindow::loadState() {
   _upperControls.clear();
   _lowerControls.clear();
 
-  if (_miDualLayout.get_active()) {
+  // Show master cross fader?
+  const bool show_master_fader = _miDualLayout.get_active() || _miSecondaryLayout.get_active();
+  if (show_master_fader) {
     _activateCrossFaderButton.emplace();
     _activateCrossFaderButton->set_image_from_icon_name("media-playback-start");
     _activateCrossFaderButton->set_tooltip_text(
@@ -618,12 +620,12 @@ void FaderWindow::onRunCrossFader() {
 }
 
 void FaderWindow::onAssignTopToBottom() {
-  const size_t n = std::min(_upperControls.size(), _lowerControls.size());
-  for (size_t i = 0; i != n; ++i) {
-    glight::theatre::SourceValue *value = _upperControls[i]->GetSourceValue();
+  std::vector<std::unique_ptr<glight::gui::ControlWidget>>& controls = _lowerControls.empty() ? _upperControls : _lowerControls;
+  for (size_t i = 0; i != controls.size(); ++i) {
+    glight::theatre::SourceValue *value = controls[i]->GetSourceValue();
     if (value) {
       value->B() = value->A();
-      _lowerControls[i]->MoveSlider();
+      controls[i]->MoveSlider();
     }
   }
 }

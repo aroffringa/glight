@@ -8,6 +8,7 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/radiobutton.h>
+#include <gtkmm/radiotoolbutton.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/separatortoolitem.h>
@@ -87,12 +88,15 @@ class SceneWindow : public Gtk::Window {
   Gtk::ToolButton seek_backward_tb_;
   Gtk::ToolButton seek_forward_tb_;
   Gtk::ToolButton change_audio_tb_;
+  Gtk::SeparatorToolItem separator2_;
+  Gtk::RadioToolButton move_cursor_tb_;
+  Gtk::RadioToolButton set_start_tb_;
+  Gtk::RadioToolButton set_end_tb_;
+  Gtk::RadioToolButton add_key_tb_;
+  Gtk::RadioToolButton add_item_tb_;
 
   Gtk::Toolbar _toolbar;
   AudioWidget _audioWidget;
-  Gtk::Label _clickIsLabel;
-  Gtk::RadioButton _clickIsSelectButton, _clickIsSetStartButton,
-      _clickIsSetEndButton, _clickIsAddKeyButton, _clickIsAddItemButton;
   Gtk::TreeView _sceneItemsListView;
   Gtk::ComboBox _controllables1ComboBox, _controllables2ComboBox;
   Glib::RefPtr<Gtk::ListStore> _sceneItemsListModel, _controllablesListModel;
@@ -105,7 +109,6 @@ class SceneWindow : public Gtk::Window {
   Gtk::HBox _scalesBox;
   Gtk::VButtonBox _sceneItemUButtonBox;
 
-  Gtk::Button _key1Button;
   Gtk::Button _createControlItemButton;
   Gtk::Button _setEndTimeButton;
   Gtk::Button _removeButton;
@@ -144,7 +147,6 @@ class SceneWindow : public Gtk::Window {
   void SeekForward();
   void ChangeAudio();
 
-  void onKey1ButtonPressed();
   void onCreateControlItemButtonPressed();
   void onSelectedSceneItemChanged();
   void onSetEndTimeButtonPressed();
