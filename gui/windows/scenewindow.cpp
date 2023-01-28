@@ -74,17 +74,24 @@ SceneWindow::SceneWindow(theatre::Management &management,
           "Select an audio file for this scene", "media-eject",
           [&]() { ChangeAudio(); });
   _toolbar.append(separator2_);
-  
+
   Gtk::RadioToolButton::Group group;
-  addTool(move_cursor_tb_, "Move cursor", "Clicking the audio will move the cursor", "start-here", [&]() { });
+  addTool(move_cursor_tb_, "Move cursor",
+          "Clicking the audio will move the cursor", "start-here", [&]() {});
   move_cursor_tb_.set_group(group);
-  addTool(set_start_tb_, "Set start time", "Clicking the audio will change the start time of the selection", "go-first", [&]() { });
+  addTool(set_start_tb_, "Set start time",
+          "Clicking the audio will change the start time of the selection",
+          "go-first", [&]() {});
   set_start_tb_.set_group(group);
-  addTool(set_end_tb_, "Set end time", "Clicking the audio will change the end time of the selection", "go-last", [&]() { });
+  addTool(set_end_tb_, "Set end time",
+          "Clicking the audio will change the end time of the selection",
+          "go-last", [&]() {});
   set_end_tb_.set_group(group);
-  addTool(add_key_tb_, "Add key", "Clicking the audio will add a key", "starred", [&]() { });
+  addTool(add_key_tb_, "Add key", "Clicking the audio will add a key",
+          "starred", [&]() {});
   add_key_tb_.set_group(group);
-  addTool(add_item_tb_, "Add item", "Clicking the audio will add an item", "list-add", [&]() { });
+  addTool(add_item_tb_, "Add item", "Clicking the audio will add an item",
+          "list-add", [&]() {});
   add_item_tb_.set_group(group);
 
   _vBox.pack_start(_toolbar, false, false);
@@ -92,7 +99,6 @@ SceneWindow::SceneWindow(theatre::Management &management,
   _audioWidget.SignalClicked().connect(
       sigc::mem_fun(*this, &SceneWindow::onAudioWidgetClicked));
   _vBox.pack_start(_audioWidget);
-
 
   Gtk::RadioButtonGroup clickIsGroup;
 
