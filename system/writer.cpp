@@ -404,6 +404,10 @@ void writeSceneItem(WriteState &state, const SceneItem &item) {
 }
 
 void writeScene(WriteState &state, const Scene &scene) {
+  for (size_t i = 0; i != scene.NOutputs(); ++i) {
+    writeControllable(state, *scene.Output(i).first);
+  }
+
   state.writer.StartObject();
 
   state.writer.String("type", "scene");
