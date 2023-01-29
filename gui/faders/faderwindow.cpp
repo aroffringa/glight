@@ -143,6 +143,77 @@ void FaderWindow::LoadState(FaderSetState *state) {
   loadState();
 }
 
+void FaderWindow::loadState() {
+  _miSolo.set_active(_state->isSolo);
+  switch (_state->mode) {
+    case FaderSetMode::Primary:
+      _miPrimaryLayout.set_active(true);
+      break;
+    case FaderSetMode::Secondary:
+      _miSecondaryLayout.set_active(true);
+      break;
+    case FaderSetMode::Dual:
+      _miDualLayout.set_active(true);
+      break;
+  }
+  _miFadeInOption[_state->fadeInSpeed].set_active(true);
+  _miFadeOutOption[_state->fadeOutSpeed].set_active(true);
+  _crossFader.reset();
+  _immediateCrossFadeButton.reset();
+  _activateCrossFaderButton.reset();
+  _upperColumns.clear();
+  _lowerColumns.clear();
+  _upperControls.clear();
+  _lowerControls.clear();
+
+  // Show master cross fader?
+  const bool show_master_fader =
+      _miDualLayout.get_active() || _miSecondaryLayout.get_active();
+  if (show_master_fader) {
+    _activateCrossFaderButton.emplace();
+    _activateCrossFaderButton->set_image_from_icon_name("media-playback-start");
+    _activateCrossFaderButton->set_tooltip_text(
+        "Activate fading of the cross-fader to smoothly make the secondary "
+        "setting the primary setting");
+    _activateCrossFaderButton->signal_clicked().connect(
+        [&]() { onStartCrossFader(); });
+    _leftBox.pack_start(*_activateCrossFaderButton, false, false);
+    _activateCrossFaderButton->show();
+
+    _immediateCrossFadeButton.emplace();
+    _immediateCrossFadeButton->set_image_from_icon_name("go-jump");
+    _immediateCrossFadeButton->set_tooltip_text(
+        "Directly switch the cross-fade");
+    _immediateCrossFadeButton->signal_clicked().connect(
+        [&]() { CrossFadeImmediately(); });
+    _leftBox.pack_start(*_immediateCrossFadeButton, false, false);
+    _immediateCrossFadeButton->show();
+
+    _crossFader.emplace(0,
+                        ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
+                        (ControlValue::MaxUInt() + 1) / 100);
+    _leftBox.pack_start(*_crossFader, true, true);
+    _crossFader->set_value(0);
+    _crossFader->set_draw_value(false);
+    _crossFader->set_has_origin(false);
+    _crossFader->set_vexpand(true);
+    _crossFader->signal_value_changed().connect(
+        sigc::mem_fun(*this, &FaderWindow::onCrossFaderChange));
+    _crossFader->show();
+  }
+  for (FaderState &state : _state->faders) {
+    addControlInLayout(state.IsToggleButton(), state.NewToggleButtonColumn());
+  }
+
+  resize(_state->width, _state->height);
+
+  for (size_t i = 0; i != _state->faders.size(); ++i) {
+    _upperControls[i]->Assign(_state->faders[i].GetSourceValue(), true);
+    if (_miDualLayout.get_active())
+      _lowerControls[i]->Assign(_state->faders[i].GetSourceValue(), true);
+  }
+}
+
 void FaderWindow::initializeWidgets() {
   set_title("Glight - faders");
 
@@ -473,75 +544,6 @@ void FaderWindow::onSetNameClicked() {
   }
 }
 
-void FaderWindow::loadState() {
-  _miSolo.set_active(_state->isSolo);
-  switch (_state->mode) {
-    case FaderSetMode::Primary:
-      _miPrimaryLayout.set_active(true);
-      break;
-    case FaderSetMode::Secondary:
-      _miSecondaryLayout.set_active(true);
-      break;
-    case FaderSetMode::Dual:
-      _miDualLayout.set_active(true);
-      break;
-  }
-  _miFadeInOption[_state->fadeInSpeed].set_active(true);
-  _miFadeOutOption[_state->fadeOutSpeed].set_active(true);
-  _crossFader.reset();
-  _activateCrossFaderButton.reset();
-  _upperColumns.clear();
-  _lowerColumns.clear();
-  _upperControls.clear();
-  _lowerControls.clear();
-
-  // Show master cross fader?
-  const bool show_master_fader =
-      _miDualLayout.get_active() || _miSecondaryLayout.get_active();
-  if (show_master_fader) {
-    _activateCrossFaderButton.emplace();
-    _activateCrossFaderButton->set_image_from_icon_name("media-playback-start");
-    _activateCrossFaderButton->set_tooltip_text(
-        "Activate fading of the cross-fader to swap the top and bottom faders");
-    _activateCrossFaderButton->signal_clicked().connect(
-        [&]() { onRunCrossFader(); });
-    _leftBox.pack_start(*_activateCrossFaderButton, false, false);
-    _activateCrossFaderButton->show();
-
-    _crossFader.emplace(0,
-                        ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
-                        (ControlValue::MaxUInt() + 1) / 100);
-    _leftBox.pack_start(*_crossFader, true, true);
-    _crossFader->set_value(0);
-    _crossFader->set_draw_value(false);
-    _crossFader->set_has_origin(false);
-    _crossFader->set_vexpand(true);
-    _crossFader->signal_value_changed().connect(
-        sigc::mem_fun(*this, &FaderWindow::onCrossFaderChange));
-    _crossFader->show();
-
-    _assignTopToBottom.emplace();
-    _assignTopToBottom->set_image_from_icon_name("go-jump");
-    _assignTopToBottom->set_tooltip_text(
-        "Assign values from top faders to bottom faders");
-    _assignTopToBottom->signal_clicked().connect(
-        [&]() { onAssignTopToBottom(); });
-    _leftBox.pack_start(*_assignTopToBottom, false, false);
-    _assignTopToBottom->show();
-  }
-  for (FaderState &state : _state->faders) {
-    addControlInLayout(state.IsToggleButton(), state.NewToggleButtonColumn());
-  }
-
-  resize(_state->width, _state->height);
-
-  for (size_t i = 0; i != _state->faders.size(); ++i) {
-    _upperControls[i]->Assign(_state->faders[i].GetSourceValue(), true);
-    if (_miDualLayout.get_active())
-      _lowerControls[i]->Assign(_state->faders[i].GetSourceValue(), true);
-  }
-}
-
 void FaderWindow::onChangeDownSpeed() {
   _state->fadeOutSpeed = getFadeOutSpeed();
   const double speed = MapSliderToSpeed(_state->fadeOutSpeed);
@@ -570,7 +572,7 @@ size_t FaderWindow::getFadeOutSpeed() const {
   return 0;
 }
 
-void FaderWindow::ReloadValues() {
+void FaderWindow::UpdateValues() {
   theatre::SourceValue *assigned_source_value = nullptr;
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
     cw->MoveSlider();
@@ -582,8 +584,14 @@ void FaderWindow::ReloadValues() {
     cw->MoveSlider();
   }
   if (_crossFader && assigned_source_value) {
+    const unsigned x_value = assigned_source_value->CrossFader().Value().UInt();
+    if (_isCrossFaderStarted) {
+      if (x_value == 0.0) {
+        AssignTopToBottom();
+      }
+    }
     RecursionLock::Token token(_recursionLock);
-    _crossFader->set_value(assigned_source_value->CrossFader().Value().UInt());
+    _crossFader->set_value(x_value);
   }
 }
 
@@ -610,7 +618,7 @@ void FaderWindow::FlipCrossFader() {
   }
 }
 
-void FaderWindow::onRunCrossFader() {
+void FaderWindow::onStartCrossFader() {
   if (_crossFader->get_value() < ControlValue::MaxUInt() / 2) FlipCrossFader();
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
     glight::theatre::SourceValue *source = cw->GetSourceValue();
@@ -618,9 +626,10 @@ void FaderWindow::onRunCrossFader() {
       source->CrossFader().Set(0.0, MapSliderToSpeed(getFadeInSpeed()));
     }
   }
+  _isCrossFaderStarted = true;
 }
 
-void FaderWindow::onAssignTopToBottom() {
+void FaderWindow::AssignTopToBottom() {
   std::vector<std::unique_ptr<glight::gui::ControlWidget>> &controls =
       _lowerControls.empty() ? _upperControls : _lowerControls;
   for (size_t i = 0; i != controls.size(); ++i) {
@@ -630,6 +639,18 @@ void FaderWindow::onAssignTopToBottom() {
       controls[i]->MoveSlider();
     }
   }
+  _isCrossFaderStarted = false;
+}
+
+void FaderWindow::CrossFadeImmediately() {
+  if (_crossFader->get_value() < ControlValue::MaxUInt() / 2) FlipCrossFader();
+  for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
+    glight::theatre::SourceValue *source = cw->GetSourceValue();
+    if (source) {
+      source->CrossFader().Set(0.0);
+    }
+  }
+  AssignTopToBottom();
 }
 
 void FaderWindow::onLayoutChanged() {

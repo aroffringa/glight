@@ -43,6 +43,12 @@ class SingleSourceValue {
     }
   }
 
+  /**
+   * Starts a fade towards the given target value. A fade
+   * of zero can be used to immediately move to the target
+   * value, but @ref Set(unsigned) can also be used in that
+   * case.
+   */
   void Set(unsigned target_value, double fade_speed) {
     target_value_ = target_value;
     fade_speed_ = fade_speed;
@@ -51,6 +57,22 @@ class SingleSourceValue {
     }
   }
 
+  /**
+   * Set the current and target value directly (without
+   * fade) to the given value and resets the fade. This
+   * is equivalent with Set(value, 0.0).
+   */
+  void Set(unsigned immediate_target_value) {
+    target_value_ = immediate_target_value;
+    fade_speed_ = 0.0;
+    value_ = ControlValue(immediate_target_value);
+  }
+
+  /**
+   * Sets the current value of the source value. Note that the value
+   * will fade towards the target value, so this should not be used
+   * when the source value needs to be perminantly changed.
+   */
   void SetValue(const ControlValue& value) { value_ = value; }
   const ControlValue& Value() const { return value_; }
 

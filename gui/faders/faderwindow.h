@@ -45,7 +45,7 @@ class FaderWindow : public Gtk::Window {
   /**
    * Set all sliders to the preset values
    */
-  void ReloadValues();
+  void UpdateValues();
 
   bool HandleKeyDown(char key);
   bool HandleKeyUp(char key);
@@ -86,13 +86,14 @@ class FaderWindow : public Gtk::Window {
   void onChangeUpSpeed();
   void onChangeDownSpeed();
   bool onTimeout() {
-    ReloadValues();
+    UpdateValues();
     return true;
   }
   void onCrossFaderChange();
-  void onRunCrossFader();
-  void onAssignTopToBottom();
+  void onStartCrossFader();
+  void AssignTopToBottom();
   void FlipCrossFader();
+  void CrossFadeImmediately();
 
   void addControl(bool isToggle, bool newToggleColumn, bool isPrimary);
   void addControlInLayout(bool isToggle, bool newToggleColumn) {
@@ -140,11 +141,11 @@ class FaderWindow : public Gtk::Window {
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
-
+  bool _isCrossFaderStarted = false;
   // In dual mode
+  std::optional<Gtk::Button> _immediateCrossFadeButton;
   std::optional<Gtk::Button> _activateCrossFaderButton;
   std::optional<Gtk::VScale> _crossFader;
-  std::optional<Gtk::Button> _assignTopToBottom;
 };
 
 }  // namespace glight::gui
