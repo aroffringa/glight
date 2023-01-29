@@ -132,7 +132,8 @@ void AudioWidget::ResizeBuffer() {
 
 void AudioWidget::DrawBuffer(Glib::RefPtr<Gdk::Pixbuf> &buffer) {
   _renderStartPosition = std::max(_cursorPosition - _width / 2, 0);
-  const int renderWidth = std::max(0, std::min(_width, static_cast<int>(DataSize()) - _renderStartPosition));
+  const int renderWidth = std::max(
+      0, std::min(_width, static_cast<int>(DataSize()) - _renderStartPosition));
 
   if (buffer) {
     guint8 *data = buffer->get_pixels();
@@ -166,7 +167,7 @@ void AudioWidget::DrawBuffer(Glib::RefPtr<Gdk::Pixbuf> &buffer) {
     }
     // Set any remaining part to white
     for (int y = 0; y < _height; ++y) {
-      guint8 *data_ptr = data + renderWidth*3 + rowStride * y;
+      guint8 *data_ptr = data + renderWidth * 3 + rowStride * y;
       for (int x = renderWidth; x != _width; ++x) {
         setColor(data_ptr, 255, 255, 255);
         data_ptr += 3;
