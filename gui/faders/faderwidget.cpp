@@ -29,15 +29,24 @@ FaderWidget::FaderWidget(theatre::Management &management,
     _overlay.add_overlay(_fadeUpButton);
   }
 
+  auto right_press = [&](GdkEventButton *event) {
+    return HandleRightPress(event);
+  };
+  auto right_release = [&](GdkEventButton *event) {
+    return HandleRightRelease(event);
+  };
+
   _scale.set_inverted(true);
   _scale.set_draw_value(false);
   _scale.set_vexpand(true);
   _scale.signal_value_changed().connect(
       sigc::mem_fun(*this, &FaderWidget::onScaleChange));
+  _scale.signal_button_press_event().connect(right_press, false);
   _overlay.add(_scale);
   _scale.show();
 
-  _mouseInBox.set_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
+  _mouseInBox.set_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
+                         Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
   _mouseInBox.signal_enter_notify_event().connect(
       [&](GdkEventCrossing *) {
         ShowFadeButtons(true);
@@ -50,6 +59,8 @@ FaderWidget::FaderWidget(theatre::Management &management,
         return false;
       },
       false);
+  _mouseInBox.signal_button_press_event().connect(right_press, false);
+  _mouseInBox.signal_button_release_event().connect(right_release, false);
 
   _box.pack_start(_mouseInBox, true, true, 0);
   _mouseInBox.show();
@@ -75,28 +86,54 @@ FaderWidget::FaderWidget(theatre::Management &management,
     _flashButton.show();
   }
 
-  _onCheckButton.set_halign(Gtk::ALIGN_CENTER);
-  _onCheckButton.SignalChanged().connect(
+  _checkButton.set_halign(Gtk::ALIGN_CENTER);
+  _checkButton.SignalChanged().connect(
       sigc::mem_fun(*this, &FaderWidget::onOnButtonClicked));
-  _box.pack_start(_onCheckButton, false, false, 0);
-  _onCheckButton.show();
+  _box.pack_start(_checkButton, false, false, 0);
+  _checkButton.show();
 
   _labelEventBox.set_events(Gdk::BUTTON_PRESS_MASK);
   _labelEventBox.show();
 
-  _labelEventBox.signal_button_press_event().connect(
-      sigc::mem_fun(*this, &FaderWidget::onNameLabelClicked));
+  _labelEventBox.signal_button_press_event().connect([&](GdkEventButton *) {
+    ShowAssignDialog();
+    return true;
+  });
   _labelEventBox.add(_nameLabel);
   _nameLabel.show();
 
   add(_box);
   _box.show();
+
+  MakePopupMenu();
+}
+
+void FaderWidget::MakePopupMenu() {
+  _miAssign.signal_activate().connect([&]() { ShowAssignDialog(); });
+  _menu.append(_miAssign);
+  _menu.append(_miSeperator1);
+  _miDisplayLabel.set_active(true);
+  _miDisplayLabel.signal_activate().connect(
+      [&]() { _nameLabel.set_visible(_miDisplayLabel.get_active()); });
+  _menu.append(_miDisplayLabel);
+  _miDisplayFlashButton.set_active(true);
+  _miDisplayFlashButton.signal_activate().connect(
+      [&]() { _flashButton.set_visible(_miDisplayFlashButton.get_active()); });
+  _menu.append(_miDisplayFlashButton);
+  _miDisplayCheckButton.set_active(true);
+  _miDisplayCheckButton.signal_activate().connect(
+      [&]() { _checkButton.set_visible(_miDisplayCheckButton.get_active()); });
+  _menu.append(_miDisplayCheckButton);
+  _miOverlayFadeButtons.set_active(true);
+  _menu.append(_miOverlayFadeButtons);
+
+  _menu.show_all_children();
 }
 
 void FaderWidget::onOnButtonClicked() {
   if (!_holdUpdates) {
     _holdUpdates = true;
-    if (_onCheckButton.GetActive())
+    if (_checkButton.GetActive())
       _scale.set_value(ControlValue::MaxUInt());
     else
       _scale.set_value(0);
@@ -121,8 +158,9 @@ void FaderWidget::onScaleChange() {
   if (!_holdUpdates) {
     _holdUpdates = true;
     const double value = _scale.get_value();
-    _onCheckButton.SetActive(value != 0);
-    if (_mouseIn) {
+    _checkButton.SetActive(value != 0);
+    if (_mouseIn && GetSourceValue() != nullptr &&
+        _miOverlayFadeButtons.get_active()) {
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
     }
@@ -133,12 +171,11 @@ void FaderWidget::onScaleChange() {
   }
 }
 
-bool FaderWidget::onNameLabelClicked(GdkEventButton * /*unused*/) {
+void FaderWidget::ShowAssignDialog() {
   InputSelectDialog dialog(GetManagement(), GetEventHub());
   if (dialog.run() == Gtk::RESPONSE_OK) {
     Assign(dialog.SelectedInputPreset(), true);
   }
-  return true;
 }
 
 void FaderWidget::OnAssigned(bool moveFader) {
@@ -154,10 +191,10 @@ void FaderWidget::OnAssigned(bool moveFader) {
     const theatre::Controllable *controllable = &source->GetControllable();
     const std::vector<theatre::Color> colors =
         controllable->InputColors(source->InputIndex());
-    _onCheckButton.SetColors(UniqueWithoutOrdering(colors));
+    _checkButton.SetColors(UniqueWithoutOrdering(colors));
   } else {
     _nameLabel.set_text("<..>");
-    _onCheckButton.SetColors({});
+    _checkButton.SetColors({});
     _fadeUpButton.set_visible(false);
     _fadeDownButton.set_visible(false);
     if (moveFader) {
@@ -174,8 +211,8 @@ void FaderWidget::MoveSlider() {
     _holdUpdates = true;
     const unsigned value = GetSingleSourceValue().Value().UInt();
     _scale.set_value(value);
-    _onCheckButton.SetActive(value != 0);
-    if (_mouseIn) {
+    _checkButton.SetActive(value != 0);
+    if (_mouseIn && _miOverlayFadeButtons.get_active()) {
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
     }
@@ -188,7 +225,7 @@ void FaderWidget::MoveSlider() {
 }
 
 void FaderWidget::Toggle() {
-  _onCheckButton.SetActive(!_onCheckButton.GetActive());
+  _checkButton.SetActive(!_checkButton.GetActive());
 }
 
 void FaderWidget::FullOn() { _scale.set_value(ControlValue::MaxUInt()); }
@@ -202,7 +239,8 @@ void FaderWidget::onFadeDown() { setTargetValue(0); }
 void FaderWidget::ShowFadeButtons(bool mouse_in) {
   if (mouse_in != _mouseIn) {
     _mouseIn = mouse_in;
-    if (mouse_in && GetSourceValue() != nullptr) {
+    if (mouse_in && GetSourceValue() != nullptr &&
+        _miOverlayFadeButtons.get_active()) {
       const double value = _scale.get_value();
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
@@ -211,6 +249,18 @@ void FaderWidget::ShowFadeButtons(bool mouse_in) {
       _fadeDownButton.set_visible(false);
     }
   }
+}
+
+bool FaderWidget::HandleRightPress(GdkEventButton *event) {
+  return event->button == 3;  // right button?
+}
+
+bool FaderWidget::HandleRightRelease(GdkEventButton *event) {
+  if (event->button == 3) {  // right button?
+    _menu.popup(event->button, event->time);
+    return true;
+  }
+  return false;
 }
 
 }  // namespace glight::gui

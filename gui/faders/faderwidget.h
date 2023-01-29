@@ -5,8 +5,12 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/checkmenuitem.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+#include <gtkmm/separatormenuitem.h>
 #include <gtkmm/overlay.h>
 #include <gtkmm/scale.h>
 
@@ -40,11 +44,14 @@ class FaderWidget final : public ControlWidget {
   void ShowFadeButtons(bool mouse_in);
   void onScaleChange();
   void onOnButtonClicked();
-  bool onNameLabelClicked(GdkEventButton *event);
+  void ShowAssignDialog();
   bool onFlashButtonPressed(GdkEventButton *event);
   bool onFlashButtonReleased(GdkEventButton *event);
   void onFadeUp();
   void onFadeDown();
+  bool HandleRightPress(GdkEventButton *event);
+  bool HandleRightRelease(GdkEventButton *event);
+  void MakePopupMenu();
 
   Gtk::EventBox _mouseInBox;
   Gtk::Overlay _overlay;
@@ -53,9 +60,18 @@ class FaderWidget final : public ControlWidget {
   Gtk::VScale _scale;
   Gtk::Button _fadeDownButton;
   Gtk::Button _flashButton;
-  IconButton _onCheckButton;
+  IconButton _checkButton;
   Gtk::EventBox _labelEventBox;
   Gtk::Label _nameLabel;
+
+  // right click menu
+  Gtk::Menu _menu;
+  Gtk::MenuItem _miAssign{"Assign..."};
+  Gtk::SeparatorMenuItem _miSeperator1;
+  Gtk::CheckMenuItem _miDisplayLabel{"Display label"};
+  Gtk::CheckMenuItem _miDisplayFlashButton{"Display flash button"};
+  Gtk::CheckMenuItem _miDisplayCheckButton{"Display check button"};
+  Gtk::CheckMenuItem _miOverlayFadeButtons{"Overlay fade buttons"};
 
   bool _mouseIn = false;
   bool _holdUpdates = false;
