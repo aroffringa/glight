@@ -515,7 +515,7 @@ void ShowWindow::onMIDesignWizardClicked() {
 
 void ShowWindow::onMIBlackOut() {
   _management->BlackOut();
-  for (std::unique_ptr<FaderWindow> &fw : _faderWindows) fw->ReloadValues();
+  for (std::unique_ptr<FaderWindow> &fw : _faderWindows) fw->UpdateValues();
 }
 
 void ShowWindow::onMIProtectBlackOut() {
