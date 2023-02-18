@@ -7,7 +7,7 @@
 #include <gtkmm/separatormenuitem.h>
 
 namespace glight::gui {
-  
+
 class FaderState;
 
 class ControlMenu : public Gtk::Menu {

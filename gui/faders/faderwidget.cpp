@@ -18,7 +18,7 @@ namespace glight::gui {
 
 using theatre::ControlValue;
 
-FaderWidget::FaderWidget(FaderWindow& fader_window, FaderState &state,
+FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
                          ControlMode mode, char key)
     : ControlWidget(fader_window, mode),
       _scale(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
@@ -88,14 +88,14 @@ FaderWidget::FaderWidget(FaderWindow& fader_window, FaderState &state,
     _flashButton.signal_button_release_event().connect(
         sigc::mem_fun(*this, &FaderWidget::onFlashButtonReleased), false);
     _box.pack_start(_flashButton, false, false, 0);
-    _flashButton.show();
+    _flashButton.set_visible(state.DisplayFlashButton());
   }
 
   _checkButton.set_halign(Gtk::ALIGN_CENTER);
   _checkButton.SignalChanged().connect(
       sigc::mem_fun(*this, &FaderWidget::onOnButtonClicked));
   _box.pack_start(_checkButton, false, false, 0);
-  _checkButton.show();
+  _checkButton.set_visible(state.DisplayCheckButton());
 
   _labelEventBox.set_events(Gdk::BUTTON_PRESS_MASK);
   _labelEventBox.show();
@@ -105,7 +105,7 @@ FaderWidget::FaderWidget(FaderWindow& fader_window, FaderState &state,
     return true;
   });
   _labelEventBox.add(_nameLabel);
-  _nameLabel.show();
+  _nameLabel.set_visible(state.DisplayName());
 
   add(_box);
   _box.show();
@@ -142,7 +142,8 @@ void FaderWidget::onScaleChange() {
     _holdUpdates = true;
     const double value = _scale.get_value();
     _checkButton.SetActive(value != 0);
-    if (_mouseIn && GetSourceValue() != nullptr && _state.OverlayFadeButtons()) {
+    if (_mouseIn && GetSourceValue() != nullptr &&
+        _state.OverlayFadeButtons()) {
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
     }
@@ -221,7 +222,8 @@ void FaderWidget::onFadeDown() { setTargetValue(0); }
 void FaderWidget::ShowFadeButtons(bool mouse_in) {
   if (mouse_in != _mouseIn) {
     _mouseIn = mouse_in;
-    if (mouse_in && GetSourceValue() != nullptr && _state.OverlayFadeButtons()) {
+    if (mouse_in && GetSourceValue() != nullptr &&
+        _state.OverlayFadeButtons()) {
       const double value = _scale.get_value();
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
@@ -238,7 +240,7 @@ bool FaderWidget::HandleRightPress(GdkEventButton *event) {
 
 bool FaderWidget::HandleRightRelease(GdkEventButton *event) {
   if (event->button == 3) {  // right button?
-    std::unique_ptr<ControlMenu>& menu = GetFaderWindow().GetControlMenu();
+    std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
     menu = std::make_unique<ControlMenu>(_state);
     menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
     menu->SignalToggleName().connect([&]() {

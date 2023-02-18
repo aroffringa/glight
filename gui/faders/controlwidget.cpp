@@ -10,7 +10,7 @@
 
 namespace glight::gui {
 
-ControlWidget::ControlWidget(FaderWindow& fader_window, ControlMode mode)
+ControlWidget::ControlWidget(FaderWindow &fader_window, ControlMode mode)
     : _mode(mode),
       fader_window_(fader_window),
       _management(fader_window.GetManagement()),

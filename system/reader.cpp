@@ -421,6 +421,13 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
   state.SetIsToggleButton(ToBool(node["is-toggle"]));
   if (state.IsToggleButton())
     state.SetNewToggleButtonColumn(ToBool(node["new-toggle-column"]));
+  state.SetDisplayName(OptionalBool(node, "display-name", state.DisplayName()));
+  state.SetDisplayFlashButton(
+      OptionalBool(node, "display-flash-button", state.DisplayFlashButton()));
+  state.SetDisplayCheckButton(
+      OptionalBool(node, "display-check-button", state.DisplayCheckButton()));
+  state.SetOverlayFadeButtons(
+      OptionalBool(node, "overlay-fade-buttons", state.OverlayFadeButtons()));
 }
 
 void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,

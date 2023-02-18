@@ -17,8 +17,7 @@ class EventTransmitter;
 
 class ToggleWidget final : public ControlWidget {
  public:
-  ToggleWidget(FaderWindow& fader_window,
-               ControlMode mode, char key);
+  ToggleWidget(FaderWindow &fader_window, ControlMode mode, char key);
 
   virtual void Toggle() override;
   virtual void FullOn() override;

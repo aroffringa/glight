@@ -65,17 +65,17 @@ void ToggleWidget::onIconClicked() {
   }
 }
 
-bool ToggleWidget::onFlashButtonPressed(GdkEventButton * /*unused*/) {
+bool ToggleWidget::onFlashButtonPressed(GdkEventButton* /*unused*/) {
   _iconButton.SetActive(true);
   return false;
 }
 
-bool ToggleWidget::onFlashButtonReleased(GdkEventButton * /*unused*/) {
+bool ToggleWidget::onFlashButtonReleased(GdkEventButton* /*unused*/) {
   _iconButton.SetActive(false);
   return false;
 }
 
-bool ToggleWidget::onNameLabelClicked(GdkEventButton * /*unused*/) {
+bool ToggleWidget::onNameLabelClicked(GdkEventButton* /*unused*/) {
   InputSelectDialog dialog(GetManagement(), GetEventHub());
   if (dialog.run() == Gtk::RESPONSE_OK) {
     Assign(dialog.SelectedInputPreset(), true);
@@ -86,7 +86,7 @@ bool ToggleWidget::onNameLabelClicked(GdkEventButton * /*unused*/) {
 void ToggleWidget::OnAssigned(bool moveFader) {
   if (GetSourceValue() != nullptr) {
     _nameLabel.set_text(GetSourceValue()->Name());
-    const theatre::Controllable *controllable =
+    const theatre::Controllable* controllable =
         &GetSourceValue()->GetControllable();
     const std::vector<theatre::Color> colors =
         controllable->InputColors(GetSourceValue()->InputIndex());

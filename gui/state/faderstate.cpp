@@ -20,7 +20,11 @@ FaderState::FaderState(SourceValue *sourceValue)
 FaderState::FaderState(const FaderState &source)
     : source_value_(source.source_value_),
       is_toggle_button_(source.is_toggle_button_),
-      new_toggle_button_column_(source.new_toggle_button_column_) {
+      new_toggle_button_column_(source.new_toggle_button_column_),
+      display_name_(source.display_name_),
+      display_flash_button_(source.display_flash_button_),
+      display_check_button_(source.display_check_button_),
+      overlay_fade_buttons_(source.overlay_fade_buttons_) {
   if (source_value_ != nullptr)
     source_value_deleted_connection_ = source_value_->SignalDelete().connect(
         [&]() { onPresetValueDeleted(); });
@@ -32,6 +36,13 @@ FaderState &FaderState::operator=(const FaderState &rhs) {
   if (source_value_ != nullptr)
     source_value_deleted_connection_ = source_value_->SignalDelete().connect(
         [&]() { onPresetValueDeleted(); });
+
+  is_toggle_button_ = rhs.is_toggle_button_;
+  new_toggle_button_column_ = rhs.new_toggle_button_column_;
+  display_name_ = rhs.display_name_;
+  display_flash_button_ = rhs.display_flash_button_;
+  display_check_button_ = rhs.display_check_button_;
+  overlay_fade_buttons_ = rhs.overlay_fade_buttons_;
   return *this;
 }
 

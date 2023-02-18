@@ -40,18 +40,25 @@ class FaderState {
 
   bool DisplayName() const { return display_name_; }
   void SetDisplayName(bool display_name) { display_name_ = display_name; }
-  
+
   bool DisplayFlashButton() const { return display_flash_button_; }
-  void SetDisplayFlashButton(bool display_flash_button) { display_flash_button_ = display_flash_button; }
-  
+  void SetDisplayFlashButton(bool display_flash_button) {
+    display_flash_button_ = display_flash_button;
+  }
+
   bool DisplayCheckButton() const { return display_check_button_; }
-  void SetDisplayCheckButton(bool display_check_button) { display_check_button_ = display_check_button; }
-  
+  void SetDisplayCheckButton(bool display_check_button) {
+    display_check_button_ = display_check_button;
+  }
+
   bool OverlayFadeButtons() const { return overlay_fade_buttons_; }
-  void SetOverlayFadeButtons(bool overlay_fade_buttons) { overlay_fade_buttons_ = overlay_fade_buttons; }
-  
+  void SetOverlayFadeButtons(bool overlay_fade_buttons) {
+    overlay_fade_buttons_ = overlay_fade_buttons;
+  }
+
  private:
   void onPresetValueDeleted();
+
   theatre::SourceValue *source_value_;
   bool is_toggle_button_ = false;
   bool new_toggle_button_column_ = false;

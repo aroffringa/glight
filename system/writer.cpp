@@ -455,7 +455,7 @@ void writeControllable(WriteState &state, const Controllable &controllable) {
   state.controllablesWritten.insert(&controllable);
 }
 
-void writeFaderState(WriteState &state, const gui::FaderSetState &guiState) {
+void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
   state.writer.StartObject();
   state.writer.String("name", guiState.name);
   state.writer.Boolean("active", guiState.isActive);
@@ -471,6 +471,10 @@ void writeFaderState(WriteState &state, const gui::FaderSetState &guiState) {
     state.writer.Boolean("is-toggle", fader.IsToggleButton());
     if (fader.IsToggleButton())
       state.writer.Boolean("new-toggle-column", fader.NewToggleButtonColumn());
+    state.writer.Boolean("display-name", fader.DisplayName());
+    state.writer.Boolean("display-flash-button", fader.DisplayFlashButton());
+    state.writer.Boolean("display-check-button", fader.DisplayCheckButton());
+    state.writer.Boolean("overlay-fade-buttons", fader.OverlayFadeButtons());
     if (fader.GetSourceValue() != nullptr) {
       state.writer.Number("input-index", fader.GetSourceValue()->InputIndex());
       state.writer.Number(
@@ -489,7 +493,7 @@ void writeGUIState(WriteState &state) {
   state.writer.StartArray("states");
   for (const std::unique_ptr<gui::FaderSetState> &fState :
        state.guiState->FaderSets())
-    writeFaderState(state, *fState);
+    writeFaderSetState(state, *fState);
   state.writer.EndArray();  // states
 }
 

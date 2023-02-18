@@ -373,12 +373,10 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
   const ControlMode controlMode =
       isSecondary ? ControlMode::Secondary : ControlMode::Primary;
   if (state.IsToggleButton()) {
-    control = std::make_unique<ToggleWidget>(*this,
-                                             controlMode, key);
+    control = std::make_unique<ToggleWidget>(*this, controlMode, key);
     nameLabel = nullptr;
   } else {
-    control = std::make_unique<FaderWidget>(*this, state,
-                                            controlMode, key);
+    control = std::make_unique<FaderWidget>(*this, state, controlMode, key);
     nameLabel = &static_cast<FaderWidget *>(control.get())->NameLabel();
   }
 
@@ -683,7 +681,8 @@ void FaderWindow::onLayoutChanged() {
   }
 }
 
-std::unique_ptr<ControlMenu>& FaderWindow::GetControlMenu()
-{ return control_menu_; }
+std::unique_ptr<ControlMenu> &FaderWindow::GetControlMenu() {
+  return control_menu_;
+}
 
 }  // namespace glight::gui

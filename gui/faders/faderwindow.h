@@ -56,9 +56,10 @@ class FaderWindow : public Gtk::Window {
 
   FaderSetState *State() { return _state; }
 
-  EventTransmitter& GetEventTransmitter() { return _eventHub; }
+  EventTransmitter &GetEventTransmitter() { return _eventHub; }
   theatre::Management &GetManagement() { return _management; }
-  std::unique_ptr<ControlMenu>& GetControlMenu();
+  std::unique_ptr<ControlMenu> &GetControlMenu();
+
  private:
   void initializeWidgets();
   void initializeMenu();
@@ -105,8 +106,8 @@ class FaderWindow : public Gtk::Window {
   size_t getFadeInSpeed() const;
   size_t getFadeOutSpeed() const;
 
-  /// The fader menu is stored here so that only one menu is allocated at one time
-  /// (instead of each fader allocating its own menu)
+  /// The fader menu is stored here so that only one menu is allocated at one
+  /// time (instead of each fader allocating its own menu)
   std::unique_ptr<ControlMenu> control_menu_;
   theatre::Management &_management;
   size_t _keyRowIndex;

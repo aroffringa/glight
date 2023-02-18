@@ -21,8 +21,7 @@ enum class ControlMode { Primary, Secondary };
  */
 class ControlWidget : public Gtk::Bin {
  public:
-  ControlWidget(FaderWindow& fader_window,
-                ControlMode mode);
+  ControlWidget(FaderWindow &fader_window, ControlMode mode);
   ~ControlWidget();
 
   /**
@@ -91,7 +90,7 @@ class ControlWidget : public Gtk::Bin {
   EventTransmitter &GetEventHub() { return _eventHub; }
   theatre::Management &GetManagement() { return _management; }
   theatre::SingleSourceValue &GetSingleSourceValue();
-  FaderWindow& GetFaderWindow() { return fader_window_; }
+  FaderWindow &GetFaderWindow() { return fader_window_; }
 
  private:
   void OnTheatreUpdate();
@@ -99,7 +98,7 @@ class ControlWidget : public Gtk::Bin {
   double _fadeUpSpeed, _fadeDownSpeed;
   ControlMode _mode;
   theatre::SourceValue *_sourceValue = nullptr;
-  FaderWindow& fader_window_;
+  FaderWindow &fader_window_;
   theatre::Management &_management;
   EventTransmitter &_eventHub;
   sigc::connection _updateConnection;
