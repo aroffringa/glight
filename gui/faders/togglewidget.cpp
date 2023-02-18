@@ -13,10 +13,9 @@
 
 namespace glight::gui {
 
-ToggleWidget::ToggleWidget(theatre::Management &management,
-                           EventTransmitter &eventHub, ControlMode mode,
+ToggleWidget::ToggleWidget(FaderWindow& fader_window, ControlMode mode,
                            char key)
-    : ControlWidget(management, eventHub, mode),
+    : ControlWidget(fader_window, mode),
       _flashButton(std::string(1, key)),
       _nameLabel("<..>"),
       _holdUpdates(false) {

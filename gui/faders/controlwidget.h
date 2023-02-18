@@ -10,6 +10,7 @@
 namespace glight::gui {
 
 class EventTransmitter;
+class FaderWindow;
 
 enum class ControlMode { Primary, Secondary };
 
@@ -20,7 +21,7 @@ enum class ControlMode { Primary, Secondary };
  */
 class ControlWidget : public Gtk::Bin {
  public:
-  ControlWidget(theatre::Management &management, EventTransmitter &eventHub,
+  ControlWidget(FaderWindow& fader_window,
                 ControlMode mode);
   ~ControlWidget();
 
@@ -58,8 +59,9 @@ class ControlWidget : public Gtk::Bin {
   virtual void MoveSlider() = 0;
   virtual void Limit(double value) = 0;
 
-  sigc::signal<void, double> &SignalValueChange() { return _signalValueChange; }
+  sigc::signal<void(double)> &SignalValueChange() { return _signalValueChange; }
   sigc::signal<void> &SignalAssigned() { return _signalAssigned; }
+  sigc::signal<void> &SignalDisplayChanged() { return _signalDisplayChanged; }
 
   theatre::SourceValue *GetSourceValue() const { return _sourceValue; }
   void Unassign() { Assign(nullptr, true); }
@@ -87,8 +89,9 @@ class ControlWidget : public Gtk::Bin {
   void setImmediateValue(unsigned value);
 
   EventTransmitter &GetEventHub() { return _eventHub; }
-  theatre::Management &GetManagement() { return *_management; }
+  theatre::Management &GetManagement() { return _management; }
   theatre::SingleSourceValue &GetSingleSourceValue();
+  FaderWindow& GetFaderWindow() { return fader_window_; }
 
  private:
   void OnTheatreUpdate();
@@ -96,11 +99,13 @@ class ControlWidget : public Gtk::Bin {
   double _fadeUpSpeed, _fadeDownSpeed;
   ControlMode _mode;
   theatre::SourceValue *_sourceValue = nullptr;
-  theatre::Management *_management;
+  FaderWindow& fader_window_;
+  theatre::Management &_management;
   EventTransmitter &_eventHub;
   sigc::connection _updateConnection;
-  sigc::signal<void, double> _signalValueChange;
+  sigc::signal<void(double)> _signalValueChange;
   sigc::signal<void> _signalAssigned;
+  sigc::signal<void> _signalDisplayChanged;
 };
 
 }  // namespace glight::gui

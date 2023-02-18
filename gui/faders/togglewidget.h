@@ -17,7 +17,7 @@ class EventTransmitter;
 
 class ToggleWidget final : public ControlWidget {
  public:
-  ToggleWidget(theatre::Management &management, EventTransmitter &eventHub,
+  ToggleWidget(FaderWindow& fader_window,
                ControlMode mode, char key);
 
   virtual void Toggle() override;

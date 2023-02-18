@@ -1,9 +1,11 @@
 #include "faderwindow.h"
+
+#include "controlmenu.h"
 #include "faderwidget.h"
 #include "togglewidget.h"
 
 #include "../eventtransmitter.h"
-#include "../guistate.h"
+#include "../state/guistate.h"
 
 #include "../../theatre/chase.h"
 #include "../../theatre/management.h"
@@ -89,7 +91,7 @@ const char FaderWindow::_keyRowsLower[3][10] = {
 
 FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
                          theatre::Management &management, size_t keyRowIndex)
-    : _management(&management),
+    : _management(management),
       _keyRowIndex(keyRowIndex),
 
       _miLayout("Layout"),
@@ -121,7 +123,7 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
 FaderWindow::~FaderWindow() {
   _timeoutConnection.disconnect();
   if (_state) _state->isActive = false;
-  _guiState.EmitFaderSetupChangeSignal();
+  _guiState.EmitFaderSetChangeSignal();
 }
 
 void FaderWindow::LoadNew() {
@@ -202,7 +204,7 @@ void FaderWindow::loadState() {
     _crossFader->show();
   }
   for (FaderState &state : _state->faders) {
-    addControlInLayout(state.IsToggleButton(), state.NewToggleButtonColumn());
+    addControlInLayout(state);
   }
 
   resize(_state->width, _state->height);
@@ -334,18 +336,33 @@ bool FaderWindow::onResize(GdkEventConfigure * /*event*/) {
   return false;
 }
 
-void FaderWindow::addControl(bool isToggle, bool newToggleColumn,
-                             bool isUpper) {
+void FaderWindow::onAddFaderClicked() {
+  addControlInLayout(_state->AddState(false, false));
+}
+
+void FaderWindow::onAdd5FadersClicked() {
+  for (size_t i = 0; i != 5; ++i)
+    addControlInLayout(_state->AddState(false, false));
+}
+
+void FaderWindow::onAdd5ToggleControlsClicked() {
+  for (size_t i = 0; i != 5; ++i)
+    addControlInLayout(_state->AddState(true, false));
+}
+
+void FaderWindow::onAddToggleClicked() {
+  addControlInLayout(_state->AddState(true, false));
+}
+
+void FaderWindow::onAddToggleColumnClicked() {
+  addControlInLayout(_state->AddState(true, true));
+}
+
+void FaderWindow::addControl(FaderState &state, bool isUpper) {
   std::vector<std::unique_ptr<ControlWidget>> &controls =
       isUpper ? _upperControls : _lowerControls;
   std::vector<Gtk::VBox> &column = isUpper ? _upperColumns : _lowerColumns;
-  if (column.empty()) newToggleColumn = true;
-  if (_recursionLock.IsFirst()) {
-    _state->faders.emplace_back();
-    FaderState &state = _state->faders.back();
-    state.SetIsToggleButton(isToggle);
-    state.SetNewToggleButtonColumn(newToggleColumn);
-  }
+  bool newToggleColumn = state.NewToggleButtonColumn() || column.empty();
   const bool hasKey = _upperControls.size() < 10 && _keyRowIndex < 3 && isUpper;
   const char key =
       hasKey ? _keyRowsLower[_keyRowIndex][_upperControls.size()] : ' ';
@@ -355,12 +372,12 @@ void FaderWindow::addControl(bool isToggle, bool newToggleColumn,
   const bool isSecondary = !isUpper || _miSecondaryLayout.get_active();
   const ControlMode controlMode =
       isSecondary ? ControlMode::Secondary : ControlMode::Primary;
-  if (isToggle) {
-    control = std::make_unique<ToggleWidget>(*_management, _eventHub,
+  if (state.IsToggleButton()) {
+    control = std::make_unique<ToggleWidget>(*this,
                                              controlMode, key);
     nameLabel = nullptr;
   } else {
-    control = std::make_unique<FaderWidget>(*_management, _eventHub,
+    control = std::make_unique<FaderWidget>(*this, state,
                                             controlMode, key);
     nameLabel = &static_cast<FaderWidget *>(control.get())->NameLabel();
   }
@@ -377,7 +394,7 @@ void FaderWindow::addControl(bool isToggle, bool newToggleColumn,
 
   const size_t vpos = isUpper ? 0 : 3;
   const size_t hpos = controls.size() + column.size();
-  if (isToggle) {
+  if (state.IsToggleButton()) {
     if (newToggleColumn) {
       _controlGrid.attach(column.emplace_back(), hpos * 2 + 1, vpos, 2, 1);
       column.back().show();
@@ -414,9 +431,9 @@ void FaderWindow::onAssignClicked() {
   const bool hasLower = _miDualLayout.get_active();
   if (!_upperControls.empty()) {
     size_t controlIndex = 0;
-    const size_t n = _management->SourceValues().size();
+    const size_t n = _management.SourceValues().size();
     for (size_t i = 0; i != n; ++i) {
-      theatre::SourceValue *source = _management->SourceValues()[i].get();
+      theatre::SourceValue *source = _management.SourceValues()[i].get();
       if (!_guiState.IsAssigned(source)) {
         _upperControls[controlIndex]->Assign(source, true);
         if (hasLower) _lowerControls[controlIndex]->Assign(source, true);
@@ -438,7 +455,7 @@ void FaderWindow::onAssignChasesClicked() {
   if (!_upperControls.empty()) {
     size_t controlIndex = 0;
     for (const std::unique_ptr<theatre::SourceValue> &sv :
-         _management->SourceValues()) {
+         _management.SourceValues()) {
       theatre::Chase *c =
           dynamic_cast<theatre::Chase *>(&sv->GetControllable());
       if (c != nullptr) {
@@ -540,7 +557,7 @@ void FaderWindow::onSetNameClicked() {
   int result = dialog.run();
   if (result == Gtk::RESPONSE_OK) {
     _state->name = entry.get_text();
-    _guiState.EmitFaderSetupChangeSignal();
+    _guiState.EmitFaderSetChangeSignal();
   }
 }
 
@@ -665,5 +682,8 @@ void FaderWindow::onLayoutChanged() {
     loadState();
   }
 }
+
+std::unique_ptr<ControlMenu>& FaderWindow::GetControlMenu()
+{ return control_menu_; }
 
 }  // namespace glight::gui

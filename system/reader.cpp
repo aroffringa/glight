@@ -17,7 +17,7 @@
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
-#include "../gui/guistate.h"
+#include "../gui/state/guistate.h"
 
 #include <fstream>
 

@@ -19,7 +19,7 @@
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
-#include "../gui/guistate.h"
+#include "../gui/state/guistate.h"
 
 namespace glight::system {
 namespace {

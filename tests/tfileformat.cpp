@@ -11,7 +11,7 @@
 
 #include "../theatre/effects/audioleveleffect.h"
 
-#include "../gui/guistate.h"
+#include "../gui/state/guistate.h"
 
 #include "../system/reader.h"
 #include "../system/writer.h"
