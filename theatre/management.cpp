@@ -151,12 +151,11 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
                 randomValue);
   const double timePassed = (relTimeInMs - _previousTime) * 1e-3;
   _previousTime = relTimeInMs;
+
+  std::lock_guard<std::mutex> lock(_mutex);
   for (std::unique_ptr<SourceValue> &sv : _sourceValues) {
     sv->ApplyFade(timePassed);
   }
-
-  std::lock_guard<std::mutex> lock(_mutex);
-
   // Reset all inputs
   for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
     for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs();
