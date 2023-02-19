@@ -64,10 +64,9 @@ include_directories(${LIBOLA_INCLUDE_DIRS})
 include_directories(${AUBIO_INCLUDE_DIR})
 
 set(GUIFILES
-  gui/application.cpp  
+  gui/application.cpp
   gui/createchasedialog.cpp
   gui/designwizard.cpp
-  gui/guistate.cpp
   gui/nameframe.cpp
   gui/objectlistframe.cpp
   gui/renderengine.cpp
@@ -83,10 +82,12 @@ set(GUIFILES
   gui/components/reorderwidget.cpp
   gui/dialogs/inputselectdialog.cpp
   gui/dialogs/sceneselect.cpp
+  gui/faders/controlmenu.cpp
   gui/faders/controlwidget.cpp
   gui/faders/faderwidget.cpp
   gui/faders/faderwindow.cpp
   gui/faders/togglewidget.cpp
+  gui/state/faderstate.cpp
   gui/windows/addfixturewindow.cpp  
   gui/windows/chasepropertieswindow.cpp
   gui/windows/effectpropertieswindow.cpp

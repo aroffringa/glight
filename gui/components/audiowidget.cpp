@@ -58,7 +58,7 @@ int getStdDev(const unsigned char *chunk, unsigned size) {
 namespace glight::gui {
 
 AudioWidget::AudioWidget()
-    : _centerPosition(0),
+    : _cursorPosition(0),
       _renderStartPosition(0),
       _buffer(nullptr),
       _width(0),
@@ -110,13 +110,13 @@ void AudioWidget::SetAudioData(system::FlacDecoder &decoder) {
 }
 
 void AudioWidget::SetPosition(double offsetInMS) {
-  _centerPosition = (offsetInMS * 44.100 * 4.0) / kChunkSize;
+  _cursorPosition = (offsetInMS * 44.100 * 4.0) / kChunkSize;
   _isUpToDate = false;
   queue_draw();
 }
 
 double AudioWidget::Position() const {
-  return _centerPosition * kChunkSize / (44.100 * 4.0);
+  return _cursorPosition * kChunkSize / (44.100 * 4.0);
 }
 
 void AudioWidget::ResizeBuffer() {
@@ -131,9 +131,9 @@ void AudioWidget::ResizeBuffer() {
 }
 
 void AudioWidget::DrawBuffer(Glib::RefPtr<Gdk::Pixbuf> &buffer) {
-  const int renderWidth = std::min(_width, static_cast<int>(DataSize()));
-  _renderStartPosition = std::clamp(_centerPosition - renderWidth / 2, 0,
-                                    static_cast<int>(DataSize()));
+  _renderStartPosition = std::max(_cursorPosition - _width / 2, 0);
+  const int renderWidth = std::max(
+      0, std::min(_width, static_cast<int>(DataSize()) - _renderStartPosition));
 
   if (buffer) {
     guint8 *data = buffer->get_pixels();
@@ -167,17 +167,17 @@ void AudioWidget::DrawBuffer(Glib::RefPtr<Gdk::Pixbuf> &buffer) {
     }
     // Set any remaining part to white
     for (int y = 0; y < _height; ++y) {
-      guint8 *data_ptr = data + rowStride * y;
+      guint8 *data_ptr = data + renderWidth * 3 + rowStride * y;
       for (int x = renderWidth; x != _width; ++x) {
         setColor(data_ptr, 255, 255, 255);
         data_ptr += 3;
       }
     }
-    verticalLine(data, rowStride, _centerPosition - _renderStartPosition - 1,
+    verticalLine(data, rowStride, _cursorPosition - _renderStartPosition - 1,
                  255, 0, 0);
-    verticalLine(data, rowStride, _centerPosition - _renderStartPosition, 255,
+    verticalLine(data, rowStride, _cursorPosition - _renderStartPosition, 255,
                  0, 0);
-    verticalLine(data, rowStride, _centerPosition - _renderStartPosition + 1,
+    verticalLine(data, rowStride, _cursorPosition - _renderStartPosition + 1,
                  255, 0, 0);
 
     std::map<int, enum KeyType>::const_iterator i =

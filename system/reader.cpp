@@ -17,7 +17,7 @@
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
-#include "../gui/guistate.h"
+#include "../gui/state/guistate.h"
 
 #include <fstream>
 
@@ -413,20 +413,29 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
     Folder *folder = management.Folders()[folderId].get();
     Controllable &controllable =
         static_cast<Controllable &>(folder->GetChild(name));
-    fader.faders.emplace_back(management.GetSourceValue(controllable, input));
+    fader.faders.emplace_back(std::make_unique<gui::FaderState>(
+        management.GetSourceValue(controllable, input)));
   } else {
-    fader.faders.emplace_back(nullptr);
+    fader.faders.emplace_back(std::make_unique<gui::FaderState>(nullptr));
   }
-  gui::FaderState &state = fader.faders.back();
-  state.SetIsToggleButton(ToBool(node["is-toggle"]));
-  if (state.IsToggleButton())
-    state.SetNewToggleButtonColumn(ToBool(node["new-toggle-column"]));
+  std::unique_ptr<gui::FaderState> &state = fader.faders.back();
+  state->SetIsToggleButton(ToBool(node["is-toggle"]));
+  if (state->IsToggleButton())
+    state->SetNewToggleButtonColumn(ToBool(node["new-toggle-column"]));
+  state->SetDisplayName(
+      OptionalBool(node, "display-name", state->DisplayName()));
+  state->SetDisplayFlashButton(
+      OptionalBool(node, "display-flash-button", state->DisplayFlashButton()));
+  state->SetDisplayCheckButton(
+      OptionalBool(node, "display-check-button", state->DisplayCheckButton()));
+  state->SetOverlayFadeButtons(
+      OptionalBool(node, "overlay-fade-buttons", state->OverlayFadeButtons()));
 }
 
 void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,
                       Management &management) {
   guiState.FaderSets().emplace_back(std::make_unique<gui::FaderSetState>());
-  gui::FaderSetState &fader_set = *guiState.FaderSets().back().get();
+  gui::FaderSetState &fader_set = *guiState.FaderSets().back();
   fader_set.name = ToStr(node["name"]);
   fader_set.isActive = ToBool(node["active"]);
   fader_set.isSolo = ToBool(node["solo"]);

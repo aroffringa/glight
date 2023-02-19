@@ -90,7 +90,7 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
 
   createMenu();
 
-  _state.FaderSetupSignalChange().connect([&]() { onFaderListChange(); });
+  _state.FaderSetSignalChange().connect([&]() { onFaderListChange(); });
   addFaderWindow();
 
   _objectListFrame = std::make_unique<ObjectListFrame>(*_management, *this);
@@ -145,7 +145,7 @@ void ShowWindow::addFaderWindow(FaderSetState *stateOrNull) {
   newWindow->signal_hide().connect(sigc::bind(
       sigc::mem_fun(*this, &ShowWindow::onFaderWindowHidden), newWindow));
   newWindow->show();
-  _state.EmitFaderSetupChangeSignal();
+  _state.EmitFaderSetChangeSignal();
 }
 
 void ShowWindow::onFixtureListButtonClicked() {
@@ -360,7 +360,7 @@ void ShowWindow::OpenFile(const std::string &filename) {
       }
     }
   }
-  _state.EmitFaderSetupChangeSignal();
+  _state.EmitFaderSetChangeSignal();
 }
 
 void ShowWindow::onMIOpenClicked() {

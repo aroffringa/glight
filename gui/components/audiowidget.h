@@ -36,7 +36,7 @@ class AudioWidget : public Gtk::DrawingArea {
  private:
   enum KeyType { ItemStart, KeyStart };
 
-  int _centerPosition;
+  int _cursorPosition;
   int _renderStartPosition;
   // Glib::RefPtr<Gdk::GC> _drawingAreaGC;
   Glib::RefPtr<Gdk::Pixbuf> _buffer;

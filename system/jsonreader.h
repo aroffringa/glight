@@ -93,9 +93,18 @@ struct Number : public Node {
 inline const Array &ToArr(const Node &node) {
   return dynamic_cast<const Array &>(node);
 }
+
 inline bool ToBool(const Node &node) {
   return dynamic_cast<const Boolean &>(node).value;
 }
+
+inline bool OptionalBool(const Object &parent, const char *name,
+                         bool default_value) {
+  const Object::const_iterator iter = parent.find(name);
+  return iter == parent.end() ? default_value
+                              : dynamic_cast<const Boolean &>(*iter).value;
+}
+
 inline const Number &ToNum(const Node &node) {
   return dynamic_cast<const Number &>(node);
 }

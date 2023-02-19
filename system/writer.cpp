@@ -19,7 +19,7 @@
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
-#include "../gui/guistate.h"
+#include "../gui/state/guistate.h"
 
 namespace glight::system {
 namespace {
@@ -404,6 +404,10 @@ void writeSceneItem(WriteState &state, const SceneItem &item) {
 }
 
 void writeScene(WriteState &state, const Scene &scene) {
+  for (size_t i = 0; i != scene.NOutputs(); ++i) {
+    writeControllable(state, *scene.Output(i).first);
+  }
+
   state.writer.StartObject();
 
   state.writer.String("type", "scene");
@@ -451,7 +455,7 @@ void writeControllable(WriteState &state, const Controllable &controllable) {
   state.controllablesWritten.insert(&controllable);
 }
 
-void writeFaderState(WriteState &state, const gui::FaderSetState &guiState) {
+void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
   state.writer.StartObject();
   state.writer.String("name", guiState.name);
   state.writer.Boolean("active", guiState.isActive);
@@ -462,18 +466,23 @@ void writeFaderState(WriteState &state, const gui::FaderSetState &guiState) {
   state.writer.Number("width", guiState.width);
   state.writer.Number("height", guiState.height);
   state.writer.StartArray("faders");
-  for (const gui::FaderState &fader : guiState.faders) {
+  for (const std::unique_ptr<gui::FaderState> &fader : guiState.faders) {
     state.writer.StartObject();
-    state.writer.Boolean("is-toggle", fader.IsToggleButton());
-    if (fader.IsToggleButton())
-      state.writer.Boolean("new-toggle-column", fader.NewToggleButtonColumn());
-    if (fader.GetSourceValue() != nullptr) {
-      state.writer.Number("input-index", fader.GetSourceValue()->InputIndex());
+    state.writer.Boolean("is-toggle", fader->IsToggleButton());
+    if (fader->IsToggleButton())
+      state.writer.Boolean("new-toggle-column", fader->NewToggleButtonColumn());
+    state.writer.Boolean("display-name", fader->DisplayName());
+    state.writer.Boolean("display-flash-button", fader->DisplayFlashButton());
+    state.writer.Boolean("display-check-button", fader->DisplayCheckButton());
+    state.writer.Boolean("overlay-fade-buttons", fader->OverlayFadeButtons());
+    if (fader->GetSourceValue() != nullptr) {
+      state.writer.Number("input-index", fader->GetSourceValue()->InputIndex());
       state.writer.Number(
           "folder",
-          state.folderIds[&fader.GetSourceValue()->GetControllable().Parent()]);
+          state
+              .folderIds[&fader->GetSourceValue()->GetControllable().Parent()]);
       state.writer.String("name",
-                          fader.GetSourceValue()->GetControllable().Name());
+                          fader->GetSourceValue()->GetControllable().Name());
     }
     state.writer.EndObject();
   }
@@ -485,7 +494,7 @@ void writeGUIState(WriteState &state) {
   state.writer.StartArray("states");
   for (const std::unique_ptr<gui::FaderSetState> &fState :
        state.guiState->FaderSets())
-    writeFaderState(state, *fState);
+    writeFaderSetState(state, *fState);
   state.writer.EndArray();  // states
 }
 

@@ -32,14 +32,19 @@ void Scene::OnSyncUpdate(double offsetInMS) {
 }
 
 void Scene::initPlayer() {
-  if (_hasAudio) {
+  if (!_audioFilename.empty()) {
     try {
       _audioPlayer.reset();
       _decoder.reset();
       _decoder = std::make_unique<system::FlacDecoder>(_audioFilename);
       _audioPlayer = std::make_unique<system::AudioPlayer>(*_decoder);
       _audioPlayer->SetSyncListener(*this);
-      _audioPlayer->Seek(_startOffset);
+      try {  // Don't report an error when seeking fails
+        _audioPlayer->Seek(_startOffset);
+        _hasAudio = true;
+      } catch (std::exception &e) {
+        _hasAudio = false;
+      }
     } catch (std::exception &e) {
       std::cout << "Could not open player for filename " << _audioFilename
                 << '\n';

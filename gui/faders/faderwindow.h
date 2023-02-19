@@ -24,8 +24,10 @@
 
 namespace glight::gui {
 
+class ControlMenu;
 class ControlWidget;
 class EventTransmitter;
+class FaderState;
 class FaderSetState;
 class GUIState;
 
@@ -34,7 +36,7 @@ class FaderWindow : public Gtk::Window {
   /**
    * Construct a fader window with a new, empty fader setup.
    */
-  FaderWindow(EventTransmitter &showWindow, GUIState &guiState,
+  FaderWindow(EventTransmitter &event_hub, GUIState &guiState,
               theatre::Management &management, size_t keyRowIndex);
 
   ~FaderWindow();
@@ -54,19 +56,19 @@ class FaderWindow : public Gtk::Window {
 
   FaderSetState *State() { return _state; }
 
+  EventTransmitter &GetEventTransmitter() { return _eventHub; }
+  theatre::Management &GetManagement() { return _management; }
+  std::unique_ptr<ControlMenu> &GetControlMenu();
+
  private:
   void initializeWidgets();
   void initializeMenu();
 
-  void onAddFaderClicked() { addControlInLayout(false, false); }
-  void onAdd5FadersClicked() {
-    for (size_t i = 0; i != 5; ++i) addControlInLayout(false, false);
-  }
-  void onAdd5ToggleControlsClicked() {
-    for (size_t i = 0; i != 5; ++i) addControlInLayout(true, false);
-  }
-  void onAddToggleClicked() { addControlInLayout(true, false); }
-  void onAddToggleColumnClicked() { addControlInLayout(true, true); }
+  void onAddFaderClicked();
+  void onAdd5FadersClicked();
+  void onAdd5ToggleControlsClicked();
+  void onAddToggleClicked();
+  void onAddToggleColumnClicked();
   void removeFader();
   void onRemoveFaderClicked() {
     if (!_upperControls.empty()) removeFader();
@@ -95,17 +97,19 @@ class FaderWindow : public Gtk::Window {
   void FlipCrossFader();
   void CrossFadeImmediately();
 
-  void addControl(bool isToggle, bool newToggleColumn, bool isPrimary);
-  void addControlInLayout(bool isToggle, bool newToggleColumn) {
-    addControl(isToggle, newToggleColumn, true);
-    if (_miDualLayout.get_active())
-      addControl(isToggle, newToggleColumn, false);
+  void addControl(FaderState &state, bool isUpper);
+  void addControlInLayout(FaderState &state) {
+    addControl(state, true);
+    if (_miDualLayout.get_active()) addControl(state, false);
   }
   void loadState();
   size_t getFadeInSpeed() const;
   size_t getFadeOutSpeed() const;
 
-  theatre::Management *_management;
+  /// The fader menu is stored here so that only one menu is allocated at one
+  /// time (instead of each fader allocating its own menu)
+  std::unique_ptr<ControlMenu> control_menu_;
+  theatre::Management &_management;
   size_t _keyRowIndex;
 
   Gtk::HBox _hBox;

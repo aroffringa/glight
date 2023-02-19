@@ -16,13 +16,16 @@
 
 namespace glight::gui {
 
+class ControlMenu;
+
 /**
  * @author Andre Offringa
  */
 class FaderWidget final : public ControlWidget {
  public:
-  FaderWidget(theatre::Management &management, EventTransmitter &eventHub,
-              ControlMode mode, char key);
+  FaderWidget(FaderWindow &fader_window, FaderState &state, ControlMode mode,
+              char key);
+  ~FaderWidget();
 
   void Toggle() override;
   void FullOn() override;
@@ -40,11 +43,14 @@ class FaderWidget final : public ControlWidget {
   void ShowFadeButtons(bool mouse_in);
   void onScaleChange();
   void onOnButtonClicked();
-  bool onNameLabelClicked(GdkEventButton *event);
   bool onFlashButtonPressed(GdkEventButton *event);
   bool onFlashButtonReleased(GdkEventButton *event);
   void onFadeUp();
   void onFadeDown();
+  bool HandleRightPress(GdkEventButton *event);
+  bool HandleRightRelease(GdkEventButton *event);
+  void MakeMenu();
+  void UpdateDisplaySettings();
 
   Gtk::EventBox _mouseInBox;
   Gtk::Overlay _overlay;
@@ -53,12 +59,12 @@ class FaderWidget final : public ControlWidget {
   Gtk::VScale _scale;
   Gtk::Button _fadeDownButton;
   Gtk::Button _flashButton;
-  IconButton _onCheckButton;
+  IconButton _checkButton;
   Gtk::EventBox _labelEventBox;
-  Gtk::Label _nameLabel;
-
+  Gtk::Label _nameLabel{"<..>"};
   bool _mouseIn = false;
   bool _holdUpdates = false;
+  sigc::connection update_display_settings_connection_;
 };
 
 }  // namespace glight::gui

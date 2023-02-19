@@ -3,7 +3,7 @@
 
 #include "../eventtransmitter.h"
 #include "../fixtureselection.h"
-#include "../guistate.h"
+#include "../state/guistate.h"
 #include "../../theatre/forwards.h"
 
 #include <gtkmm/box.h>
