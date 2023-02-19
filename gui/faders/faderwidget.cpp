@@ -3,8 +3,6 @@
 #include "controlmenu.h"
 #include "faderwindow.h"
 
-#include "../dialogs/inputselectdialog.h"
-
 #include "../state/faderstate.h"
 
 #include "../../theatre/controllable.h"
@@ -20,11 +18,10 @@ using theatre::ControlValue;
 
 FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
                          ControlMode mode, char key)
-    : ControlWidget(fader_window, mode),
+    : ControlWidget(fader_window, state, mode),
       _scale(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
              (ControlValue::MaxUInt() + 1) / 100),
-      _flashButton(std::string(1, key)),
-      _state(state) {
+      _flashButton(std::string(1, key)) {
   if (GetMode() == ControlMode::Primary) {
     _fadeUpButton.set_image_from_icon_name("go-up");
     _fadeUpButton.signal_clicked().connect([&]() { onFadeUp(); });
@@ -109,9 +106,14 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
 
   add(_box);
   _box.show();
+
+  update_display_settings_connection_ =
+      State().SignalChange().connect([&]() { UpdateDisplaySettings(); });
 }
 
-FaderWidget::~FaderWidget() = default;
+FaderWidget::~FaderWidget() {
+  update_display_settings_connection_.disconnect();
+}
 
 void FaderWidget::onOnButtonClicked() {
   if (!_holdUpdates) {
@@ -143,7 +145,7 @@ void FaderWidget::onScaleChange() {
     const double value = _scale.get_value();
     _checkButton.SetActive(value != 0);
     if (_mouseIn && GetSourceValue() != nullptr &&
-        _state.OverlayFadeButtons()) {
+        State().OverlayFadeButtons()) {
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
     }
@@ -151,13 +153,6 @@ void FaderWidget::onScaleChange() {
 
     setImmediateValue(_scale.get_value());
     SignalValueChange().emit(_scale.get_value());
-  }
-}
-
-void FaderWidget::ShowAssignDialog() {
-  InputSelectDialog dialog(GetManagement(), GetEventHub());
-  if (dialog.run() == Gtk::RESPONSE_OK) {
-    Assign(dialog.SelectedInputPreset(), true);
   }
 }
 
@@ -195,7 +190,7 @@ void FaderWidget::MoveSlider() {
     const unsigned value = GetSingleSourceValue().Value().UInt();
     _scale.set_value(value);
     _checkButton.SetActive(value != 0);
-    if (_mouseIn && _state.OverlayFadeButtons()) {
+    if (_mouseIn && State().OverlayFadeButtons()) {
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
     }
@@ -223,7 +218,7 @@ void FaderWidget::ShowFadeButtons(bool mouse_in) {
   if (mouse_in != _mouseIn) {
     _mouseIn = mouse_in;
     if (mouse_in && GetSourceValue() != nullptr &&
-        _state.OverlayFadeButtons()) {
+        State().OverlayFadeButtons()) {
       const double value = _scale.get_value();
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
@@ -241,31 +236,26 @@ bool FaderWidget::HandleRightPress(GdkEventButton *event) {
 bool FaderWidget::HandleRightRelease(GdkEventButton *event) {
   if (event->button == 3) {  // right button?
     std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
-    menu = std::make_unique<ControlMenu>(_state);
+    menu = std::make_unique<ControlMenu>(State());
     menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
-    menu->SignalToggleName().connect([&]() {
-      _nameLabel.set_visible(menu->DisplayName());
-      _state.SetDisplayName(menu->DisplayName());
-      SignalDisplayChanged().emit();
-    });
-    menu->SignalToggleFlashButton().connect([&]() {
-      _flashButton.set_visible(menu->DisplayFlashButton());
-      _state.SetDisplayFlashButton(menu->DisplayFlashButton());
-      SignalDisplayChanged().emit();
-    });
-    menu->SignalToggleCheckButton().connect([&]() {
-      _checkButton.set_visible(menu->DisplayCheckButton());
-      _state.SetDisplayCheckButton(menu->DisplayCheckButton());
-      SignalDisplayChanged().emit();
-    });
-    menu->SignalToggleFadeButtons().connect([&]() {
-      _state.SetOverlayFadeButtons(menu->OverlayFadeButtons());
-      SignalDisplayChanged().emit();
-    });
+    menu->SignalToggleName().connect(
+        [&]() { State().SetDisplayName(menu->DisplayName()); });
+    menu->SignalToggleFlashButton().connect(
+        [&]() { State().SetDisplayFlashButton(menu->DisplayFlashButton()); });
+    menu->SignalToggleCheckButton().connect(
+        [&]() { State().SetDisplayCheckButton(menu->DisplayCheckButton()); });
+    menu->SignalToggleFadeButtons().connect(
+        [&]() { State().SetOverlayFadeButtons(menu->OverlayFadeButtons()); });
     menu->popup(event->button, event->time);
     return true;
   }
   return false;
+}
+
+void FaderWidget::UpdateDisplaySettings() {
+  _nameLabel.set_visible(State().DisplayName());
+  _flashButton.set_visible(State().DisplayFlashButton());
+  _checkButton.set_visible(State().DisplayCheckButton());
 }
 
 }  // namespace glight::gui

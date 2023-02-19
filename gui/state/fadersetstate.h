@@ -1,6 +1,8 @@
 #ifndef GLIGHT_FADER_SET_STATE_H_
 #define GLIGHT_FADER_SET_STATE_H_
 
+#include <memory>
+
 #include "faderstate.h"
 
 namespace glight::theatre {
@@ -47,19 +49,19 @@ class FaderSetState {
   size_t height = 0;
 
   bool IsAssigned(const theatre::SourceValue *p) const {
-    for (const FaderState &fader : faders)
-      if (p == fader.GetSourceValue()) return true;
+    for (const std::unique_ptr<FaderState> &fader : faders)
+      if (p == fader->GetSourceValue()) return true;
     return false;
   }
 
   FaderState &AddState(bool is_toggle_button, bool new_toggle_column) {
-    FaderState &state = faders.emplace_back();
+    FaderState &state = *faders.emplace_back(std::make_unique<FaderState>());
     state.SetIsToggleButton(is_toggle_button);
     state.SetNewToggleButtonColumn(new_toggle_column);
     return state;
   }
 
-  std::vector<FaderState> faders;
+  std::vector<std::unique_ptr<FaderState>> faders;
 };
 
 }  // namespace glight::gui

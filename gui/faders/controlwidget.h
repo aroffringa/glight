@@ -10,6 +10,7 @@
 namespace glight::gui {
 
 class EventTransmitter;
+class FaderState;
 class FaderWindow;
 
 enum class ControlMode { Primary, Secondary };
@@ -21,7 +22,7 @@ enum class ControlMode { Primary, Secondary };
  */
 class ControlWidget : public Gtk::Bin {
  public:
-  ControlWidget(FaderWindow &fader_window, ControlMode mode);
+  ControlWidget(FaderWindow &fader_window, FaderState &state, ControlMode mode);
   ~ControlWidget();
 
   /**
@@ -60,7 +61,6 @@ class ControlWidget : public Gtk::Bin {
 
   sigc::signal<void(double)> &SignalValueChange() { return _signalValueChange; }
   sigc::signal<void> &SignalAssigned() { return _signalAssigned; }
-  sigc::signal<void> &SignalDisplayChanged() { return _signalDisplayChanged; }
 
   theatre::SourceValue *GetSourceValue() const { return _sourceValue; }
   void Unassign() { Assign(nullptr, true); }
@@ -74,6 +74,7 @@ class ControlWidget : public Gtk::Bin {
 
  protected:
   virtual void OnAssigned(bool moveFader) = 0;
+  void ShowAssignDialog();
 
   /**
    * Set the value after a fader change. This function
@@ -92,11 +93,15 @@ class ControlWidget : public Gtk::Bin {
   theatre::SingleSourceValue &GetSingleSourceValue();
   FaderWindow &GetFaderWindow() { return fader_window_; }
 
+ protected:
+  FaderState &State() { return _state; }
+
  private:
   void OnTheatreUpdate();
 
   double _fadeUpSpeed, _fadeDownSpeed;
   ControlMode _mode;
+  FaderState &_state;
   theatre::SourceValue *_sourceValue = nullptr;
   FaderWindow &fader_window_;
   theatre::Management &_management;

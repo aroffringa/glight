@@ -17,8 +17,6 @@
 namespace glight::gui {
 
 class ControlMenu;
-class FaderState;
-class FaderWindow;
 
 /**
  * @author Andre Offringa
@@ -45,7 +43,6 @@ class FaderWidget final : public ControlWidget {
   void ShowFadeButtons(bool mouse_in);
   void onScaleChange();
   void onOnButtonClicked();
-  void ShowAssignDialog();
   bool onFlashButtonPressed(GdkEventButton *event);
   bool onFlashButtonReleased(GdkEventButton *event);
   void onFadeUp();
@@ -53,6 +50,7 @@ class FaderWidget final : public ControlWidget {
   bool HandleRightPress(GdkEventButton *event);
   bool HandleRightRelease(GdkEventButton *event);
   void MakeMenu();
+  void UpdateDisplaySettings();
 
   Gtk::EventBox _mouseInBox;
   Gtk::Overlay _overlay;
@@ -64,11 +62,9 @@ class FaderWidget final : public ControlWidget {
   IconButton _checkButton;
   Gtk::EventBox _labelEventBox;
   Gtk::Label _nameLabel{"<..>"};
-
-  FaderState &_state;
-
   bool _mouseIn = false;
   bool _holdUpdates = false;
+  sigc::connection update_display_settings_connection_;
 };
 
 }  // namespace glight::gui

@@ -13,11 +13,11 @@
 
 namespace glight::gui {
 
-class EventTransmitter;
-
 class ToggleWidget final : public ControlWidget {
  public:
-  ToggleWidget(FaderWindow &fader_window, ControlMode mode, char key);
+  ToggleWidget(FaderWindow &fader_window, FaderState &state, ControlMode mode,
+               char key);
+  ~ToggleWidget();
 
   virtual void Toggle() override;
   virtual void FullOn() override;
@@ -36,11 +36,14 @@ class ToggleWidget final : public ControlWidget {
 
   bool _holdUpdates;
 
+  sigc::connection update_display_settings_connection_;
+
   virtual void OnAssigned(bool moveFader) override;
   void onIconClicked();
-  bool onNameLabelClicked(GdkEventButton *event);
   bool onFlashButtonPressed(GdkEventButton *event);
   bool onFlashButtonReleased(GdkEventButton *event);
+  bool HandleRightRelease(GdkEventButton *event);
+  void UpdateDisplaySettings();
 };
 
 }  // namespace glight::gui

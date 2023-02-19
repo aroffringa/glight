@@ -8,10 +8,14 @@
 #include "../../theatre/presetvalue.h"
 #include "../../theatre/sourcevalue.h"
 
+#include "../dialogs/inputselectdialog.h"
+
 namespace glight::gui {
 
-ControlWidget::ControlWidget(FaderWindow &fader_window, ControlMode mode)
+ControlWidget::ControlWidget(FaderWindow &fader_window, FaderState &state,
+                             ControlMode mode)
     : _mode(mode),
+      _state(state),
       fader_window_(fader_window),
       _management(fader_window.GetManagement()),
       _eventHub(fader_window.GetEventTransmitter()),
@@ -69,6 +73,13 @@ void ControlWidget::OnTheatreUpdate() {
 
 theatre::SingleSourceValue &ControlWidget::GetSingleSourceValue() {
   return _mode == ControlMode::Primary ? _sourceValue->A() : _sourceValue->B();
+}
+
+void ControlWidget::ShowAssignDialog() {
+  InputSelectDialog dialog(GetManagement(), GetEventHub());
+  if (dialog.run() == Gtk::RESPONSE_OK) {
+    Assign(dialog.SelectedInputPreset(), true);
+  }
 }
 
 }  // namespace glight::gui

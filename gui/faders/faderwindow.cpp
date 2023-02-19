@@ -130,7 +130,8 @@ void FaderWindow::LoadNew() {
   _guiState.FaderSets().emplace_back(std::make_unique<FaderSetState>());
   _state = _guiState.FaderSets().back().get();
   _state->name = "Unnamed fader setup";
-  for (size_t i = 0; i != 10; ++i) _state->faders.emplace_back();
+  for (size_t i = 0; i != 10; ++i)
+    _state->faders.emplace_back(std::make_unique<FaderState>());
 
   _state->width = std::max(100, get_width());
   _state->height = std::max(300, get_height());
@@ -203,16 +204,16 @@ void FaderWindow::loadState() {
         sigc::mem_fun(*this, &FaderWindow::onCrossFaderChange));
     _crossFader->show();
   }
-  for (FaderState &state : _state->faders) {
-    addControlInLayout(state);
+  for (std::unique_ptr<FaderState> &state : _state->faders) {
+    addControlInLayout(*state);
   }
 
   resize(_state->width, _state->height);
 
   for (size_t i = 0; i != _state->faders.size(); ++i) {
-    _upperControls[i]->Assign(_state->faders[i].GetSourceValue(), true);
+    _upperControls[i]->Assign(_state->faders[i]->GetSourceValue(), true);
     if (_miDualLayout.get_active())
-      _lowerControls[i]->Assign(_state->faders[i].GetSourceValue(), true);
+      _lowerControls[i]->Assign(_state->faders[i]->GetSourceValue(), true);
   }
 }
 
@@ -373,7 +374,7 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
   const ControlMode controlMode =
       isSecondary ? ControlMode::Secondary : ControlMode::Primary;
   if (state.IsToggleButton()) {
-    control = std::make_unique<ToggleWidget>(*this, controlMode, key);
+    control = std::make_unique<ToggleWidget>(*this, state, controlMode, key);
     nameLabel = nullptr;
   } else {
     control = std::make_unique<FaderWidget>(*this, state, controlMode, key);
@@ -413,7 +414,7 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
 }
 
 void FaderWindow::removeFader() {
-  FaderState &state = _state->faders.back();
+  FaderState &state = *_state->faders.back();
   const bool hasLower = _miDualLayout.get_active();
   if (state.IsToggleButton() && state.NewToggleButtonColumn()) {
     _upperColumns.pop_back();
@@ -498,7 +499,7 @@ void FaderWindow::onControlAssigned(size_t widgetIndex) {
   if (_recursionLock.IsFirst()) {
     theatre::SourceValue *source =
         _upperControls[widgetIndex]->GetSourceValue();
-    _state->faders[widgetIndex].SetSourceValue(source);
+    _state->faders[widgetIndex]->SetSourceValue(source);
     if (_miDualLayout.get_active()) {
       _lowerControls[widgetIndex]->Assign(source, true);
     }
