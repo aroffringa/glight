@@ -7,7 +7,8 @@
 #include "components/objectbrowser.h"
 #include "components/reorderwidget.h"
 
-#include "../theatre/autodesign.h"
+#include "../theatre/design/autodesign.h"
+
 #include "../theatre/forwards.h"
 
 #include <gtkmm/box.h>
@@ -52,7 +53,8 @@ class DesignWizard : public Gtk::Window {
     Page4_3_ShiftingColors,
     Page4_4_VUMeter,
     Page4_5_ColorPreset,
-    Page4_6_Increasing
+    Page4_6_Increasing,
+    Page4_7_Rotation
   };
 
   void onNextClicked();
@@ -64,6 +66,7 @@ class DesignWizard : public Gtk::Window {
   void initPage4_4VUMeter();
   void initPage4_5ColorPreset();
   void initPage4_6Increasing();
+  void initPage4_7Rotation();
   void initPage4Destination(const std::string &name);
   theatre::Folder &getCurrentFolder() const;
   theatre::Folder &makeDestinationFolder() const;
@@ -74,7 +77,7 @@ class DesignWizard : public Gtk::Window {
   void onRemoveControllable();
   void onControllableSelected();
 
-  theatre::AutoDesign::ColorDeduction colorDeduction() const;
+  theatre::ColorDeduction colorDeduction() const;
 
   EventTransmitter &_eventHub;
   theatre::Management &_management;
@@ -100,7 +103,7 @@ class DesignWizard : public Gtk::Window {
   Gtk::VBox _vBoxPage3, _vBoxPage3Type, _vBoxPage3Deduction;
   Gtk::Frame _typeFrameP3, _deductionFrameP3;
   Gtk::RadioButton _colorPresetBtn, _runningLightBtn, _singleColorBtn,
-      _shiftColorsBtn, _increaseBtn, _vuMeterBtn;
+      _shiftColorsBtn, _increaseBtn, _rotationBtn, _vuMeterBtn;
   Gtk::CheckButton _deduceWhite, _deduceAmber, _deduceUV, _deduceLime;
 
   // Page 4 common widgets
@@ -134,6 +137,9 @@ class DesignWizard : public Gtk::Window {
   // 4_6
   Gtk::RadioButton _incForwardRB, _incBackwardRB, _incForwardReturnRB,
       _incBackwardReturnRB;
+
+  // 4_7
+  Gtk::RadioButton _rotForwardRB, _rotBackwardRB, _rotForwardReturnRB;
 
   Gtk::ButtonBox _buttonBox;
   Gtk::Button _nextButton;

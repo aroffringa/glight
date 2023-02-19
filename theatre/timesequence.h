@@ -146,9 +146,9 @@ class TimeSequence final : public Controllable {
 
   std::vector<Step> &Steps() { return _steps; }
 
-  void AddStep(Controllable &controllable, size_t input) {
+  Step &AddStep(Controllable &controllable, size_t input) {
     _sequence.Add(controllable, input);
-    _steps.emplace_back();
+    return _steps.emplace_back();
   }
 
   void RemoveStep(size_t index) {

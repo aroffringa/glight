@@ -90,7 +90,7 @@ class ColorSequenceWidget : public Gtk::VBox {
   }
 
   void SetMinCount(size_t minCount) {
-    if (_maxCount < minCount) SetMaxCount(minCount);
+    if (_maxCount < minCount && _maxCount != 0) SetMaxCount(minCount);
     while (_widgets.size() < minCount) onIncreaseColors();
     _minCount = minCount;
     _minButton.set_sensitive(_widgets.size() > _minCount);
@@ -99,7 +99,7 @@ class ColorSequenceWidget : public Gtk::VBox {
   }
 
   void SetMaxCount(size_t maxCount) {
-    if (_minCount > maxCount) SetMinCount(maxCount);
+    if (_minCount > maxCount && maxCount != 0) SetMinCount(maxCount);
     _maxCount = maxCount;
     if (_maxCount != 0) {
       if (_widgets.size() > _maxCount) {

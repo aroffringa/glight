@@ -113,7 +113,6 @@ set(SYSTEMFILES
 )
 
 set(THEATREFILES
-  theatre/autodesign.cpp
   theatre/beatfinder.cpp
   theatre/effect.cpp
   theatre/fixture.cpp
@@ -127,6 +126,9 @@ set(THEATREFILES
   theatre/presetvalue.cpp
   theatre/scene.cpp
   theatre/theatre.cpp
+  theatre/design/autodesign.cpp
+  theatre/design/colorpreset.cpp
+  theatre/design/rotation.cpp
   theatre/effects/hue_saturation_lightness_effect.cpp
   theatre/properties/propertyset.cpp)
   
