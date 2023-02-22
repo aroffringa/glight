@@ -50,7 +50,7 @@ TimeSequence &MakeRotation(Management &management, Folder &destination,
     TimeSequence::Step &step2 = result.AddStep(pc2, 0);
     pc2.SetName(destination.GetAvailableName(result.Name() + "_"));
     step2.transition.SetLengthInMs(0);
-    step2.trigger.SetDelayInMs(500);
+    step2.trigger.SetDelayInMs(0);
   }
   if (type == RotationType::ForwardBackward) {
   }
