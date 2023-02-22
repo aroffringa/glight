@@ -17,29 +17,26 @@ class DurationInput : public Gtk::HBox {
   DurationInput(const std::string &label, double value);
 
   sigc::signal<void(double)> &SignalValueChanged() {
-    return _signalValueChanged;
+    return signal_value_changed_;
   }
 
-  double Value() const { return atof(_entry.get_text().c_str()) * 1e3; }
+  double Value() const { return atof(entry_.get_text().c_str()) * 1e3; }
 
   void SetValue(double newValue);
 
  private:
-  void initialize(double value);
+  void Initialize(double value);
 
-  static double valueToScale(double value);
+  static double ValueToScale(double value);
   void onScaleChanged();
-  void onEntryChanged();
-  void setEntry(double value);
+  void OnEntryChanged();
+  void SetEntry(double value);
 
-  static constexpr size_t NVALUES = 21;
-  static const double values[NVALUES];
-
-  Gtk::Label _label;
-  Gtk::HScale _scale;
-  Gtk::Entry _entry;
-  RecursionLock _recursionLock;
-  sigc::signal<void(double)> _signalValueChanged;
+  Gtk::Label label_;
+  Gtk::HScale scale_;
+  Gtk::Entry entry_;
+  RecursionLock recursion_lock_;
+  sigc::signal<void(double)> signal_value_changed_;
 };
 
 }  // namespace glight::gui

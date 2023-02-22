@@ -1,5 +1,6 @@
 #include "beatfinder.h"
 
+#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -80,6 +81,10 @@ void BeatFinder::open() {
   _audioLevel = 0;
   uint16_t nAudioLevels = 0;
 
+  unsigned samples_since_last_beat = 0;
+  unsigned last_beat_duration = std::numeric_limits<unsigned>::max();
+  enum class Stage { Start, Quarter, Half, ThreeQuarter } stage = Stage::Start;
+
   while (!_isStopping) {
     rc = snd_pcm_readi(_handle, alsaBuffer.data(), period_size);
     if (rc == -EPIPE) {
@@ -131,15 +136,48 @@ void BeatFinder::open() {
         // 'float' precision does not run out. With 8 beats per second, this
         // would still take 24h to run out.
         if (beat.value < (60.0 * 60.0 * 24.0 * 8.0))
-          ++beat.value;
+          beat.value = std::floor(beat.value + 1);
         else
           beat.value = 0.0;
         _beat = beat;  // atomic store
+        last_beat_duration = samples_since_last_beat;
+        samples_since_last_beat = 0;
+        stage = Stage::Start;
       }
     } else if (is_silence) {
       Beat beat = _beat;  // atomic load
       beat.confidence = 0.0;
       _beat = beat;  // atomic load
+    }
+
+    ++samples_since_last_beat;
+    switch (stage) {
+      case Stage::Start:
+        if (samples_since_last_beat * 4 > last_beat_duration) {
+          stage = Stage::Quarter;
+          Beat beat = _beat;  // atomic load
+          beat.value += 0.25;
+          _beat = beat;
+        }
+        break;
+      case Stage::Quarter:
+        if (samples_since_last_beat * 2 > last_beat_duration) {
+          stage = Stage::Half;
+          Beat beat = _beat;  // atomic load
+          beat.value += 0.25;
+          _beat = beat;
+        }
+        break;
+      case Stage::Half:
+        if (samples_since_last_beat * 4 > last_beat_duration * 3) {
+          stage = Stage::ThreeQuarter;
+          Beat beat = _beat;  // atomic load
+          beat.value += 0.25;
+          _beat = beat;
+        }
+        break;
+      case Stage::ThreeQuarter:
+        break;
     }
   }
   snd_pcm_drop(_handle);

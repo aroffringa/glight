@@ -5,6 +5,7 @@
 
 #include "../../theatre/forwards.h"
 
+#include "../components/beatinput.h"
 #include "../components/durationinput.h"
 #include "../components/transitiontypebox.h"
 
@@ -39,7 +40,7 @@ class ChasePropertiesWindow : public PropertiesWindow {
   void onTransitionSpeedChanged(double newValue);
   void onTransitionTypeChanged(theatre::TransitionType type);
   void onSyncCountChanged();
-  void onBeatSpeedChanged();
+  void onBeatSpeedChanged(double value);
 
   void onUpdateControllables();
   void onToTimeSequenceClicked();
@@ -60,7 +61,7 @@ class ChasePropertiesWindow : public PropertiesWindow {
 
   Gtk::RadioButton _beatTriggerCheckButton;
   Gtk::Label _beatSpeedLabel;
-  Gtk::HScale _beatSpeed;
+  BeatInput _beatSpeed;
 
   Gtk::HButtonBox _buttonBox;
   Gtk::Button _toTimeSequenceButton, _closeButton;
