@@ -33,12 +33,11 @@ class BeatFinder {
   virtual ~BeatFinder() { close(); }
 
   void Start() {
-    AlsaThread alsaThreadFunc(*this);
-    _alsaThread.reset(new std::thread(alsaThreadFunc));
+    _alsaThread = std::make_unique<std::thread>([&]() { TryOpen(); });
   }
 
   void GetBeatValue(double &beatValue, double &confidence) {
-    Beat beat = _beat;
+    const Beat beat = _beat;
     beatValue = beat.value;
     confidence = beat.confidence;
   }
@@ -46,19 +45,13 @@ class BeatFinder {
   uint16_t GetAudioLevel() const { return _audioLevel; }
 
  private:
-  struct AlsaThread {
-   public:
-    BeatFinder &_player;
-    AlsaThread(BeatFinder &player) : _player(player) {}
-    void operator()() {
-      try {
-        _player.open();
-      } catch (std::exception &e) {
-        std::cout
-            << "Could not open alsa device: beat finder is not working.\n";
-      }
+  void TryOpen() {
+    try {
+      open();
+    } catch (std::exception &e) {
+      std::cout << "Could not open alsa device: beat finder is not working.\n";
     }
-  };
+  }
 
   snd_pcm_t *_handle;
   unsigned _alsaPeriodSize, _alsaBufferSize;
@@ -67,10 +60,10 @@ class BeatFinder {
   bool _isOpen;
   std::mutex _mutex;
   struct Beat {
-    Beat() : value(0.0), confidence(0.0) {}
+    Beat() = default;
     Beat(float c, float v) : value(v), confidence(c) {}
-    float value;
-    float confidence;
+    float value = 0.0;
+    float confidence = 0.0;
   };
   std::atomic<Beat> _beat;
   uint32_t _audioLevelAccumulator;

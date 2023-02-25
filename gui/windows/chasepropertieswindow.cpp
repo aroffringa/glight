@@ -24,7 +24,7 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
 
       _beatTriggerCheckButton("Trigger by beat"),
       _beatSpeedLabel("Beats per trigger :"),
-      _beatSpeed(0.25, 4.0, 0.25),
+      _beatSpeed(1.0),
 
       _toTimeSequenceButton("Convert to time sequence"),
       _closeButton("Close"),
@@ -75,8 +75,8 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
   _grid.attach(_beatSpeedLabel, 1, 6, 1, 1);
   _grid.attach(_beatSpeed, 2, 6, 1, 1);
   _beatSpeed.set_hexpand(true);
-  _beatSpeed.set_value(1.0);
-  _beatSpeed.signal_value_changed().connect(
+  _beatSpeed.SetValue(1.0);
+  _beatSpeed.SignalValueChanged().connect(
       sigc::mem_fun(*this, &ChasePropertiesWindow::onBeatSpeedChanged));
 
   _grid.set_hexpand(true);
@@ -149,9 +149,9 @@ void ChasePropertiesWindow::onSyncCountChanged() {
   _chase->GetTrigger().SetDelayInSyncs(_synchronizationsCount.get_value());
 }
 
-void ChasePropertiesWindow::onBeatSpeedChanged() {
+void ChasePropertiesWindow::onBeatSpeedChanged(double value) {
   std::lock_guard<std::mutex> lock(_management->Mutex());
-  _chase->GetTrigger().SetDelayInBeats(_beatSpeed.get_value());
+  _chase->GetTrigger().SetDelayInBeats(value);
 }
 
 void ChasePropertiesWindow::loadChaseInfo(theatre::Chase &chase) {
@@ -165,7 +165,7 @@ void ChasePropertiesWindow::loadChaseInfo(theatre::Chase &chase) {
   lock.unlock();
   _triggerDuration.SetValue(triggerSpeed);
   _transitionDuration.SetValue(transitionSpeed);
-  _beatSpeed.set_value(beatSpeed);
+  _beatSpeed.SetValue(beatSpeed);
   _synchronizationsCount.set_value(syncSpeed);
   switch (triggerType) {
     case theatre::TriggerType::Delay:

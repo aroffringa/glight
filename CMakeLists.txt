@@ -71,6 +71,7 @@ set(GUIFILES
   gui/objectlistframe.cpp
   gui/renderengine.cpp
   gui/components/audiowidget.cpp
+  gui/components/beatinput.cpp
   gui/components/colorselectwidget.cpp
   gui/components/colorsequencewidget.cpp
   gui/components/durationinput.cpp

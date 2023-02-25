@@ -1,5 +1,5 @@
-#ifndef DURATION_INPUT_H
-#define DURATION_INPUT_H
+#ifndef BEAT_INPUT_H
+#define BEAT_INPUT_H
 
 #include <gtkmm/box.h>
 #include <gtkmm/entry.h>
@@ -10,31 +10,31 @@
 
 namespace glight::gui {
 
-class DurationInput : public Gtk::HBox {
+class BeatInput : public Gtk::HBox {
  public:
-  DurationInput(double value);
+  BeatInput(double value);
 
-  DurationInput(const std::string &label, double value);
+  BeatInput(const std::string &label, double value);
 
   sigc::signal<void(double)> &SignalValueChanged() {
     return signal_value_changed_;
   }
 
-  double Value() const { return atof(entry_.get_text().c_str()) * 1e3; }
+  double Value() const { return ScaleToValue(scale_.get_value()); }
 
-  void SetValue(double newValue);
+  void SetValue(double new_value);
 
  private:
   void Initialize(double value);
 
   static double ValueToScale(double value);
-  void onScaleChanged();
-  void OnEntryChanged();
-  void SetEntry(double value);
+  static double ScaleToValue(size_t index);
+  void OnScaleChanged();
+  void SetValueLabel(unsigned index);
 
-  Gtk::Label label_;
+  Gtk::Label caption_label_;
   Gtk::HScale scale_;
-  Gtk::Entry entry_;
+  Gtk::Label value_label_;
   RecursionLock recursion_lock_;
   sigc::signal<void(double)> signal_value_changed_;
 };
