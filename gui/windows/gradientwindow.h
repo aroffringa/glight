@@ -7,7 +7,7 @@ namespace glight::gui {
 class GradientWindow : public Gtk::Window {
  public:
   GradientWindow(size_t maxCount)
-      : _colorSequence(this, false),
+      : _colorSequence(this, false, false),
         _cancelButton("Cancel"),
         _okayButton("Okay"),
         _result(false) {

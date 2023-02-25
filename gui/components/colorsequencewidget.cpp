@@ -1,9 +1,12 @@
 #include "colorsequencewidget.h"
 
-#include "../windows/gradientwindow.h"
+#include <algorithm>
+#include <random>
 
 #include <glibmm/main.h>
 #include <gtkmm/main.h>
+
+#include "../windows/gradientwindow.h"
 
 namespace glight::gui {
 
@@ -34,6 +37,12 @@ void ColorSequenceWidget::onGradient() {
       }
     }
   }
+}
+
+void ColorSequenceWidget::Shuffle() {
+  std::vector<glight::theatre::Color> colors = GetColors();
+  std::shuffle(colors.begin(), colors.end(), std::random_device());
+  SetColors(colors);
 }
 
 }  // namespace glight::gui
