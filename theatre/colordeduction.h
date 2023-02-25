@@ -5,6 +5,13 @@
 
 namespace glight::theatre {
 
+struct ColorDeduction {
+  bool whiteFromRGB;
+  bool amberFromRGB;
+  bool uvFromRGB;
+  bool limeFromRGB;
+};
+
 inline ControlValue DeduceWhite(ControlValue r, ControlValue g,
                                 ControlValue b) {
   return Min(r, g, b);

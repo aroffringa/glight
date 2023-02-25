@@ -446,6 +446,7 @@ void VisualizationWindow::onAddFixtures() {
 
 void VisualizationWindow::onRemoveFixtures() {
   for (theatre::Fixture *fixture : _selectedFixtures) {
+    std::lock_guard<std::mutex> lock(_management->Mutex());
     _management->RemoveFixture(*fixture);
   }
   _selectedFixtures.clear();

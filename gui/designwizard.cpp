@@ -3,6 +3,10 @@
 
 #include "components/colorselectwidget.h"
 
+#include "../theatre/design/colorpreset.h"
+#include "../theatre/design/rotation.h"
+
+#include "../theatre/colordeduction.h"
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
 #include "../theatre/folder.h"
@@ -32,9 +36,10 @@ DesignWizard::DesignWizard(theatre::Management &management,
       _deductionFrameP3("Colour deduction"),
       _colorPresetBtn("Colour preset"),
       _runningLightBtn("Running light"),
-      _singleColorBtn("Random around single colour"),
+      _singleColorBtn("Color variation"),
       _shiftColorsBtn("Shifting colours"),
       _increaseBtn("Increasing colours"),
+      _rotationBtn("Rotating colours"),
       _vuMeterBtn("VU meter"),
       _deduceWhite("White from RGB"),
       _deduceAmber("Amber from RGB"),
@@ -64,6 +69,9 @@ DesignWizard::DesignWizard(theatre::Management &management,
       _incBackwardRB("Backward direction"),
       _incForwardReturnRB("Forward and return"),
       _incBackwardReturnRB("Backward and return"),
+      _rotForwardRB("Forward direction"),
+      _rotBackwardRB("Backward direction"),
+      _rotForwardReturnRB("Forward and return"),
       _nextButton("Next"),
       _currentPage(Page1_SelFixtures) {
   initPage1();
@@ -138,6 +146,8 @@ void DesignWizard::initPage2() {
   _vBoxPage3Type.pack_start(_shiftColorsBtn);
   _increaseBtn.set_group(group);
   _vBoxPage3Type.pack_start(_increaseBtn);
+  _rotationBtn.set_group(group);
+  _vBoxPage3Type.pack_start(_rotationBtn);
   _vuMeterBtn.set_group(group);
   _vBoxPage3Type.pack_start(_vuMeterBtn);
 
@@ -230,6 +240,18 @@ void DesignWizard::initPage4_6Increasing() {
   _vBoxPage4.pack_start(_incForwardReturnRB, false, false);
   _incBackwardReturnRB.set_group(group);
   _vBoxPage4.pack_start(_incBackwardReturnRB, false, false);
+}
+
+void DesignWizard::initPage4_7Rotation() {
+  initPage4Destination("Rotation");
+  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
+  Gtk::RadioButtonGroup group;
+  _rotForwardRB.set_group(group);
+  _vBoxPage4.pack_start(_rotForwardRB, false, false);
+  _rotBackwardRB.set_group(group);
+  _vBoxPage4.pack_start(_rotBackwardRB, false, false);
+  _rotForwardReturnRB.set_group(group);
+  _vBoxPage4.pack_start(_rotForwardReturnRB, false, false);
 }
 
 void DesignWizard::initPage4Destination(const std::string &name) {
@@ -333,30 +355,38 @@ void DesignWizard::onNextClicked() {
         _mainBox.pack_start(_vBoxPage4, true, true);
         _vBoxPage4.show_all();
         _currentPage = Page4_4_VUMeter;
-      } else {
+      } else if (_increaseBtn.get_active()) {
         initPage4_6Increasing();
         _colorsWidgetP4.SetMinCount(_selectedControllables.size());
         _colorsWidgetP4.SetMaxCount(_selectedControllables.size());
         _mainBox.pack_start(_vBoxPage4, true, true);
         _vBoxPage4.show_all();
         _currentPage = Page4_6_Increasing;
+      } else {  // _rotationBtn.get_active()
+        initPage4_7Rotation();
+        _colorsWidgetP4.SetMinCount(_selectedControllables.size());
+        _colorsWidgetP4.SetMaxCount(0);
+        _mainBox.pack_start(_vBoxPage4, true, true);
+        _vBoxPage4.show_all();
+        _currentPage = Page4_7_Rotation;
       }
       break;
 
     case Page4_1_RunningLight: {
-      enum AutoDesign::RunType runType;
+      using theatre::RunType;
+      RunType runType;
       if (_increasingRunRB.get_active())
-        runType = AutoDesign::IncreasingRun;
+        runType = RunType::IncreasingRun;
       else if (_decreasingRunRB.get_active())
-        runType = AutoDesign::DecreasingRun;
+        runType = RunType::DecreasingRun;
       else if (_backAndForthRunRB.get_active())
-        runType = AutoDesign::BackAndForthRun;
+        runType = RunType::BackAndForthRun;
       else if (_inwardRunRB.get_active())
-        runType = AutoDesign::InwardRun;
+        runType = RunType::InwardRun;
       else if (_outwardRunRB.get_active())
-        runType = AutoDesign::OutwardRun;
+        runType = RunType::OutwardRun;
       else  // if(_randomRunRB.get_active())
-        runType = AutoDesign::RandomRun;
+        runType = RunType::RandomRun;
       AutoDesign::MakeRunningLight(
           _management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetColors(), colorDeduction(), runType);
@@ -374,15 +404,16 @@ void DesignWizard::onNextClicked() {
       break;
 
     case Page4_3_ShiftingColors: {
-      enum AutoDesign::ShiftType shiftType;
+      using theatre::ShiftType;
+      ShiftType shiftType;
       if (_shiftIncreasingRB.get_active())
-        shiftType = AutoDesign::IncreasingShift;
+        shiftType = ShiftType::IncreasingShift;
       else if (_shiftDecreasingRB.get_active())
-        shiftType = AutoDesign::DecreasingShift;
+        shiftType = ShiftType::DecreasingShift;
       else if (_shiftBackAndForthRB.get_active())
-        shiftType = AutoDesign::BackAndForthShift;
+        shiftType = ShiftType::BackAndForthShift;
       else
-        shiftType = AutoDesign::RandomShift;
+        shiftType = ShiftType::RandomShift;
       AutoDesign::MakeColorShift(
           _management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetColors(), colorDeduction(), shiftType);
@@ -391,15 +422,16 @@ void DesignWizard::onNextClicked() {
     } break;
 
     case Page4_4_VUMeter: {
-      AutoDesign::VUMeterDirection direction;
+      using theatre::VUMeterDirection;
+      VUMeterDirection direction;
       if (_vuIncreasingRB.get_active())
-        direction = AutoDesign::VUIncreasing;
+        direction = VUMeterDirection::VUIncreasing;
       else if (_vuDecreasingRB.get_active())
-        direction = AutoDesign::VUDecreasing;
+        direction = VUMeterDirection::VUDecreasing;
       else if (_vuInwardRunRB.get_active())
-        direction = AutoDesign::VUInward;
+        direction = VUMeterDirection::VUInward;
       else  // if(_vuOutwardRunRB.get_active())
-        direction = AutoDesign::VUOutward;
+        direction = VUMeterDirection::VUOutward;
       AutoDesign::MakeVUMeter(
           _management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetColors(), colorDeduction(), direction);
@@ -409,30 +441,46 @@ void DesignWizard::onNextClicked() {
 
     case Page4_5_ColorPreset: {
       if (_eachFixtureSeparatelyCB.get_active())
-        AutoDesign::MakeColorPresetPerFixture(
+        MakeColorPresetPerFixture(
             _management, makeDestinationFolder(), _selectedControllables,
             _colorsWidgetP4.GetColors(), colorDeduction());
       else
-        AutoDesign::MakeColorPreset(
-            _management, makeDestinationFolder(), _selectedControllables,
-            _colorsWidgetP4.GetColors(), colorDeduction());
+        MakeColorPreset(_management, makeDestinationFolder(),
+                        _selectedControllables, _colorsWidgetP4.GetColors(),
+                        colorDeduction());
       _eventHub.EmitUpdate();
       hide();
     } break;
 
     case Page4_6_Increasing: {
-      AutoDesign::IncreasingType incType;
+      using theatre::IncreasingType;
+      IncreasingType incType;
       if (_incForwardRB.get_active())
-        incType = AutoDesign::IncForward;
+        incType = IncreasingType::IncForward;
       else if (_incBackwardRB.get_active())
-        incType = AutoDesign::IncBackward;
+        incType = IncreasingType::IncBackward;
       else if (_incForwardReturnRB.get_active())
-        incType = AutoDesign::IncForwardReturn;
+        incType = IncreasingType::IncForwardReturn;
       else  // if(_incBackwardReturnRB.get_active())
-        incType = AutoDesign::IncBackwardReturn;
+        incType = IncreasingType::IncBackwardReturn;
       AutoDesign::MakeIncreasingChase(
           _management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetColors(), colorDeduction(), incType);
+      _eventHub.EmitUpdate();
+      hide();
+    } break;
+
+    case Page4_7_Rotation: {
+      using theatre::RotationType;
+      RotationType type;
+      if (_rotForwardRB.get_active())
+        type = RotationType::Forward;
+      else if (_rotBackwardRB.get_active())
+        type = RotationType::Backward;
+      else  // if (_rotForwardReturnRB.get_active())
+        type = RotationType::ForwardBackward;
+      MakeRotation(_management, makeDestinationFolder(), _selectedControllables,
+                   _colorsWidgetP4.GetColors(), colorDeduction(), type);
       _eventHub.EmitUpdate();
       hide();
     } break;
@@ -473,8 +521,8 @@ void DesignWizard::onControllableSelected() {
   _addControllableButton.set_sensitive(object != nullptr);
 }
 
-AutoDesign::ColorDeduction DesignWizard::colorDeduction() const {
-  AutoDesign::ColorDeduction deduction;
+theatre::ColorDeduction DesignWizard::colorDeduction() const {
+  theatre::ColorDeduction deduction;
   deduction.whiteFromRGB = _deduceWhite.get_active();
   deduction.amberFromRGB = _deduceAmber.get_active();
   deduction.uvFromRGB = _deduceUV.get_active();
