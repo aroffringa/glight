@@ -376,10 +376,14 @@ void SceneWindow::onCreateControlItemButtonPressed() {
       theatre::ControlSceneItem *item = _selectedScene->AddControlSceneItem(
           selItem->OffsetInMS(),
           *(*activeControllable)[_controllablesListColumns._controllable], 0);
-      if (nextItem != nullptr)
-        item->SetDurationInMS(nextItem->OffsetInMS() - item->OffsetInMS());
-      else
-        item->SetDurationInMS(1000);
+      if (_management.HasCycle())
+        _selectedScene->Remove(item);
+      else {
+        if (nextItem != nullptr)
+          item->SetDurationInMS(nextItem->OffsetInMS() - item->OffsetInMS());
+        else
+          item->SetDurationInMS(1000);
+      }
     }
     lock.unlock();
 
@@ -630,7 +634,10 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
       theatre::ControlSceneItem *item = _selectedScene->AddControlSceneItem(
           timeInMS,
           *(*activeControllable)[_controllablesListColumns._controllable], 0);
-      item->SetDurationInMS(1000);
+      if (_management.HasCycle())
+        _selectedScene->Remove(item);
+      else
+        item->SetDurationInMS(1000);
       lock.unlock();
 
       fillSceneItemList();
