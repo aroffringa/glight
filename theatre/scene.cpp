@@ -15,7 +15,8 @@ Scene::Scene(Management &management)
       _startOffset(0.0),
 
       _hasAudio(false),
-      _isPlaying(false) {
+      _isPlaying(false),
+      _endOfItems(0) {
   initPlayer();
 }
 

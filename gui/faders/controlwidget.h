@@ -54,7 +54,7 @@ class ControlWidget : public Gtk::Bin {
   void Assign(theatre::SourceValue *item, bool moveFader);
 
   /**
-   * Resyncs the fader with the source value.
+   * Resyncs the control with the source value.
    */
   virtual void MoveSlider() = 0;
   virtual void Limit(double value) = 0;

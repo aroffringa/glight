@@ -136,7 +136,7 @@ bool Theatre::IsUsed(const FixtureType &fixtureType) const {
 
 void Theatre::NotifyDmxChange() {
   unsigned highest = 0;
-  for (const std::unique_ptr<class Fixture> &fixture : _fixtures) {
+  for (const std::unique_ptr<Fixture> &fixture : _fixtures) {
     std::vector<unsigned> channels = fixture->GetChannels();
     for (unsigned channel : channels) {
       if (channel > highest) highest = channel;
@@ -151,7 +151,7 @@ Position Theatre::GetFreePosition() const {
   std::unique_ptr<bool[]> available(new bool[n]);
   std::fill_n(available.get(), n, true);
 
-  for (const std::unique_ptr<class Fixture> &fixture : _fixtures) {
+  for (const std::unique_ptr<Fixture> &fixture : _fixtures) {
     double x = fixture->GetPosition().X();
     if (x < rowLength) {
       double index = x + fixture->GetPosition().Y() * rowLength;
@@ -167,14 +167,14 @@ Position Theatre::GetFreePosition() const {
     }
   }
   for (size_t i = 0; i != n; ++i) {
-    if (available[i]) return {i % rowLength, i / rowLength};
+    if (available[i]) return Position(i % rowLength, i / rowLength);
   }
-  return {n % rowLength, n / rowLength};
+  return Position(n % rowLength, n / rowLength);
 }
 
 Position Theatre::Extend() const {
   Position extend;
-  for (const std::unique_ptr<class Fixture> &fixture : _fixtures) {
+  for (const std::unique_ptr<Fixture> &fixture : _fixtures) {
     const double right = fixture->GetPosition().X() + 1.0;
     const double bottom = fixture->GetPosition().Y() + 1.0;
     if (right > extend.X()) extend.X() = right;

@@ -10,6 +10,7 @@
 #include "../../theatre/controlvalue.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetvalue.h"
+#include "../../theatre/scene.h"
 #include "../../theatre/sourcevalue.h"
 
 #include "../../system/uniquewithoutordering.h"
@@ -144,8 +145,26 @@ void ToggleWidget::OnAssigned(bool moveFader) {
 }
 
 void ToggleWidget::MoveSlider() {
-  if (GetSourceValue() != nullptr) {
-    const unsigned target_value = GetSingleSourceValue().TargetValue();
+  const theatre::SourceValue *source = GetSourceValue();
+  if (source != nullptr) {
+    unsigned target_value = GetSingleSourceValue().TargetValue();
+    // Most sliders will be off, so as a small optimization test this before
+    // doing the more expensive dynamic_cast
+    if (target_value) {
+      const theatre::Scene *scene =
+          dynamic_cast<const theatre::Scene *>(&source->GetControllable());
+      // If the control is connected to a scene, uncheck control if scene has
+      // finished
+      if (scene && !scene->IsPlaying()) {
+        // Build a slight delay in, so that a control isn't turned off just
+        // because the management thread hasn't started the scene yet.
+        ++counter_;
+        if (counter_ > 5) {
+          target_value = 0;
+          counter_ = 0;
+        }
+      }
+    }
     _iconButton.SetActive(target_value != 0);
     SignalValueChange().emit(target_value);
   }

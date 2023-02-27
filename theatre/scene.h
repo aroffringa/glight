@@ -2,6 +2,7 @@
 #define THEATRE_SCENE_H_
 
 #include <algorithm>
+#include <atomic>
 #include <set>
 #include <map>
 #include <mutex>
@@ -19,19 +20,23 @@ class Management;
  * @author Andre Offringa
  */
 class Scene : public Controllable, private system::SyncListener {
+ private:
+  constexpr static int kWaitSyncs = 5;
+
  public:
   Scene(Management &management);
   ~Scene();
 
-  bool HasEnd(double globalTimeInMS) {
-    const double relTimeInMs = globalTimeInMS - StartTimeInMS();
-    skipTo(relTimeInMs);
-    return _nextStartedItem == _items.end() && _startedItems.empty();
-  }
-
   double StartTimeInMS() const { return _startTimeInMS; }
 
-  bool IsPlaying() const { return _isPlaying; }
+  /**
+   * This method is thread safe and thus may be called from a
+   * thread other than the management thread.
+   */
+  bool IsPlaying() const {
+    return _isPlaying &&
+           (_audioPlayer->IsPlaying() || _endOfItems < kWaitSyncs);
+  }
 
   ControlSceneItem *AddControlSceneItem(double offsetInMS,
                                         Controllable &controllable,
@@ -144,6 +149,7 @@ class Scene : public Controllable, private system::SyncListener {
     Stop();
     _startTimeInMS = _startTimeInMS - _startOffset;
     _isPlaying = true;
+    _endOfItems = 0;
     if (_hasAudio) _audioPlayer->Play();
   }
 
@@ -157,6 +163,14 @@ class Scene : public Controllable, private system::SyncListener {
     } else {
       if (_audioPlayer == nullptr) initPlayer();
     }
+  }
+
+  /**
+   * True when the last item has been played (irrespectively of
+   * whether the audio player is still playing).
+   */
+  bool ItemsHaveEnd() const {
+    return _nextStartedItem == _items.end() && _startedItems.empty();
   }
 
   void initPlayer();
@@ -184,6 +198,7 @@ class Scene : public Controllable, private system::SyncListener {
         _startedItems.erase(removePointer);
       }
     }
+    if (ItemsHaveEnd()) ++_endOfItems;
     _currentOffset = offsetInMS;
   }
 
@@ -228,7 +243,9 @@ class Scene : public Controllable, private system::SyncListener {
   double _currentOffset, _startOffset;
   std::unique_ptr<system::FlacDecoder> _decoder;
   std::unique_ptr<system::AudioPlayer> _audioPlayer;
-  bool _hasAudio, _isPlaying;
+  bool _hasAudio;
+  std::atomic<bool> _isPlaying;
+  std::atomic<int> _endOfItems;
   std::string _audioFilename;
   double _startTimeInMS;
 
