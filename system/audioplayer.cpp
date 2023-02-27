@@ -30,6 +30,7 @@ void AudioPlayer::open() {
     throw AlsaError(std::string("snd_pcm_open() returned: ") +
                     snd_strerror(rc));
   _isOpen = true;
+  _isPlaying = true;
 
   // Get default hardware parameters
   snd_pcm_hw_params_t *hw_params = nullptr;
@@ -79,7 +80,7 @@ void AudioPlayer::open() {
   unsigned writeAtATime = _alsaPeriodSize;
   unsigned position = _startPosition;
 
-  while (!isStopping() && _decoder.HasMore()) {
+  while (!_isStopping && _decoder.HasMore()) {
     size_t readSize = writeAtATime * 4;
     _decoder.GetSamples(_alsaBuffer, readSize);
 
@@ -102,7 +103,8 @@ void AudioPlayer::open() {
 
     position += writeAtATime;
   }
-  if (isStopping())
+  _isPlaying = false;
+  if (_isStopping)
     snd_pcm_drop(_handle);
   else
     snd_pcm_drain(_handle);

@@ -37,6 +37,7 @@ class ToggleWidget final : public ControlWidget {
   bool _holdUpdates;
 
   sigc::connection update_display_settings_connection_;
+  size_t counter_ = 0;
 
   virtual void OnAssigned(bool moveFader) override;
   void onIconClicked();
