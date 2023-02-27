@@ -8,7 +8,9 @@
 #include <gtkmm/box.h>
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/combobox.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 
 #include <vector>
@@ -20,54 +22,7 @@ using theatre::Color;
 class ColorSequenceWidget : public Gtk::VBox {
  public:
   ColorSequenceWidget(Gtk::Window *parent, bool showGradientButton = true,
-                      bool showShuffleButton = true)
-      : _frame("Colors"),
-        _allEqual("Use one color for all"),
-        _plusButton("+"),
-        _gradientButton("Gradient"),
-        _shuffleButton("Shuffle"),
-        _minButton("-"),
-        _parent(parent),
-        _minCount(1),
-        _maxCount(0) {
-    _allEqual.signal_clicked().connect(
-        sigc::mem_fun(*this, &ColorSequenceWidget::onToggleEqual));
-    pack_start(_allEqual, false, false);
-
-    _minButton.set_sensitive(false);
-    _minButton.signal_clicked().connect(
-        sigc::mem_fun(*this, &ColorSequenceWidget::onDecreaseColors));
-    _buttonBox.pack_start(_minButton);
-
-    if (showGradientButton) {
-      _gradientButton.set_sensitive(false);
-      _gradientButton.signal_clicked().connect(
-          sigc::mem_fun(*this, &ColorSequenceWidget::onGradient));
-      _buttonBox.pack_start(_gradientButton);
-    }
-
-    if (showShuffleButton) {
-      _shuffleButton.set_sensitive(false);
-      _shuffleButton.signal_clicked().connect([&]() { Shuffle(); });
-      _buttonBox.pack_start(_shuffleButton);
-    }
-
-    _plusButton.signal_clicked().connect(
-        sigc::mem_fun(*this, &ColorSequenceWidget::onIncreaseColors));
-    _buttonBox.pack_start(_plusButton);
-    pack_start(_buttonBox, false, false);
-
-    _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent));
-    _box.pack_start(*_widgets.back(), true, false);
-    _widgets.back()->SignalColorChanged().connect(
-        sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
-
-    _scrolledWindow.add(_box);
-    _frame.add(_scrolledWindow);
-    pack_start(_frame, true, true);
-
-    show_all_children();
-  }
+                      bool showShuffleButton = true);
 
   void SetColors(const std::vector<Color> &colors) {
     if (_maxCount < colors.size()) _maxCount = 0;
@@ -120,8 +75,18 @@ class ColorSequenceWidget : public Gtk::VBox {
   std::vector<std::unique_ptr<ColorSelectWidget>> _widgets;
   Gtk::ButtonBox _buttonBox;
   Gtk::Button _plusButton, _gradientButton, _shuffleButton, _minButton;
+  Gtk::HBox _loadDefaultBox;
+  Gtk::ComboBox _loadDefaultCombo;
+  Gtk::Button _loadDefaultButton;
+  Glib::RefPtr<Gtk::ListStore> _loadDefaultList;
+  struct ListColumns : public Gtk::TreeModelColumnRecord {
+    ListColumns() { add(_title); }
+    Gtk::TreeModelColumn<Glib::ustring> _title;
+  } _listColumns;
   Gtk::Window *_parent;
   size_t _minCount, _maxCount;
+
+  void LoadDefault();
 
   void onDecreaseColors() {
     if (_widgets.size() > _minCount) {
