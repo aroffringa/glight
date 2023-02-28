@@ -10,8 +10,9 @@
 
 #include "../../theatre/folder.h"
 #include "../../theatre/management.h"
-#include "../../theatre/scene.h"
 #include "../../theatre/sourcevalue.h"
+
+#include "../../theatre/scenes/scene.h"
 
 #include "../eventtransmitter.h"
 

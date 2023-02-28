@@ -20,7 +20,8 @@
 #include "../components/audiowidget.h"
 
 #include "../../theatre/forwards.h"
-#include "../../theatre/keysceneitem.h"
+
+#include "../../theatre/scenes/keysceneitem.h"
 
 #include "../nameframe.h"
 

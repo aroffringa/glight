@@ -10,8 +10,9 @@
 #include "../../theatre/controlvalue.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetvalue.h"
-#include "../../theatre/scene.h"
 #include "../../theatre/sourcevalue.h"
+
+#include "../../theatre/scenes/scene.h"
 
 #include "../../system/uniquewithoutordering.h"
 

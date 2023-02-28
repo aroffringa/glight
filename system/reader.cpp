@@ -13,9 +13,10 @@
 #include "../theatre/fixturegroup.h"
 #include "../theatre/folder.h"
 #include "../theatre/presetvalue.h"
-#include "../theatre/scene.h"
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
+
+#include "../theatre/scenes/scene.h"
 
 #include "../gui/state/guistate.h"
 

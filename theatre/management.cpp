@@ -16,12 +16,13 @@
 #include "folderoperations.h"
 #include "presetcollection.h"
 #include "presetvalue.h"
-#include "scene.h"
 #include "sequence.h"
 #include "sourcevalue.h"
 #include "theatre.h"
 #include "timesequence.h"
 #include "valuesnapshot.h"
+
+#include "scenes/scene.h"
 
 namespace glight::theatre {
 

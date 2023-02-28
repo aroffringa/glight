@@ -1,6 +1,6 @@
 #include "scene.h"
 
-#include "management.h"
+#include "../management.h"
 
 #include <iostream>
 
@@ -103,8 +103,6 @@ void Scene::Start(double timeInMS) {
   _startTimeInMS = timeInMS;
   resetCurrentOffset();
   Stop();
-  _storedSourceValues = _management.StoreSourceValues(true);
-  _management.BlackOut(true, 0.4);
   _startTimeInMS = _startTimeInMS - _startOffset;
   _isPlaying = true;
   _endOfItems = 0;
@@ -112,10 +110,7 @@ void Scene::Start(double timeInMS) {
 }
 
 void Scene::Stop() {
-  if (!_storedSourceValues.Empty()) {
-    _management.LoadSourceValues(_storedSourceValues, true, 0.4);
-    _storedSourceValues.Clear();
-  }
+  RestoreFromBlackout(1.0);
   if (_isPlaying) {
     _audioPlayer.reset();
     _decoder.reset();
@@ -132,7 +127,8 @@ void Scene::skipTo(double offsetInMS) {
   // "Start" all items that have started since the last tick
   while (_nextStartedItem != _items.end() &&
          _nextStartedItem->first <= offsetInMS) {
-    _startedItems.push_back(_nextStartedItem->second.get());
+    glight::theatre::SceneItem* item = _startedItems.emplace_back(_nextStartedItem->second.get());
+    item->Start(*this);
     ++_nextStartedItem;
   }
   // "End" all items which duration have passed.
@@ -161,6 +157,18 @@ void Scene::RecalculateControllables() {
     }
   }
   controllables_.assign(controllables.begin(), controllables.end());
+}
+
+void Scene::BlackOut(double fade_speed) {
+  _storedSourceValues = _management.StoreSourceValues(true);
+  _management.BlackOut(true, 0.4);
+}
+
+void Scene::RestoreFromBlackout(double fade_speed) {
+  if (!_storedSourceValues.Empty()) {
+    _management.LoadSourceValues(_storedSourceValues, true, fade_speed);
+    _storedSourceValues.Clear();
+  }
 }
 
 }  // namespace glight::theatre

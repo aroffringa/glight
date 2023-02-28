@@ -9,8 +9,9 @@
 #include "../../theatre/folder.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetcollection.h"
-#include "../../theatre/scene.h"
 #include "../../theatre/timesequence.h"
+
+#include "../../theatre/scenes/scene.h"
 
 namespace glight::gui {
 

@@ -7,11 +7,12 @@
 #include <map>
 #include <mutex>
 
-#include "../system/audioplayer.h"
+#include "../../system/audioplayer.h"
 
 #include "controlsceneitem.h"
 #include "keysceneitem.h"
-#include "sourcevaluestore.h"
+
+#include "../sourcevaluestore.h"
 
 namespace glight::theatre {
 
@@ -107,6 +108,9 @@ class Scene : public Controllable, private system::SyncListener {
     initPlayer();
   }
 
+  void BlackOut(double fade_speed);
+  
+  void RestoreFromBlackout(double fade_speed);
  protected:
   void Start(double timeInMS);
 

@@ -125,14 +125,15 @@ set(THEATREFILES
   theatre/oladevice.cpp
   theatre/presetcollection.cpp
   theatre/presetvalue.cpp
-  theatre/scene.cpp
   theatre/sourcevaluestore.cpp
   theatre/theatre.cpp
   theatre/design/autodesign.cpp
   theatre/design/colorpreset.cpp
   theatre/design/rotation.cpp
   theatre/effects/hue_saturation_lightness_effect.cpp
-  theatre/properties/propertyset.cpp)
+  theatre/properties/propertyset.cpp
+  theatre/scenes/blackoutsceneitem.cpp
+  theatre/scenes/scene.cpp)
   
 set(EXTERNALFILES
   external/hsluv/hsluv.c)
