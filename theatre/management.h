@@ -11,6 +11,7 @@
 
 #include "forwards.h"
 #include "valuesnapshot.h"
+#include "sourcevaluestore.h"
 
 namespace glight::theatre {
 
@@ -136,9 +137,17 @@ class Management {
     }
   }
 
-  void BlackOut();
+  void BlackOut(bool skip_scenes, double fade_speed);
 
-  void MakeSourceValueSet();
+  /**
+   * Returns a source value store with all values as currently set in
+   * the primary (A) or secondary (B) values. The store will not include
+   * source values associated with a Scene.
+   */
+  SourceValueStore StoreSourceValues(bool use_a) const;
+
+  void LoadSourceValues(const SourceValueStore &store, bool use_a,
+                        double fade_speed);
 
  private:
   void ThreadLoop();

@@ -67,6 +67,7 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
   add(_box);
   _box.show();
 
+  UpdateDisplaySettings();
   update_display_settings_connection_ =
       State().SignalChange().connect([&]() { UpdateDisplaySettings(); });
 }
