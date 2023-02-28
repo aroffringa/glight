@@ -138,6 +138,8 @@ class Management {
 
   void BlackOut();
 
+  void MakeSourceValueSet();
+
  private:
   void ThreadLoop();
 

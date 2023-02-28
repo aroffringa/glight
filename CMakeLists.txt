@@ -126,6 +126,7 @@ set(THEATREFILES
   theatre/presetcollection.cpp
   theatre/presetvalue.cpp
   theatre/scene.cpp
+  theatre/sourcevaluestore.cpp
   theatre/theatre.cpp
   theatre/design/autodesign.cpp
   theatre/design/colorpreset.cpp
