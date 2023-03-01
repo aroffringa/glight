@@ -54,14 +54,14 @@ void Scene::initPlayer() {
   }
 }
 
-ControlSceneItem *Scene::AddControlSceneItem(double offsetInMS,
+ControlSceneItem *Scene::AddControlSceneItem(double offset_in_ms,
                                              Controllable &controllable,
                                              size_t input) {
   std::unique_ptr<ControlSceneItem> item =
       std::make_unique<ControlSceneItem>(controllable, input);
-  item->SetOffsetInMS(offsetInMS);
+  item->SetOffsetInMS(offset_in_ms);
   ControlSceneItem *result = item.get();
-  _items.emplace(offsetInMS, std::move(item));
+  _items.emplace(offset_in_ms, std::move(item));
   resetCurrentOffset();
   std::pair<const Controllable *, size_t> value(&controllable, input);
   if (std::find(controllables_.begin(), controllables_.end(), value) ==
@@ -71,13 +71,23 @@ ControlSceneItem *Scene::AddControlSceneItem(double offsetInMS,
   return result;
 }
 
-KeySceneItem *Scene::AddKeySceneItem(double offsetInMS) {
+KeySceneItem *Scene::AddKeySceneItem(double offset_in_ms) {
   std::unique_ptr<KeySceneItem> item = std::make_unique<KeySceneItem>();
-  item->SetOffsetInMS(offsetInMS);
+  item->SetOffsetInMS(offset_in_ms);
   KeySceneItem *result = item.get();
-  _items.emplace(offsetInMS, std::move(item));
+  _items.emplace(offset_in_ms, std::move(item));
   resetCurrentOffset();
   return result;
+}
+
+BlackOutSceneItem &Scene::AddBlackOutItem(double offset_in_ms) {
+  std::unique_ptr<BlackOutSceneItem> item =
+      std::make_unique<BlackOutSceneItem>();
+  item->SetOffsetInMS(offset_in_ms);
+  BlackOutSceneItem *result = item.get();
+  _items.emplace(offset_in_ms, std::move(item));
+  resetCurrentOffset();
+  return *result;
 }
 
 void Scene::ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS) {

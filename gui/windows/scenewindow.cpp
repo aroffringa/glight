@@ -16,6 +16,7 @@
 
 #include "../eventtransmitter.h"
 
+#include "../dialogs/stringinputdialog.h"
 #include "../dialogs/sceneselect.h"
 
 #include "scenewindow.h"
@@ -46,8 +47,9 @@ SceneWindow::SceneWindow(theatre::Management &management,
       _createControlItemButton(Gtk::Stock::ADD),
       _setEndTimeButton("Set end time"),
       _removeButton(Gtk::Stock::REMOVE),
-      _blackOutButton("Black-out"),
+      _blackoutButton("Black-out"),
       _restoreButton("Restore"),
+      _setFadeSpeedButton("Fade speed"),
       _startScale(0, theatre::ControlValue::MaxUInt() + 1,
                   theatre::ControlValue::MaxUInt() / 100.0),
       _endScale(0, theatre::ControlValue::MaxUInt() + 1,
@@ -110,7 +112,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
 
   createSceneItemsList();
 
-  createControllablesList1();
+  createControllablesList();
 
   _createControlItemButton.signal_clicked().connect(
       sigc::mem_fun(*this, &SceneWindow::onCreateControlItemButtonPressed));
@@ -127,15 +129,21 @@ SceneWindow::SceneWindow(theatre::Management &management,
   _removeButton.set_sensitive(false);
   _sceneItemUButtonBox.pack_start(_removeButton);
 
-  _blackOutButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneWindow::onBlackOutButtonPressed));
-  _blackOutButton.set_sensitive(false);
-  _sceneItemUButtonBox.pack_start(_blackOutButton);
+  _blackoutButton.signal_clicked().connect([&]() {
+    SceneWindow::AddBlackoutItem(theatre::BlackoutOperation::Blackout);
+  });
+  _blackoutButton.set_sensitive(false);
+  _sceneItemUButtonBox.pack_start(_blackoutButton);
 
-  _restoreButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &SceneWindow::onRestoreButtonPressed));
+  _restoreButton.signal_clicked().connect([&]() {
+    SceneWindow::AddBlackoutItem(theatre::BlackoutOperation::Restore);
+  });
   _restoreButton.set_sensitive(false);
   _sceneItemUButtonBox.pack_start(_restoreButton);
+
+  _setFadeSpeedButton.signal_clicked().connect([&]() { SetFadeSpeed(); });
+  _setFadeSpeedButton.set_sensitive(false);
+  _sceneItemUButtonBox.pack_start(_setFadeSpeedButton);
 
   _sceneItemBox.pack_start(_sceneItemUButtonBox, false, false, 2);
 
@@ -154,8 +162,6 @@ SceneWindow::SceneWindow(theatre::Management &management,
   _scalesBox.pack_start(_endScale);
 
   _sceneItemBox.pack_start(_scalesBox);
-
-  createControllablesList2();
 
   _hBox.pack_start(_sceneItemBox, false, false, 2);
 
@@ -215,7 +221,7 @@ void SceneWindow::createSceneItemsList() {
   _listScrolledWindow.show();
 }
 
-void SceneWindow::createControllablesList1() {
+void SceneWindow::createControllablesList() {
   _controllablesListModel = Gtk::ListStore::create(_controllablesListColumns);
 
   _controllables1ComboBox.set_model(_controllablesListModel);
@@ -223,14 +229,6 @@ void SceneWindow::createControllablesList1() {
 
   _sceneItemBox.pack_start(_controllables1ComboBox, false, false);
   _controllables1ComboBox.show();
-}
-
-void SceneWindow::createControllablesList2() {
-  _controllables2ComboBox.set_model(_controllablesListModel);
-  _controllables2ComboBox.pack_start(_controllablesListColumns._text);
-
-  _sceneItemBox.pack_start(_controllables2ComboBox, false, false);
-  _controllables2ComboBox.show();
 }
 
 void SceneWindow::fillSceneItemList() {
@@ -413,15 +411,13 @@ void SceneWindow::onSelectedSceneItemChanged() {
         _createControlItemButton.set_sensitive(false);
         _setEndTimeButton.set_sensitive(false);
         _removeButton.set_sensitive(false);
+        _blackoutButton.set_sensitive(false);
+        _restoreButton.set_sensitive(false);
+        _setFadeSpeedButton.set_sensitive(false);
         _startScale.set_sensitive(false);
         _endScale.set_sensitive(false);
         break;
       case 1: {
-        _createControlItemButton.set_sensitive(true);
-        _setEndTimeButton.set_sensitive(true);
-        _removeButton.set_sensitive(true);
-        _startScale.set_sensitive(true);
-        _endScale.set_sensitive(true);
         std::unique_lock<std::mutex> lock(_management.Mutex());
         theatre::SceneItem *item = selectedItem();
         theatre::ControlSceneItem *csi =
@@ -433,12 +429,27 @@ void SceneWindow::onSelectedSceneItemChanged() {
           _startScale.set_value(s);
           _endScale.set_value(e);
         }
-        _audioWidget.SetPosition(item->OffsetInMS());
+        const double offset = item->OffsetInMS();
+        const bool is_blackout =
+            dynamic_cast<theatre::BlackOutSceneItem *>(item);
+        lock.unlock();
+        _audioWidget.SetPosition(offset);
+        _createControlItemButton.set_sensitive(true);
+        _setEndTimeButton.set_sensitive(true);
+        _removeButton.set_sensitive(true);
+        _blackoutButton.set_sensitive(true);
+        _restoreButton.set_sensitive(true);
+        _setFadeSpeedButton.set_sensitive(is_blackout);
+        _startScale.set_sensitive(true);
+        _endScale.set_sensitive(true);
       } break;
       default:
         _createControlItemButton.set_sensitive(true);
         _setEndTimeButton.set_sensitive(true);
         _removeButton.set_sensitive(true);
+        _blackoutButton.set_sensitive(true);
+        _restoreButton.set_sensitive(true);
+        _setFadeSpeedButton.set_sensitive(false);
         _startScale.set_sensitive(true);
         _endScale.set_sensitive(true);
         break;
@@ -725,8 +736,53 @@ void SceneWindow::UpdateAudioWidgetKeys() {
     _audioWidget.SetNoScene();
 }
 
-void SceneWindow::onBlackOutButtonPressed() {}
+void SceneWindow::AddBlackoutItem(theatre::BlackoutOperation operation) {
+  Glib::RefPtr<Gtk::TreeSelection> selection =
+      _sceneItemsListView.get_selection();
+  Gtk::TreeModel::Path path = selection->get_selected_rows().front();
 
-void SceneWindow::onRestoreButtonPressed() {}
+  std::unique_lock<std::mutex> lock(_management.Mutex());
+  theatre::SceneItem *selected_item =
+      (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
+  theatre::BlackOutSceneItem &new_item =
+      _selectedScene->AddBlackOutItem(selected_item->OffsetInMS());
+  new_item.SetFadeSpeed(1.0);
+  new_item.SetOperation(operation);
+  lock.unlock();
+
+  fillSceneItemList();
+  UpdateAudioWidgetKeys();
+}
+
+void SceneWindow::SetFadeSpeed() {
+  Glib::RefPtr<Gtk::TreeSelection> selection =
+      _sceneItemsListView.get_selection();
+  Gtk::TreeModel::Path path = selection->get_selected_rows().front();
+
+  std::unique_lock<std::mutex> lock(_management.Mutex());
+  theatre::SceneItem *selected_item =
+      (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
+  theatre::BlackOutSceneItem *blackout =
+      dynamic_cast<theatre::BlackOutSceneItem *>(selected_item);
+  if (blackout) {
+    const double fade_speed = blackout->FadeSpeed();
+    lock.unlock();
+
+    std::stringstream fade_speed_str;
+    fade_speed_str << fade_speed;
+    StringInputDialog dialog("Fade speed",
+                             "Enter new fade speed:", fade_speed_str.str());
+    dialog.run();
+
+    lock.lock();
+    selected_item =
+        (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
+    blackout = dynamic_cast<theatre::BlackOutSceneItem *>(selected_item);
+    if (blackout) {
+      blackout->SetFadeSpeed(std::atof(dialog.Value().c_str()));
+    }
+    lock.unlock();
+  }
+}
 
 }  // namespace glight::gui
