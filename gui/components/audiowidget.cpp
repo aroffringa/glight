@@ -2,8 +2,8 @@
 
 #include "../../system/flacdecoder.h"
 
-#include "../../theatre/scene.h"
-#include "../../theatre/sceneitem.h"
+#include "../../theatre/scenes/scene.h"
+#include "../../theatre/scenes/sceneitem.h"
 
 #include <cairomm/context.h>
 

@@ -10,8 +10,9 @@
 #include "../../theatre/controlvalue.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetvalue.h"
-#include "../../theatre/scene.h"
 #include "../../theatre/sourcevalue.h"
+
+#include "../../theatre/scenes/scene.h"
 
 #include "../../system/uniquewithoutordering.h"
 
@@ -67,6 +68,7 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
   add(_box);
   _box.show();
 
+  UpdateDisplaySettings();
   update_display_settings_connection_ =
       State().SignalChange().connect([&]() { UpdateDisplaySettings(); });
 }

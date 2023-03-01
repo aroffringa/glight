@@ -3,12 +3,13 @@
 
 namespace glight::theatre {
 
+class Scene;
 class Timing;
 
 class SceneItem {
  public:
-  SceneItem() : _offsetInMS(0.0), _durationInMS(0.0) {}
-  virtual ~SceneItem() = default;
+  SceneItem() = default;
+  virtual ~SceneItem() noexcept = default;
 
   double OffsetInMS() const { return _offsetInMS; }
   double DurationInMS() const { return _durationInMS; }
@@ -18,11 +19,17 @@ class SceneItem {
 
   virtual std::string Description() const = 0;
 
-  virtual void Mix(const Timing &timing, bool primary) = 0;
+  /**
+   * This is for scene items that need to perform a one-time action
+   * once the scene item's starting time has reached.
+   */
+  virtual void Start(Scene& scene) {}
+
+  virtual void Mix(const Timing& timing, bool primary) {}
 
  private:
-  double _offsetInMS;
-  double _durationInMS;
+  double _offsetInMS = 0.0;
+  double _durationInMS = 0.0;
 };
 
 }  // namespace glight::theatre

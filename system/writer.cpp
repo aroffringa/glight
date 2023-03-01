@@ -4,18 +4,20 @@
 
 #include "../theatre/properties/propertyset.h"
 
+#include "../theatre/scenes/blackoutsceneitem.h"
+#include "../theatre/scenes/controlsceneitem.h"
+#include "../theatre/scenes/keysceneitem.h"
+#include "../theatre/scenes/scene.h"
+
 #include "../theatre/chase.h"
 #include "../theatre/controllable.h"
-#include "../theatre/controlsceneitem.h"
 #include "../theatre/effect.h"
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
 #include "../theatre/fixturefunction.h"
 #include "../theatre/fixturegroup.h"
 #include "../theatre/folder.h"
-#include "../theatre/keysceneitem.h"
 #include "../theatre/presetvalue.h"
-#include "../theatre/scene.h"
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
@@ -385,20 +387,30 @@ void writeControlSceneItem(WriteState &state, const ControlSceneItem &item) {
                       state.folderIds[&item.GetControllable().Parent()]);
 }
 
+void writeBlackoutSceneItem(WriteState &state, const BlackoutSceneItem &item) {
+  state.writer.String("type", "blackout");
+  state.writer.String("operation", ToString(item.Operation()));
+  state.writer.Number("fade-speed", item.FadeSpeed());
+}
+
 void writeSceneItem(WriteState &state, const SceneItem &item) {
   state.writer.StartObject();
 
   state.writer.Number("offset", item.OffsetInMS());
   state.writer.Number("duration", item.DurationInMS());
 
-  const KeySceneItem *keyItem = dynamic_cast<const KeySceneItem *>(&item);
-  const ControlSceneItem *controlItem =
-      dynamic_cast<const ControlSceneItem *>(&item);
-
-  if (keyItem != nullptr)
+  if (const KeySceneItem *keyItem = dynamic_cast<const KeySceneItem *>(&item);
+      keyItem)
     writeKeySceneItem(state, *keyItem);
-  else
+  else if (const ControlSceneItem *controlItem =
+               dynamic_cast<const ControlSceneItem *>(&item);
+           controlItem)
     writeControlSceneItem(state, *controlItem);
+  else {
+    const BlackoutSceneItem *blackout =
+        dynamic_cast<const BlackoutSceneItem *>(&item);
+    writeBlackoutSceneItem(state, *blackout);
+  }
 
   state.writer.EndObject();
 }

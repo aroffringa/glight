@@ -6,7 +6,8 @@
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
-#include "../../theatre/scene.h"
+#include "../../theatre/scenes/scene.h"
+
 #include "../../theatre/management.h"
 
 namespace glight::gui::dialogs {

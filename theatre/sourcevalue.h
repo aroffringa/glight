@@ -1,8 +1,10 @@
 #ifndef THEATRE_SOURCE_VALUE_H_
 #define THEATRE_SOURCE_VALUE_H_
 
+#include "controlvalue.h"
 #include "input.h"
-#include "presetvalue.h"
+
+#include <sigc++/signal.h>
 
 namespace glight::theatre {
 

@@ -1,10 +1,11 @@
 #ifndef THEATRE_CONTROLSCENEITEM_H_
 #define THEATRE_CONTROLSCENEITEM_H_
 
-#include "controllable.h"
-#include "controlvalue.h"
+#include "../controllable.h"
+#include "../controlvalue.h"
+#include "../timing.h"
+
 #include "sceneitem.h"
-#include "timing.h"
 
 namespace glight::theatre {
 

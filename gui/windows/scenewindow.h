@@ -20,7 +20,9 @@
 #include "../components/audiowidget.h"
 
 #include "../../theatre/forwards.h"
-#include "../../theatre/keysceneitem.h"
+
+#include "../../theatre/scenes/blackoutsceneitem.h"
+#include "../../theatre/scenes/keysceneitem.h"
 
 #include "../nameframe.h"
 
@@ -47,7 +49,8 @@ class SceneWindow : public Gtk::Window {
     SceneItemsListColumns() {
       add(_startTime);
       add(_endTime);
-      add(_startValue), add(_endValue);
+      add(_startValue);
+      add(_endValue);
       add(_description);
       add(_item);
     }
@@ -112,7 +115,9 @@ class SceneWindow : public Gtk::Window {
   Gtk::Button _createControlItemButton;
   Gtk::Button _setEndTimeButton;
   Gtk::Button _removeButton;
-  Gtk::Button _createTransitionItemButton;
+  Gtk::Button _blackoutButton;
+  Gtk::Button _restoreButton;
+  Gtk::Button _setFadeSpeedButton;
   Gtk::VScale _startScale, _endScale;
 
   sigc::connection _updateConnection;
@@ -131,8 +136,7 @@ class SceneWindow : public Gtk::Window {
   void Update();
 
   void createSceneItemsList();
-  void createControllablesList1();
-  void createControllablesList2();
+  void createControllablesList();
   void fillSceneItemList();
   void setSceneItemListRow(theatre::SceneItem *sceneItem,
                            const Gtk::TreeModel::Row &row) const;
@@ -151,12 +155,14 @@ class SceneWindow : public Gtk::Window {
   void onSelectedSceneItemChanged();
   void onSetEndTimeButtonPressed();
   void onRemoveButtonPressed();
+  void AddBlackoutItem(theatre::BlackoutOperation operation);
   void onScalesChanged();
   bool onTimeout();
   void onAudioWidgetClicked(double timeInMS);
 
   void updateAudio();
   void UpdateAudioWidgetKeys();
+  void SetFadeSpeed();
 
   size_t selectedSceneItemCount() const {
     return _sceneItemsListView.get_selection()->count_selected_rows();

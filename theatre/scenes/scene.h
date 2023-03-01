@@ -7,10 +7,13 @@
 #include <map>
 #include <mutex>
 
-#include "../system/audioplayer.h"
+#include "../../system/audioplayer.h"
 
+#include "blackoutsceneitem.h"
 #include "controlsceneitem.h"
 #include "keysceneitem.h"
+
+#include "../sourcevaluestore.h"
 
 namespace glight::theatre {
 
@@ -34,43 +37,19 @@ class Scene : public Controllable, private system::SyncListener {
    * thread other than the management thread.
    */
   bool IsPlaying() const {
-    return _isPlaying &&
-           (_audioPlayer->IsPlaying() || _endOfItems < kWaitSyncs);
+    return _isPlaying && ((_audioPlayer && _audioPlayer->IsPlaying()) ||
+                          _endOfItems < kWaitSyncs);
   }
 
   ControlSceneItem *AddControlSceneItem(double offsetInMS,
                                         Controllable &controllable,
-                                        size_t input) {
-    std::unique_ptr<ControlSceneItem> item =
-        std::make_unique<ControlSceneItem>(controllable, input);
-    item->SetOffsetInMS(offsetInMS);
-    ControlSceneItem *result = item.get();
-    _items.emplace(offsetInMS, std::move(item));
-    resetCurrentOffset();
-    std::pair<const Controllable *, size_t> value(&controllable, input);
-    if (std::find(controllables_.begin(), controllables_.end(), value) ==
-        controllables_.end()) {
-      controllables_.emplace_back(value);
-    }
-    return result;
-  }
+                                        size_t input);
 
-  KeySceneItem *AddKeySceneItem(double offsetInMS) {
-    std::unique_ptr<KeySceneItem> item = std::make_unique<KeySceneItem>();
-    item->SetOffsetInMS(offsetInMS);
-    KeySceneItem *result = item.get();
-    _items.emplace(offsetInMS, std::move(item));
-    resetCurrentOffset();
-    return result;
-  }
+  KeySceneItem *AddKeySceneItem(double offsetInMS);
 
-  void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS) {
-    ItemMap::node_type node = _items.extract(find(item));
-    node.mapped()->SetOffsetInMS(newOffsetInMS);
-    node.key() = newOffsetInMS;
-    _items.insert(std::move(node));
-    resetCurrentOffset();
-  }
+  BlackoutSceneItem &AddBlackoutItem(double offsetInMS);
+
+  void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS);
 
   const std::multimap<double, std::unique_ptr<SceneItem>> &SceneItems() const {
     return _items;
@@ -105,17 +84,7 @@ class Scene : public Controllable, private system::SyncListener {
     }
   }
 
-  void Remove(SceneItem *item) {
-    std::multimap<double, std::unique_ptr<SceneItem>>::iterator iter =
-        find(item);
-    // Make sure the object is deleted only at the end of this function:
-    std::unique_ptr<SceneItem> owned_item = std::move(iter->second);
-    _items.erase(iter);
-    if (ControlSceneItem *c_item = dynamic_cast<ControlSceneItem *>(item);
-        c_item) {
-      RecalculateControllables();
-    }
-  }
+  void Remove(SceneItem *item);
 
   /**
    * Allows skipping part of the scene and starting the scene at a later point.
@@ -142,28 +111,14 @@ class Scene : public Controllable, private system::SyncListener {
     initPlayer();
   }
 
- protected:
-  void Start(double timeInMS) {
-    _startTimeInMS = timeInMS;
-    resetCurrentOffset();
-    Stop();
-    _startTimeInMS = _startTimeInMS - _startOffset;
-    _isPlaying = true;
-    _endOfItems = 0;
-    if (_hasAudio) _audioPlayer->Play();
-  }
+  void BlackOut(double fade_speed);
 
-  void Stop() {
-    if (_isPlaying) {
-      _audioPlayer.reset();
-      _decoder.reset();
-      _isPlaying = false;
-      _startOffset = 0.0;
-      initPlayer();
-    } else {
-      if (_audioPlayer == nullptr) initPlayer();
-    }
-  }
+  void RestoreFromBlackout(double fade_speed);
+
+ protected:
+  void Start(double timeInMS);
+
+  void Stop();
 
   /**
    * True when the last item has been played (irrespectively of
@@ -180,27 +135,7 @@ class Scene : public Controllable, private system::SyncListener {
     _startedItems.clear();
   }
 
-  void skipTo(double offsetInMS) {
-    if (_currentOffset > offsetInMS) resetCurrentOffset();
-    // "Start" all items that have started since the last tick
-    while (_nextStartedItem != _items.end() &&
-           _nextStartedItem->first <= offsetInMS) {
-      _startedItems.push_back(_nextStartedItem->second.get());
-      ++_nextStartedItem;
-    }
-    // "End" all items which duration have passed.
-    for (std::vector<SceneItem *>::iterator i = _startedItems.begin();
-         i != _startedItems.end(); ++i) {
-      if ((*i)->OffsetInMS() + (*i)->DurationInMS() < offsetInMS) {
-        --i;
-        std::vector<SceneItem *>::iterator removePointer = i;
-        ++removePointer;
-        _startedItems.erase(removePointer);
-      }
-    }
-    if (ItemsHaveEnd()) ++_endOfItems;
-    _currentOffset = offsetInMS;
-  }
+  void skipTo(double offsetInMS);
 
   std::multimap<double, std::unique_ptr<SceneItem>>::iterator find(
       SceneItem *item) {
@@ -214,19 +149,7 @@ class Scene : public Controllable, private system::SyncListener {
     return _items.end();
   }
 
-  void RecalculateControllables() {
-    std::set<std::pair<const Controllable *, size_t>> controllables;
-    for (const std::pair<const double, std::unique_ptr<SceneItem>> &item :
-         _items) {
-      if (ControlSceneItem *c_item =
-              dynamic_cast<ControlSceneItem *>(item.second.get());
-          c_item) {
-        controllables.emplace(
-            std::make_pair(&c_item->GetControllable(), c_item->GetInput()));
-      }
-    }
-    controllables_.assign(controllables.begin(), controllables.end());
-  }
+  void RecalculateControllables();
 
  private:
   Management &_management;
@@ -248,6 +171,7 @@ class Scene : public Controllable, private system::SyncListener {
   std::atomic<int> _endOfItems;
   std::string _audioFilename;
   double _startTimeInMS;
+  SourceValueStore _storedSourceValues;
 
   void OnSyncUpdate(double offsetInMS) override;
 };

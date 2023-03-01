@@ -16,12 +16,13 @@
 #include "folderoperations.h"
 #include "presetcollection.h"
 #include "presetvalue.h"
-#include "scene.h"
 #include "sequence.h"
 #include "sourcevalue.h"
 #include "theatre.h"
 #include "timesequence.h"
 #include "valuesnapshot.h"
+
+#include "scenes/scene.h"
 
 namespace glight::theatre {
 
@@ -495,10 +496,41 @@ bool Management::topologicalSortVisit(Controllable &controllable,
   return true;
 }
 
-void Management::BlackOut() {
-  for (std::unique_ptr<SourceValue> &sv : _sourceValues) {
-    sv->A().Set(0, 0.0);
-    sv->B().Set(0, 0.0);
+void Management::BlackOut(bool skip_scenes, double fade_speed) {
+  for (std::unique_ptr<SourceValue> &source_value : _sourceValues) {
+    Controllable &controllable = source_value->GetControllable();
+    if (!skip_scenes || !dynamic_cast<Scene *>(&controllable)) {
+      source_value->A().Set(0, fade_speed);
+      source_value->B().Set(0, fade_speed);
+    }
+  }
+}
+
+SourceValueStore Management::StoreSourceValues(bool use_a) const {
+  SourceValueStore result;
+  for (const std::unique_ptr<glight::theatre::SourceValue> &source_value :
+       _sourceValues) {
+    const ControlValue value =
+        use_a ? source_value->A().Value() : source_value->B().Value();
+    if (value) {
+      Controllable &controllable = source_value->GetControllable();
+      if (!dynamic_cast<Scene *>(&controllable)) {
+        result.AddItem(*source_value, value);
+      }
+    }
+  }
+  return result;
+}
+
+void Management::LoadSourceValues(const SourceValueStore &store, bool use_a,
+                                  double fade_speed) {
+  const std::vector<SourceValueStoreItem> &items = store.GetItems();
+  for (const SourceValueStoreItem &item : items) {
+    SourceValue &source_value = item.GetSourceValue();
+    if (use_a)
+      source_value.A().Set(item.GetValue().UInt(), fade_speed);
+    else
+      source_value.B().Set(item.GetValue().UInt(), fade_speed);
   }
 }
 

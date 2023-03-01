@@ -65,8 +65,6 @@ class KeySceneItem final : public SceneItem {
     }
   }
 
-  void Mix(const Timing &timing, bool primary) override{};
-
  private:
   KeySceneLevel _level;
 };

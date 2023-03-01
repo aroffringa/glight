@@ -5,9 +5,10 @@
 #include "../theatre/folder.h"
 #include "../theatre/management.h"
 #include "../theatre/presetcollection.h"
-#include "../theatre/scene.h"
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
+
+#include "../theatre/scenes/scene.h"
 
 #include "../theatre/effects/audioleveleffect.h"
 
@@ -95,6 +96,12 @@ void FillManagement(Management &management) {
   glight::theatre::KeySceneItem *key = scene.AddKeySceneItem(250.0);
   key->SetDurationInMS(500.0);
   key->SetLevel(KeySceneLevel::Beat);
+  glight::theatre::BlackoutSceneItem &blackout = scene.AddBlackoutItem(250.0);
+  blackout.SetFadeSpeed(2.0);
+  blackout.SetOperation(BlackoutOperation::Blackout);
+  glight::theatre::BlackoutSceneItem &restore = scene.AddBlackoutItem(250.0);
+  restore.SetFadeSpeed(0.0);
+  restore.SetOperation(BlackoutOperation::Restore);
 
   BOOST_CHECK(!management.HasCycle());
 }
@@ -240,6 +247,22 @@ void CheckEqual(const Management &a, const Management &b) {
       BOOST_CHECK(scene_b);
       BOOST_CHECK_EQUAL(scene_a->SceneItems().size(),
                         scene_b->SceneItems().size());
+      auto iterator_b = scene_b->SceneItems().begin();
+      for (const auto &pair_a : scene_a->SceneItems()) {
+        BOOST_CHECK(typeid(pair_a.second.get()) ==
+                    typeid(iterator_b->second.get()));
+        if (BlackoutSceneItem *blackout_a =
+                dynamic_cast<BlackoutSceneItem *>(pair_a.second.get());
+            blackout_a) {
+          BlackoutSceneItem *blackout_b =
+              dynamic_cast<BlackoutSceneItem *>(iterator_b->second.get());
+          BOOST_CHECK(blackout_b);
+          BOOST_CHECK(blackout_a->Operation() == blackout_b->Operation());
+          BOOST_CHECK_CLOSE_FRACTION(blackout_a->FadeSpeed(),
+                                     blackout_b->FadeSpeed(), 1e-5);
+        }
+        ++iterator_b;
+      }
     }
   }
 }

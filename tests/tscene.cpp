@@ -1,5 +1,6 @@
 #include "../theatre/management.h"
-#include "../theatre/scene.h"
+
+#include "../theatre/scenes/scene.h"
 
 #include <boost/test/unit_test.hpp>
 
