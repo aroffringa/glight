@@ -16,6 +16,7 @@
 #include "../theatre/theatre.h"
 #include "../theatre/timesequence.h"
 
+#include "../theatre/scenes/blackoutsceneitem.h"
 #include "../theatre/scenes/scene.h"
 
 #include "../gui/state/guistate.h"
@@ -341,6 +342,14 @@ ControlSceneItem &ParseControlSceneItem(const Object &node, Scene &scene,
   return *item;
 }
 
+BlackoutSceneItem &ParseBlackoutSceneItem(const Object &node, Scene &scene) {
+  BlackoutSceneItem &item =
+      scene.AddBlackoutItem(ToNum(node["offset"]).AsDouble());
+  item.SetOperation(GetBlackoutOperation(ToStr(node["operation"])));
+  item.SetFadeSpeed(ToNum(node["fade-speed"]).AsDouble());
+  return item;
+}
+
 void ParseSceneItem(const Object &node, Scene &scene, Management &management) {
   const std::string &type = ToStr(node["type"]);
   SceneItem *item;
@@ -348,6 +357,8 @@ void ParseSceneItem(const Object &node, Scene &scene, Management &management) {
     item = &ParseKeySceneItem(node, scene);
   else if (type == "control")
     item = &ParseControlSceneItem(node, scene, management);
+  else if (type == "blackout")
+    item = &ParseBlackoutSceneItem(node, scene);
   else
     throw std::runtime_error(std::string("Invalid type for scene item: ") +
                              type);

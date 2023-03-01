@@ -431,7 +431,7 @@ void SceneWindow::onSelectedSceneItemChanged() {
         }
         const double offset = item->OffsetInMS();
         const bool is_blackout =
-            dynamic_cast<theatre::BlackOutSceneItem *>(item);
+            dynamic_cast<theatre::BlackoutSceneItem *>(item);
         lock.unlock();
         _audioWidget.SetPosition(offset);
         _createControlItemButton.set_sensitive(true);
@@ -744,8 +744,8 @@ void SceneWindow::AddBlackoutItem(theatre::BlackoutOperation operation) {
   std::unique_lock<std::mutex> lock(_management.Mutex());
   theatre::SceneItem *selected_item =
       (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
-  theatre::BlackOutSceneItem &new_item =
-      _selectedScene->AddBlackOutItem(selected_item->OffsetInMS());
+  theatre::BlackoutSceneItem &new_item =
+      _selectedScene->AddBlackoutItem(selected_item->OffsetInMS());
   new_item.SetFadeSpeed(1.0);
   new_item.SetOperation(operation);
   lock.unlock();
@@ -762,8 +762,8 @@ void SceneWindow::SetFadeSpeed() {
   std::unique_lock<std::mutex> lock(_management.Mutex());
   theatre::SceneItem *selected_item =
       (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
-  theatre::BlackOutSceneItem *blackout =
-      dynamic_cast<theatre::BlackOutSceneItem *>(selected_item);
+  theatre::BlackoutSceneItem *blackout =
+      dynamic_cast<theatre::BlackoutSceneItem *>(selected_item);
   if (blackout) {
     const double fade_speed = blackout->FadeSpeed();
     lock.unlock();
@@ -777,7 +777,7 @@ void SceneWindow::SetFadeSpeed() {
     lock.lock();
     selected_item =
         (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
-    blackout = dynamic_cast<theatre::BlackOutSceneItem *>(selected_item);
+    blackout = dynamic_cast<theatre::BlackoutSceneItem *>(selected_item);
     if (blackout) {
       blackout->SetFadeSpeed(std::atof(dialog.Value().c_str()));
     }

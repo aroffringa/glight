@@ -31,10 +31,10 @@ inline BlackoutOperation GetBlackoutOperation(const std::string& str) {
 /**
  * @author Andre Offringa
  */
-class BlackOutSceneItem final : public SceneItem {
+class BlackoutSceneItem final : public SceneItem {
  public:
-  BlackOutSceneItem() : operation_(BlackoutOperation::Blackout) {}
-  ~BlackOutSceneItem() {}
+  BlackoutSceneItem() : operation_(BlackoutOperation::Blackout) {}
+  ~BlackoutSceneItem() {}
 
   BlackoutOperation Operation() const { return operation_; }
   void SetOperation(BlackoutOperation operation) { operation_ = operation; }

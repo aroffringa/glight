@@ -4,7 +4,7 @@
 
 namespace glight::theatre {
 
-void BlackOutSceneItem::Start(Scene& scene) {
+void BlackoutSceneItem::Start(Scene& scene) {
   switch (operation_) {
     case BlackoutOperation::Blackout:
       scene.BlackOut(fade_speed_);

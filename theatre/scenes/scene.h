@@ -47,7 +47,7 @@ class Scene : public Controllable, private system::SyncListener {
 
   KeySceneItem *AddKeySceneItem(double offsetInMS);
 
-  BlackOutSceneItem &AddBlackOutItem(double offsetInMS);
+  BlackoutSceneItem &AddBlackoutItem(double offsetInMS);
 
   void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS);
 

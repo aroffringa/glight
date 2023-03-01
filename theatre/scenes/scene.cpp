@@ -80,11 +80,11 @@ KeySceneItem *Scene::AddKeySceneItem(double offset_in_ms) {
   return result;
 }
 
-BlackOutSceneItem &Scene::AddBlackOutItem(double offset_in_ms) {
-  std::unique_ptr<BlackOutSceneItem> item =
-      std::make_unique<BlackOutSceneItem>();
+BlackoutSceneItem &Scene::AddBlackoutItem(double offset_in_ms) {
+  std::unique_ptr<BlackoutSceneItem> item =
+      std::make_unique<BlackoutSceneItem>();
   item->SetOffsetInMS(offset_in_ms);
-  BlackOutSceneItem *result = item.get();
+  BlackoutSceneItem *result = item.get();
   _items.emplace(offset_in_ms, std::move(item));
   resetCurrentOffset();
   return *result;
@@ -172,7 +172,7 @@ void Scene::RecalculateControllables() {
 
 void Scene::BlackOut(double fade_speed) {
   _storedSourceValues = _management.StoreSourceValues(true);
-  _management.BlackOut(true, 0.4);
+  _management.BlackOut(true, fade_speed);
 }
 
 void Scene::RestoreFromBlackout(double fade_speed) {
