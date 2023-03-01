@@ -48,7 +48,8 @@ class SceneWindow : public Gtk::Window {
     SceneItemsListColumns() {
       add(_startTime);
       add(_endTime);
-      add(_startValue), add(_endValue);
+      add(_startValue);
+      add(_endValue);
       add(_description);
       add(_item);
     }
@@ -113,7 +114,8 @@ class SceneWindow : public Gtk::Window {
   Gtk::Button _createControlItemButton;
   Gtk::Button _setEndTimeButton;
   Gtk::Button _removeButton;
-  Gtk::Button _createTransitionItemButton;
+  Gtk::Button _blackOutButton;
+  Gtk::Button _restoreButton;
   Gtk::VScale _startScale, _endScale;
 
   sigc::connection _updateConnection;
@@ -152,6 +154,8 @@ class SceneWindow : public Gtk::Window {
   void onSelectedSceneItemChanged();
   void onSetEndTimeButtonPressed();
   void onRemoveButtonPressed();
+  void onBlackOutButtonPressed();
+  void onRestoreButtonPressed();
   void onScalesChanged();
   bool onTimeout();
   void onAudioWidgetClicked(double timeInMS);

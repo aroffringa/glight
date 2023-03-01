@@ -21,10 +21,10 @@ inline std::string ToString(BlackoutOperation operation) {
   }
 }
 
-inline BlackoutOperation GetBlackoutOperation(const std::string &str) {
+inline BlackoutOperation GetBlackoutOperation(const std::string& str) {
   if (str == "blackout")
     return BlackoutOperation::Blackout;
-  else // if (str == "highlight")
+  else  // if (str == "highlight")
     return BlackoutOperation::Restore;
 }
 
@@ -38,7 +38,7 @@ class BlackOutSceneItem final : public SceneItem {
 
   BlackoutOperation Operation() const { return operation_; }
   void SetOperation(BlackoutOperation operation) { operation_ = operation; }
-  
+
   double FadeSpeed() const { return fade_speed_; }
   void SetFadeSpeed(double fade_speed) { fade_speed_ = fade_speed; }
 

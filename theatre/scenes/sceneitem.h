@@ -24,8 +24,8 @@ class SceneItem {
    * once the scene item's starting time has reached.
    */
   virtual void Start(Scene& scene) {}
-  
-  virtual void Mix(const Timing &timing, bool primary) {}
+
+  virtual void Mix(const Timing& timing, bool primary) {}
 
  private:
   double _offsetInMS = 0.0;

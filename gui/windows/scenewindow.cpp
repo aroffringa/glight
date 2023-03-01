@@ -46,7 +46,8 @@ SceneWindow::SceneWindow(theatre::Management &management,
       _createControlItemButton(Gtk::Stock::ADD),
       _setEndTimeButton("Set end time"),
       _removeButton(Gtk::Stock::REMOVE),
-      _createTransitionItemButton("Add transition"),
+      _blackOutButton("Black-out"),
+      _restoreButton("Restore"),
       _startScale(0, theatre::ControlValue::MaxUInt() + 1,
                   theatre::ControlValue::MaxUInt() / 100.0),
       _endScale(0, theatre::ControlValue::MaxUInt() + 1,
@@ -125,6 +126,16 @@ SceneWindow::SceneWindow(theatre::Management &management,
       sigc::mem_fun(*this, &SceneWindow::onRemoveButtonPressed));
   _removeButton.set_sensitive(false);
   _sceneItemUButtonBox.pack_start(_removeButton);
+
+  _blackOutButton.signal_clicked().connect(
+      sigc::mem_fun(*this, &SceneWindow::onBlackOutButtonPressed));
+  _blackOutButton.set_sensitive(false);
+  _sceneItemUButtonBox.pack_start(_blackOutButton);
+
+  _restoreButton.signal_clicked().connect(
+      sigc::mem_fun(*this, &SceneWindow::onRestoreButtonPressed));
+  _restoreButton.set_sensitive(false);
+  _sceneItemUButtonBox.pack_start(_restoreButton);
 
   _sceneItemBox.pack_start(_sceneItemUButtonBox, false, false, 2);
 
@@ -713,5 +724,9 @@ void SceneWindow::UpdateAudioWidgetKeys() {
   else
     _audioWidget.SetNoScene();
 }
+
+void SceneWindow::onBlackOutButtonPressed() {}
+
+void SceneWindow::onRestoreButtonPressed() {}
 
 }  // namespace glight::gui

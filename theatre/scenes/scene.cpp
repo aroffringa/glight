@@ -127,7 +127,8 @@ void Scene::skipTo(double offsetInMS) {
   // "Start" all items that have started since the last tick
   while (_nextStartedItem != _items.end() &&
          _nextStartedItem->first <= offsetInMS) {
-    glight::theatre::SceneItem* item = _startedItems.emplace_back(_nextStartedItem->second.get());
+    glight::theatre::SceneItem *item =
+        _startedItems.emplace_back(_nextStartedItem->second.get());
     item->Start(*this);
     ++_nextStartedItem;
   }

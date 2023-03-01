@@ -9,6 +9,7 @@
 
 #include "../../system/audioplayer.h"
 
+#include "blackoutsceneitem.h"
 #include "controlsceneitem.h"
 #include "keysceneitem.h"
 
@@ -36,8 +37,8 @@ class Scene : public Controllable, private system::SyncListener {
    * thread other than the management thread.
    */
   bool IsPlaying() const {
-    return _isPlaying &&
-           (_audioPlayer->IsPlaying() || _endOfItems < kWaitSyncs);
+    return _isPlaying && ((_audioPlayer && _audioPlayer->IsPlaying()) ||
+                          _endOfItems < kWaitSyncs);
   }
 
   ControlSceneItem *AddControlSceneItem(double offsetInMS,
@@ -45,6 +46,8 @@ class Scene : public Controllable, private system::SyncListener {
                                         size_t input);
 
   KeySceneItem *AddKeySceneItem(double offsetInMS);
+
+  BlackOutSceneItem &AddBlackOutItem(double offsetInMS);
 
   void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS);
 
@@ -109,8 +112,9 @@ class Scene : public Controllable, private system::SyncListener {
   }
 
   void BlackOut(double fade_speed);
-  
+
   void RestoreFromBlackout(double fade_speed);
+
  protected:
   void Start(double timeInMS);
 
