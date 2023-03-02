@@ -101,8 +101,10 @@ class SceneWindow : public Gtk::Window {
   Gtk::Toolbar _toolbar;
   AudioWidget _audioWidget;
   Gtk::TreeView _sceneItemsListView;
-  Gtk::ComboBox _controllables1ComboBox, _controllables2ComboBox;
-  Glib::RefPtr<Gtk::ListStore> _sceneItemsListModel, _controllablesListModel;
+  Glib::RefPtr<Gtk::ListStore> _sceneItemsListModel;
+  Gtk::ComboBox _controllablesComboBox;
+  Glib::RefPtr<Gtk::ListStore> _controllablesListModel;
+  theatre::Controllable *_latestSelectedControllable = nullptr;
   Gtk::VBox _vBox;
   Gtk::HBox _hBox;
   Gtk::HBox _audioBox;
@@ -112,6 +114,7 @@ class SceneWindow : public Gtk::Window {
   Gtk::HBox _scalesBox;
   Gtk::VButtonBox _sceneItemUButtonBox;
 
+  Gtk::Button _selectControllableButton;
   Gtk::Button _createControlItemButton;
   Gtk::Button _setEndTimeButton;
   Gtk::Button _removeButton;
@@ -151,6 +154,7 @@ class SceneWindow : public Gtk::Window {
   void SeekForward();
   void ChangeAudio();
 
+  void onSelectControllable();
   void onCreateControlItemButtonPressed();
   void onSelectedSceneItemChanged();
   void onSetEndTimeButtonPressed();

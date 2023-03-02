@@ -16,6 +16,7 @@
 
 #include "../eventtransmitter.h"
 
+#include "../dialogs/inputselectdialog.h"
 #include "../dialogs/stringinputdialog.h"
 #include "../dialogs/sceneselect.h"
 
@@ -44,6 +45,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
     : _management(management),
       _eventHub(eventHub),
       _audioLabel("Audio file: -"),
+      _selectControllableButton("Select..."),
       _createControlItemButton(Gtk::Stock::ADD),
       _setEndTimeButton("Set end time"),
       _removeButton(Gtk::Stock::REMOVE),
@@ -114,6 +116,10 @@ SceneWindow::SceneWindow(theatre::Management &management,
 
   createControllablesList();
 
+  _selectControllableButton.signal_clicked().connect(
+      sigc::mem_fun(*this, &SceneWindow::onSelectControllable));
+  _sceneItemUButtonBox.pack_start(_selectControllableButton);
+
   _createControlItemButton.signal_clicked().connect(
       sigc::mem_fun(*this, &SceneWindow::onCreateControlItemButtonPressed));
   _createControlItemButton.set_sensitive(false);
@@ -182,6 +188,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
   else {
     NewScene();
   }
+  fillControllablesList();
 }
 
 SceneWindow::~SceneWindow() {
@@ -224,11 +231,11 @@ void SceneWindow::createSceneItemsList() {
 void SceneWindow::createControllablesList() {
   _controllablesListModel = Gtk::ListStore::create(_controllablesListColumns);
 
-  _controllables1ComboBox.set_model(_controllablesListModel);
-  _controllables1ComboBox.pack_start(_controllablesListColumns._text);
+  _controllablesComboBox.set_model(_controllablesListModel);
+  _controllablesComboBox.pack_start(_controllablesListColumns._text);
 
-  _sceneItemBox.pack_start(_controllables1ComboBox, false, false);
-  _controllables1ComboBox.show();
+  _sceneItemBox.pack_start(_controllablesComboBox, false, false);
+  _controllablesComboBox.show();
 }
 
 void SceneWindow::fillSceneItemList() {
@@ -293,14 +300,30 @@ void SceneWindow::updateSelectedSceneItems() {
 void SceneWindow::fillControllablesList() {
   _controllablesListModel->clear();
 
-  std::lock_guard<std::mutex> lock(_management.Mutex());
-  const std::vector<std::unique_ptr<theatre::Controllable>> &controllable =
-      _management.Controllables();
-  for (const std::unique_ptr<theatre::Controllable> &contr : controllable) {
-    Gtk::TreeModel::iterator iter = _controllablesListModel->append();
-    const Gtk::TreeModel::Row &row = *iter;
-    row[_controllablesListColumns._text] = contr->Name();
-    row[_controllablesListColumns._controllable] = contr.get();
+  if (_selectedScene) {
+    std::lock_guard<std::mutex> lock(_management.Mutex());
+    if (_latestSelectedControllable) {
+      if (_management.Contains(*_latestSelectedControllable)) {
+        Gtk::TreeModel::iterator iter = _controllablesListModel->append();
+        const Gtk::TreeModel::Row &row = *iter;
+        row[_controllablesListColumns._text] =
+            _latestSelectedControllable->Name();
+        row[_controllablesListColumns._controllable] =
+            _latestSelectedControllable;
+      } else {
+        _latestSelectedControllable = nullptr;
+      }
+    }
+    for (size_t output_index = 0; output_index != _selectedScene->NOutputs();
+         ++output_index) {
+      std::pair<const glight::theatre::Controllable *, size_t> output =
+          _selectedScene->Output(output_index);
+      Gtk::TreeModel::iterator iter = _controllablesListModel->append();
+      const Gtk::TreeModel::Row &row = *iter;
+      row[_controllablesListColumns._text] = output.first->Name();
+      row[_controllablesListColumns._controllable] =
+          const_cast<glight::theatre::Controllable *>(output.first);
+    }
   }
 }
 
@@ -360,9 +383,17 @@ void SceneWindow::addKey(theatre::KeySceneLevel level) {
   UpdateAudioWidgetKeys();
 }
 
+void SceneWindow::onSelectControllable() {
+  InputSelectDialog dialog(_management, _eventHub, false);
+  if (dialog.run() == Gtk::RESPONSE_OK) {
+    _latestSelectedControllable = dialog.SelectedInput().GetControllable();
+    fillControllablesList();
+  }
+}
+
 void SceneWindow::onCreateControlItemButtonPressed() {
   Gtk::TreeModel::iterator activeControllable =
-      _controllables1ComboBox.get_active();
+      _controllablesComboBox.get_active();
   if (activeControllable) {
     _isUpdating = true;
 
@@ -650,7 +681,7 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     onSelectedSceneItemChanged();
   } else if (add_item_tb_.get_active()) {
     Gtk::TreeModel::iterator activeControllable =
-        _controllables1ComboBox.get_active();
+        _controllablesComboBox.get_active();
     if (activeControllable) {
       _isUpdating = true;
 
