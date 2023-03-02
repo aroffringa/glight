@@ -3,6 +3,7 @@
 #include "fixture.h"
 #include "folder.h"
 
+#include <cassert>
 #include <cmath>
 #include <sstream>
 
@@ -123,6 +124,19 @@ void Theatre::RemoveFixtureType(const FixtureType &fixtureType) {
   const size_t ftIndex = FolderObject::FindIndex(_fixtureTypes, &fixtureType);
   _fixtureTypes[ftIndex]->Parent().Remove(*_fixtureTypes[ftIndex]);
   _fixtureTypes.erase(_fixtureTypes.begin() + ftIndex);
+}
+
+void Theatre::SwapFixturePositions(const Fixture &fixture_a,
+                                   const Fixture &fixture_b) {
+  std::unique_ptr<Fixture> *a = nullptr;
+  std::unique_ptr<Fixture> *b = nullptr;
+  for (std::unique_ptr<Fixture> &f : _fixtures) {
+    if (f.get() == &fixture_a) a = &f;
+    if (f.get() == &fixture_b) b = &f;
+  }
+  assert(a);
+  assert(b);
+  std::swap(*a, *b);
 }
 
 bool Theatre::IsUsed(const FixtureType &fixtureType) const {
