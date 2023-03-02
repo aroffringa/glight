@@ -208,6 +208,7 @@ void FaderWindow::loadState() {
     addControlInLayout(*state);
   }
 
+  set_title(_state->name);
   resize(_state->width, _state->height);
 
   for (size_t i = 0; i != _state->faders.size(); ++i) {
@@ -556,6 +557,7 @@ void FaderWindow::onSetNameClicked() {
   int result = dialog.run();
   if (result == Gtk::RESPONSE_OK) {
     _state->name = entry.get_text();
+    set_title(_state->name);
     _guiState.EmitFaderSetChangeSignal();
   }
 }
