@@ -40,6 +40,7 @@ class Theatre {
   void RemoveFixture(const Fixture &fixture);
   void RemoveFixtureType(const FixtureType &fixtureType);
 
+  void SwapFixturePositions(const Fixture &fixture_a, const Fixture &fixture_b);
   bool IsUsed(const FixtureType &fixtureType) const;
 
   unsigned HighestChannel() const { return _highestChannel; }

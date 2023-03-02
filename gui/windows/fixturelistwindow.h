@@ -44,6 +44,9 @@ class FixtureListWindow : public Gtk::Window {
   static std::string getChannelString(const theatre::Fixture &fixture);
   void onSelectionChanged();
   void onGlobalSelectionChange();
+  void onUpClicked();
+  void onDownClicked();
+  void onReassignClicked();
 
   EventTransmitter &_eventHub;
   theatre::Management &_management;
@@ -72,8 +75,14 @@ class FixtureListWindow : public Gtk::Window {
   Gtk::VBox _mainBox;
   Gtk::HButtonBox _buttonBox;
 
-  Gtk::Button _newButton, _removeButton;
-  Gtk::Button _incChannelButton, _decChannelButton, _setChannelButton;
+  Gtk::Button _newButton;
+  Gtk::Button _removeButton;
+  Gtk::Button _incChannelButton;
+  Gtk::Button _decChannelButton;
+  Gtk::Button _setChannelButton;
+  Gtk::Button _upButton;
+  Gtk::Button _downButton;
+  Gtk::Button _reassignButton;
 };
 
 }  // namespace glight::gui

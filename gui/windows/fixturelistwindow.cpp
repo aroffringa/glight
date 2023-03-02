@@ -27,7 +27,10 @@ FixtureListWindow::FixtureListWindow(EventTransmitter &eventHub,
       _removeButton("Remove"),
       _incChannelButton("+channel"),
       _decChannelButton("-channel"),
-      _setChannelButton("Set...") {
+      _setChannelButton("Set..."),
+      _upButton(),
+      _downButton(),
+      _reassignButton("Reassign") {
   set_title("Glight - fixtures");
   set_size_request(200, 400);
 
@@ -74,6 +77,20 @@ FixtureListWindow::FixtureListWindow(EventTransmitter &eventHub,
   _setChannelButton.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureListWindow::onSetChannelButtonClicked));
   _buttonBox.pack_start(_setChannelButton);
+
+  _upButton.signal_clicked().connect(
+      sigc::mem_fun(*this, &FixtureListWindow::onUpClicked));
+  _upButton.set_image_from_icon_name("go-up");
+  _buttonBox.pack_start(_upButton);
+
+  _downButton.signal_clicked().connect(
+      sigc::mem_fun(*this, &FixtureListWindow::onDownClicked));
+  _downButton.set_image_from_icon_name("go-down");
+  _buttonBox.pack_start(_downButton);
+
+  _reassignButton.signal_clicked().connect(
+      sigc::mem_fun(*this, &FixtureListWindow::onReassignClicked));
+  _buttonBox.pack_start(_reassignButton);
 
   _mainBox.pack_start(_buttonBox, false, false, 0);
 
@@ -237,6 +254,67 @@ void FixtureListWindow::onGlobalSelectionChange() {
       }
     }
   }
+}
+
+void FixtureListWindow::onUpClicked() {
+  Glib::RefPtr<Gtk::TreeSelection> selection =
+      _fixturesListView.get_selection();
+  Gtk::TreeModel::iterator selected = selection->get_selected();
+  if (selected) {
+    theatre::Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
+    std::unique_lock<std::mutex> lock(_management.Mutex());
+    theatre::Fixture *previous_fixture = nullptr;
+    for (const std::unique_ptr<theatre::Fixture> &f :
+         _management.GetTheatre().Fixtures()) {
+      if (f.get() == fixture) {
+        if (previous_fixture) {
+          _management.GetTheatre().SwapFixturePositions(*previous_fixture,
+                                                        *fixture);
+        }
+        break;
+      }
+      previous_fixture = f.get();
+    }
+    lock.unlock();
+    _eventHub.EmitUpdate();
+    _globalSelection.SetSelection(std::vector{fixture});
+  }
+}
+
+void FixtureListWindow::onDownClicked() {
+  Glib::RefPtr<Gtk::TreeSelection> selection =
+      _fixturesListView.get_selection();
+  Gtk::TreeModel::iterator selected = selection->get_selected();
+  if (selected) {
+    theatre::Fixture *fixture = (*selected)[_fixturesListColumns._fixture];
+    std::unique_lock<std::mutex> lock(_management.Mutex());
+    for (auto iterator = _management.GetTheatre().Fixtures().begin();
+         iterator != _management.GetTheatre().Fixtures().end(); ++iterator) {
+      if (iterator->get() == fixture) {
+        ++iterator;
+        if (iterator != _management.GetTheatre().Fixtures().end()) {
+          _management.GetTheatre().SwapFixturePositions(**iterator, *fixture);
+        }
+        break;
+      }
+    }
+    lock.unlock();
+    _eventHub.EmitUpdate();
+    _globalSelection.SetSelection(std::vector{fixture});
+  }
+}
+
+void FixtureListWindow::onReassignClicked() {
+  unsigned channel = 0;
+  for (const std::unique_ptr<theatre::Fixture> &fixture :
+       _management.GetTheatre().Fixtures()) {
+    fixture->SetChannel(channel);
+    const std::vector<unsigned> channels = fixture->GetChannels();
+    for (unsigned ch : channels) {
+      channel = std::max(channel, ch + 1);
+    }
+  }
+  _eventHub.EmitUpdate();
 }
 
 }  // namespace glight::gui
