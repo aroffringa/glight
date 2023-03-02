@@ -102,10 +102,15 @@ void EffectPropertiesWindow::onSelectedConnectionChanged() {
 }
 
 void EffectPropertiesWindow::onAddConnectionClicked() {
-  InputSelectDialog dialog(*_management, _parentWindow);
-  if (dialog.run() == Gtk::RESPONSE_OK) {
-    onInputSelected(dialog.SelectedInputPreset());
-  }
+  InputSelectDialog dialog(*_management, _parentWindow, true);
+  bool stay_open;
+  do {
+    stay_open = false;
+    if (dialog.run() == Gtk::RESPONSE_OK) {
+      onInputSelected(dialog.SelectedSourceValue());
+      stay_open = dialog.StayOpenRequested();
+    }
+  } while (stay_open);
 }
 
 void EffectPropertiesWindow::onRemoveConnectionClicked() {
