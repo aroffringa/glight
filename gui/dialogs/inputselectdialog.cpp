@@ -4,7 +4,7 @@
 
 namespace glight::gui {
 
-theatre::SourceValue *InputSelectDialog::SelectedInputPreset() const {
+theatre::SourceValue *InputSelectDialog::SelectedSourceValue() const {
   return _management.GetSourceValue(*_inputSelector.SelectedObject(),
                                     _inputSelector.SelectedInput());
 }

@@ -4,9 +4,11 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/buttonbox.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/dialog.h>
 
 #include "../../theatre/forwards.h"
+#include "../../theatre/input.h"
 
 #include "../components/inputselectwidget.h"
 
@@ -16,16 +18,20 @@ class EventTransmitter;
 
 class InputSelectDialog : public Gtk::Dialog {
  public:
-  InputSelectDialog(theatre::Management &management, EventTransmitter &eventHub)
+  InputSelectDialog(theatre::Management &management, EventTransmitter &eventHub,
+                    bool allow_stay_open)
       : Dialog("Select input", true),
         _management(management),
-        _inputSelector(management, eventHub) {
+        _inputSelector(management, eventHub),
+        _stayOpenCheckButton("Stay open") {
     set_size_request(600, 400);
 
     _inputSelector.SignalSelectionChange().connect(
         [&]() { onSelectionChanged(); });
     get_content_area()->pack_start(_inputSelector);
-
+    if (allow_stay_open) {
+      get_content_area()->pack_start(_stayOpenCheckButton);
+    }
     add_button("Cancel", Gtk::RESPONSE_CANCEL);
     _selectButton = add_button("Select", Gtk::RESPONSE_OK);
     _selectButton->set_sensitive(false);
@@ -33,12 +39,14 @@ class InputSelectDialog : public Gtk::Dialog {
     show_all_children();
   }
 
-  std::pair<theatre::Controllable *, size_t> SelectedInput() const {
-    return std::make_pair(_inputSelector.SelectedObject(),
+  theatre::Input SelectedInput() const {
+    return theatre::Input(*_inputSelector.SelectedObject(),
                           _inputSelector.SelectedInput());
   }
 
-  theatre::SourceValue *SelectedInputPreset() const;
+  theatre::SourceValue *SelectedSourceValue() const;
+
+  bool StayOpenRequested() const { return _stayOpenCheckButton.get_active(); }
 
  private:
   void onSelectionChanged() {
@@ -46,6 +54,7 @@ class InputSelectDialog : public Gtk::Dialog {
   }
   theatre::Management &_management;
   InputSelectWidget _inputSelector;
+  Gtk::CheckButton _stayOpenCheckButton;
   Gtk::Button *_selectButton;
 };
 

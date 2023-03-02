@@ -420,19 +420,20 @@ void SceneWindow::onSelectedSceneItemChanged() {
       case 1: {
         std::unique_lock<std::mutex> lock(_management.Mutex());
         theatre::SceneItem *item = selectedItem();
-        theatre::ControlSceneItem *csi =
-            dynamic_cast<theatre::ControlSceneItem *>(item);
-        if (csi != nullptr) {
+        const double offset = item->OffsetInMS();
+        const bool is_blackout =
+            dynamic_cast<theatre::BlackoutSceneItem *>(item);
+        if (theatre::ControlSceneItem *csi =
+                dynamic_cast<theatre::ControlSceneItem *>(item);
+            csi) {
           const unsigned s = csi->StartValue().UInt();
           const unsigned e = csi->EndValue().UInt();
           lock.unlock();
           _startScale.set_value(s);
           _endScale.set_value(e);
+        } else {
+          lock.unlock();
         }
-        const double offset = item->OffsetInMS();
-        const bool is_blackout =
-            dynamic_cast<theatre::BlackoutSceneItem *>(item);
-        lock.unlock();
         _audioWidget.SetPosition(offset);
         _createControlItemButton.set_sensitive(true);
         _setEndTimeButton.set_sensitive(true);

@@ -76,9 +76,9 @@ theatre::SingleSourceValue &ControlWidget::GetSingleSourceValue() {
 }
 
 void ControlWidget::ShowAssignDialog() {
-  InputSelectDialog dialog(GetManagement(), GetEventHub());
+  InputSelectDialog dialog(GetManagement(), GetEventHub(), false);
   if (dialog.run() == Gtk::RESPONSE_OK) {
-    Assign(dialog.SelectedInputPreset(), true);
+    Assign(dialog.SelectedSourceValue(), true);
   }
 }
 
