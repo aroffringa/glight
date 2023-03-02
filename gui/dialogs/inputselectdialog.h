@@ -30,7 +30,7 @@ class InputSelectDialog : public Gtk::Dialog {
         [&]() { onSelectionChanged(); });
     get_content_area()->pack_start(_inputSelector);
     if (allow_stay_open) {
-      get_content_area()->pack_start(_stayOpenCheckButton);
+      get_content_area()->pack_start(_stayOpenCheckButton, false, false);
     }
     add_button("Cancel", Gtk::RESPONSE_CANCEL);
     _selectButton = add_button("Select", Gtk::RESPONSE_OK);
