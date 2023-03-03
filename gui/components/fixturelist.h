@@ -32,11 +32,13 @@ class FixtureList : public Gtk::ScrolledWindow {
       add(title_);
       add(type_);
       add(fixture_);
+      add(group_);
     }
 
     Gtk::TreeModelColumn<Glib::ustring> title_;
     Gtk::TreeModelColumn<Glib::ustring> type_;
     Gtk::TreeModelColumn<theatre::Fixture *> fixture_;
+    Gtk::TreeModelColumn<theatre::FixtureGroup *> group_;
   } columns_;
   theatre::Management &management_;
   EventTransmitter &hub_;
