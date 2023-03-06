@@ -101,6 +101,7 @@ class SourceValue {
    */
   SourceValue(Controllable& controllable, size_t input_index)
       : input_(controllable, input_index), a_(), b_(), cross_fader_() {}
+  ~SourceValue() { signal_delete_(); }
 
   SingleSourceValue& A() { return a_; }
   const SingleSourceValue& A() const { return a_; }

@@ -17,10 +17,7 @@ namespace glight::gui {
 class FaderState {
  public:
   explicit FaderState(theatre::SourceValue *source_value);
-  FaderState()
-      : source_value_(nullptr),
-        is_toggle_button_(false),
-        new_toggle_button_column_(false) {}
+  FaderState() : is_toggle_button_(false), new_toggle_button_column_(false) {}
   FaderState(const FaderState &source) = delete;
   ~FaderState() { source_value_deleted_connection_.disconnect(); }
 
@@ -86,7 +83,7 @@ class FaderState {
  private:
   void onPresetValueDeleted();
 
-  theatre::SourceValue *source_value_;
+  theatre::SourceValue *source_value_ = nullptr;
   bool is_toggle_button_ = false;
   bool new_toggle_button_column_ = false;
   bool display_name_ = true;
