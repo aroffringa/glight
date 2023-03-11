@@ -5,7 +5,6 @@
 
 #include <alsa/asoundlib.h>
 
-#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -15,6 +14,11 @@ namespace glight::system {
 class SyncListener {
  public:
   virtual ~SyncListener(){};
+  /**
+   * This call may not lock the mutex, as this can lead to
+   * a deadlock when the audioplayer is closing with
+   * locked mutex (e.g. through Scene::Mix()).
+   */
   virtual void OnSyncUpdate(double offsetInMS) = 0;
 };
 
@@ -65,7 +69,6 @@ class AudioPlayer : private SyncListener {
   std::atomic<bool> _isStopping;
   std::atomic<bool> _isPlaying;
   bool _isOpen;
-  std::mutex _mutex;
   FlacDecoder &_decoder;
   SyncListener *_syncListener;
   unsigned _startPosition;

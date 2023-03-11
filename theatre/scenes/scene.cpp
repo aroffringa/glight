@@ -23,10 +23,9 @@ Scene::Scene(Management &management)
 Scene::~Scene() { Stop(); }
 
 void Scene::OnSyncUpdate(double offsetInMS) {
-  std::lock_guard<std::mutex> lock(_mutex);
   double currentTime = _management.GetOffsetTimeInMS();
-  // bias = currentTime - StartTimeInMS() - offsetInMS;
-
+  
+  // The bias is given by currentTime - StartTimeInMS() - offsetInMS;
   // We only adjust 5%, to avoid large steps
   _startTimeInMS =
       StartTimeInMS() + (currentTime - StartTimeInMS() - offsetInMS) * 0.05;

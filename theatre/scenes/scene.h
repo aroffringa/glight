@@ -170,7 +170,7 @@ class Scene : public Controllable, private system::SyncListener {
   std::atomic<bool> _isPlaying;
   std::atomic<int> _endOfItems;
   std::string _audioFilename;
-  double _startTimeInMS;
+  std::atomic<double> _startTimeInMS;
   SourceValueStore _storedSourceValues;
 
   void OnSyncUpdate(double offsetInMS) override;
