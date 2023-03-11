@@ -25,7 +25,7 @@ After this, the fader window looks like this:
     :alt: The fader window after assigning all faders.
     :width: 100%
 
-Note the text under the faders, saying (for example) "*A (R)*". This refers
-to fixture A, channel R.
+Note the text under the faders, saying (for example) "*RGB A (R)*". This refers
+to fixture RGB A, channel R.
 
 Next chapter: :doc:`controlling-lights`
