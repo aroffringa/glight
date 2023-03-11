@@ -3,6 +3,8 @@ Glight allows a computer with DMX interface to act as a DMX controller for live 
 
 Glight's website with documentation can be found here: https://glight.readthedocs.io/
 
+<img src="https://raw.githubusercontent.com/aroffringa/glight/master/doc/NTDS-2023.jpg" alt="NTDS-2023" title="Photo of Glight in action" />
+
 Glight is specifically aimed at shows or events in which the lighting is controlled live. Any DMX device can be controlled, but Glight was in particular written for controlling less advanced lighting devices, such as light spots and pars, RGB LED lights/uplighting, etc. The development of Glight is focussed on Linux, makes use of the GTK toolkit and is written in C++. The following features are provided:
 
 * Create scenes and chases and control these live; or design fully audio-annotated shows that run automatically.
@@ -13,7 +15,7 @@ Glight is specifically aimed at shows or events in which the lighting is control
 * Lights can be visualized on-screen. This makes it possible to follow their state on the screen (although the real lights are much more exiting to watch!), and also allows dry testing without having a DMX interface connected.
 * It is possible to 'disconnect' the real lighting fixtures from the controls. In those mode, the real lights continue their show (chases, etc.) while the use can change faders until happy with the new config, and only then affect the real lights.
 
-<img src="https://raw.githubusercontent.com/aroffringa/glight/master/doc/Screenshot-2019-08-07-glight-0.8.1.png" alt="Screenshot" title="Screenshot of Glight in action" />
+<img src="https://raw.githubusercontent.com/aroffringa/glight/master/doc/Screenshot-2023-03-11-glight-0.9.png" alt="Screenshot" title="Screenshot of Glight in action" />
 
 ## Installation
 The source of Glight can be downloaded from Github, currently from https://github.com/aroffringa/glight/. Glight has a few dependencies. Fortunately, these are all available as precompiled packages in Debian, Ubuntu and most other distributions. Apart from system tools such as cmake, these are the important dependencies:

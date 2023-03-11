@@ -11,6 +11,10 @@ The change is also visible in the visualization window:
     :alt: One light turned on.
     :width: 100%
 
+.. Hint:: The direction of the beam can be redirected by selecting the
+  relevant fixtures in the visualization window, clicking with the right
+  mouse button on one of them and selecting "*Properties*".
+    
 Using faders is an important aspect of controlling the lights in a live show,
 and there are several ways to control the faders by either mouse or keyboard:
 
@@ -21,6 +25,8 @@ and there are several ways to control the faders by either mouse or keyboard:
 - The button between the check-box and fader (with a single letter in it) can
   be used to flash / briefly turn a fader on. The fader will be on only on as long
   as the mouse button is hold down.
+- When hovering with the mouse over a fader, a up and/or down arrow button
+  appears. Pressing these will fade in or out the light, correspondingly.
 - The letters on the flash button of each fader specifies a key that can be
   pressed to switch the fader on or off. For the image, for example, pressing
   the 'n' key would switch the fader off again. By default, each fader window
@@ -34,7 +40,8 @@ Fader groups
 The previously created fader group controls the upper row of lights. A second frame
 is required to control the lower row of lights. Before we do this, we will
 give our first fader group a name to be able to distinguish it. Press the
-*Name* button and name it appropriately, for example "*Upper lights*".
+top left button on the fader window to make a menu apear. Select the
+*Name* button and name the fader window appropriately, for example "*Upper lights*".
 
 Make a new fader frame by, from the main window, open the *Window* menu, then
 the *Fader windows* submenu and select *New*. In this new window, add again

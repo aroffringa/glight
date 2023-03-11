@@ -19,7 +19,11 @@ what we want. If we were creating a chase with only the 4 upper row lights,
 we could have selected those 4 in the visualization window, or we
 could change the selection at this point in the design window.
 
-Press the *next* button to continue the design process. The next step
+Press the *next* button to continue the design process. In this step,
+the selected fixtures can be reordered, if this would be necessary
+to create the particular desired chase. Because our fixtures are
+already ordered logically, we can skip this step and immediately press
+*next*. The next step
 is to select what type of chase (or effect) we want to create. Select
 *Running light*: this is a simple chase that switches one light on
 at a time and moves it from one to another light. Note also the options
@@ -46,19 +50,20 @@ two rows of lights, that is not what we want.
     :alt: The design wizard (step 2).
 
 Select *inward* and some nice colours and press next to create the chase.
-The main window will now show several *Runchase* objects:
+The main window will now show a "*Running light1*" folder. Enter it
+by double clicking on it, and several *Runchase* objects appear:
 
 .. image:: images/show-window-with-chase.png
     :alt: The main show window displaying a chase.
 
-It shows one chase ('C') object and four presets ('P'). Each preset
+There should be one chase ('C') object and four presets ('P'). Each preset
 is one of the steps of the chase. The chase and presets
 can be manipulated individually by double clicking on them. 
 
 Before doing so, it is useful to turn on the chase, as follows:
 
-* Open a new fader group frame, and assign the first fader to
-  *Runchase1*.
+* Open a new fader group frame, assign the first fader to *Runchase1*
+  that is inside the "*Running light1*" folder.
 * Optionally, rename the fader group to "*Chases*" and close the
   other fader frames.
 * Switch the *Runchase1* fader on.
