@@ -24,7 +24,7 @@ Scene::~Scene() { Stop(); }
 
 void Scene::OnSyncUpdate(double offsetInMS) {
   double currentTime = _management.GetOffsetTimeInMS();
-  
+
   // The bias is given by currentTime - StartTimeInMS() - offsetInMS;
   // We only adjust 5%, to avoid large steps
   _startTimeInMS =
