@@ -10,30 +10,37 @@ namespace glight::theatre {
 /**
         @author Andre Offringa
 */
-class DummyDevice : public DmxDevice {
+class DummyDevice final : public DmxDevice {
  public:
-  DummyDevice() : _isOpen(false) {}
+  DummyDevice() = default;
 
-  virtual ~DummyDevice() {}
+  ~DummyDevice() override = default;
 
-  virtual void Open() final override { _isOpen = true; }
+  void Open() override { _isOpen = true; }
 
-  virtual void SetValues(const unsigned char *newValues,
-                         size_t size) final override {}
+  size_t NOutputUniverses() const override { return 1; }
 
-  virtual void GetValues(unsigned char *destination,
-                         size_t size) final override {
-    for (size_t i = 0; i < size; ++i) destination[i] = 0;
+  void SetOutputValues(unsigned universe, const unsigned char *newValues,
+                       size_t size) override {}
+
+  void GetOutputValues(unsigned universe, unsigned char *destination,
+                       size_t size) override {
+    std::fill_n(destination, size, 0);
   }
 
-  virtual void WaitForNextSync() final override { usleep(40000); }
+  void GetInputValues(unsigned universe, unsigned char *destination,
+                      size_t size) override {
+    std::fill_n(destination, size, 0);
+  }
 
-  virtual void Abort() final override { _isOpen = false; }
+  void WaitForNextSync() override { usleep(40000); }
 
-  virtual bool IsOpen() final override { return _isOpen; }
+  void Abort() override { _isOpen = false; }
+
+  bool IsOpen() override { return _isOpen; }
 
  private:
-  bool _isOpen;
+  bool _isOpen = false;
 };
 
 }  // namespace glight::theatre

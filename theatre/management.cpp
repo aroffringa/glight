@@ -66,9 +66,10 @@ void Management::Clear() {
 
 void Management::AddDevice(std::unique_ptr<DmxDevice> device) {
   std::lock_guard<std::mutex> lock(_mutex);
-  _devices.emplace_back(std::move(device));
-  _primarySnapshot->SetUniverseCount(_devices.size());
-  _secondarySnapshot->SetUniverseCount(_devices.size());
+  _device = std::move(device);
+  const size_t n_universes = _device->NOutputUniverses();
+  _primarySnapshot->SetUniverseCount(n_universes);
+  _secondarySnapshot->SetUniverseCount(n_universes);
 }
 
 void Management::Run() {
@@ -80,14 +81,15 @@ void Management::Run() {
 }
 
 void Management::ThreadLoop() {
+  const size_t n_universes = _device->NOutputUniverses();
   std::unique_ptr<ValueSnapshot> nextPrimary =
-      std::make_unique<ValueSnapshot>(true, _devices.size());
+      std::make_unique<ValueSnapshot>(true, n_universes);
   std::unique_ptr<ValueSnapshot> nextSecondary =
-      std::make_unique<ValueSnapshot>(false, _devices.size());
+      std::make_unique<ValueSnapshot>(false, n_universes);
   unsigned timestepNumber = 0;
   while (!_isQuitting) {
     for (bool is_primary : {true, false}) {
-      for (unsigned universe = 0; universe != _devices.size(); ++universe) {
+      for (unsigned universe = 0; universe != n_universes; ++universe) {
         unsigned values[512];
         unsigned char valuesChar[512];
 
@@ -107,11 +109,11 @@ void Management::ThreadLoop() {
         universeValues.SetValues(valuesChar, _theatre->HighestChannel() + 1);
 
         if (is_primary) {
-          _devices[universe]->WaitForNextSync();
-          _devices[universe]->SetValues(valuesChar, 512);
+          _device->SetOutputValues(universe, valuesChar, 512);
         }
       }
     }
+    _device->WaitForNextSync();
 
     std::lock_guard<std::mutex> lock(_mutex);
     std::swap(_primarySnapshot, nextPrimary);
@@ -121,11 +123,7 @@ void Management::ThreadLoop() {
   }
 }
 
-void Management::abortAllDevices() {
-  for (std::unique_ptr<DmxDevice> &device : _devices) {
-    device->Abort();
-  }
-}
+void Management::abortAllDevices() { _device->Abort(); }
 
 void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
                                   unsigned universe, bool primary) {
