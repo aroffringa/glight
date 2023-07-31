@@ -80,7 +80,10 @@ void Management::Run() {
     throw std::runtime_error("Invalid call to Run(): already running");
 }
 
-void Management::GetInputUniverseValue(unsigned universe, unsigned timestep_number, ValueSnapshot& next_primary, ValueSnapshot& next_secondary) {
+void Management::GetInputUniverseValue(unsigned universe,
+                                       unsigned timestep_number,
+                                       ValueSnapshot &next_primary,
+                                       ValueSnapshot &next_secondary) {
   for (bool is_primary : {true, false}) {
     unsigned values[512];
     unsigned char values_char[512];
@@ -97,7 +100,7 @@ void Management::GetInputUniverseValue(unsigned universe, unsigned timestep_numb
 
     ValueUniverseSnapshot &universe_values =
         is_primary ? next_primary.GetUniverseSnapshot(universe)
-                    : next_secondary.GetUniverseSnapshot(universe);
+                   : next_secondary.GetUniverseSnapshot(universe);
     universe_values.SetValues(values_char, _theatre->HighestChannel() + 1);
 
     if (is_primary) {
@@ -115,7 +118,8 @@ void Management::ThreadLoop() {
   unsigned timestep_number = 0;
   while (!_isQuitting) {
     for (unsigned universe = 0; universe != n_universes; ++universe) {
-      GetInputUniverseValue(universe, timestep_number, *next_primary, *next_secondary);
+      GetInputUniverseValue(universe, timestep_number, *next_primary,
+                            *next_secondary);
     }
     _device->WaitForNextSync();
 
