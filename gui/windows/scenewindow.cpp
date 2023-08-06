@@ -54,11 +54,11 @@ SceneWindow::SceneWindow(theatre::Management &management,
       _restoreButton("Restore"),
       _setFadeSpeedButton("Fade speed"),
       _startScale(
-          Gtk::Adjustment::create(0, theatre::ControlValue::MaxUInt() + 1,
+          Gtk::Adjustment::create(0, 0, theatre::ControlValue::MaxUInt() + 1,
                                   theatre::ControlValue::MaxUInt() / 100.0),
           Gtk::ORIENTATION_VERTICAL),
       _endScale(
-          Gtk::Adjustment::create(0, theatre::ControlValue::MaxUInt() + 1,
+          Gtk::Adjustment::create(0, 0, theatre::ControlValue::MaxUInt() + 1,
                                   theatre::ControlValue::MaxUInt() / 100.0),
           Gtk::ORIENTATION_VERTICAL),
       _nameFrame(management, parentWindow),

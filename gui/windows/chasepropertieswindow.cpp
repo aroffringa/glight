@@ -20,7 +20,7 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
 
       _synchronizedTriggerCheckButton("Synchronized"),
       _synchronizationsLabel("Nr. of synchronizations:"),
-      _synchronizationsCount(Gtk::Adjustment::create(1.0, 100.0, 1.0),
+      _synchronizationsCount(Gtk::Adjustment::create(1.0, 1.0, 100.0, 1.0),
                              Gtk::ORIENTATION_HORIZONTAL),
 
       _beatTriggerCheckButton("Trigger by beat"),

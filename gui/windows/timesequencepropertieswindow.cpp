@@ -16,18 +16,18 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
 
       _sustainCB("Sustain"),
       _maxRepeatCB("Max repeats:"),
-      _maxRepeatCount(Gtk::Adjustment::create(1.0, 100.0, 1.0),
+      _maxRepeatCount(Gtk::Adjustment::create(1.0, 1.0, 100.0, 1.0),
                       Gtk::ORIENTATION_HORIZONTAL),
 
       _delayTriggerCheckButton("Delayed trigger (s):"),
       _triggerDuration(500.0),
 
       _synchronizedTriggerCheckButton("Synchronized, count:"),
-      _synchronizationsCount(Gtk::Adjustment::create(1.0, 100.0, 1.0),
+      _synchronizationsCount(Gtk::Adjustment::create(1.0, 1.0, 100.0, 1.0),
                              Gtk::ORIENTATION_HORIZONTAL),
 
       _beatTriggerCheckButton("Trigger by beat, count:"),
-      _beatSpeed(Gtk::Adjustment::create(0.25, 4.0, 0.25),
+      _beatSpeed(Gtk::Adjustment::create(0.25, 0.25, 4.0, 0.25),
                  Gtk::ORIENTATION_HORIZONTAL),
 
       _transitionSpeedLabel("Transition speed"),

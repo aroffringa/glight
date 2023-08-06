@@ -22,7 +22,7 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
                          ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode),
       _scale(Gtk::Adjustment::create(
-                 0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
+                 0, 0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
                  (ControlValue::MaxUInt() + 1) / 100),
              Gtk::ORIENTATION_VERTICAL),
       _flashButton(std::string(1, key)) {

@@ -12,14 +12,14 @@ inline const double values[NVALUES] = {
 }  // namespace
 
 DurationInput::DurationInput(double value)
-    : scale_(Gtk::Adjustment::create(0, NVALUES, 1),
+    : scale_(Gtk::Adjustment::create(0, 0, NVALUES, 1),
              Gtk::ORIENTATION_HORIZONTAL) {
   Initialize(value);
 }
 
 DurationInput::DurationInput(const std::string &label, double value)
     : label_(label),
-      scale_(Gtk::Adjustment::create(0, NVALUES, 1),
+      scale_(Gtk::Adjustment::create(0, 0, NVALUES, 1),
              Gtk::ORIENTATION_HORIZONTAL) {
   label_.set_halign(Gtk::ALIGN_END);
   pack_start(label_, false, false);

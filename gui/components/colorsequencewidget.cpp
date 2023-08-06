@@ -89,6 +89,7 @@ void ColorSequenceWidget::OnGradient() {
     gradient_window_->set_modal(true);
     gradient_window_->set_transient_for(*_parent);
     gradient_window_->signal_hide().connect([&]() { OnGradientSelected(); });
+    gradient_window_->show();
   }
 }
 

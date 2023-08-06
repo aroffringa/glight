@@ -11,14 +11,14 @@ inline const std::string kStringValues[]{"1/4", "1/2", "1", "2",
                                          "3",   "4",   "6", "8"};
 
 BeatInput::BeatInput(double value)
-    : scale_(Gtk::Adjustment::create(0, NVALUES, 1),
+    : scale_(Gtk::Adjustment::create(0, 0, NVALUES, 1),
              Gtk::ORIENTATION_HORIZONTAL) {
   Initialize(value);
 }
 
 BeatInput::BeatInput(const std::string &label, double value)
     : caption_label_(label),
-      scale_(Gtk::Adjustment::create(0, NVALUES, 1),
+      scale_(Gtk::Adjustment::create(0, 0, NVALUES, 1),
              Gtk::ORIENTATION_HORIZONTAL) {
   caption_label_.set_halign(Gtk::ALIGN_END);
   pack_start(caption_label_, false, false);
