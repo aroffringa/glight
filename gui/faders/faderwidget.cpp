@@ -3,6 +3,8 @@
 #include "controlmenu.h"
 #include "faderwindow.h"
 
+#include <gtkmm/adjustment.h>
+
 #include "../state/faderstate.h"
 
 #include "../../theatre/controllable.h"
@@ -19,8 +21,10 @@ using theatre::ControlValue;
 FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
                          ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode),
-      _scale(0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
-             (ControlValue::MaxUInt() + 1) / 100),
+      _scale(Gtk::Adjustment::create(
+                 0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
+                 (ControlValue::MaxUInt() + 1) / 100),
+             Gtk::ORIENTATION_VERTICAL),
       _flashButton(std::string(1, key)) {
   if (GetMode() == ControlMode::Primary) {
     _fadeUpButton.set_image_from_icon_name("go-up");
@@ -246,7 +250,7 @@ bool FaderWidget::HandleRightRelease(GdkEventButton *event) {
         [&]() { State().SetDisplayCheckButton(menu->DisplayCheckButton()); });
     menu->SignalToggleFadeButtons().connect(
         [&]() { State().SetOverlayFadeButtons(menu->OverlayFadeButtons()); });
-    menu->popup(event->button, event->time);
+    menu->popup_at_pointer(reinterpret_cast<const GdkEvent *>(event));
     return true;
   }
   return false;

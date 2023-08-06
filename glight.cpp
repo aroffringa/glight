@@ -8,7 +8,8 @@
 #include "system/writer.h"
 
 int main(int argc, char *argv[]) {
-  glight::gui::Run(argc, argv);
+  glight::gui::Application application;
+  application.Run(argc, argv);
 
   return EXIT_SUCCESS;
 }

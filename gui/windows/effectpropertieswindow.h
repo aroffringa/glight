@@ -57,7 +57,7 @@ class EffectPropertiesWindow : public PropertiesWindow {
   PropertiesBox _propertiesBox;
 
   Gtk::ScrolledWindow _connectionsScrolledWindow;
-  Gtk::VButtonBox _connectionsButtonBox;
+  Gtk::ButtonBox _connectionsButtonBox;
   Gtk::Button _addConnectionButton, _removeConnectionButton;
 
   theatre::Effect *_effect;

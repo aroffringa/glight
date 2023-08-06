@@ -33,6 +33,10 @@ set(CMAKE_CXX_CLANG_TIDY "clang-tidy;--fix-errors;-checks=*,-llvmlibc*,\
 endif()
   
 add_compile_options(
+  -DGTKMM_DISABLE_DEPRECATED
+#  -DGDKMM_DISABLE_DEPRECATED
+#  -DGLIBMM_DISABLE_DEPRECATED
+#  -DGIOMM_DISABLE_DEPRECATED
   -DNDEBUG
   -O3
   -Wall

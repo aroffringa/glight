@@ -33,7 +33,7 @@ class BeatInput : public Gtk::HBox {
   void SetValueLabel(unsigned index);
 
   Gtk::Label caption_label_;
-  Gtk::HScale scale_;
+  Gtk::Scale scale_;
   Gtk::Label value_label_;
   RecursionLock recursion_lock_;
   sigc::signal<void(double)> signal_value_changed_;

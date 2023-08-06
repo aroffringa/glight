@@ -108,7 +108,7 @@ void FixtureTypeFunctionsFrame::SetFunctions(
 void FixtureTypeFunctionsFrame::onAdd() {
   size_t dmx_offset = 0;
   if (!functions_model_->children().empty()) {
-    Gtk::TreeModel::Row row = *functions_model_->children().rbegin();
+    Gtk::TreeModel::Row row = *functions_model_->children().begin();
     if (row[functions_columns_.is_16_bit_])
       dmx_offset = row[functions_columns_.dmx_offset_] + 2;
     else
@@ -135,12 +135,13 @@ void FixtureTypeFunctionsFrame::onRemove() {
 void FixtureTypeFunctionsFrame::onSelectionChanged() {
   Gtk::TreeModel::iterator selected =
       functions_view_.get_selection()->get_selected();
-  dmx_offset_label_.set_sensitive(selected);
-  dmx_offset_entry_.set_sensitive(selected);
-  is_16_bit_button_.set_sensitive(selected);
-  function_type_label_.set_sensitive(selected);
-  function_type_combo_.set_sensitive(selected);
-  if (selected) {
+  const bool is_selected = static_cast<bool>(selected);
+  dmx_offset_label_.set_sensitive(is_selected);
+  dmx_offset_entry_.set_sensitive(is_selected);
+  is_16_bit_button_.set_sensitive(is_selected);
+  function_type_label_.set_sensitive(is_selected);
+  function_type_combo_.set_sensitive(is_selected);
+  if (is_selected) {
     dmx_offset_entry_.set_text(
         std::to_string((*selected)[functions_columns_.dmx_offset_]));
     is_16_bit_button_.set_active((*selected)[functions_columns_.is_16_bit_]);

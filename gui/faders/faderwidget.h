@@ -56,7 +56,7 @@ class FaderWidget final : public ControlWidget {
   Gtk::Overlay _overlay;
   Gtk::VBox _box;
   Gtk::Button _fadeUpButton;
-  Gtk::VScale _scale;
+  Gtk::Scale _scale;
   Gtk::Button _fadeDownButton;
   Gtk::Button _flashButton;
   IconButton _checkButton;

@@ -11,8 +11,7 @@
 
 namespace glight::gui {
 
-void Run(int argc, char *argv[]) {
-  Gtk::Main kit(argc, argv);
+void Application::Run(int argc, char *argv[]) {
   std::unique_ptr<theatre::DmxDevice> device;
   bool isOpen = false;
   try {
@@ -27,10 +26,11 @@ void Run(int argc, char *argv[]) {
     device = std::make_unique<theatre::DummyDevice>();
   }
   ShowWindow window(std::move(device));
+  add_window(window);
   if (argc > 1) {
     window.OpenFile(argv[1]);
   }
-  Gtk::Main::run(window);
+  run(argc, argv);
 }
 
 }  // namespace glight::gui

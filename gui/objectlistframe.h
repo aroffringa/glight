@@ -24,7 +24,7 @@ namespace glight::gui {
 
 class ShowWindow;
 
-class ObjectListFrame : public Gtk::VPaned {
+class ObjectListFrame : public Gtk::Paned {
  public:
   ObjectListFrame(theatre::Management &management, ShowWindow &parentWindow);
 
@@ -50,7 +50,7 @@ class ObjectListFrame : public Gtk::VPaned {
   Gtk::VBox _presetsVBox;
   Gtk::HBox _presetsHBox;
 
-  Gtk::VButtonBox _presetsButtonBox;
+  Gtk::ButtonBox _presetsButtonBox;
   Gtk::Button _newPresetButton, _newChaseButton, _newTimeSequenceButton,
       _newEffectButton, _newFolderButton, _deletePresetButton;
 

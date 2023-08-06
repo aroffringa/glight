@@ -10,12 +10,16 @@ inline const double values[NVALUES] = {0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0};
 inline const std::string kStringValues[]{"1/4", "1/2", "1", "2",
                                          "3",   "4",   "6", "8"};
 
-BeatInput::BeatInput(double value) : scale_(0, NVALUES, 1) {
+BeatInput::BeatInput(double value)
+    : scale_(Gtk::Adjustment::create(0, NVALUES, 1),
+             Gtk::ORIENTATION_HORIZONTAL) {
   Initialize(value);
 }
 
 BeatInput::BeatInput(const std::string &label, double value)
-    : caption_label_(label), scale_(0, NVALUES, 1) {
+    : caption_label_(label),
+      scale_(Gtk::Adjustment::create(0, NVALUES, 1),
+             Gtk::ORIENTATION_HORIZONTAL) {
   caption_label_.set_halign(Gtk::ALIGN_END);
   pack_start(caption_label_, false, false);
 

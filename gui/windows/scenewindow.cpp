@@ -45,17 +45,22 @@ SceneWindow::SceneWindow(theatre::Management &management,
     : _management(management),
       _eventHub(eventHub),
       _audioLabel("Audio file: -"),
+      _sceneItemUButtonBox(Gtk::ORIENTATION_VERTICAL),
       _selectControllableButton("Select..."),
-      _createControlItemButton(Gtk::Stock::ADD),
+      _createControlItemButton("Add"),
       _setEndTimeButton("Set end time"),
-      _removeButton(Gtk::Stock::REMOVE),
+      _removeButton("Remove"),
       _blackoutButton("Black-out"),
       _restoreButton("Restore"),
       _setFadeSpeedButton("Fade speed"),
-      _startScale(0, theatre::ControlValue::MaxUInt() + 1,
-                  theatre::ControlValue::MaxUInt() / 100.0),
-      _endScale(0, theatre::ControlValue::MaxUInt() + 1,
-                theatre::ControlValue::MaxUInt() / 100.0),
+      _startScale(
+          Gtk::Adjustment::create(0, theatre::ControlValue::MaxUInt() + 1,
+                                  theatre::ControlValue::MaxUInt() / 100.0),
+          Gtk::ORIENTATION_VERTICAL),
+      _endScale(
+          Gtk::Adjustment::create(0, theatre::ControlValue::MaxUInt() + 1,
+                                  theatre::ControlValue::MaxUInt() / 100.0),
+          Gtk::ORIENTATION_VERTICAL),
       _nameFrame(management, parentWindow),
       _selectedScene(nullptr),
       _sourceValue(nullptr),
@@ -120,6 +125,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
       sigc::mem_fun(*this, &SceneWindow::onSelectControllable));
   _sceneItemUButtonBox.pack_start(_selectControllableButton);
 
+  _createControlItemButton.set_image_from_icon_name("list-add");
   _createControlItemButton.signal_clicked().connect(
       sigc::mem_fun(*this, &SceneWindow::onCreateControlItemButtonPressed));
   _createControlItemButton.set_sensitive(false);
@@ -130,6 +136,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
   _setEndTimeButton.set_sensitive(false);
   _sceneItemUButtonBox.pack_start(_setEndTimeButton);
 
+  _removeButton.set_image_from_icon_name("edit-delete");
   _removeButton.signal_clicked().connect(
       sigc::mem_fun(*this, &SceneWindow::onRemoveButtonPressed));
   _removeButton.set_sensitive(false);
@@ -602,7 +609,7 @@ void SceneWindow::ChangeAudio() {
     Gtk::FileChooserDialog dialog("Open audio file",
                                   Gtk::FILE_CHOOSER_ACTION_OPEN);
 
-    dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+    dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
     dialog.add_button("Open", Gtk::RESPONSE_OK);
 
     Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
@@ -732,8 +739,8 @@ bool SceneWindow::NewScene() {
   Gtk::MessageDialog dialog(*this, "Name fader setup", false,
                             Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
   Gtk::Entry entry;
-  dialog.get_vbox()->pack_start(entry, Gtk::PACK_SHRINK);
-  dialog.get_vbox()->show_all_children();
+  dialog.get_message_area()->pack_start(entry, Gtk::PACK_SHRINK);
+  dialog.get_message_area()->show_all_children();
   dialog.set_secondary_text("Name of new scene:");
   int result = dialog.run();
   if (result == Gtk::RESPONSE_OK) {

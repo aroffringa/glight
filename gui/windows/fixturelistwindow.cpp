@@ -138,7 +138,8 @@ std::string FixtureListWindow::getChannelString(
 void FixtureListWindow::onNewButtonClicked() {
   AddFixtureWindow window(&_eventHub, _management);
   window.set_modal(true);
-  Gtk::Main::run(window);
+  window.set_transient_for(*this);
+  window.show();
 }
 
 void FixtureListWindow::onRemoveButtonClicked() {
@@ -190,8 +191,8 @@ void FixtureListWindow::onSetChannelButtonClicked() {
     Gtk::Entry entry;
     entry.set_text(std::to_string(
         fixture->Functions().front()->FirstChannel().Channel() + 1));
-    dialog.get_vbox()->pack_start(entry, Gtk::PACK_SHRINK);
-    dialog.get_vbox()->show_all_children();
+    dialog.get_message_area()->pack_start(entry, Gtk::PACK_SHRINK);
+    dialog.get_message_area()->show_all_children();
     dialog.set_secondary_text(
         "Please enter the new DMX channel for this fixture");
     int result = dialog.run();

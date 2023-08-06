@@ -10,7 +10,7 @@ namespace glight::gui {
 using theatre::Property;
 
 PropertiesBox::PropertiesBox()
-    : _typeLabel("No object selected"), _applyButton(Gtk::Stock::APPLY) {
+    : _typeLabel("No object selected"), _applyButton("Apply") {
   pack_start(_typeLabel);
 
   _grid.set_column_homogeneous(false);

@@ -35,11 +35,11 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
     : _miFile("_File", true),
       _miDesign("_Design", true),
       _miWindow("_Window", true),
-      _miNew(Gtk::Stock::NEW),
-      _miOpen(Gtk::Stock::OPEN),
-      _miSave(Gtk::Stock::SAVE_AS),
+      _miNew("New"),
+      _miOpen("_Open...", true),
+      _miSave("Save _as...", true),
       _miImport("_Import...", true),
-      _miQuit(Gtk::Stock::QUIT),
+      _miQuit("_Quit", true),
       _miBlackOut("Black-out"),
       _miProtectBlackout("Protect black-out"),
       _miDesignWizard("Design wizard"),
@@ -223,8 +223,6 @@ bool ShowWindow::onDelete(GdkEventAny * /*unused*/) {
 }
 
 void ShowWindow::createMenu() {
-  _menuFile.set_title("_File");
-
   _miNew.signal_activate().connect(
       sigc::mem_fun(*this, &ShowWindow::onMINewClicked));
   _menuFile.append(_miNew);
@@ -248,8 +246,6 @@ void ShowWindow::createMenu() {
   _miFile.set_submenu(_menuFile);
   _menuBar.append(_miFile);
 
-  _menuDesign.set_title("_Design");
-
   _menuDesign.append(_miDesignSep1);
 
   _miProtectBlackout.signal_activate().connect(
@@ -269,8 +265,6 @@ void ShowWindow::createMenu() {
 
   _miDesign.set_submenu(_menuDesign);
   _menuBar.append(_miDesign);
-
-  _menuWindow.set_title("_Window");
 
   _miNewFaderWindow.signal_activate().connect([&]() { addFaderWindow(); });
   _menuFaderWindows.append(_miNewFaderWindow);
@@ -380,7 +374,7 @@ void ShowWindow::onMIOpenClicked() {
     Gtk::FileChooserDialog dialog(*this, "Open glight show",
                                   Gtk::FILE_CHOOSER_ACTION_OPEN);
 
-    dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+    dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
     dialog.add_button("Open", Gtk::RESPONSE_OK);
 
     Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
@@ -398,7 +392,7 @@ void ShowWindow::onMISaveClicked() {
   Gtk::FileChooserDialog dialog(*this, "Save glight show",
                                 Gtk::FILE_CHOOSER_ACTION_SAVE);
 
-  dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
   dialog.add_button("Save", Gtk::RESPONSE_OK);
 
   Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
@@ -421,7 +415,7 @@ void ShowWindow::onMIImportClicked() {
   Gtk::FileChooserDialog dialog(*this, "Open glight show",
                                 Gtk::FILE_CHOOSER_ACTION_OPEN);
 
-  dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
   dialog.add_button("Open", Gtk::RESPONSE_OK);
 
   Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();

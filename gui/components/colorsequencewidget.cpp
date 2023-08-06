@@ -37,7 +37,7 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   if (showGradientButton) {
     _gradientButton.set_sensitive(false);
     _gradientButton.signal_clicked().connect(
-        sigc::mem_fun(*this, &ColorSequenceWidget::onGradient));
+        sigc::mem_fun(*this, &ColorSequenceWidget::OnGradient));
     _buttonBox.pack_start(_gradientButton);
   }
 
@@ -81,33 +81,39 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   show_all_children();
 }
 
-void ColorSequenceWidget::onGradient() {
+ColorSequenceWidget::~ColorSequenceWidget() = default;
+
+void ColorSequenceWidget::OnGradient() {
   if (!_allEqual.get_active() && _widgets.size() > 2) {
-    GradientWindow window(_widgets.size());
-    window.set_modal(true);
-    Gtk::Main::run(window);
+    gradient_window_ = std::make_unique<GradientWindow>(_widgets.size());
+    gradient_window_->set_modal(true);
+    gradient_window_->set_transient_for(*_parent);
+    gradient_window_->signal_hide().connect([&]() { OnGradientSelected(); });
+  }
+}
 
-    if (window.Result()) {
-      std::vector<Color> colors = window.GetColors();
-      _widgets.front()->SetColor(colors.front());
-      _widgets.back()->SetColor(colors.back());
+void ColorSequenceWidget::OnGradientSelected() {
+  if (gradient_window_->Result()) {
+    std::vector<Color> colors = gradient_window_->GetColors();
+    _widgets.front()->SetColor(colors.front());
+    _widgets.back()->SetColor(colors.back());
 
-      for (size_t i = 1; i < _widgets.size() - 1; ++i) {
-        double floatIndex = static_cast<double>(i) * (colors.size() - 1) /
-                            (_widgets.size() - 1);
-        const Color leftColor = colors[floor(floatIndex)];
-        const Color rightColor = colors[floor(floatIndex) + 1];
-        const double balance = floatIndex - floor(floatIndex);
-        const unsigned red =
-            (rightColor.Red() * balance + leftColor.Red() * (1.0 - balance));
-        const unsigned green = (rightColor.Green() * balance +
-                                leftColor.Green() * (1.0 - balance));
-        const unsigned blue =
-            (rightColor.Blue() * balance + leftColor.Blue() * (1.0 - balance));
-        _widgets[i]->SetColor(Color(red, green, blue));
-      }
+    for (size_t i = 1; i < _widgets.size() - 1; ++i) {
+      double floatIndex =
+          static_cast<double>(i) * (colors.size() - 1) / (_widgets.size() - 1);
+      const Color leftColor = colors[floor(floatIndex)];
+      const Color rightColor = colors[floor(floatIndex) + 1];
+      const double balance = floatIndex - floor(floatIndex);
+      const unsigned red =
+          (rightColor.Red() * balance + leftColor.Red() * (1.0 - balance));
+      const unsigned green =
+          (rightColor.Green() * balance + leftColor.Green() * (1.0 - balance));
+      const unsigned blue =
+          (rightColor.Blue() * balance + leftColor.Blue() * (1.0 - balance));
+      _widgets[i]->SetColor(Color(red, green, blue));
     }
   }
+  gradient_window_->close();
 }
 
 void ColorSequenceWidget::Shuffle() {

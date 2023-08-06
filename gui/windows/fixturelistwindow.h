@@ -73,7 +73,7 @@ class FixtureListWindow : public Gtk::Window {
   Gtk::ScrolledWindow _fixturesScrolledWindow;
 
   Gtk::VBox _mainBox;
-  Gtk::HButtonBox _buttonBox;
+  Gtk::ButtonBox _buttonBox;
 
   Gtk::Button _newButton;
   Gtk::Button _removeButton;

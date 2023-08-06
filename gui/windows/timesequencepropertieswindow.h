@@ -89,16 +89,16 @@ class TimeSequencePropertiesWindow final : public PropertiesWindow {
 
   Gtk::CheckButton _sustainCB;
   Gtk::CheckButton _maxRepeatCB;
-  Gtk::HScale _maxRepeatCount;
+  Gtk::Scale _maxRepeatCount;
 
   Gtk::RadioButton _delayTriggerCheckButton;
   DurationInput _triggerDuration;
 
   Gtk::RadioButton _synchronizedTriggerCheckButton;
-  Gtk::HScale _synchronizationsCount;
+  Gtk::Scale _synchronizationsCount;
 
   Gtk::RadioButton _beatTriggerCheckButton;
-  Gtk::HScale _beatSpeed;
+  Gtk::Scale _beatSpeed;
 
   Gtk::Label _transitionSpeedLabel;
   DurationInput _transitionDuration;

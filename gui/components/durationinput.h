@@ -33,7 +33,7 @@ class DurationInput : public Gtk::HBox {
   void SetEntry(double value);
 
   Gtk::Label label_;
-  Gtk::HScale scale_;
+  Gtk::Scale scale_;
   Gtk::Entry entry_;
   RecursionLock recursion_lock_;
   sigc::signal<void(double)> signal_value_changed_;

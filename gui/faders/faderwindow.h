@@ -117,10 +117,9 @@ class FaderWindow : public Gtk::Window {
   Gtk::Grid _controlGrid;
   Gtk::MenuButton _menuButton;
 
-  Gtk::Image _miNameImage;
   Gtk::Menu _popupMenu, _layoutMenu, _fadeInMenu, _fadeOutMenu;
   Gtk::MenuItem _miLayout, _miFadeIn, _miFadeOut;
-  Gtk::ImageMenuItem _miName;
+  Gtk::MenuItem _miName;
   Gtk::CheckMenuItem _miSolo;
   Gtk::RadioMenuItem _miFadeInOption[11], _miFadeOutOption[11];
   Gtk::SeparatorMenuItem _miSep1;
@@ -149,7 +148,7 @@ class FaderWindow : public Gtk::Window {
   // In dual mode
   std::optional<Gtk::Button> _immediateCrossFadeButton;
   std::optional<Gtk::Button> _activateCrossFaderButton;
-  std::optional<Gtk::VScale> _crossFader;
+  std::optional<Gtk::Scale> _crossFader;
 };
 
 }  // namespace glight::gui

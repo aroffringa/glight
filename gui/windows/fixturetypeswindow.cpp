@@ -141,9 +141,10 @@ void FixtureTypesWindow::fillList() {
 
 void FixtureTypesWindow::onNewButtonClicked() {
   if (!list_model_->children().empty()) {
-    Gtk::TreeModel::Row row = *list_model_->children().rbegin();
+    Gtk::TreeNodeChildren::iterator last = list_model_->children().end();
+    --last;
     // If the last row is already a new, unsaved type, ignore the request
-    if (row[list_columns_.fixture_type_] == nullptr) return;
+    if ((*last)[list_columns_.fixture_type_] == nullptr) return;
   }
   Gtk::TreeModel::iterator iter = list_model_->append();
   const Gtk::TreeModel::Row &row = *iter;
@@ -208,7 +209,7 @@ void FixtureTypesWindow::onSelectionChanged() {
     RecursionLock::Token token(recursion_lock_);
     Glib::RefPtr<Gtk::TreeSelection> selection = list_view_.get_selection();
     const Gtk::TreeModel::const_iterator selected = selection->get_selected();
-    const bool has_selection = selected;
+    const bool has_selection = static_cast<bool>(selected);
     const theatre::FixtureType *type =
         has_selection ? static_cast<theatre::FixtureType *>(
                             (*selected)[list_columns_.fixture_type_])

@@ -36,10 +36,11 @@ ObjectListFrame::ObjectListFrame(theatre::Management &management,
       _newTimeSequenceButton("Sequence"),
       _newEffectButton("Effect"),
       _newFolderButton("Folder"),
-      _deletePresetButton(Gtk::Stock::DELETE),
+      _deletePresetButton("Delete"),
       _management(&management),
       _parentWindow(parentWindow),
       _nameFrame(management, parentWindow) {
+  set_orientation(Gtk::ORIENTATION_VERTICAL);
   initPresetsPart();
 
   pack1(_objectListFrame);
@@ -52,6 +53,7 @@ void ObjectListFrame::initPresetsPart() {
   _newPresetButton.signal_clicked().connect(
       sigc::mem_fun(*this, &ObjectListFrame::onNewPresetButtonClicked));
   _newPresetButton.set_image_from_icon_name("document-new");
+  _presetsButtonBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
   _presetsButtonBox.pack_start(_newPresetButton, false, false, 5);
 
   _newChaseButton.signal_clicked().connect(
@@ -76,6 +78,7 @@ void ObjectListFrame::initPresetsPart() {
   _presetsButtonBox.pack_start(_newFolderButton, false, false, 5);
 
   _deletePresetButton.set_sensitive(false);
+  _deletePresetButton.set_image_from_icon_name("edit-delete");
   _deletePresetButton.signal_clicked().connect(
       sigc::mem_fun(*this, &ObjectListFrame::onDeletePresetButtonClicked));
   _presetsButtonBox.pack_start(_deletePresetButton, false, false, 5);
@@ -152,7 +155,10 @@ bool ObjectListFrame::onNewEffectButtonClicked(GdkEventButton *event) {
     }
 
     _popupEffectMenu->show_all_children();
-    _popupEffectMenu->popup(event->button, event->time);
+    _popupEffectMenu->popup_at_widget(
+        &_newEffectButton, Gdk::Gravity::GRAVITY_SOUTH_WEST,
+        Gdk::Gravity::GRAVITY_NORTH_WEST,
+        reinterpret_cast<const GdkEvent *>(event));
     return true;
   }
   return false;

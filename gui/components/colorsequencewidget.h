@@ -19,10 +19,14 @@ namespace glight::gui {
 
 using theatre::Color;
 
+class GradientWindow;
+
 class ColorSequenceWidget : public Gtk::VBox {
  public:
   ColorSequenceWidget(Gtk::Window *parent, bool showGradientButton = true,
                       bool showShuffleButton = true);
+
+  ~ColorSequenceWidget();
 
   void SetColors(const std::vector<Color> &colors) {
     if (_maxCount < colors.size()) _maxCount = 0;
@@ -84,6 +88,7 @@ class ColorSequenceWidget : public Gtk::VBox {
     Gtk::TreeModelColumn<Glib::ustring> _title;
   } _listColumns;
   Gtk::Window *_parent;
+  std::unique_ptr<GradientWindow> gradient_window_;
   size_t _minCount, _maxCount;
 
   void LoadDefault();
@@ -115,7 +120,8 @@ class ColorSequenceWidget : public Gtk::VBox {
     _plusButton.set_sensitive(_maxCount == 0 || _widgets.size() < _maxCount);
   }
 
-  void onGradient();
+  void OnGradient();
+  void OnGradientSelected();
   void Shuffle();
 
   void onFirstColorChange() {

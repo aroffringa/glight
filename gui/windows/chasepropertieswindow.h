@@ -52,18 +52,18 @@ class ChasePropertiesWindow : public PropertiesWindow {
   DurationInput _triggerDuration;
   DurationInput _transitionDuration;
   TransitionTypeBox _transitionTypeBox;
-  Gtk::HSeparator _transitionSep;
+  Gtk::Separator _transitionSep;
 
   Gtk::RadioButton _synchronizedTriggerCheckButton;
   Gtk::Label _synchronizationsLabel;
-  Gtk::HScale _synchronizationsCount;
-  Gtk::HSeparator _synchronizedSep;
+  Gtk::Scale _synchronizationsCount;
+  Gtk::Separator _synchronizedSep;
 
   Gtk::RadioButton _beatTriggerCheckButton;
   Gtk::Label _beatSpeedLabel;
   BeatInput _beatSpeed;
 
-  Gtk::HButtonBox _buttonBox;
+  Gtk::ButtonBox _buttonBox;
   Gtk::Button _toTimeSequenceButton, _closeButton;
 
   theatre::Chase *_chase;
