@@ -11,7 +11,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
@@ -63,7 +62,7 @@ class ChasePropertiesWindow : public PropertiesWindow {
   Gtk::Label _beatSpeedLabel;
   BeatInput _beatSpeed;
 
-  Gtk::ButtonBox _buttonBox;
+  Gtk::Box _buttonBox;
   Gtk::Button _toTimeSequenceButton, _closeButton;
 
   theatre::Chase *_chase;

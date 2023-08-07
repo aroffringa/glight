@@ -17,6 +17,8 @@ PropertiesBox::PropertiesBox()
   _grid.set_column_spacing(0);
   pack_start(_grid, true, true);
 
+  _propertiesButtonBox.set_homogeneous(true);
+
   _applyButton.set_sensitive(false);
   _applyButton.signal_clicked().connect(
       sigc::mem_fun(*this, &PropertiesBox::onApplyClicked));

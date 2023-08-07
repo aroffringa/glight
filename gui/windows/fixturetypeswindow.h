@@ -8,7 +8,6 @@
 #include "../recursionlock.h"
 
 #include <gtkmm/box.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
@@ -89,7 +88,7 @@ class FixtureTypesWindow : public Gtk::Window {
 
   FixtureTypeFunctionsFrame functions_frame_;
 
-  Gtk::ButtonBox button_box_;
+  Gtk::Box button_box_;
   Gtk::Button new_button_;
   Gtk::Button remove_button_;
   Gtk::Button save_button_;

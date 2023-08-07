@@ -3,7 +3,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/paned.h>
@@ -50,7 +49,7 @@ class ObjectListFrame : public Gtk::Paned {
   Gtk::VBox _presetsVBox;
   Gtk::HBox _presetsHBox;
 
-  Gtk::ButtonBox _presetsButtonBox;
+  Gtk::Box _presetsButtonBox;
   Gtk::Button _newPresetButton, _newChaseButton, _newTimeSequenceButton,
       _newEffectButton, _newFolderButton, _deletePresetButton;
 

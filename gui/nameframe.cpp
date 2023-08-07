@@ -26,6 +26,7 @@ NameFrame::NameFrame(theatre::Management &management, ShowWindow &showWindow)
   _button.set_label("Apply");
   _button.signal_clicked().connect(
       sigc::mem_fun(*this, &NameFrame::onButtonClicked));
+  _buttonBox.set_homogeneous(true);
   _buttonBox.pack_start(_button, false, false, 0);
   _buttonBox.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
   _button.show();

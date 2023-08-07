@@ -6,7 +6,6 @@
 #include "../../theatre/color.h"
 
 #include <gtkmm/box.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/frame.h>
@@ -77,7 +76,7 @@ class ColorSequenceWidget : public Gtk::VBox {
   Gtk::VBox _box;
   Gtk::CheckButton _allEqual;
   std::vector<std::unique_ptr<ColorSelectWidget>> _widgets;
-  Gtk::ButtonBox _buttonBox;
+  Gtk::Box _buttonBox;
   Gtk::Button _plusButton, _gradientButton, _shuffleButton, _minButton;
   Gtk::HBox _loadDefaultBox;
   Gtk::ComboBox _loadDefaultCombo;

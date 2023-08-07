@@ -59,6 +59,7 @@ void CreateChaseDialog::initNewSequencePart() {
   _addObjectToChaseButton.signal_clicked().connect(sigc::mem_fun(
       *this, &CreateChaseDialog::onAddObjectToChaseButtonClicked));
   _newChaseButtonBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
+  _newChaseButtonBox.set_homogeneous(true);
   _newChaseButtonBox.pack_start(_addObjectToChaseButton);
 
   _clearChaseButton.signal_clicked().connect(

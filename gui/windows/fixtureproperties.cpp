@@ -40,6 +40,8 @@ FixtureProperties::FixtureProperties(EventTransmitter &event_hub,
   main_grid_.attach(tilt_label_, 0, 1);
   main_grid_.attach(tilt_entry_, 1, 1);
 
+  button_box_.set_homogeneous(true);
+
   set_button_.signal_clicked().connect([&]() { onSetClicked(); });
   button_box_.pack_start(set_button_);
   main_grid_.attach(button_box_, 0, 2, 2, 1);

@@ -3,7 +3,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 
@@ -42,7 +41,7 @@ class NameFrame : public Gtk::HBox {
 
   Gtk::Entry _entry;
   Gtk::Label _label;
-  Gtk::ButtonBox _buttonBox;
+  Gtk::Box _buttonBox;
   Gtk::Button _button;
   sigc::signal<void> _signalNameChange;
 };

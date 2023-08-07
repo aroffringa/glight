@@ -3,7 +3,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/menubutton.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/image.h>

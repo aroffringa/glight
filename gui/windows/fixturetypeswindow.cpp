@@ -95,6 +95,8 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   main_grid_.attach(paned_, 0, 0, 1, 1);
 
   // Buttons at bottom
+  button_box_.set_homogeneous(true);
+
   new_button_.set_image_from_icon_name("document-new");
   new_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureTypesWindow::onNewButtonClicked), false);

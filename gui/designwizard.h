@@ -13,7 +13,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
@@ -141,7 +140,7 @@ class DesignWizard : public Gtk::Window {
   // 4_7
   Gtk::RadioButton _rotForwardRB, _rotBackwardRB, _rotForwardReturnRB;
 
-  Gtk::ButtonBox _buttonBox;
+  Gtk::Box _buttonBox;
   Gtk::Button _nextButton;
   Page _currentPage;
 

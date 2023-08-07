@@ -3,7 +3,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/liststore.h>
@@ -61,7 +60,7 @@ class CreateChaseDialog : public Gtk::Dialog {
 
   Gtk::ScrolledWindow _newChaseScrolledWindow;
 
-  Gtk::ButtonBox _newChaseButtonBox;
+  Gtk::Box _newChaseButtonBox;
   Gtk::Button _addObjectToChaseButton, _clearChaseButton;
 
   Gtk::Button *_makeChaseButton;

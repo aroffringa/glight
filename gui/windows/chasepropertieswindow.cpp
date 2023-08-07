@@ -87,6 +87,7 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
 
   _toTimeSequenceButton.signal_clicked().connect(
       [&]() { onToTimeSequenceClicked(); });
+  _buttonBox.set_homogeneous(true);
   _buttonBox.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
   _buttonBox.pack_start(_toTimeSequenceButton, true, false, 5);
 

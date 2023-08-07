@@ -38,6 +38,7 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
   _addConnectionButton.set_image_from_icon_name("list-add");
   _addConnectionButton.signal_clicked().connect(
       sigc::mem_fun(*this, &EffectPropertiesWindow::onAddConnectionClicked));
+  _connectionsButtonBox.set_homogeneous(true);
   _connectionsButtonBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
   _connectionsButtonBox.pack_start(_addConnectionButton);
 

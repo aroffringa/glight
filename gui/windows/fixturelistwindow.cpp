@@ -56,6 +56,8 @@ FixtureListWindow::FixtureListWindow(EventTransmitter &eventHub,
   _fixturesScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
   _mainBox.pack_start(_fixturesScrolledWindow);
 
+  _buttonBox.set_homogeneous(true);
+
   _newButton.set_image_from_icon_name("document-new");
   _newButton.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureListWindow::onNewButtonClicked), false);

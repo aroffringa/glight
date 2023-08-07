@@ -2,7 +2,6 @@
 #define GUI_FIXTURE_LIST_WINDOW_H_
 
 #include <gtkmm/box.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
@@ -76,7 +75,7 @@ class FixtureListWindow : public Gtk::Window {
   Gtk::ScrolledWindow _fixturesScrolledWindow;
 
   Gtk::VBox _mainBox;
-  Gtk::ButtonBox _buttonBox;
+  Gtk::Box _buttonBox;
 
   Gtk::Button _newButton;
   Gtk::Button _removeButton;

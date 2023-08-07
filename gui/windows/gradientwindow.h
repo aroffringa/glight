@@ -16,6 +16,8 @@ class GradientWindow : public Gtk::Window {
     _colorSequence.SetMaxCount(maxCount);
     _box.pack_start(_colorSequence);
 
+    _buttonBox.set_homogeneous(true);
+
     _cancelButton.signal_clicked().connect([&] { hide(); });
     _buttonBox.pack_start(_cancelButton);
     _okayButton.signal_clicked().connect([&] {
@@ -37,7 +39,7 @@ class GradientWindow : public Gtk::Window {
  private:
   Gtk::VBox _box;
   ColorSequenceWidget _colorSequence;
-  Gtk::ButtonBox _buttonBox;
+  Gtk::Box _buttonBox;
   Gtk::Button _cancelButton, _okayButton;
   bool _result;
 };
