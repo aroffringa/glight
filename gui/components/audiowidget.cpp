@@ -126,7 +126,7 @@ void AudioWidget::ResizeBuffer() {
     _buffer =
         Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, _width, _height);
   } else {
-    _buffer.clear();
+    _buffer.reset();
   }
 }
 

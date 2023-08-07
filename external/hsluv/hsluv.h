@@ -29,11 +29,6 @@
 #ifndef HSLUV_H
 #define HSLUV_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 /**
  * Convert HSLuv to RGB.
  *
@@ -84,10 +79,5 @@ void hpluv2rgb(double h, double s, double l, double* pr, double* pg, double* pb)
  * arbitrary RGB to it may generate invalid HPLuv colors.
  */
 void rgb2hpluv(double r, double g, double b, double* ph, double* ps, double* pl);
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif  /* HSLUV_H */

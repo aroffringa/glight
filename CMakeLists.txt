@@ -34,10 +34,9 @@ endif()
   
 add_compile_options(
   -DGTKMM_DISABLE_DEPRECATED
-#  -DGDKMM_DISABLE_DEPRECATED
-#  -DGLIBMM_DISABLE_DEPRECATED
-#  -DGIOMM_DISABLE_DEPRECATED
-  -DNDEBUG
+  -DGDKMM_DISABLE_DEPRECATED
+  -DGLIBMM_DISABLE_DEPRECATED
+  -DGIOMM_DISABLE_DEPRECATED
   -O3
   -Wall
   -Wvla
@@ -140,7 +139,7 @@ set(THEATREFILES
   theatre/scenes/scene.cpp)
   
 set(EXTERNALFILES
-  external/hsluv/hsluv.c)
+  external/hsluv/hsluv.cpp)
 
 include_directories(external/hsluv)
 
