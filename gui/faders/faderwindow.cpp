@@ -192,9 +192,11 @@ void FaderWindow::loadState() {
     _leftBox.pack_start(*_immediateCrossFadeButton, false, false);
     _immediateCrossFadeButton->show();
 
-    _crossFader.emplace(0,
-                        ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
-                        (ControlValue::MaxUInt() + 1) / 100);
+    _crossFader.emplace(
+        Gtk::Adjustment::create(
+            0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
+            (ControlValue::MaxUInt() + 1) / 100),
+        Gtk::ORIENTATION_VERTICAL);
     _leftBox.pack_start(*_crossFader, true, true);
     _crossFader->set_value(0);
     _crossFader->set_draw_value(false);
@@ -232,7 +234,7 @@ void FaderWindow::initializeWidgets() {
   _menuButton.set_events(Gdk::BUTTON_PRESS_MASK);
   _menuButton.set_image_from_icon_name("document-properties");
   _menuButton.set_tooltip_text("Open options menu");
-  _menuButton.set_menu(_popupMenu);
+  _menuButton.set_popup(_popupMenu);
   _leftBox.pack_start(_menuButton, false, false, 5);
   _hBox.pack_start(_leftBox, false, false);
 
@@ -283,9 +285,6 @@ void FaderWindow::initializeMenu() {
 
   _popupMenu.append(_miSep1);
 
-  _miNameImage.set_from_icon_name("user-bookmarks",
-                                  Gtk::BuiltinIconSize::ICON_SIZE_MENU);
-  _miName.set_image(_miNameImage);
   _miName.signal_activate().connect([&]() { onSetNameClicked(); });
   _popupMenu.append(_miName);
 
@@ -551,8 +550,8 @@ void FaderWindow::onSetNameClicked() {
   Gtk::MessageDialog dialog(*this, "Name fader setup", false,
                             Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
   Gtk::Entry entry;
-  dialog.get_vbox()->pack_start(entry, Gtk::PACK_SHRINK);
-  dialog.get_vbox()->show_all_children();
+  dialog.get_message_area()->pack_start(entry, Gtk::PACK_SHRINK);
+  dialog.get_message_area()->show_all_children();
   dialog.set_secondary_text("Please enter a name for this fader setup");
   int result = dialog.run();
   if (result == Gtk::RESPONSE_OK) {

@@ -194,7 +194,7 @@ bool ToggleWidget::HandleRightRelease(GdkEventButton *event) {
       [&]() { State().SetDisplayCheckButton(menu->DisplayCheckButton()); });
   menu->SignalToggleFadeButtons().connect(
       [&]() { State().SetOverlayFadeButtons(menu->OverlayFadeButtons()); });
-  menu->popup(event->button, event->time);
+  menu->popup_at_pointer(reinterpret_cast<const GdkEvent *>(event));
   return true;
 }
 

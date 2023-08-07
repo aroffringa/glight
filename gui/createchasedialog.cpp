@@ -20,7 +20,7 @@ CreateChaseDialog::CreateChaseDialog(theatre::Management &management,
       _listFrame("Object list"),
       _list(management, parentWindow),
       _newChaseFrame("Chase objects"),
-      _addObjectToChaseButton(Gtk::Stock::ADD),
+      _addObjectToChaseButton(),
       _clearChaseButton("Clear"),
       _management(&management),
       _parentWindow(parentWindow),
@@ -30,6 +30,7 @@ CreateChaseDialog::CreateChaseDialog(theatre::Management &management,
   initListPart();
   initNewSequencePart();
 
+  _paned.set_orientation(Gtk::ORIENTATION_VERTICAL);
   _paned.pack1(_listFrame);
   _paned.pack2(_newChaseFrame);
   get_content_area()->pack_start(_paned);
@@ -54,8 +55,10 @@ void CreateChaseDialog::initListPart() {
 
 void CreateChaseDialog::initNewSequencePart() {
   _addObjectToChaseButton.set_sensitive(false);
+  _addObjectToChaseButton.set_image_from_icon_name("list-add");
   _addObjectToChaseButton.signal_clicked().connect(sigc::mem_fun(
       *this, &CreateChaseDialog::onAddObjectToChaseButtonClicked));
+  _newChaseButtonBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
   _newChaseButtonBox.pack_start(_addObjectToChaseButton);
 
   _clearChaseButton.signal_clicked().connect(

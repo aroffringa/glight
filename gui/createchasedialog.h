@@ -37,7 +37,7 @@ class CreateChaseDialog : public Gtk::Dialog {
   void onCreateChaseButtonClicked();
   void onSelectedObjectChanged();
 
-  Gtk::VPaned _paned;
+  Gtk::Paned _paned;
 
   Gtk::Frame _listFrame;
   ObjectBrowser _list;
@@ -61,7 +61,7 @@ class CreateChaseDialog : public Gtk::Dialog {
 
   Gtk::ScrolledWindow _newChaseScrolledWindow;
 
-  Gtk::VButtonBox _newChaseButtonBox;
+  Gtk::ButtonBox _newChaseButtonBox;
   Gtk::Button _addObjectToChaseButton, _clearChaseButton;
 
   Gtk::Button *_makeChaseButton;

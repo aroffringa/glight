@@ -200,7 +200,6 @@ void ObjectList::constructContextMenu() {
 
     // Move submenu
     std::unique_ptr<Gtk::Menu> menuMove(new Gtk::Menu());
-    menuMove->set_title("Move");
     std::unique_ptr<Gtk::MenuItem> miMove(new Gtk::MenuItem("Move _to", true));
     _contextMenu.append(*miMove);
     miMove->show();
@@ -227,7 +226,6 @@ void ObjectList::constructFolderMenu(Gtk::Menu &menu, Folder &folder) {
         if (!subMenu) {
           _contextMenuItems.emplace_back(new Gtk::Menu());
           subMenu = static_cast<Gtk::Menu *>(_contextMenuItems.back().get());
-          subMenu->set_title(folder.Name());
           item->set_submenu(*subMenu);
 
           std::unique_ptr<Gtk::MenuItem> selfMI(new Gtk::MenuItem("."));

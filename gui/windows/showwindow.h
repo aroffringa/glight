@@ -129,7 +129,7 @@ class ShowWindow : public Gtk::Window, public EventTransmitter {
   Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
 
   Gtk::MenuItem _miFile, _miDesign, _miWindow;
-  Gtk::ImageMenuItem _miNew, _miOpen, _miSave, _miImport, _miQuit;
+  Gtk::MenuItem _miNew, _miOpen, _miSave, _miImport, _miQuit;
   Gtk::MenuItem _miBlackOut;
   Gtk::CheckMenuItem _miProtectBlackout;
   Gtk::SeparatorMenuItem _miDesignSep1, _miDesignSep2;

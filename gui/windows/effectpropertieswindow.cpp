@@ -21,8 +21,8 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
                   EffectTypeToName(effect.GetType()) + ")"),
       _connectionsFrame("Connections"),
       _propertiesFrame("Properties"),
-      _addConnectionButton(Gtk::Stock::ADD),
-      _removeConnectionButton(Gtk::Stock::REMOVE),
+      _addConnectionButton("Add"),
+      _removeConnectionButton("Remove"),
 
       _effect(&effect),
       _management(&management),
@@ -35,10 +35,13 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
 
   _topBox.pack_start(_titleLabel);
 
-  _addConnectionButton.signal_pressed().connect(
+  _addConnectionButton.set_image_from_icon_name("list-add");
+  _addConnectionButton.signal_clicked().connect(
       sigc::mem_fun(*this, &EffectPropertiesWindow::onAddConnectionClicked));
+  _connectionsButtonBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
   _connectionsButtonBox.pack_start(_addConnectionButton);
 
+  _removeConnectionButton.set_image_from_icon_name("list-remove");
   _removeConnectionButton.signal_clicked().connect(
       sigc::mem_fun(*this, &EffectPropertiesWindow::onRemoveConnectionClicked));
   _removeConnectionButton.set_sensitive(false);

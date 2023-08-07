@@ -277,7 +277,7 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
       _miRemove.set_sensitive(!_selectedFixtures.empty());
       _miSymbolMenu.set_sensitive(!_selectedFixtures.empty());
       _miProperties.set_sensitive(!_selectedFixtures.empty());
-      _popupMenu.popup(event->button, event->time);
+      _popupMenu.popup_at_pointer(reinterpret_cast<GdkEvent *>(event));
     }
   }
   return true;
@@ -441,7 +441,8 @@ void VisualizationWindow::onDistributeEvenly() {
 void VisualizationWindow::onAddFixtures() {
   AddFixtureWindow window(_eventTransmitter, *_management);
   window.set_modal(true);
-  Gtk::Main::run(window);
+  window.set_transient_for(*this);
+  window.show();
 }
 
 void VisualizationWindow::onRemoveFixtures() {

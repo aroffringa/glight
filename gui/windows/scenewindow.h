@@ -112,7 +112,7 @@ class SceneWindow : public Gtk::Window {
   Gtk::ScrolledWindow _listScrolledWindow;
   Gtk::VBox _sceneItemBox;
   Gtk::HBox _scalesBox;
-  Gtk::VButtonBox _sceneItemUButtonBox;
+  Gtk::ButtonBox _sceneItemUButtonBox;
 
   Gtk::Button _selectControllableButton;
   Gtk::Button _createControlItemButton;
@@ -121,7 +121,7 @@ class SceneWindow : public Gtk::Window {
   Gtk::Button _blackoutButton;
   Gtk::Button _restoreButton;
   Gtk::Button _setFadeSpeedButton;
-  Gtk::VScale _startScale, _endScale;
+  Gtk::Scale _startScale, _endScale;
 
   sigc::connection _updateConnection;
   sigc::connection _timeoutConnection;

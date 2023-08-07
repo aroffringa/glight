@@ -42,7 +42,7 @@ class NameFrame : public Gtk::HBox {
 
   Gtk::Entry _entry;
   Gtk::Label _label;
-  Gtk::HButtonBox _buttonBox;
+  Gtk::ButtonBox _buttonBox;
   Gtk::Button _button;
   sigc::signal<void> _signalNameChange;
 };

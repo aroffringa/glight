@@ -11,12 +11,16 @@ inline const double values[NVALUES] = {
     7500.0, 10000.0, 15000.0, 30000.0, 60000.0, 120000.0, 300000.0};
 }  // namespace
 
-DurationInput::DurationInput(double value) : scale_(0, NVALUES, 1) {
+DurationInput::DurationInput(double value)
+    : scale_(Gtk::Adjustment::create(0, 0, NVALUES, 1),
+             Gtk::ORIENTATION_HORIZONTAL) {
   Initialize(value);
 }
 
 DurationInput::DurationInput(const std::string &label, double value)
-    : label_(label), scale_(0, NVALUES, 1) {
+    : label_(label),
+      scale_(Gtk::Adjustment::create(0, 0, NVALUES, 1),
+             Gtk::ORIENTATION_HORIZONTAL) {
   label_.set_halign(Gtk::ALIGN_END);
   pack_start(label_, false, false);
 

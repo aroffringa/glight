@@ -19,6 +19,7 @@
 
 namespace glight::gui {
 
+class AddFixtureWindow;
 class EventTransmitter;
 class FixtureSelection;
 
@@ -52,6 +53,8 @@ class FixtureListWindow : public Gtk::Window {
   theatre::Management &_management;
   FixtureSelection &_globalSelection;
 
+  std::unique_ptr<AddFixtureWindow> add_fixture_window_;
+
   sigc::connection _updateControllablesConnection;
   sigc::connection _globalSelectionConnection;
   RecursionLock _recursionLock;
@@ -73,7 +76,7 @@ class FixtureListWindow : public Gtk::Window {
   Gtk::ScrolledWindow _fixturesScrolledWindow;
 
   Gtk::VBox _mainBox;
-  Gtk::HButtonBox _buttonBox;
+  Gtk::ButtonBox _buttonBox;
 
   Gtk::Button _newButton;
   Gtk::Button _removeButton;

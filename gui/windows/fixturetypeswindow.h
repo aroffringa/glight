@@ -89,7 +89,7 @@ class FixtureTypesWindow : public Gtk::Window {
 
   FixtureTypeFunctionsFrame functions_frame_;
 
-  Gtk::HButtonBox button_box_;
+  Gtk::ButtonBox button_box_;
   Gtk::Button new_button_;
   Gtk::Button remove_button_;
   Gtk::Button save_button_;

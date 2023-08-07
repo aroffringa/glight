@@ -16,16 +16,18 @@ NameFrame::NameFrame(theatre::Management &management, ShowWindow &showWindow)
       _showWindow(showWindow),
       _namedObject(nullptr),
       _label("Name:"),
-      _button(Gtk::Stock::APPLY) {
+      _button() {
   pack_start(_label, false, false, 2);
   _label.show();
 
   pack_start(_entry, true, true, 2);
   _entry.show();
 
+  _button.set_label("Apply");
   _button.signal_clicked().connect(
       sigc::mem_fun(*this, &NameFrame::onButtonClicked));
   _buttonBox.pack_start(_button, false, false, 0);
+  _buttonBox.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
   _button.show();
 
   pack_start(_buttonBox, false, false, 2);
