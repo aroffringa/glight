@@ -2,7 +2,6 @@
 #define GUI_DIALOG_SCENE_SELLECT_H_
 
 #include <gtkmm/box.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>

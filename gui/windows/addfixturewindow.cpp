@@ -59,6 +59,8 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
   _incCountButton.signal_clicked().connect([&]() { onIncCount(); });
   _grid.attach(_incCountButton, 3, 2, 1, 1);
 
+  _buttonBox.set_homogeneous(true);
+
   _cancelButton.signal_clicked().connect([&]() { onCancel(); });
   _buttonBox.pack_start(_cancelButton);
   _addButton.signal_clicked().connect([&]() { onAdd(); });

@@ -121,6 +121,8 @@ SceneWindow::SceneWindow(theatre::Management &management,
 
   createControllablesList();
 
+  _sceneItemUButtonBox.set_homogeneous(true);
+
   _selectControllableButton.signal_clicked().connect(
       sigc::mem_fun(*this, &SceneWindow::onSelectControllable));
   _sceneItemUButtonBox.pack_start(_selectControllableButton);

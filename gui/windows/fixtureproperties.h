@@ -7,7 +7,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/window.h>
@@ -49,7 +48,7 @@ class FixtureProperties : public Gtk::Window {
   Gtk::Entry direction_entry_;
   Gtk::Label tilt_label_;
   Gtk::Entry tilt_entry_;
-  Gtk::ButtonBox button_box_;
+  Gtk::Box button_box_;
   Gtk::Button set_button_;
 };
 

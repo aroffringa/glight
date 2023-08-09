@@ -50,6 +50,8 @@ ObjectListFrame::ObjectListFrame(theatre::Management &management,
 }
 
 void ObjectListFrame::initPresetsPart() {
+  _presetsButtonBox.set_homogeneous(true);
+
   _newPresetButton.signal_clicked().connect(
       sigc::mem_fun(*this, &ObjectListFrame::onNewPresetButtonClicked));
   _newPresetButton.set_image_from_icon_name("document-new");

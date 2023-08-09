@@ -7,7 +7,6 @@
 #include "../../theatre/forwards.h"
 
 #include <gtkmm/box.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/checkmenuitem.h>
 #include <gtkmm/imagemenuitem.h>
 #include <gtkmm/menu.h>

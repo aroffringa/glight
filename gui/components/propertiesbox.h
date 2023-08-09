@@ -3,8 +3,8 @@
 
 #include "../../theatre/properties/propertyset.h"
 
+#include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
@@ -37,7 +37,7 @@ class PropertiesBox : public Gtk::VBox {
   std::vector<PropertyRow> _rows;
   Gtk::Label _typeLabel;
   Gtk::Grid _grid;
-  Gtk::ButtonBox _propertiesButtonBox;
+  Gtk::Box _propertiesButtonBox;
   Gtk::Button _applyButton;
 
   void onApplyClicked();

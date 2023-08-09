@@ -29,6 +29,8 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
       sigc::mem_fun(*this, &ColorSequenceWidget::onToggleEqual));
   pack_start(_allEqual, false, false);
 
+  _buttonBox.set_homogeneous(true);
+
   _minButton.set_sensitive(false);
   _minButton.signal_clicked().connect(
       sigc::mem_fun(*this, &ColorSequenceWidget::onDecreaseColors));

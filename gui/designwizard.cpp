@@ -80,6 +80,8 @@ DesignWizard::DesignWizard(theatre::Management &management,
   _mainBox.pack_start(_vBoxPage1, true, true);
   _vBoxPage1.show_all();
 
+  _buttonBox.set_homogeneous(true);
+
   _nextButton.signal_clicked().connect(
       sigc::mem_fun(*this, &DesignWizard::onNextClicked));
   _buttonBox.pack_start(_nextButton);

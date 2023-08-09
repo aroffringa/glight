@@ -3,7 +3,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/liststore.h>
@@ -112,7 +111,7 @@ class SceneWindow : public Gtk::Window {
   Gtk::ScrolledWindow _listScrolledWindow;
   Gtk::VBox _sceneItemBox;
   Gtk::HBox _scalesBox;
-  Gtk::ButtonBox _sceneItemUButtonBox;
+  Gtk::Box _sceneItemUButtonBox;
 
   Gtk::Button _selectControllableButton;
   Gtk::Button _createControlItemButton;

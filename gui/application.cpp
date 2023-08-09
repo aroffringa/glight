@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include <gtkmm/main.h>
-
 #include "windows/showwindow.h"
 
 #include "../theatre/dummydevice.h"
