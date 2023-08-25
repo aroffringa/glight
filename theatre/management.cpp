@@ -80,10 +80,10 @@ void Management::Run() {
     throw std::runtime_error("Invalid call to Run(): already running");
 }
 
-void Management::GetInputUniverseValue(unsigned universe,
-                                       unsigned timestep_number,
-                                       ValueSnapshot &next_primary,
-                                       ValueSnapshot &next_secondary) {
+void Management::ProcessInputUniverse(unsigned universe,
+                                      unsigned timestep_number,
+                                      ValueSnapshot &next_primary,
+                                      ValueSnapshot &next_secondary) {
   for (bool is_primary : {true, false}) {
     unsigned values[512];
     unsigned char values_char[512];
@@ -118,8 +118,8 @@ void Management::ThreadLoop() {
   unsigned timestep_number = 0;
   while (!_isQuitting) {
     for (unsigned universe = 0; universe != n_universes; ++universe) {
-      GetInputUniverseValue(universe, timestep_number, *next_primary,
-                            *next_secondary);
+      ProcessInputUniverse(universe, timestep_number, *next_primary,
+                           *next_secondary);
     }
     _device->WaitForNextSync();
 
@@ -154,8 +154,8 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
     audioLevel = 0;
 
   const unsigned randomValue = _rndDistribution(_randomGenerator);
-  Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel,
-                randomValue);
+  const Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel,
+                      randomValue);
   const double timePassed = (relTimeInMs - _previousTime) * 1e-3;
   _previousTime = relTimeInMs;
 

@@ -147,7 +147,7 @@ void BeatFinder::open() {
     } else if (is_silence) {
       Beat beat = _beat;  // atomic load
       beat.confidence = 0.0;
-      _beat = beat;  // atomic load
+      _beat = beat;  // atomic store
     }
 
     ++samples_since_last_beat;

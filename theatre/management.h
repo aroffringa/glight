@@ -149,9 +149,9 @@ class Management {
 
  private:
   void ThreadLoop();
-  void GetInputUniverseValue(unsigned universe, unsigned timestep_number,
-                             ValueSnapshot &next_primary,
-                             ValueSnapshot &next_secondary);
+  void ProcessInputUniverse(unsigned universe, unsigned timestep_number,
+                            ValueSnapshot &next_primary,
+                            ValueSnapshot &next_secondary);
 
   void getChannelValues(unsigned timestepNumber, unsigned *values,
                         unsigned universe, bool primary);

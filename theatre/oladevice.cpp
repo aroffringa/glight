@@ -36,9 +36,12 @@ void OLADevice::Open() {
 
 bool OLADevice::SendDmx() {
   for (size_t universe = 0; universe != universes_.size(); ++universe) {
-    if (universes_[universe].type == OlaUniverseType::Output)
-      client_->GetClient()->SendDMX(universe, *universes_[universe].send_buffer,
+    const OlaUniverse& ola_universe = universes_[universe];
+    if (ola_universe.type == OlaUniverseType::Output) {
+      // OLA's Universe index 1 is the first universe (i.e. not zero indexed)
+      client_->GetClient()->SendDMX(universe + 1, *ola_universe.send_buffer,
                                     send_dmx_args_);
+    }
   }
   if (abort_) client_->GetSelectServer()->Terminate();
   send_event_.Release();
@@ -107,15 +110,18 @@ void OLADevice::ReceiveUniverseList(
     const ola::client::Result& result,
     const std::vector<ola::client::OlaUniverse>& universes) {
   for (const ola::client::OlaUniverse& u : universes) {
-    std::cout << "Universe: " << u.Name() << '\n';
     OlaUniverse& ola_universe = universes_.emplace_back();
     if (u.InputPortCount() != 0) {
+      std::cout << "Input universe " << universes_.size() << ": " << u.Name()
+                << '\n';
       ola_universe.type = OlaUniverseType::Input;
       ola_universe.receive_buffer.resize(512);
       client_->GetClient()->RegisterUniverse(
           u.Id(), ola::client::REGISTER,
           ola::NewSingleCallback(this, &OLADevice::RegisterUniverseCallback));
     } else {
+      std::cout << "Output universe " << universes_.size() << ": " << u.Name()
+                << '\n';
       ola_universe.type = OlaUniverseType::Output;
       ola_universe.send_buffer.emplace();
     }
