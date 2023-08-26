@@ -8,6 +8,7 @@
 #include "../state/guistate.h"
 
 #include "../../theatre/chase.h"
+#include "../../theatre/dmxdevice.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetvalue.h"
 
@@ -109,6 +110,7 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
       _miAddToggleColumn("Add toggle column"),
       _miRemoveFader("Remove 1"),
       _miRemove5Faders("Remove 5"),
+      _miInputDevice("Input device..."),
       // Layout menu
       _miPrimaryLayout("Primary"),
       _miSecondaryLayout("Secondary"),
@@ -325,6 +327,10 @@ void FaderWindow::initializeMenu() {
   _miRemove5Faders.signal_activate().connect(
       [&]() { onRemove5FadersClicked(); });
   _popupMenu.append(_miRemove5Faders);
+
+  _miInputDevice.signal_activate().connect(
+      [&]() { onInputDeviceClicked(); });
+  _popupMenu.append(_miInputDevice);
 
   _popupMenu.show_all_children();
 }
@@ -610,6 +616,14 @@ void FaderWindow::UpdateValues() {
     RecursionLock::Token token(_recursionLock);
     _crossFader->set_value(x_value);
   }
+  if(_connectedInputUniverse) {
+    _inputValues.resize(_upperControls.size());
+    _management.Device()->GetInputValues(*_connectedInputUniverse, _inputValues.data(), _inputValues.size());
+    for(size_t i=0; i!=_upperControls.size(); ++i) {
+      if(theatre::SourceValue* sv = _upperControls[i]->GetSourceValue(); sv)
+        sv->A().Set(ControlValue::CharToValue(_inputValues[i]));
+    }
+  }
 }
 
 void FaderWindow::onCrossFaderChange() {
@@ -681,6 +695,13 @@ void FaderWindow::onLayoutChanged() {
       _state->mode = FaderSetMode::Dual;
     loadState();
   }
+}
+
+void FaderWindow::onInputDeviceClicked() {
+  if(_connectedInputUniverse)
+    _connectedInputUniverse.reset();
+  else if(_management.Device()->NUniverses() != 0)
+    _connectedInputUniverse = std::max<size_t>(1, _management.Device()->NUniverses())-1;
 }
 
 std::unique_ptr<ControlMenu> &FaderWindow::GetControlMenu() {

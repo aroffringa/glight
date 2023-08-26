@@ -27,11 +27,8 @@ class OLADevice final : public DmxDevice {
   OLADevice();
 
   void Open() override;
-  size_t NOutputUniverses() const override {
-    return std::count_if(universes_.begin(), universes_.end(),
-                         [](const OlaUniverse &universe) {
-                           return universe.type == OlaUniverseType::Output;
-                         });
+  size_t NUniverses() const override {
+    return universes_.size();
   }
   void SetOutputValues(unsigned universe, const unsigned char *newValues,
                        size_t size) override;

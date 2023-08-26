@@ -73,7 +73,7 @@ class SingleSourceValue {
   /**
    * Sets the current value of the source value. Note that the value
    * will fade towards the target value, so this should not be used
-   * when the source value needs to be perminantly changed.
+   * when the source value needs to be changed directly.
    */
   void SetValue(const ControlValue& value) { value_ = value; }
   const ControlValue& Value() const { return value_; }

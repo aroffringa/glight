@@ -31,6 +31,7 @@ void OLADevice::Open() {
   }
   client_->GetClient()->FetchUniverseList(
       ola::NewSingleCallback(this, &OLADevice::ReceiveUniverseList));
+  client_->GetSelectServer()->Run();
   ola_thread_ = std::thread([&]() { client_->GetSelectServer()->Run(); });
 }
 
@@ -126,12 +127,15 @@ void OLADevice::ReceiveUniverseList(
       ola_universe.send_buffer.emplace();
     }
   }
+  if(universes_.empty())
+    throw std::runtime_error("No ola universes defined");
 
   // Enable DMX send/receive callbacks
   client_->GetClient()->SetDMXCallback(
       ola::NewCallback(this, &OLADevice::ReceiveDmx));
   ola::io::SelectServer* ss = client_->GetSelectServer();
   ss->RegisterRepeatingTimeout(25, ola::NewCallback(this, &OLADevice::SendDmx));
+  ss->Terminate();
 }
 
 }  // namespace glight::theatre

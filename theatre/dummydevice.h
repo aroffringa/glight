@@ -18,7 +18,7 @@ class DummyDevice final : public DmxDevice {
 
   void Open() override { is_open_ = true; }
 
-  size_t NOutputUniverses() const override { return 1; }
+  size_t NUniverses() const override { return 2; }
 
   void SetOutputValues(unsigned universe, const unsigned char *new_values,
                        size_t size) override {}
@@ -31,8 +31,10 @@ class DummyDevice final : public DmxDevice {
   void GetInputValues(unsigned universe, unsigned char *destination,
                       size_t size) override {
     std::fill_n(destination + 1, size, 0);
-    if (universe == 1)
-      *destination = 255.0 * 0.5 * (std::cos(-sync_ * M_PI / 25.0) + 0.5);
+    if (universe == 1) {
+      const float float_value = (255.0 * 0.5) * (std::cos(-static_cast<float>(sync_) * M_PI / 25.0) + 1.0);
+      *destination = std::round(float_value);
+    }
   }
 
   void WaitForNextSync() override {

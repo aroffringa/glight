@@ -67,7 +67,7 @@ void Management::Clear() {
 void Management::AddDevice(std::unique_ptr<DmxDevice> device) {
   std::lock_guard<std::mutex> lock(_mutex);
   _device = std::move(device);
-  const size_t n_universes = _device->NOutputUniverses();
+  const size_t n_universes = _device->NUniverses();
   _primarySnapshot->SetUniverseCount(n_universes);
   _secondarySnapshot->SetUniverseCount(n_universes);
 }
@@ -110,7 +110,7 @@ void Management::ProcessInputUniverse(unsigned universe,
 }
 
 void Management::ThreadLoop() {
-  const size_t n_universes = _device->NOutputUniverses();
+  const size_t n_universes = _device->NUniverses();
   std::unique_ptr<ValueSnapshot> next_primary =
       std::make_unique<ValueSnapshot>(true, n_universes);
   std::unique_ptr<ValueSnapshot> next_secondary =

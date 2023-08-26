@@ -28,6 +28,7 @@ class ControlValue {
   constexpr static unsigned MaxUInt() { return (1 << 24) - 1; }
 
   constexpr static unsigned Invert(unsigned value) { return MaxUInt() - value; }
+  constexpr static unsigned CharToValue(unsigned char value) { return (static_cast<unsigned>(value) * MaxUInt()) >> 8; }
 
   static unsigned Mix(unsigned firstValue, unsigned secondValue,
                       MixStyle mixStyle) {
