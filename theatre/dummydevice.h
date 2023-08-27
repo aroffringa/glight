@@ -32,8 +32,19 @@ class DummyDevice final : public DmxDevice {
                       size_t size) override {
     std::fill_n(destination + 1, size, 0);
     if (universe == 1) {
-      const float float_value = (255.0 * 0.5) * (std::cos(-static_cast<float>(sync_) * M_PI / 25.0) + 1.0);
-      *destination = std::round(float_value);
+      if (sync_ >= 150) {
+        sync_ = 0;
+      }
+      if (sync_ >= 75 && sync_ < 125) {
+        *destination = 0;
+      } else if (sync_ >= 50) {
+        const float float_value =
+            (255.0 * 0.5) *
+            (std::cos(-static_cast<float>(sync_) * M_PI / 25.0) + 1.0);
+        *destination = std::round(float_value);
+      } else {
+        *destination = 255;
+      }
     }
   }
 

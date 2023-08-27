@@ -6,6 +6,7 @@
 
 #include "../eventtransmitter.h"
 #include "../state/guistate.h"
+#include "../dialogs/stringinputdialog.h"
 
 #include "../../theatre/chase.h"
 #include "../../theatre/dmxdevice.h"
@@ -328,8 +329,7 @@ void FaderWindow::initializeMenu() {
       [&]() { onRemove5FadersClicked(); });
   _popupMenu.append(_miRemove5Faders);
 
-  _miInputDevice.signal_activate().connect(
-      [&]() { onInputDeviceClicked(); });
+  _miInputDevice.signal_activate().connect([&]() { onInputDeviceClicked(); });
   _popupMenu.append(_miInputDevice);
 
   _popupMenu.show_all_children();
@@ -596,6 +596,21 @@ size_t FaderWindow::getFadeOutSpeed() const {
 }
 
 void FaderWindow::UpdateValues() {
+  if (_connectedInputUniverse) {
+    const size_t n = _upperControls.size();
+    _inputValues.resize(n);
+    _previousInputValues.resize(n);
+    _management.Device()->GetInputValues(*_connectedInputUniverse,
+                                         _inputValues.data(), n);
+    for (size_t i = 0; i != n; ++i) {
+      if (theatre::SourceValue *sv = _upperControls[i]->GetSourceValue();
+          _inputValues[i] != _previousInputValues[i] && sv) {
+        sv->A().Set(ControlValue::CharToValue(_inputValues[i]));
+      }
+    }
+    std::swap(_previousInputValues, _inputValues);
+  }
+
   theatre::SourceValue *assigned_source_value = nullptr;
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
     cw->MoveSlider();
@@ -615,14 +630,6 @@ void FaderWindow::UpdateValues() {
     }
     RecursionLock::Token token(_recursionLock);
     _crossFader->set_value(x_value);
-  }
-  if(_connectedInputUniverse) {
-    _inputValues.resize(_upperControls.size());
-    _management.Device()->GetInputValues(*_connectedInputUniverse, _inputValues.data(), _inputValues.size());
-    for(size_t i=0; i!=_upperControls.size(); ++i) {
-      if(theatre::SourceValue* sv = _upperControls[i]->GetSourceValue(); sv)
-        sv->A().Set(ControlValue::CharToValue(_inputValues[i]));
-    }
   }
 }
 
@@ -698,10 +705,16 @@ void FaderWindow::onLayoutChanged() {
 }
 
 void FaderWindow::onInputDeviceClicked() {
-  if(_connectedInputUniverse)
-    _connectedInputUniverse.reset();
-  else if(_management.Device()->NUniverses() != 0)
-    _connectedInputUniverse = std::max<size_t>(1, _management.Device()->NUniverses())-1;
+  _connectedInputUniverse.reset();
+  StringInputDialog dialog(
+      "Connect input universe to faders",
+      "Enter universe number:\n(1 = first universe, leave empty to disconnect)",
+      "1");
+  if (dialog.run() == Gtk::RESPONSE_OK) {
+    const size_t value = std::atoi(dialog.Value().c_str());
+    if (value >= 1 && value <= _management.Device()->NUniverses())
+      _connectedInputUniverse = value - 1;
+  }
 }
 
 std::unique_ptr<ControlMenu> &FaderWindow::GetControlMenu() {

@@ -148,6 +148,7 @@ class FaderWindow : public Gtk::Window {
   bool _isCrossFaderStarted = false;
   std::optional<size_t> _connectedInputUniverse;
   std::vector<unsigned char> _inputValues;
+  std::vector<unsigned char> _previousInputValues;
   // In dual mode
   std::optional<Gtk::Button> _immediateCrossFadeButton;
   std::optional<Gtk::Button> _activateCrossFaderButton;

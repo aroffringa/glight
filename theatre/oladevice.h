@@ -27,9 +27,7 @@ class OLADevice final : public DmxDevice {
   OLADevice();
 
   void Open() override;
-  size_t NUniverses() const override {
-    return universes_.size();
-  }
+  size_t NUniverses() const override { return universes_.size(); }
   void SetOutputValues(unsigned universe, const unsigned char *newValues,
                        size_t size) override;
   void GetOutputValues(unsigned universe, unsigned char *destination,

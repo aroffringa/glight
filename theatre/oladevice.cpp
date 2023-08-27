@@ -127,8 +127,7 @@ void OLADevice::ReceiveUniverseList(
       ola_universe.send_buffer.emplace();
     }
   }
-  if(universes_.empty())
-    throw std::runtime_error("No ola universes defined");
+  if (universes_.empty()) throw std::runtime_error("No ola universes defined");
 
   // Enable DMX send/receive callbacks
   client_->GetClient()->SetDMXCallback(
