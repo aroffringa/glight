@@ -99,7 +99,7 @@ void OLADevice::WaitForNextSync() { send_event_.Wait(); }
 void OLADevice::ReceiveDmx(const ola::client::DMXMetadata& metadata,
                            const ola::DmxBuffer& data) {
   std::lock_guard<std::mutex> lock(receive_mutex_);
-  const unsigned universe = metadata.universe;
+  const unsigned universe = metadata.universe - 1;
   std::vector<unsigned char>& buffer = universes_[universe].receive_buffer;
   std::copy_n(data.GetRaw(), std::min<unsigned>(data.Size(), buffer.size()),
               buffer.data());
