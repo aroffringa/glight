@@ -15,7 +15,7 @@ FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type)
     : _theatre(theatre), _type(type), _firstChannel(0, 0), _is16Bit(false) {}
 
 FixtureFunction::FixtureFunction(const FixtureFunction &source,
-                                 class Theatre &theatre)
+                                 Theatre &theatre)
     : NamedObject(source),
       _theatre(theatre),
       _type(source._type),

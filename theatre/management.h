@@ -54,9 +54,7 @@ class Management {
   std::vector<std::unique_ptr<SourceValue>> &SourceValues() {
     return _sourceValues;
   }
-  const std::vector<std::unique_ptr<DmxDevice>> &Devices() const {
-    return _devices;
-  }
+  const std::unique_ptr<DmxDevice> &Device() const { return _device; }
 
   void RemoveObject(FolderObject &object);
 
@@ -151,6 +149,9 @@ class Management {
 
  private:
   void ThreadLoop();
+  void ProcessInputUniverse(unsigned universe, unsigned timestep_number,
+                            ValueSnapshot &next_primary,
+                            ValueSnapshot &next_secondary);
 
   void getChannelValues(unsigned timestepNumber, unsigned *values,
                         unsigned universe, bool primary);
@@ -188,7 +189,7 @@ class Management {
   std::vector<std::unique_ptr<Controllable>> _controllables;
   std::vector<std::unique_ptr<FixtureGroup>> _groups;
   std::vector<std::unique_ptr<SourceValue>> _sourceValues;
-  std::vector<std::unique_ptr<DmxDevice>> _devices;
+  std::unique_ptr<DmxDevice> _device;
 };
 
 }  // namespace glight::theatre

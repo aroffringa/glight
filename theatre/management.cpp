@@ -66,9 +66,10 @@ void Management::Clear() {
 
 void Management::AddDevice(std::unique_ptr<DmxDevice> device) {
   std::lock_guard<std::mutex> lock(_mutex);
-  _devices.emplace_back(std::move(device));
-  _primarySnapshot->SetUniverseCount(_devices.size());
-  _secondarySnapshot->SetUniverseCount(_devices.size());
+  _device = std::move(device);
+  const size_t n_universes = _device->NUniverses();
+  _primarySnapshot->SetUniverseCount(n_universes);
+  _secondarySnapshot->SetUniverseCount(n_universes);
 }
 
 void Management::Run() {
@@ -79,53 +80,58 @@ void Management::Run() {
     throw std::runtime_error("Invalid call to Run(): already running");
 }
 
-void Management::ThreadLoop() {
-  std::unique_ptr<ValueSnapshot> nextPrimary =
-      std::make_unique<ValueSnapshot>(true, _devices.size());
-  std::unique_ptr<ValueSnapshot> nextSecondary =
-      std::make_unique<ValueSnapshot>(false, _devices.size());
-  unsigned timestepNumber = 0;
-  while (!_isQuitting) {
-    for (bool is_primary : {true, false}) {
-      for (unsigned universe = 0; universe != _devices.size(); ++universe) {
-        unsigned values[512];
-        unsigned char valuesChar[512];
+void Management::ProcessInputUniverse(unsigned universe,
+                                      unsigned timestep_number,
+                                      ValueSnapshot &next_primary,
+                                      ValueSnapshot &next_secondary) {
+  for (bool is_primary : {true, false}) {
+    unsigned values[512];
+    unsigned char values_char[512];
 
-        std::fill_n(values, 512, 0);
+    std::fill_n(values, 512, 0);
 
-        getChannelValues(timestepNumber, values, universe, is_primary);
+    getChannelValues(timestep_number, values, universe, is_primary);
 
-        for (unsigned i = 0; i < 512; ++i) {
-          unsigned val = (values[i] >> 16);
-          if (val > 255) val = 255;
-          valuesChar[i] = static_cast<unsigned char>(val);
-        }
-
-        ValueUniverseSnapshot &universeValues =
-            is_primary ? nextPrimary->GetUniverseSnapshot(universe)
-                       : nextSecondary->GetUniverseSnapshot(universe);
-        universeValues.SetValues(valuesChar, _theatre->HighestChannel() + 1);
-
-        if (is_primary) {
-          _devices[universe]->WaitForNextSync();
-          _devices[universe]->SetValues(valuesChar, 512);
-        }
-      }
+    for (unsigned i = 0; i < 512; ++i) {
+      unsigned val = (values[i] >> 16);
+      if (val > 255) val = 255;
+      values_char[i] = static_cast<unsigned char>(val);
     }
 
+    ValueUniverseSnapshot &universe_values =
+        is_primary ? next_primary.GetUniverseSnapshot(universe)
+                   : next_secondary.GetUniverseSnapshot(universe);
+    universe_values.SetValues(values_char, _theatre->HighestChannel() + 1);
+
+    if (is_primary) {
+      _device->SetOutputValues(universe, values_char, 512);
+    }
+  }
+}
+
+void Management::ThreadLoop() {
+  const size_t n_universes = _device->NUniverses();
+  std::unique_ptr<ValueSnapshot> next_primary =
+      std::make_unique<ValueSnapshot>(true, n_universes);
+  std::unique_ptr<ValueSnapshot> next_secondary =
+      std::make_unique<ValueSnapshot>(false, n_universes);
+  unsigned timestep_number = 0;
+  while (!_isQuitting) {
+    for (unsigned universe = 0; universe != n_universes; ++universe) {
+      ProcessInputUniverse(universe, timestep_number, *next_primary,
+                           *next_secondary);
+    }
+    _device->WaitForNextSync();
+
     std::lock_guard<std::mutex> lock(_mutex);
-    std::swap(_primarySnapshot, nextPrimary);
-    std::swap(_secondarySnapshot, nextSecondary);
+    std::swap(_primarySnapshot, next_primary);
+    std::swap(_secondarySnapshot, next_secondary);
 
-    ++timestepNumber;
+    ++timestep_number;
   }
 }
 
-void Management::abortAllDevices() {
-  for (std::unique_ptr<DmxDevice> &device : _devices) {
-    device->Abort();
-  }
-}
+void Management::abortAllDevices() { _device->Abort(); }
 
 void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
                                   unsigned universe, bool primary) {
@@ -148,8 +154,8 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
     audioLevel = 0;
 
   const unsigned randomValue = _rndDistribution(_randomGenerator);
-  Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel,
-                randomValue);
+  const Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel,
+                      randomValue);
   const double timePassed = (relTimeInMs - _previousTime) * 1e-3;
   _previousTime = relTimeInMs;
 

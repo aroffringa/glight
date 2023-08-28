@@ -92,6 +92,7 @@ class FaderWindow : public Gtk::Window {
   }
   void onCrossFaderChange();
   void onStartCrossFader();
+  void onInputDeviceClicked();
   void AssignTopToBottom();
   void FlipCrossFader();
   void CrossFadeImmediately();
@@ -127,6 +128,7 @@ class FaderWindow : public Gtk::Window {
   Gtk::MenuItem _miAddFader, _miAdd5Faders, _miAddToggleButton,
       _miAdd5ToggleButtons, _miAddToggleColumn, _miRemoveFader,
       _miRemove5Faders;
+  Gtk::MenuItem _miInputDevice;
 
   // Layout menu
   Gtk::RadioMenuItem _miPrimaryLayout;
@@ -144,6 +146,9 @@ class FaderWindow : public Gtk::Window {
   sigc::connection _timeoutConnection;
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
   bool _isCrossFaderStarted = false;
+  std::optional<size_t> _connectedInputUniverse;
+  std::vector<unsigned char> _inputValues;
+  std::vector<unsigned char> _previousInputValues;
   // In dual mode
   std::optional<Gtk::Button> _immediateCrossFadeButton;
   std::optional<Gtk::Button> _activateCrossFaderButton;

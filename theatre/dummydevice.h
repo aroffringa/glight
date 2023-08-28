@@ -8,32 +8,58 @@
 namespace glight::theatre {
 
 /**
-        @author Andre Offringa
-*/
-class DummyDevice : public DmxDevice {
+ * @author Andre Offringa
+ */
+class DummyDevice final : public DmxDevice {
  public:
-  DummyDevice() : _isOpen(false) {}
+  DummyDevice() = default;
 
-  virtual ~DummyDevice() {}
+  ~DummyDevice() override = default;
 
-  virtual void Open() final override { _isOpen = true; }
+  void Open() override { is_open_ = true; }
 
-  virtual void SetValues(const unsigned char *newValues,
-                         size_t size) final override {}
+  size_t NUniverses() const override { return 2; }
 
-  virtual void GetValues(unsigned char *destination,
-                         size_t size) final override {
-    for (size_t i = 0; i < size; ++i) destination[i] = 0;
+  void SetOutputValues(unsigned universe, const unsigned char *new_values,
+                       size_t size) override {}
+
+  void GetOutputValues(unsigned universe, unsigned char *destination,
+                       size_t size) override {
+    std::fill_n(destination, size, 0);
   }
 
-  virtual void WaitForNextSync() final override { usleep(40000); }
+  void GetInputValues(unsigned universe, unsigned char *destination,
+                      size_t size) override {
+    std::fill_n(destination + 1, size, 0);
+    if (universe == 1) {
+      if (sync_ >= 150) {
+        sync_ = 0;
+      }
+      if (sync_ >= 75 && sync_ < 125) {
+        *destination = 0;
+      } else if (sync_ >= 50) {
+        const float float_value =
+            (255.0 * 0.5) *
+            (std::cos(-static_cast<float>(sync_) * M_PI / 25.0) + 1.0);
+        *destination = std::round(float_value);
+      } else {
+        *destination = 255;
+      }
+    }
+  }
 
-  virtual void Abort() final override { _isOpen = false; }
+  void WaitForNextSync() override {
+    usleep(40000);
+    ++sync_;
+  }
 
-  virtual bool IsOpen() final override { return _isOpen; }
+  void Abort() override { is_open_ = false; }
+
+  bool IsOpen() override { return is_open_; }
 
  private:
-  bool _isOpen;
+  bool is_open_ = false;
+  size_t sync_ = 0;
 };
 
 }  // namespace glight::theatre

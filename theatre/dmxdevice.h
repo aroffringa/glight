@@ -16,9 +16,16 @@ class DmxDevice {
 
   virtual void Open() = 0;
 
-  virtual void SetValues(const unsigned char *newValues, size_t size) = 0;
+  virtual size_t NUniverses() const = 0;
 
-  virtual void GetValues(unsigned char *destination, size_t size) = 0;
+  virtual void SetOutputValues(unsigned universe,
+                               const unsigned char *newValues, size_t size) = 0;
+
+  virtual void GetOutputValues(unsigned universe, unsigned char *destination,
+                               size_t size) = 0;
+
+  virtual void GetInputValues(unsigned universe, unsigned char *destination,
+                              size_t size) = 0;
 
   virtual void WaitForNextSync() = 0;
 

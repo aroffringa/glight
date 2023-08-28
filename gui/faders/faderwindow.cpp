@@ -6,8 +6,10 @@
 
 #include "../eventtransmitter.h"
 #include "../state/guistate.h"
+#include "../dialogs/stringinputdialog.h"
 
 #include "../../theatre/chase.h"
+#include "../../theatre/dmxdevice.h"
 #include "../../theatre/management.h"
 #include "../../theatre/presetvalue.h"
 
@@ -109,6 +111,7 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
       _miAddToggleColumn("Add toggle column"),
       _miRemoveFader("Remove 1"),
       _miRemove5Faders("Remove 5"),
+      _miInputDevice("Input device..."),
       // Layout menu
       _miPrimaryLayout("Primary"),
       _miSecondaryLayout("Secondary"),
@@ -325,6 +328,9 @@ void FaderWindow::initializeMenu() {
   _miRemove5Faders.signal_activate().connect(
       [&]() { onRemove5FadersClicked(); });
   _popupMenu.append(_miRemove5Faders);
+
+  _miInputDevice.signal_activate().connect([&]() { onInputDeviceClicked(); });
+  _popupMenu.append(_miInputDevice);
 
   _popupMenu.show_all_children();
 }
@@ -590,6 +596,21 @@ size_t FaderWindow::getFadeOutSpeed() const {
 }
 
 void FaderWindow::UpdateValues() {
+  if (_connectedInputUniverse) {
+    const size_t n = _upperControls.size();
+    _inputValues.resize(n);
+    _previousInputValues.resize(n);
+    _management.Device()->GetInputValues(*_connectedInputUniverse,
+                                         _inputValues.data(), n);
+    for (size_t i = 0; i != n; ++i) {
+      if (theatre::SourceValue *sv = _upperControls[i]->GetSourceValue();
+          _inputValues[i] != _previousInputValues[i] && sv) {
+        sv->A().Set(ControlValue::CharToValue(_inputValues[i]));
+      }
+    }
+    std::swap(_previousInputValues, _inputValues);
+  }
+
   theatre::SourceValue *assigned_source_value = nullptr;
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
     cw->MoveSlider();
@@ -680,6 +701,19 @@ void FaderWindow::onLayoutChanged() {
     else  // if(_miDualLayout.get_active())
       _state->mode = FaderSetMode::Dual;
     loadState();
+  }
+}
+
+void FaderWindow::onInputDeviceClicked() {
+  _connectedInputUniverse.reset();
+  StringInputDialog dialog(
+      "Connect input universe to faders",
+      "Enter universe number:\n(1 = first universe, leave empty to disconnect)",
+      "1");
+  if (dialog.run() == Gtk::RESPONSE_OK) {
+    const size_t value = std::atoi(dialog.Value().c_str());
+    if (value >= 1 && value <= _management.Device()->NUniverses())
+      _connectedInputUniverse = value - 1;
   }
 }
 

@@ -19,11 +19,9 @@ class StringInputDialog : public Gtk::Dialog {
                     const Glib::ustring& value_caption,
                     const std::string& default_value)
       : Dialog(title, true), label_(value_caption) {
-    h_box_.pack_start(label_);
+    h_box_.pack_start(label_, true, true, 10);
 
-    std::ostringstream s;
-    s << default_value;
-    entry_.set_text(s.str());
+    entry_.set_text(default_value);
     entry_.set_activates_default(true);
     h_box_.pack_end(entry_);
 
