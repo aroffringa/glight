@@ -10,14 +10,16 @@ namespace glight::theatre {
 class FluorescentStartEffectPS final : public PropertySet {
  public:
   FluorescentStartEffectPS() {
+    addProperty(Property("averageduration", "Average duration",
+                         PropertyType::Duration));
     addProperty(
-        Property("averageduration", "Average duration", Property::Duration));
-    addProperty(Property("stddev", "Standard deviation", Property::Duration));
+        Property("stddev", "Standard deviation", PropertyType::Duration));
     addProperty(
-        Property("flashduration", "Flash duration", Property::Duration));
-    addProperty(Property("glowvalue", "Glow value", Property::ControlValue));
+        Property("flashduration", "Flash duration", PropertyType::Duration));
+    addProperty(
+        Property("glowvalue", "Glow value", PropertyType::ControlValue));
     addProperty(Property("independentoutputs", "Independent outputs",
-                         Property::Boolean));
+                         PropertyType::Boolean));
   }
 
  protected:

@@ -20,8 +20,8 @@ class ConstantValueEffect final : public Effect {
   void SetValue(unsigned value) { _value = value; }
 
  protected:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
     setConnectedInputs(ControlValue(_value));
   }
 

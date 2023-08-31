@@ -11,10 +11,11 @@ class FadeEffectPS final : public PropertySet {
  public:
   FadeEffectPS() {
     addProperty(
-        Property("upduration", "Up fading duration", Property::Duration));
+        Property("upduration", "Up fading duration", PropertyType::Duration));
+    addProperty(Property("downduration", "Down fading duration",
+                         PropertyType::Duration));
     addProperty(
-        Property("downduration", "Down fading duration", Property::Duration));
-    addProperty(Property("sustaintime", "Sustain time", Property::Duration));
+        Property("sustaintime", "Sustain time", PropertyType::Duration));
   }
 
  protected:

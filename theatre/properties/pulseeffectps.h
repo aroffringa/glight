@@ -10,11 +10,11 @@ namespace glight::theatre {
 class PulseEffectPS final : public PropertySet {
  public:
   PulseEffectPS() {
-    addProperty(Property("repeat", "Repeat", Property::Boolean));
-    addProperty(Property("attack", "Attack", Property::Duration));
-    addProperty(Property("hold", "Hold", Property::Duration));
-    addProperty(Property("release", "Release", Property::Duration));
-    addProperty(Property("sleep", "Sleep", Property::Duration));
+    addProperty(Property("repeat", "Repeat", PropertyType::Boolean));
+    addProperty(Property("attack", "Attack", PropertyType::Duration));
+    addProperty(Property("hold", "Hold", PropertyType::Duration));
+    addProperty(Property("release", "Release", PropertyType::Duration));
+    addProperty(Property("sleep", "Sleep", PropertyType::Duration));
   }
 
  protected:

@@ -16,6 +16,7 @@
 #include "effects/pulseeffect.h"
 #include "effects/randomselecteffect.h"
 #include "effects/thresholdeffect.h"
+#include "effects/twinkleeffect.h"
 
 #include "properties/propertyset.h"
 
@@ -57,6 +58,8 @@ std::unique_ptr<Effect> Effect::Make(EffectType type) {
       return up(new RandomSelectEffect());
     case ET::Threshold:
       return up(new ThresholdEffect());
+    case ET::Twinkle:
+      return up(new TwinkleEffect());
   }
   return nullptr;
 }

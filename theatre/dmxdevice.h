@@ -5,9 +5,11 @@
 
 namespace glight::theatre {
 
+enum class UniverseType { Input, Output };
+
 /**
-        @author Andre Offringa
-*/
+ * @author Andre Offringa
+ */
 class DmxDevice {
  public:
   DmxDevice() {}
@@ -17,6 +19,8 @@ class DmxDevice {
   virtual void Open() = 0;
 
   virtual size_t NUniverses() const = 0;
+
+  virtual UniverseType GetUniverseType(size_t universe) const = 0;
 
   virtual void SetOutputValues(unsigned universe,
                                const unsigned char *newValues, size_t size) = 0;

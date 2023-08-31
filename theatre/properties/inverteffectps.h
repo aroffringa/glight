@@ -11,7 +11,7 @@ class InvertEffectPS final : public PropertySet {
  public:
   InvertEffectPS() {
     addProperty(
-        Property("offthreshold", "Off threshold", Property::ControlValue));
+        Property("offthreshold", "Off threshold", PropertyType::ControlValue));
   }
 
  protected:

@@ -48,8 +48,8 @@ class HueSaturationLightnessEffect final : public Effect {
   void SetColorSpace(HslColorSpace color_space) { color_space_ = color_space; }
 
  private:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override;
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override;
 
   std::array<ControlValue, 3> Convert(ControlValue l, ControlValue c,
                                       ControlValue h);

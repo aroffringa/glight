@@ -30,8 +30,8 @@ class CurveEffect final : public Effect {
   void SetFunction(enum Function f) { _function = f; }
 
  protected:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
     unsigned value = values[0].UInt();
     switch (_function) {
       case Linear:

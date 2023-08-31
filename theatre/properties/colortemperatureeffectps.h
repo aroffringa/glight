@@ -10,10 +10,10 @@ namespace glight::theatre {
 class ColorTemperatureEffectPS final : public PropertySet {
  public:
   ColorTemperatureEffectPS() {
-    addProperty(
-        Property("min-temperature", "Minimum temperature", Property::Integer));
-    addProperty(
-        Property("max-temperature", "Maximum temperature", Property::Integer));
+    addProperty(Property("min-temperature", "Minimum temperature",
+                         PropertyType::Integer));
+    addProperty(Property("max-temperature", "Maximum temperature",
+                         PropertyType::Integer));
   }
 
  protected:

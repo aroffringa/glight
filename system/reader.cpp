@@ -249,16 +249,18 @@ void ParseTrigger(const Object &node, Trigger &trigger) {
   trigger.SetDelayInSyncs(ToNum(node["delay-in-syncs"]).AsDouble());
 }
 
-void ParseTransition(const Object &node, Transition &transition) {
+Transition ParseTransition(const Object &node) {
+  Transition transition;
   transition.SetType(GetTransitionType(ToStr(node["type"])));
   transition.SetLengthInMs(ToNum(node["length-in-ms"]).AsDouble());
+  return transition;
 }
 
 void ParseChase(const Object &node, Management &management) {
   Chase &chase = management.AddChase();
   ParseFolderAttr(node, chase, management);
   ParseTrigger(ToObj(node["trigger"]), chase.GetTrigger());
-  ParseTransition(ToObj(node["transition"]), chase.GetTransition());
+  chase.GetTransition() = ParseTransition(ToObj(node["transition"]));
   ParseSequence(ToObj(node["sequence"]), chase.GetSequence(), management);
 }
 
@@ -274,7 +276,7 @@ void ParseTimeSequence(const Object &node, Management &management) {
     const Object &step_obj = ToObj(item);
     TimeSequence::Step &step = timeSequence.Steps().emplace_back();
     ParseTrigger(ToObj(step_obj["trigger"]), step.trigger);
-    ParseTransition(ToObj(step_obj["transition"]), step.transition);
+    step.transition = ParseTransition(ToObj(step_obj["transition"]));
     ++stepIndex;
   }
   if (timeSequence.Steps().size() != timeSequence.Sequence().Size())
@@ -294,20 +296,23 @@ void ParseEffect(const Object &node, Management &management) {
     const std::string &propName = ToStr(p_node["name"]);
     Property &p = ps->GetProperty(propName);
     switch (p.GetType()) {
-      case Property::Choice:
+      case PropertyType::Choice:
         ps->SetChoice(p, ToStr(p_node["value"]));
         break;
-      case Property::ControlValue:
+      case PropertyType::ControlValue:
         ps->SetControlValue(p, ToNum(p_node["value"]).AsUInt());
         break;
-      case Property::Duration:
+      case PropertyType::Duration:
         ps->SetDuration(p, ToNum(p_node["value"]).AsDouble());
         break;
-      case Property::Boolean:
+      case PropertyType::Boolean:
         ps->SetBool(p, ToBool(p_node["value"]));
         break;
-      case Property::Integer:
+      case PropertyType::Integer:
         ps->SetInteger(p, ToNum(p_node["value"]).AsInt());
+        break;
+      case PropertyType::Transition:
+        ps->SetTransition(p, ParseTransition(ToObj(p_node["value"])));
         break;
     }
   }

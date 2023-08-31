@@ -12,9 +12,9 @@ class DispenserEffect final : public Effect {
   virtual EffectType GetType() const override { return EffectType::Dispenser; }
 
  protected:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
-    setConnectedInputs(ControlValue(values[0]));
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
+    setConnectedInputs(values[0]);
   }
 
  private:

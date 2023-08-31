@@ -10,7 +10,7 @@ namespace glight::theatre {
 class MusicActivationEffectPS final : public PropertySet {
  public:
   MusicActivationEffectPS() {
-    addProperty(Property("offdelay", "Off delay", Property::Duration));
+    addProperty(Property("offdelay", "Off delay", PropertyType::Duration));
   }
 
  protected:

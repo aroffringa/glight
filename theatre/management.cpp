@@ -118,8 +118,10 @@ void Management::ThreadLoop() {
   unsigned timestep_number = 0;
   while (!_isQuitting) {
     for (unsigned universe = 0; universe != n_universes; ++universe) {
-      ProcessInputUniverse(universe, timestep_number, *next_primary,
-                           *next_secondary);
+      if (_device->GetUniverseType(universe) == UniverseType::Output) {
+        ProcessInputUniverse(universe, timestep_number, *next_primary,
+                             *next_secondary);
+      }
     }
     _device->WaitForNextSync();
 

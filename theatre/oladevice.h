@@ -8,6 +8,7 @@
 #include <ola/DmxBuffer.h>
 #include <ola/client/ClientWrapper.h>
 
+#include <cassert>
 #include <optional>
 #include <memory>
 #include <semaphore>
@@ -28,6 +29,12 @@ class OLADevice final : public DmxDevice {
 
   void Open() override;
   size_t NUniverses() const override { return universes_.size(); }
+  UniverseType GetUniverseType(size_t universe) const override {
+    assert(universes_[universe].type != OlaUniverseType::Uninitialized);
+    return universes_[universe].type == OlaUniverseType::Output
+               ? UniverseType::Output
+               : UniverseType::Input;
+  }
   void SetOutputValues(unsigned universe, const unsigned char *newValues,
                        size_t size) override;
   void GetOutputValues(unsigned universe, unsigned char *destination,

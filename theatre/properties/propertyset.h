@@ -5,6 +5,7 @@
 
 #include "../../theatre/controlvalue.h"
 #include "../../theatre/folderobject.h"
+#include "../../theatre/transition.h"
 
 #include <memory>
 #include <string>
@@ -77,6 +78,14 @@ class PropertySet {
     return getInteger(*_object, property._setIndex);
   }
 
+  void SetTransition(const Property &property, const Transition &value) {
+    setTransition(*_object, property._setIndex, value);
+  }
+
+  Transition GetTransition(const Property &property) const {
+    return getTransition(*_object, property._setIndex);
+  }
+
   FolderObject &Object() const { return *_object; }
 
   Property &GetProperty(const std::string &name) {
@@ -133,6 +142,16 @@ class PropertySet {
   virtual int getInteger(const FolderObject &object, size_t index) const {
     getterNotImplemented();
     return 0;
+  }
+
+  virtual void setTransition(FolderObject &object, size_t index,
+                             const Transition &value) const {
+    setterNotImplemented();
+  }
+  virtual Transition getTransition(const FolderObject &object,
+                                   size_t index) const {
+    getterNotImplemented();
+    return Transition();
   }
 
   size_t addProperty(const Property &property) {

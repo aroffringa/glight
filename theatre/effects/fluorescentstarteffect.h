@@ -42,8 +42,8 @@ class FluorescentStartEffect final : public Effect {
   }
 
  private:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
     std::vector<ConnectionInfo> &primary_data = _data[primary];
     if (values[0]) {
       const size_t count = _independentOutputs ? Connections().size() : 1;

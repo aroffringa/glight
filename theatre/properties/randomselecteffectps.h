@@ -10,8 +10,9 @@ namespace glight::theatre {
 class RandomSelectEffectPS final : public PropertySet {
  public:
   RandomSelectEffectPS() {
-    addProperty(Property("delay", "Delay for reselection", Property::Duration));
-    addProperty(Property("count", "Number of outputs", Property::Integer));
+    addProperty(
+        Property("delay", "Delay for reselection", PropertyType::Duration));
+    addProperty(Property("count", "Number of outputs", PropertyType::Integer));
   }
 
  protected:

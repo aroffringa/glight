@@ -28,8 +28,8 @@ class DelayEffect final : public Effect {
   void SetDelayInMS(double delayInMS) { _delayInMS = delayInMS; }
 
  protected:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
     std::vector<std::pair<double, ControlValue>> &buffer = _buffer[primary];
     if (_previousTimestep[primary] == timing.TimestepNumber()) {
       unsigned prevWritePos =

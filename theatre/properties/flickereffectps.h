@@ -10,9 +10,9 @@ namespace glight::theatre {
 class FlickerEffectPS final : public PropertySet {
  public:
   FlickerEffectPS() {
-    addProperty(Property("speed", "Speed", Property::ControlValue));
+    addProperty(Property("speed", "Speed", PropertyType::ControlValue));
     addProperty(Property("independentoutputs", "Independent outputs",
-                         Property::Boolean));
+                         PropertyType::Boolean));
   }
 
  protected:

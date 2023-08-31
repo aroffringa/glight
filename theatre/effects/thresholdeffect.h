@@ -49,8 +49,8 @@ class ThresholdEffect final : public Effect {
   }
 
  protected:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
     ControlValue thresholded;
     if (values[0].UInt() < _lowerEndLimit) {
       if (values[0].UInt() <= _lowerStartLimit)
