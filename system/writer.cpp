@@ -262,8 +262,9 @@ void writeTrigger(WriteState &state, const Trigger &trigger) {
   state.writer.EndObject();
 }
 
-void writeTransition(WriteState &state, const Transition &transition) {
-  state.writer.StartObject("transition");
+void writeTransition(WriteState &state, const Transition &transition,
+                     const char *name = "transition") {
+  state.writer.StartObject(name);
   state.writer.Number("length-in-ms", transition.LengthInMs());
   state.writer.String("type", ToString(transition.Type()));
   state.writer.EndObject();
@@ -340,20 +341,23 @@ void writeEffect(WriteState &state, const Effect &effect) {
       state.writer.StartObject();
       state.writer.String("name", p.Name());
       switch (p.GetType()) {
-        case Property::Choice:
+        case PropertyType::Choice:
           state.writer.String("value", ps->GetChoice(p));
           break;
-        case Property::ControlValue:
+        case PropertyType::ControlValue:
           state.writer.Number("value", ps->GetControlValue(p));
           break;
-        case Property::Duration:
+        case PropertyType::Duration:
           state.writer.Number("value", ps->GetDuration(p));
           break;
-        case Property::Boolean:
+        case PropertyType::Boolean:
           state.writer.Boolean("value", ps->GetBool(p));
           break;
-        case Property::Integer:
+        case PropertyType::Integer:
           state.writer.Number("value", ps->GetInteger(p));
+          break;
+        case PropertyType::Transition:
+          writeTransition(state, ps->GetTransition(p), "value");
           break;
       }
       state.writer.EndObject();

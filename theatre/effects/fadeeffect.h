@@ -37,8 +37,8 @@ class FadeEffect final : public Effect {
   void SetSustain(double sustainMS) { _sustain = 1e-3 * sustainMS; }
 
  protected:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
     double timePassed = 0.001 * (timing.TimeInMS() - _previousTime[primary]);
     _previousTime[primary] = timing.TimeInMS();
     const unsigned targetValue = values[0].UInt();

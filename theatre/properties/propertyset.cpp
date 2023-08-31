@@ -16,6 +16,7 @@
 #include "pulseeffectps.h"
 #include "randomselecteffectps.h"
 #include "thresholdeffectps.h"
+#include "twinkleeffectps.h"
 
 namespace glight::theatre {
 
@@ -47,7 +48,11 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
     FXCASE(Pulse);
     FXCASE(RandomSelect);
     FXCASE(Threshold);
+    FXCASE(Twinkle);
   }
+  if (!ps)
+    throw std::runtime_error(
+        "Unknown effect type in call to PropertySet::Make()");
   ps->_object = &object;
   return ps;
 }
@@ -57,20 +62,23 @@ void PropertySet::AssignProperty(const Property &to, const Property &from,
   if (from._type != to._type)
     throw std::runtime_error("Copying different types");
   switch (from._type) {
-    case Property::Boolean:
+    case PropertyType::Boolean:
       SetBool(to, fromSet.GetBool(from));
       break;
-    case Property::Choice:
+    case PropertyType::Choice:
       SetChoice(to, fromSet.GetChoice(from));
       break;
-    case Property::ControlValue:
+    case PropertyType::ControlValue:
       SetControlValue(to, fromSet.GetControlValue(from));
       break;
-    case Property::Duration:
+    case PropertyType::Duration:
       SetDuration(to, fromSet.GetDuration(from));
       break;
-    case Property::Integer:
+    case PropertyType::Integer:
       SetInteger(to, fromSet.GetInteger(from));
+      break;
+    case PropertyType::Transition:
+      SetTransition(to, fromSet.GetTransition(from));
       break;
   }
 }

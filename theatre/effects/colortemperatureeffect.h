@@ -33,7 +33,8 @@ class ColorTemperatureEffect final : public Effect {
   }
 
  protected:
-  virtual void mix(const ControlValue *values, const Timing &, bool) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &,
+                                 bool) override {
     const unsigned range =
         std::min(40000u, max_temperature_ - min_temperature_);
     const unsigned scaled_value = values[0].UInt() >> 14;  // make 10 bit

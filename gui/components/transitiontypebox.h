@@ -28,48 +28,47 @@ class TransitionTypeBox : public Gtk::VBox {
     Gtk::RadioButtonGroup transTypeGroup;
     _noneRB.set_group(transTypeGroup);
     _noneRB.signal_clicked().connect(
-        [&]() { _signalChanged.emit(theatre::TransitionType::None); });
+        [&]() { Change(theatre::TransitionType::None); });
     _topBox.pack_start(_noneRB);
 
     _fadeRB.set_group(transTypeGroup);
     _fadeRB.signal_clicked().connect(
-        [&]() { _signalChanged.emit(theatre::TransitionType::Fade); });
+        [&]() { Change(theatre::TransitionType::Fade); });
     _topBox.pack_start(_fadeRB);
 
     _fadeThroughBlackRB.set_group(transTypeGroup);
-    _fadeThroughBlackRB.signal_clicked().connect([&]() {
-      _signalChanged.emit(theatre::TransitionType::FadeThroughBlack);
-    });
+    _fadeThroughBlackRB.signal_clicked().connect(
+        [&]() { Change(theatre::TransitionType::FadeThroughBlack); });
     _topBox.pack_start(_fadeThroughBlackRB);
 
     _steppedRB.set_group(transTypeGroup);
     _steppedRB.signal_clicked().connect(
-        [&]() { _signalChanged.emit(theatre::TransitionType::Stepped); });
+        [&]() { Change(theatre::TransitionType::Stepped); });
     _centreBox.pack_start(_steppedRB);
 
     _randomRB.set_group(transTypeGroup);
     _randomRB.signal_clicked().connect(
-        [&]() { _signalChanged.emit(theatre::TransitionType::Random); });
+        [&]() { Change(theatre::TransitionType::Random); });
     _centreBox.pack_start(_randomRB);
 
     _erraticRB.set_group(transTypeGroup);
     _erraticRB.signal_clicked().connect(
-        [&]() { _signalChanged.emit(theatre::TransitionType::Erratic); });
+        [&]() { Change(theatre::TransitionType::Erratic); });
     _centreBox.pack_start(_erraticRB);
 
     _blackRB.set_group(transTypeGroup);
     _blackRB.signal_clicked().connect(
-        [&]() { _signalChanged.emit(theatre::TransitionType::Black); });
+        [&]() { Change(theatre::TransitionType::Black); });
     _bottomBox.pack_start(_blackRB);
 
     _fadeFromBlackRB.set_group(transTypeGroup);
     _fadeFromBlackRB.signal_clicked().connect(
-        [&]() { _signalChanged.emit(theatre::TransitionType::FadeFromBlack); });
+        [&]() { Change(theatre::TransitionType::FadeFromBlack); });
     _bottomBox.pack_start(_fadeFromBlackRB);
 
     _fadeToBlackRB.set_group(transTypeGroup);
     _fadeToBlackRB.signal_clicked().connect(
-        [&]() { _signalChanged.emit(theatre::TransitionType::FadeToBlack); });
+        [&]() { Change(theatre::TransitionType::FadeToBlack); });
     _bottomBox.pack_start(_fadeToBlackRB);
 
     pack_start(_topBox);
@@ -116,12 +115,20 @@ class TransitionTypeBox : public Gtk::VBox {
     }
   }
 
+  theatre::TransitionType Get() const { return _value; }
+
  private:
+  void Change(theatre::TransitionType type) {
+    _value = type;
+    _signalChanged(type);
+  }
+
   Gtk::Label _label;
   Gtk::HBox _topBox, _centreBox, _bottomBox;
   Gtk::RadioButton _noneRB, _fadeRB, _fadeThroughBlackRB, _steppedRB, _randomRB,
       _erraticRB, _blackRB, _fadeFromBlackRB, _fadeToBlackRB;
   sigc::signal<void(theatre::TransitionType)> _signalChanged;
+  theatre::TransitionType _value;
 };
 
 }  // namespace glight::gui

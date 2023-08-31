@@ -9,21 +9,30 @@
 
 namespace glight::theatre {
 
+enum class PropertyType {
+  Choice,
+  ControlValue,
+  Duration,
+  Boolean,
+  Integer,
+  Transition
+};
+
 class Property final {
  public:
-  enum Type { Choice, ControlValue, Duration, Boolean, Integer };
-  Property(const std::string &name, const std::string &description, Type type)
+  Property(const std::string &name, const std::string &description,
+           PropertyType type)
       : _type(type), _setIndex(0), _name(name), _description(description) {}
 
   Property(const std::string &name, const std::string &description,
            const std::vector<std::pair<std::string, std::string>> &options)
-      : _type(Choice),
+      : _type(PropertyType::Choice),
         _setIndex(0),
         _name(name),
         _description(description),
         _options(options) {}
 
-  Type GetType() const { return _type; }
+  PropertyType GetType() const { return _type; }
 
   const std::string &Name() const { return _name; }
 
@@ -40,7 +49,7 @@ class Property final {
  private:
   friend class PropertySet;
 
-  Type _type;
+  PropertyType _type;
   size_t _setIndex;
   std::string _name, _description;
   std::vector<std::pair<std::string, std::string>> _options;

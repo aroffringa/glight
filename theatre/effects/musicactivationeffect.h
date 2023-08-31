@@ -26,8 +26,8 @@ class MusicActivationEffect final : public Effect {
   void SetOffDelay(unsigned offDelay) { _offDelay = offDelay; }
 
  protected:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
     if (_lastBeatValue[primary] != timing.BeatValue()) {
       _lastBeatValue[primary] = timing.BeatValue();
       _lastBeatTime[primary] = timing.TimeInMS();

@@ -4,6 +4,8 @@
 #include "presetcollection.h"
 #include "timing.h"
 
+#include <cassert>
+
 namespace glight::theatre {
 
 enum class TransitionType {
@@ -47,6 +49,8 @@ inline TransitionType GetTransitionType(const std::string &str) {
     return TransitionType::Fade;
   else if (str == "fade_through_black")
     return TransitionType::FadeThroughBlack;
+  else if (str == "random")
+    return TransitionType::Random;
   else if (str == "stepped")
     return TransitionType::Stepped;
   else if (str == "erratic")
@@ -66,31 +70,92 @@ inline TransitionType GetTransitionType(const std::string &str) {
  */
 class Transition {
  public:
-  Transition() : _lengthInMs(250.0), _type(TransitionType::Fade) {}
-  ~Transition() {}
+  constexpr Transition() = default;
+  constexpr ~Transition() = default;
 
-  TransitionType Type() const { return _type; }
+  constexpr Transition(double length_in_ms, TransitionType type)
+      : _lengthInMs(length_in_ms), _type(type) {}
+
+  constexpr TransitionType Type() const { return _type; }
   void SetType(TransitionType type) { _type = type; }
 
-  double LengthInMs() const { return _lengthInMs; }
+  constexpr double LengthInMs() const { return _lengthInMs; }
   void SetLengthInMs(double length) { _lengthInMs = length; }
+
+  ControlValue TransitionValue(double transition_time,
+                               const Timing &timing) const {
+    switch (_type) {
+      case TransitionType::None:
+        if (transition_time * 2.0 <= _lengthInMs)
+          return ControlValue::Zero();
+        else
+          return ControlValue::Max();
+      case TransitionType::FadeFromBlack:
+      case TransitionType::Fade: {
+        const unsigned ratio =
+            (unsigned)((transition_time / _lengthInMs) *
+                       static_cast<double>(ControlValue::MaxUInt()));
+        return ControlValue(ratio);
+      }
+      case TransitionType::FadeThroughBlack: {
+        if (transition_time >= 0.5) {
+          const unsigned ratio = (unsigned)((transition_time / _lengthInMs) *
+                                            ControlValue::MaxUInt() * 2);
+          return ControlValue(ratio - ControlValue::MaxUInt());
+        } else {
+          return ControlValue::Zero();
+        }
+      }
+      case TransitionType::Stepped: {
+        const unsigned value =
+            static_cast<unsigned>((transition_time / _lengthInMs) * 5.0);
+        return ControlValue(value * ControlValue::MaxUInt() / 5);
+      }
+      case TransitionType::Random: {
+        const unsigned ratio =
+            (unsigned)((transition_time / _lengthInMs) * 256);
+        const unsigned upper_bound = std::min(255u, ratio * 2u);
+        const unsigned lower_bound = std::max(ratio * 2u, 256u) - 256u;
+        const unsigned value =
+            timing.DrawRandomValue(upper_bound - lower_bound) + lower_bound;
+        return ControlValue(value << 16);
+      }
+      case TransitionType::Erratic: {
+        unsigned ratio = (unsigned)((transition_time / _lengthInMs) *
+                                    ControlValue::MaxUInt());
+        if (ratio >= timing.DrawRandomValue())
+          return ControlValue::Max();
+        else
+          return ControlValue::Zero();
+      }
+      case TransitionType::Black:
+        return ControlValue::Zero();
+      case TransitionType::FadeToBlack: {
+        const unsigned ratio = (unsigned)((transition_time / _lengthInMs) *
+                                          ControlValue::MaxUInt());
+        return ControlValue(ControlValue::MaxUInt() - ratio);
+      }
+    }
+    assert(false);
+    return ControlValue::Zero();
+  }
 
   /**
    * @param transitionTime value between 0 and _lengthInMS.
    */
   void Mix(Controllable &first, size_t firstInput, Controllable &second,
-           size_t secondInput, double transitionTime, const ControlValue &value,
-           const Timing &timing) const {
+           size_t secondInput, double transition_time,
+           const ControlValue &value, const Timing &timing) const {
     switch (_type) {
       case TransitionType::None:
-        if (transitionTime * 2.0 <= _lengthInMs)
+        if (transition_time * 2.0 <= _lengthInMs)
           first.MixInput(firstInput, value);
         else
           second.MixInput(secondInput, value);
         break;
       case TransitionType::Fade: {
         const unsigned secondRatioValue =
-            (unsigned)((transitionTime / _lengthInMs) * 256.0);
+            (unsigned)((transition_time / _lengthInMs) * 256.0);
         const unsigned firstRatioValue = 255 - secondRatioValue;
         first.MixInput(firstInput,
                        ControlValue((value.UInt() * firstRatioValue) >> 8));
@@ -99,7 +164,7 @@ class Transition {
       } break;
       case TransitionType::FadeThroughBlack: {
         const unsigned ratio =
-            (unsigned)((transitionTime / _lengthInMs) * 512.0);
+            (unsigned)((transition_time / _lengthInMs) * 512.0);
         if (ratio < 256) {
           ControlValue firstValue((value.UInt() * (255 - ratio)) >> 8);
           first.MixInput(firstInput, firstValue);
@@ -110,7 +175,7 @@ class Transition {
       } break;
       case TransitionType::Stepped: {
         unsigned secondRatioValue =
-            (unsigned)((transitionTime / _lengthInMs) * 256.0);
+            (unsigned)((transition_time / _lengthInMs) * 256.0);
         secondRatioValue = (secondRatioValue / 51) * 51;
         const unsigned firstRatioValue = 255 - secondRatioValue;
         first.MixInput(firstInput,
@@ -119,7 +184,8 @@ class Transition {
                         ControlValue((value.UInt() * secondRatioValue) >> 8));
       } break;
       case TransitionType::Random: {
-        const unsigned ratio = (unsigned)((transitionTime / _lengthInMs) * 256);
+        const unsigned ratio =
+            (unsigned)((transition_time / _lengthInMs) * 256);
         const unsigned upper_bound = std::min(255u, ratio * 2u);
         const unsigned lower_bound = std::max(ratio * 2u, 256u) - 256u;
         const unsigned secondRatioValue =
@@ -131,7 +197,7 @@ class Transition {
                         ControlValue((value.UInt() * secondRatioValue) >> 8));
       } break;
       case TransitionType::Erratic: {
-        unsigned ratio = (unsigned)((transitionTime / _lengthInMs) *
+        unsigned ratio = (unsigned)((transition_time / _lengthInMs) *
                                     ControlValue::MaxUInt());
         if (ratio < timing.DrawRandomValue())
           first.MixInput(firstInput, value);
@@ -142,13 +208,13 @@ class Transition {
         break;
       case TransitionType::FadeFromBlack: {
         unsigned ratioValue =
-            (unsigned)((transitionTime / _lengthInMs) * 256.0);
+            (unsigned)((transition_time / _lengthInMs) * 256.0);
         second.MixInput(secondInput,
                         ControlValue((value.UInt() * ratioValue) >> 8));
       } break;
       case TransitionType::FadeToBlack: {
         unsigned ratioValue =
-            255 - (unsigned)((transitionTime / _lengthInMs) * 256.0);
+            255 - (unsigned)((transition_time / _lengthInMs) * 256.0);
         first.MixInput(secondInput,
                        ControlValue((value.UInt() * ratioValue) >> 8));
       } break;
@@ -156,8 +222,8 @@ class Transition {
   }
 
  private:
-  double _lengthInMs;
-  TransitionType _type;
+  double _lengthInMs = 250.0;
+  TransitionType _type = TransitionType::Fade;
 };
 
 }  // namespace glight::theatre

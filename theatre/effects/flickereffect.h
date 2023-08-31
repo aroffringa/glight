@@ -27,8 +27,8 @@ class FlickerEffect final : public Effect {
   }
 
  private:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
     if (values[0]) {
       const size_t count = _independentOutputs ? Connections().size() : 1;
       std::vector<unsigned> &value = _value[primary];

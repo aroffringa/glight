@@ -3,6 +3,7 @@
 
 #include "dmxdevice.h"
 
+#include <cassert>
 #include <unistd.h>
 
 namespace glight::theatre {
@@ -19,6 +20,11 @@ class DummyDevice final : public DmxDevice {
   void Open() override { is_open_ = true; }
 
   size_t NUniverses() const override { return 2; }
+
+  UniverseType GetUniverseType(size_t universe) const override {
+    assert(universe < 2);
+    return universe == 0 ? UniverseType::Output : UniverseType::Input;
+  }
 
   void SetOutputValues(unsigned universe, const unsigned char *new_values,
                        size_t size) override {}

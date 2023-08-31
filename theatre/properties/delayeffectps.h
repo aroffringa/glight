@@ -10,7 +10,7 @@ namespace glight::theatre {
 class DelayEffectPS final : public PropertySet {
  public:
   DelayEffectPS() {
-    addProperty(Property("delay", "Delay", Property::Duration));
+    addProperty(Property("delay", "Delay", PropertyType::Duration));
   }
 
  protected:

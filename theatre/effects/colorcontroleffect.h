@@ -41,8 +41,8 @@ class ColorControlEffect final : public Effect {
   }
 
  protected:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing, bool primary) override {
     for (const std::pair<Controllable *, size_t> &connection : Connections()) {
       switch (connection.first->InputType(connection.second)) {
         case FunctionType::Red: {

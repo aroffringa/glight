@@ -24,7 +24,8 @@ enum class EffectType {
   MusicActivation,
   Pulse,
   RandomSelect,
-  Threshold
+  Threshold,
+  Twinkle
 };
 
 inline std::string EffectTypeToName(EffectType type) {
@@ -62,6 +63,8 @@ inline std::string EffectTypeToName(EffectType type) {
       return "Random select";
     case ET::Threshold:
       return "Threshold";
+    case ET::Twinkle:
+      return "Twinkle";
   }
   return std::string();
 }
@@ -100,6 +103,8 @@ inline EffectType NameToEffectType(const std::string &name) {
     return ET::RandomSelect;
   else if (name == "Threshold")
     return ET::Threshold;
+  else if (name == "Twinkle")
+    return ET::Twinkle;
   else
     throw std::runtime_error("Unknown effect type");
 }
@@ -121,7 +126,8 @@ inline std::vector<EffectType> GetEffectTypes() {
                          ET::MusicActivation,
                          ET::Pulse,
                          ET::RandomSelect,
-                         ET::Threshold};
+                         ET::Threshold,
+                         ET::Twinkle};
 }
 
 }  // namespace glight::theatre

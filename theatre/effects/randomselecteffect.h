@@ -28,8 +28,9 @@ class RandomSelectEffect final : public Effect {
   void SetCount(size_t count) { _count = count; }
 
  private:
-  virtual void mix(const ControlValue *values, const Timing &timing,
-                   bool primary) final override {
+  virtual void MixImplementation(const ControlValue *values,
+                                 const Timing &timing,
+                                 bool primary) final override {
     size_t count = std::min(_count, Connections().size());
     if (values[0] && count != 0) {
       std::vector<size_t> &activeConnections = _activeConnections[primary];

@@ -10,7 +10,8 @@ namespace glight::theatre {
 class AudioLevelEffectPS final : public PropertySet {
  public:
   AudioLevelEffectPS() {
-    addProperty(Property("decayspeed", "Decay speed", Property::ControlValue));
+    addProperty(
+        Property("decayspeed", "Decay speed", PropertyType::ControlValue));
   }
 
  protected:

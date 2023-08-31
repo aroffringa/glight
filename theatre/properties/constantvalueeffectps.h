@@ -10,7 +10,7 @@ namespace glight::theatre {
 class ConstantValueEffectPS final : public PropertySet {
  public:
   ConstantValueEffectPS() {
-    addProperty(Property("value", "Value", Property::ControlValue));
+    addProperty(Property("value", "Value", PropertyType::ControlValue));
   }
 
  protected:
