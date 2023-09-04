@@ -121,7 +121,10 @@ void MainWindow::InitializeMenu() {
       sigc::mem_fun(*this, &MainWindow::onFixtureTypesButtonClicked));
   main_menu_.Visualization.connect(
       [&]() { onVisualizationWindowButtonClicked(); });
-  main_menu_.SceneWindow.connect([&]() { onSceneWindowClicked(); });
+  main_menu_.SceneWindow.connect(
+      [&](bool active) { onSceneWindowClicked(active); });
+  main_menu_.FaderWindow.connect(
+      [&](FaderSetState &fader_set) { onFaderWindowSelected(fader_set); });
 
   _box.pack_start(main_menu_, false, false);
 }
@@ -378,27 +381,17 @@ void MainWindow::onFaderWindowHidden(FaderWindow *window) {
 }
 
 void MainWindow::onFaderListChange() {
-  _miFaderWindows.clear();
-
-  for (const std::unique_ptr<FaderSetState> &state : _state.FaderSets()) {
-    _miFaderWindows.emplace_back(state->name);
-    _miFaderWindows.back().set_active(state->isActive);
-    _miFaderWindows.back().signal_toggled().connect(
-        [&]() { onFaderWindowSelected(_miFaderWindows.back(), *state); });
-    _miFaderWindows.back().show();
-    _menuFaderWindows.append(_miFaderWindows.back());
-  }
+  main_menu_.SetFaderList(_state.FaderSets());
 }
 
-FaderWindow *MainWindow::getFaderWindow(FaderSetState &state) {
+FaderWindow *MainWindow::getFaderWindow(const FaderSetState &state) {
   for (const std::unique_ptr<FaderWindow> &window : _faderWindows) {
     if (window->State() == &state) return window.get();
   }
   return nullptr;
 }
 
-void MainWindow::onFaderWindowSelected(Gtk::CheckMenuItem & /*menuItem*/,
-                                       FaderSetState &state) {
+void MainWindow::onFaderWindowSelected(FaderSetState &state) {
   FaderWindow *window = getFaderWindow(state);
   if (window) {
     window->hide();
@@ -440,14 +433,14 @@ void MainWindow::onMIBlackOut() {
   for (std::unique_ptr<FaderWindow> &fw : _faderWindows) fw->UpdateValues();
 }
 
-void MainWindow::onHideFixtureList() { _miFixtureListWindow.set_active(false); }
+void MainWindow::onHideFixtureList() { main_menu_.SetFixtureListActive(false); }
 
 void MainWindow::onHideFixtureTypes() {
-  _miFixtureTypesWindow.set_active(false);
+  main_menu_.SetFixtureTypesActive(false);
 }
 
 void MainWindow::onHideVisualizationWindow() {
-  _miVisualizationWindow.set_active(false);
+  main_menu_.SetVisualizationActive(false);
 }
 
 PropertiesWindow &MainWindow::OpenPropertiesWindow(
@@ -455,9 +448,8 @@ PropertiesWindow &MainWindow::OpenPropertiesWindow(
   return _objectListFrame->OpenPropertiesWindow(object);
 }
 
-void MainWindow::onSceneWindowClicked() {
-  const bool show = _miSceneWindow.get_active();
-  if (show) {
+void MainWindow::onSceneWindowClicked(bool active) {
+  if (active) {
     _sceneWindow = std::make_unique<SceneWindow>(*_management, *this, *this);
     _sceneWindow->present();
     _sceneWindow->signal_hide().connect([&]() { onHideSceneWindow(); });
@@ -466,6 +458,6 @@ void MainWindow::onSceneWindowClicked() {
   }
 }
 
-void MainWindow::onHideSceneWindow() { _miSceneWindow.set_active(false); }
+void MainWindow::onHideSceneWindow() { main_menu_.SetSceneWindowActive(false); }
 
 }  // namespace glight::gui

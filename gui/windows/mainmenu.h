@@ -7,6 +7,13 @@
 #include <gtkmm/menubar.h>
 #include <gtkmm/separatormenuitem.h>
 
+#include <memory>
+#include <vector>
+
+namespace glight::gui {
+
+class FaderSetState;
+
 class MainMenu : public Gtk::MenuBar {
  public:
   MainMenu();
@@ -27,13 +34,29 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> FixtureList;
   sigc::signal<void()> FixtureTypes;
   sigc::signal<void()> Visualization;
-  sigc::signal<void()> SceneWindow;
+  sigc::signal<void(bool active)> SceneWindow;
+  sigc::signal<void(FaderSetState& fader_set)> FaderWindow;
 
   bool FixtureListActive() const { return _miFixtureListWindow.get_active(); }
+  void SetFixtureListActive(bool active) {
+    _miFixtureListWindow.set_active(active);
+  }
+
   bool FixtureTypesActive() const { return _miFixtureTypesWindow.get_active(); }
+  void SetFixtureTypesActive(bool active) {
+    _miFixtureTypesWindow.set_active(active);
+  }
+
   bool VisualizationActive() const {
     return _miVisualizationWindow.get_active();
   }
+  void SetVisualizationActive(bool active) {
+    _miVisualizationWindow.set_active(active);
+  }
+
+  void SetSceneWindowActive(bool active) { _miSceneWindow.set_active(active); }
+
+  void SetFaderList(const std::vector<std::unique_ptr<FaderSetState>>& faders);
 
  private:
   Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
@@ -53,5 +76,7 @@ class MainMenu : public Gtk::MenuBar {
   Gtk::CheckMenuItem _miVisualizationWindow;
   Gtk::CheckMenuItem _miSceneWindow;
 };
+
+}  // namespace glight::gui
 
 #endif

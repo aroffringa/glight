@@ -90,10 +90,9 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   void onFaderWindowHidden(FaderWindow *window);
   void onFaderListChange();
-  void onFaderWindowSelected(Gtk::CheckMenuItem &menuItem,
-                             FaderSetState &state);
-  FaderWindow *getFaderWindow(FaderSetState &state);
-  void onSceneWindowClicked();
+  void onFaderWindowSelected(FaderSetState &state);
+  FaderWindow *getFaderWindow(const FaderSetState &state);
+  void onSceneWindowClicked(bool active);
   void onHideSceneWindow();
 
   size_t nextControlKeyRow() const;

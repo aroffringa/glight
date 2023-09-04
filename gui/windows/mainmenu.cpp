@@ -1,5 +1,9 @@
 #include "mainmenu.h"
 
+#include "../state/fadersetstate.h"
+
+namespace glight::gui {
+
 MainMenu::MainMenu()
     : _miFile("_File", true),
       _miDesign("_Design", true),
@@ -57,7 +61,7 @@ MainMenu::MainMenu()
   _miDesign.set_submenu(_menuDesign);
   append(_miDesign);
 
-  _miNewFaderWindow.signal_activate().connect([&]() { addFaderWindow(); });
+  _miNewFaderWindow.signal_activate().connect([&]() { NewFaderWindow(); });
   _menuFaderWindows.append(_miNewFaderWindow);
 
   _menuFaderWindows.append(_miFaderWindowSeperator);
@@ -78,9 +82,25 @@ MainMenu::MainMenu()
   _menuWindow.append(_miVisualizationWindow);
 
   _miSceneWindow.set_active(false);
-  _miSceneWindow.signal_activate().connect(SceneWindow);
+  _miSceneWindow.signal_activate().connect(
+      [&]() { SceneWindow(_miSceneWindow.get_active()); });
   _menuWindow.append(_miSceneWindow);
 
   _miWindow.set_submenu(_menuWindow);
   append(_miWindow);
 }
+
+void MainMenu::SetFaderList(
+    const std::vector<std::unique_ptr<FaderSetState>>& faders) {
+  _miFaderWindows.clear();
+
+  for (const std::unique_ptr<FaderSetState>& state : faders) {
+    Gtk::CheckMenuItem& item = _miFaderWindows.emplace_back(state->name);
+    item.set_active(state->isActive);
+    item.signal_toggled().connect([&]() { FaderWindow(*state); });
+    item.show();
+    _menuFaderWindows.append(item);
+  }
+}
+
+}  // namespace glight::gui
