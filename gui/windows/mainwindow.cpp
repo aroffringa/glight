@@ -62,23 +62,27 @@ MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
       sigc::mem_fun(*this, &MainWindow::onKeyUp));
   _fixtureTypesWindow->signal_hide().connect([&]() { onHideFixtureTypes(); });
 
-  _visualizationWindow = std::make_unique<VisualizationWindow>(
-      _management.get(), this, &_fixtureSelection, this);
-  _visualizationWindow->signal_key_press_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyDown));
-  _visualizationWindow->signal_key_release_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyUp));
-  _visualizationWindow->signal_hide().connect(
-      [&]() { onHideVisualizationWindow(); });
-
   InitializeMenu();
 
   _state.FaderSetSignalChange().connect([&]() { onFaderListChange(); });
   addFaderWindow();
 
   _objectListFrame = std::make_unique<ObjectListFrame>(*_management, *this);
+  revealer_.add(*_objectListFrame);
+  revealer_.set_reveal_child(true);
+  revealer_.set_transition_type(
+      Gtk::RevealerTransitionType::REVEALER_TRANSITION_TYPE_SLIDE_RIGHT);
+  revealer_box_.pack_start(revealer_, false, false);
 
-  _box.pack_start(*_objectListFrame);
+  _visualizationWidget = std::make_unique<VisualizationWidget>(
+      _management.get(), this, &_fixtureSelection, this);
+  _visualizationWidget->signal_key_press_event().connect(
+      sigc::mem_fun(*this, &MainWindow::onKeyDown));
+  _visualizationWidget->signal_key_release_event().connect(
+      sigc::mem_fun(*this, &MainWindow::onKeyUp));
+  revealer_box_.pack_end(*_visualizationWidget, true, true);
+
+  _box.pack_start(revealer_box_, true, true);
 
   add(_box);
   _box.show_all();
@@ -92,7 +96,7 @@ MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
 
 MainWindow::~MainWindow() {
   _sceneWindow.reset();
-  _visualizationWindow.reset();
+  _visualizationWidget.reset();
   _fixtureListWindow.reset();
   _fixtureTypesWindow.reset();
 
@@ -114,13 +118,13 @@ void MainWindow::InitializeMenu() {
   main_menu_.DesignWizard.connect(
       sigc::mem_fun(*this, &MainWindow::onMIDesignWizardClicked));
 
+  main_menu_.SideBar.connect([&]() { onSideBarButtonClicked(); });
+  main_menu_.FullScreen.connect([&]() { onFullscreen(); });
   main_menu_.NewFaderWindow.connect([&]() { addFaderWindow(); });
   main_menu_.FixtureList.connect(
       sigc::mem_fun(*this, &MainWindow::onFixtureListButtonClicked));
   main_menu_.FixtureTypes.connect(
       sigc::mem_fun(*this, &MainWindow::onFixtureTypesButtonClicked));
-  main_menu_.Visualization.connect(
-      [&]() { onVisualizationWindowButtonClicked(); });
   main_menu_.SceneWindow.connect(
       [&](bool active) { onSceneWindowClicked(active); });
   main_menu_.FaderWindow.connect(
@@ -173,12 +177,10 @@ void MainWindow::onFixtureTypesButtonClicked() {
     _fixtureTypesWindow->hide();
 }
 
-void MainWindow::onVisualizationWindowButtonClicked() {
-  const bool show = main_menu_.VisualizationActive();
-  if (show)
-    _visualizationWindow->show();
-  else
-    _visualizationWindow->hide();
+void MainWindow::onSideBarButtonClicked() {
+  if (revealer_.get_child_revealed() != main_menu_.SideBarActive()) {
+    revealer_.set_reveal_child(main_menu_.SideBarActive());
+  }
 }
 
 void MainWindow::increaseManualBeat(int val) {
@@ -439,10 +441,6 @@ void MainWindow::onHideFixtureTypes() {
   main_menu_.SetFixtureTypesActive(false);
 }
 
-void MainWindow::onHideVisualizationWindow() {
-  main_menu_.SetVisualizationActive(false);
-}
-
 PropertiesWindow &MainWindow::OpenPropertiesWindow(
     theatre::FolderObject &object) {
   return _objectListFrame->OpenPropertiesWindow(object);
@@ -459,5 +457,12 @@ void MainWindow::onSceneWindowClicked(bool active) {
 }
 
 void MainWindow::onHideSceneWindow() { main_menu_.SetSceneWindowActive(false); }
+
+void MainWindow::onFullscreen() {
+  if (main_menu_.FullScreenActive())
+    fullscreen();
+  else
+    unfullscreen();
+}
 
 }  // namespace glight::gui

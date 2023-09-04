@@ -10,6 +10,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/notebook.h>
+#include <gtkmm/revealer.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/window.h>
 
@@ -26,7 +27,7 @@ class FixtureTypesWindow;
 class ObjectListFrame;
 class PropertiesWindow;
 class SceneWindow;
-class VisualizationWindow;
+class VisualizationWidget;
 
 /**
  * @author Andre Offringa
@@ -59,7 +60,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   void onFixtureListButtonClicked();
   void onFixtureTypesButtonClicked();
-  void onVisualizationWindowButtonClicked();
+  void onSideBarButtonClicked();
 
   /**
    * If stateOrNull is nullptr, the first inactive state is selected, or
@@ -74,7 +75,6 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   void onHideFixtureList();
   void onHideFixtureTypes();
-  void onHideVisualizationWindow();
 
   void onMINewClicked();
   void onMIOpenClicked();
@@ -88,6 +88,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   void onMIDesignWizardClicked();
 
+  void onFullscreen();
   void onFaderWindowHidden(FaderWindow *window);
   void onFaderListChange();
   void onFaderWindowSelected(FaderSetState &state);
@@ -98,17 +99,19 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   size_t nextControlKeyRow() const;
 
   Gtk::VBox _box;
+  Gtk::HBox revealer_box_;
 
   std::vector<std::unique_ptr<FaderWindow>> _faderWindows;
   std::unique_ptr<FixtureListWindow> _fixtureListWindow;
   std::unique_ptr<FixtureTypesWindow> _fixtureTypesWindow;
-  std::unique_ptr<VisualizationWindow> _visualizationWindow;
   std::unique_ptr<DesignWizard> _designWizard;
+  std::unique_ptr<SceneWindow> _sceneWindow;
 
   std::unique_ptr<theatre::Management> _management;
 
+  Gtk::Revealer revealer_;
   std::unique_ptr<ObjectListFrame> _objectListFrame;
-  std::unique_ptr<SceneWindow> _sceneWindow;
+  std::unique_ptr<VisualizationWidget> _visualizationWidget;
 
   GUIState _state;
   FixtureSelection _fixtureSelection;

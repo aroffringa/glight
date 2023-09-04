@@ -30,10 +30,11 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> DesignWizard;
 
   // Window menu
+  sigc::signal<void()> FullScreen;
   sigc::signal<void()> NewFaderWindow;
   sigc::signal<void()> FixtureList;
   sigc::signal<void()> FixtureTypes;
-  sigc::signal<void()> Visualization;
+  sigc::signal<void()> SideBar;
   sigc::signal<void(bool active)> SceneWindow;
   sigc::signal<void(FaderSetState& fader_set)> FaderWindow;
 
@@ -47,16 +48,14 @@ class MainMenu : public Gtk::MenuBar {
     _miFixtureTypesWindow.set_active(active);
   }
 
-  bool VisualizationActive() const {
-    return _miVisualizationWindow.get_active();
-  }
-  void SetVisualizationActive(bool active) {
-    _miVisualizationWindow.set_active(active);
-  }
+  bool SideBarActive() const { return _miSideBar.get_active(); }
+  void SetSideBarActive(bool active) { _miSideBar.set_active(active); }
 
   void SetSceneWindowActive(bool active) { _miSceneWindow.set_active(active); }
 
   void SetFaderList(const std::vector<std::unique_ptr<FaderSetState>>& faders);
+
+  bool FullScreenActive() const { return _miFullScreen.get_active(); }
 
  private:
   Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
@@ -67,13 +66,14 @@ class MainMenu : public Gtk::MenuBar {
   Gtk::CheckMenuItem _miProtectBlackout;
   Gtk::SeparatorMenuItem _miDesignSep1, _miDesignSep2;
   Gtk::MenuItem _miDesignWizard;
+  Gtk::CheckMenuItem _miSideBar;
+  Gtk::CheckMenuItem _miFullScreen;
   Gtk::CheckMenuItem _miFixtureListWindow;
   Gtk::CheckMenuItem _miFixtureTypesWindow;
   Gtk::MenuItem _miFaderWindowMenu;
   Gtk::MenuItem _miNewFaderWindow;
   Gtk::SeparatorMenuItem _miFaderWindowSeperator;
   std::vector<Gtk::CheckMenuItem> _miFaderWindows;
-  Gtk::CheckMenuItem _miVisualizationWindow;
   Gtk::CheckMenuItem _miSceneWindow;
 };
 

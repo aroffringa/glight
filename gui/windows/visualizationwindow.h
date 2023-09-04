@@ -15,7 +15,6 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/separatormenuitem.h>
-#include <gtkmm/window.h>
 
 namespace glight::gui {
 
@@ -27,26 +26,25 @@ namespace windows {
 class FixtureProperties;
 }
 
-class VisualizationWindow : public Gtk::Window {
+class VisualizationWidget : public Gtk::DrawingArea {
  public:
-  VisualizationWindow(theatre::Management *management,
+  VisualizationWidget(theatre::Management *management,
                       EventTransmitter *eventTransmitter,
                       FixtureSelection *fixtureSelection,
                       MainWindow *showWindow);
-  ~VisualizationWindow();
+  ~VisualizationWidget();
 
   void Update() { queue_draw(); }
 
  private:
-  VisualizationWindow(const VisualizationWindow &) = delete;
-  VisualizationWindow &operator=(const VisualizationWindow &) = delete;
+  VisualizationWidget(const VisualizationWidget &) = delete;
+  VisualizationWidget &operator=(const VisualizationWidget &) = delete;
 
-  Gtk::DrawingArea _drawingArea;
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;
   FixtureSelection *_globalSelection;
   sigc::connection _globalSelectionConnection;
-  MainWindow *_showWindow;
+  MainWindow *main_window_;
   system::DeletablePtr<glight::gui::windows::FixtureProperties>
       _propertiesWindow;
   bool _isInitialized, _isTimerRunning;
@@ -61,13 +59,13 @@ class VisualizationWindow : public Gtk::Window {
       _selectedFixturesBeforeDrag;
   theatre::Position _draggingStart, _draggingTo;
   RenderEngine _renderEngine;
+  std::unique_ptr<Gtk::Window> sub_window_;
 
   Gtk::Menu _popupMenu;
   Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
   Gtk::MenuItem _miSymbolMenu, _miDryModeStyle, _miAlignHorizontally,
       _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miGroup,
       _miDesign;
-  Gtk::CheckMenuItem _miFullscreen;
   Gtk::Menu _symbolMenu, _dryModeStyleMenu;
   Gtk::MenuItem _miProperties;
   std::vector<Gtk::MenuItem> _miSymbols;
@@ -95,7 +93,6 @@ class VisualizationWindow : public Gtk::Window {
   void onRemoveFixtures();
   void onGroupFixtures();
   void onDesignFixtures();
-  void onFullscreen();
   void onSetSymbol(theatre::FixtureSymbol::Symbol symbol);
   void onGlobalSelectionChanged();
 

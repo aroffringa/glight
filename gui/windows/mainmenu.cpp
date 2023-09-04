@@ -16,11 +16,12 @@ MainMenu::MainMenu()
       _miBlackOut("Black-out"),
       _miProtectBlackout("Protect black-out"),
       _miDesignWizard("Design wizard"),
+      _miSideBar("Side bar"),
+      _miFullScreen("Full screen"),
       _miFixtureListWindow("Fixtures"),
       _miFixtureTypesWindow("Fixture types"),
       _miFaderWindowMenu("Fader windows"),
       _miNewFaderWindow("New"),
-      _miVisualizationWindow("Visualization"),
       _miSceneWindow("Scene") {
   _miNew.signal_activate().connect(New);
   _menuFile.append(_miNew);
@@ -61,9 +62,15 @@ MainMenu::MainMenu()
   _miDesign.set_submenu(_menuDesign);
   append(_miDesign);
 
+  _miSideBar.set_active(true);
+  _miSideBar.signal_activate().connect(SideBar);
+  _menuWindow.append(_miSideBar);
+
+  _miFullScreen.signal_activate().connect(FullScreen);
+  _menuWindow.append(_miFullScreen);
+
   _miNewFaderWindow.signal_activate().connect([&]() { NewFaderWindow(); });
   _menuFaderWindows.append(_miNewFaderWindow);
-
   _menuFaderWindows.append(_miFaderWindowSeperator);
 
   _miFaderWindowMenu.set_submenu(_menuFaderWindows);
@@ -76,10 +83,6 @@ MainMenu::MainMenu()
   _miFixtureTypesWindow.set_active(false);
   _miFixtureTypesWindow.signal_activate().connect(FixtureTypes);
   _menuWindow.append(_miFixtureTypesWindow);
-
-  _miVisualizationWindow.set_active(false);
-  _miVisualizationWindow.signal_activate().connect(Visualization);
-  _menuWindow.append(_miVisualizationWindow);
 
   _miSceneWindow.set_active(false);
   _miSceneWindow.signal_activate().connect(
