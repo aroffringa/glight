@@ -2,7 +2,7 @@
 
 #include "addfixturewindow.h"
 #include "fixtureproperties.h"
-#include "showwindow.h"
+#include "mainwindow.h"
 
 #include "../designwizard.h"
 #include "../eventtransmitter.h"
@@ -25,7 +25,7 @@ namespace glight::gui {
 VisualizationWindow::VisualizationWindow(theatre::Management *management,
                                          EventTransmitter *eventTransmitter,
                                          FixtureSelection *fixtureSelection,
-                                         ShowWindow *showWindow)
+                                         MainWindow *showWindow)
     : _management(management),
       _eventTransmitter(eventTransmitter),
       _globalSelection(fixtureSelection),

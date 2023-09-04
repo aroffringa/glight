@@ -41,7 +41,7 @@ Scene *FirstScene(glight::theatre::Management &management) {
 namespace glight::gui {
 
 SceneWindow::SceneWindow(theatre::Management &management,
-                         ShowWindow &parentWindow, EventTransmitter &eventHub)
+                         MainWindow &parentWindow, EventTransmitter &eventHub)
     : _management(management),
       _eventHub(eventHub),
       _audioLabel("Audio file: -"),

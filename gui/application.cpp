@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "windows/showwindow.h"
+#include "windows/mainwindow.h"
 
 #include "../theatre/dummydevice.h"
 #include "../theatre/oladevice.h"
@@ -23,7 +23,7 @@ void Application::Run(int argc, char *argv[]) {
     std::cerr << "DMX device not working, switching to dummy device.\n";
     device = std::make_unique<theatre::DummyDevice>();
   }
-  ShowWindow window(std::move(device));
+  MainWindow window(std::move(device));
   if (argc > 1) {
     window.OpenFile(argv[1]);
   }

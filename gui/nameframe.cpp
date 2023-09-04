@@ -1,6 +1,6 @@
 #include "nameframe.h"
 
-#include "windows/showwindow.h"
+#include "windows/mainwindow.h"
 
 #include "../theatre/folder.h"
 #include "../theatre/folderobject.h"
@@ -11,7 +11,7 @@
 
 namespace glight::gui {
 
-NameFrame::NameFrame(theatre::Management &management, ShowWindow &showWindow)
+NameFrame::NameFrame(theatre::Management &management, MainWindow &showWindow)
     : _management(&management),
       _showWindow(showWindow),
       _namedObject(nullptr),

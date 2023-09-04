@@ -21,11 +21,11 @@
 
 namespace glight::gui {
 
-class ShowWindow;
+class MainWindow;
 
 class ObjectListFrame : public Gtk::Paned {
  public:
-  ObjectListFrame(theatre::Management &management, ShowWindow &parentWindow);
+  ObjectListFrame(theatre::Management &management, MainWindow &parentWindow);
 
   theatre::Folder &SelectedFolder() { return _list.SelectedFolder(); }
   void OpenFolder(const theatre::Folder &folder) { _list.OpenFolder(folder); }
@@ -59,7 +59,7 @@ class ObjectListFrame : public Gtk::Paned {
   WindowList<PropertiesWindow> _windowList;
 
   theatre::Management *_management;
-  ShowWindow &_parentWindow;
+  MainWindow &_parentWindow;
   NameFrame _nameFrame;
   RecursionLock _delayUpdates;
 };

@@ -10,11 +10,11 @@
 
 namespace glight::gui {
 
-class ShowWindow;
+class MainWindow;
 
 class NameFrame : public Gtk::HBox {
  public:
-  NameFrame(theatre::Management &management, ShowWindow &showWindow);
+  NameFrame(theatre::Management &management, MainWindow &showWindow);
   ~NameFrame();
 
   void SetNamedObject(theatre::FolderObject &namedObject) {
@@ -36,7 +36,7 @@ class NameFrame : public Gtk::HBox {
   void update();
 
   theatre::Management *_management;
-  ShowWindow &_showWindow;
+  MainWindow &_showWindow;
   theatre::FolderObject *_namedObject;
 
   Gtk::Entry _entry;

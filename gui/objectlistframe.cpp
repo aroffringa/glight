@@ -8,7 +8,7 @@
 #include "windows/effectpropertieswindow.h"
 #include "windows/groupwindow.h"
 #include "windows/presetcollectionwindow.h"
-#include "windows/showwindow.h"
+#include "windows/mainwindow.h"
 #include "windows/timesequencepropertieswindow.h"
 
 #include "../theatre/chase.h"
@@ -28,7 +28,7 @@ using theatre::Folder;
 using theatre::FolderObject;
 
 ObjectListFrame::ObjectListFrame(theatre::Management &management,
-                                 ShowWindow &parentWindow)
+                                 MainWindow &parentWindow)
     : _objectListFrame("Object programming"),
       _list(management, parentWindow),
       _newPresetButton("Preset"),

@@ -21,7 +21,7 @@ namespace glight::gui {
 
 class EventTransmitter;
 class FixtureSelection;
-class ShowWindow;
+class MainWindow;
 
 namespace windows {
 class FixtureProperties;
@@ -32,7 +32,7 @@ class VisualizationWindow : public Gtk::Window {
   VisualizationWindow(theatre::Management *management,
                       EventTransmitter *eventTransmitter,
                       FixtureSelection *fixtureSelection,
-                      ShowWindow *showWindow);
+                      MainWindow *showWindow);
   ~VisualizationWindow();
 
   void Update() { queue_draw(); }
@@ -46,7 +46,7 @@ class VisualizationWindow : public Gtk::Window {
   EventTransmitter *_eventTransmitter;
   FixtureSelection *_globalSelection;
   sigc::connection _globalSelectionConnection;
-  ShowWindow *_showWindow;
+  MainWindow *_showWindow;
   system::DeletablePtr<glight::gui::windows::FixtureProperties>
       _propertiesWindow;
   bool _isInitialized, _isTimerRunning;
