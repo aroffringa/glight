@@ -3,10 +3,11 @@
 #include "fixturelistwindow.h"
 #include "fixturetypeswindow.h"
 #include "scenewindow.h"
-#include "visualizationwindow.h"
 
 #include "../designwizard.h"
 #include "../objectlistframe.h"
+
+#include "../components/visualizationwidget.h"
 
 #include "../faders/faderwindow.h"
 

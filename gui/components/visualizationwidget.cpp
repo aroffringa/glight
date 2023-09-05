@@ -1,8 +1,8 @@
-#include "visualizationwindow.h"
+#include "visualizationwidget.h"
 
-#include "addfixturewindow.h"
-#include "fixtureproperties.h"
-#include "mainwindow.h"
+#include "../windows/addfixturewindow.h"
+#include "../windows/fixtureproperties.h"
+#include "../windows/mainwindow.h"
 
 #include "../designwizard.h"
 #include "../eventtransmitter.h"
