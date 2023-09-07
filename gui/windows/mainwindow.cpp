@@ -1,12 +1,13 @@
-#include "showwindow.h"
+#include "mainwindow.h"
 
 #include "fixturelistwindow.h"
 #include "fixturetypeswindow.h"
 #include "scenewindow.h"
-#include "visualizationwindow.h"
 
 #include "../designwizard.h"
 #include "../objectlistframe.h"
+
+#include "../components/visualizationwidget.h"
 
 #include "../faders/faderwindow.h"
 
@@ -31,24 +32,7 @@
 
 namespace glight::gui {
 
-ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
-    : _miFile("_File", true),
-      _miDesign("_Design", true),
-      _miWindow("_Window", true),
-      _miNew("New"),
-      _miOpen("_Open...", true),
-      _miSave("Save _as...", true),
-      _miImport("_Import...", true),
-      _miQuit("_Quit", true),
-      _miBlackOut("Black-out"),
-      _miProtectBlackout("Protect black-out"),
-      _miDesignWizard("Design wizard"),
-      _miFixtureListWindow("Fixtures"),
-      _miFixtureTypesWindow("Fixture types"),
-      _miFaderWindowMenu("Fader windows"),
-      _miNewFaderWindow("New"),
-      _miVisualizationWindow("Visualization"),
-      _miSceneWindow("Scene") {
+MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
   set_title("Glight - show");
   set_default_icon_name("glight");
 
@@ -66,52 +50,54 @@ ShowWindow::ShowWindow(std::unique_ptr<theatre::DmxDevice> device)
   _fixtureListWindow = std::make_unique<glight::gui::FixtureListWindow>(
       *this, *_management, _fixtureSelection);
   _fixtureListWindow->signal_key_press_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyDown));
+      sigc::mem_fun(*this, &MainWindow::onKeyDown));
   _fixtureListWindow->signal_key_release_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+      sigc::mem_fun(*this, &MainWindow::onKeyUp));
   _fixtureListWindow->signal_hide().connect([&]() { onHideFixtureList(); });
 
   _fixtureTypesWindow =
       std::make_unique<FixtureTypesWindow>(this, *_management);
   _fixtureTypesWindow->signal_key_press_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyDown));
+      sigc::mem_fun(*this, &MainWindow::onKeyDown));
   _fixtureTypesWindow->signal_key_release_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+      sigc::mem_fun(*this, &MainWindow::onKeyUp));
   _fixtureTypesWindow->signal_hide().connect([&]() { onHideFixtureTypes(); });
 
-  _visualizationWindow = std::make_unique<VisualizationWindow>(
-      _management.get(), this, &_fixtureSelection, this);
-  _visualizationWindow->signal_key_press_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyDown));
-  _visualizationWindow->signal_key_release_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyUp));
-  _visualizationWindow->signal_hide().connect(
-      [&]() { onHideVisualizationWindow(); });
-
-  createMenu();
+  InitializeMenu();
 
   _state.FaderSetSignalChange().connect([&]() { onFaderListChange(); });
   addFaderWindow();
 
   _objectListFrame = std::make_unique<ObjectListFrame>(*_management, *this);
+  revealer_.add(*_objectListFrame);
+  revealer_.set_reveal_child(true);
+  revealer_.set_transition_type(
+      Gtk::RevealerTransitionType::REVEALER_TRANSITION_TYPE_SLIDE_RIGHT);
+  revealer_box_.pack_start(revealer_, false, false);
 
-  _box.pack_start(*_objectListFrame);
+  _visualizationWidget = std::make_unique<VisualizationWidget>(
+      _management.get(), this, &_fixtureSelection, this);
+  _visualizationWidget->signal_key_press_event().connect(
+      sigc::mem_fun(*this, &MainWindow::onKeyDown));
+  _visualizationWidget->signal_key_release_event().connect(
+      sigc::mem_fun(*this, &MainWindow::onKeyUp));
+  revealer_box_.pack_end(*_visualizationWidget, true, true);
+
+  _box.pack_start(revealer_box_, true, true);
 
   add(_box);
   _box.show_all();
 
   signal_key_press_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyDown));
+      sigc::mem_fun(*this, &MainWindow::onKeyDown));
   signal_key_release_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyUp));
-  signal_delete_event().connect(sigc::mem_fun(*this, &ShowWindow::onDelete));
+      sigc::mem_fun(*this, &MainWindow::onKeyUp));
+  signal_delete_event().connect(sigc::mem_fun(*this, &MainWindow::onDelete));
 }
 
-ShowWindow::~ShowWindow() {
-  _menuFile.detach();
-
+MainWindow::~MainWindow() {
   _sceneWindow.reset();
-  _visualizationWindow.reset();
+  _visualizationWidget.reset();
   _fixtureListWindow.reset();
   _fixtureTypesWindow.reset();
 
@@ -120,9 +106,37 @@ ShowWindow::~ShowWindow() {
   _management.reset();
 }
 
-void ShowWindow::EmitUpdate() { _signalUpdateControllables(); }
+void MainWindow::InitializeMenu() {
+  main_menu_.New.connect(sigc::mem_fun(*this, &MainWindow::onMINewClicked));
+  main_menu_.Open.connect(sigc::mem_fun(*this, &MainWindow::onMIOpenClicked));
+  main_menu_.Save.connect(sigc::mem_fun(*this, &MainWindow::onMISaveClicked));
 
-void ShowWindow::addFaderWindow(FaderSetState *stateOrNull) {
+  main_menu_.Import.connect(
+      sigc::mem_fun(*this, &MainWindow::onMIImportClicked));
+  main_menu_.Quit.connect(sigc::mem_fun(*this, &MainWindow::onMIQuitClicked));
+
+  main_menu_.BlackOut.connect([&]() { onMIBlackOut(); });
+  main_menu_.DesignWizard.connect(
+      sigc::mem_fun(*this, &MainWindow::onMIDesignWizardClicked));
+
+  main_menu_.SideBar.connect([&]() { onSideBarButtonClicked(); });
+  main_menu_.FullScreen.connect([&]() { onFullscreen(); });
+  main_menu_.NewFaderWindow.connect([&]() { addFaderWindow(); });
+  main_menu_.FixtureList.connect(
+      sigc::mem_fun(*this, &MainWindow::onFixtureListButtonClicked));
+  main_menu_.FixtureTypes.connect(
+      sigc::mem_fun(*this, &MainWindow::onFixtureTypesButtonClicked));
+  main_menu_.SceneWindow.connect(
+      [&](bool active) { onSceneWindowClicked(active); });
+  main_menu_.FaderWindow.connect(
+      [&](FaderSetState &fader_set) { onFaderWindowSelected(fader_set); });
+
+  _box.pack_start(main_menu_, false, false);
+}
+
+void MainWindow::EmitUpdate() { _signalUpdateControllables(); }
+
+void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
   if (stateOrNull == nullptr) {
     for (std::unique_ptr<FaderSetState> &setup : _state.FaderSets()) {
       if (!setup->isActive) {
@@ -139,45 +153,42 @@ void ShowWindow::addFaderWindow(FaderSetState *stateOrNull) {
   else
     newWindow->LoadState(stateOrNull);
   newWindow->signal_key_press_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyDown));
+      sigc::mem_fun(*this, &MainWindow::onKeyDown));
   newWindow->signal_key_release_event().connect(
-      sigc::mem_fun(*this, &ShowWindow::onKeyUp));
+      sigc::mem_fun(*this, &MainWindow::onKeyUp));
   newWindow->signal_hide().connect(sigc::bind(
-      sigc::mem_fun(*this, &ShowWindow::onFaderWindowHidden), newWindow));
+      sigc::mem_fun(*this, &MainWindow::onFaderWindowHidden), newWindow));
   newWindow->show();
   _state.EmitFaderSetChangeSignal();
 }
 
-void ShowWindow::onFixtureListButtonClicked() {
-  const bool show = _miFixtureListWindow.get_active();
+void MainWindow::onFixtureListButtonClicked() {
+  const bool show = main_menu_.FixtureListActive();
   if (show)
     _fixtureListWindow->show();
   else
     _fixtureListWindow->hide();
 }
 
-void ShowWindow::onFixtureTypesButtonClicked() {
-  const bool show = _miFixtureTypesWindow.get_active();
+void MainWindow::onFixtureTypesButtonClicked() {
+  const bool show = main_menu_.FixtureTypesActive();
   if (show)
     _fixtureTypesWindow->show();
   else
     _fixtureTypesWindow->hide();
 }
 
-void ShowWindow::onVisualizationWindowButtonClicked() {
-  const bool show = _miVisualizationWindow.get_active();
-  if (show)
-    _visualizationWindow->show();
-  else
-    _visualizationWindow->hide();
+void MainWindow::onSideBarButtonClicked() {
+  if (revealer_.get_child_revealed() != main_menu_.SideBarActive()) {
+    revealer_.set_reveal_child(main_menu_.SideBarActive());
+  }
 }
 
-void ShowWindow::increaseManualBeat(int val) {
+void MainWindow::increaseManualBeat(int val) {
   _management->IncreaseManualBeat(val);
-  if (_backgroundManagement) _backgroundManagement->IncreaseManualBeat(val);
 }
 
-bool ShowWindow::onKeyDown(GdkEventKey *event) {
+bool MainWindow::onKeyDown(GdkEventKey *event) {
   if (event->keyval == '0')
     increaseManualBeat(0);
   else if (event->keyval == '1')
@@ -202,14 +213,14 @@ bool ShowWindow::onKeyDown(GdkEventKey *event) {
   return false;
 }
 
-bool ShowWindow::onKeyUp(GdkEventKey *event) {
+bool MainWindow::onKeyUp(GdkEventKey *event) {
   bool handled = false;
   for (std::unique_ptr<FaderWindow> &cw : _faderWindows)
     if (!handled) handled = cw->HandleKeyUp(event->keyval);
   return handled;
 }
 
-bool ShowWindow::onDelete(GdkEventAny * /*unused*/) {
+bool MainWindow::onDelete(GdkEventAny * /*unused*/) {
   if (_management->IsEmpty())
     return false;
   else {
@@ -222,84 +233,7 @@ bool ShowWindow::onDelete(GdkEventAny * /*unused*/) {
   }
 }
 
-void ShowWindow::createMenu() {
-  _miNew.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onMINewClicked));
-  _menuFile.append(_miNew);
-
-  _miOpen.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onMIOpenClicked));
-  _menuFile.append(_miOpen);
-
-  _miSave.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onMISaveClicked));
-  _menuFile.append(_miSave);
-
-  _miImport.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onMIImportClicked));
-  _menuFile.append(_miImport);
-
-  _miQuit.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onMIQuitClicked));
-  _menuFile.append(_miQuit);
-
-  _miFile.set_submenu(_menuFile);
-  _menuBar.append(_miFile);
-
-  _menuDesign.append(_miDesignSep1);
-
-  _miProtectBlackout.signal_activate().connect(
-      [&]() { onMIProtectBlackOut(); });
-  _miProtectBlackout.set_active(true);
-  _menuDesign.append(_miProtectBlackout);
-
-  _miBlackOut.signal_activate().connect([&]() { onMIBlackOut(); });
-  _miBlackOut.set_sensitive(false);
-  _menuDesign.append(_miBlackOut);
-
-  _menuDesign.append(_miDesignSep2);
-
-  _miDesignWizard.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onMIDesignWizardClicked));
-  _menuDesign.append(_miDesignWizard);
-
-  _miDesign.set_submenu(_menuDesign);
-  _menuBar.append(_miDesign);
-
-  _miNewFaderWindow.signal_activate().connect([&]() { addFaderWindow(); });
-  _menuFaderWindows.append(_miNewFaderWindow);
-
-  _menuFaderWindows.append(_miFaderWindowSeperator);
-
-  _miFaderWindowMenu.set_submenu(_menuFaderWindows);
-  _menuWindow.append(_miFaderWindowMenu);
-
-  _miFixtureListWindow.set_active(false);
-  _miFixtureListWindow.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onFixtureListButtonClicked));
-  _menuWindow.append(_miFixtureListWindow);
-
-  _miFixtureTypesWindow.set_active(false);
-  _miFixtureTypesWindow.signal_activate().connect(
-      sigc::mem_fun(*this, &ShowWindow::onFixtureTypesButtonClicked));
-  _menuWindow.append(_miFixtureTypesWindow);
-
-  _miVisualizationWindow.set_active(false);
-  _miVisualizationWindow.signal_activate().connect(
-      [&]() { onVisualizationWindowButtonClicked(); });
-  _menuWindow.append(_miVisualizationWindow);
-
-  _miSceneWindow.set_active(false);
-  _miSceneWindow.signal_activate().connect([&]() { onSceneWindowClicked(); });
-  _menuWindow.append(_miSceneWindow);
-
-  _miWindow.set_submenu(_menuWindow);
-  _menuBar.append(_miWindow);
-
-  _box.pack_start(_menuBar, false, false);
-}
-
-void ShowWindow::onMINewClicked() {
+void MainWindow::onMINewClicked() {
   bool confirmed = false;
   if (_management->IsEmpty())
     confirmed = true;
@@ -326,7 +260,7 @@ void ShowWindow::onMINewClicked() {
   }
 }
 
-void ShowWindow::OpenFile(const std::string &filename) {
+void MainWindow::OpenFile(const std::string &filename) {
   std::unique_lock<std::mutex> lock(_management->Mutex());
   _management->Clear();
   _faderWindows.clear();
@@ -357,7 +291,7 @@ void ShowWindow::OpenFile(const std::string &filename) {
   _state.EmitFaderSetChangeSignal();
 }
 
-void ShowWindow::onMIOpenClicked() {
+void MainWindow::onMIOpenClicked() {
   bool confirmed = false;
   if (_management->IsEmpty())
     confirmed = true;
@@ -388,7 +322,7 @@ void ShowWindow::onMIOpenClicked() {
   }
 }
 
-void ShowWindow::onMISaveClicked() {
+void MainWindow::onMISaveClicked() {
   Gtk::FileChooserDialog dialog(*this, "Save glight show",
                                 Gtk::FILE_CHOOSER_ACTION_SAVE);
 
@@ -411,7 +345,7 @@ void ShowWindow::onMISaveClicked() {
   }
 }
 
-void ShowWindow::onMIImportClicked() {
+void MainWindow::onMIImportClicked() {
   Gtk::FileChooserDialog dialog(*this, "Open glight show",
                                 Gtk::FILE_CHOOSER_ACTION_OPEN);
 
@@ -436,9 +370,9 @@ void ShowWindow::onMIImportClicked() {
   }
 }
 
-void ShowWindow::onMIQuitClicked() { hide(); }
+void MainWindow::onMIQuitClicked() { hide(); }
 
-void ShowWindow::onFaderWindowHidden(FaderWindow *window) {
+void MainWindow::onFaderWindowHidden(FaderWindow *window) {
   for (std::vector<std::unique_ptr<FaderWindow>>::iterator i =
            _faderWindows.begin();
        i != _faderWindows.end(); ++i) {
@@ -449,28 +383,18 @@ void ShowWindow::onFaderWindowHidden(FaderWindow *window) {
   }
 }
 
-void ShowWindow::onFaderListChange() {
-  _miFaderWindows.clear();
-
-  for (const std::unique_ptr<FaderSetState> &state : _state.FaderSets()) {
-    _miFaderWindows.emplace_back(state->name);
-    _miFaderWindows.back().set_active(state->isActive);
-    _miFaderWindows.back().signal_toggled().connect(
-        [&]() { onFaderWindowSelected(_miFaderWindows.back(), *state); });
-    _miFaderWindows.back().show();
-    _menuFaderWindows.append(_miFaderWindows.back());
-  }
+void MainWindow::onFaderListChange() {
+  main_menu_.SetFaderList(_state.FaderSets());
 }
 
-FaderWindow *ShowWindow::getFaderWindow(FaderSetState &state) {
+FaderWindow *MainWindow::getFaderWindow(const FaderSetState &state) {
   for (const std::unique_ptr<FaderWindow> &window : _faderWindows) {
     if (window->State() == &state) return window.get();
   }
   return nullptr;
 }
 
-void ShowWindow::onFaderWindowSelected(Gtk::CheckMenuItem & /*menuItem*/,
-                                       FaderSetState &state) {
+void MainWindow::onFaderWindowSelected(FaderSetState &state) {
   FaderWindow *window = getFaderWindow(state);
   if (window) {
     window->hide();
@@ -479,7 +403,7 @@ void ShowWindow::onFaderWindowSelected(Gtk::CheckMenuItem & /*menuItem*/,
   }
 }
 
-size_t ShowWindow::nextControlKeyRow() const {
+size_t MainWindow::nextControlKeyRow() const {
   size_t index = 0;
   while (index < std::numeric_limits<size_t>::max()) {
     bool found = false;
@@ -495,11 +419,11 @@ size_t ShowWindow::nextControlKeyRow() const {
   throw std::runtime_error("Error in nextControlKeyRow()");
 }
 
-theatre::Folder &ShowWindow::SelectedFolder() const {
+theatre::Folder &MainWindow::SelectedFolder() const {
   return _objectListFrame->SelectedFolder();
 }
 
-void ShowWindow::onMIDesignWizardClicked() {
+void MainWindow::onMIDesignWizardClicked() {
   if (!_designWizard || !_designWizard->is_visible()) {
     _designWizard = std::make_unique<DesignWizard>(*_management, *this);
   }
@@ -507,34 +431,24 @@ void ShowWindow::onMIDesignWizardClicked() {
   _designWizard->present();
 }
 
-void ShowWindow::onMIBlackOut() {
+void MainWindow::onMIBlackOut() {
   _management->BlackOut(false, 0.0);
   for (std::unique_ptr<FaderWindow> &fw : _faderWindows) fw->UpdateValues();
 }
 
-void ShowWindow::onMIProtectBlackOut() {
-  bool protect = _miProtectBlackout.get_active();
-  _miBlackOut.set_sensitive(!protect);
+void MainWindow::onHideFixtureList() { main_menu_.SetFixtureListActive(false); }
+
+void MainWindow::onHideFixtureTypes() {
+  main_menu_.SetFixtureTypesActive(false);
 }
 
-void ShowWindow::onHideFixtureList() { _miFixtureListWindow.set_active(false); }
-
-void ShowWindow::onHideFixtureTypes() {
-  _miFixtureTypesWindow.set_active(false);
-}
-
-void ShowWindow::onHideVisualizationWindow() {
-  _miVisualizationWindow.set_active(false);
-}
-
-PropertiesWindow &ShowWindow::OpenPropertiesWindow(
+PropertiesWindow &MainWindow::OpenPropertiesWindow(
     theatre::FolderObject &object) {
   return _objectListFrame->OpenPropertiesWindow(object);
 }
 
-void ShowWindow::onSceneWindowClicked() {
-  const bool show = _miSceneWindow.get_active();
-  if (show) {
+void MainWindow::onSceneWindowClicked(bool active) {
+  if (active) {
     _sceneWindow = std::make_unique<SceneWindow>(*_management, *this, *this);
     _sceneWindow->present();
     _sceneWindow->signal_hide().connect([&]() { onHideSceneWindow(); });
@@ -543,6 +457,13 @@ void ShowWindow::onSceneWindowClicked() {
   }
 }
 
-void ShowWindow::onHideSceneWindow() { _miSceneWindow.set_active(false); }
+void MainWindow::onHideSceneWindow() { main_menu_.SetSceneWindowActive(false); }
+
+void MainWindow::onFullscreen() {
+  if (main_menu_.FullScreenActive())
+    fullscreen();
+  else
+    unfullscreen();
+}
 
 }  // namespace glight::gui

@@ -1,8 +1,8 @@
-#include "visualizationwindow.h"
+#include "visualizationwidget.h"
 
-#include "addfixturewindow.h"
-#include "fixtureproperties.h"
-#include "showwindow.h"
+#include "../windows/addfixturewindow.h"
+#include "../windows/fixtureproperties.h"
+#include "../windows/mainwindow.h"
 
 #include "../designwizard.h"
 #include "../eventtransmitter.h"
@@ -22,14 +22,14 @@
 
 namespace glight::gui {
 
-VisualizationWindow::VisualizationWindow(theatre::Management *management,
+VisualizationWidget::VisualizationWidget(theatre::Management *management,
                                          EventTransmitter *eventTransmitter,
                                          FixtureSelection *fixtureSelection,
-                                         ShowWindow *showWindow)
+                                         MainWindow *showWindow)
     : _management(management),
       _eventTransmitter(eventTransmitter),
       _globalSelection(fixtureSelection),
-      _showWindow(showWindow),
+      main_window_(showWindow),
       _isInitialized(false),
       _isTimerRunning(false),
       _dragType(NotDragging),
@@ -44,40 +44,35 @@ VisualizationWindow::VisualizationWindow(theatre::Management *management,
       _miRemove("Remove"),
       _miGroup("Group..."),
       _miDesign("Design..."),
-      _miFullscreen("Fullscreen"),
       _miProperties("Properties"),
       _miDMSPrimary("Primary"),
       _miDMSSecondary("Secondary"),
       _miDMSVertical("Vertical"),
       _miDMSHorizontal("Horizontal"),
       _miDMSShadow("Shadow") {
-  set_title("Glight - visualization");
-  set_default_size(600, 200);
+  set_size_request(600, 200);
 
   _globalSelectionConnection = _globalSelection->SignalChange().connect(
       [&]() { onGlobalSelectionChanged(); });
 
-  _drawingArea.set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK |
-                          Gdk::POINTER_MOTION_MASK);
-  _drawingArea.signal_draw().connect(
-      sigc::mem_fun(*this, &VisualizationWindow::onExpose));
-  _drawingArea.signal_button_press_event().connect(
-      sigc::mem_fun(*this, &VisualizationWindow::onButtonPress));
-  _drawingArea.signal_button_release_event().connect(
-      sigc::mem_fun(*this, &VisualizationWindow::onButtonRelease));
-  _drawingArea.signal_motion_notify_event().connect(
-      sigc::mem_fun(*this, &VisualizationWindow::onMotion));
-  add(_drawingArea);
-  _drawingArea.show();
+  set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK |
+             Gdk::POINTER_MOTION_MASK);
+  signal_draw().connect(sigc::mem_fun(*this, &VisualizationWidget::onExpose));
+  signal_button_press_event().connect(
+      sigc::mem_fun(*this, &VisualizationWidget::onButtonPress));
+  signal_button_release_event().connect(
+      sigc::mem_fun(*this, &VisualizationWidget::onButtonRelease));
+  signal_motion_notify_event().connect(
+      sigc::mem_fun(*this, &VisualizationWidget::onMotion));
   inializeContextMenu();
 }
 
-VisualizationWindow::~VisualizationWindow() {
+VisualizationWidget::~VisualizationWidget() {
   _timeoutConnection.disconnect();
   _globalSelectionConnection.disconnect();
 }
 
-void VisualizationWindow::inializeContextMenu() {
+void VisualizationWidget::inializeContextMenu() {
   std::vector<theatre::FixtureSymbol::Symbol> symbols(
       theatre::FixtureSymbol::List());
   _miSymbols.reserve(symbols.size());
@@ -133,27 +128,24 @@ void VisualizationWindow::inializeContextMenu() {
 
   _popupMenu.add(_miSeparator2);
 
-  _miFullscreen.signal_activate().connect([&] { onFullscreen(); });
-  _popupMenu.add(_miFullscreen);
-
   _miProperties.signal_activate().connect([&] { onFixtureProperties(); });
   _popupMenu.add(_miProperties);
 
   _popupMenu.show_all_children();
 }
 
-void VisualizationWindow::initialize() {
+void VisualizationWidget::initialize() {
   queue_draw();
   _isInitialized = true;
 
   if (!_isTimerRunning) {
     _timeoutConnection = Glib::signal_timeout().connect(
-        sigc::mem_fun(*this, &VisualizationWindow::onTimeout), 40);
+        sigc::mem_fun(*this, &VisualizationWidget::onTimeout), 40);
     _isTimerRunning = true;
   }
 }
 
-void VisualizationWindow::onTheatreChanged() {
+void VisualizationWidget::onTheatreChanged() {
   for (size_t i = _selectedFixtures.size(); i != 0; --i) {
     if (!_management->GetTheatre().Contains(*_selectedFixtures[i - 1]))
       _selectedFixtures.erase(_selectedFixtures.begin() + i - 1);
@@ -161,7 +153,7 @@ void VisualizationWindow::onTheatreChanged() {
   Update();
 }
 
-bool VisualizationWindow::onExpose(
+bool VisualizationWidget::onExpose(
     const Cairo::RefPtr<Cairo::Context> &context) {
   if (!_isInitialized) initialize();
 
@@ -169,9 +161,9 @@ bool VisualizationWindow::onExpose(
   return true;
 }
 
-void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
-  const size_t width = _drawingArea.get_width();
-  const size_t height = _drawingArea.get_height();
+void VisualizationWidget::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
+  const size_t width = get_width();
+  const size_t height = get_height();
 
   cairo->set_source_rgba(0, 0, 0, 1);
   cairo->rectangle(0, 0, width, height);
@@ -228,18 +220,18 @@ void VisualizationWindow::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
   }
 }
 
-bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
+bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
   if (event->button == 1 || event->button == 3) {
     const bool shift =
         (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK)) ==
         GDK_SHIFT_MASK;
     double height;
     if (_miDMSPrimary.get_active())
-      height = _drawingArea.get_height();
+      height = get_height();
     else  // TODO other dry mode styles
-      height = _drawingArea.get_height() / 2.0;
-    const theatre::Position pos = _renderEngine.MouseToPosition(
-        event->x, event->y, _drawingArea.get_width(), height);
+      height = get_height() / 2.0;
+    const theatre::Position pos =
+        _renderEngine.MouseToPosition(event->x, event->y, get_width(), height);
     theatre::Fixture *selectedFixture = _renderEngine.FixtureAt(pos);
     if (!shift) {
       if (selectedFixture) {
@@ -283,13 +275,12 @@ bool VisualizationWindow::onButtonPress(GdkEventButton *event) {
   return true;
 }
 
-bool VisualizationWindow::onButtonRelease(GdkEventButton *event) {
+bool VisualizationWidget::onButtonRelease(GdkEventButton *event) {
   if (event->button == 1) {
     if (_dragType == DragFixture) {
       // TODO correct width/height for layout
       _draggingStart = _renderEngine.MouseToPosition(event->x, event->y,
-                                                     _drawingArea.get_width(),
-                                                     _drawingArea.get_height());
+                                                     get_width(), get_height());
     } else if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
     }
     _globalSelection->SetSelection(_selectedFixtures);
@@ -300,10 +291,10 @@ bool VisualizationWindow::onButtonRelease(GdkEventButton *event) {
   return true;
 }
 
-bool VisualizationWindow::onMotion(GdkEventMotion *event) {
+bool VisualizationWidget::onMotion(GdkEventMotion *event) {
   if (_dragType != NotDragging) {
-    const double width = _drawingArea.get_width();
-    const double height = _drawingArea.get_height();
+    const double width = get_width();
+    const double height = get_height();
     const theatre::Position pos =
         _renderEngine.MouseToPosition(event->x, event->y, width, height);
     switch (_dragType) {
@@ -328,7 +319,7 @@ bool VisualizationWindow::onMotion(GdkEventMotion *event) {
   return true;
 }
 
-void VisualizationWindow::selectFixtures(const theatre::Position &a,
+void VisualizationWidget::selectFixtures(const theatre::Position &a,
                                          const theatre::Position &b) {
   _selectedFixtures.clear();
   double x1 = a.X();
@@ -350,7 +341,7 @@ void VisualizationWindow::selectFixtures(const theatre::Position &a,
   }
 }
 
-void VisualizationWindow::addFixtures(const theatre::Position &a,
+void VisualizationWidget::addFixtures(const theatre::Position &a,
                                       const theatre::Position &b) {
   selectFixtures(a, b);
   for (theatre::Fixture *fixture : _selectedFixturesBeforeDrag) {
@@ -363,7 +354,7 @@ void VisualizationWindow::addFixtures(const theatre::Position &a,
   }
 }
 
-void VisualizationWindow::onAlignHorizontally() {
+void VisualizationWidget::onAlignHorizontally() {
   if (_selectedFixtures.size() >= 2) {
     double y = 0.0;
 
@@ -377,7 +368,7 @@ void VisualizationWindow::onAlignHorizontally() {
   }
 }
 
-void VisualizationWindow::onAlignVertically() {
+void VisualizationWidget::onAlignVertically() {
   if (_selectedFixtures.size() >= 2) {
     double x = 0.0;
 
@@ -391,7 +382,7 @@ void VisualizationWindow::onAlignVertically() {
   }
 }
 
-void VisualizationWindow::onDistributeEvenly() {
+void VisualizationWidget::onDistributeEvenly() {
   if (_selectedFixtures.size() >= 2) {
     double left = _selectedFixtures[0]->GetPosition().X();
     double right = _selectedFixtures[0]->GetPosition().X();
@@ -438,14 +429,15 @@ void VisualizationWindow::onDistributeEvenly() {
   }
 }
 
-void VisualizationWindow::onAddFixtures() {
-  AddFixtureWindow window(_eventTransmitter, *_management);
-  window.set_modal(true);
-  window.set_transient_for(*this);
-  window.show();
+void VisualizationWidget::onAddFixtures() {
+  sub_window_ =
+      std::make_unique<AddFixtureWindow>(_eventTransmitter, *_management);
+  sub_window_->set_transient_for(*main_window_);
+  sub_window_->set_modal(true);
+  sub_window_->show();
 }
 
-void VisualizationWindow::onRemoveFixtures() {
+void VisualizationWidget::onRemoveFixtures() {
   for (theatre::Fixture *fixture : _selectedFixtures) {
     std::lock_guard<std::mutex> lock(_management->Mutex());
     _management->RemoveFixture(*fixture);
@@ -454,9 +446,9 @@ void VisualizationWindow::onRemoveFixtures() {
   _eventTransmitter->EmitUpdate();
 }
 
-void VisualizationWindow::onGroupFixtures() {
+void VisualizationWidget::onGroupFixtures() {
   std::unique_lock lock(_management->Mutex());
-  theatre::Folder &parent = _showWindow->SelectedFolder();
+  theatre::Folder &parent = main_window_->SelectedFolder();
   const std::string name = parent.GetAvailableName("group");
   theatre::FixtureGroup &group = _management->AddFixtureGroup(parent, name);
   for (theatre::Fixture *fixture : _selectedFixtures) {
@@ -464,26 +456,19 @@ void VisualizationWindow::onGroupFixtures() {
   }
   lock.unlock();
   _eventTransmitter->EmitUpdate();
-  _showWindow->OpenPropertiesWindow(group);
+  main_window_->OpenPropertiesWindow(group);
 }
 
-void VisualizationWindow::onDesignFixtures() {
-  std::unique_ptr<DesignWizard> &designWizard = _showWindow->GetDesignWizard();
+void VisualizationWidget::onDesignFixtures() {
+  std::unique_ptr<DesignWizard> &designWizard = main_window_->GetDesignWizard();
   designWizard =
       std::make_unique<DesignWizard>(*_management, *_eventTransmitter);
-  designWizard->SetCurrentPath(_showWindow->SelectedFolder().FullPath());
+  designWizard->SetCurrentPath(main_window_->SelectedFolder().FullPath());
   designWizard->Select(_selectedFixtures);
   designWizard->present();
 }
 
-void VisualizationWindow::onFullscreen() {
-  if (_miFullscreen.get_active())
-    fullscreen();
-  else
-    unfullscreen();
-}
-
-void VisualizationWindow::onFixtureProperties() {
+void VisualizationWidget::onFixtureProperties() {
   if (!_propertiesWindow) {
     _propertiesWindow = system::MakeDeletable<windows::FixtureProperties>(
         *_eventTransmitter, *_management, *_globalSelection);
@@ -491,7 +476,7 @@ void VisualizationWindow::onFixtureProperties() {
   _propertiesWindow->present();
 }
 
-void VisualizationWindow::onSetSymbol(theatre::FixtureSymbol::Symbol symbol) {
+void VisualizationWidget::onSetSymbol(theatre::FixtureSymbol::Symbol symbol) {
   for (theatre::Fixture *fixture : _selectedFixtures) {
     fixture->SetSymbol(theatre::FixtureSymbol(symbol));
   }
@@ -499,7 +484,7 @@ void VisualizationWindow::onSetSymbol(theatre::FixtureSymbol::Symbol symbol) {
   _eventTransmitter->EmitUpdate();
 }
 
-void VisualizationWindow::onGlobalSelectionChanged() {
+void VisualizationWidget::onGlobalSelectionChanged() {
   _selectedFixtures = _globalSelection->Selection();
   queue_draw();
 }

@@ -28,11 +28,11 @@
 namespace glight::gui {
 
 class EventTransmitter;
-class ShowWindow;
+class MainWindow;
 
 class SceneWindow : public Gtk::Window {
  public:
-  SceneWindow(theatre::Management &management, ShowWindow &parentWindow,
+  SceneWindow(theatre::Management &management, MainWindow &parentWindow,
               EventTransmitter &eventHub);
   ~SceneWindow();
 

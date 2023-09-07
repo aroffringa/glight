@@ -1,5 +1,5 @@
 #include "effectpropertieswindow.h"
-#include "showwindow.h"
+#include "mainwindow.h"
 
 #include "../dialogs/inputselectdialog.h"
 
@@ -14,7 +14,7 @@ namespace glight::gui {
 
 EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
                                                theatre::Management &management,
-                                               ShowWindow &parentWindow)
+                                               MainWindow &parentWindow)
     : PropertiesWindow(),
 
       _titleLabel("Effect " + effect.Name() + " (" +

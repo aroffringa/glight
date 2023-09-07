@@ -3,7 +3,7 @@
 
 #include <gtkmm/stock.h>
 
-#include "windows/showwindow.h"
+#include "windows/mainwindow.h"
 
 #include "../theatre/chase.h"
 #include "../theatre/folder.h"
@@ -15,7 +15,7 @@
 namespace glight::gui {
 
 CreateChaseDialog::CreateChaseDialog(theatre::Management &management,
-                                     ShowWindow &parentWindow)
+                                     MainWindow &parentWindow)
     : Dialog("Create chase", true),
       _listFrame("Object list"),
       _list(management, parentWindow),

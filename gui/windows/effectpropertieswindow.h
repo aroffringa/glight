@@ -15,13 +15,13 @@
 
 namespace glight::gui {
 
-class ShowWindow;
+class MainWindow;
 
 class EffectPropertiesWindow : public PropertiesWindow {
  public:
   EffectPropertiesWindow(theatre::Effect &effect,
                          theatre::Management &management,
-                         ShowWindow &parentWindow);
+                         MainWindow &parentWindow);
 
   theatre::FolderObject &GetObject() final override;
 
@@ -62,7 +62,7 @@ class EffectPropertiesWindow : public PropertiesWindow {
 
   theatre::Effect *_effect;
   theatre::Management *_management;
-  ShowWindow &_parentWindow;
+  MainWindow &_parentWindow;
 };
 
 }  // namespace glight::gui

@@ -84,6 +84,7 @@ set(GUIFILES
   gui/components/objectlist.cpp
   gui/components/propertiesbox.cpp
   gui/components/reorderwidget.cpp
+  gui/components/visualizationwidget.cpp
   gui/dialogs/inputselectdialog.cpp
   gui/dialogs/sceneselect.cpp
   gui/faders/controlmenu.cpp
@@ -100,11 +101,11 @@ set(GUIFILES
   gui/windows/fixturetypeswindow.cpp
   gui/windows/fixturetypefunctionsframe.cpp
   gui/windows/groupwindow.cpp
+  gui/windows/mainmenu.cpp
+  gui/windows/mainwindow.cpp
   gui/windows/presetcollectionwindow.cpp
   gui/windows/scenewindow.cpp
-  gui/windows/showwindow.cpp
-  gui/windows/timesequencepropertieswindow.cpp
-  gui/windows/visualizationwindow.cpp)
+  gui/windows/timesequencepropertieswindow.cpp)
 
 set(SYSTEMFILES
   system/audioplayer.cpp

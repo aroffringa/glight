@@ -19,11 +19,11 @@
 
 namespace glight::gui {
 
-class ShowWindow;
+class MainWindow;
 
 class CreateChaseDialog : public Gtk::Dialog {
  public:
-  CreateChaseDialog(theatre::Management &management, ShowWindow &parentWindow);
+  CreateChaseDialog(theatre::Management &management, MainWindow &parentWindow);
 
   theatre::Chase &CreatedChase() { return *_newChase; }
 
@@ -66,7 +66,7 @@ class CreateChaseDialog : public Gtk::Dialog {
   Gtk::Button *_makeChaseButton;
 
   theatre::Management *_management;
-  ShowWindow &_parentWindow;
+  MainWindow &_parentWindow;
   RecursionLock _delayUpdates;
   theatre::Chase *_newChase;
 };
