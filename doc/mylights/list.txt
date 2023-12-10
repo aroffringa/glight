@@ -1,6 +1,6 @@
 - 1x ADJ Mega 64 Profile Plus, RGB+UV, 4 channels
 - 1x ADJ Flat Par QA12X, RGBA, 4 channels
-- 4x Ayra RGBAW, 5 channels
+- 8x Ayra RGBAW, 5 channels
 - 1x Showtec RP‑405 MKII Relay Pack, 4 channels
 - 2x Ayra TDC Sunrise, 7 channels
 - 1x Eurolite LED PST-15W MK2 RGBW, 4 channels

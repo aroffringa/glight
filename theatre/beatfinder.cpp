@@ -67,7 +67,7 @@ void BeatFinder::open() {
 
   // Initial libaubio
   fvec_t *tempo_out = new_fvec(2);
-  const unsigned hopsPerAudioLevel = 10;
+  constexpr unsigned hopsPerAudioLevel = 4;
   const char method[] = "default";
   aubio_tempo_t *tempo =
       new_aubio_tempo(method, period_size * 2, period_size, samplerate);
@@ -79,6 +79,7 @@ void BeatFinder::open() {
 
   _beat = Beat(0.0, 0.0);
   _audioLevel = 0;
+  uint32_t audio_level_accumulator = 0;
   uint16_t nAudioLevels = 0;
 
   unsigned samples_since_last_beat = 0;
@@ -97,7 +98,6 @@ void BeatFinder::open() {
       if (rc != static_cast<int>(period_size))
         std::cout << "Only " << rc << " frames were read in snd_pcm_readi().\n";
     }
-    // uint16_t localAudioLevel = 0;
     uint32_t audioRMS = 0;
     for (size_t i = 0; i != period_size; ++i) {
       int16_t l = alsaBuffer[i * 2];
@@ -106,8 +106,6 @@ void BeatFinder::open() {
       smpl_t s = static_cast<smpl_t>(l) + static_cast<smpl_t>(r);
       fvec_set_sample(ibuf, s, i);
 
-      l = l / 2;  // create headroom for multiplication
-      r = r / 2;  // (-2^15 x 2^15 wouldn't fit in a int32_t)
       audioRMS += static_cast<uint32_t>(static_cast<int32_t>(l) *
                                         static_cast<int32_t>(l)) >>
                   8;
@@ -115,12 +113,12 @@ void BeatFinder::open() {
                                         static_cast<int32_t>(r)) >>
                   8;
     }
-    _audioLevelAccumulator += audioRMS / (2 * period_size);
+    audio_level_accumulator += audioRMS / (2 * period_size);
     ++nAudioLevels;
     if (nAudioLevels > hopsPerAudioLevel) {
-      _audioLevel = _audioLevelAccumulator / hopsPerAudioLevel;
+      _audioLevel = audio_level_accumulator / hopsPerAudioLevel;
       nAudioLevels = 0;
-      _audioLevelAccumulator = 0;
+      audio_level_accumulator = 0;
     }
     aubio_tempo_do(tempo, ibuf, tempo_out);
     const smpl_t is_beat = fvec_get_sample(tempo_out, 0);
