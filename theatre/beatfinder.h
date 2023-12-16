@@ -66,7 +66,6 @@ class BeatFinder {
     float confidence = 0.0;
   };
   std::atomic<Beat> _beat;
-  uint32_t _audioLevelAccumulator;
   std::atomic<uint16_t> _audioLevel;
   float _minimumConfidence;
 
