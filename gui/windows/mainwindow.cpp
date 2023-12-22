@@ -346,23 +346,33 @@ void MainWindow::onMISaveClicked() {
 }
 
 void MainWindow::onMIImportClicked() {
-  Gtk::FileChooserDialog dialog(*this, "Open glight show",
+  Gtk::FileChooserDialog dialog(*this, "Import fixture types",
                                 Gtk::FILE_CHOOSER_ACTION_OPEN);
 
   dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
   dialog.add_button("Open", Gtk::RESPONSE_OK);
 
-  Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
-  filter->set_name("Open fixture file");
-  filter->add_pattern("*.json");
-  filter->add_mime_type("text/json");
-  dialog.add_filter(filter);
+  Glib::RefPtr<Gtk::FileFilter> json_filter = Gtk::FileFilter::create();
+  json_filter->set_name("Open fixture file");
+  json_filter->add_pattern("*.json");
+  json_filter->add_mime_type("text/json");
+  dialog.add_filter(json_filter);
+
+  Glib::RefPtr<Gtk::FileFilter> gshow_filter = Gtk::FileFilter::create();
+  gshow_filter->set_name("Glight file format");
+  gshow_filter->add_pattern("*.gshow");
+  dialog.add_filter(gshow_filter);
 
   const int result = dialog.run();
   if (result == Gtk::RESPONSE_OK) {
-    std::ifstream stream(dialog.get_filename());
-    std::unique_ptr<json::Node> root = json::Parse(stream);
-    {
+    const std::string filename = dialog.get_filename();
+
+    if (dialog.get_filter() == gshow_filter) {
+      std::lock_guard<std::mutex> lock(_management->Mutex());
+      system::ImportFixtureTypes(filename, *_management);
+    } else {
+      std::ifstream stream(filename);
+      std::unique_ptr<json::Node> root = json::Parse(stream);
       std::lock_guard<std::mutex> lock(_management->Mutex());
       system::ReadOpenFixture(*_management, *root);
     }

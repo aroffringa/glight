@@ -11,7 +11,7 @@ MainMenu::MainMenu()
       _miNew("New"),
       _miOpen("_Open...", true),
       _miSave("Save _as...", true),
-      _miImport("_Import...", true),
+      _miImport("_Import fixtures...", true),
       _miQuit("_Quit", true),
       _miBlackOut("Black-out"),
       _miProtectBlackout("Protect black-out"),

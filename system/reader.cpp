@@ -506,4 +506,16 @@ void Read(const std::string &filename, Management &management,
   Read(stream, management, guiState);
 }
 
+void ImportFixtureTypes(const std::string &filename,
+                        theatre::Management &management) {
+  theatre::Management file_management;
+  system::Read(filename, file_management);
+  const std::vector<std::unique_ptr<theatre::FixtureType>> &types =
+      file_management.GetTheatre().FixtureTypes();
+  for (const std::unique_ptr<theatre::FixtureType> &type : types) {
+    // if(_management.GetTheatre().
+    management.GetTheatre().AddFixtureType(*type);
+  }
+}
+
 }  // namespace glight::system
