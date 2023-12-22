@@ -12,7 +12,7 @@
  * @headername{Lane.h}
  */
 
-//#define LANE_DEBUG_MODE
+// #define LANE_DEBUG_MODE
 
 #ifdef LANE_DEBUG_MODE
 #include <cmath>

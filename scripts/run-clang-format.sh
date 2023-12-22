@@ -29,7 +29,7 @@ SOURCE_EXT=(*.cpp *.h)
 
 set -e
 
-if [[ `which clang-format` != "" ]] ; then
+if [[ `which clang-format-14` != "" ]] ; then
   
   # Detect run environment.
   if [ -n "$CI" ]; then
@@ -39,7 +39,7 @@ if [[ `which clang-format` != "" ]] ; then
   fi
 
   # print in bold-face
-  echo -e "\e[1mRunning clang-format$DRYRUN...\e[0m"
+  echo -e "\e[1mRunning clang-format-14$DRYRUN...\e[0m"
   
   # Convert SOURCE_EXT into "-name ext1 -o -name ext2 -o name ext3 ..."
   FIND_NAMES="-name ${SOURCE_EXT[0]}"
@@ -57,7 +57,7 @@ if [[ `which clang-format` != "" ]] ; then
 
   if [ -n "$DRYRUN" ]; then
     # If the xml has no replacement entries, all files are formatted.
-    if clang-format -style=file --output-replacements-xml $FILES |
+    if clang-format-14 -style=file --output-replacements-xml $FILES |
   grep -q "<replacement "; then
     # Print in bold-face red
     echo -e "\e[1m\e[31mAt least one file is not properly formatted!\e[0m"
@@ -69,7 +69,7 @@ if [[ `which clang-format` != "" ]] ; then
     exit 0;
   fi
   else
-    clang-format -i -style=file $FILES
+    clang-format-14 -i -style=file $FILES
     # print in bold-face
     echo -e "\e[1mSuccessfully formatted all files.\e[0m"
   fi
