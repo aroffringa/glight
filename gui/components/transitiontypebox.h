@@ -17,6 +17,7 @@ class TransitionTypeBox : public Gtk::VBox {
         _noneRB("None"),
         _fadeRB("Fade"),
         _fadeThroughBlackRB("Through black"),
+        _fadeThroughFullRB("Through full"),
         _steppedRB("Stepped"),
         _randomRB("Random"),
         _erraticRB("Erratic"),
@@ -40,6 +41,11 @@ class TransitionTypeBox : public Gtk::VBox {
     _fadeThroughBlackRB.signal_clicked().connect(
         [&]() { Change(theatre::TransitionType::FadeThroughBlack); });
     _topBox.pack_start(_fadeThroughBlackRB);
+
+    _fadeThroughFullRB.set_group(transTypeGroup);
+    _fadeThroughFullRB.signal_clicked().connect(
+        [&]() { Change(theatre::TransitionType::FadeThroughFull); });
+    _topBox.pack_start(_fadeThroughFullRB);
 
     _steppedRB.set_group(transTypeGroup);
     _steppedRB.signal_clicked().connect(
@@ -94,6 +100,9 @@ class TransitionTypeBox : public Gtk::VBox {
       case TransitionType::FadeThroughBlack:
         _fadeThroughBlackRB.set_active();
         break;
+      case TransitionType::FadeThroughFull:
+        _fadeThroughFullRB.set_active();
+        break;
       case TransitionType::Stepped:
         _steppedRB.set_active();
         break;
@@ -125,8 +134,10 @@ class TransitionTypeBox : public Gtk::VBox {
 
   Gtk::Label _label;
   Gtk::HBox _topBox, _centreBox, _bottomBox;
-  Gtk::RadioButton _noneRB, _fadeRB, _fadeThroughBlackRB, _steppedRB, _randomRB,
-      _erraticRB, _blackRB, _fadeFromBlackRB, _fadeToBlackRB;
+  Gtk::RadioButton _noneRB, _fadeRB, _fadeThroughBlackRB;
+  Gtk::RadioButton _fadeThroughFullRB;
+  Gtk::RadioButton _steppedRB, _randomRB, _erraticRB, _blackRB,
+      _fadeFromBlackRB, _fadeToBlackRB;
   sigc::signal<void(theatre::TransitionType)> _signalChanged;
   theatre::TransitionType _value;
 };

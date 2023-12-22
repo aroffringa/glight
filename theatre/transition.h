@@ -12,6 +12,7 @@ enum class TransitionType {
   None,
   Fade,
   FadeThroughBlack,
+  FadeThroughFull,
   Random,
   Stepped,
   Erratic,
@@ -29,6 +30,8 @@ inline std::string ToString(TransitionType mix_style) {
       return "fade";
     case TransitionType::FadeThroughBlack:
       return "fade_through_black";
+    case TransitionType::FadeThroughFull:
+      return "fade_through_full";
     case TransitionType::Random:
       return "random";
     case TransitionType::Stepped:
@@ -49,6 +52,8 @@ inline TransitionType GetTransitionType(const std::string &str) {
     return TransitionType::Fade;
   else if (str == "fade_through_black")
     return TransitionType::FadeThroughBlack;
+  else if (str == "fade_through_full")
+    return TransitionType::FadeThroughFull;
   else if (str == "random")
     return TransitionType::Random;
   else if (str == "stepped")
@@ -70,10 +75,10 @@ inline TransitionType GetTransitionType(const std::string &str) {
  */
 class Transition {
  public:
-  constexpr Transition() = default;
-  constexpr ~Transition() = default;
+  constexpr Transition() noexcept = default;
+  constexpr ~Transition() noexcept = default;
 
-  constexpr Transition(double length_in_ms, TransitionType type)
+  constexpr Transition(double length_in_ms, TransitionType type) noexcept
       : _lengthInMs(length_in_ms), _type(type) {}
 
   constexpr TransitionType Type() const { return _type; }
@@ -82,6 +87,11 @@ class Transition {
   constexpr double LengthInMs() const { return _lengthInMs; }
   void SetLengthInMs(double length) { _lengthInMs = length; }
 
+  /**
+   * Calculates the control value transition towards. This implies
+   * that for a transition from A to B, this function returns
+   * the value of B at a given time.
+   */
   ControlValue TransitionValue(double transition_time,
                                const Timing &timing) const {
     switch (_type) {
@@ -97,6 +107,7 @@ class Transition {
                        static_cast<double>(ControlValue::MaxUInt()));
         return ControlValue(ratio);
       }
+      case TransitionType::FadeThroughFull:
       case TransitionType::FadeThroughBlack: {
         if (transition_time >= 0.5) {
           const unsigned ratio = (unsigned)((transition_time / _lengthInMs) *
@@ -171,6 +182,19 @@ class Transition {
         } else {
           ControlValue secondValue((value.UInt() * (ratio - 256)) >> 8);
           second.MixInput(secondInput, secondValue);
+        }
+      } break;
+      case TransitionType::FadeThroughFull: {
+        const unsigned ratio =
+            (unsigned)((transition_time / _lengthInMs) * 512.0);
+        if (ratio < 256) {
+          first.MixInput(firstInput, value);
+          const ControlValue secondValue((value.UInt() * ratio) >> 8);
+          second.MixInput(secondInput, secondValue);
+        } else {
+          const ControlValue firstValue((value.UInt() * (512 - ratio)) >> 8);
+          first.MixInput(firstInput, firstValue);
+          second.MixInput(secondInput, value);
         }
       } break;
       case TransitionType::Stepped: {
