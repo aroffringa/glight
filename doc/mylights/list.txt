@@ -3,10 +3,10 @@
 - 4x ADJ LP7 IP
 - 4x ADJ LP5 IP
 - 1x ADJ Z7LP
-- 1x ADJ Mega 64 Profile Plus, RGB+UV, 4 channels
-- 1x ADJ Flat Par QA12X, RGBA, 4 channels
+- 1x ADJ Mega 64 Profile Plus, RGB+UV, 4 channels, 25 deg beam
+- 1x ADJ Flat Par QA12X, RGBA, 4 channels, 40 deg beam
 - 11x ADJ MOD TW100
-- 8x Ayra RGBAW, 5 channels
+- 8x Ayra RGBAW, 5 channels, 45 deg beam
 - 4x Ayra Tri-Bar 12 RGB
 - 1x Showtec RP‑405 MKII Relay Pack, 4 channels
 - 2x Ayra TDC Sunrise, 7 channels

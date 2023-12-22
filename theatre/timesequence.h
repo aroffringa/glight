@@ -134,7 +134,9 @@ class TimeSequence final : public Controllable {
     }
   }
 
-  class Sequence &Sequence() { return _sequence; }
+  class Sequence &Sequence() {
+    return _sequence;
+  }
   const class Sequence &Sequence() const { return _sequence; }
 
   struct Step {
