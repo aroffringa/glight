@@ -12,7 +12,7 @@
  * @headername{Lane.h}
  */
 
-//#define LANE_DEBUG_MODE
+// #define LANE_DEBUG_MODE
 
 #ifdef LANE_DEBUG_MODE
 #include <cmath>
@@ -196,24 +196,24 @@ class Lane {
    * other write and read methods from different threads.
    *
    * If this call comes after a call to write_end(), the call
-   * will be ignored.
+   * will be ignored. If a write_end() call comes during write(), the
+   * write() call is aborted and returns immediately.
    * @param element Object to be copied into the cyclic buffer.
    */
   void write(const value_type& element) {
     std::unique_lock<std::mutex> lock(_mutex);
     LANE_REGISTER_DEBUG_INFO;
 
+    while (_free_write_space == 0 && _status == status_normal) {
+      LANE_REGISTER_DEBUG_WRITE_WAIT;
+      _writing_possible_condition.wait(lock);
+    }
     if (_status == status_normal) {
-      while (_free_write_space == 0) {
-        LANE_REGISTER_DEBUG_WRITE_WAIT;
-        _writing_possible_condition.wait(lock);
-      }
-
       _buffer[_write_position] = element;
       _write_position = (_write_position + 1) % _capacity;
       --_free_write_space;
       // Now that there is less free write space, there is more free read
-      // space and thus readers can possibly continue.
+      // space and thus readers may continue.
       _reading_possible_condition.notify_all();
     }
   }
@@ -234,12 +234,12 @@ class Lane {
     std::unique_lock<std::mutex> lock(_mutex);
     LANE_REGISTER_DEBUG_INFO;
 
-    if (_status == status_normal) {
-      while (_free_write_space == 0) {
-        LANE_REGISTER_DEBUG_WRITE_WAIT;
-        _writing_possible_condition.wait(lock);
-      }
+    while (_free_write_space == 0 && _status == status_normal) {
+      LANE_REGISTER_DEBUG_WRITE_WAIT;
+      _writing_possible_condition.wait(lock);
+    }
 
+    if (_status == status_normal) {
       _buffer[_write_position] = value_type(std::forward<Args>(args)...);
       _write_position = (_write_position + 1) % _capacity;
       --_free_write_space;
@@ -261,12 +261,11 @@ class Lane {
     std::unique_lock<std::mutex> lock(_mutex);
     LANE_REGISTER_DEBUG_INFO;
 
+    while (_free_write_space == 0 && _status == status_normal) {
+      LANE_REGISTER_DEBUG_WRITE_WAIT;
+      _writing_possible_condition.wait(lock);
+    }
     if (_status == status_normal) {
-      while (_free_write_space == 0) {
-        LANE_REGISTER_DEBUG_WRITE_WAIT;
-        _writing_possible_condition.wait(lock);
-      }
-
       _buffer[_write_position] = std::move(element);
       _write_position = (_write_position + 1) % _capacity;
       --_free_write_space;
@@ -464,7 +463,7 @@ class Lane {
       immediate_write(elements, write_size);
       n -= write_size;
 
-      while (n != 0) {
+      while (n != 0 && _status == status_normal) {
         elements += write_size;
 
         do {
@@ -505,7 +504,7 @@ class Lane {
       _free_write_space -= n;
 
       // Now that there is less free write space, there is more free read
-      // space and thus readers can possibly continue.
+      // space and thus readers may continue.
       _reading_possible_condition.notify_all();
     }
   }
