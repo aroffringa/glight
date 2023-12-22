@@ -126,6 +126,7 @@ FixtureTypesWindow::~FixtureTypesWindow() {
 }
 
 void FixtureTypesWindow::fillList() {
+  RecursionLock::Token token(recursion_lock_);
   list_model_->clear();
 
   std::lock_guard<std::mutex> lock(management_->Mutex());
