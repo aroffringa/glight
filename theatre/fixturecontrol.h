@@ -33,7 +33,7 @@ class FixtureControl final : public Controllable {
       case FT::Master:
       case FT::Pan:
       case FT::Pulse:
-      case FT::Rotation:
+      case FT::RotationSpeed:
       case FT::Saturation:
       case FT::Strobe:
       case FT::Tilt:

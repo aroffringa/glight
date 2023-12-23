@@ -140,10 +140,10 @@ void witeMacroParameters(WriteState &state, const MacroParameters &pars) {
 }
 
 void writeRotationParameters(WriteState &state,
-                             const RotationParameters &pars) {
+                             const RotationSpeedParameters &pars) {
   state.writer.StartObject("parameters");
   state.writer.StartArray("ranges");
-  for (const RotationParameters::Range &range : pars.GetRanges()) {
+  for (const RotationSpeedParameters::Range &range : pars.GetRanges()) {
     state.writer.StartObject();
     state.writer.Number("input-min", range.input_min);
     state.writer.Number("input-max", range.input_max);
@@ -166,8 +166,8 @@ void writeFixtureTypeFunction(WriteState &state,
     case FunctionType::ColorMacro:
       witeMacroParameters(state, function.GetMacroParameters());
       break;
-    case FunctionType::Rotation:
-      writeRotationParameters(state, function.GetRotationParameters());
+    case FunctionType::RotationSpeed:
+      writeRotationParameters(state, function.GetRotationSpeedParameters());
       break;
     default:
       break;
@@ -182,7 +182,12 @@ void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
   state.writer.String("fixture-class",
                       FixtureType::ClassName(fixtureType.GetFixtureClass()));
   state.writer.Number("shape-count", fixtureType.ShapeCount());
-  state.writer.Number("beam-angle", fixtureType.MinBeamAngle());
+  state.writer.Number("min-beam-angle", fixtureType.MinBeamAngle());
+  state.writer.Number("max-beam-angle", fixtureType.MaxBeamAngle());
+  state.writer.Number("min-pan", fixtureType.MinPan());
+  state.writer.Number("max-pan", fixtureType.MaxPan());
+  state.writer.Number("min-tilt", fixtureType.MinTilt());
+  state.writer.Number("max-tilt", fixtureType.MaxTilt());
   state.writer.Number("brightness", fixtureType.Brightness());
   state.writer.StartArray("functions");
   for (const FixtureTypeFunction &f : fixtureType.Functions()) {

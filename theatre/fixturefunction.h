@@ -56,8 +56,15 @@ class FixtureFunction final : public NamedObject {
   void IncChannel();
   void DecChannel();
   FunctionType Type() const { return _type; }
-  unsigned char GetValue(const ValueSnapshot &snapshot) const {
+  unsigned char GetCharValue(const ValueSnapshot &snapshot) const {
     return snapshot.GetValue(_firstChannel);
+  }
+  unsigned GetControlValue(const ValueSnapshot &snapshot) const {
+    if (_is16Bit)
+      return (unsigned(snapshot.GetValue(_firstChannel)) << 16) +
+             (unsigned(snapshot.GetValue(_firstChannel.Next())) << 8);
+    else
+      return unsigned(snapshot.GetValue(_firstChannel)) << 16;
   }
 
  private:

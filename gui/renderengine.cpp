@@ -53,15 +53,20 @@ struct DrawData {
 
 void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
   const glight::theatre::FixtureType &type = fixture.Type();
-  size_t shape_count = type.ShapeCount();
+  const size_t shape_count = type.ShapeCount();
   for (size_t shape_index = 0; shape_index != shape_count; ++shape_index) {
     const theatre::Color c = fixture.GetColor(data.snapshot, shape_index);
     if (c != theatre::Color::Black() && type.MinBeamAngle() > 0.0) {
+      double direction = fixture.Direction();
+      if (type.CanBeamRotate()) {
+        direction += type.GetPan(fixture, data.snapshot, shape_index);
+      }
+
       const double beam_angle =
           type.CanZoom() ? type.GetZoom(fixture, data.snapshot, shape_index)
                          : type.MinBeamAngle();
-      const double direction_1 = fixture.Direction() - beam_angle * 0.5;
-      const double direction_2 = fixture.Direction() + beam_angle * 0.5;
+      const double direction_1 = direction - beam_angle * 0.5;
+      const double direction_2 = direction + beam_angle * 0.5;
       const double radius = GetRadius(fixture.Symbol().Value());
       const double beam_start_radius = radius * 1.2;
       const double beam_factor = type.MinBeamAngle() / beam_angle;
@@ -115,10 +120,10 @@ void DrawFixture(const DrawData &data, const theatre::Fixture &fixture,
                                static_cast<double>(c.Green()) / 224.0 + 0.125,
                                static_cast<double>(c.Blue()) / 224.0 + 0.125);
 
-    const double singleRadius = GetRadius(fixture.Symbol().Value());
+    const double single_radius = GetRadius(fixture.Symbol().Value());
     const double radius =
         shapeCount == 1
-            ? singleRadius
+            ? single_radius
             : 0.33 + 0.07 * static_cast<double>(shapeIndex) / (shapeCount - 1);
     const double x =
         fixture.GetPosition().X() + 0.5 + data.style.xOffset / data.scale;
@@ -127,15 +132,19 @@ void DrawFixture(const DrawData &data, const theatre::Fixture &fixture,
     data.cairo->arc(x, y, radius, 0.0, 2.0 * M_PI);
     data.cairo->fill();
 
-    const int rotation = fixture.GetRotationSpeed(data.snapshot, shapeIndex);
+    // If a fixture is continuously rotating (e.g. a disco ball light), draw a
+    // rotating cross.
 
-    if (rotation != 0) {
-      const double rotationDisp = M_PI * static_cast<double>(rotation) *
-                                  data.style.timeSince / (10.0 * (1U << 24U));
-      fixture_state.rotation =
-          std::fmod(rotationDisp + fixture_state.rotation, M_PI);
-      const double s = std::sin(fixture_state.rotation);
-      const double c = std::cos(fixture_state.rotation);
+    const int rotation_speed =
+        fixture.GetRotationSpeed(data.snapshot, shapeIndex);
+    if (rotation_speed != 0) {
+      const double displayed_rotation =
+          M_PI * static_cast<double>(rotation_speed) * data.style.timeSince /
+          (10.0 * (1U << 24U));
+      fixture_state.continuous_rotation = std::fmod(
+          displayed_rotation + fixture_state.continuous_rotation, M_PI);
+      const double s = std::sin(fixture_state.continuous_rotation);
+      const double c = std::cos(fixture_state.continuous_rotation);
       data.cairo->set_line_width(radius * 0.2);
       data.cairo->set_source_rgb(0, 0, 0);
       data.cairo->move_to(x + c * radius + data.style.xOffset / data.scale,

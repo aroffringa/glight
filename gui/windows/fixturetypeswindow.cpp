@@ -26,6 +26,10 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
       class_label_("Class:"),
       min_beam_angle_label_("Min beam angle:"),
       max_beam_angle_label_("Max beam angle:"),
+      min_pan_label_("Min pan:"),
+      max_pan_label_("Max pan:"),
+      min_tilt_label_("Min tilt:"),
+      max_tilt_label_("Max tilt:"),
       brightness_label_("Brightness:"),
       new_button_("New"),
       remove_button_("Remove"),
@@ -47,10 +51,10 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   list_view_.get_selection()->signal_changed().connect(
       [&]() { onSelectionChanged(); });
   fillList();
-  scrolled_window_.add(list_view_);
+  type_scrollbars_.add(list_view_);
 
-  scrolled_window_.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-  left_box_.pack_start(scrolled_window_);
+  type_scrollbars_.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+  left_box_.pack_start(type_scrollbars_);
 
   paned_.add1(left_box_);
   left_box_.set_hexpand(true);
@@ -79,10 +83,22 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   right_grid_.attach(max_beam_angle_label_, 0, 4);
   right_grid_.attach(max_beam_angle_entry_, 1, 4);
 
-  right_grid_.attach(brightness_label_, 0, 5);
-  right_grid_.attach(brightness_entry_, 1, 5);
+  right_grid_.attach(min_pan_label_, 0, 5);
+  right_grid_.attach(min_pan_entry_, 1, 5);
 
-  right_grid_.attach(functions_frame_, 0, 6, 2, 1);
+  right_grid_.attach(max_pan_label_, 0, 6);
+  right_grid_.attach(max_pan_entry_, 1, 6);
+
+  right_grid_.attach(min_tilt_label_, 0, 7);
+  right_grid_.attach(min_beam_tilt_entry_, 1, 7);
+
+  right_grid_.attach(max_tilt_label_, 0, 8);
+  right_grid_.attach(max_beam_tilt_entry_, 1, 8);
+
+  right_grid_.attach(brightness_label_, 0, 9);
+  right_grid_.attach(brightness_entry_, 1, 9);
+
+  right_grid_.attach(functions_frame_, 0, 10, 2, 1);
   functions_frame_.set_vexpand(true);
   functions_frame_.set_hexpand(true);
 
@@ -182,12 +198,24 @@ void FixtureTypesWindow::onSaveClicked() {
   }
   type->SetName(name_entry_.get_text());
   type->SetShortName(short_name_entry_.get_text());
+
   const double min_beam_angle =
       std::atof(min_beam_angle_entry_.get_text().c_str());
   type->SetMinBeamAngle(std::clamp(min_beam_angle, 0.0, 360.0) * M_PI / 180.0);
   const double max_beam_angle =
       std::atof(max_beam_angle_entry_.get_text().c_str());
   type->SetMaxBeamAngle(std::clamp(max_beam_angle, 0.0, 360.0) * M_PI / 180.0);
+
+  const double min_pan = std::atof(min_pan_entry_.get_text().c_str());
+  type->SetMinPan(std::clamp(min_pan, -3600.0, 3600.0) * M_PI / 180.0);
+  const double max_pan = std::atof(max_pan_entry_.get_text().c_str());
+  type->SetMaxPan(std::clamp(max_pan, -3600.0, 3600.0) * M_PI / 180.0);
+
+  const double min_tilt = std::atof(min_beam_tilt_entry_.get_text().c_str());
+  type->SetMinTilt(std::clamp(min_tilt, -3600.0, 3600.0) * M_PI / 180.0);
+  const double max_tilt = std::atof(max_beam_tilt_entry_.get_text().c_str());
+  type->SetMaxTilt(std::clamp(max_tilt, -3600.0, 3600.0) * M_PI / 180.0);
+
   const double brightness = std::atof(brightness_entry_.get_text().c_str());
   type->SetBrightness(std::clamp(brightness, 0.0, 100.0));
   if (!is_used) {
@@ -224,21 +252,37 @@ void FixtureTypesWindow::onSelectionChanged() {
       const bool is_used = management_->GetTheatre().IsUsed(*type);
       name_entry_.set_text(type->Name());
       short_name_entry_.set_text(type->ShortName());
+
       min_beam_angle_entry_.set_text(
-          std::to_string(type->MinBeamAngle() * 180.0 / M_PI));
+          std::format("{:.1f}", type->MinBeamAngle() * 180.0 / M_PI));
       max_beam_angle_entry_.set_text(
-          std::to_string(type->MaxBeamAngle() * 180.0 / M_PI));
+          std::format("{:.1f}", type->MaxBeamAngle() * 180.0 / M_PI));
+
+      min_pan_entry_.set_text(
+          std::format("{:.1f}", type->MinPan() * 180.0 / M_PI));
+      max_pan_entry_.set_text(
+          std::format("{:.1f}", type->MaxPan() * 180.0 / M_PI));
+
+      min_beam_tilt_entry_.set_text(
+          std::format("{:.1f}", type->MinTilt() * 180.0 / M_PI));
+      max_beam_tilt_entry_.set_text(
+          std::format("{:.1f}", type->MaxTilt() * 180.0 / M_PI));
+
       brightness_entry_.set_text(std::to_string(type->Brightness()));
-      class_combo_.set_sensitive(is_used);
+      class_combo_.set_sensitive(!is_used);
       class_combo_.set_active_text(
           theatre::FixtureType::ClassName(type->GetFixtureClass()));
-      functions_frame_.set_sensitive(is_used);
+      functions_frame_.set_sensitive(!is_used);
       functions_frame_.SetFunctions(type->Functions());
     } else {
       name_entry_.set_text("");
       short_name_entry_.set_text("");
       min_beam_angle_entry_.set_text("30");
       max_beam_angle_entry_.set_text("30");
+      min_pan_entry_.set_text("0");
+      max_pan_entry_.set_text("0");
+      min_beam_tilt_entry_.set_text("0");
+      max_beam_tilt_entry_.set_text("0");
       brightness_entry_.set_text("10");
       class_combo_.set_sensitive(true);
       class_combo_.set_active_text(

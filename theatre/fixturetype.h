@@ -156,7 +156,7 @@ class FixtureType : public FolderObject {
   }
 
   Color GetColor(const Fixture &fixture, const ValueSnapshot &snapshot,
-                 size_t shapeIndex) const;
+                 size_t shape_index) const;
 
   /**
    * Determine the rotation speed of the fixture corresponding with the
@@ -164,10 +164,16 @@ class FixtureType : public FolderObject {
    * Positive is clockwise rotation.
    */
   int GetRotationSpeed(const Fixture &fixture, const ValueSnapshot &snapshot,
-                       size_t shapeIndex) const;
+                       size_t shape_index) const;
+
+  double GetPan(const Fixture &fixture, const ValueSnapshot &snapshot,
+                size_t shape_index) const;
+
+  double GetTilt(const Fixture &fixture, const ValueSnapshot &snapshot,
+                 size_t shape_index) const;
 
   double GetZoom(const Fixture &fixture, const ValueSnapshot &snapshot,
-                 size_t shapeIndex) const;
+                 size_t shape_index) const;
 
   FixtureClass GetFixtureClass() const { return class_; }
 
@@ -216,7 +222,29 @@ class FixtureType : public FolderObject {
     max_beam_angle_ = max_beam_angle;
   }
 
+  /**
+   * Pan is the horizonal / primary axis rotation of a beamed device (e.g.
+   * moving head), in radians.
+   */
+  double MinPan() const { return min_pan_; }
+  void SetMinPan(double min_pan) { min_pan_ = min_pan; }
+
+  double MaxPan() const { return max_pan_; }
+  void SetMaxPan(double max_pan) { max_pan_ = max_pan; }
+
+  /**
+   * Tilt is the vertical / 2nd axis rotation of a beamed device (e.g. moving
+   * head), in radians.
+   */
+  double MinTilt() const { return min_tilt_; }
+  void SetMinTilt(double min_tilt) { min_tilt_ = min_tilt; }
+
+  double MaxTilt() const { return max_tilt_; }
+  void SetMaxTilt(double max_tilt) { max_tilt_ = max_tilt; }
+
   bool CanZoom() const { return min_beam_angle_ != max_beam_angle_; }
+  bool CanBeamRotate() const { return min_pan_ != max_pan_; }
+  bool CanBeamTilt() const { return min_tilt_ != max_tilt_; }
 
   /**
    * Distance in meters that the beam can reach at the static beam angle.
@@ -239,6 +267,10 @@ class FixtureType : public FolderObject {
   std::string short_name_;
   double min_beam_angle_ = 30.0 * M_PI / 180.0;
   double max_beam_angle_ = 30.0 * M_PI / 180.0;
+  double min_pan_ = 0.0;
+  double max_pan_ = 0.0;
+  double min_tilt_ = 0.0;
+  double max_tilt_ = 0.0;
   double brightness_ = 10.0;
 };
 

@@ -21,7 +21,7 @@ enum class FunctionType {
   ColorMacro,
   Strobe,
   Pulse,
-  Rotation,
+  RotationSpeed,
   Pan,
   Tilt,
   Zoom,
@@ -48,7 +48,7 @@ inline std::vector<FunctionType> GetFunctionTypes() {
                                    FT::ColorMacro,
                                    FT::Strobe,
                                    FT::Pulse,
-                                   FT::Rotation,
+                                   FT::RotationSpeed,
                                    FT::Pan,
                                    FT::Tilt,
                                    FT::Zoom,
@@ -98,8 +98,8 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
       return "PN";
     case FunctionType::Pulse:
       return "P";
-    case FunctionType::Rotation:
-      return "O";
+    case FunctionType::RotationSpeed:
+      return "SP";
     case FunctionType::Saturation:
       return "SA";
     case FunctionType::Strobe:
@@ -153,7 +153,7 @@ inline FunctionType GetFunctionType(const std::string& name) {
       break;
     case 'R':
       if (name == "Red") return FunctionType::Red;
-      if (name == "Rotation") return FunctionType::Rotation;
+      if (name == "Rotation speed") return FunctionType::RotationSpeed;
       break;
     case 'S':
       if (name == "Saturation") return FunctionType::Saturation;
@@ -211,8 +211,8 @@ inline std::string ToString(FunctionType functionType) {
       return "Pulse";
     case FunctionType::Red:
       return "Red";
-    case FunctionType::Rotation:
-      return "Rotation";
+    case FunctionType::RotationSpeed:
+      return "Rotation speed";
     case FunctionType::Saturation:
       return "Saturation";
     case FunctionType::Strobe:
@@ -240,7 +240,7 @@ inline constexpr Color GetFunctionColor(FunctionType type) {
     case FunctionType::Lightness:
     case FunctionType::Master:
     case FunctionType::Pulse:
-    case FunctionType::Rotation:
+    case FunctionType::RotationSpeed:
     case FunctionType::Pan:
     case FunctionType::Saturation:
     case FunctionType::Strobe:

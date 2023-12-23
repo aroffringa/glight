@@ -19,7 +19,9 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
   functions_view_.set_hexpand(true);
   functions_view_.get_selection()->signal_changed().connect(
       [&]() { onSelectionChanged(); });
-  grid_.attach(functions_view_, 0, 0, 2, 1);
+  functions_scrollbars_.add(functions_view_);
+  functions_scrollbars_.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+  grid_.attach(functions_scrollbars_, 0, 0, 2, 1);
 
   add_function_button_.signal_clicked().connect([&]() { onAdd(); });
   functions_button_box_.pack_start(add_function_button_);
@@ -108,7 +110,9 @@ void FixtureTypeFunctionsFrame::SetFunctions(
 void FixtureTypeFunctionsFrame::onAdd() {
   size_t dmx_offset = 0;
   if (!functions_model_->children().empty()) {
-    Gtk::TreeModel::Row row = *functions_model_->children().begin();
+    Gtk::TreeIter end_iter = functions_model_->children().end();
+    --end_iter;
+    Gtk::TreeModel::Row row = *end_iter;
     if (row[functions_columns_.is_16_bit_])
       dmx_offset = row[functions_columns_.dmx_offset_] + 2;
     else

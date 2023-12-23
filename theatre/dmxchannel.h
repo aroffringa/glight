@@ -28,6 +28,9 @@ class DmxChannel {
   void SetDefaultMixStyle(MixStyle defaultMixStyle) {
     _defaultMixStyle = defaultMixStyle;
   }
+  DmxChannel Next() const {
+    return DmxChannel((_channel + 1) % 512, _universe);
+  }
 
  private:
   unsigned _universe;

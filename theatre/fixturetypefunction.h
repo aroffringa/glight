@@ -49,11 +49,11 @@ class FixtureTypeFunction {
   bool Is16Bit() const { return is_16_bit_; }
   unsigned Shape() const { return shape_; }
 
-  RotationParameters& GetRotationParameters() {
-    return parameters_.parameters.rotation;
+  RotationSpeedParameters& GetRotationParameters() {
+    return parameters_.parameters.rotation_speed;
   }
-  const RotationParameters& GetRotationParameters() const {
-    return parameters_.parameters.rotation;
+  const RotationSpeedParameters& GetRotationSpeedParameters() const {
+    return parameters_.parameters.rotation_speed;
   }
 
   MacroParameters& GetMacroParameters() { return parameters_.parameters.macro; }
@@ -67,8 +67,8 @@ class FixtureTypeFunction {
       case FunctionType::ColorMacro:
         parameters_.SetMacroParameters(MacroParameters());
         break;
-      case FunctionType::Rotation:
-        parameters_.SetRotationParameters(RotationParameters());
+      case FunctionType::RotationSpeed:
+        parameters_.SetRotationSpeedParameters(RotationSpeedParameters());
         break;
       default:
         break;
@@ -80,7 +80,7 @@ class FixtureTypeFunction {
       case FunctionType::ColorMacro:
         parameters_.UnsetMacroParameters();
         break;
-      case FunctionType::Rotation:
+      case FunctionType::RotationSpeed:
         parameters_.UnsetRotationParameters();
         break;
       default:
@@ -93,9 +93,9 @@ class FixtureTypeFunction {
       case FunctionType::ColorMacro:
         parameters_.SetMacroParameters(source.parameters_.parameters.macro);
         break;
-      case FunctionType::Rotation:
-        parameters_.SetRotationParameters(
-            source.parameters_.parameters.rotation);
+      case FunctionType::RotationSpeed:
+        parameters_.SetRotationSpeedParameters(
+            source.parameters_.parameters.rotation_speed);
         break;
       default:
         break;

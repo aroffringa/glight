@@ -125,13 +125,13 @@ void CheckEqual(const FixtureTypeFunction &a, const FixtureTypeFunction &b) {
         BOOST_CHECK_EQUAL(a_range.input_min, b_range.input_min);
       }
     } break;
-    case FunctionType::Rotation: {
-      const RotationParameters &a_pars = a.GetRotationParameters();
-      const RotationParameters &b_pars = b.GetRotationParameters();
+    case FunctionType::RotationSpeed: {
+      const RotationSpeedParameters &a_pars = a.GetRotationSpeedParameters();
+      const RotationSpeedParameters &b_pars = b.GetRotationSpeedParameters();
       BOOST_REQUIRE_EQUAL(a_pars.GetRanges().size(), b_pars.GetRanges().size());
       for (size_t i = 0; i != a_pars.GetRanges().size(); ++i) {
-        const RotationParameters::Range &a_range = a_pars.GetRanges()[i];
-        const RotationParameters::Range &b_range = b_pars.GetRanges()[i];
+        const RotationSpeedParameters::Range &a_range = a_pars.GetRanges()[i];
+        const RotationSpeedParameters::Range &b_range = b_pars.GetRanges()[i];
         BOOST_CHECK_EQUAL(a_range.input_min, b_range.input_min);
         BOOST_CHECK_EQUAL(a_range.input_max, b_range.input_max);
         BOOST_CHECK_EQUAL(a_range.speed_min, b_range.speed_min);

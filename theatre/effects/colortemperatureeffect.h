@@ -81,7 +81,7 @@ class ColorTemperatureEffect final : public Effect {
         case FunctionType::ColorMacro:
         case FunctionType::Strobe:
         case FunctionType::Pulse:
-        case FunctionType::Rotation:
+        case FunctionType::RotationSpeed:
         case FunctionType::Unknown:
         case FunctionType::Pan:
         case FunctionType::Tilt:

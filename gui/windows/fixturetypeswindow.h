@@ -65,7 +65,7 @@ class FixtureTypesWindow : public Gtk::Window {
     Gtk::TreeModelColumn<bool> in_use_;
     Gtk::TreeModelColumn<theatre::FixtureType *> fixture_type_;
   } list_columns_;
-  Gtk::ScrolledWindow scrolled_window_;
+  Gtk::ScrolledWindow type_scrollbars_;
 
   Gtk::Grid main_grid_;
   Gtk::Paned paned_;
@@ -79,10 +79,22 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::Entry short_name_entry_;
   Gtk::Label class_label_;
   Gtk::ComboBoxText class_combo_;
+
   Gtk::Label min_beam_angle_label_;
   Gtk::Entry min_beam_angle_entry_;
   Gtk::Label max_beam_angle_label_;
   Gtk::Entry max_beam_angle_entry_;
+
+  Gtk::Label min_pan_label_;
+  Gtk::Entry min_pan_entry_;
+  Gtk::Label max_pan_label_;
+  Gtk::Entry max_pan_entry_;
+
+  Gtk::Label min_tilt_label_;
+  Gtk::Entry min_beam_tilt_entry_;
+  Gtk::Label max_tilt_label_;
+  Gtk::Entry max_beam_tilt_entry_;
+
   Gtk::Label brightness_label_;
   Gtk::Entry brightness_entry_;
 

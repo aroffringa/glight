@@ -25,14 +25,14 @@ class Fixture : public NamedObject {
   Fixture(const Fixture &source, Theatre &theatre);
 
   const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const {
-    return _functions;
+    return functions_;
   }
 
-  const FixtureType &Type() const { return _type; }
+  const FixtureType &Type() const { return type_; }
 
   std::vector<unsigned> GetChannels() const {
     std::vector<unsigned> channels;
-    for (const std::unique_ptr<FixtureFunction> &ff : _functions) {
+    for (const std::unique_ptr<FixtureFunction> &ff : functions_) {
       channels.emplace_back(ff->FirstChannel().Channel());
       if (!ff->IsSingleChannel())
         channels.emplace_back(ff->FirstChannel().Channel() + 1);
@@ -46,37 +46,43 @@ class Fixture : public NamedObject {
 
   void SetChannel(unsigned dmxChannel);
 
-  void ClearFunctions() { _functions.clear(); }
+  void ClearFunctions() { functions_.clear(); }
   FixtureFunction &AddFunction(FunctionType type) {
-    _functions.emplace_back(new FixtureFunction(_theatre, type));
-    return *_functions.back();
+    functions_.emplace_back(new FixtureFunction(theatre_, type));
+    return *functions_.back();
   }
-  inline Color GetColor(const ValueSnapshot &snapshot, size_t shapeIndex) const;
+  inline Color GetColor(const ValueSnapshot &snapshot,
+                        size_t shape_index) const;
 
   inline int GetRotationSpeed(const ValueSnapshot &snapshot,
-                              size_t shapeIndex) const;
+                              size_t shape_index) const;
 
-  Position &GetPosition() { return _position; }
-  const Position &GetPosition() const { return _position; }
+  inline int GetRotation(const ValueSnapshot &snapshot,
+                         size_t shape_index) const;
 
-  FixtureSymbol Symbol() const { return _symbol; }
-  void SetSymbol(FixtureSymbol symbol) { _symbol = symbol; }
-  bool IsVisible() const { return _symbol != FixtureSymbol::Hidden; }
+  inline int GetTilt(const ValueSnapshot &snapshot, size_t shape_index) const;
 
-  double Direction() const { return _direction; }
-  void SetDirection(double direction) { _direction = direction; }
+  Position &GetPosition() { return position_; }
+  const Position &GetPosition() const { return position_; }
 
-  double Tilt() const { return _tilt; }
-  void SetTilt(double tilt) { _tilt = tilt; }
+  FixtureSymbol Symbol() const { return symbol_; }
+  void SetSymbol(FixtureSymbol symbol) { symbol_ = symbol; }
+  bool IsVisible() const { return symbol_ != FixtureSymbol::Hidden; }
+
+  double Direction() const { return direction_; }
+  void SetDirection(double direction) { direction_ = direction; }
+
+  double Tilt() const { return tilt_; }
+  void SetTilt(double tilt) { tilt_ = tilt; }
 
  private:
-  Theatre &_theatre;
-  const FixtureType &_type;
-  Position _position;
-  double _direction = 0.5 * M_PI;
-  double _tilt = 0.0;
-  FixtureSymbol _symbol;
-  std::vector<std::unique_ptr<FixtureFunction>> _functions;
+  Theatre &theatre_;
+  const FixtureType &type_;
+  Position position_;
+  double direction_ = 0.5 * M_PI;
+  double tilt_ = 0.0;
+  FixtureSymbol symbol_;
+  std::vector<std::unique_ptr<FixtureFunction>> functions_;
 };
 
 }  // namespace glight::theatre
@@ -86,13 +92,22 @@ class Fixture : public NamedObject {
 namespace glight::theatre {
 
 Color Fixture::GetColor(const ValueSnapshot &snapshot,
-                        size_t shapeIndex) const {
-  return _type.GetColor(*this, snapshot, shapeIndex);
+                        size_t shape_index) const {
+  return type_.GetColor(*this, snapshot, shape_index);
 }
 
 int Fixture::GetRotationSpeed(const ValueSnapshot &snapshot,
-                              size_t shapeIndex) const {
-  return _type.GetRotationSpeed(*this, snapshot, shapeIndex);
+                              size_t shape_index) const {
+  return type_.GetRotationSpeed(*this, snapshot, shape_index);
+}
+
+int Fixture::GetRotation(const ValueSnapshot &snapshot,
+                         size_t shape_index) const {
+  return type_.GetPan(*this, snapshot, shape_index);
+}
+
+int Fixture::GetTilt(const ValueSnapshot &snapshot, size_t shape_index) const {
+  return type_.GetTilt(*this, snapshot, shape_index);
 }
 
 }  // namespace glight::theatre

@@ -9,6 +9,7 @@
 #include <gtkmm/grid.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
 namespace glight::gui {
@@ -24,6 +25,7 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
   void onRemove();
   void onSelectionChanged();
 
+  Gtk::ScrolledWindow functions_scrollbars_;
   Gtk::TreeView functions_view_;
   Glib::RefPtr<Gtk::ListStore> functions_model_;
   struct FunctionsColumns : public Gtk::TreeModelColumnRecord {

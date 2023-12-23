@@ -51,7 +51,7 @@ struct MacroParameters {
   std::vector<Range> ranges_;
 };
 
-struct RotationParameters {
+struct RotationSpeedParameters {
   struct Range {
     constexpr Range(unsigned input_min_, unsigned input_max_, int speed_min_,
                     int speed_max_)
@@ -87,10 +87,14 @@ struct RotationParameters {
 };
 
 struct FixtureFunctionParameters {
-  void SetRotationParameters(const RotationParameters& rotation_parameters) {
-    new (&parameters.rotation) RotationParameters(rotation_parameters);
+  void SetRotationSpeedParameters(
+      const RotationSpeedParameters& rotation_parameters) {
+    new (&parameters.rotation_speed)
+        RotationSpeedParameters(rotation_parameters);
   }
-  void UnsetRotationParameters() { parameters.rotation.~RotationParameters(); }
+  void UnsetRotationParameters() {
+    parameters.rotation_speed.~RotationSpeedParameters();
+  }
 
   void SetMacroParameters(const MacroParameters& macro_parameters) {
     new (&parameters.macro) MacroParameters(macro_parameters);
@@ -101,7 +105,7 @@ struct FixtureFunctionParameters {
     Parameters() {}
     ~Parameters() {}
     MacroParameters macro;
-    RotationParameters rotation;
+    RotationSpeedParameters rotation_speed;
   } parameters;
 };
 
