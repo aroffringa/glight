@@ -15,9 +15,11 @@
 #include "../../theatre/valuesnapshot.h"
 
 #include <glibmm/main.h>
-#include <gtkmm/main.h>
-#include <cmath>
 
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/main.h>
+
+#include <cmath>
 #include <memory>
 
 namespace glight::gui {
@@ -45,6 +47,7 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
       _miGroup("Group..."),
       _miDesign("Design..."),
       _miProperties("Properties"),
+      _miSaveImage("Save image..."),
       _miDMSPrimary("Primary"),
       _miDMSSecondary("Secondary"),
       _miDMSVertical("Vertical"),
@@ -131,6 +134,9 @@ void VisualizationWidget::inializeContextMenu() {
   _miProperties.signal_activate().connect([&] { onFixtureProperties(); });
   _popupMenu.add(_miProperties);
 
+  _miSaveImage.signal_activate().connect([&] { onSaveImage(); });
+  _popupMenu.add(_miSaveImage);
+
   _popupMenu.show_all_children();
 }
 
@@ -161,10 +167,10 @@ bool VisualizationWidget::onExpose(
   return true;
 }
 
-void VisualizationWidget::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
-  const size_t width = get_width();
-  const size_t height = get_height();
-
+void VisualizationWidget::drawFixtures(
+    const Cairo::RefPtr<Cairo::Context> &cairo,
+    const std::vector<theatre::Fixture *> &selection, size_t width,
+    size_t height) {
   cairo->set_source_rgba(0, 0, 0, 1);
   cairo->rectangle(0, 0, width, height);
   cairo->fill();
@@ -180,40 +186,47 @@ void VisualizationWidget::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
   previousTime = time;
   if (_miDMSPrimary.get_active()) {
     _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
-                               _selectedFixtures);
+                               selection);
   } else if (_miDMSHorizontal.get_active()) {
     style.xOffset = 0;
     style.width = width / 2;
     _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
-                               _selectedFixtures);
+                               selection);
     style.xOffset = style.width;
     style.width = width - style.width;
     _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
-                               _selectedFixtures);
+                               selection);
   } else if (_miDMSVertical.get_active()) {
     style.yOffset = 0;
     style.height = height / 2;
     _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
-                               _selectedFixtures);
+                               selection);
     style.yOffset = style.height;
     style.height = height - style.height;
     _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
-                               _selectedFixtures);
+                               selection);
   } else if (_miDMSShadow.get_active()) {
     style.xOffset = width * 1 / 100;
     style.yOffset = height * 1 / 100;
     style.width = width * 99 / 100;
     style.height = height * 99 / 100;
     _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
-                               _selectedFixtures);
+                               selection);
     style.xOffset = 0;
     style.yOffset = 0;
     _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
-                               _selectedFixtures);
+                               selection);
   } else {  // Secondary
     _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
-                               _selectedFixtures);
+                               selection);
   }
+}
+
+void VisualizationWidget::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
+  const size_t width = get_width();
+  const size_t height = get_height();
+
+  drawFixtures(cairo, _selectedFixtures, width, height);
 
   if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
     _renderEngine.DrawSelectionRectangle(cairo, _draggingStart, _draggingTo);
@@ -474,6 +487,33 @@ void VisualizationWidget::onFixtureProperties() {
         *_eventTransmitter, *_management, *_globalSelection);
   }
   _propertiesWindow->present();
+}
+
+void VisualizationWidget::onSaveImage() {
+  Gtk::FileChooserDialog dialog("Save image", Gtk::FILE_CHOOSER_ACTION_SAVE);
+  dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
+  dialog.add_button("Save", Gtk::RESPONSE_OK);
+
+  Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
+  filter->set_name("Scalable Vector Graphics (*.svg)");
+  filter->add_pattern("*.svg");
+  filter->add_mime_type("image/svg+xml");
+  dialog.add_filter(filter);
+
+  const int result = dialog.run();
+  if (result == Gtk::RESPONSE_OK) {
+    Glib::ustring filename(dialog.get_filename());
+    if (filename.find('.') == Glib::ustring::npos) filename += ".svg";
+
+    const size_t width = get_width();
+    const size_t height = get_height();
+    const Cairo::RefPtr<Cairo::SvgSurface> surface =
+        Cairo::SvgSurface::create(filename, width, height);
+    const Cairo::RefPtr<Cairo::Context> cairo = Cairo::Context::create(surface);
+    drawFixtures(cairo, {}, width, height);
+    cairo->show_page();
+    surface->finish();
+  }
 }
 
 void VisualizationWidget::onSetSymbol(theatre::FixtureSymbol::Symbol symbol) {

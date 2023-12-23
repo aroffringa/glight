@@ -68,6 +68,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
       _miDesign;
   Gtk::Menu _symbolMenu, _dryModeStyleMenu;
   Gtk::MenuItem _miProperties;
+  Gtk::MenuItem _miSaveImage;
   std::vector<Gtk::MenuItem> _miSymbols;
   Gtk::RadioMenuItem _miDMSPrimary, _miDMSSecondary, _miDMSVertical,
       _miDMSHorizontal, _miDMSShadow;
@@ -75,6 +76,9 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void inializeContextMenu();
   void initialize();
   void drawAll(const Cairo::RefPtr<Cairo::Context> &cairo);
+  void drawFixtures(const Cairo::RefPtr<Cairo::Context> &cairo,
+                    const std::vector<theatre::Fixture *> &selection,
+                    size_t width, size_t height);
   void onTheatreChanged();
   bool onButtonPress(GdkEventButton *event);
   bool onButtonRelease(GdkEventButton *event);
@@ -86,6 +90,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   }
 
   void onFixtureProperties();
+  void onSaveImage();
   void onAlignHorizontally();
   void onAlignVertically();
   void onDistributeEvenly();
