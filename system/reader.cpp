@@ -42,7 +42,8 @@ void ParseFolderAttr(const Object &node, FolderObject &object,
   if (hasFolder) {
     size_t parent = ToNum(node["parent"]).AsSize();
     if (parent >= management.Folders().size())
-      throw std::runtime_error("Invalid parent specified in file");
+      throw std::runtime_error("Invalid parent " + std::to_string(parent) +
+                               " specified in file");
     management.Folders()[parent]->Add(object);
   }
   ParseNameAttr(node, object);
@@ -504,6 +505,21 @@ void Read(const std::string &filename, Management &management,
   std::ifstream stream(filename);
   if (!stream) throw std::runtime_error("Failed to open file");
   Read(stream, management, guiState);
+}
+
+void ImportFixtureTypes(const std::string &filename,
+                        theatre::Management &management) {
+  theatre::Management file_management;
+  system::Read(filename, file_management);
+  const std::vector<std::unique_ptr<theatre::FixtureType>> &new_types =
+      file_management.GetTheatre().FixtureTypes();
+  for (const std::unique_ptr<theatre::FixtureType> &type : new_types) {
+    if (!management.RootFolder().GetChildIfExists(type->Name())) {
+      glight::theatre::FixtureType &added_type =
+          management.GetTheatre().AddFixtureType(*type);
+      management.RootFolder().Add(added_type);
+    }
+  }
 }
 
 }  // namespace glight::system

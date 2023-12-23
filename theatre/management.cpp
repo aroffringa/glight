@@ -56,6 +56,7 @@ void Management::StartBeatFinder() {
 
 void Management::Clear() {
   _controllables.clear();
+  _groups.clear();
   _sourceValues.clear();
   _folders.clear();
   _rootFolder = _folders.emplace_back(std::make_unique<Folder>()).get();
