@@ -312,7 +312,7 @@ void MainWindow::onMIOpenClicked() {
     dialog.add_button("Open", Gtk::RESPONSE_OK);
 
     Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
-    filter->set_name("Glight show");
+    filter->set_name("Glight show (*.gshow)");
     filter->add_pattern("*.gshow");
     filter->add_mime_type("text/gshow+json");
     dialog.add_filter(filter);
@@ -330,7 +330,7 @@ void MainWindow::onMISaveClicked() {
   dialog.add_button("Save", Gtk::RESPONSE_OK);
 
   Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
-  filter->set_name("Glight show");
+  filter->set_name("Glight show (*.gshow)");
   filter->add_pattern("*.gshow");
   filter->add_mime_type("text/gshow+json");
   dialog.add_filter(filter);
@@ -353,13 +353,13 @@ void MainWindow::onMIImportClicked() {
   dialog.add_button("Open", Gtk::RESPONSE_OK);
 
   Glib::RefPtr<Gtk::FileFilter> json_filter = Gtk::FileFilter::create();
-  json_filter->set_name("Open fixture file");
+  json_filter->set_name("Open fixture file (*.json)");
   json_filter->add_pattern("*.json");
   json_filter->add_mime_type("text/json");
   dialog.add_filter(json_filter);
 
   Glib::RefPtr<Gtk::FileFilter> gshow_filter = Gtk::FileFilter::create();
-  gshow_filter->set_name("Glight file format");
+  gshow_filter->set_name("Glight file format (*.gshow)");
   gshow_filter->add_pattern("*.gshow");
   dialog.add_filter(gshow_filter);
 
