@@ -4,7 +4,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     apt-get install -y \
     clang-format \
     cmake \
-    g++ \
+    g++-13 \
     libasound2-dev \
     libaubio-dev \
     libboost-test-dev \
@@ -22,6 +22,6 @@ RUN \
   scripts/run-clang-format.sh && \
   mkdir /build && \
   cd /build && \
-  cmake ../src && \
+  CC=/usr/bin/gcc-13 CXX=/usr/bin/g++-13 cmake ../src && \
   make install -j`nproc` && \
   make check -j`nproc`
