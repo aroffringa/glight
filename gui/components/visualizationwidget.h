@@ -58,7 +58,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   std::vector<theatre::Fixture *> _selectedFixtures,
       _selectedFixturesBeforeDrag;
   theatre::Position _draggingStart, _draggingTo;
-  RenderEngine _renderEngine;
+  RenderEngine render_engine_;
   std::unique_ptr<Gtk::Window> sub_window_;
 
   Gtk::Menu _popupMenu;

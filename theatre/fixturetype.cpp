@@ -98,8 +98,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
     case StockFixture::H2ODMXPro: {
       functions_.emplace_back(FunctionType::Master, 0, false, 0);
       FixtureTypeFunction &rotation =
-          functions_.emplace_back(FunctionType::Rotation, 1, false, 0);
-      std::vector<RotationParameters::Range> &ranges =
+          functions_.emplace_back(FunctionType::RotationSpeed, 1, false, 0);
+      std::vector<RotationSpeedParameters::Range> &ranges =
           rotation.GetRotationParameters().GetRanges();
       constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
       ranges.emplace_back(9, 121, 0, max_speed);
@@ -116,9 +116,9 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Blue, 3, false, 0);
       functions_.emplace_back(FunctionType::Strobe, 4, false, 0);
       FixtureTypeFunction &rotation =
-          functions_.emplace_back(FunctionType::Rotation, 5, false, 0);
+          functions_.emplace_back(FunctionType::RotationSpeed, 5, false, 0);
       constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
-      std::vector<RotationParameters::Range> &ranges =
+      std::vector<RotationSpeedParameters::Range> &ranges =
           rotation.GetRotationParameters().GetRanges();
       // [ 5 - 128 ) is static positioning
       ranges.emplace_back(128, 256, -max_speed, max_speed);
@@ -294,7 +294,8 @@ Color FixtureType::GetColor(const Fixture &fixture,
   std::optional<Color> macro_color;
   for (size_t i = 0; i != functions_.size(); ++i) {
     if (functions_[i].Shape() == shapeIndex) {
-      const unsigned channel_value = fixture.Functions()[i]->GetValue(snapshot);
+      const unsigned channel_value =
+          fixture.Functions()[i]->GetCharValue(snapshot);
       const FunctionType type = functions_[i].Type();
       if (type == FunctionType::Master) {
         master = channel_value;
@@ -325,12 +326,43 @@ int FixtureType::GetRotationSpeed(const Fixture &fixture,
                                   size_t shape_index) const {
   for (size_t i = 0; i != functions_.size(); ++i) {
     if (functions_[i].Shape() == shape_index &&
-        functions_[i].Type() == FunctionType::Rotation) {
-      const unsigned channel_value = fixture.Functions()[i]->GetValue(snapshot);
-      return functions_[i].GetRotationParameters().GetSpeed(channel_value);
+        functions_[i].Type() == FunctionType::RotationSpeed) {
+      const unsigned channel_value =
+          fixture.Functions()[i]->GetCharValue(snapshot);
+      return functions_[i].GetRotationSpeedParameters().GetSpeed(channel_value);
     }
   }
   return 0;
+}
+
+double FixtureType::GetPan(const Fixture &fixture,
+                           const ValueSnapshot &snapshot,
+                           size_t shape_index) const {
+  for (size_t i = 0; i != functions_.size(); ++i) {
+    if (functions_[i].Shape() == shape_index &&
+        functions_[i].Type() == FunctionType::Pan) {
+      const unsigned channel_value =
+          fixture.Functions()[i]->GetControlValue(snapshot);
+      return (max_pan_ - min_pan_) * channel_value / ControlValue::MaxUInt() +
+             min_pan_;
+    }
+  }
+  return 0.0;
+}
+
+double FixtureType::GetTilt(const Fixture &fixture,
+                            const ValueSnapshot &snapshot,
+                            size_t shape_index) const {
+  for (size_t i = 0; i != functions_.size(); ++i) {
+    if (functions_[i].Shape() == shape_index &&
+        functions_[i].Type() == FunctionType::Tilt) {
+      const unsigned channel_value =
+          fixture.Functions()[i]->GetControlValue(snapshot);
+      return (max_tilt_ - min_tilt_) * channel_value / ControlValue::MaxUInt() +
+             min_tilt_;
+    }
+  }
+  return 0.0;
 }
 
 double FixtureType::GetZoom(const Fixture &fixture,
@@ -339,8 +371,10 @@ double FixtureType::GetZoom(const Fixture &fixture,
   for (size_t i = 0; i != functions_.size(); ++i) {
     if (functions_[i].Shape() == shape_index &&
         functions_[i].Type() == FunctionType::Zoom) {
-      const unsigned channel_value = fixture.Functions()[i]->GetValue(snapshot);
-      return (max_beam_angle_ - min_beam_angle_) * channel_value / 255 +
+      const unsigned channel_value =
+          fixture.Functions()[i]->GetControlValue(snapshot);
+      return (max_beam_angle_ - min_beam_angle_) * channel_value /
+                 ControlValue::MaxUInt() +
              min_beam_angle_;
     }
   }

@@ -90,7 +90,7 @@ void ParseMacroParameters(const json::Object &node,
 }
 
 void ParseRotationParameters(const json::Object &node,
-                             RotationParameters &parameters) {
+                             RotationSpeedParameters &parameters) {
   const json::Array &ranges = ToArr(node["ranges"]);
   for (json::Node &item : ranges) {
     const json::Object &obj = ToObj(item);
@@ -119,7 +119,7 @@ void ParseFixtureTypeFunctions(const json::Array &node,
         ParseMacroParameters(ToObj(obj["parameters"]),
                              new_function.GetMacroParameters());
         break;
-      case FunctionType::Rotation:
+      case FunctionType::RotationSpeed:
         ParseRotationParameters(ToObj(obj["parameters"]),
                                 new_function.GetRotationParameters());
         break;
@@ -137,7 +137,20 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
     ft.SetShortName(ToStr(ft_node["short-name"]));
     const std::string &class_name = ToStr(ft_node["fixture-class"]);
     ft.SetFixtureClass(FixtureType::NameToClass(class_name));
-    ft.SetMinBeamAngle(ToNum(ft_node["beam-angle"]).AsDouble());
+    if (ft_node.contains("beam-angle")) {
+      const double angle = ToNum(ft_node["beam-angle"]).AsDouble();
+      ft.SetMinBeamAngle(angle);
+      ft.SetMaxBeamAngle(angle);
+    } else {
+      ft.SetMinBeamAngle(ToNum(ft_node["min-beam-angle"]).AsDouble());
+      ft.SetMaxBeamAngle(ToNum(ft_node["max-beam-angle"]).AsDouble());
+    }
+    if (ft_node.contains("min-pan")) {
+      ft.SetMinPan(ToNum(ft_node["min-pan"]).AsDouble());
+      ft.SetMaxPan(ToNum(ft_node["max-pan"]).AsDouble());
+      ft.SetMinTilt(ToNum(ft_node["min-tilt"]).AsDouble());
+      ft.SetMaxTilt(ToNum(ft_node["max-tilt"]).AsDouble());
+    }
     ft.SetBrightness(ToNum(ft_node["brightness"]).AsDouble());
     FixtureType &new_type = management.GetTheatre().AddFixtureType(ft);
     if (management.RootFolder().GetChildIfExists(new_type.Name())) {

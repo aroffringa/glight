@@ -20,7 +20,7 @@ struct DrawStyle {
 };
 
 struct FixtureState {
-  double rotation = 0.0;
+  double continuous_rotation = 0.0;
 };
 
 class RenderEngine {

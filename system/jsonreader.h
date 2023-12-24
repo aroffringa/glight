@@ -32,6 +32,10 @@ struct Object : public Node {
       return *iter->second;
   }
 
+  bool contains(const char *name) const {
+    return children.find(name) != children.end();
+  }
+
   const_iterator find(const char *name) const {
     return const_iterator(children.find(name));
   }

@@ -36,7 +36,7 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
       _isTimerRunning(false),
       _dragType(NotDragging),
 
-      _renderEngine(*management),
+      render_engine_(*management),
       _miSymbolMenu("Symbol"),
       _miDryModeStyle("Dry mode style"),
       _miAlignHorizontally("Align horizontally"),
@@ -185,40 +185,40 @@ void VisualizationWidget::drawFixtures(
                   .timeSince = time - previousTime};
   previousTime = time;
   if (_miDMSPrimary.get_active()) {
-    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
-                               selection);
+    render_engine_.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                                selection);
   } else if (_miDMSHorizontal.get_active()) {
     style.xOffset = 0;
     style.width = width / 2;
-    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
-                               selection);
+    render_engine_.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                                selection);
     style.xOffset = style.width;
     style.width = width - style.width;
-    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
-                               selection);
+    render_engine_.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                                selection);
   } else if (_miDMSVertical.get_active()) {
     style.yOffset = 0;
     style.height = height / 2;
-    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
-                               selection);
+    render_engine_.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                                selection);
     style.yOffset = style.height;
     style.height = height - style.height;
-    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
-                               selection);
+    render_engine_.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                                selection);
   } else if (_miDMSShadow.get_active()) {
     style.xOffset = width * 1 / 100;
     style.yOffset = height * 1 / 100;
     style.width = width * 99 / 100;
     style.height = height * 99 / 100;
-    _renderEngine.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
-                               selection);
+    render_engine_.DrawSnapshot(cairo, _management->PrimarySnapshot(), style,
+                                selection);
     style.xOffset = 0;
     style.yOffset = 0;
-    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
-                               selection);
+    render_engine_.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                                selection);
   } else {  // Secondary
-    _renderEngine.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
-                               selection);
+    render_engine_.DrawSnapshot(cairo, _management->SecondarySnapshot(), style,
+                                selection);
   }
 }
 
@@ -229,7 +229,7 @@ void VisualizationWidget::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
   drawFixtures(cairo, _selectedFixtures, width, height);
 
   if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
-    _renderEngine.DrawSelectionRectangle(cairo, _draggingStart, _draggingTo);
+    render_engine_.DrawSelectionRectangle(cairo, _draggingStart, _draggingTo);
   }
 }
 
@@ -244,8 +244,8 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
     else  // TODO other dry mode styles
       height = get_height() / 2.0;
     const theatre::Position pos =
-        _renderEngine.MouseToPosition(event->x, event->y, get_width(), height);
-    theatre::Fixture *selectedFixture = _renderEngine.FixtureAt(pos);
+        render_engine_.MouseToPosition(event->x, event->y, get_width(), height);
+    theatre::Fixture *selectedFixture = render_engine_.FixtureAt(pos);
     if (!shift) {
       if (selectedFixture) {
         // Was a fixture clicked that was already selected? Then keep all
@@ -292,8 +292,8 @@ bool VisualizationWidget::onButtonRelease(GdkEventButton *event) {
   if (event->button == 1) {
     if (_dragType == DragFixture) {
       // TODO correct width/height for layout
-      _draggingStart = _renderEngine.MouseToPosition(event->x, event->y,
-                                                     get_width(), get_height());
+      _draggingStart = render_engine_.MouseToPosition(
+          event->x, event->y, get_width(), get_height());
     } else if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
     }
     _globalSelection->SetSelection(_selectedFixtures);
@@ -309,7 +309,7 @@ bool VisualizationWidget::onMotion(GdkEventMotion *event) {
     const double width = get_width();
     const double height = get_height();
     const theatre::Position pos =
-        _renderEngine.MouseToPosition(event->x, event->y, width, height);
+        render_engine_.MouseToPosition(event->x, event->y, width, height);
     switch (_dragType) {
       case NotDragging:
         break;

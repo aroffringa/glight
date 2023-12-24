@@ -27,7 +27,7 @@ void Application::Run(int argc, char *argv[]) {
   if (argc > 1) {
     window.OpenFile(argv[1]);
   }
-  run(window, argc, argv);
+  run(window, 1, argv);
 }
 
 }  // namespace glight::gui

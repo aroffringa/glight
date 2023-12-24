@@ -92,7 +92,7 @@ class ColorControlEffect final : public Effect {
         case FunctionType::ColorTemperature:
         case FunctionType::Strobe:
         case FunctionType::Pulse:
-        case FunctionType::Rotation:
+        case FunctionType::RotationSpeed:
         case FunctionType::Unknown:
         case FunctionType::Pan:
         case FunctionType::Tilt:
