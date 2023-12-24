@@ -67,7 +67,8 @@ void FixtureProperties::update() {
     const theatre::Fixture &first_fixture = *fixtures.front();
     direction_entry_.set_text(
         std::format("{:.1f}", first_fixture.Direction() * 180.0 / M_PI));
-    tilt_entry_.set_text(std::format("{:.1f}", first_fixture.Tilt() * 180.0 / M_PI));
+    tilt_entry_.set_text(
+        std::format("{:.1f}", first_fixture.Tilt() * 180.0 / M_PI));
   }
 }
 
