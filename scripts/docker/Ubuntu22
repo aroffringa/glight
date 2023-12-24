@@ -1,10 +1,10 @@
-FROM ubuntu:22.04
+FROM ubuntu:23.10
 
 RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     apt-get install -y \
     clang-format \
     cmake \
-    g++-13 \
+    g++ \
     libasound2-dev \
     libaubio-dev \
     libboost-test-dev \
