@@ -14,6 +14,7 @@
 #include "../../theatre/theatre.h"
 
 #include <algorithm>
+#include <format>
 
 namespace glight::gui {
 
