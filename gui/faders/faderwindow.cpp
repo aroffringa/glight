@@ -197,7 +197,7 @@ void FaderWindow::loadState() {
 
     _crossFader.emplace(
         Gtk::Adjustment::create(
-            0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
+            0, 0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
             (ControlValue::MaxUInt() + 1) / 100),
         Gtk::ORIENTATION_VERTICAL);
     _leftBox.pack_start(*_crossFader, true, true);
@@ -624,7 +624,7 @@ void FaderWindow::UpdateValues() {
   if (_crossFader && assigned_source_value) {
     const unsigned x_value = assigned_source_value->CrossFader().Value().UInt();
     if (_isCrossFaderStarted) {
-      if (x_value == 0.0) {
+      if (x_value == 0) {
         AssignTopToBottom();
       }
     }

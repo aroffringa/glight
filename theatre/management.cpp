@@ -202,7 +202,7 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
     ValueSnapshot &snapshot = is_primary ? primary : secondary;
     for (unsigned universe = 0; universe != n_universes; ++universe) {
       if (_device->GetUniverseType(universe) == UniverseType::Output) {
-        ProcessInputUniverse(universe, timestep_number, snapshot, is_primary);
+        ProcessInputUniverse(universe, snapshot, is_primary);
       }
     }
   }
