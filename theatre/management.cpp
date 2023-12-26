@@ -92,7 +92,7 @@ void Management::ProcessInputUniverse(unsigned universe,
   for (const std::unique_ptr<Controllable> &controllable : _controllables) {
     if (FixtureControl *fc =
             dynamic_cast<FixtureControl *>(controllable.get())) {
-      fc->MixChannels(values, universe);
+      fc->GetChannelValues(values, universe);
     }
   }
 

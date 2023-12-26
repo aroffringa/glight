@@ -1,0 +1,61 @@
+#ifndef THEATRE_FILTER_H_
+#define THEATRE_FILTER_H_
+
+#include "../controlvalue.h"
+#include "../folderobject.h"
+#include "../functiontype.h"
+
+namespace glight::theatre {
+
+class Filter {
+ public:
+  Filter() noexcept = default;
+
+  virtual ~Filter() = default;
+
+  const std::vector<FunctionType>& InputTypes() const { return input_types_; }
+  const std::vector<FunctionType>& OutputTypes() const { return output_types_; }
+
+  /**
+   * Determines the input types that this filter provides from the output
+   * types, and calls @ref SetInputTypes() accordingly.
+   * This function is called when the filter is connected to a filter
+   * or a fixture.
+   *
+   * For example, a filter that converts an RGB fixture to white only
+   * might replace the R, G and B functions by a single white function,
+   * and copy other functions (master channel, strobe, etc.) from the output.
+   */
+  virtual void DetermineInputTypes() = 0;
+
+  /**
+   * Set the output types, which connects this filter to another filter or
+   * fixture and adapts the input types accordingly.
+   */
+  void SetOutputTypes(std::vector<FunctionType> output_functions) {
+    output_types_ = std::move(output_functions);
+    DetermineInputTypes();
+  }
+
+  /**
+   * Applies the filter to the input and sets the output accordingly.
+   * @param input should have a size of InputTypes().size().
+   * @param output Output parameter. On input, should have a size equal to
+   * OutputTypes().size().
+   */
+  virtual void Apply(const std::vector<ControlValue>& input,
+                     std::vector<ControlValue>& output) = 0;
+
+ protected:
+  void SetInputTypes(std::vector<FunctionType> input_types) {
+    input_types_ = std::move(input_types);
+  }
+
+ private:
+  std::vector<FunctionType> input_types_;
+  std::vector<FunctionType> output_types_;
+};
+
+}  // namespace glight::theatre
+
+#endif

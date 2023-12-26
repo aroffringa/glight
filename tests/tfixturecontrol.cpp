@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   std::vector<unsigned> values(512, 0);
   Timing timing(0.0, 0, 0, 0, 0);
   control.Mix(timing, true);
-  control.MixChannels(values.data(), 0);
+  control.GetChannelValues(values.data(), 0);
   for (size_t i = 0; i != 512; ++i) {
     if (i == 100)
       BOOST_CHECK_EQUAL(values[100], ControlValue::MaxUInt());

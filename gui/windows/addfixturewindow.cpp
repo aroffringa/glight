@@ -8,6 +8,8 @@
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 
+#include "../../theatre/filters/monochromefilter.h"
+
 namespace glight::gui {
 
 using theatre::FixtureType;
@@ -21,6 +23,8 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
 
       _decCountButton("-"),
       _incCountButton("+"),
+      filters_frame_("Filters"),
+      monochrome_cb_("Monochrome"),
       _cancelButton("Cancel"),
       _addButton("Add"),
       _eventHub(*eventHub),
@@ -59,13 +63,16 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
   _incCountButton.signal_clicked().connect([&]() { onIncCount(); });
   _grid.attach(_incCountButton, 3, 2, 1, 1);
 
+  filters_frame_.add(monochrome_cb_);
+  _grid.attach(filters_frame_, 0, 3, 4, 1);
+
   _buttonBox.set_homogeneous(true);
 
   _cancelButton.signal_clicked().connect([&]() { onCancel(); });
   _buttonBox.pack_start(_cancelButton);
   _addButton.signal_clicked().connect([&]() { onAdd(); });
   _buttonBox.pack_end(_addButton);
-  _grid.attach(_buttonBox, 0, 3, 3, 1);
+  _grid.attach(_buttonBox, 0, 4, 4, 1);
 
   add(_grid);
   _grid.set_hexpand(true);
@@ -130,15 +137,13 @@ void AddFixtureWindow::onAdd() {
           _management->GetTheatre().AddFixture(*project_type);
       fixture.GetPosition() = position;
 
-      const std::vector<std::unique_ptr<theatre::FixtureFunction>> &functions =
-          fixture.Functions();
-
-      int number = 1;
       theatre::FixtureControl &control = _management->AddFixtureControl(
           fixture, _management->RootFolder() /* TODO */);
-      for (size_t i = 0; i != functions.size(); ++i) {
+      if (monochrome_cb_.get_active()) {
+        control.AddFilter(std::make_unique<theatre::MonochromeFilter>());
+      }
+      for (size_t i = 0; i != control.NInputs(); ++i) {
         _management->AddSourceValue(control, i);
-        ++number;
       }
     }
 
