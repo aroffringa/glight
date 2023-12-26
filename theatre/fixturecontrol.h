@@ -1,8 +1,14 @@
 #ifndef THEATRE_FIXTURE_CONTROL_H_
 #define THEATRE_FIXTURE_CONTROL_H_
 
+#include <cassert>
+#include <memory>
+#include <vector>
+
 #include "controllable.h"
 #include "fixture.h"
+
+#include "filters/filter.h"
 
 namespace glight::theatre {
 
@@ -10,17 +16,25 @@ class FixtureControl final : public Controllable {
  public:
   FixtureControl(Fixture &fixture)
       : Controllable(fixture.Name()),
-        _fixture(&fixture),
-        _values(fixture.Functions().size()) {}
+        fixture_(&fixture),
+        values_(fixture.Functions().size()) {}
 
-  Fixture &GetFixture() const { return *_fixture; }
+  Fixture &GetFixture() const { return *fixture_; }
 
-  size_t NInputs() const override { return _fixture->Functions().size(); }
+  size_t NInputs() const override {
+    if (filters_.empty())
+      return fixture_->Functions().size();
+    else
+      return filters_.back()->InputTypes().size();
+  }
 
-  ControlValue &InputValue(size_t index) override { return _values[index]; }
+  ControlValue &InputValue(size_t index) override { return values_[index]; }
 
   virtual FunctionType InputType(size_t index) const override {
-    return _fixture->Functions()[index]->Type();
+    if (filters_.empty())
+      return fixture_->Functions()[index]->Type();
+    else
+      return filters_.back()->InputTypes()[index];
   }
 
   Color InputColor(size_t index) const {
@@ -69,22 +83,50 @@ class FixtureControl final : public Controllable {
   size_t NOutputs() const override { return 0; }
 
   std::pair<const Controllable *, size_t> Output(size_t) const override {
+    assert(false);
     return std::pair<const Controllable *, size_t>(nullptr, 0);
   }
 
-  void Mix(const Timing &, bool) override {}
+  void Mix(const Timing &, bool is_primary) override {
+    // Propagate control values through the filters
+    for (std::unique_ptr<Filter> &filter : filters_) {
+      scratch_.resize(filter->OutputTypes().size());
+      filter->Apply(values_, scratch_);
+      std::swap(scratch_, values_);
+    }
+  }
 
-  void MixChannels(unsigned *channelValues, unsigned universe) {
-    for (size_t i = 0; i != _fixture->Functions().size(); ++i) {
-      const std::unique_ptr<FixtureFunction> &ff = _fixture->Functions()[i];
-      ff->MixChannels(_values[i].UInt(), MixStyle::Default, channelValues,
+  void GetChannelValues(unsigned *channelValues, unsigned universe) const {
+    for (size_t i = 0; i != fixture_->Functions().size(); ++i) {
+      const std::unique_ptr<FixtureFunction> &ff = fixture_->Functions()[i];
+      ff->MixChannels(values_[i].UInt(), MixStyle::Default, channelValues,
                       universe);
     }
   }
 
+  void AddFilter(std::unique_ptr<Filter> &&filter) {
+    if (filters_.empty()) {
+      filters_.emplace_back(std::move(filter));
+      std::vector<FunctionType> types;
+      types.reserve(fixture_->Functions().size());
+      for (const std::unique_ptr<FixtureFunction> &function :
+           fixture_->Functions()) {
+        types.emplace_back(function->Type());
+      }
+      filters_.front()->SetOutputTypes(types);
+    } else {
+      filters_.insert(filters_.begin(), std::move(filter));
+      filters_.front()->SetOutputTypes(filters_[1]->InputTypes());
+    }
+  }
+
+  const std::vector<std::unique_ptr<Filter>> &Filters() { return filters_; }
+
  private:
-  Fixture *_fixture;
-  std::vector<ControlValue> _values;
+  Fixture *fixture_;
+  std::vector<ControlValue> values_;
+  std::vector<ControlValue> scratch_;
+  std::vector<std::unique_ptr<Filter>> filters_;
 };
 
 }  // namespace glight::theatre

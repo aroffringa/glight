@@ -149,12 +149,22 @@ class Management {
 
  private:
   void ThreadLoop();
-  void ProcessInputUniverse(unsigned universe, unsigned timestep_number,
-                            ValueSnapshot &next_primary,
-                            ValueSnapshot &next_secondary);
 
-  void getChannelValues(unsigned timestepNumber, unsigned *values,
-                        unsigned universe, bool primary);
+  /**
+   * Prepares the dependency chain, and propagates values starting at the
+   * source values through the controllables.
+   */
+  void MixAll(unsigned timestep_number, ValueSnapshot &primary,
+              ValueSnapshot &secondary);
+
+  /**
+   * Obtains the channel values from the current situation of the controllables.
+   * If this is the primary snapshot, the values are also send to the DMX
+   * device.
+   */
+  void ProcessInputUniverse(unsigned universe, ValueSnapshot &snapshot,
+                            bool is_primary);
+
   void removeControllable(
       std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr);
 

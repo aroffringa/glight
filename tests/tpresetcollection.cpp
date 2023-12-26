@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   // Mix controls in order of dependencies
   presetCollection.Mix(timing, true);
   fixtureControl.Mix(timing, true);
-  fixtureControl.MixChannels(values.data(), 0);
+  fixtureControl.GetChannelValues(values.data(), 0);
   for (size_t i = 0; i != 512; ++i) {
     if (i == 100) {
       // it's not accurately Max, because of truncations.

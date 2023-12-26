@@ -39,13 +39,13 @@ class FixtureFunction final : public NamedObject {
       } else {  // 16 bit
         const unsigned currentValue =
             (channels[_firstChannel.Channel()]) +
-            (channels[_firstChannel.Channel() + 1] >> 8);
+            (channels[_firstChannel.Next().Channel()] >> 8);
         const unsigned mixedValue =
             ControlValue::Mix(currentValue, value, combiMixStyle);
         // Set to the first 8 of 24 bits.
         channels[_firstChannel.Channel()] = (mixedValue & (~0xFFFF));
-        // Set to bits 9-24.
-        channels[_firstChannel.Channel() + 1] = (mixedValue & 0xFFFF) << 8;
+        // Set to bits 9-16.
+        channels[_firstChannel.Next().Channel()] = (mixedValue & 0xFFFF) << 8;
       }
     }
   }

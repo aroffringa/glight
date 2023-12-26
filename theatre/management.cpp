@@ -82,31 +82,32 @@ void Management::Run() {
 }
 
 void Management::ProcessInputUniverse(unsigned universe,
-                                      unsigned timestep_number,
-                                      ValueSnapshot &next_primary,
-                                      ValueSnapshot &next_secondary) {
-  for (bool is_primary : {true, false}) {
-    unsigned values[512];
-    unsigned char values_char[512];
+                                      ValueSnapshot &snapshot,
+                                      bool is_primary) {
+  unsigned values[512];
+  unsigned char values_char[512];
 
-    std::fill_n(values, 512, 0);
+  std::fill_n(values, 512, 0);
 
-    getChannelValues(timestep_number, values, universe, is_primary);
-
-    for (unsigned i = 0; i < 512; ++i) {
-      unsigned val = (values[i] >> 16);
-      if (val > 255) val = 255;
-      values_char[i] = static_cast<unsigned char>(val);
+  for (const std::unique_ptr<Controllable> &controllable : _controllables) {
+    if (FixtureControl *fc =
+            dynamic_cast<FixtureControl *>(controllable.get())) {
+      fc->GetChannelValues(values, universe);
     }
+  }
 
-    ValueUniverseSnapshot &universe_values =
-        is_primary ? next_primary.GetUniverseSnapshot(universe)
-                   : next_secondary.GetUniverseSnapshot(universe);
-    universe_values.SetValues(values_char, _theatre->HighestChannel() + 1);
+  for (unsigned i = 0; i < 512; ++i) {
+    unsigned val = (values[i] >> 16);
+    if (val > 255) val = 255;
+    values_char[i] = static_cast<unsigned char>(val);
+  }
 
-    if (is_primary) {
-      _device->SetOutputValues(universe, values_char, 512);
-    }
+  ValueUniverseSnapshot &universe_values =
+      snapshot.GetUniverseSnapshot(universe);
+  universe_values.SetValues(values_char, _theatre->HighestChannel() + 1);
+
+  if (is_primary) {
+    _device->SetOutputValues(universe, values_char, 512);
   }
 }
 
@@ -118,12 +119,7 @@ void Management::ThreadLoop() {
       std::make_unique<ValueSnapshot>(false, n_universes);
   unsigned timestep_number = 0;
   while (!_isQuitting) {
-    for (unsigned universe = 0; universe != n_universes; ++universe) {
-      if (_device->GetUniverseType(universe) == UniverseType::Output) {
-        ProcessInputUniverse(universe, timestep_number, *next_primary,
-                             *next_secondary);
-      }
-    }
+    MixAll(timestep_number, *next_primary, *next_secondary);
     _device->WaitForNextSync();
 
     std::lock_guard<std::mutex> lock(_mutex);
@@ -136,8 +132,8 @@ void Management::ThreadLoop() {
 
 void Management::abortAllDevices() { _device->Abort(); }
 
-void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
-                                  unsigned universe, bool primary) {
+void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
+                        ValueSnapshot &secondary) {
   const double relTimeInMs = GetOffsetTimeInMS();
   double beatValue = 0.0;
   unsigned audioLevel = 0;
@@ -157,7 +153,7 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
     audioLevel = 0;
 
   const unsigned randomValue = _rndDistribution(_randomGenerator);
-  const Timing timing(relTimeInMs, timestepNumber, beatValue, audioLevel,
+  const Timing timing(relTimeInMs, timestep_number, beatValue, audioLevel,
                       randomValue);
   const double timePassed = (relTimeInMs - _previousTime) * 1e-3;
   _previousTime = relTimeInMs;
@@ -165,23 +161,6 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
   std::lock_guard<std::mutex> lock(_mutex);
   for (std::unique_ptr<SourceValue> &sv : _sourceValues) {
     sv->ApplyFade(timePassed);
-  }
-  // Reset all inputs
-  for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
-    for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs();
-         ++inputIndex) {
-      sv->GetControllable().InputValue(inputIndex) = ControlValue(0);
-    }
-  }
-
-  if (primary) {
-    for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-      sv->GetControllable().MixInput(sv->InputIndex(),
-                                     ControlValue(sv->PrimaryValue()));
-  } else {
-    for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-      sv->GetControllable().MixInput(sv->InputIndex(),
-                                     ControlValue(sv->SecondaryValue()));
   }
 
   // Solve dependency graph of controllables
@@ -192,10 +171,39 @@ void Management::getChannelValues(unsigned timestepNumber, unsigned *values,
   if (!topologicalSort(unorderedList, orderedList))
     throw std::runtime_error("Cycle in dependencies");
 
-  for (Controllable *controllable : std::ranges::reverse_view(orderedList)) {
-    controllable->Mix(timing, primary);
-    if (FixtureControl *fc = dynamic_cast<FixtureControl *>(controllable)) {
-      fc->MixChannels(values, universe);
+  for (bool is_primary : {false, true}) {
+    // Reset all inputs
+    for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
+      for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs();
+           ++inputIndex) {
+        sv->GetControllable().InputValue(inputIndex) = ControlValue(0);
+      }
+    }
+
+    // Process source values. These will output to controllables.
+    if (is_primary) {
+      for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
+        sv->GetControllable().MixInput(sv->InputIndex(),
+                                       ControlValue(sv->PrimaryValue()));
+    } else {
+      for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
+        sv->GetControllable().MixInput(sv->InputIndex(),
+                                       ControlValue(sv->SecondaryValue()));
+    }
+
+    // Process all controllables that follow
+    for (Controllable *controllable : std::ranges::reverse_view(orderedList)) {
+      controllable->Mix(timing, is_primary);
+    }
+
+    // All controllables have provided their output; now obtain the DMX values
+    // and store them in the ValueSnapshot.
+    const unsigned n_universes = _device->NUniverses();
+    ValueSnapshot &snapshot = is_primary ? primary : secondary;
+    for (unsigned universe = 0; universe != n_universes; ++universe) {
+      if (_device->GetUniverseType(universe) == UniverseType::Output) {
+        ProcessInputUniverse(universe, snapshot, is_primary);
+      }
     }
   }
 }

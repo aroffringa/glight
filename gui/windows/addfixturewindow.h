@@ -3,8 +3,10 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
@@ -48,6 +50,8 @@ class AddFixtureWindow : public Gtk::Window {
   Gtk::Entry _countEntry;
   Gtk::Button _decCountButton;
   Gtk::Button _incCountButton;
+  Gtk::Frame filters_frame_;
+  Gtk::CheckButton monochrome_cb_;
   Gtk::Box _buttonBox;
   Gtk::Button _cancelButton;
   Gtk::Button _addButton;

@@ -144,6 +144,8 @@ set(EXTERNALFILES
 
 include_directories(external/hsluv)
 
+include_directories($<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+
 add_library(glight-object OBJECT
   ${GUIFILES} ${SYSTEMFILES} ${THEATREFILES} ${EXTERNALFILES})
 
@@ -190,6 +192,7 @@ if(Boost_FOUND)
     tests/tscene.cpp
     tests/ttheatre.cpp
     tests/tuniquewithoutordering.cpp
+    tests/theatre/filters/tmonochromefilter.cpp
     )
   target_link_directories(runtests PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})
