@@ -40,7 +40,7 @@ void FillManagement(Management &management) {
   management.AddFixtureGroup(root, "Ayra and ADJ");
 
   FixtureType &ft =
-      management.GetTheatre().AddFixtureType(StockFixture::RGBWLight4Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::Rgbw4Ch);
   root.Add(ft);
   Fixture &f = management.GetTheatre().AddFixture(ft);
   FixtureControl &fc = management.AddFixtureControl(f, subFolder);

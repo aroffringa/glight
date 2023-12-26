@@ -51,6 +51,8 @@ class AddFixtureWindow : public Gtk::Window {
   Gtk::Button _decCountButton;
   Gtk::Button _incCountButton;
   Gtk::Frame filters_frame_;
+  Gtk::VBox filters_box_;
+  Gtk::CheckButton rgb_cb_;
   Gtk::CheckButton monochrome_cb_;
   Gtk::Box _buttonBox;
   Gtk::Button _cancelButton;

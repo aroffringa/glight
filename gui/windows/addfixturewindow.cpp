@@ -9,6 +9,7 @@
 #include "../../theatre/theatre.h"
 
 #include "../../theatre/filters/monochromefilter.h"
+#include "../../theatre/filters/rgbfilter.h"
 
 namespace glight::gui {
 
@@ -24,6 +25,7 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
       _decCountButton("-"),
       _incCountButton("+"),
       filters_frame_("Filters"),
+      rgb_cb_("RGB colorspace"),
       monochrome_cb_("Monochrome"),
       _cancelButton("Cancel"),
       _addButton("Add"),
@@ -63,7 +65,11 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
   _incCountButton.signal_clicked().connect([&]() { onIncCount(); });
   _grid.attach(_incCountButton, 3, 2, 1, 1);
 
-  filters_frame_.add(monochrome_cb_);
+  filters_box_.pack_start(rgb_cb_);
+  rgb_cb_.set_active(true);
+  filters_box_.pack_start(monochrome_cb_);
+
+  filters_frame_.add(filters_box_);
   _grid.attach(filters_frame_, 0, 3, 4, 1);
 
   _buttonBox.set_homogeneous(true);
@@ -92,8 +98,7 @@ void AddFixtureWindow::fillStock() {
     Gtk::TreeModel::iterator iter = type_model_->append();
     (*iter)[type_columns_.type_str_] = item.first;
     (*iter)[type_columns_.type_] = &item.second;
-    if (item.first ==
-        FixtureType::StockName(theatre::StockFixture::RGBLight3Ch)) {
+    if (item.first == FixtureType::StockName(theatre::StockFixture::Rgb3Ch)) {
       _typeCombo.set_active(iter);
     }
   }
@@ -139,6 +144,9 @@ void AddFixtureWindow::onAdd() {
 
       theatre::FixtureControl &control = _management->AddFixtureControl(
           fixture, _management->RootFolder() /* TODO */);
+      if (rgb_cb_.get_active()) {
+        control.AddFilter(std::make_unique<theatre::RgbFilter>());
+      }
       if (monochrome_cb_.get_active()) {
         control.AddFilter(std::make_unique<theatre::MonochromeFilter>());
       }

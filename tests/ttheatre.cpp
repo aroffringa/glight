@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_SUITE(theatre)
 BOOST_AUTO_TEST_CASE(add_fixture) {
   Management management;
   FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::RGBLight3Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
   Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
   FixtureControl &control = management.AddFixtureControl(fixture);
   BOOST_CHECK_EQUAL(&management.GetFixtureControl(fixture), &control);
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(add_fixture) {
 BOOST_AUTO_TEST_CASE(AddMany) {
   Management management;
   FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::RGBLight3Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
   Fixture *fixture = &management.GetTheatre().AddFixture(fixtureType);
   BOOST_CHECK_EQUAL(fixture->Name(), "RGB A");
   for (size_t i = 0; i != 30; ++i) {
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(AddMany) {
 BOOST_AUTO_TEST_CASE(remove_fixture) {
   Management management;
   FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::RGBLight3Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
   management.RootFolder().Add(fixtureType);
   Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
   FixtureControl &control =

@@ -15,20 +15,19 @@ namespace glight::theatre {
 
 class Fixture;
 
-// These currently have a fixed position, because they are written
-// as integers into save files... TODO write as name into the file.
 enum class StockFixture {
   Light1Ch,
-  RGBLight3Ch,
-  RGBLight4Ch,
-  RGBALight4Ch,
-  RGBALight5Ch,
-  RGBWLight4Ch,
-  RGBUVLight4Ch,
-  RGBAWLight5Ch,
-  RGBAWUVLight6Ch,
-  UVLight3Ch,
-  H2ODMXPro,
+  Rgb3Ch,
+  Rgb4Ch,
+  Rgba4Ch,
+  Rgba5Ch,
+  Rgbw4Ch,
+  RgbUv4Ch,
+  Rgbaw5Ch,
+  RgbawUv6Ch,
+  Rgbl4Ch,
+  Uv3Ch,
+  H2ODmxPro,
   AyraTDCSunrise,
   RGB_ADJ_6CH,
   RGB_ADJ_7CH,
@@ -68,31 +67,33 @@ class FixtureType : public FolderObject {
     switch (fixtureClass) {
       case StockFixture::Light1Ch:
         return "Light (1ch)";
-      case StockFixture::RGBLight3Ch:
+      case StockFixture::Rgb3Ch:
         return "RGB light (3ch)";
-      case StockFixture::RGBLight4Ch:
+      case StockFixture::Rgb4Ch:
         return "RGB light (4ch)";
-      case StockFixture::RGBALight4Ch:
+      case StockFixture::Rgba4Ch:
         return "RGBA light (4ch)";
-      case StockFixture::RGBALight5Ch:
+      case StockFixture::Rgba5Ch:
         return "RGBA light (5ch)";
-      case StockFixture::RGBWLight4Ch:
+      case StockFixture::Rgbw4Ch:
         return "RGBW light (4ch)";
-      case StockFixture::RGBUVLight4Ch:
+      case StockFixture::RgbUv4Ch:
         return "RGBUV light (4ch)";
-      case StockFixture::RGBAWLight5Ch:
+      case StockFixture::Rgbaw5Ch:
         return "RGBAW light (5ch)";
-      case StockFixture::RGBAWUVLight6Ch:
+      case StockFixture::RgbawUv6Ch:
         return "RGBAW+UV light (6ch)";
+      case StockFixture::Rgbl4Ch:
+        return "RGBL light (4ch)";
       case StockFixture::CWWW2Ch:
         return "CW/WW light (2ch)";
       case StockFixture::CWWW4Ch:
         return "CW/WW light (4ch)";
       case StockFixture::CWWWA3Ch:
         return "CW/WW/A light (3ch)";
-      case StockFixture::UVLight3Ch:
+      case StockFixture::Uv3Ch:
         return "UV light (3ch)";
-      case StockFixture::H2ODMXPro:
+      case StockFixture::H2ODmxPro:
         return "H2O DMX Pro";
       case StockFixture::AyraTDCSunrise:
         return "Ayra TDC Sunrise";
@@ -125,13 +126,14 @@ class FixtureType : public FolderObject {
   static std::vector<StockFixture> GetStockList() {
     using SF = StockFixture;
     return std::vector<SF>{
-        SF::Light1Ch,       SF::RGBLight3Ch,    SF::RGBLight4Ch,
-        SF::RGBALight4Ch,   SF::RGBALight5Ch,   SF::RGBWLight4Ch,
-        SF::RGBUVLight4Ch,  SF::RGBAWLight5Ch,  SF::RGBAWUVLight6Ch,
-        SF::CWWW2Ch,        SF::CWWW4Ch,        SF::CWWWA3Ch,
-        SF::UVLight3Ch,     SF::H2ODMXPro,      SF::AyraTDCSunrise,
-        SF::RGB_ADJ_6CH,    SF::RGB_ADJ_7CH,    SF::BT_VINTAGE_5CH,
-        SF::BT_VINTAGE_6CH, SF::BT_VINTAGE_7CH, SF::RGBLight6Ch_16bit};
+        SF::Light1Ch,         SF::Rgb3Ch,         SF::Rgb4Ch,
+        SF::Rgba4Ch,          SF::Rgba5Ch,        SF::Rgbw4Ch,
+        SF::RgbUv4Ch,         SF::Rgbaw5Ch,       SF::RgbawUv6Ch,
+        SF::Rgbl4Ch,          SF::CWWW2Ch,        SF::CWWW4Ch,
+        SF::CWWWA3Ch,         SF::Uv3Ch,          SF::H2ODmxPro,
+        SF::AyraTDCSunrise,   SF::RGB_ADJ_6CH,    SF::RGB_ADJ_7CH,
+        SF::BT_VINTAGE_5CH,   SF::BT_VINTAGE_6CH, SF::BT_VINTAGE_7CH,
+        SF::RGBLight6Ch_16bit};
   }
 
   static std::vector<FixtureClass> GetClassList() {

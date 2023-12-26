@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(construct) {
 BOOST_AUTO_TEST_CASE(insert) {
   glight::theatre::Theatre theatre;
   const glight::theatre::FixtureType& type =
-      theatre.AddFixtureType(StockFixture::RGBLight3Ch);
+      theatre.AddFixtureType(StockFixture::Rgb3Ch);
   Fixture& a = theatre.AddFixture(type);
   Fixture& b = theatre.AddFixture(type);
   FixtureGroup group("g1");
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(insert) {
 BOOST_AUTO_TEST_CASE(remove) {
   glight::theatre::Theatre theatre;
   const glight::theatre::FixtureType& type =
-      theatre.AddFixtureType(StockFixture::RGBLight3Ch);
+      theatre.AddFixtureType(StockFixture::Rgb3Ch);
   Fixture& a = theatre.AddFixture(type);
   Fixture& b = theatre.AddFixture(type);
   Fixture& c = theatre.AddFixture(type);
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(remove) {
 BOOST_AUTO_TEST_CASE(contains) {
   Theatre theatre;
   const glight::theatre::FixtureType& type =
-      theatre.AddFixtureType(StockFixture::RGBLight3Ch);
+      theatre.AddFixtureType(StockFixture::Rgb3Ch);
   Fixture& a = theatre.AddFixture(type);
   Fixture& b = theatre.AddFixture(type);
   Fixture& c = theatre.AddFixture(type);
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(add_to_management) {
   Management management;
   Theatre& theatre = management.GetTheatre();
   const glight::theatre::FixtureType& type =
-      theatre.AddFixtureType(StockFixture::RGBLight3Ch);
+      theatre.AddFixtureType(StockFixture::Rgb3Ch);
   Fixture& a = theatre.AddFixture(type);
   theatre.AddFixture(type);
   Fixture& c = theatre.AddFixture(type);

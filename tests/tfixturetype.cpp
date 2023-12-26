@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(Construct) {
 }
 
 BOOST_AUTO_TEST_CASE(Copy) {
-  FixtureType typeA(StockFixture::RGBLight3Ch);
+  FixtureType typeA(StockFixture::Rgb3Ch);
   FixtureType typeB(typeA);
   BOOST_REQUIRE_EQUAL(typeB.Functions().size(), 3);
   BOOST_CHECK(typeB.Functions()[0].Type() == FunctionType::Red);
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(Copy) {
 }
 
 BOOST_AUTO_TEST_CASE(ShapeCount) {
-  FixtureType typeA(StockFixture::RGBLight3Ch);
+  FixtureType typeA(StockFixture::Rgb3Ch);
   BOOST_CHECK_EQUAL(typeA.ShapeCount(), 1);
   FixtureType typeB(StockFixture::BT_VINTAGE_5CH);
   BOOST_CHECK_EQUAL(typeB.ShapeCount(), 2);
@@ -70,7 +70,7 @@ Color testColor(StockFixture cl, const std::vector<unsigned char> &values) {
 }
 
 BOOST_AUTO_TEST_CASE(GetColor_RGB) {
-  const Color color = testColor(StockFixture::RGBLight3Ch, {17, 128, 255});
+  const Color color = testColor(StockFixture::Rgb3Ch, {17, 128, 255});
   BOOST_TEST(color.Red() == 17);
   BOOST_TEST(color.Green() == 128);
   BOOST_TEST(color.Blue() == 255);
@@ -78,37 +78,37 @@ BOOST_AUTO_TEST_CASE(GetColor_RGB) {
 
 BOOST_AUTO_TEST_CASE(GetColor_RGBAWUV) {
   const Color colorRed =
-      testColor(StockFixture::RGBAWUVLight6Ch, {255, 0, 0, 0, 0, 0});
+      testColor(StockFixture::RgbawUv6Ch, {255, 0, 0, 0, 0, 0});
   BOOST_TEST(colorRed.Red() >= 64);
   BOOST_TEST(colorRed.Green() == 0);
   BOOST_TEST(colorRed.Blue() == 0);
 
   const Color colorGreen =
-      testColor(StockFixture::RGBAWUVLight6Ch, {0, 255, 0, 0, 0, 0});
+      testColor(StockFixture::RgbawUv6Ch, {0, 255, 0, 0, 0, 0});
   BOOST_TEST(colorGreen.Red() == 0);
   BOOST_TEST(colorGreen.Green() >= 64);
   BOOST_TEST(colorGreen.Blue() == 0);
 
   const Color colorBlue =
-      testColor(StockFixture::RGBAWUVLight6Ch, {0, 0, 255, 0, 0, 0});
+      testColor(StockFixture::RgbawUv6Ch, {0, 0, 255, 0, 0, 0});
   BOOST_TEST(colorBlue.Red() == 0);
   BOOST_TEST(colorBlue.Green() == 0);
   BOOST_TEST(colorBlue.Blue() >= 64);
 
   const Color colorAmber =
-      testColor(StockFixture::RGBAWUVLight6Ch, {0, 0, 0, 255, 0, 0});
+      testColor(StockFixture::RgbawUv6Ch, {0, 0, 0, 255, 0, 0});
   BOOST_TEST(colorAmber.Red() >= 32);
   BOOST_TEST(colorAmber.Green() >= 24);
   BOOST_TEST(colorAmber.Blue() == 0);
 
   const Color colorWhite =
-      testColor(StockFixture::RGBAWUVLight6Ch, {0, 0, 0, 0, 255, 0});
+      testColor(StockFixture::RgbawUv6Ch, {0, 0, 0, 0, 255, 0});
   BOOST_TEST(colorWhite.Red() >= 64);
   BOOST_TEST(colorWhite.Green() >= 64);
   BOOST_TEST(colorWhite.Blue() >= 64);
 
   const Color colorUV =
-      testColor(StockFixture::RGBAWUVLight6Ch, {0, 0, 0, 0, 0, 255});
+      testColor(StockFixture::RgbawUv6Ch, {0, 0, 0, 0, 0, 255});
   BOOST_TEST(colorUV.Red() >= 24);
   BOOST_TEST(colorUV.Green() == 0);
   BOOST_TEST(colorUV.Blue() >= 48);
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(function_summary) {
   Management management;
 
   const FixtureType &rgb_type =
-      management.GetTheatre().AddFixtureType(StockFixture::RGBLight3Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
   BOOST_CHECK_EQUAL(FunctionSummary(rgb_type), "R-G-B");
 
   const FixtureType &btv_type =

@@ -44,13 +44,15 @@ void ColorSelectWidget::onColorClicked() {
       Gdk::RGBA("#FF8080"), Gdk::RGBA("#FF80FF"), Gdk::RGBA("#C080FF"),
       Gdk::RGBA("#8080FF"), Gdk::RGBA("#80C0FF"), Gdk::RGBA("#80FFFF"),
       Gdk::RGBA("#80FFC0"), Gdk::RGBA("#80FF80"), Gdk::RGBA("#C0FF80"),
-      Gdk::RGBA("#E0FF80"), Gdk::RGBA("#FFFF80"), Gdk::RGBA("#FFFFC0"),
-      Gdk::RGBA("#FFC0C0"),
-      Gdk::RGBA("#FFD4D4"),  // warm white
-      Gdk::RGBA("#FFE2E2"), Gdk::RGBA("#FFF0F0"),
-      Gdk::RGBA("#FFFFFF"),  // white
-      Gdk::RGBA("#F0F0FF"), Gdk::RGBA("#E2E2FF"),
-      Gdk::RGBA("#D4D4FF"),  // cold white
+      Gdk::RGBA("#E0FF80"),  // 30
+      Gdk::RGBA("#FFFF80"), Gdk::RGBA("#FFFFC0"), Gdk::RGBA("#FFC0C0"),
+      Gdk::RGBA("#FFAA5F"),  // warm white (2700 K)
+      Gdk::RGBA("#FFBA81"),  // 3200 K
+      Gdk::RGBA("#FFD0AA"),  // 4000 K
+      Gdk::RGBA("#FFE2CA"),  // 4800 K
+      Gdk::RGBA("#FFFFFF"),  // sRGB neutral white (6500 K)
+      Gdk::RGBA("#D5E1FF"),  // 8500 K
+      Gdk::RGBA("#C5D7FF"),  // 10500 K
   };
   dialog.add_palette(Gtk::Orientation::ORIENTATION_HORIZONTAL, 10, colors);
   const int result = dialog.run();
