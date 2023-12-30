@@ -21,6 +21,13 @@ BOOST_AUTO_TEST_CASE(warm2700) {
   BOOST_CHECK_EQUAL(95, c.Blue());    // 0x5f
 }
 
+BOOST_AUTO_TEST_CASE(warm3000) {
+  const Color c = TemperatureToRgb(3000);
+  BOOST_CHECK_EQUAL(255, c.Red());
+  BOOST_CHECK_EQUAL(180, c.Green());  // 0xb4
+  BOOST_CHECK_EQUAL(116, c.Blue());   // 0x74
+}
+
 BOOST_AUTO_TEST_CASE(warm3200) {
   const Color c = TemperatureToRgb(3200);
   BOOST_CHECK_EQUAL(255, c.Red());
@@ -53,6 +60,13 @@ BOOST_AUTO_TEST_CASE(neutral) {
   const Color c = TemperatureToRgb(6500);
   BOOST_CHECK_EQUAL(255, c.Red());
   BOOST_CHECK_EQUAL(255, c.Green());
+  BOOST_CHECK_EQUAL(255, c.Blue());
+}
+
+BOOST_AUTO_TEST_CASE(cold7000) {
+  const Color c = TemperatureToRgb(7000);
+  BOOST_CHECK_EQUAL(239, c.Red());    // 0xef
+  BOOST_CHECK_EQUAL(240, c.Green());  // 0xf0
   BOOST_CHECK_EQUAL(255, c.Blue());
 }
 

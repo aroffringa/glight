@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(apply) {
       output);
   BOOST_CHECK_EQUAL(output[0].UInt(), 20);  // master
   BOOST_CHECK_EQUAL(output[1].UInt(), 10);  // red
-  BOOST_CHECK_EQUAL(output[2].UInt(), 10);  // gren
+  BOOST_CHECK_EQUAL(output[2].UInt(), 10);  // green
   BOOST_CHECK_EQUAL(output[3].UInt(), 10);  // blue
   BOOST_CHECK_EQUAL(output[4].UInt(), 30);  // strobe
 }

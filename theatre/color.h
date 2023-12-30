@@ -7,12 +7,13 @@ namespace glight::theatre {
 
 class Color {
  public:
-  constexpr Color(unsigned char red, unsigned char green, unsigned char blue)
+  constexpr Color(unsigned char red, unsigned char green,
+                  unsigned char blue) noexcept
       : red_(red), green_(green), blue_(blue) {}
-  constexpr Color(const Color &) = default;
-  Color &operator=(const Color &) = default;
+  constexpr Color(const Color &) noexcept = default;
+  Color &operator=(const Color &) noexcept = default;
 
-  static Color FromHexString(const char *s) {
+  static constexpr Color FromHexString(const char *s) {
     const auto from_hex = [](char c) -> int {
       if (c >= '1' && c <= '9')
         return c - '0';
@@ -37,10 +38,13 @@ class Color {
   constexpr double GreenRatio() const { return green_ / 255.0; }
   constexpr double BlueRatio() const { return blue_ / 255.0; }
 
+  constexpr Color operator/(unsigned int divisor) const {
+    return Color(red_ / divisor, green_ / divisor, blue_ / divisor);
+  }
+
   constexpr static Color Gray(unsigned char intensity) {
     return Color(intensity, intensity, intensity);
   }
-
   constexpr static Color Black() { return Color(0, 0, 0); }
   constexpr static Color White() { return Color(255, 255, 255); }
   constexpr static Color WhiteOrange() { return Color(255, 192, 128); }
@@ -61,9 +65,17 @@ class Color {
   constexpr static Color Purple() { return Color(255, 0, 255); }
   constexpr static Color PurpleBlue() { return Color(128, 0, 255); }
   constexpr static Color PurpleWhite() { return Color(255, 128, 255); }
-  constexpr static Color ColdWhite() { return Color(228, 228, 255); }
-  constexpr static Color WarmWhite() { return Color(255, 228, 228); }
+  constexpr static Color ColdWhite() { return White8500K(); }
+  constexpr static Color WarmWhite() { return White3200K(); }
   constexpr static Color UV() { return Color(85, 0, 255); }
+
+  constexpr static Color White3000K() { return Color(255, 180, 116); }
+  constexpr static Color White3200K() { return Color(255, 186, 129); }
+  constexpr static Color White4000K() { return Color(255, 208, 170); }
+  constexpr static Color White4800K() { return Color(255, 226, 202); }
+  constexpr static Color White7000K() { return Color(239, 240, 255); }
+  constexpr static Color White8500K() { return Color(213, 225, 255); }
+  constexpr static Color White10500K() { return Color(197, 215, 255); }
 
  private:
   unsigned char red_, green_, blue_;

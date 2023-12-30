@@ -119,6 +119,7 @@ set(SYSTEMFILES
 
 set(THEATREFILES
   theatre/beatfinder.cpp
+  theatre/colordeduction.cpp
   theatre/effect.cpp
   theatre/fixture.cpp
   theatre/fixturefunction.cpp
@@ -192,7 +193,9 @@ if(Boost_FOUND)
     tests/tscene.cpp
     tests/ttheatre.cpp
     tests/tuniquewithoutordering.cpp
+    tests/theatre/tcolordeduction.cpp
     tests/theatre/filters/tmonochromefilter.cpp
+    tests/theatre/filters/trgbfilter.cpp
     )
   target_link_directories(runtests PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
   target_link_libraries(runtests ${GLIGHT_LIBRARIES})

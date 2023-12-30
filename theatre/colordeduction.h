@@ -1,6 +1,7 @@
 #ifndef THEATRE_COLOR_DEDUCTION_H_
 #define THEATRE_COLOR_DEDUCTION_H_
 
+#include "color.h"
 #include "controlvalue.h"
 
 namespace glight::theatre {
@@ -48,6 +49,24 @@ inline ControlValue DeduceWarmWhite(ControlValue r, ControlValue g,
   const unsigned ww = std::min(gb * 64, r.UInt() * 57) / 64;
   return ControlValue(ww);
 }
+
+/**
+ * Solves the equation f1 a + f2 b <= rgb_values, such that the 1-norm of the
+ * difference is minimized.
+ */
+void Solve2ColorFit(Color a, Color b, const ControlValue* rgb_values,
+                    ControlValue* fitted_values);
+
+/**
+ * Solves the equation f1 a + f2 b + f3 c <= rgb_values, such that the 1-norm of
+ * the difference is minimized.
+ */
+void Solve3ColorFit(Color a, Color b, Color c, const ControlValue* rgb_values,
+                    ControlValue* fitted_values);
+
+void Normalized3ColorFit(Color a, Color b, Color c,
+                         const ControlValue* rgb_values,
+                         ControlValue* fitted_values);
 
 }  // namespace glight::theatre
 
