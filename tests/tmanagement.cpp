@@ -54,10 +54,10 @@ BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
       management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
   management.RootFolder().Add(typeA);
   FixtureType &typeB =
-      management.GetTheatre().AddFixtureType(StockFixture::RGBLight3Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
   management.RootFolder().Add(typeB);
   FixtureType &typeC =
-      management.GetTheatre().AddFixtureType(StockFixture::RGBALight4Ch);
+      management.GetTheatre().AddFixtureType(StockFixture::Rgba4Ch);
   management.RootFolder().Add(typeC);
   management.RemoveFixtureType(typeB);
   management.RemoveFixtureType(typeC);

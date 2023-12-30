@@ -4,6 +4,7 @@
 #include "mixstyle.h"
 
 #include <cmath>
+#include <cstdint>
 
 namespace glight::theatre {
 
@@ -64,6 +65,18 @@ class ControlValue {
     return (first * second) >> 6;
   }
 
+  constexpr static unsigned Fraction(unsigned numerator, unsigned denominator) {
+    if (denominator == 0) {
+      return numerator == 0 ? 0 : MaxUInt();
+    } else {
+      const uint64_t n =
+          (static_cast<uint64_t>(numerator) << 24u);  // to 48 bits
+      const uint64_t d = denominator;                 // remain 24 bits
+      return std::min(MaxUInt(),
+                      static_cast<unsigned>(n / d));  // from 48 bit to 24 bit
+    }
+  }
+
   constexpr static MixStyle CombineMixStyles(MixStyle primaryStyle,
                                              MixStyle secondaryStyle) {
     if (primaryStyle == MixStyle::Default)
@@ -92,6 +105,10 @@ inline ControlValue operator*(const ControlValue& lhs,
   return ControlValue(ControlValue::MultiplyValues(lhs.UInt(), rhs.UInt()));
 }
 
+inline ControlValue operator*(const ControlValue& lhs, unsigned factor) {
+  return ControlValue(lhs.UInt() * factor);
+}
+
 inline ControlValue operator/(const ControlValue& lhs, unsigned factor) {
   return ControlValue(lhs.UInt() / factor);
 }
@@ -112,8 +129,15 @@ inline ControlValue Invert(const ControlValue& v) {
                       std::min(v.UInt(), ControlValue::MaxUInt()));
 }
 
-inline ControlValue Max(const ControlValue& a, const ControlValue& b) {
-  return ControlValue(std::max(a.UInt(), b.UInt()));
+template <class... Pack>
+inline ControlValue Max(const ControlValue& first, const ControlValue& second) {
+  return ControlValue(std::max(first.UInt(), second.UInt()));
+}
+
+template <class... Pack>
+inline ControlValue Max(const ControlValue& first, const ControlValue& second,
+                        Pack... third) {
+  return ControlValue(std::max(first.UInt(), Max(second, third...).UInt()));
 }
 
 inline ControlValue Mix(const ControlValue& firstValue,

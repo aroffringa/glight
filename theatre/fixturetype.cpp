@@ -12,27 +12,27 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::White, 0, false, 0);
       short_name_ = "Light";
       break;
-    case StockFixture::RGBLight3Ch:
+    case StockFixture::Rgb3Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       short_name_ = "RGB";
       break;
-    case StockFixture::RGBLight4Ch:
+    case StockFixture::Rgb4Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::Master, 3, false, 0);
       short_name_ = "RGB";
       break;
-    case StockFixture::RGBALight4Ch:
+    case StockFixture::Rgba4Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::Amber, 3, false, 0);
       short_name_ = "RGBA";
       break;
-    case StockFixture::RGBALight5Ch:
+    case StockFixture::Rgba5Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
@@ -40,21 +40,21 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Master, 4, false, 0);
       short_name_ = "RGBA";
       break;
-    case StockFixture::RGBWLight4Ch:
+    case StockFixture::Rgbw4Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::White, 3, false, 0);
       short_name_ = "RGBW";
       break;
-    case StockFixture::RGBUVLight4Ch:
+    case StockFixture::RgbUv4Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
       functions_.emplace_back(FunctionType::UV, 3, false, 0);
       short_name_ = "RGBUV";
       break;
-    case StockFixture::RGBAWLight5Ch:
+    case StockFixture::Rgbaw5Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
@@ -62,7 +62,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::White, 4, false, 0);
       short_name_ = "RGBAW";
       break;
-    case StockFixture::RGBAWUVLight6Ch:
+    case StockFixture::RgbawUv6Ch:
       functions_.emplace_back(FunctionType::Red, 0, false, 0);
       functions_.emplace_back(FunctionType::Green, 1, false, 0);
       functions_.emplace_back(FunctionType::Blue, 2, false, 0);
@@ -70,6 +70,13 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::White, 4, false, 0);
       functions_.emplace_back(FunctionType::UV, 5, false, 0);
       short_name_ = "RGBAWUV";
+      break;
+    case StockFixture::Rgbl4Ch:
+      functions_.emplace_back(FunctionType::Red, 0, false, 0);
+      functions_.emplace_back(FunctionType::Green, 1, false, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, false, 0);
+      functions_.emplace_back(FunctionType::Lime, 3, false, 0);
+      short_name_ = "RGBL";
       break;
     case StockFixture::CWWW2Ch:
       functions_.emplace_back(FunctionType::ColdWhite, 0, false, 0);
@@ -89,13 +96,13 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Amber, 2, false, 0);
       short_name_ = "CW/WW/A";
       break;
-    case StockFixture::UVLight3Ch:
+    case StockFixture::Uv3Ch:
       functions_.emplace_back(FunctionType::UV, 0, false, 0);
       functions_.emplace_back(FunctionType::Strobe, 1, false, 0);
       functions_.emplace_back(FunctionType::Pulse, 2, false, 0);
       short_name_ = "UV";
       break;
-    case StockFixture::H2ODMXPro: {
+    case StockFixture::H2ODmxPro: {
       functions_.emplace_back(FunctionType::Master, 0, false, 0);
       FixtureTypeFunction &rotation =
           functions_.emplace_back(FunctionType::RotationSpeed, 1, false, 0);
