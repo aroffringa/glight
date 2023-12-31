@@ -24,6 +24,14 @@ class Test {
   static_assert(GetAssigned() == 0);
   static_assert(*GetAssigned() == 0);
 
+  static constexpr OptionalNumber<T> GetReset() {
+    OptionalNumber<T> number = GetAssigned();
+    number.reset();
+    return number;
+  }
+
+  static_assert(!GetReset());
+
   static constexpr OptionalNumber<T> GetUnassigned() {
     OptionalNumber<T> number(T(1));
     number = {};

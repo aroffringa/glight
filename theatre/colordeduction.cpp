@@ -1,7 +1,6 @@
 #include "colordeduction.h"
 
 #include <algorithm>
-#include <iostream>  // DEBUG
 
 namespace glight::theatre {
 
@@ -68,8 +67,6 @@ void ApplyDiffFit(Color a, Color b, unsigned& red, unsigned& green,
   fit_a -= fit_diff;
   Subtract(b, fit_diff, red, green, blue);
   fit_b += fit_diff;
-  std::cout << "Fit_diff=" << fit_diff << ", rgb=" << red << "," << green << ","
-            << blue << '\n';
 }
 
 }  // namespace
@@ -86,11 +83,8 @@ void Solve2ColorFit(Color a, Color b, const ControlValue* rgb_values,
   Subtract(b, fit_b, red, green, blue);
 
   ApplyDiffFit(a, b, red, green, blue, fit_a, fit_b);
-  std::cout << "Before=" << fit_a << '\n';
   fit_a =
       std::min(ControlValue::MaxUInt(), fit_a + FitColor(a, red, green, blue));
-  std::cout << "After=" << fit_a << ", RGB=" << red << ',' << green << ','
-            << blue << '\n';
 
   fitted_values[0] = ControlValue(fit_a);
   fitted_values[1] = ControlValue(fit_b);
@@ -104,32 +98,16 @@ void Solve3ColorFit(Color a, Color b, Color c, const ControlValue* rgb_values,
 
   unsigned fit_a = FitColor(a, red, green, blue);
   Subtract(a, fit_a, red, green, blue);
-  std::cout << "fit_a=" << fit_a << ", rgb=" << red << "," << green << ","
-            << blue << '\n';
   unsigned fit_b = FitColor(b, red, green, blue);
   Subtract(b, fit_b, red, green, blue);
-  std::cout << "fit_b=" << fit_b << ", rgb=" << red << "," << green << ","
-            << blue << '\n';
   unsigned fit_c = FitColor(c, red, green, blue);
   Subtract(c, fit_c, red, green, blue);
-  std::cout << "fit_c=" << fit_c << ", rgb=" << red << "," << green << ","
-            << blue << '\n';
 
   ApplyDiffFit(a, b, red, green, blue, fit_a, fit_b);
-  std::cout << "fit_a=" << fit_a << ", rgb=" << red << "," << green << ","
-            << blue << '\n';
   ApplyDiffFit(a, c, red, green, blue, fit_a, fit_c);
-  std::cout << "fit_a=" << fit_a << ", rgb=" << red << "," << green << ","
-            << blue << '\n';
   ApplyDiffFit(b, c, red, green, blue, fit_b, fit_c);
-  std::cout << "fit_a=" << fit_a << ", rgb=" << red << "," << green << ","
-            << blue << '\n';
   ApplyDiffFit(b, a, red, green, blue, fit_b, fit_a);
-  std::cout << "fit_a=" << fit_a << ", rgb=" << red << "," << green << ","
-            << blue << '\n';
   ApplyDiffFit(c, a, red, green, blue, fit_c, fit_a);
-  std::cout << "fit_a=" << fit_a << ", rgb=" << red << "," << green << ","
-            << blue << '\n';
   ApplyDiffFit(c, b, red, green, blue, fit_c, fit_b);
 
   fitted_values[0] = ControlValue(fit_a);

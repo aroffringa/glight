@@ -8,6 +8,7 @@
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 
+#include "../../theatre/filters/masterchannelfilter.h"
 #include "../../theatre/filters/monochromefilter.h"
 #include "../../theatre/filters/rgbfilter.h"
 
@@ -25,6 +26,7 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
       _decCountButton("-"),
       _incCountButton("+"),
       filters_frame_("Filters"),
+      auto_master_cb_("Auto master channel"),
       rgb_cb_("RGB colorspace"),
       monochrome_cb_("Monochrome"),
       _cancelButton("Cancel"),
@@ -65,6 +67,8 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
   _incCountButton.signal_clicked().connect([&]() { onIncCount(); });
   _grid.attach(_incCountButton, 3, 2, 1, 1);
 
+  filters_box_.pack_start(auto_master_cb_);
+  auto_master_cb_.set_active(true);
   filters_box_.pack_start(rgb_cb_);
   rgb_cb_.set_active(true);
   filters_box_.pack_start(monochrome_cb_);
@@ -144,6 +148,9 @@ void AddFixtureWindow::onAdd() {
 
       theatre::FixtureControl &control = _management->AddFixtureControl(
           fixture, _management->RootFolder() /* TODO */);
+      if (auto_master_cb_.get_active()) {
+        control.AddFilter(std::make_unique<theatre::MasterChannelFilter>());
+      }
       if (rgb_cb_.get_active()) {
         control.AddFilter(std::make_unique<theatre::RgbFilter>());
       }
