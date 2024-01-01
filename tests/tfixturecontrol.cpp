@@ -4,7 +4,7 @@
 #include "../theatre/theatre.h"
 #include "../theatre/timing.h"
 
-#include "../theatre/filters/masterchannelfilter.h"
+#include "../theatre/filters/automasterfilter.h"
 #include "../theatre/filters/monochromefilter.h"
 #include "../theatre/filters/rgbfilter.h"
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(Filters) {
         management.GetTheatre().AddFixtureType(StockFixture::Rgba5Ch);
     Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
     FixtureControl &control = management.AddFixtureControl(fixture);
-    control.AddFilter(std::make_unique<MasterChannelFilter>());
+    control.AddFilter(std::make_unique<AutoMasterFilter>());
     control.AddFilter(std::make_unique<RgbFilter>());
     BOOST_REQUIRE_EQUAL(control.NInputs(), 3);
     BOOST_CHECK(control.InputType(0) == FunctionType::Red);

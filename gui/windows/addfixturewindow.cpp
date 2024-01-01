@@ -8,7 +8,7 @@
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
 
-#include "../../theatre/filters/masterchannelfilter.h"
+#include "../../theatre/filters/automasterfilter.h"
 #include "../../theatre/filters/monochromefilter.h"
 #include "../../theatre/filters/rgbfilter.h"
 
@@ -149,7 +149,7 @@ void AddFixtureWindow::onAdd() {
       theatre::FixtureControl &control = _management->AddFixtureControl(
           fixture, _management->RootFolder() /* TODO */);
       if (auto_master_cb_.get_active()) {
-        control.AddFilter(std::make_unique<theatre::MasterChannelFilter>());
+        control.AddFilter(std::make_unique<theatre::AutoMasterFilter>());
       }
       if (rgb_cb_.get_active()) {
         control.AddFilter(std::make_unique<theatre::RgbFilter>());

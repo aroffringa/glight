@@ -195,7 +195,7 @@ if(Boost_FOUND)
     tests/ttheatre.cpp
     tests/tuniquewithoutordering.cpp
     tests/theatre/tcolordeduction.cpp
-    tests/theatre/filters/tmasterchannelfilter.cpp
+    tests/theatre/filters/tautomasterfilter.cpp
     tests/theatre/filters/tmonochromefilter.cpp
     tests/theatre/filters/trgbfilter.cpp
     )

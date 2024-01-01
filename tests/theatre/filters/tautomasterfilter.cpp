@@ -1,4 +1,4 @@
-#include "theatre/filters/masterchannelfilter.h"
+#include "theatre/filters/automasterfilter.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -6,10 +6,10 @@
 
 using namespace glight::theatre;
 
-BOOST_AUTO_TEST_SUITE(master_channel_filter)
+BOOST_AUTO_TEST_SUITE(auto_master_filter)
 
 BOOST_AUTO_TEST_CASE(types) {
-  MasterChannelFilter filter;
+  AutoMasterFilter filter;
   filter.SetOutputTypes({FunctionType::Red, FunctionType::Green,
                          FunctionType::Blue, FunctionType::Master,
                          FunctionType::Strobe});
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(types) {
 }
 
 BOOST_AUTO_TEST_CASE(apply_full_on) {
-  MasterChannelFilter filter;
+  AutoMasterFilter filter;
   filter.SetOutputTypes({FunctionType::Master, FunctionType::Red,
                          FunctionType::Green, FunctionType::Blue,
                          FunctionType::Strobe});
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(apply_full_on) {
 }
 
 BOOST_AUTO_TEST_CASE(apply_low_brightness) {
-  MasterChannelFilter filter;
+  AutoMasterFilter filter;
   filter.SetOutputTypes({FunctionType::Red, FunctionType::Green,
                          FunctionType::Blue, FunctionType::Master});
   std::vector<ControlValue> output(5);

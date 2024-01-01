@@ -12,7 +12,7 @@
 
 #include "../theatre/effects/audioleveleffect.h"
 
-#include "../theatre/filters/masterchannelfilter.h"
+#include "../theatre/filters/automasterfilter.h"
 #include "../theatre/filters/rgbfilter.h"
 
 #include "../gui/state/guistate.h"
@@ -49,7 +49,7 @@ void FillManagement(Management &management) {
   FixtureControl &fc = management.AddFixtureControl(f, subFolder);
   fc.SetName("Control for RGBW fixture");
   fc.AddFilter(std::make_unique<RgbFilter>());
-  fc.AddFilter(std::make_unique<MasterChannelFilter>());
+  fc.AddFilter(std::make_unique<AutoMasterFilter>());
   management.AddSourceValue(fc, 0);
   management.AddSourceValue(fc, 1);
   management.AddSourceValue(fc, 2).A().SetValue(ControlValue::Max());

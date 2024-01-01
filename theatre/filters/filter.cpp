@@ -1,6 +1,6 @@
 #include "filter.h"
 
-#include "masterchannelfilter.h"
+#include "automasterfilter.h"
 #include "monochromefilter.h"
 #include "rgbfilter.h"
 
@@ -30,7 +30,7 @@ FilterType GetFilterType(const std::string& filter_type_string) {
 std::unique_ptr<Filter> Filter::Make(FilterType type) {
   switch (type) {
     case FilterType::AutoMaster:
-      return std::make_unique<MasterChannelFilter>();
+      return std::make_unique<AutoMasterFilter>();
     case FilterType::Monochrome:
       return std::make_unique<MonochromeFilter>();
     case FilterType::RgbColorspace:

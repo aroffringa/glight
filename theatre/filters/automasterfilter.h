@@ -1,5 +1,5 @@
-#ifndef GLIGHT_THEATRE_MASTER_CHANNEL_FILTER_H_
-#define GLIGHT_THEATRE_MASTER_CHANNEL_FILTER_H_
+#ifndef GLIGHT_THEATRE_AUTO_MASTER_FILTER_H_
+#define GLIGHT_THEATRE_AUTO_MASTER_FILTER_H_
 
 #include <cassert>
 
@@ -9,7 +9,7 @@
 
 namespace glight::theatre {
 
-class MasterChannelFilter final : public Filter {
+class AutoMasterFilter final : public Filter {
  public:
   FilterType GetType() const override { return FilterType::AutoMaster; }
 
