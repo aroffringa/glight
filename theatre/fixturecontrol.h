@@ -105,6 +105,7 @@ class FixtureControl final : public Controllable {
   }
 
   void AddFilter(std::unique_ptr<Filter> &&filter) {
+    assert(filter);
     if (filters_.empty()) {
       filters_.emplace_back(std::move(filter));
       std::vector<FunctionType> types;
@@ -113,19 +114,25 @@ class FixtureControl final : public Controllable {
            fixture_->Functions()) {
         types.emplace_back(function->Type());
       }
-      filters_.front()->SetOutputTypes(types);
+      filters_.back()->SetOutputTypes(std::move(types));
     } else {
-      filters_.insert(filters_.begin(), std::move(filter));
-      filters_.front()->SetOutputTypes(filters_[1]->InputTypes());
+      Filter *previous_last = filters_.back().get();
+      filters_.emplace_back(std::move(filter));
+      filters_.back()->SetOutputTypes(previous_last->InputTypes());
     }
   }
 
-  const std::vector<std::unique_ptr<Filter>> &Filters() { return filters_; }
+  const std::vector<std::unique_ptr<Filter>> &Filters() const {
+    return filters_;
+  }
 
  private:
   Fixture *fixture_;
   std::vector<ControlValue> values_;
   std::vector<ControlValue> scratch_;
+  // The filters, in backward order. Therefore, filters_.back()
+  // defines the inputs of this fixture, and the result of filters_.back()
+  // is transferred to the previous filter, unless filters_.front() is reached.
   std::vector<std::unique_ptr<Filter>> filters_;
 };
 
