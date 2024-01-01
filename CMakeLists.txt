@@ -136,6 +136,7 @@ set(THEATREFILES
   theatre/design/colorpreset.cpp
   theatre/design/rotation.cpp
   theatre/effects/hue_saturation_lightness_effect.cpp
+  theatre/filters/filter.cpp
   theatre/properties/propertyset.cpp
   theatre/scenes/blackoutsceneitem.cpp
   theatre/scenes/scene.cpp)

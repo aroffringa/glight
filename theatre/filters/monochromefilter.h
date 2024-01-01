@@ -11,6 +11,8 @@ namespace glight::theatre {
 
 class MonochromeFilter final : public Filter {
  public:
+  FilterType GetType() const override { return FilterType::Monochrome; }
+
   void Apply(const std::vector<ControlValue>& input,
              std::vector<ControlValue>& output) override {
     assert(input.size() == InputTypes().size());

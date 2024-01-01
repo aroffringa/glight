@@ -1,11 +1,18 @@
 #ifndef THEATRE_FILTER_H_
 #define THEATRE_FILTER_H_
 
+#include <string>
+
 #include "../controlvalue.h"
 #include "../folderobject.h"
 #include "../functiontype.h"
 
 namespace glight::theatre {
+
+enum class FilterType { AutoMaster, Monochrome, RgbColorspace };
+
+std::string ToString(FilterType type);
+FilterType GetFilterType(const std::string& filter_type_string);
 
 class Filter {
  public:
@@ -13,8 +20,12 @@ class Filter {
 
   virtual ~Filter() = default;
 
+  static std::unique_ptr<Filter> Make(FilterType type);
+
   const std::vector<FunctionType>& InputTypes() const { return input_types_; }
   const std::vector<FunctionType>& OutputTypes() const { return output_types_; }
+
+  virtual FilterType GetType() const = 0;
 
   /**
    * Determines the input types that this filter provides from the output

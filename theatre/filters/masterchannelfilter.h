@@ -11,6 +11,8 @@ namespace glight::theatre {
 
 class MasterChannelFilter final : public Filter {
  public:
+  FilterType GetType() const override { return FilterType::AutoMaster; }
+
   void Apply(const std::vector<ControlValue>& input,
              std::vector<ControlValue>& output) override {
     unsigned maximum;
