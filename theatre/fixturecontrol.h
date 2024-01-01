@@ -89,7 +89,9 @@ class FixtureControl final : public Controllable {
 
   void Mix(const Timing &, bool is_primary) override {
     // Propagate control values through the filters
-    for (std::unique_ptr<Filter> &filter : filters_) {
+    for (auto iterator = filters_.rbegin(); iterator != filters_.rend();
+         ++iterator) {
+      std::unique_ptr<Filter> &filter = *iterator;
       scratch_.resize(filter->OutputTypes().size());
       filter->Apply(values_, scratch_);
       std::swap(scratch_, values_);
