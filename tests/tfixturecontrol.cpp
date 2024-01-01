@@ -4,6 +4,10 @@
 #include "../theatre/theatre.h"
 #include "../theatre/timing.h"
 
+#include "../theatre/filters/automasterfilter.h"
+#include "../theatre/filters/monochromefilter.h"
+#include "../theatre/filters/rgbfilter.h"
+
 #include <boost/test/unit_test.hpp>
 
 #include <memory>
@@ -19,6 +23,7 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
   fixture.SetChannel(100);
   FixtureControl &control = management.AddFixtureControl(fixture);
+  BOOST_REQUIRE_EQUAL(control.NInputs(), 1);
   control.InputValue(0) = ControlValue::Zero();
   control.MixInput(0, ControlValue::Max());
   std::vector<unsigned> values(512, 0);
@@ -30,6 +35,33 @@ BOOST_AUTO_TEST_CASE(SetValue) {
       BOOST_CHECK_EQUAL(values[100], ControlValue::MaxUInt());
     else
       BOOST_CHECK_EQUAL(values[i], 0);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(Filters) {
+  Management management;
+
+  {
+    FixtureType &fixtureType =
+        management.GetTheatre().AddFixtureType(StockFixture::Rgba4Ch);
+    Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
+    FixtureControl &control = management.AddFixtureControl(fixture);
+    control.AddFilter(std::make_unique<RgbFilter>());
+    control.AddFilter(std::make_unique<MonochromeFilter>());
+    BOOST_REQUIRE_EQUAL(control.NInputs(), 1);
+    BOOST_CHECK(control.InputType(0) == FunctionType::White);
+  }
+  {
+    FixtureType &fixtureType =
+        management.GetTheatre().AddFixtureType(StockFixture::Rgba5Ch);
+    Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
+    FixtureControl &control = management.AddFixtureControl(fixture);
+    control.AddFilter(std::make_unique<AutoMasterFilter>());
+    control.AddFilter(std::make_unique<RgbFilter>());
+    BOOST_REQUIRE_EQUAL(control.NInputs(), 3);
+    BOOST_CHECK(control.InputType(0) == FunctionType::Red);
+    BOOST_CHECK(control.InputType(1) == FunctionType::Green);
+    BOOST_CHECK(control.InputType(2) == FunctionType::Blue);
   }
 }
 

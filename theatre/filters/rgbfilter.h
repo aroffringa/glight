@@ -19,6 +19,8 @@ enum class RgbFilterMode { MaxBrightness, Balanced, Accurate };
  */
 class RgbFilter : public Filter {
  public:
+  FilterType GetType() const override { return FilterType::RgbColorspace; }
+
   void SetMode(RgbFilterMode mode) { mode_ = mode; }
 
   void Apply(const std::vector<ControlValue>& input,
@@ -143,6 +145,15 @@ class RgbFilter : public Filter {
 
  protected:
   void DetermineInputTypes() override {
+    red_index_.reset();
+    green_index_.reset();
+    blue_index_.reset();
+    lime_index_.reset();
+    amber_index_.reset();
+    white_index_.reset();
+    cw_index_.reset();
+    ww_index_.reset();
+
     std::vector<FunctionType> input_types{
         FunctionType::Red, FunctionType::Green, FunctionType::Blue};
     for (size_t i = 0; i != OutputTypes().size(); ++i) {

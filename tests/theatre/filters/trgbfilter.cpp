@@ -1,5 +1,7 @@
 #include "theatre/filters/rgbfilter.h"
 
+#include "tolerance_check.h"
+
 #include <algorithm>
 
 #include <boost/test/unit_test.hpp>
@@ -7,15 +9,6 @@
 using namespace glight::theatre;
 
 BOOST_AUTO_TEST_SUITE(rgb_filter)
-
-namespace {
-void ToleranceCheck(const ControlValue& value, unsigned expected,
-                    unsigned tolerance = 1) {
-  BOOST_CHECK_LE(
-      std::abs(static_cast<int>(value.UInt()) - static_cast<int>(expected)),
-      tolerance);
-}
-}  // namespace
 
 constexpr unsigned kFull = ControlValue::MaxUInt();
 constexpr ControlValue kZeroCV = ControlValue::Zero();

@@ -255,6 +255,15 @@ void writeFixtureControl(WriteState &state, const FixtureControl &control) {
   state.writer.String("type", "fixture-control");
   writeFolderAttributes(state, control);
   state.writer.String("fixture-ref", control.GetFixture().Name());
+  if (!control.Filters().empty()) {
+    state.writer.StartArray("filters");
+    for (const std::unique_ptr<Filter> &filter : control.Filters()) {
+      state.writer.StartObject();
+      state.writer.String("type", ToString(filter->GetType()));
+      state.writer.EndObject();
+    }
+    state.writer.EndArray();
+  }
   state.writer.EndObject();
 }
 

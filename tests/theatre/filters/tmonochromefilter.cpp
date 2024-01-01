@@ -8,13 +8,9 @@ BOOST_AUTO_TEST_SUITE(monochrome_filter)
 
 BOOST_AUTO_TEST_CASE(types) {
   MonochromeFilter filter;
-  filter.SetOutputTypes({
-      FunctionType::Master,
-      FunctionType::Red,
-      FunctionType::Green,
-      FunctionType::Blue,
-      FunctionType::Strobe,
-  });
+  filter.SetOutputTypes({FunctionType::Master, FunctionType::Red,
+                         FunctionType::Green, FunctionType::Blue,
+                         FunctionType::Strobe});
   BOOST_REQUIRE_EQUAL(filter.InputTypes().size(), 3);
   BOOST_CHECK(filter.InputTypes()[0] == FunctionType::White);
   BOOST_CHECK(filter.InputTypes()[1] == FunctionType::Master);
@@ -27,13 +23,9 @@ BOOST_AUTO_TEST_CASE(types) {
 
 BOOST_AUTO_TEST_CASE(apply) {
   MonochromeFilter filter;
-  filter.SetOutputTypes({
-      FunctionType::Master,
-      FunctionType::Red,
-      FunctionType::Green,
-      FunctionType::Blue,
-      FunctionType::Strobe,
-  });
+  filter.SetOutputTypes({FunctionType::Master, FunctionType::Red,
+                         FunctionType::Green, FunctionType::Blue,
+                         FunctionType::Strobe});
   std::vector<ControlValue> output(5);
   filter.Apply(
       {

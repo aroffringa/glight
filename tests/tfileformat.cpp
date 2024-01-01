@@ -12,6 +12,9 @@
 
 #include "../theatre/effects/audioleveleffect.h"
 
+#include "../theatre/filters/automasterfilter.h"
+#include "../theatre/filters/rgbfilter.h"
+
 #include "../gui/state/guistate.h"
 
 #include "../system/reader.h"
@@ -45,6 +48,8 @@ void FillManagement(Management &management) {
   Fixture &f = management.GetTheatre().AddFixture(ft);
   FixtureControl &fc = management.AddFixtureControl(f, subFolder);
   fc.SetName("Control for RGBW fixture");
+  fc.AddFilter(std::make_unique<RgbFilter>());
+  fc.AddFilter(std::make_unique<AutoMasterFilter>());
   management.AddSourceValue(fc, 0);
   management.AddSourceValue(fc, 1);
   management.AddSourceValue(fc, 2).A().SetValue(ControlValue::Max());
@@ -167,7 +172,8 @@ void CheckEqual(const Management &a, const Management &b) {
   const Fixture &a_fixture = *a.GetTheatre().Fixtures()[0];
   const FixtureControl &a_fixture_control = a.GetFixtureControl(a_fixture);
   BOOST_CHECK_EQUAL(a_fixture_control.Name(), "Control for RGBW fixture");
-  BOOST_CHECK_EQUAL(a_fixture_control.NInputs(), 4);
+  BOOST_CHECK_EQUAL(a_fixture_control.NInputs(),
+                    3);  // rgb filter will make it 3
   BOOST_CHECK_EQUAL(a_fixture_control.NOutputs(), 0);
   BOOST_CHECK_EQUAL(
       &a.GetFixtureControl(a_fixture),

@@ -22,6 +22,8 @@
 #include "../gui/state/guistate.h"
 
 #include <fstream>
+#include <list>
+#include <memory>
 
 namespace glight::system {
 namespace {
@@ -220,6 +222,15 @@ void ParseFixtureControl(const Object &node, Management &management) {
       management.GetTheatre().GetFixture(ToStr(node["fixture-ref"]));
   FixtureControl &control = management.AddFixtureControl(fixture);
   ParseFolderAttr(node, control, management);
+  if (node.contains("filters")) {
+    const glight::json::Array &filters = ToArr(node["filters"]);
+    for (const Node &node : filters) {
+      const Object &filter = ToObj(node);
+      const FilterType type = GetFilterType(ToStr(filter["type"]));
+      std::cout << "FILTER=" << ToString(type) << '\n';
+      control.AddFilter(Filter::Make(type));
+    }
+  }
 }
 
 void ParsePresetCollection(const Object &node, Management &management) {

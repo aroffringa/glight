@@ -136,6 +136,7 @@ set(THEATREFILES
   theatre/design/colorpreset.cpp
   theatre/design/rotation.cpp
   theatre/effects/hue_saturation_lightness_effect.cpp
+  theatre/filters/filter.cpp
   theatre/properties/propertyset.cpp
   theatre/scenes/blackoutsceneitem.cpp
   theatre/scenes/scene.cpp)
@@ -194,6 +195,7 @@ if(Boost_FOUND)
     tests/ttheatre.cpp
     tests/tuniquewithoutordering.cpp
     tests/theatre/tcolordeduction.cpp
+    tests/theatre/filters/tautomasterfilter.cpp
     tests/theatre/filters/tmonochromefilter.cpp
     tests/theatre/filters/trgbfilter.cpp
     )

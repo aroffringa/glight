@@ -121,6 +121,8 @@ class OptionalNumber {
 
   constexpr bool operator>(NumberType rhs) const { return !(*this <= rhs); }
 
+  constexpr void reset() { number_ = UnsetValue; }
+
  private:
   NumberType number_ = UnsetValue;
 };
