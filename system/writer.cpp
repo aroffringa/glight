@@ -71,8 +71,6 @@ void writeDmxChannel(WriteState &state, const DmxChannel &dmxChannel) {
   state.writer.StartObject("dmx-channel");
   state.writer.Number("universe", dmxChannel.Universe());
   state.writer.Number("channel", dmxChannel.Channel());
-  state.writer.String("default-mix-style",
-                      ToString(dmxChannel.DefaultMixStyle()));
   state.writer.EndObject();
 }
 
@@ -81,7 +79,7 @@ void writeFixtureFunction(WriteState &state,
   state.writer.StartObject();
   state.writer.String("name", fixtureFunction.Name());
   state.writer.String("type", ToString(fixtureFunction.Type()));
-  writeDmxChannel(state, fixtureFunction.FirstChannel());
+  writeDmxChannel(state, fixtureFunction.MainChannel());
   state.writer.EndObject();
 }
 
@@ -160,7 +158,8 @@ void writeFixtureTypeFunction(WriteState &state,
   state.writer.StartObject();
   state.writer.String("type", ToString(function.Type()));
   state.writer.Number("dmx-offset", function.DmxOffset());
-  state.writer.Boolean("is-16-bit", function.Is16Bit());
+  if (function.FineChannelOffset())
+    state.writer.Number("fine-channel-offset", *function.FineChannelOffset());
   state.writer.Number("shape", function.Shape());
   switch (function.Type()) {
     case FunctionType::ColorMacro:

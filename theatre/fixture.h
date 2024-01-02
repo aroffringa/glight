@@ -33,9 +33,9 @@ class Fixture : public NamedObject {
   std::vector<unsigned> GetChannels() const {
     std::vector<unsigned> channels;
     for (const std::unique_ptr<FixtureFunction> &ff : functions_) {
-      channels.emplace_back(ff->FirstChannel().Channel());
-      if (!ff->IsSingleChannel())
-        channels.emplace_back(ff->FirstChannel().Channel() + 1);
+      channels.emplace_back(ff->MainChannel().Channel());
+      if (ff->FineChannel())
+        channels.emplace_back(ff->FineChannel()->Channel());
     }
     return channels;
   }
@@ -44,7 +44,7 @@ class Fixture : public NamedObject {
 
   void DecChannel();
 
-  void SetChannel(unsigned dmxChannel);
+  void SetChannel(DmxChannel dmx_channel);
 
   void ClearFunctions() { functions_.clear(); }
   FixtureFunction &AddFunction(FunctionType type) {

@@ -6,15 +6,18 @@ namespace glight::theatre {
 Fixture::Fixture(Theatre &theatre, const FixtureType &type,
                  const std::string &name)
     : NamedObject(name), theatre_(theatre), type_(type) {
-  size_t ch = theatre.FirstFreeChannel();
+  DmxChannel base_channel = theatre.FirstFreeChannel();
   for (size_t ci = 0; ci != type.Functions().size(); ++ci) {
     const FixtureTypeFunction function = type.Functions()[ci];
     const std::string name(AbbreviatedFunctionType(function.Type()));
     functions_.emplace_back(
         std::make_unique<FixtureFunction>(theatre_, function.Type(), name));
-    const bool is16bit = function.Is16Bit();
-    functions_[ci]->SetChannel(DmxChannel((ch + function.DmxOffset()) % 512, 0),
-                               is16bit);
+    const DmxChannel main_channel(base_channel + function.DmxOffset());
+    std::optional<DmxChannel> fine_channel;
+    if (function.FineChannelOffset())
+      fine_channel = base_channel + *function.FineChannelOffset();
+
+    functions_[ci]->SetChannel(main_channel, fine_channel);
   }
 }
 
@@ -40,16 +43,16 @@ void Fixture::DecChannel() {
   theatre_.NotifyDmxChange();
 }
 
-void Fixture::SetChannel(unsigned dmxChannel) {
-  for (std::unique_ptr<FixtureFunction> &ff : functions_) {
-    dmxChannel = dmxChannel % 512;
-    DmxChannel c = ff->FirstChannel();
-    c.SetChannel(dmxChannel);
-    ff->SetChannel(c);
-    if (ff->IsSingleChannel())
-      ++dmxChannel;
-    else
-      dmxChannel += 2;
+void Fixture::SetChannel(DmxChannel dmx_channel) {
+  for (size_t i = 0; i != functions_.size(); ++i) {
+    std::unique_ptr<FixtureFunction> &ff = functions_[i];
+    const glight::theatre::FixtureTypeFunction &tf = Type().Functions()[i];
+    if (tf.FineChannelOffset()) {
+      ff->SetChannel(dmx_channel + tf.DmxOffset(),
+                     dmx_channel + *tf.FineChannelOffset());
+    } else {
+      ff->SetChannel(dmx_channel + tf.DmxOffset());
+    }
   }
 
   theatre_.NotifyDmxChange();

@@ -31,13 +31,13 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
   struct FunctionsColumns : public Gtk::TreeModelColumnRecord {
     FunctionsColumns() {
       add(dmx_offset_);
-      add(is_16_bit_);
+      add(fine_channel_);
       add(function_type_);
       add(function_type_str_);
     }
 
     Gtk::TreeModelColumn<size_t> dmx_offset_;
-    Gtk::TreeModelColumn<bool> is_16_bit_;
+    Gtk::TreeModelColumn<Glib::ustring> fine_channel_;
     Gtk::TreeModelColumn<theatre::FunctionType> function_type_;
     Gtk::TreeModelColumn<Glib::ustring> function_type_str_;
   } functions_columns_;
@@ -49,7 +49,8 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
 
   Gtk::Label dmx_offset_label_;
   Gtk::Entry dmx_offset_entry_;
-  Gtk::CheckButton is_16_bit_button_;
+  Gtk::Label fine_channel_label_;
+  Gtk::Entry fine_channel_entry_;
   Gtk::Label function_type_label_;
   Glib::RefPtr<Gtk::ListStore> function_type_model_;
   Gtk::ComboBox function_type_combo_;

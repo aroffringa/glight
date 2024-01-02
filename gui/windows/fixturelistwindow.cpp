@@ -193,7 +193,7 @@ void FixtureListWindow::onSetChannelButtonClicked() {
                               Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
     Gtk::Entry entry;
     entry.set_text(std::to_string(
-        fixture->Functions().front()->FirstChannel().Channel() + 1));
+        fixture->Functions().front()->MainChannel().Channel() + 1));
     dialog.get_message_area()->pack_start(entry, Gtk::PACK_SHRINK);
     dialog.get_message_area()->show_all_children();
     dialog.set_secondary_text(
@@ -205,7 +205,8 @@ void FixtureListWindow::onSetChannelButtonClicked() {
       if (value > 0 && value <= 512) {
         if (!fixture->IsVisible())
           fixture->SetSymbol(theatre::FixtureSymbol::Normal);
-        fixture->SetChannel(value - 1);
+        const unsigned universe = 0;  // TODO
+        fixture->SetChannel(theatre::DmxChannel(value - 1, universe));
         updateFixture(fixture);
       }
     }
@@ -310,9 +311,10 @@ void FixtureListWindow::onDownClicked() {
 
 void FixtureListWindow::onReassignClicked() {
   unsigned channel = 0;
+  unsigned universe = 0;
   for (const std::unique_ptr<theatre::Fixture> &fixture :
        _management.GetTheatre().Fixtures()) {
-    fixture->SetChannel(channel);
+    fixture->SetChannel(theatre::DmxChannel(channel, universe));
     const std::vector<unsigned> channels = fixture->GetChannels();
     for (unsigned ch : channels) {
       channel = std::max(channel, ch + 1);

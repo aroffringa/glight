@@ -44,8 +44,9 @@ class Theatre {
   bool IsUsed(const FixtureType &fixtureType) const;
 
   unsigned HighestChannel() const { return _highestChannel; }
-  unsigned FirstFreeChannel() const {
-    return _fixtures.empty() ? 0 : _highestChannel + 1;
+  DmxChannel FirstFreeChannel() const {
+    // TODO support multiple universes
+    return DmxChannel(_fixtures.empty() ? 0 : _highestChannel + 1, 0);
   }
   void NotifyDmxChange();
 

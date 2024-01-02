@@ -2,18 +2,37 @@
 
 namespace glight::gui {
 
+using system::OptionalNumber;
+
+namespace {
+std::string FineToString(OptionalNumber<size_t> fine_channel) {
+  if (fine_channel)
+    return std::to_string(*fine_channel);
+  else
+    return "-";
+}
+
+OptionalNumber<size_t> GetFine(const std::string& str) {
+  if (str == "" || str == "-")
+    return {};
+  else
+    return OptionalNumber<size_t>(std::atoi(str.c_str()));
+}
+
+}  // namespace
+
 FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     : Gtk::Frame("Functions"),
       add_function_button_("+"),
       remove_function_button_("-"),
       dmx_offset_label_("DMX offset:"),
-      is_16_bit_button_("16 bit"),
+      fine_channel_label_("Fine channel:"),
       function_type_label_("Function type:") {
   functions_model_ = Gtk::ListStore::create(functions_columns_);
 
   functions_view_.set_model(functions_model_);
   functions_view_.append_column("DMX", functions_columns_.dmx_offset_);
-  functions_view_.append_column("16 bit?", functions_columns_.is_16_bit_);
+  functions_view_.append_column("Fine", functions_columns_.fine_channel_);
   functions_view_.append_column("Type", functions_columns_.function_type_str_);
   functions_view_.set_vexpand(true);
   functions_view_.set_hexpand(true);
@@ -41,15 +60,16 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     }
   });
   grid_.attach(dmx_offset_entry_, 1, 2);
-  is_16_bit_button_.signal_clicked().connect([&]() {
+  fine_channel_entry_.signal_changed().connect([&]() {
     Gtk::TreeModel::iterator selected =
         functions_view_.get_selection()->get_selected();
     if (selected) {
-      (*selected)[functions_columns_.is_16_bit_] =
-          is_16_bit_button_.get_active();
+      (*selected)[functions_columns_.fine_channel_] =
+          FineToString(GetFine(fine_channel_entry_.get_text()));
     }
   });
-  grid_.attach(is_16_bit_button_, 1, 3);
+  grid_.attach(fine_channel_label_, 0, 3);
+  grid_.attach(fine_channel_entry_, 1, 3);
   grid_.attach(function_type_label_, 0, 4);
 
   function_type_model_ = Gtk::ListStore::create(function_type_columns_);
@@ -87,9 +107,11 @@ FixtureTypeFunctionsFrame::GetFunctions() const {
   for (const Gtk::TreeRow& child : functions_model_->children()) {
     const size_t dmx_offset = child[functions_columns_.dmx_offset_];
     const theatre::FunctionType type = child[functions_columns_.function_type_];
-    const bool is_16_bit = child[functions_columns_.is_16_bit_];
+    const Glib::ustring fine_channel_str =
+        child[functions_columns_.fine_channel_];
+    const OptionalNumber<size_t> fine_channel = GetFine(fine_channel_str);
     const size_t shape = 0;
-    functions.emplace_back(type, dmx_offset, is_16_bit, shape);
+    functions.emplace_back(type, dmx_offset, fine_channel, shape);
   }
   return functions;
 }
@@ -101,7 +123,7 @@ void FixtureTypeFunctionsFrame::SetFunctions(
     Gtk::TreeModel::iterator iter = functions_model_->append();
     const Gtk::TreeModel::Row& row = *iter;
     row[functions_columns_.dmx_offset_] = f.DmxOffset();
-    row[functions_columns_.is_16_bit_] = f.Is16Bit();
+    row[functions_columns_.fine_channel_] = FineToString(f.FineChannelOffset());
     row[functions_columns_.function_type_] = f.Type();
     row[functions_columns_.function_type_str_] = ToString(f.Type());
   }
@@ -113,8 +135,11 @@ void FixtureTypeFunctionsFrame::onAdd() {
     Gtk::TreeIter end_iter = functions_model_->children().end();
     --end_iter;
     Gtk::TreeModel::Row row = *end_iter;
-    if (row[functions_columns_.is_16_bit_])
-      dmx_offset = row[functions_columns_.dmx_offset_] + 2;
+    OptionalNumber<size_t> fine =
+        GetFine(Glib::ustring(row[functions_columns_.fine_channel_]));
+    if (fine)
+      dmx_offset =
+          std::max<size_t>(row[functions_columns_.dmx_offset_], *fine) + 1;
     else
       dmx_offset = row[functions_columns_.dmx_offset_] + 1;
   }
@@ -122,7 +147,7 @@ void FixtureTypeFunctionsFrame::onAdd() {
   Gtk::TreeModel::iterator iter = functions_model_->append();
   const Gtk::TreeModel::Row& row = *iter;
   row[functions_columns_.dmx_offset_] = dmx_offset;
-  row[functions_columns_.is_16_bit_] = false;
+  row[functions_columns_.fine_channel_] = "-";
   row[functions_columns_.function_type_] = theatre::FunctionType::White;
   row[functions_columns_.function_type_str_] =
       ToString(theatre::FunctionType::White);
@@ -142,19 +167,20 @@ void FixtureTypeFunctionsFrame::onSelectionChanged() {
   const bool is_selected = static_cast<bool>(selected);
   dmx_offset_label_.set_sensitive(is_selected);
   dmx_offset_entry_.set_sensitive(is_selected);
-  is_16_bit_button_.set_sensitive(is_selected);
+  fine_channel_label_.set_sensitive(is_selected);
+  fine_channel_entry_.set_sensitive(is_selected);
   function_type_label_.set_sensitive(is_selected);
   function_type_combo_.set_sensitive(is_selected);
   if (is_selected) {
     dmx_offset_entry_.set_text(
         std::to_string((*selected)[functions_columns_.dmx_offset_]));
-    is_16_bit_button_.set_active((*selected)[functions_columns_.is_16_bit_]);
+    fine_channel_entry_.set_text((*selected)[functions_columns_.fine_channel_]);
     const int ft_index = static_cast<int>(
         theatre::FunctionType((*selected)[functions_columns_.function_type_]));
     function_type_combo_.set_active(ft_index);
   } else {
     dmx_offset_entry_.set_text("");
-    is_16_bit_button_.set_active(false);
+    fine_channel_entry_.set_text("-");
     function_type_combo_.set_active(-1);
   }
 }

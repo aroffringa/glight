@@ -1,6 +1,7 @@
 #ifndef THEATRE_FIXTUREFUNCTION_H_
 #define THEATRE_FIXTUREFUNCTION_H_
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -30,48 +31,46 @@ class FixtureFunction final : public NamedObject {
 
   void MixChannels(unsigned value, MixStyle mixStyle, unsigned *channels,
                    unsigned universe) {
-    if (_firstChannel.Universe() == universe) {
-      MixStyle combiMixStyle = ControlValue::CombineMixStyles(
-          mixStyle, _firstChannel.DefaultMixStyle());
-      if (IsSingleChannel()) {
-        channels[_firstChannel.Channel()] = ControlValue::Mix(
-            channels[_firstChannel.Channel()], value, combiMixStyle);
+    if (main_channel_.Universe() == universe) {
+      if (!fine_channel_) {
+        channels[main_channel_.Channel()] = ControlValue::Mix(
+            channels[main_channel_.Channel()], value, mixStyle);
       } else {  // 16 bit
-        const unsigned currentValue =
-            (channels[_firstChannel.Channel()]) +
-            (channels[_firstChannel.Next().Channel()] >> 8);
+        const unsigned currentValue = (channels[main_channel_.Channel()]) +
+                                      (channels[fine_channel_->Channel()] >> 8);
         const unsigned mixedValue =
-            ControlValue::Mix(currentValue, value, combiMixStyle);
+            ControlValue::Mix(currentValue, value, mixStyle);
         // Set to the first 8 of 24 bits.
-        channels[_firstChannel.Channel()] = (mixedValue & (~0xFFFF));
+        channels[main_channel_.Channel()] = (mixedValue & (~0xFFFF));
         // Set to bits 9-16.
-        channels[_firstChannel.Next().Channel()] = (mixedValue & 0xFFFF) << 8;
+        channels[fine_channel_->Channel()] = (mixedValue & 0xFFFF) << 8;
       }
     }
   }
 
-  void SetChannel(const DmxChannel &channel, bool is16Bit = false);
-  bool IsSingleChannel() const { return !_is16Bit; }
-  const DmxChannel &FirstChannel() const { return _firstChannel; }
+  void SetChannel(const DmxChannel &channel,
+                  const std::optional<DmxChannel> &fine_channel = {});
+  const std::optional<DmxChannel> &FineChannel() const { return fine_channel_; }
+  const DmxChannel &MainChannel() const { return main_channel_; }
   void IncChannel();
   void DecChannel();
-  FunctionType Type() const { return _type; }
+  FunctionType Type() const { return type_; }
   unsigned char GetCharValue(const ValueSnapshot &snapshot) const {
-    return snapshot.GetValue(_firstChannel);
+    return snapshot.GetValue(main_channel_);
   }
   unsigned GetControlValue(const ValueSnapshot &snapshot) const {
-    if (_is16Bit)
-      return (unsigned(snapshot.GetValue(_firstChannel)) << 16) +
-             (unsigned(snapshot.GetValue(_firstChannel.Next())) << 8);
+    if (fine_channel_)
+      return (unsigned(snapshot.GetValue(main_channel_)) << 16) +
+             (unsigned(snapshot.GetValue(*fine_channel_)) << 8);
     else
-      return unsigned(snapshot.GetValue(_firstChannel)) << 16;
+      return unsigned(snapshot.GetValue(main_channel_)) << 16;
   }
 
  private:
-  Theatre &_theatre;
-  FunctionType _type;
-  DmxChannel _firstChannel;
-  bool _is16Bit;
+  Theatre &theatre_;
+  FunctionType type_;
+  DmxChannel main_channel_;
+  std::optional<DmxChannel> fine_channel_;
 };
 
 }  // namespace glight::theatre

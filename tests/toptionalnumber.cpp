@@ -40,6 +40,8 @@ class Test {
 
   static_assert(!GetUnassigned());
 
+  static_assert(*OptionalNumber(OptionalNumber<T>(5)) == 5);
+
   static_assert(OptionalNumber<T>().ValueOr(3) == 3);
   static_assert(OptionalNumber<T>(2).ValueOr(3) == 2);
 
