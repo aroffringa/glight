@@ -10,11 +10,9 @@ namespace glight::theatre {
  */
 class DmxChannel {
  public:
-  constexpr DmxChannel()
-      : universe_(0), channel_(0) {}
+  constexpr DmxChannel() : universe_(0), channel_(0) {}
   constexpr DmxChannel(unsigned channel, unsigned universe)
-      : universe_(universe),
-        channel_(channel) {}
+      : universe_(universe), channel_(channel) {}
   ~DmxChannel() {}
 
   constexpr unsigned Universe() const { return universe_; }
