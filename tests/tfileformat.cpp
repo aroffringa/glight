@@ -114,7 +114,7 @@ void FillManagement(Management &management) {
 void CheckEqual(const FixtureTypeFunction &a, const FixtureTypeFunction &b) {
   BOOST_REQUIRE(a.Type() == b.Type());
   BOOST_CHECK_EQUAL(a.DmxOffset(), b.DmxOffset());
-  BOOST_CHECK_EQUAL(a.Is16Bit(), b.Is16Bit());
+  BOOST_CHECK(a.FineChannelOffset() == b.FineChannelOffset());
   BOOST_CHECK_EQUAL(a.Shape(), b.Shape());
 
   switch (a.Type()) {

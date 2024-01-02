@@ -6,38 +6,39 @@ namespace glight::theatre {
 FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type,
                                  const std::string &name)
     : NamedObject(name),
-      _theatre(theatre),
-      _type(type),
-      _firstChannel(0, 0),
-      _is16Bit(false) {}
+      theatre_(theatre),
+      type_(type),
+      main_channel_(0, 0),
+      fine_channel_() {}
 
 FixtureFunction::FixtureFunction(Theatre &theatre, FunctionType type)
-    : _theatre(theatre), _type(type), _firstChannel(0, 0), _is16Bit(false) {}
+    : theatre_(theatre), type_(type), main_channel_(0, 0), fine_channel_() {}
 
 FixtureFunction::FixtureFunction(const FixtureFunction &source,
                                  Theatre &theatre)
     : NamedObject(source),
-      _theatre(theatre),
-      _type(source._type),
-      _firstChannel(source._firstChannel),
-      _is16Bit(source._is16Bit) {}
+      theatre_(theatre),
+      type_(source.type_),
+      main_channel_(source.main_channel_),
+      fine_channel_(source.fine_channel_) {}
 
 void FixtureFunction::IncChannel() {
-  _firstChannel =
-      DmxChannel((_firstChannel.Channel() + 1) % 512, _firstChannel.Universe());
-  _theatre.NotifyDmxChange();
+  main_channel_ = main_channel_.Next();
+  if (fine_channel_) fine_channel_ = fine_channel_->Next();
+  theatre_.NotifyDmxChange();
 }
 
 void FixtureFunction::DecChannel() {
-  _firstChannel = DmxChannel((_firstChannel.Channel() + 512 - 1) % 512,
-                             _firstChannel.Universe());
-  _theatre.NotifyDmxChange();
+  main_channel_ = main_channel_.Previous();
+  if (fine_channel_) fine_channel_ = fine_channel_->Previous();
+  theatre_.NotifyDmxChange();
 }
 
-void FixtureFunction::SetChannel(const DmxChannel &channel, bool is16Bit) {
-  _firstChannel = channel;
-  _is16Bit = is16Bit;
-  _theatre.NotifyDmxChange();
+void FixtureFunction::SetChannel(
+    const DmxChannel &channel, const std::optional<DmxChannel> &fine_channel) {
+  main_channel_ = channel;
+  fine_channel_ = fine_channel;
+  theatre_.NotifyDmxChange();
 }
 
 }  // namespace glight::theatre

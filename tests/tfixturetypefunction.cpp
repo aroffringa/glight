@@ -10,10 +10,10 @@ using namespace glight::theatre;
 BOOST_AUTO_TEST_SUITE(fixture_type_function)
 
 BOOST_AUTO_TEST_CASE(range_function) {
-  FixtureTypeFunction f(FunctionType::RotationSpeed, 37, false, 2);
+  FixtureTypeFunction f(FunctionType::RotationSpeed, 37, {}, 2);
   BOOST_CHECK_EQUAL(f.DmxOffset(), 37);
   BOOST_CHECK(f.Type() == FunctionType::RotationSpeed);
-  BOOST_CHECK(!f.Is16Bit());
+  BOOST_CHECK(!f.FineChannelOffset());
   BOOST_CHECK_EQUAL(f.Shape(), 2);
 
   std::vector<RotationSpeedParameters::Range>& ranges =

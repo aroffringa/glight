@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   FixtureType &fixtureType =
       management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
   Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
-  fixture.SetChannel(100);
+  fixture.SetChannel(DmxChannel(100, 0));
   FixtureControl &fixtureControl = management.AddFixtureControl(fixture);
   SourceValue &value = management.AddSourceValue(fixtureControl, 0);
   value.A().SetValue(ControlValue::Max());

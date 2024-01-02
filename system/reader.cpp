@@ -112,10 +112,13 @@ void ParseFixtureTypeFunctions(const json::Array &node,
     const json::Object &obj = ToObj(child);
     const FunctionType ft = GetFunctionType(ToStr(obj["type"]));
     const size_t dmx_offset = ToNum(obj["dmx-offset"]).AsSize();
-    const bool is_16_bit = ToBool(obj["is-16-bit"]);
+    system::OptionalNumber<size_t> fine_channel;
+    if (obj.contains("fine-channel-offset")) {
+      fine_channel = ToNum(obj["fine-channel-offset"]).AsSize();
+    }
     const unsigned shape = ToNum(obj["shape"]).AsUInt();
     FixtureTypeFunction &new_function =
-        functions.emplace_back(ft, dmx_offset, is_16_bit, shape);
+        functions.emplace_back(ft, dmx_offset, fine_channel, shape);
     switch (ft) {
       case FunctionType::ColorMacro:
         ParseMacroParameters(ToObj(obj["parameters"]),

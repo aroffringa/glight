@@ -33,7 +33,7 @@ void ParseCapabilities(const json::Array& capabilities,
                  .emplace(std::piecewise_construct,
                           std::make_tuple(channel_name),
                           std::make_tuple(theatre::FunctionType::ColorMacro, 0,
-                                          false, 0))
+                                          OptionalNumber<size_t>(), 0))
                  .first->second;
       if (function->Type() == theatre::FunctionType::ColorMacro) {
         std::vector<glight::theatre::MacroParameters::Range>& ranges =
@@ -69,9 +69,10 @@ std::map<std::string, FixtureTypeFunction> ParseFunctions(
       const json::Object& capability = ToObj(*capability_iter);
       const std::string& type = ToStr(capability["type"]);
       if (type == "Intensity") {
-        functions.emplace(
-            std::piecewise_construct, std::make_tuple(channel_name),
-            std::make_tuple(theatre::FunctionType::Master, 0, false, 0));
+        functions.emplace(std::piecewise_construct,
+                          std::make_tuple(channel_name),
+                          std::make_tuple(theatre::FunctionType::Master, 0,
+                                          OptionalNumber<size_t>(), 0));
       } else if (type == "ColorIntensity") {
         theatre::FunctionType t = theatre::FunctionType::Unknown;
         const std::string& color_str = ToStr(capability["color"]);
@@ -95,11 +96,12 @@ std::map<std::string, FixtureTypeFunction> ParseFunctions(
           t = theatre::FunctionType::WarmWhite;
         functions.emplace(std::piecewise_construct,
                           std::make_tuple(channel_name),
-                          std::make_tuple(t, 0, false, 0));
+                          std::make_tuple(t, 0, OptionalNumber<size_t>(), 0));
       } else if (type == "EffectSpeed") {
-        functions.emplace(
-            std::piecewise_construct, std::make_tuple(channel_name),
-            std::make_tuple(theatre::FunctionType::Strobe, 0, false, 0));
+        functions.emplace(std::piecewise_construct,
+                          std::make_tuple(channel_name),
+                          std::make_tuple(theatre::FunctionType::Strobe, 0,
+                                          OptionalNumber<size_t>(), 0));
       }
     } else {
       const json::Array& capabilities = ToArr(availableChannel["capabilities"]);
@@ -129,10 +131,10 @@ void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
       const auto iter = functions.find(ToStr(channel));
       if (iter == functions.end())
         mode_functions.emplace_back(theatre::FunctionType::Unknown, dmx_channel,
-                                    false, 0);
+                                    OptionalNumber<size_t>(), 0);
       else
         mode_functions.emplace_back(iter->second).SetDmxOffset(dmx_channel);
-      if (mode_functions.back().Is16Bit())
+      if (mode_functions.back().FineChannelOffset())
         dmx_channel += 2;
       else
         ++dmx_channel;

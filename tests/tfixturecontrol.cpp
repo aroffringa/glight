@@ -21,9 +21,12 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   FixtureType &fixtureType =
       management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
   Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
-  fixture.SetChannel(100);
+  fixture.SetChannel(DmxChannel(100, 0));
   FixtureControl &control = management.AddFixtureControl(fixture);
   BOOST_REQUIRE_EQUAL(control.NInputs(), 1);
+  BOOST_CHECK_EQUAL(fixture.Functions().size(), 1);
+  BOOST_CHECK_EQUAL(fixture.Functions().front()->MainChannel().Channel(), 100);
+  BOOST_CHECK(!fixture.Functions().front()->FineChannel());
   control.InputValue(0) = ControlValue::Zero();
   control.MixInput(0, ControlValue::Max());
   std::vector<unsigned> values(512, 0);

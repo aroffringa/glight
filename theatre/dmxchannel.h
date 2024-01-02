@@ -11,31 +11,42 @@ namespace glight::theatre {
  */
 class DmxChannel {
  public:
-  DmxChannel()
-      : _universe(0), _channel(0), _defaultMixStyle(MixStyle::Default) {}
-  DmxChannel(unsigned channel, unsigned universe)
-      : _universe(universe),
-        _channel(channel),
-        _defaultMixStyle(MixStyle::Default) {}
+  constexpr DmxChannel()
+      : universe_(0), channel_(0), default_mix_style_(MixStyle::Default) {}
+  constexpr DmxChannel(unsigned channel, unsigned universe)
+      : universe_(universe),
+        channel_(channel),
+        default_mix_style_(MixStyle::Default) {}
   ~DmxChannel() {}
 
-  unsigned Universe() const { return _universe; }
-  unsigned Channel() const { return _channel; }
-  MixStyle DefaultMixStyle() const { return _defaultMixStyle; }
+  constexpr unsigned Universe() const { return universe_; }
+  constexpr unsigned Channel() const { return channel_; }
+  constexpr MixStyle DefaultMixStyle() const { return default_mix_style_; }
 
-  void SetUniverse(unsigned universe) { _universe = universe; }
-  void SetChannel(unsigned channel) { _channel = channel; }
-  void SetDefaultMixStyle(MixStyle defaultMixStyle) {
-    _defaultMixStyle = defaultMixStyle;
+  constexpr void SetUniverse(unsigned universe) { universe_ = universe; }
+  constexpr void SetChannel(unsigned channel) { channel_ = channel; }
+  constexpr void SetDefaultMixStyle(MixStyle defaultMixStyle) {
+    default_mix_style_ = defaultMixStyle;
   }
   DmxChannel Next() const {
-    return DmxChannel((_channel + 1) % 512, _universe);
+    return DmxChannel((channel_ + 1) % 512, universe_);
+  }
+  DmxChannel Previous() const {
+    return DmxChannel((channel_ + 512 - 1) % 512, universe_);
+  }
+  /**
+   * Returns the DmxChannel with given offset from this channel. If the
+   * resulting channel would be higher than 512, it will wrap around in the same
+   * universe. The universe of the DmxChannel is always the same as this.
+   */
+  DmxChannel operator+(size_t channel_offset) const {
+    return DmxChannel((channel_ + channel_offset) % 512, universe_);
   }
 
  private:
-  unsigned _universe;
-  unsigned _channel;
-  MixStyle _defaultMixStyle;
+  unsigned universe_;
+  unsigned channel_;
+  MixStyle default_mix_style_;
 };
 
 }  // namespace glight::theatre

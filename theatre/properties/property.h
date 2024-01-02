@@ -24,6 +24,10 @@ class Property final {
            PropertyType type)
       : _type(type), _setIndex(0), _name(name), _description(description) {}
 
+  /**
+   * Create a choice property, similar to an enum.
+   * @param options holds the names and descriptions of the choices.
+   */
   Property(const std::string &name, const std::string &description,
            const std::vector<std::pair<std::string, std::string>> &options)
       : _type(PropertyType::Choice),
@@ -52,6 +56,7 @@ class Property final {
   PropertyType _type;
   size_t _setIndex;
   std::string _name, _description;
+  // Vector with names and descriptions
   std::vector<std::pair<std::string, std::string>> _options;
 };
 

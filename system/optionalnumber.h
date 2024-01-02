@@ -20,36 +20,35 @@ class OptionalNumber {
   constexpr explicit OptionalNumber(std::nullopt_t) noexcept {}
 
   template <class T = NumberType>
-  constexpr explicit OptionalNumber(T&& number) noexcept : number_(number) {}
+  constexpr explicit OptionalNumber(T number) noexcept : number_(number) {}
 
-  template <typename T>
-  constexpr explicit OptionalNumber(const OptionalNumber<T>& source) noexcept
-      : number_(source.number_) {}
+  constexpr OptionalNumber(const OptionalNumber<NumberType>& source) noexcept =
+      default;
+  constexpr OptionalNumber(OptionalNumber<NumberType>&& source) noexcept =
+      default;
 
   template <typename T>
   constexpr explicit OptionalNumber(const std::optional<T>& source) noexcept
       : number_(source ? *source : UnsetValue) {}
 
-  constexpr OptionalNumber<NumberType> operator=(std::nullopt_t) noexcept {
+  constexpr OptionalNumber<NumberType>& operator=(std::nullopt_t) noexcept {
     number_ = UnsetValue;
     return *this;
   }
 
   template <class T>
-  constexpr OptionalNumber<NumberType> operator=(T&& number) noexcept {
+  constexpr OptionalNumber<NumberType> operator=(T number) noexcept {
     number_ = number;
     return *this;
   }
 
-  template <class T = NumberType>
-  constexpr OptionalNumber<NumberType> operator=(
-      const OptionalNumber<T>& rhs) noexcept {
-    number_ = rhs.number_;
-    return *this;
-  }
+  constexpr OptionalNumber<NumberType>& operator=(
+      const OptionalNumber<NumberType>& rhs) noexcept = default;
+  constexpr OptionalNumber<NumberType>& operator=(
+      OptionalNumber<NumberType>&& rhs) noexcept = default;
 
   template <class T = NumberType>
-  constexpr OptionalNumber<NumberType> operator=(
+  constexpr OptionalNumber<NumberType>& operator=(
       const std::optional<T>& rhs) noexcept {
     number_ = rhs.number_;
     return *this;
