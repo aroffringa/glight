@@ -78,11 +78,13 @@ class ObjectList : public Gtk::ScrolledWindow {
   Glib::RefPtr<Gtk::ListStore> _listModel;
   struct ListColumns : public Gtk::TreeModelColumnRecord {
     ListColumns() {
+      add(_icon);
       add(_type);
       add(_title);
       add(_object);
     }
 
+    Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> _icon;
     Gtk::TreeModelColumn<Glib::ustring> _type;
     Gtk::TreeModelColumn<Glib::ustring> _title;
     Gtk::TreeModelColumn<theatre::FolderObject *> _object;

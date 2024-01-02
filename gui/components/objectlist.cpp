@@ -1,5 +1,7 @@
 #include "objectlist.h"
 
+#include <gtkmm/icontheme.h>
+
 #include "../eventtransmitter.h"
 
 #include "../../theatre/chase.h"
@@ -30,7 +32,8 @@ ObjectList::ObjectList(theatre::Management &management,
   _listModel = Gtk::ListStore::create(_listColumns);
 
   _listView.set_model(_listModel);
-  _listView.append_column("Object", _listColumns._title);
+  _listView.append_column("", _listColumns._icon);
+  _listView.append_column("object", _listColumns._title);
   _listView.get_selection()->signal_changed().connect([&]() {
     if (_avoidRecursion.IsFirst()) _signalSelectionChange.emit();
   });
@@ -49,9 +52,9 @@ void ObjectList::SetShowTypeColumn(bool showTypeColumn) {
   if (showTypeColumn != _showTypeColumn) {
     _showTypeColumn = showTypeColumn;
     if (_showTypeColumn)
-      _listView.insert_column("T", _listColumns._type, 0);
+      _listView.insert_column("T", _listColumns._type, 1);
     else
-      _listView.remove_column(*_listView.get_column(0));
+      _listView.remove_column(*_listView.get_column(1));
   }
 }
 
@@ -64,20 +67,20 @@ void ObjectList::fillList() {
                : nullptr;
   _listModel->clear();
   Gtk::TreeViewColumn *objectColumn =
-      _showTypeColumn ? _listView.get_column(1) : _listView.get_column(0);
+      _showTypeColumn ? _listView.get_column(2) : _listView.get_column(1);
   switch (_displayType) {
     case ObjectListType::AllExceptFixtures:
     case ObjectListType::All:
-      objectColumn->set_title("objects");
+      objectColumn->set_title("object");
       break;
     case ObjectListType::OnlyPresetCollections:
-      objectColumn->set_title("preset collections");
+      objectColumn->set_title("preset collection");
       break;
     case ObjectListType::OnlyChases:
-      objectColumn->set_title("chases");
+      objectColumn->set_title("chase");
       break;
     case ObjectListType::OnlyEffects:
-      objectColumn->set_title("effects");
+      objectColumn->set_title("effect");
       break;
   }
   std::unique_lock<std::mutex> lock(_management->Mutex());
@@ -100,6 +103,10 @@ void ObjectList::fillListFolder(const Folder &folder,
   bool showEffects = _displayType == ObjectListType::OnlyEffects || almostAll;
   bool showFixtures = _displayType == ObjectListType::All;
 
+  Glib::RefPtr<Gtk::IconTheme> theme = Gtk::IconTheme::get_default();
+  int icon_width = 16;
+  int icon_height = 16;
+  Gtk::IconSize::lookup(Gtk::ICON_SIZE_MENU, icon_width, icon_height);
   for (FolderObject *obj : folder.Children()) {
     Folder *childFolder = showFolders ? dynamic_cast<Folder *>(obj) : nullptr;
     theatre::PresetCollection *presetCollection =
@@ -123,13 +130,17 @@ void ObjectList::fillListFolder(const Folder &folder,
         fixtureControl || fixtureGroup || scene) {
       Gtk::TreeModel::iterator iter = _listModel->append();
       const Gtk::TreeModel::Row &childRow = *iter;
-      if (chase)
+      std::string icon_name = "x-office-document";
+      if (chase) {
         childRow[_listColumns._type] = "C";
-      else if (timeSequence)
+        icon_name = "application-x-executable";
+      } else if (timeSequence) {
         childRow[_listColumns._type] = "T";
-      else if (childFolder)
+        icon_name = "x-office-calendar";
+      } else if (childFolder) {
         childRow[_listColumns._type] = "F";
-      else if (presetCollection)
+        icon_name = "folder";
+      } else if (presetCollection)
         childRow[_listColumns._type] = "P";
       else if (effect)
         childRow[_listColumns._type] = "E";
@@ -141,6 +152,9 @@ void ObjectList::fillListFolder(const Folder &folder,
         childRow[_listColumns._type] = "S";
       childRow[_listColumns._title] = obj->Name();
       childRow[_listColumns._object] = obj;
+      if (!icon_name.empty()) {
+        childRow[_listColumns._icon] = theme->load_icon(icon_name, icon_height);
+      }
       if (obj == selectedObj) {
         _listView.get_selection()->select(iter);
       }
