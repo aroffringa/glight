@@ -245,14 +245,28 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
       height = get_height() / 2.0;
     const theatre::Position pos =
         render_engine_.MouseToPosition(event->x, event->y, get_width(), height);
-    theatre::Fixture *selectedFixture = render_engine_.FixtureAt(pos);
-    if (!shift) {
-      if (selectedFixture) {
+    theatre::Fixture *clicked_fixture = render_engine_.FixtureAt(pos);
+    if (shift) {
+      if (clicked_fixture) {
+        // Was a fixture clicked that was already selected? Then unselect.
+        // If not, add the clicked fixture to the selection
+        auto iterator = std::find(_selectedFixtures.begin(),
+                                  _selectedFixtures.end(), clicked_fixture);
+        if (iterator == _selectedFixtures.end()) {
+          _selectedFixtures.emplace_back(clicked_fixture);
+          _globalSelection->SetSelection(_selectedFixtures);
+        } else {
+          _selectedFixtures.erase(iterator);
+          _globalSelection->SetSelection(_selectedFixtures);
+        }
+      }
+    } else {
+      if (clicked_fixture) {
         // Was a fixture clicked that was already selected? Then keep all
-        // selected. If not, select the clicked fixture:
+        // selected. If not, select the clicked fixture
         if (std::find(_selectedFixtures.begin(), _selectedFixtures.end(),
-                      selectedFixture) == _selectedFixtures.end()) {
-          _selectedFixtures.assign(1, selectedFixture);
+                      clicked_fixture) == _selectedFixtures.end()) {
+          _selectedFixtures.assign(1, clicked_fixture);
           _globalSelection->SetSelection(_selectedFixtures);
         }
       } else {
