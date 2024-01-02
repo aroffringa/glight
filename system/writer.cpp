@@ -71,8 +71,6 @@ void writeDmxChannel(WriteState &state, const DmxChannel &dmxChannel) {
   state.writer.StartObject("dmx-channel");
   state.writer.Number("universe", dmxChannel.Universe());
   state.writer.Number("channel", dmxChannel.Channel());
-  state.writer.String("default-mix-style",
-                      ToString(dmxChannel.DefaultMixStyle()));
   state.writer.EndObject();
 }
 

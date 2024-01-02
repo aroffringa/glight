@@ -2,7 +2,6 @@
 #define THEATRE_DMXCHANNEL_H_
 
 #include "controlvalue.h"
-#include "mixstyle.h"
 
 namespace glight::theatre {
 
@@ -12,22 +11,17 @@ namespace glight::theatre {
 class DmxChannel {
  public:
   constexpr DmxChannel()
-      : universe_(0), channel_(0), default_mix_style_(MixStyle::Default) {}
+      : universe_(0), channel_(0) {}
   constexpr DmxChannel(unsigned channel, unsigned universe)
       : universe_(universe),
-        channel_(channel),
-        default_mix_style_(MixStyle::Default) {}
+        channel_(channel) {}
   ~DmxChannel() {}
 
   constexpr unsigned Universe() const { return universe_; }
   constexpr unsigned Channel() const { return channel_; }
-  constexpr MixStyle DefaultMixStyle() const { return default_mix_style_; }
 
   constexpr void SetUniverse(unsigned universe) { universe_ = universe; }
   constexpr void SetChannel(unsigned channel) { channel_ = channel; }
-  constexpr void SetDefaultMixStyle(MixStyle defaultMixStyle) {
-    default_mix_style_ = defaultMixStyle;
-  }
   DmxChannel Next() const {
     return DmxChannel((channel_ + 1) % 512, universe_);
   }
@@ -46,7 +40,6 @@ class DmxChannel {
  private:
   unsigned universe_;
   unsigned channel_;
-  MixStyle default_mix_style_;
 };
 
 }  // namespace glight::theatre

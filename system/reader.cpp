@@ -169,7 +169,6 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
 void ParseDmxChannel(const Object &node, DmxChannel &dmxChannel) {
   dmxChannel.SetUniverse(ToNum(node["universe"]).AsInt());
   dmxChannel.SetChannel(ToNum(node["channel"]).AsInt());
-  dmxChannel.SetDefaultMixStyle(GetMixStyle(ToStr(node["default-mix-style"])));
 }
 
 void ParseFixtureFunction(const Object &node, Fixture &parentFixture) {

@@ -32,16 +32,14 @@ class FixtureFunction final : public NamedObject {
   void MixChannels(unsigned value, MixStyle mixStyle, unsigned *channels,
                    unsigned universe) {
     if (main_channel_.Universe() == universe) {
-      MixStyle combiMixStyle = ControlValue::CombineMixStyles(
-          mixStyle, main_channel_.DefaultMixStyle());
       if (!fine_channel_) {
         channels[main_channel_.Channel()] = ControlValue::Mix(
-            channels[main_channel_.Channel()], value, combiMixStyle);
+            channels[main_channel_.Channel()], value, mixStyle);
       } else {  // 16 bit
         const unsigned currentValue = (channels[main_channel_.Channel()]) +
                                       (channels[fine_channel_->Channel()] >> 8);
         const unsigned mixedValue =
-            ControlValue::Mix(currentValue, value, combiMixStyle);
+            ControlValue::Mix(currentValue, value, mixStyle);
         // Set to the first 8 of 24 bits.
         channels[main_channel_.Channel()] = (mixedValue & (~0xFFFF));
         // Set to bits 9-16.
