@@ -35,6 +35,12 @@ class FixtureTypesWindow : public Gtk::Window {
                      theatre::Management &management);
   ~FixtureTypesWindow();
 
+  void SetLayoutLocked(bool locked) {
+    layout_locked_ = locked;
+    new_button_.set_sensitive(!locked);
+    onSelectionChanged();
+  }
+
  private:
   void update() { fillList(); }
   void fillList();
@@ -104,6 +110,8 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::Button new_button_;
   Gtk::Button remove_button_;
   Gtk::Button save_button_;
+
+  bool layout_locked_ = false;
 };
 
 }  // namespace glight::gui

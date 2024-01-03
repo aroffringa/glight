@@ -98,6 +98,8 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   size_t nextControlKeyRow() const;
 
+  void UpdateLayoutLock();
+
   Gtk::VBox _box;
   Gtk::HBox revealer_box_;
 

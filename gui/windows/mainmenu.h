@@ -26,6 +26,7 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> Quit;
 
   // Design menu
+  sigc::signal<void()> LockLayout;
   sigc::signal<void()> BlackOut;
   sigc::signal<void()> DesignWizard;
 
@@ -57,12 +58,16 @@ class MainMenu : public Gtk::MenuBar {
 
   bool FullScreenActive() const { return _miFullScreen.get_active(); }
 
+  bool IsLayoutLocked() const { return _miLockLayout.get_active(); }
+  void SetLayoutLocked(bool lock) { _miLockLayout.set_active(lock); }
+
  private:
   Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
 
   Gtk::MenuItem _miFile, _miDesign, _miWindow;
   Gtk::MenuItem _miNew, _miOpen, _miSave, _miImport, _miQuit;
   Gtk::MenuItem _miBlackOut;
+  Gtk::CheckMenuItem _miLockLayout;
   Gtk::CheckMenuItem _miProtectBlackout;
   Gtk::SeparatorMenuItem _miDesignSep1, _miDesignSep2;
   Gtk::MenuItem _miDesignWizard;

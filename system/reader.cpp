@@ -497,6 +497,9 @@ void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,
 
 void ParseGui(const Object &node, gui::GUIState &guiState,
               Management &management) {
+  const bool locked =
+      node.contains("layout-locked") && ToBool(node["layout-locked"]);
+  guiState.SetLayoutLocked(locked);
   const Array &states = ToArr(node["states"]);
   for (const Node &item : states) {
     const Object &state_node = ToObj(item);

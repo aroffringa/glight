@@ -14,6 +14,7 @@ MainMenu::MainMenu()
       _miImport("_Import fixtures...", true),
       _miQuit("_Quit", true),
       _miBlackOut("Black-out"),
+      _miLockLayout("Lock layout"),
       _miProtectBlackout("Protect black-out"),
       _miDesignWizard("Design wizard"),
       _miSideBar("Side bar"),
@@ -42,6 +43,9 @@ MainMenu::MainMenu()
   append(_miFile);
 
   _menuDesign.append(_miDesignSep1);
+
+  _miLockLayout.signal_activate().connect(LockLayout);
+  _menuDesign.append(_miLockLayout);
 
   _miProtectBlackout.signal_activate().connect([&]() {
     bool protect = _miProtectBlackout.get_active();

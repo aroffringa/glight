@@ -180,18 +180,20 @@ class Management {
                                    std::vector<Controllable *> &list);
 
   std::unique_ptr<std::thread> _thread;
-  std::atomic<bool> _isQuitting;
+  std::atomic<bool> _isQuitting = false;
   std::mutex _mutex;
-  std::chrono::time_point<std::chrono::steady_clock> _createTime;
+  std::chrono::time_point<std::chrono::steady_clock> _createTime =
+      std::chrono::steady_clock::now();
   std::mt19937 _randomGenerator;
-  std::uniform_int_distribution<unsigned> _rndDistribution;
-  std::atomic<size_t> _overridenBeat;
-  std::atomic<double> _lastOverridenBeatTime;
-  std::atomic<double> _previousTime;
+  std::uniform_int_distribution<unsigned> _rndDistribution =
+      std::uniform_int_distribution<unsigned>(0, ControlValue::MaxUInt() + 1);
+  std::atomic<size_t> _overridenBeat = 0;
+  std::atomic<double> _lastOverridenBeatTime = 0.0;
+  std::atomic<double> _previousTime = 0.0;
 
   std::unique_ptr<Theatre> _theatre;
-  std::unique_ptr<ValueSnapshot> _primarySnapshot;
-  std::unique_ptr<ValueSnapshot> _secondarySnapshot;
+  ValueSnapshot _primarySnapshot = {true, 0};
+  ValueSnapshot _secondarySnapshot = {false, 0};
   std::shared_ptr<BeatFinder> _beatFinder;
 
   Folder *_rootFolder;

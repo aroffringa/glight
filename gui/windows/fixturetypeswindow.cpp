@@ -246,9 +246,9 @@ void FixtureTypesWindow::onSelectionChanged() {
         has_selection ? static_cast<theatre::FixtureType *>(
                             (*selected)[list_columns_.fixture_type_])
                       : nullptr;
-    remove_button_.set_sensitive(has_selection);
-    save_button_.set_sensitive(has_selection);
-    right_grid_.set_sensitive(has_selection);
+    remove_button_.set_sensitive(has_selection && !layout_locked_);
+    save_button_.set_sensitive(has_selection && !layout_locked_);
+    right_grid_.set_sensitive(has_selection && !layout_locked_);
     if (type) {
       const bool is_used = management_->GetTheatre().IsUsed(*type);
       name_entry_.set_text(type->Name());
@@ -270,10 +270,10 @@ void FixtureTypesWindow::onSelectionChanged() {
           std::format("{:.1f}", type->MaxTilt() * 180.0 / M_PI));
 
       brightness_entry_.set_text(std::to_string(type->Brightness()));
-      class_combo_.set_sensitive(!is_used);
+      class_combo_.set_sensitive(!is_used && !layout_locked_);
       class_combo_.set_active_text(
           theatre::FixtureType::ClassName(type->GetFixtureClass()));
-      functions_frame_.set_sensitive(!is_used);
+      functions_frame_.set_sensitive(!is_used && !layout_locked_);
       functions_frame_.SetFunctions(type->Functions());
     } else {
       name_entry_.set_text("");
@@ -285,10 +285,10 @@ void FixtureTypesWindow::onSelectionChanged() {
       min_beam_tilt_entry_.set_text("0");
       max_beam_tilt_entry_.set_text("0");
       brightness_entry_.set_text("10");
-      class_combo_.set_sensitive(true);
+      class_combo_.set_sensitive(!layout_locked_);
       class_combo_.set_active_text(
           theatre::FixtureType::ClassName(theatre::FixtureClass::Par));
-      functions_frame_.set_sensitive(true);
+      functions_frame_.set_sensitive(!layout_locked_);
       functions_frame_.SetFunctions({});
     }
   }

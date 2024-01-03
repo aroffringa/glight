@@ -520,6 +520,10 @@ void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
 }
 
 void writeGUIState(WriteState &state) {
+  if (state.guiState->LayoutLocked()) {
+    state.writer.Boolean("layout-locked", true);
+  }
+
   state.writer.StartArray("states");
   for (const std::unique_ptr<gui::FaderSetState> &fState :
        state.guiState->FaderSets())
