@@ -41,6 +41,11 @@ class ValueSnapshot {
     return *_universeValues[index];
   }
 
+  friend void swap(ValueSnapshot &left, ValueSnapshot &right) {
+    std::swap(left._universeValues, right._universeValues);
+    std::swap(left.primary_, right.primary_);
+  }
+
  private:
   static std::vector<std::unique_ptr<ValueUniverseSnapshot>> copy(
       const std::vector<std::unique_ptr<ValueUniverseSnapshot>> &source) {

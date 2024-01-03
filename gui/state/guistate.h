@@ -28,7 +28,10 @@ class GUIState {
 
   void EmitFaderSetChangeSignal() { fader_set_signal_change_(); }
 
-  void Clear() { fader_sets_.clear(); }
+  void Clear() {
+    fader_sets_.clear();
+    layout_locked_ = false;
+  }
 
   bool Empty() const { return fader_sets_.empty(); }
 
@@ -39,7 +42,11 @@ class GUIState {
     return false;
   }
 
+  bool LayoutLocked() const { return layout_locked_; }
+  void SetLayoutLocked(bool layout_locked) { layout_locked_ = layout_locked; }
+
  private:
+  bool layout_locked_ = false;
   sigc::signal<void()> fader_set_signal_change_;
   std::vector<std::unique_ptr<FaderSetState>> fader_sets_;
 };

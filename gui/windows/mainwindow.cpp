@@ -115,6 +115,7 @@ void MainWindow::InitializeMenu() {
       sigc::mem_fun(*this, &MainWindow::onMIImportClicked));
   main_menu_.Quit.connect(sigc::mem_fun(*this, &MainWindow::onMIQuitClicked));
 
+  main_menu_.LockLayout.connect([&]() { UpdateLayoutLock(); });
   main_menu_.BlackOut.connect([&]() { onMIBlackOut(); });
   main_menu_.DesignWizard.connect(
       sigc::mem_fun(*this, &MainWindow::onMIDesignWizardClicked));
@@ -254,6 +255,7 @@ void MainWindow::onMINewClicked() {
     _state.Clear();
     lock.unlock();
 
+    UpdateLayoutLock();
     EmitUpdate();
 
     addFaderWindow();
@@ -273,6 +275,7 @@ void MainWindow::OpenFile(const std::string &filename) {
 
   EmitUpdate();
 
+  UpdateLayoutLock();
   if (_state.Empty()) {
     std::cout << "File did not contain GUI state info: will start with default "
                  "faders.\n";
@@ -474,6 +477,13 @@ void MainWindow::onFullscreen() {
     fullscreen();
   else
     unfullscreen();
+}
+
+void MainWindow::UpdateLayoutLock() {
+  const bool layout_locked = main_menu_.IsLayoutLocked();
+  _state.SetLayoutLocked(layout_locked);
+  _fixtureListWindow->SetLayoutLocked(layout_locked);
+  _fixtureTypesWindow->SetLayoutLocked(layout_locked);
 }
 
 }  // namespace glight::gui

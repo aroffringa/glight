@@ -26,16 +26,7 @@
 
 namespace glight::theatre {
 
-Management::Management()
-    : _isQuitting(false),
-      _createTime(std::chrono::steady_clock::now()),
-      _rndDistribution(0, ControlValue::MaxUInt() + 1),
-      _overridenBeat(0),
-      _lastOverridenBeatTime(0.0),
-
-      _theatre(std::make_unique<Theatre>()),
-      _primarySnapshot(std::make_unique<ValueSnapshot>(true, 0)),
-      _secondarySnapshot(std::make_unique<ValueSnapshot>(false, 0)) {
+Management::Management() : _theatre(std::make_unique<Theatre>()) {
   _rootFolder = _folders.emplace_back(std::make_unique<Folder>()).get();
   _rootFolder->SetName("Root");
 }
@@ -69,8 +60,8 @@ void Management::AddDevice(std::unique_ptr<DmxDevice> device) {
   std::lock_guard<std::mutex> lock(_mutex);
   _device = std::move(device);
   const size_t n_universes = _device->NUniverses();
-  _primarySnapshot->SetUniverseCount(n_universes);
-  _secondarySnapshot->SetUniverseCount(n_universes);
+  _primarySnapshot.SetUniverseCount(n_universes);
+  _secondarySnapshot.SetUniverseCount(n_universes);
 }
 
 void Management::Run() {
@@ -113,18 +104,16 @@ void Management::ProcessInputUniverse(unsigned universe,
 
 void Management::ThreadLoop() {
   const size_t n_universes = _device->NUniverses();
-  std::unique_ptr<ValueSnapshot> next_primary =
-      std::make_unique<ValueSnapshot>(true, n_universes);
-  std::unique_ptr<ValueSnapshot> next_secondary =
-      std::make_unique<ValueSnapshot>(false, n_universes);
+  ValueSnapshot next_primary(true, n_universes);
+  ValueSnapshot next_secondary(false, n_universes);
   unsigned timestep_number = 0;
   while (!_isQuitting) {
-    MixAll(timestep_number, *next_primary, *next_secondary);
+    MixAll(timestep_number, next_primary, next_secondary);
     _device->WaitForNextSync();
 
     std::lock_guard<std::mutex> lock(_mutex);
-    std::swap(_primarySnapshot, next_primary);
-    std::swap(_secondarySnapshot, next_secondary);
+    swap(_primarySnapshot, next_primary);
+    swap(_secondarySnapshot, next_secondary);
 
     ++timestep_number;
   }
@@ -474,12 +463,12 @@ size_t Management::SourceValueIndex(const SourceValue *sourceValue) const {
 
 ValueSnapshot Management::PrimarySnapshot() {
   std::lock_guard<std::mutex> lock(_mutex);
-  return *_primarySnapshot;
+  return _primarySnapshot;
 }
 
 ValueSnapshot Management::SecondarySnapshot() {
   std::lock_guard<std::mutex> lock(_mutex);
-  return *_secondarySnapshot;
+  return _secondarySnapshot;
 }
 
 ValueSnapshot Management::Snapshot(bool primary) {

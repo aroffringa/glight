@@ -31,6 +31,17 @@ class FixtureListWindow : public Gtk::Window {
                     FixtureSelection &globalSelection);
   ~FixtureListWindow();
 
+  void SetLayoutLocked(bool locked) {
+    _newButton.set_sensitive(!locked);
+    _removeButton.set_sensitive(!locked);
+    _incChannelButton.set_sensitive(!locked);
+    _decChannelButton.set_sensitive(!locked);
+    _setChannelButton.set_sensitive(!locked);
+    _upButton.set_sensitive(!locked);
+    _downButton.set_sensitive(!locked);
+    _reassignButton.set_sensitive(!locked);
+  }
+
  private:
   void update() { fillFixturesList(); }
   void fillFixturesList();
