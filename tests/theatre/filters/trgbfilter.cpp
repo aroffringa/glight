@@ -1,6 +1,6 @@
 #include "theatre/filters/rgbfilter.h"
 
-#include "tolerance_check.h"
+#include "tests/tolerance_check.h"
 
 #include <algorithm>
 
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(white) {
       FunctionType::White,
       FunctionType::Strobe,
   });
-  std::vector<ControlValue> output(5);
+  std::vector<ControlValue> output(6);
   filter.Apply(
       {
           kFullCV,            // red

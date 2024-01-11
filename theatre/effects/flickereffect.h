@@ -54,7 +54,7 @@ class FlickerEffect final : public Effect {
                                            values[0] * ControlValue(value[i]));
         }
       } else {
-        setConnectedInputs(values[0] * ControlValue(value[0]));
+        setAllOutputs(values[0] * ControlValue(value[0]));
       }
     }
   }

@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "theatre/color.h"
+
 namespace glight::theatre {
 
 class Controllable;
@@ -11,6 +13,7 @@ struct ColorDeduction;
 class Folder;
 class Management;
 class PresetCollection;
+class VariableEffect;
 
 /**
  * Add a single preset value to a PresetCollection constructed
@@ -19,6 +22,21 @@ class PresetCollection;
 void AddPresetValue(Management &management, Controllable &control,
                     PresetCollection &pc, const Color &color,
                     const ColorDeduction &deduction);
+
+void AddPresetValue(Management &management, Controllable &control,
+                    PresetCollection &pc, VariableEffect *variable,
+                    const ColorDeduction &deduction);
+
+inline void AddPresetValue(Management &management, Controllable &control,
+                           PresetCollection &pc,
+                           const ColorOrVariable &color_or_variable,
+                           const ColorDeduction &deduction) {
+  std::visit(
+      [&](auto &&arg) {
+        AddPresetValue(management, control, pc, arg, deduction);
+      },
+      color_or_variable);
+}
 
 /**
  * Construct a single PresetCollection where controllables are given a color.

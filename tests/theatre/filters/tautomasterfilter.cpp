@@ -2,7 +2,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "tolerance_check.h"
+#include "tests/tolerance_check.h"
 
 using namespace glight::theatre;
 

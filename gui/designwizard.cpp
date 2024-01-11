@@ -28,7 +28,7 @@ DesignWizard::DesignWizard(theatre::Management &management,
 
       _selectLabel("Select fixtures:"),
       _fixtureList(management, hub),
-      _objectBrowser(management, hub),
+      _objectBrowser(),
 
       _reorderWidget(management, hub),
 
@@ -47,7 +47,7 @@ DesignWizard::DesignWizard(theatre::Management &management,
       _deduceLime("Lime from RGB"),
 
       _colorsWidgetP4(this),
-      _parentFolderCombo(management, hub),
+      _parentFolderCombo(),
       _newFolderCB("New folder: "),
       _increasingRunRB("Increasing order"),
       _decreasingRunRB("Decreasing order"),
@@ -391,7 +391,7 @@ void DesignWizard::onNextClicked() {
         runType = RunType::RandomRun;
       AutoDesign::MakeRunningLight(
           _management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetColors(), colorDeduction(), runType);
+          _colorsWidgetP4.GetSelection(), colorDeduction(), runType);
       _eventHub.EmitUpdate();
       hide();
     } break;

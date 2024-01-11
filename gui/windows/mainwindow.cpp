@@ -4,22 +4,23 @@
 #include "fixturetypeswindow.h"
 #include "scenewindow.h"
 
-#include "../designwizard.h"
-#include "../objectlistframe.h"
+#include "gui/designwizard.h"
+#include "gui/instance.h"
+#include "gui/objectlistframe.h"
 
-#include "../components/visualizationwidget.h"
+#include "gui/components/visualizationwidget.h"
 
-#include "../faders/faderwindow.h"
+#include "gui/faders/faderwindow.h"
 
-#include "../../theatre/dmxdevice.h"
-#include "../../theatre/fixture.h"
-#include "../../theatre/management.h"
-#include "../../theatre/presetcollection.h"
-#include "../../theatre/theatre.h"
+#include "theatre/dmxdevice.h"
+#include "theatre/fixture.h"
+#include "theatre/management.h"
+#include "theatre/presetcollection.h"
+#include "theatre/theatre.h"
 
-#include "../../system/openfixturereader.h"
-#include "../../system/reader.h"
-#include "../../system/writer.h"
+#include "system/openfixturereader.h"
+#include "system/reader.h"
+#include "system/writer.h"
 
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/icontheme.h>
@@ -41,14 +42,16 @@ MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
       std::filesystem::path(GLIGHT_INSTALL_PATH) / "share/icons";
   iconTheme->prepend_search_path(iconPath.string());
 
+  Instance::Get().SetEvents(*this);
   _management = std::make_unique<theatre::Management>();
+  Instance::Get().SetManagement(*_management);
   _management->AddDevice(std::move(device));
   _management->StartBeatFinder();
 
   _management->Run();
 
-  _fixtureListWindow = std::make_unique<glight::gui::FixtureListWindow>(
-      *this, *_management, _fixtureSelection);
+  _fixtureListWindow =
+      std::make_unique<glight::gui::FixtureListWindow>(_fixtureSelection);
   _fixtureListWindow->signal_key_press_event().connect(
       sigc::mem_fun(*this, &MainWindow::onKeyDown));
   _fixtureListWindow->signal_key_release_event().connect(

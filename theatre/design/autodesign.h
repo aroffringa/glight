@@ -3,9 +3,17 @@
 
 #include <vector>
 
+#include "theatre/color.h"
+#include "theatre/forwards.h"
+
 namespace glight::theatre {
 
+class Chase;
+class Color;
 struct ColorDeduction;
+class Controllable;
+class Folder;
+class Management;
 
 enum class RunType {
   IncreasingRun,
@@ -34,34 +42,34 @@ enum class IncreasingType {
 
 class AutoDesign {
  public:
-  static class Chase &MakeRunningLight(
-      class Management &management, class Folder &destination,
-      const std::vector<class Controllable *> &controllables,
-      const std::vector<class Color> &colors, const ColorDeduction &deduction,
-      RunType runType);
+  static Chase &MakeRunningLight(
+      Management &management, Folder &destination,
+      const std::vector<Controllable *> &controllables,
+      const std::vector<ColorOrVariable> &colors,
+      const ColorDeduction &deduction, RunType runType);
 
   static class Chase &MakeColorVariation(
       class Management &management, class Folder &destination,
       const std::vector<class Controllable *> &controllables,
-      const std::vector<class Color> &colors, const ColorDeduction &deduction,
+      const std::vector<Color> &colors, const ColorDeduction &deduction,
       double variation);
 
   static class Chase &MakeColorShift(
       class Management &management, class Folder &destination,
       const std::vector<class Controllable *> &controllables,
-      const std::vector<class Color> &colors, const ColorDeduction &deduction,
+      const std::vector<Color> &colors, const ColorDeduction &deduction,
       ShiftType shiftType);
 
   static class Controllable &MakeVUMeter(
       class Management &management, class Folder &destination,
       const std::vector<class Controllable *> &controllables,
-      const std::vector<class Color> &colors, const ColorDeduction &deduction,
+      const std::vector<Color> &colors, const ColorDeduction &deduction,
       VUMeterDirection direction);
 
   static class Chase &MakeIncreasingChase(
       class Management &management, class Folder &destination,
       const std::vector<class Controllable *> &controllables,
-      const std::vector<class Color> &colors, const ColorDeduction &deduction,
+      const std::vector<Color> &colors, const ColorDeduction &deduction,
       IncreasingType incType);
 };
 

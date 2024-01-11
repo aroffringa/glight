@@ -3,7 +3,8 @@
 
 #include "colorselectwidget.h"
 
-#include "../../theatre/color.h"
+#include "theatre/color.h"
+#include "theatre/forwards.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/checkbutton.h>
@@ -17,7 +18,9 @@
 namespace glight::gui {
 
 using theatre::Color;
+using theatre::ColorOrVariable;
 
+class EventTransmitter;
 class GradientWindow;
 
 class ColorSequenceWidget : public Gtk::VBox {
@@ -28,18 +31,27 @@ class ColorSequenceWidget : public Gtk::VBox {
   ~ColorSequenceWidget();
 
   void SetColors(const std::vector<Color> &colors) {
-    if (_maxCount < colors.size()) _maxCount = 0;
-    if (colors.size() < _minCount) _minCount = colors.size();
+    std::vector<ColorOrVariable> values;
+    values.reserve(colors.size());
+    for (const Color &c : colors) {
+      values.emplace_back(c);
+    }
+    SetSelection(values);
+  }
+
+  void SetSelection(const std::vector<ColorOrVariable> &values) {
+    if (_maxCount < values.size()) _maxCount = 0;
+    if (values.size() < _minCount) _minCount = values.size();
     _allEqual.set_active(false);
     _widgets.clear();
-    for (size_t i = 0; i != colors.size(); ++i) {
-      const Color &color = colors[i];
-      _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent));
+    for (size_t i = 0; i != values.size(); ++i) {
+      _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
       if (i == 0) {
         _widgets.back()->SignalColorChanged().connect(
             sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
       }
-      _widgets.back()->SetColor(color);
+      _widgets.back()->SetSelection(values[i]);
+      _widgets.back()->SetAllowVariables(allow_variables_);
       _box.pack_start(*_widgets.back(), true, false);
       _widgets.back()->show();
     }
@@ -47,8 +59,17 @@ class ColorSequenceWidget : public Gtk::VBox {
 
   std::vector<Color> GetColors() const {
     std::vector<Color> result;
+    result.reserve(_widgets.size());
     for (const std::unique_ptr<ColorSelectWidget> &w : _widgets)
       result.emplace_back(w->GetColor());
+    return result;
+  }
+
+  std::vector<ColorOrVariable> GetSelection() const {
+    std::vector<ColorOrVariable> result;
+    result.reserve(_widgets.size());
+    for (const std::unique_ptr<ColorSelectWidget> &w : _widgets)
+      result.emplace_back(w->GetSelection());
     return result;
   }
 
@@ -70,6 +91,10 @@ class ColorSequenceWidget : public Gtk::VBox {
     updateSensitivities();
   }
 
+  void SetAllowVariables(bool allow_variables) {
+    allow_variables_ = allow_variables;
+  }
+
  private:
   Gtk::Frame _frame;
   Gtk::ScrolledWindow _scrolledWindow;
@@ -89,6 +114,7 @@ class ColorSequenceWidget : public Gtk::VBox {
   Gtk::Window *_parent;
   std::unique_ptr<GradientWindow> gradient_window_;
   size_t _minCount, _maxCount;
+  bool allow_variables_ = true;
 
   void LoadDefault();
 
@@ -100,9 +126,10 @@ class ColorSequenceWidget : public Gtk::VBox {
   }
   void onIncreaseColors() {
     if (_maxCount == 0 || _widgets.size() < _maxCount) {
-      _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent));
+      _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
+      _widgets.back()->SetAllowVariables(allow_variables_);
       if (_allEqual.get_active()) {
-        _widgets.back()->SetColor(_widgets.front()->GetColor());
+        _widgets.back()->SetSelection(_widgets.front()->GetSelection());
         _widgets.back()->set_sensitive(false);
       }
       updateSensitivities();
@@ -125,18 +152,18 @@ class ColorSequenceWidget : public Gtk::VBox {
 
   void onFirstColorChange() {
     if (_allEqual.get_active()) {
-      Color c = _widgets.front()->GetColor();
+      const ColorOrVariable value = _widgets.front()->GetSelection();
       for (size_t i = 1; i != _widgets.size(); ++i) {
-        _widgets[i]->SetColor(c);
+        _widgets[i]->SetSelection(value);
         _widgets[i]->set_sensitive(false);
       }
     }
   }
   void onToggleEqual() {
     if (_allEqual.get_active()) {
-      Color c = _widgets.front()->GetColor();
+      const ColorOrVariable value = _widgets.front()->GetColor();
       for (size_t i = 1; i != _widgets.size(); ++i) {
-        _widgets[i]->SetColor(c);
+        _widgets[i]->SetSelection(value);
         _widgets[i]->set_sensitive(false);
       }
     } else {

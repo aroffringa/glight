@@ -14,7 +14,7 @@ class EventTransmitter;
 
 class FolderCombo : public Gtk::ComboBox {
  public:
-  FolderCombo(theatre::Management &management, EventTransmitter &eventHub);
+  FolderCombo();
 
   theatre::Folder &Selection() const;
 
@@ -25,9 +25,6 @@ class FolderCombo : public Gtk::ComboBox {
   void Select(const theatre::Folder &object);
 
  private:
-  theatre::Management *_management;
-  EventTransmitter &_eventHub;
-
   Glib::RefPtr<Gtk::ListStore> _listModel;
   struct ListColumns : public Gtk::TreeModelColumnRecord {
     ListColumns() {

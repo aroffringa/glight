@@ -19,7 +19,7 @@ class InputSelectWidget : public Gtk::VBox {
   static const size_t NO_INPUT_SELECTED = std::numeric_limits<size_t>::max();
 
   InputSelectWidget(theatre::Management &management, EventTransmitter &eventHub)
-      : _browser(management, eventHub),
+      : _browser(),
         _inputLabel("Input:"),
         _selectedObject(nullptr),
         _selectedInput(NO_INPUT_SELECTED) {

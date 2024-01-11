@@ -78,7 +78,7 @@ class FluorescentStartEffect final : public Effect {
           Connections()[i].first->MixInput(Connections()[i].second,
                                            values[0] * ControlValue(value));
         } else {
-          setConnectedInputs(values[0] * ControlValue(value));
+          setAllOutputs(values[0] * ControlValue(value));
         }
       }
     } else {

@@ -61,6 +61,20 @@ class Management {
   PresetCollection &AddPresetCollection();
   void RemoveControllable(Controllable &controllable);
   bool Contains(Controllable &controllable) const;
+  template <typename ControllableType>
+  /**
+   * Retrieve list of controllables of a specific type. Can for example
+   * be used to get a list of variables.
+   */
+  std::vector<ControllableType *> GetSpecificControllables() const {
+    std::vector<ControllableType *> list;
+    for (const std::unique_ptr<Controllable> &c : _controllables) {
+      if (ControllableType *t = dynamic_cast<ControllableType *>(c.get()); t) {
+        list.emplace_back(t);
+      }
+    }
+    return list;
+  }
 
   Folder &AddFolder(Folder &parent, const std::string &name);
   Folder &GetFolder(const std::string &path);
@@ -90,7 +104,14 @@ class Management {
 
   TimeSequence &AddTimeSequence();
 
+  /**
+   * Add an effect and do not place it in a folder. The caller needs to
+   * manually place the effect in a folder.
+   */
   Effect &AddEffect(std::unique_ptr<Effect> effect);
+  /**
+   * Add an effect and place it in a folder.
+   */
   Effect &AddEffect(std::unique_ptr<Effect> effect, Folder &folder);
 
   Scene &AddScene(bool in_folder);

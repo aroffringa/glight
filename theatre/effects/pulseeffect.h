@@ -56,7 +56,7 @@ class PulseEffect final : public Effect {
           if (pos < _attack) {
             // Fade in
             unsigned ratio = (unsigned)((pos / double(_attack)) * 256.0);
-            setConnectedInputs(ControlValue((values[0].UInt() * ratio) >> 8));
+            setAllOutputs(ControlValue((values[0].UInt() * ratio) >> 8));
             handled = true;
           } else
             pos -= _attack;
@@ -64,7 +64,7 @@ class PulseEffect final : public Effect {
 
         if (_hold != 0 && !handled) {
           if (pos < _hold) {
-            setConnectedInputs(ControlValue(values[0].UInt()));
+            setAllOutputs(ControlValue(values[0].UInt()));
             handled = true;
           } else
             pos -= _hold;
@@ -74,7 +74,7 @@ class PulseEffect final : public Effect {
           if (pos < _release) {
             // Fade out
             unsigned ratio = 255 - (unsigned)((pos / double(_release)) * 256.0);
-            setConnectedInputs(ControlValue((values[0].UInt() * ratio) >> 8));
+            setAllOutputs(ControlValue((values[0].UInt() * ratio) >> 8));
             handled = true;
           } else
             pos -= _hold;

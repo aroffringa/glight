@@ -22,7 +22,7 @@ class ConstantValueEffect final : public Effect {
  protected:
   virtual void MixImplementation(const ControlValue *values,
                                  const Timing &timing, bool primary) override {
-    setConnectedInputs(ControlValue(_value));
+    setAllOutputs(ControlValue(_value));
   }
 
  private:

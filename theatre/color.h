@@ -2,8 +2,11 @@
 #define THEATRE_COLOR_H_
 
 #include <cmath>
+#include <variant>
 
 namespace glight::theatre {
+
+class VariableEffect;
 
 class Color {
  public:
@@ -165,6 +168,8 @@ inline double ColorDistance(double r1, double g1, double b1, double r2,
   return std::sqrt((((512.0 + rmean) * r * r) / 256.0) + 4.0 * g * g +
                    (((767.0 - rmean) * b * b) / 256.0));
 }
+
+using ColorOrVariable = std::variant<Color, VariableEffect *>;
 
 }  // namespace glight::theatre
 

@@ -3,8 +3,6 @@
 
 #include <sigc++/signal.h>
 
-#include "../theatre/forwards.h"
-
 namespace glight::gui {
 
 class EventTransmitter {

@@ -2,31 +2,30 @@
 
 #include <gtkmm/icontheme.h>
 
-#include "../eventtransmitter.h"
+#include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
-#include "../../theatre/chase.h"
-#include "../../theatre/effect.h"
-#include "../../theatre/fixturecontrol.h"
-#include "../../theatre/fixturegroup.h"
-#include "../../theatre/folder.h"
-#include "../../theatre/management.h"
-#include "../../theatre/presetcollection.h"
-#include "../../theatre/timesequence.h"
+#include "theatre/chase.h"
+#include "theatre/effect.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/fixturegroup.h"
+#include "theatre/folder.h"
+#include "theatre/effects/variableeffect.h"
+#include "theatre/management.h"
+#include "theatre/presetcollection.h"
+#include "theatre/timesequence.h"
 
-#include "../../theatre/scenes/scene.h"
+#include "theatre/scenes/scene.h"
 
 namespace glight::gui {
 
 using theatre::Folder;
 using theatre::FolderObject;
 
-ObjectList::ObjectList(theatre::Management &management,
-                       EventTransmitter &eventHub)
-    : _management(&management),
-      _eventHub(eventHub),
-      _openFolder(&management.RootFolder()),
+ObjectList::ObjectList()
+    : _openFolder(&Instance::Get().Management().RootFolder()),
       _listView(*this) {
-  _eventHub.SignalUpdateControllables().connect(
+  Instance::Get().Events().SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &ObjectList::fillList));
 
   _listModel = Gtk::ListStore::create(_listColumns);
@@ -82,8 +81,11 @@ void ObjectList::fillList() {
     case ObjectListType::OnlyEffects:
       objectColumn->set_title("effect");
       break;
+    case ObjectListType::OnlyVariables:
+      objectColumn->set_title("variables");
+      break;
   }
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+  std::unique_lock<std::mutex> lock(Instance::Get().Management().Mutex());
   fillListFolder(*_openFolder, selectedObj);
   lock.unlock();
   if (selectedObj &&
@@ -100,7 +102,8 @@ void ObjectList::fillListFolder(const Folder &folder,
   bool showPresetCollections =
       _displayType == ObjectListType::OnlyPresetCollections || almostAll;
   bool showChases = _displayType == ObjectListType::OnlyChases || almostAll;
-  bool showEffects = _displayType == ObjectListType::OnlyEffects || almostAll;
+  bool showEffects = _displayType == ObjectListType::OnlyEffects ||
+                     _displayType == ObjectListType::OnlyVariables || almostAll;
   bool showFixtures = _displayType == ObjectListType::All;
 
   Glib::RefPtr<Gtk::IconTheme> theme = Gtk::IconTheme::get_default();
@@ -116,8 +119,11 @@ void ObjectList::fillListFolder(const Folder &folder,
         showChases ? dynamic_cast<theatre::Chase *>(obj) : nullptr;
     theatre::TimeSequence *timeSequence =
         showChases ? dynamic_cast<theatre::TimeSequence *>(obj) : nullptr;
-    theatre::Effect *effect =
-        showEffects ? dynamic_cast<theatre::Effect *>(obj) : nullptr;
+    theatre::Effect *effect = nullptr;
+    if (_displayType == ObjectListType::OnlyVariables)
+      effect = dynamic_cast<theatre::VariableEffect *>(obj);
+    else if (showEffects)
+      effect = dynamic_cast<theatre::Effect *>(obj);
     theatre::FixtureControl *fixtureControl =
         showFixtures ? dynamic_cast<theatre::FixtureControl *>(obj) : nullptr;
     theatre::FixtureGroup *fixtureGroup =
@@ -194,7 +200,7 @@ void ObjectList::constructContextMenu() {
   _contextMenu = Gtk::Menu();
 
   FolderObject *obj = SelectedObject();
-  if (obj != &_management->RootFolder()) {
+  if (obj != &Instance::Get().Management().RootFolder()) {
     // Move up & down
     std::unique_ptr<Gtk::MenuItem> miMoveUp(
         new Gtk::MenuItem("Move _up", true));
@@ -218,7 +224,7 @@ void ObjectList::constructContextMenu() {
     _contextMenu.append(*miMove);
     miMove->show();
 
-    constructFolderMenu(*menuMove, _management->RootFolder());
+    constructFolderMenu(*menuMove, Instance::Get().Management().RootFolder());
     miMove->set_submenu(*menuMove);
 
     _contextMenuItems.emplace_back(std::move(miMove));
@@ -273,17 +279,17 @@ bool ObjectList::TreeViewWithMenu::on_button_press_event(
 void ObjectList::onMoveSelected(Folder *destination) {
   FolderObject *object = SelectedObject();
   Folder::Move(*object, *destination);
-  _eventHub.EmitUpdate();
+  Instance::Get().Events().EmitUpdate();
 }
 
 void ObjectList::onMoveUpSelected() {
   SelectedObject()->Parent().MoveUp(*SelectedObject());
-  _eventHub.EmitUpdate();
+  Instance::Get().Events().EmitUpdate();
 }
 
 void ObjectList::onMoveDownSelected() {
   SelectedObject()->Parent().MoveDown(*SelectedObject());
-  _eventHub.EmitUpdate();
+  Instance::Get().Events().EmitUpdate();
 }
 
 }  // namespace glight::gui

@@ -23,7 +23,7 @@ class MainWindow;
 
 class CreateChaseDialog : public Gtk::Dialog {
  public:
-  CreateChaseDialog(theatre::Management &management, MainWindow &parentWindow);
+  CreateChaseDialog(MainWindow &parentWindow);
 
   theatre::Chase &CreatedChase() { return *_newChase; }
 
@@ -65,7 +65,6 @@ class CreateChaseDialog : public Gtk::Dialog {
 
   Gtk::Button *_makeChaseButton;
 
-  theatre::Management *_management;
   MainWindow &_parentWindow;
   RecursionLock _delayUpdates;
   theatre::Chase *_newChase;

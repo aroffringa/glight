@@ -20,8 +20,8 @@ namespace glight::theatre {
 
 Chase &AutoDesign::MakeRunningLight(
     Management &management, Folder &destination,
-    const std::vector<class Controllable *> &controllables,
-    const std::vector<class Color> &colors, const ColorDeduction &deduction,
+    const std::vector<Controllable *> &controllables,
+    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
     RunType runType) {
   Chase &chase = management.AddChase();
   chase.SetName(destination.GetAvailableName("Runchase"));

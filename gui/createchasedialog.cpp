@@ -3,26 +3,25 @@
 
 #include <gtkmm/stock.h>
 
-#include "windows/mainwindow.h"
+#include "gui/instance.h"
+#include "gui/windows/mainwindow.h"
 
-#include "../theatre/chase.h"
-#include "../theatre/folder.h"
-#include "../theatre/management.h"
-#include "../theatre/presetcollection.h"
-#include "../theatre/presetvalue.h"
-#include "../theatre/sequence.h"
+#include "theatre/chase.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/presetcollection.h"
+#include "theatre/presetvalue.h"
+#include "theatre/sequence.h"
 
 namespace glight::gui {
 
-CreateChaseDialog::CreateChaseDialog(theatre::Management &management,
-                                     MainWindow &parentWindow)
+CreateChaseDialog::CreateChaseDialog(MainWindow &parentWindow)
     : Dialog("Create chase", true),
       _listFrame("Object list"),
-      _list(management, parentWindow),
+      _list(),
       _newChaseFrame("Chase objects"),
       _addObjectToChaseButton(),
       _clearChaseButton("Clear"),
-      _management(&management),
       _parentWindow(parentWindow),
       _newChase(nullptr) {
   set_size_request(600, 400);
@@ -88,7 +87,7 @@ void CreateChaseDialog::onAddObjectToChaseButtonClicked() {
         dynamic_cast<theatre::Controllable *>(selectedObj);
     if (object) {
       Gtk::TreeModel::iterator newRow = _newChaseListModel->append();
-      std::lock_guard<std::mutex> lock(_management->Mutex());
+      std::lock_guard<std::mutex> lock(Instance::Get().Management().Mutex());
       (*newRow)[_newChaseListColumns._title] = object->Name();
       (*newRow)[_newChaseListColumns._controllable] = object;
       _makeChaseButton->set_sensitive(true);
@@ -105,10 +104,11 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
   if (!_newChaseListModel->children().empty()) {
     // Determine folder
     theatre::Folder &folder = _list.SelectedFolder();
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    theatre::Management &management = Instance::Get().Management();
+    std::unique_lock<std::mutex> lock(management.Mutex());
 
-    _newChase = &_management->AddChase();
-    _management->AddSourceValue(*_newChase, 0);
+    _newChase = &management.AddChase();
+    management.AddSourceValue(*_newChase, 0);
     _newChase->SetName(folder.GetAvailableName("Chase"));
     folder.Add(*_newChase);
 

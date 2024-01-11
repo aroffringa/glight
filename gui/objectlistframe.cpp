@@ -30,7 +30,7 @@ using theatre::FolderObject;
 ObjectListFrame::ObjectListFrame(theatre::Management &management,
                                  MainWindow &parentWindow)
     : _objectListFrame("Object programming"),
-      _list(management, parentWindow),
+      _list(),
       _newPresetButton("Preset"),
       _newChaseButton("Chase"),
       _newTimeSequenceButton("Sequence"),
@@ -120,7 +120,7 @@ void ObjectListFrame::onNewPresetButtonClicked() {
 }
 
 void ObjectListFrame::onNewChaseButtonClicked() {
-  CreateChaseDialog dialog(*_management, _parentWindow);
+  CreateChaseDialog dialog(_parentWindow);
   if (dialog.run() == Gtk::RESPONSE_OK) {
     _list.SelectObject(dialog.CreatedChase());
     OpenPropertiesWindow(dialog.CreatedChase());

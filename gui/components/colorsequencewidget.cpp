@@ -6,9 +6,11 @@
 #include <glibmm/main.h>
 #include <gtkmm/main.h>
 
-#include "../windows/gradientwindow.h"
+#include "gui/windows/gradientwindow.h"
+#include "gui/eventtransmitter.h"
 
-#include "../../theatre/design/colorsequences.h"
+#include "theatre/management.h"
+#include "theatre/design/colorsequences.h"
 
 namespace glight::gui {
 
@@ -71,7 +73,7 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   _loadDefaultBox.pack_end(_loadDefaultButton);
   pack_start(_loadDefaultBox, false, false);
 
-  _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent));
+  _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
   _box.pack_start(*_widgets.back(), true, false);
   _widgets.back()->SignalColorChanged().connect(
       sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
@@ -120,9 +122,9 @@ void ColorSequenceWidget::OnGradientSelected() {
 }
 
 void ColorSequenceWidget::Shuffle() {
-  std::vector<glight::theatre::Color> colors = GetColors();
-  std::shuffle(colors.begin(), colors.end(), std::random_device());
-  SetColors(colors);
+  std::vector<glight::theatre::ColorOrVariable> selection = GetSelection();
+  std::shuffle(selection.begin(), selection.end(), std::random_device());
+  SetSelection(selection);
 }
 
 void ColorSequenceWidget::LoadDefault() {
