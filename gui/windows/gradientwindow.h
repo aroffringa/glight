@@ -14,6 +14,7 @@ class GradientWindow : public Gtk::Window {
     set_size_request(250, 300);
     _colorSequence.SetMinCount(2);
     _colorSequence.SetMaxCount(maxCount);
+    _colorSequence.SetAllowVariables(false);
     _box.pack_start(_colorSequence);
 
     _buttonBox.set_homogeneous(true);

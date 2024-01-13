@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "theatre/color.h"
+
 namespace glight::theatre {
 
 class Controllable;
@@ -11,6 +13,7 @@ struct ColorDeduction;
 class Folder;
 class Management;
 class PresetCollection;
+class VariableEffect;
 
 /**
  * Add a single preset value to a PresetCollection constructed
@@ -21,6 +24,27 @@ void AddPresetValue(Management &management, Controllable &control,
                     const ColorDeduction &deduction);
 
 /**
+ * Add a single preset value to a PresetCollection for which the color
+ * can be controlled by a variable. A RgbMasterEffect is added in
+ * between the preset collection and the variable to let the preset
+ * collection control the intensity.
+ */
+void AddPresetValue(Management &management, Controllable &control,
+                    PresetCollection &pc, VariableEffect *variable,
+                    const ColorDeduction &deduction);
+
+inline void AddPresetValue(Management &management, Controllable &control,
+                           PresetCollection &pc,
+                           const ColorOrVariable &color_or_variable,
+                           const ColorDeduction &deduction) {
+  std::visit(
+      [&](auto &&arg) {
+        AddPresetValue(management, control, pc, arg, deduction);
+      },
+      color_or_variable);
+}
+
+/**
  * Construct a single PresetCollection where controllables are given a color.
  * Each controllable in the list is assigned the color
  * with the same index from the list of colors.
@@ -28,7 +52,8 @@ void AddPresetValue(Management &management, Controllable &control,
 PresetCollection &MakeColorPreset(
     Management &management, Folder &destination,
     const std::vector<Controllable *> &controllables,
-    const std::vector<Color> &colors, const ColorDeduction &deduction);
+    const std::vector<ColorOrVariable> &colors,
+    const ColorDeduction &deduction);
 
 /**
  * Construct PresetCollections from a list of colors.
@@ -38,7 +63,7 @@ PresetCollection &MakeColorPreset(
  */
 void MakeColorPresetPerFixture(Management &management, Folder &destination,
                                const std::vector<Controllable *> &controllables,
-                               const std::vector<Color> &colors,
+                               const std::vector<ColorOrVariable> &colors,
                                const ColorDeduction &deduction);
 
 }  // namespace glight::theatre

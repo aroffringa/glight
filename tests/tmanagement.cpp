@@ -48,6 +48,26 @@ BOOST_AUTO_TEST_CASE(RemoveObject) {
   BOOST_CHECK(management.SourceValues().empty());
 }
 
+BOOST_AUTO_TEST_CASE(GetSpecificControllables) {
+  Management management;
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(),
+                    0);
+  management.AddEffect(Effect::Make(EffectType::Fade));
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(),
+                    1);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Effect>().size(), 1);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<FadeEffect>().size(),
+                    1);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Chase>().size(), 0);
+  management.AddEffect(Effect::Make(EffectType::Variable));
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(),
+                    2);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Effect>().size(), 2);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<FadeEffect>().size(),
+                    1);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Chase>().size(), 0);
+}
+
 BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
   Management management;
   FixtureType &typeA =

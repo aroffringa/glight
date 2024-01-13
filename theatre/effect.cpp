@@ -15,8 +15,10 @@
 #include "effects/musicactivationeffect.h"
 #include "effects/pulseeffect.h"
 #include "effects/randomselecteffect.h"
+#include "effects/rgbmastereffect.h"
 #include "effects/thresholdeffect.h"
 #include "effects/twinkleeffect.h"
+#include "effects/variableeffect.h"
 
 #include "properties/propertyset.h"
 
@@ -56,10 +58,14 @@ std::unique_ptr<Effect> Effect::Make(EffectType type) {
       return up(new PulseEffect());
     case ET::RandomSelect:
       return up(new RandomSelectEffect());
+    case ET::RgbMaster:
+      return up(new RgbMasterEffect());
     case ET::Threshold:
       return up(new ThresholdEffect());
     case ET::Twinkle:
       return up(new TwinkleEffect());
+    case ET::Variable:
+      return up(new VariableEffect());
   }
   return nullptr;
 }

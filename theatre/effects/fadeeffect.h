@@ -77,7 +77,7 @@ class FadeEffect final : public Effect {
       }
     }
     if (_fadingValue[primary] != 0) {
-      setConnectedInputs(ControlValue(_fadingValue[primary]));
+      setAllOutputs(ControlValue(_fadingValue[primary]));
     }
   }
 

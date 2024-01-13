@@ -20,8 +20,8 @@ namespace glight::theatre {
 
 Chase &AutoDesign::MakeRunningLight(
     Management &management, Folder &destination,
-    const std::vector<class Controllable *> &controllables,
-    const std::vector<class Color> &colors, const ColorDeduction &deduction,
+    const std::vector<Controllable *> &controllables,
+    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
     RunType runType) {
   Chase &chase = management.AddChase();
   chase.SetName(destination.GetAvailableName("Runchase"));
@@ -104,9 +104,9 @@ Chase &AutoDesign::MakeRunningLight(
 }
 
 Chase &AutoDesign::MakeColorVariation(
-    class Management &management, Folder &destination,
-    const std::vector<class Controllable *> &controllables,
-    const std::vector<class Color> &colors, const ColorDeduction &deduction,
+    Management &management, Folder &destination,
+    const std::vector<Controllable *> &controllables,
+    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
     double variation) {
   Chase &chase = management.AddChase();
   chase.SetName(destination.GetAvailableName("Colorvar"));
@@ -116,25 +116,31 @@ Chase &AutoDesign::MakeColorVariation(
   std::random_device rd;
   std::mt19937 rnd(rd());
   std::normal_distribution<double> distribution(0.0, variation);
-  for (const Color &color : colors) {
+  for (const ColorOrVariable &color_or_var : colors) {
     PresetCollection &pc = management.AddPresetCollection();
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc);
     for (Controllable *c : controllables) {
-      const double redVar = round(distribution(rnd));
-      const double greenVar = round(distribution(rnd));
-      const double blueVar = round(distribution(rnd));
-      Color randomizedColor(
-          std::max<double>(
-              0.0,
-              std::min<double>(static_cast<double>(color.Red()) + redVar, 255)),
-          std::max<double>(
-              0.0, std::min<double>(
-                       static_cast<double>(color.Green()) + greenVar, 255)),
-          std::max<double>(
-              0.0, std::min<double>(static_cast<double>(color.Blue()) + blueVar,
-                                    255)));
-      AddPresetValue(management, *c, pc, randomizedColor, deduction);
+      const double redVar = std::round(distribution(rnd));
+      const double greenVar = std::round(distribution(rnd));
+      const double blueVar = std::round(distribution(rnd));
+      if (std::holds_alternative<Color>(color_or_var)) {
+        const Color color = std::get<Color>(color_or_var);
+        Color randomizedColor(
+            std::max<double>(
+                0.0, std::min<double>(static_cast<double>(color.Red()) + redVar,
+                                      255)),
+            std::max<double>(
+                0.0, std::min<double>(
+                         static_cast<double>(color.Green()) + greenVar, 255)),
+            std::max<double>(
+                0.0, std::min<double>(
+                         static_cast<double>(color.Blue()) + blueVar, 255)));
+        AddPresetValue(management, *c, pc, randomizedColor, deduction);
+      } else {
+        AddPresetValue(management, *c, pc,
+                       std::get<VariableEffect *>(color_or_var), deduction);
+      }
     }
     seq.Add(pc, 0);
     management.AddSourceValue(pc, 0);
@@ -144,8 +150,8 @@ Chase &AutoDesign::MakeColorVariation(
 
 Chase &AutoDesign::MakeColorShift(
     Management &management, Folder &destination,
-    const std::vector<class Controllable *> &controllables,
-    const std::vector<Color> &colors, const ColorDeduction &deduction,
+    const std::vector<Controllable *> &controllables,
+    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
     ShiftType shiftType) {
   Chase &chase = management.AddChase();
   chase.SetName(destination.GetAvailableName("Colourshift"));
@@ -218,8 +224,8 @@ Chase &AutoDesign::MakeColorShift(
 
 Controllable &AutoDesign::MakeVUMeter(
     Management &management, Folder &destination,
-    const std::vector<class Controllable *> &controllables,
-    const std::vector<Color> &colors, const ColorDeduction &deduction,
+    const std::vector<Controllable *> &controllables,
+    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
     VUMeterDirection direction) {
   if (colors.size() != controllables.size())
     throw std::runtime_error(
@@ -287,8 +293,8 @@ Controllable &AutoDesign::MakeVUMeter(
 
 Chase &AutoDesign::MakeIncreasingChase(
     Management &management, Folder &destination,
-    const std::vector<class Controllable *> &controllables,
-    const std::vector<class Color> &colors, const ColorDeduction &deduction,
+    const std::vector<Controllable *> &controllables,
+    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
     IncreasingType incType) {
   if (colors.size() != controllables.size())
     throw std::runtime_error(

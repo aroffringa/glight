@@ -84,7 +84,6 @@ void FixtureProperties::onSetClicked() {
     fixture->SetDirection(direction);
     fixture->SetTilt(tilt);
   }
-  event_hub_.EmitUpdate();
 }
 
 }  // namespace glight::gui::windows

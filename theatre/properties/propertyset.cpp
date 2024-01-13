@@ -6,7 +6,6 @@
 #include "constantvalueeffectps.h"
 #include "curveeffectps.h"
 #include "delayeffectps.h"
-#include "dispensereffectps.h"
 #include "fadeeffectps.h"
 #include "flickereffectps.h"
 #include "fluorescentstarteffectps.h"
@@ -25,6 +24,11 @@ namespace glight::theatre {
     ps = std::make_unique<X##EffectPS>(); \
     break;
 
+#define EMPTYPSCASE(X)                \
+  case EffectType::X:                 \
+    ps = std::make_unique<EmptyPS>(); \
+    break;
+
 std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
   const Effect *effect = dynamic_cast<const Effect *>(&object);
   if (!effect)
@@ -38,7 +42,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
     FXCASE(ConstantValue);
     FXCASE(Curve);
     FXCASE(Delay);
-    FXCASE(Dispenser);
+    EMPTYPSCASE(Dispenser);
     FXCASE(Fade);
     FXCASE(Flicker);
     FXCASE(FluorescentStart);
@@ -47,8 +51,10 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
     FXCASE(MusicActivation);
     FXCASE(Pulse);
     FXCASE(RandomSelect);
+    EMPTYPSCASE(RgbMaster);
     FXCASE(Threshold);
     FXCASE(Twinkle);
+    EMPTYPSCASE(Variable);
   }
   if (!ps)
     throw std::runtime_error(

@@ -3,10 +3,11 @@
 
 #include <vector>
 
+#include "theatre/color.h"
+
 namespace glight::theatre {
 
 class Controllable;
-class Color;
 struct ColorDeduction;
 class Folder;
 class Management;
@@ -16,7 +17,7 @@ enum class RotationType { Forward, Backward, ForwardBackward };
 
 TimeSequence &MakeRotation(Management &management, Folder &destination,
                            const std::vector<Controllable *> &controllables,
-                           const std::vector<Color> &colors,
+                           const std::vector<ColorOrVariable> &colors,
                            const ColorDeduction &deduction, RotationType type);
 }  // namespace glight::theatre
 

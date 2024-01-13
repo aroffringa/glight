@@ -16,8 +16,7 @@ namespace glight::gui {
 
 class ObjectBrowser : public Gtk::VBox {
  public:
-  ObjectBrowser(theatre::Management &management, EventTransmitter &eventHub)
-      : _folderCombo(management, eventHub), _list(management, eventHub) {
+  ObjectBrowser() : _folderCombo(), _list() {
     _parentFolderButton.set_image_from_icon_name("go-up");
     _parentFolderButton.signal_clicked().connect(
         [&]() { onParentFolderClicked(); });

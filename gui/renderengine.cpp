@@ -79,12 +79,15 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
       Cairo::RefPtr<Cairo::RadialGradient> gradient =
           Cairo::RadialGradient::create(x, y, beam_start_radius, x, y,
                                         beam_end_radius);
-      gradient->add_color_stop_rgba(0.0, static_cast<double>(c.Red()) / 255.0,
-                                    static_cast<double>(c.Green()) / 255.0,
-                                    static_cast<double>(c.Blue()) / 255.0, 0.5);
-      gradient->add_color_stop_rgba(1.0, static_cast<double>(c.Red()) / 255.0,
-                                    static_cast<double>(c.Green()) / 255.0,
-                                    static_cast<double>(c.Blue()) / 255.0, 0.0);
+      double r = static_cast<double>(c.Red()) / 255.0;
+      double g = static_cast<double>(c.Green()) / 255.0;
+      double b = static_cast<double>(c.Blue()) / 255.0;
+      const double max_rgb = std::max({r, g, b});
+      r /= max_rgb;
+      g /= max_rgb;
+      b /= max_rgb;
+      gradient->add_color_stop_rgba(0.0, r, g, b, 0.5 * max_rgb);
+      gradient->add_color_stop_rgba(1.0, r, g, b, 0.0);
       data.cairo->set_source(gradient);
       const double cos_1 = std::cos(direction_1);
       const double sin_1 = std::sin(direction_1);

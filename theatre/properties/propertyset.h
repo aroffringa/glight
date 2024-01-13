@@ -180,6 +180,11 @@ class PropertySet {
   std::vector<Property> _properties;
 };
 
+class EmptyPS final : public PropertySet {
+ public:
+  EmptyPS() = default;
+};
+
 }  // namespace glight::theatre
 
 #endif

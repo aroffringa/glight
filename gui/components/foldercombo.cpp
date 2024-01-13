@@ -1,22 +1,21 @@
 #include "foldercombo.h"
 
-#include "../eventtransmitter.h"
+#include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
-#include "../../theatre/chase.h"
-#include "../../theatre/effect.h"
-#include "../../theatre/folder.h"
-#include "../../theatre/management.h"
-#include "../../theatre/presetcollection.h"
+#include "theatre/chase.h"
+#include "theatre/effect.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/presetcollection.h"
 
 namespace glight::gui {
 
 using theatre::Folder;
 using theatre::FolderObject;
 
-FolderCombo::FolderCombo(theatre::Management &management,
-                         EventTransmitter &eventHub)
-    : Gtk::ComboBox(false), _management(&management), _eventHub(eventHub) {
-  _eventHub.SignalUpdateControllables().connect(
+FolderCombo::FolderCombo() : Gtk::ComboBox(false) {
+  Instance::Get().Events().SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &FolderCombo::fillList));
 
   _listModel = Gtk::ListStore::create(_listColumns);
@@ -38,18 +37,19 @@ void FolderCombo::fillList() {
                : nullptr;
   _listModel->clear();
 
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+  theatre::Management &management = Instance::Get().Management();
+  std::unique_lock<std::mutex> lock(management.Mutex());
 
   Gtk::TreeModel::iterator iter = _listModel->append();
   const Gtk::TreeModel::Row &row = *iter;
-  row[_listColumns._title] = _management->RootFolder().Name();
-  row[_listColumns._folder] = &_management->RootFolder();
-  if (selectedObj == &_management->RootFolder()) set_active(iter);
-  fillListFolder(_management->RootFolder(), 1, selectedObj);
+  row[_listColumns._title] = management.RootFolder().Name();
+  row[_listColumns._folder] = &management.RootFolder();
+  if (selectedObj == &management.RootFolder()) set_active(iter);
+  fillListFolder(management.RootFolder(), 1, selectedObj);
   if (!get_active())  // in case it was removed, the selection changes
   {
     lock.unlock();
-    Select(_management->RootFolder());
+    Select(management.RootFolder());
     _signalSelectionChange.emit();
   }
 }

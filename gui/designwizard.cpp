@@ -28,7 +28,7 @@ DesignWizard::DesignWizard(theatre::Management &management,
 
       _selectLabel("Select fixtures:"),
       _fixtureList(management, hub),
-      _objectBrowser(management, hub),
+      _objectBrowser(),
 
       _reorderWidget(management, hub),
 
@@ -47,7 +47,7 @@ DesignWizard::DesignWizard(theatre::Management &management,
       _deduceLime("Lime from RGB"),
 
       _colorsWidgetP4(this),
-      _parentFolderCombo(management, hub),
+      _parentFolderCombo(),
       _newFolderCB("New folder: "),
       _increasingRunRB("Increasing order"),
       _decreasingRunRB("Decreasing order"),
@@ -391,7 +391,7 @@ void DesignWizard::onNextClicked() {
         runType = RunType::RandomRun;
       AutoDesign::MakeRunningLight(
           _management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetColors(), colorDeduction(), runType);
+          _colorsWidgetP4.GetSelection(), colorDeduction(), runType);
       _eventHub.EmitUpdate();
       hide();
     } break;
@@ -399,7 +399,7 @@ void DesignWizard::onNextClicked() {
     case Page4_2_SingleColor:
       AutoDesign::MakeColorVariation(_management, makeDestinationFolder(),
                                      _selectedControllables,
-                                     _colorsWidgetP4.GetColors(),
+                                     _colorsWidgetP4.GetSelection(),
                                      colorDeduction(), _variation.get_value());
       _eventHub.EmitUpdate();
       hide();
@@ -418,7 +418,7 @@ void DesignWizard::onNextClicked() {
         shiftType = ShiftType::RandomShift;
       AutoDesign::MakeColorShift(
           _management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetColors(), colorDeduction(), shiftType);
+          _colorsWidgetP4.GetSelection(), colorDeduction(), shiftType);
       _eventHub.EmitUpdate();
       hide();
     } break;
@@ -436,7 +436,7 @@ void DesignWizard::onNextClicked() {
         direction = VUMeterDirection::VUOutward;
       AutoDesign::MakeVUMeter(
           _management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetColors(), colorDeduction(), direction);
+          _colorsWidgetP4.GetSelection(), colorDeduction(), direction);
       _eventHub.EmitUpdate();
       hide();
     } break;
@@ -445,10 +445,10 @@ void DesignWizard::onNextClicked() {
       if (_eachFixtureSeparatelyCB.get_active())
         MakeColorPresetPerFixture(
             _management, makeDestinationFolder(), _selectedControllables,
-            _colorsWidgetP4.GetColors(), colorDeduction());
+            _colorsWidgetP4.GetSelection(), colorDeduction());
       else
         MakeColorPreset(_management, makeDestinationFolder(),
-                        _selectedControllables, _colorsWidgetP4.GetColors(),
+                        _selectedControllables, _colorsWidgetP4.GetSelection(),
                         colorDeduction());
       _eventHub.EmitUpdate();
       hide();
@@ -467,7 +467,7 @@ void DesignWizard::onNextClicked() {
         incType = IncreasingType::IncBackwardReturn;
       AutoDesign::MakeIncreasingChase(
           _management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetColors(), colorDeduction(), incType);
+          _colorsWidgetP4.GetSelection(), colorDeduction(), incType);
       _eventHub.EmitUpdate();
       hide();
     } break;
@@ -482,7 +482,7 @@ void DesignWizard::onNextClicked() {
       else  // if (_rotForwardReturnRB.get_active())
         type = RotationType::ForwardBackward;
       MakeRotation(_management, makeDestinationFolder(), _selectedControllables,
-                   _colorsWidgetP4.GetColors(), colorDeduction(), type);
+                   _colorsWidgetP4.GetSelection(), colorDeduction(), type);
       _eventHub.EmitUpdate();
       hide();
     } break;

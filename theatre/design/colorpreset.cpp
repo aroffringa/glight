@@ -1,10 +1,13 @@
 #include "colorpreset.h"
 
-#include "../colordeduction.h"
-#include "../folder.h"
-#include "../folderobject.h"
-#include "../management.h"
-#include "../presetcollection.h"
+#include "theatre/colordeduction.h"
+#include "theatre/folder.h"
+#include "theatre/folderobject.h"
+#include "theatre/management.h"
+#include "theatre/presetcollection.h"
+
+#include "theatre/effects/rgbmastereffect.h"
+#include "theatre/effects/variableeffect.h"
 
 namespace glight::theatre {
 
@@ -79,10 +82,37 @@ void AddPresetValue(Management &management, Controllable &control,
   }
 }
 
+void AddPresetValue(Management &management, Controllable &control,
+                    PresetCollection &pc, VariableEffect *variable,
+                    const ColorDeduction &deduction) {
+  std::unique_ptr<RgbMasterEffect> effect = std::make_unique<RgbMasterEffect>();
+  effect->SetName(pc.Parent().GetAvailableName(pc.Name() + "_var"));
+  Effect &added_effect = management.AddEffect(std::move(effect), pc.Parent());
+  for (size_t inp = 0; inp != added_effect.NInputs(); ++inp)
+    management.AddSourceValue(added_effect, inp);
+
+  pc.AddPresetValue(added_effect, RgbMasterEffect::kMasterInput)
+      .SetValue(ControlValue::Max());
+  variable->AddConnection(added_effect, RgbMasterEffect::kRedInput);
+  variable->AddConnection(added_effect, RgbMasterEffect::kGreenInput);
+  variable->AddConnection(added_effect, RgbMasterEffect::kBlueInput);
+
+  for (size_t i = 0; i != control.NInputs(); ++i) {
+    const FunctionType type = control.InputType(i);
+    if (type == FunctionType::Master) {
+      pc.AddPresetValue(control, i).SetValue(ControlValue::Max());
+    } else if (type == FunctionType::Red || type == FunctionType::Green ||
+               type == FunctionType::Blue) {
+      added_effect.AddConnection(control, i);
+    }
+  }
+}
+
 PresetCollection &MakeColorPreset(
     Management &management, Folder &destination,
     const std::vector<Controllable *> &controllables,
-    const std::vector<Color> &colors, const ColorDeduction &deduction) {
+    const std::vector<ColorOrVariable> &colors,
+    const ColorDeduction &deduction) {
   PresetCollection &pc = management.AddPresetCollection();
   pc.SetName(destination.GetAvailableName("Colourpreset"));
   destination.Add(pc);
@@ -97,7 +127,7 @@ PresetCollection &MakeColorPreset(
 
 void MakeColorPresetPerFixture(Management &management, Folder &destination,
                                const std::vector<Controllable *> &controllables,
-                               const std::vector<Color> &colors,
+                               const std::vector<ColorOrVariable> &colors,
                                const ColorDeduction &deduction) {
   for (size_t cIndex = 0; cIndex != controllables.size(); ++cIndex) {
     PresetCollection &pc = management.AddPresetCollection();

@@ -67,7 +67,7 @@ class CurveEffect final : public Effect {
                 std::sqrt(double(ControlValue::MaxUInt()));
       } break;
     }
-    setConnectedInputs(ControlValue(value));
+    setAllOutputs(ControlValue(value));
   }
 
  private:

@@ -17,14 +17,15 @@ enum class ObjectListType {
   All,
   OnlyPresetCollections,
   OnlyChases,
-  OnlyEffects
+  OnlyEffects,
+  OnlyVariables
 };
 
 class EventTransmitter;
 
 class ObjectList : public Gtk::ScrolledWindow {
  public:
-  ObjectList(theatre::Management &management, EventTransmitter &eventHub);
+  ObjectList();
 
   ObjectListType DisplayType() const { return _displayType; }
   void SetDisplayType(ObjectListType displayType) {
@@ -59,8 +60,6 @@ class ObjectList : public Gtk::ScrolledWindow {
   bool ShowTypeColumn() const { return _showTypeColumn; }
 
  private:
-  theatre::Management *_management;
-  EventTransmitter &_eventHub;
   enum ObjectListType _displayType = ObjectListType::AllExceptFixtures;
   bool _showFixtureGroups = true;
   bool _showTypeColumn = false;

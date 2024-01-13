@@ -12,7 +12,7 @@ namespace glight::theatre {
 
 TimeSequence &MakeRotation(Management &management, Folder &destination,
                            const std::vector<Controllable *> &controllables,
-                           const std::vector<Color> &colors,
+                           const std::vector<ColorOrVariable> &colors,
                            const ColorDeduction &deduction, RotationType type) {
   assert(!controllables.empty());
   assert(!colors.empty());
@@ -23,17 +23,18 @@ TimeSequence &MakeRotation(Management &management, Folder &destination,
   destination.Add(result);
   management.AddSourceValue(result, 0);
 
-  std::vector<Color> modified_colors = colors;
+  std::vector<ColorOrVariable> modified_colors = colors;
   while (modified_colors.size() < controllables.size()) {
     modified_colors.emplace_back(Color::Black());
   }
 
-  std::vector<Color> step_colors(controllables.size(), Color::Black());
+  std::vector<ColorOrVariable> step_colors(controllables.size(),
+                                           Color::Black());
   for (size_t offset = 0; offset != colors.size(); ++offset) {
     for (size_t i = 0; i != controllables.size(); ++i) {
       step_colors[i] = modified_colors[(i + offset) % modified_colors.size()];
     }
-    const Color back = step_colors.back();
+    const ColorOrVariable back = step_colors.back();
     step_colors.back() = Color::Black();
     PresetCollection &pc1 = MakeColorPreset(
         management, destination, controllables, step_colors, deduction);

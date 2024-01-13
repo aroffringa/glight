@@ -19,8 +19,8 @@ class Effect : public Controllable {
   Effect(size_t n_inputs) : input_values_(n_inputs, ControlValue()) {}
 
   virtual ~Effect() {
-    while (!connections_.empty()) {
-      RemoveConnection(connections_.size() - 1);
+    while (!outputs_.empty()) {
+      RemoveConnection(outputs_.size() - 1);
     }
   }
 
@@ -29,7 +29,7 @@ class Effect : public Controllable {
   static std::unique_ptr<Effect> Make(EffectType type);
 
   void AddConnection(Controllable &controllable, size_t input) {
-    connections_.emplace_back(&controllable, input);
+    outputs_.emplace_back(&controllable, input);
     on_delete_connections_.emplace_back(
         controllable.SignalDelete().connect([&controllable, input, this]() {
           RemoveConnection(controllable, input);
@@ -37,25 +37,24 @@ class Effect : public Controllable {
   }
 
   void RemoveConnection(Controllable &controllable, size_t input) {
-    std::vector<std::pair<Controllable *, size_t>>::iterator item =
-        std::find(connections_.begin(), connections_.end(),
-                  std::make_pair(&controllable, input));
-    if (item == connections_.end())
+    std::vector<std::pair<Controllable *, size_t>>::iterator item = std::find(
+        outputs_.begin(), outputs_.end(), std::make_pair(&controllable, input));
+    if (item == outputs_.end())
       throw std::runtime_error(
           "RemoveConnection() called for unconnected controllable");
     // convert to index to also remove corresponding connection
-    size_t index = item - connections_.begin();
+    size_t index = item - outputs_.begin();
     RemoveConnection(index);
   }
 
   void RemoveConnection(size_t index) {
-    connections_.erase(connections_.begin() + index);
+    outputs_.erase(outputs_.begin() + index);
     on_delete_connections_[index].disconnect();
     on_delete_connections_.erase(on_delete_connections_.begin() + index);
   }
 
   const std::vector<std::pair<Controllable *, size_t>> &Connections() const {
-    return connections_;
+    return outputs_;
   }
 
   std::unique_ptr<Effect> Copy() const;
@@ -70,11 +69,11 @@ class Effect : public Controllable {
     return FunctionType::Master;
   }
 
-  size_t NOutputs() const final override { return connections_.size(); }
+  size_t NOutputs() const final override { return outputs_.size(); }
 
   std::pair<const Controllable *, size_t> Output(
       size_t index) const final override {
-    return connections_[index];
+    return outputs_[index];
   }
 
   void Mix(const Timing &timing, bool primary) final override {
@@ -85,7 +84,12 @@ class Effect : public Controllable {
   virtual void MixImplementation(const ControlValue *inputValues,
                                  const Timing &timing, bool primary) = 0;
 
-  void setConnectedInputs(const ControlValue &value) const {
+  /**
+   * Output the provided value to all output connections. Because
+   * inputs are where the values are stored, this implies that this
+   * function sets the inputs of the connected objects.
+   */
+  void setAllOutputs(const ControlValue &value) const {
     for (const std::pair<Controllable *, size_t> &connection : Connections())
       connection.first->MixInput(connection.second, value);
   }
@@ -94,7 +98,7 @@ class Effect : public Controllable {
   friend class EffectControl;
 
   std::vector<ControlValue> input_values_;
-  std::vector<std::pair<Controllable *, size_t>> connections_;
+  std::vector<std::pair<Controllable *, size_t>> outputs_;
   std::vector<sigc::connection> on_delete_connections_;
 };
 

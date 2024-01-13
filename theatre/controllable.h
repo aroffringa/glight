@@ -71,7 +71,7 @@ class Controllable : public FolderObject {
   }
 
   /**
-   * Sets the value at the controllables input.
+   * Sets the value at the controllable's input.
    */
   void MixInput(size_t index, const ControlValue &value) {
     const unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(),
