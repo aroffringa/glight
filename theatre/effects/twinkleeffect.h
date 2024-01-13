@@ -31,16 +31,18 @@ class TwinkleEffect final : public Effect {
   const Transition& GetTransitionOut() const { return transition_out_; }
 
  protected:
-  virtual void MixImplementation(const ControlValue* values,
-                                 const Timing& timing, bool primary) override {
+  void MixImplementation(const ControlValue* values, const Timing& timing,
+                         bool primary) override {
     if (values[0]) {
-      if (previous_time_ == -1.0) previous_time_ = timing.TimeInMS();
-      inputs_.resize(Connections().size());
+      if (previous_time_[primary] == -1.0)
+        previous_time_[primary] = timing.TimeInMS();
+      inputs_[primary].resize(Connections().size());
       for (size_t i = 0; i != Connections().size(); ++i) {
-        MixInput(Connections()[i], inputs_[i], values[0], timing);
+        MixInput(Connections()[i], inputs_[primary][i], values[0], timing,
+                 primary);
       }
     }
-    previous_time_ = timing.TimeInMS();
+    previous_time_[primary] = timing.TimeInMS();
   }
 
  private:
@@ -52,8 +54,8 @@ class TwinkleEffect final : public Effect {
 
   void MixInput(const std::pair<Controllable*, size_t>& connection,
                 InputData& input, const ControlValue& value,
-                const Timing& timing) {
-    const double time_passed = timing.TimeInMS() - previous_time_;
+                const Timing& timing, bool primary) {
+    const double time_passed = timing.TimeInMS() - previous_time_[primary];
     input.state_timer -= time_passed;
     switch (input.state) {
       case State::Waiting:
@@ -99,13 +101,13 @@ class TwinkleEffect final : public Effect {
     }
   }
 
-  double previous_time_ = -1.0;
+  double previous_time_[2] = {-1.0, -1.0};
 
   double average_delay_ = 1500.0;
   double hold_time_ = 0.0;
   Transition transition_in_ = Transition(300, TransitionType::Fade);
   Transition transition_out_ = Transition(300, TransitionType::Fade);
-  std::vector<InputData> inputs_;
+  std::vector<InputData> inputs_[2];
 };
 
 }  // namespace glight::theatre
