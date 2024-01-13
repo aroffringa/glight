@@ -12,7 +12,7 @@ class TwinkleEffect final : public Effect {
  public:
   TwinkleEffect() : Effect(1) {}
 
-  virtual EffectType GetType() const override { return EffectType::Twinkle; }
+  EffectType GetType() const override { return EffectType::Twinkle; }
 
   void SetAverageDelay(double delay) { average_delay_ = delay; }
   double AverageDelay() const { return average_delay_; }
