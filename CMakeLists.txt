@@ -49,6 +49,11 @@ add_compile_options(
   -Wextra
   -Wno-unused-parameter
   -march=native)
+  
+if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES "aarch64")
+  add_compile_options(-Wno-psabi)
+endif()
+
 if (NOT CMAKE_BUILD_TYPE EQUAL "DEBUG")
   add_compile_options(-DNDEBUG)
 endif()
