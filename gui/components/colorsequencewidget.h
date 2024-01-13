@@ -93,6 +93,9 @@ class ColorSequenceWidget : public Gtk::VBox {
 
   void SetAllowVariables(bool allow_variables) {
     allow_variables_ = allow_variables;
+    for (std::unique_ptr<ColorSelectWidget> &w : _widgets) {
+      w->SetAllowVariables(allow_variables);
+    }
   }
 
  private:

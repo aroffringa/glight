@@ -16,22 +16,29 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
     : parent_(parent),
       static_button_("Static"),
       variable_button_("Variable"),
+      color_label_("Color"),
       set_button_("Set...") {
   Gtk::RadioButton::Group group;
   static_button_.set_group(group);
   static_button_.signal_clicked().connect([&]() {
-    variable_label_.set_visible(false);
-    area_.set_visible(true);
-    signal_color_changed_();
+    if (variable_label_.get_parent()) {
+      remove(variable_label_);
+      pack_end(area_, true, true, 5);
+      area_.show();
+      signal_color_changed_();
+    }
   });
   pack_start(static_button_, false, false, 0);
   static_button_.show();
 
   variable_button_.set_group(group);
   variable_button_.signal_clicked().connect([&]() {
-    variable_label_.set_visible(true);
-    area_.set_visible(false);
-    signal_color_changed_();
+    if (area_.get_parent()) {
+      remove(area_);
+      pack_end(variable_label_);
+      variable_label_.show();
+      signal_color_changed_();
+    }
   });
   pack_start(variable_button_, true, true, 0);
   variable_button_.show();
@@ -42,12 +49,10 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
     else
       OpenVariableSelection();
   });
-  set_button_.show();
 
   pack_end(set_button_);
   set_button_.show();
 
-  pack_end(variable_label_);
   area_.signal_draw().connect(
       sigc::mem_fun(*this, &ColorSelectWidget::OnColorAreaDraw));
   pack_end(area_, true, true, 5);

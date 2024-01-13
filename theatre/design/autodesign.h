@@ -48,29 +48,29 @@ class AutoDesign {
       const std::vector<ColorOrVariable> &colors,
       const ColorDeduction &deduction, RunType runType);
 
-  static class Chase &MakeColorVariation(
-      class Management &management, class Folder &destination,
-      const std::vector<class Controllable *> &controllables,
-      const std::vector<Color> &colors, const ColorDeduction &deduction,
-      double variation);
+  static Chase &MakeColorVariation(
+      Management &management, Folder &destination,
+      const std::vector<Controllable *> &controllables,
+      const std::vector<ColorOrVariable> &colors,
+      const ColorDeduction &deduction, double variation);
 
-  static class Chase &MakeColorShift(
-      class Management &management, class Folder &destination,
-      const std::vector<class Controllable *> &controllables,
-      const std::vector<Color> &colors, const ColorDeduction &deduction,
-      ShiftType shiftType);
+  static Chase &MakeColorShift(Management &management, Folder &destination,
+                               const std::vector<Controllable *> &controllables,
+                               const std::vector<ColorOrVariable> &colors,
+                               const ColorDeduction &deduction,
+                               ShiftType shiftType);
 
-  static class Controllable &MakeVUMeter(
-      class Management &management, class Folder &destination,
-      const std::vector<class Controllable *> &controllables,
-      const std::vector<Color> &colors, const ColorDeduction &deduction,
-      VUMeterDirection direction);
+  static Controllable &MakeVUMeter(
+      Management &management, Folder &destination,
+      const std::vector<Controllable *> &controllables,
+      const std::vector<ColorOrVariable> &colors,
+      const ColorDeduction &deduction, VUMeterDirection direction);
 
-  static class Chase &MakeIncreasingChase(
-      class Management &management, class Folder &destination,
-      const std::vector<class Controllable *> &controllables,
-      const std::vector<Color> &colors, const ColorDeduction &deduction,
-      IncreasingType incType);
+  static Chase &MakeIncreasingChase(
+      Management &management, Folder &destination,
+      const std::vector<Controllable *> &controllables,
+      const std::vector<ColorOrVariable> &colors,
+      const ColorDeduction &deduction, IncreasingType incType);
 };
 
 }  // namespace glight::theatre

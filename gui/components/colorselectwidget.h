@@ -60,13 +60,33 @@ class ColorSelectWidget : public Gtk::HBox {
   }
   sigc::signal<void()> &SignalColorChanged() { return signal_color_changed_; }
   void SetAllowVariables(bool allow_variables) {
-    allow_variables_ = allow_variables;
+    if (allow_variables != allow_variables_) {
+      allow_variables_ = allow_variables;
+      if (allow_variables) {
+        remove(color_label_);
+        pack_start(static_button_, false, false, 0);
+        static_button_.show();
+        pack_start(variable_button_, true, true, 0);
+        variable_button_.show();
+        static_button_.set_active(true);
+        variable_label_.set_visible(false);
+      } else {
+        static_button_.set_active(true);
+        remove(static_button_);
+        remove(variable_button_);
+        pack_end(color_label_, true, true, 0);
+        color_label_.show();
+      }
+      area_.set_visible(true);
+      signal_color_changed_();
+    }
   }
 
  private:
   Gtk::Window *parent_;
   Gtk::RadioButton static_button_;
   Gtk::RadioButton variable_button_;
+  Gtk::Label color_label_;
   Gtk::DrawingArea area_;
   Gtk::Label variable_label_;
   Gtk::Button set_button_;

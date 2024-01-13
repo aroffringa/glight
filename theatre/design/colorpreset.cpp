@@ -111,7 +111,8 @@ void AddPresetValue(Management &management, Controllable &control,
 PresetCollection &MakeColorPreset(
     Management &management, Folder &destination,
     const std::vector<Controllable *> &controllables,
-    const std::vector<Color> &colors, const ColorDeduction &deduction) {
+    const std::vector<ColorOrVariable> &colors,
+    const ColorDeduction &deduction) {
   PresetCollection &pc = management.AddPresetCollection();
   pc.SetName(destination.GetAvailableName("Colourpreset"));
   destination.Add(pc);
@@ -126,7 +127,7 @@ PresetCollection &MakeColorPreset(
 
 void MakeColorPresetPerFixture(Management &management, Folder &destination,
                                const std::vector<Controllable *> &controllables,
-                               const std::vector<Color> &colors,
+                               const std::vector<ColorOrVariable> &colors,
                                const ColorDeduction &deduction) {
   for (size_t cIndex = 0; cIndex != controllables.size(); ++cIndex) {
     PresetCollection &pc = management.AddPresetCollection();

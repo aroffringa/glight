@@ -30,6 +30,7 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   _allEqual.signal_clicked().connect(
       sigc::mem_fun(*this, &ColorSequenceWidget::onToggleEqual));
   pack_start(_allEqual, false, false);
+  _allEqual.show();
 
   _buttonBox.set_homogeneous(true);
 
@@ -56,6 +57,7 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   _buttonBox.pack_start(_plusButton);
 
   pack_start(_buttonBox, false, false);
+  _buttonBox.show_all();
 
   _loadDefaultList = Gtk::ListStore::create(_listColumns);
   const std::vector<std::string> list = theatre::GetDefaultColorSequences();
@@ -72,17 +74,20 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   _loadDefaultButton.signal_clicked().connect([&]() { LoadDefault(); });
   _loadDefaultBox.pack_end(_loadDefaultButton);
   pack_start(_loadDefaultBox, false, false);
+  _loadDefaultBox.show_all();
 
   _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
   _box.pack_start(*_widgets.back(), true, false);
   _widgets.back()->SignalColorChanged().connect(
       sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
+  _widgets.back()->show();
 
   _scrolledWindow.add(_box);
+  _box.show();
   _frame.add(_scrolledWindow);
+  _scrolledWindow.show();
   pack_start(_frame, true, true);
-
-  show_all_children();
+  _frame.show();
 }
 
 ColorSequenceWidget::~ColorSequenceWidget() = default;

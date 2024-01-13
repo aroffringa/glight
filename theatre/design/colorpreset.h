@@ -23,6 +23,12 @@ void AddPresetValue(Management &management, Controllable &control,
                     PresetCollection &pc, const Color &color,
                     const ColorDeduction &deduction);
 
+/**
+ * Add a single preset value to a PresetCollection for which the color
+ * can be controlled by a variable. A RgbMasterEffect is added in
+ * between the preset collection and the variable to let the preset
+ * collection control the intensity.
+ */
 void AddPresetValue(Management &management, Controllable &control,
                     PresetCollection &pc, VariableEffect *variable,
                     const ColorDeduction &deduction);
@@ -46,7 +52,8 @@ inline void AddPresetValue(Management &management, Controllable &control,
 PresetCollection &MakeColorPreset(
     Management &management, Folder &destination,
     const std::vector<Controllable *> &controllables,
-    const std::vector<Color> &colors, const ColorDeduction &deduction);
+    const std::vector<ColorOrVariable> &colors,
+    const ColorDeduction &deduction);
 
 /**
  * Construct PresetCollections from a list of colors.
@@ -56,7 +63,7 @@ PresetCollection &MakeColorPreset(
  */
 void MakeColorPresetPerFixture(Management &management, Folder &destination,
                                const std::vector<Controllable *> &controllables,
-                               const std::vector<Color> &colors,
+                               const std::vector<ColorOrVariable> &colors,
                                const ColorDeduction &deduction);
 
 }  // namespace glight::theatre
