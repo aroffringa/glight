@@ -60,7 +60,7 @@ class ControlValue {
   }
 
   constexpr static unsigned MultiplyValues(unsigned first, unsigned second) {
-    if (first == MaxUInt() && second == MaxUInt()) return MaxUInt();
+    if (first >= MaxUInt() && second >= MaxUInt()) return MaxUInt();
     first >>= 9;
     second >>= 9;
     return (first * second) >> 6;
