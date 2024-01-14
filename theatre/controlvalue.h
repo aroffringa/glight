@@ -97,20 +97,30 @@ class ControlValue {
   unsigned int _value;
 };
 
-inline bool operator==(const ControlValue& lhs, const ControlValue& rhs) {
+inline constexpr bool operator==(const ControlValue& lhs,
+                                 const ControlValue& rhs) {
   return lhs.UInt() == rhs.UInt();
 }
 
-inline ControlValue operator*(const ControlValue& lhs,
-                              const ControlValue& rhs) {
+inline constexpr ControlValue operator*(const ControlValue& lhs,
+                                        const ControlValue& rhs) {
   return ControlValue(ControlValue::MultiplyValues(lhs.UInt(), rhs.UInt()));
 }
 
-inline ControlValue operator*(const ControlValue& lhs, unsigned factor) {
+inline constexpr ControlValue operator*(const ControlValue& lhs,
+                                        unsigned factor) {
   return ControlValue(lhs.UInt() * factor);
 }
 
-inline ControlValue operator/(const ControlValue& lhs, unsigned factor) {
+/**
+ * @param ratio Value between 0 and 1.
+ */
+inline constexpr ControlValue operator*(const ControlValue& lhs, double ratio) {
+  return ControlValue(lhs.UInt() * ratio);
+}
+
+inline constexpr ControlValue operator/(const ControlValue& lhs,
+                                        unsigned factor) {
   return ControlValue(lhs.UInt() / factor);
 }
 
