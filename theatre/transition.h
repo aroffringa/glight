@@ -13,6 +13,7 @@ enum class TransitionType {
   Fade,
   FadeThroughBlack,
   FadeThroughFull,
+  GlowFade,
   Random,
   Stepped,
   Erratic,
@@ -32,6 +33,8 @@ inline std::string ToString(TransitionType mix_style) {
       return "fade_through_black";
     case TransitionType::FadeThroughFull:
       return "fade_through_full";
+    case TransitionType::GlowFade:
+      return "glow_fade";
     case TransitionType::Random:
       return "random";
     case TransitionType::Stepped:
@@ -54,6 +57,8 @@ inline TransitionType GetTransitionType(const std::string &str) {
     return TransitionType::FadeThroughBlack;
   else if (str == "fade_through_full")
     return TransitionType::FadeThroughFull;
+  else if (str == "glow_fade")
+    return TransitionType::GlowFade;
   else if (str == "random")
     return TransitionType::Random;
   else if (str == "stepped")
@@ -115,6 +120,18 @@ class Transition {
           return ControlValue(ratio - ControlValue::MaxUInt());
         } else {
           return ControlValue::Zero();
+        }
+      }
+      case TransitionType::GlowFade: {
+        constexpr double stage_split = 0.25;
+        double transition_point = transition_time / _lengthInMs;
+        if (transition_point < stage_split) {
+          transition_point /= stage_split;
+          return ControlValue(ControlValue::Max() * transition_point);
+        } else {
+          transition_point =
+              (transition_point - stage_split) / (1.0 - stage_split);
+          return ControlValue::Max();
         }
       }
       case TransitionType::Stepped: {
@@ -194,6 +211,28 @@ class Transition {
         } else {
           const ControlValue firstValue((value.UInt() * (512 - ratio)) >> 8);
           first.MixInput(firstInput, firstValue);
+          second.MixInput(secondInput, value);
+        }
+      } break;
+      case TransitionType::GlowFade: {
+        // This fade is divided in 2 stages:
+        // - Quickly fade up B, quickly but partially fade down A
+        // - B is full on, slowly finish fading down A ("glow")
+        constexpr double stage_split = 0.25;
+        constexpr double glow_level = 0.1;
+        double transition_point = transition_time / _lengthInMs;
+        if (transition_point < stage_split) {
+          transition_point /= stage_split;
+          const double a =
+              (1.0 - transition_point) * (1.0 - glow_level) + glow_level;
+          first.MixInput(firstInput, ControlValue(value.UInt() * a));
+          second.MixInput(secondInput,
+                          ControlValue(value.UInt() * transition_point));
+        } else {
+          transition_point =
+              (transition_point - stage_split) / (1.0 - stage_split);
+          const double a = (1.0 - transition_point) * glow_level;
+          first.MixInput(firstInput, ControlValue(value.UInt() * a));
           second.MixInput(secondInput, value);
         }
       } break;
