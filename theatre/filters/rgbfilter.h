@@ -145,14 +145,14 @@ class RgbFilter : public Filter {
 
  protected:
   void DetermineInputTypes() override {
-    red_index_.reset();
-    green_index_.reset();
-    blue_index_.reset();
-    lime_index_.reset();
-    amber_index_.reset();
-    white_index_.reset();
-    cw_index_.reset();
-    ww_index_.reset();
+    red_index_.Reset();
+    green_index_.Reset();
+    blue_index_.Reset();
+    lime_index_.Reset();
+    amber_index_.Reset();
+    white_index_.Reset();
+    cw_index_.Reset();
+    ww_index_.Reset();
 
     std::vector<FunctionType> input_types{
         FunctionType::Red, FunctionType::Green, FunctionType::Blue};

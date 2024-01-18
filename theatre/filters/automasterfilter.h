@@ -45,7 +45,7 @@ class AutoMasterFilter final : public Filter {
 
  protected:
   void DetermineInputTypes() override {
-    master_channel_index_.reset();
+    master_channel_index_.Reset();
     std::vector<FunctionType> input_types;
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
       const FunctionType type = OutputTypes()[i];
