@@ -39,51 +39,51 @@ class PropertySet {
 
   void SetControlValue(const Property &property, unsigned value) const {
     if (value > ControlValue::MaxUInt()) value = ControlValue::MaxUInt();
-    setControlValue(*_object, property._setIndex, value);
+    setControlValue(*_object, property.set_index_, value);
   }
 
   unsigned GetControlValue(const Property &property) const {
-    return getControlValue(*_object, property._setIndex);
+    return getControlValue(*_object, property.set_index_);
   }
 
   void SetDuration(const Property &property, double value) const {
-    setDuration(*_object, property._setIndex, value);
+    setDuration(*_object, property.set_index_, value);
   }
 
   double GetDuration(const Property &property) const {
-    return getDuration(*_object, property._setIndex);
+    return getDuration(*_object, property.set_index_);
   }
 
   void SetBool(const Property &property, double value) {
-    setBool(*_object, property._setIndex, value);
+    setBool(*_object, property.set_index_, value);
   }
 
   bool GetBool(const Property &property) const {
-    return getBool(*_object, property._setIndex);
+    return getBool(*_object, property.set_index_);
   }
 
   void SetChoice(const Property &property, const std::string &value) {
-    setChoice(*_object, property._setIndex, value);
+    setChoice(*_object, property.set_index_, value);
   }
 
   std::string GetChoice(const Property &property) const {
-    return getChoice(*_object, property._setIndex);
+    return getChoice(*_object, property.set_index_);
   }
 
   void SetInteger(const Property &property, int value) {
-    setInteger(*_object, property._setIndex, value);
+    setInteger(*_object, property.set_index_, value);
   }
 
   int GetInteger(const Property &property) const {
-    return getInteger(*_object, property._setIndex);
+    return getInteger(*_object, property.set_index_);
   }
 
   void SetTransition(const Property &property, const Transition &value) {
-    setTransition(*_object, property._setIndex, value);
+    setTransition(*_object, property.set_index_, value);
   }
 
   Transition GetTransition(const Property &property) const {
-    return getTransition(*_object, property._setIndex);
+    return getTransition(*_object, property.set_index_);
   }
 
   FolderObject &Object() const { return *_object; }
@@ -156,13 +156,13 @@ class PropertySet {
 
   size_t addProperty(const Property &property) {
     _properties.emplace_back(property);
-    _properties.back()._setIndex = _properties.size() - 1;
-    return _properties.back()._setIndex;
+    _properties.back().set_index_ = _properties.size() - 1;
+    return _properties.back().set_index_;
   }
   size_t addProperty(Property &&property) {
-    property._setIndex = _properties.size();
+    property.set_index_ = _properties.size();
     _properties.emplace_back(std::move(property));
-    return _properties.back()._setIndex;
+    return _properties.back().set_index_;
   }
 
  private:

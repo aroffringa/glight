@@ -203,6 +203,27 @@ FixtureType::FixtureType(StockFixture stock_fixture)
                               0);
       short_name_ = "RGB";
       break;
+    case StockFixture::ZoomLight:
+      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Zoom, 3, fine_channel, 0);
+      min_beam_angle_ = 10.0 * M_PI / 180.0;
+      max_beam_angle_ = 50.0 * M_PI / 180.0;
+      short_name_ = "Zoom";
+      break;
+    case StockFixture::MovingHead:
+      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Pan, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Tilt, 4, fine_channel, 0);
+      min_pan_ = 0.0;
+      max_pan_ = 2.0 * M_PI;
+      min_tilt_ = -0.25 * M_PI;
+      max_tilt_ = 0.5 * M_PI;
+      short_name_ = "Move";
+      break;
   }
   UpdateFunctions();
 }

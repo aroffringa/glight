@@ -10,6 +10,7 @@
 #include "effects/fadeeffect.h"
 #include "effects/flickereffect.h"
 #include "effects/fluorescentstarteffect.h"
+#include "effects/functiongeneratoreffect.h"
 #include "effects/hue_saturation_lightness_effect.h"
 #include "effects/inverteffect.h"
 #include "effects/musicactivationeffect.h"
@@ -48,6 +49,8 @@ std::unique_ptr<Effect> Effect::Make(EffectType type) {
       return up(new FlickerEffect());
     case ET::FluorescentStart:
       return up(new FluorescentStartEffect());
+    case ET::FunctionGenerator:
+      return up(new FunctionGeneratorEffect());
     case ET::HueSaturationLightness:
       return up(new HueSaturationLightnessEffect());
     case ET::Invert:

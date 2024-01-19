@@ -22,7 +22,7 @@ class Property final {
  public:
   Property(const std::string &name, const std::string &description,
            PropertyType type)
-      : _type(type), _setIndex(0), _name(name), _description(description) {}
+      : type_(type), set_index_(0), name_(name), description_(description) {}
 
   /**
    * Create a choice property, similar to an enum.
@@ -30,34 +30,35 @@ class Property final {
    */
   Property(const std::string &name, const std::string &description,
            const std::vector<std::pair<std::string, std::string>> &options)
-      : _type(PropertyType::Choice),
-        _setIndex(0),
-        _name(name),
-        _description(description),
-        _options(options) {}
+      : type_(PropertyType::Choice),
+        set_index_(0),
+        name_(name),
+        description_(description),
+        options_(options) {}
 
-  PropertyType GetType() const { return _type; }
+  PropertyType GetType() const { return type_; }
 
-  const std::string &Name() const { return _name; }
+  const std::string &Name() const { return name_; }
 
-  const std::string &Description() const { return _description; }
+  const std::string &Description() const { return description_; }
 
-  size_t OptionCount() const { return _options.size(); }
+  size_t OptionCount() const { return options_.size(); }
   const std::string &OptionName(size_t index) const {
-    return _options[index].first;
+    return options_[index].first;
   }
   const std::string &OptionDescription(size_t index) const {
-    return _options[index].second;
+    return options_[index].second;
   }
 
  private:
   friend class PropertySet;
 
-  PropertyType _type;
-  size_t _setIndex;
-  std::string _name, _description;
+  PropertyType type_;
+  size_t set_index_;
+  std::string name_;
+  std::string description_;
   // Vector with names and descriptions
-  std::vector<std::pair<std::string, std::string>> _options;
+  std::vector<std::pair<std::string, std::string>> options_;
 };
 
 }  // namespace glight::theatre

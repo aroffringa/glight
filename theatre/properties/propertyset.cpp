@@ -9,6 +9,7 @@
 #include "fadeeffectps.h"
 #include "flickereffectps.h"
 #include "fluorescentstarteffectps.h"
+#include "functiongeneratorps.h"
 #include "hue_saturation_lightness_ps.h"
 #include "inverteffectps.h"
 #include "musicactivationeffectps.h"
@@ -46,6 +47,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
     FXCASE(Fade);
     FXCASE(Flicker);
     FXCASE(FluorescentStart);
+    FXCASE(FunctionGenerator);
     FXCASE(HueSaturationLightness);
     FXCASE(Invert);
     FXCASE(MusicActivation);
@@ -65,9 +67,9 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
 
 void PropertySet::AssignProperty(const Property &to, const Property &from,
                                  const PropertySet &fromSet) {
-  if (from._type != to._type)
+  if (from.type_ != to.type_)
     throw std::runtime_error("Copying different types");
-  switch (from._type) {
+  switch (from.type_) {
     case PropertyType::Boolean:
       SetBool(to, fromSet.GetBool(from));
       break;
