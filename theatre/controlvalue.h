@@ -15,7 +15,6 @@ class ControlValue {
  public:
   constexpr ControlValue() : _value(0) {}
   constexpr explicit ControlValue(unsigned value) : _value(value) {}
-  constexpr ControlValue(const ControlValue& source) = default;
 
   constexpr explicit operator bool() const { return _value != 0; }
 

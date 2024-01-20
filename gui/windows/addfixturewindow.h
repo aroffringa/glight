@@ -27,6 +27,7 @@ class AddFixtureWindow : public Gtk::Window {
   AddFixtureWindow(EventTransmitter *eventHub, theatre::Management &management);
 
  private:
+  void updateFilters();
   void fillStock();
   void fillFromProject();
 

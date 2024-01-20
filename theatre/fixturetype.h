@@ -37,7 +37,9 @@ enum class StockFixture {
   CWWW2Ch,
   CWWW4Ch,
   CWWWA3Ch,
-  RGBLight6Ch_16bit
+  RGBLight6Ch_16bit,
+  ZoomLight,
+  MovingHead
 };
 
 enum class FixtureClass {
@@ -109,6 +111,10 @@ class FixtureType : public FolderObject {
         return "Briteq Vintage (7ch)";
       case StockFixture::RGBLight6Ch_16bit:
         return "RGB light (6ch, 16 bit)";
+      case StockFixture::ZoomLight:
+        return "Zoom light (RGB)";
+      case StockFixture::MovingHead:
+        return "Moving head (RGB)";
     }
     return "Unknown fixture class";
   }
@@ -126,14 +132,14 @@ class FixtureType : public FolderObject {
   static std::vector<StockFixture> GetStockList() {
     using SF = StockFixture;
     return std::vector<SF>{
-        SF::Light1Ch,         SF::Rgb3Ch,         SF::Rgb4Ch,
-        SF::Rgba4Ch,          SF::Rgba5Ch,        SF::Rgbw4Ch,
-        SF::RgbUv4Ch,         SF::Rgbaw5Ch,       SF::RgbawUv6Ch,
-        SF::Rgbl4Ch,          SF::CWWW2Ch,        SF::CWWW4Ch,
-        SF::CWWWA3Ch,         SF::Uv3Ch,          SF::H2ODmxPro,
-        SF::AyraTDCSunrise,   SF::RGB_ADJ_6CH,    SF::RGB_ADJ_7CH,
-        SF::BT_VINTAGE_5CH,   SF::BT_VINTAGE_6CH, SF::BT_VINTAGE_7CH,
-        SF::RGBLight6Ch_16bit};
+        SF::Light1Ch,          SF::Rgb3Ch,         SF::Rgb4Ch,
+        SF::Rgba4Ch,           SF::Rgba5Ch,        SF::Rgbw4Ch,
+        SF::RgbUv4Ch,          SF::Rgbaw5Ch,       SF::RgbawUv6Ch,
+        SF::Rgbl4Ch,           SF::CWWW2Ch,        SF::CWWW4Ch,
+        SF::CWWWA3Ch,          SF::Uv3Ch,          SF::H2ODmxPro,
+        SF::AyraTDCSunrise,    SF::RGB_ADJ_6CH,    SF::RGB_ADJ_7CH,
+        SF::BT_VINTAGE_5CH,    SF::BT_VINTAGE_6CH, SF::BT_VINTAGE_7CH,
+        SF::RGBLight6Ch_16bit, SF::ZoomLight,      SF::MovingHead};
   }
 
   static std::vector<FixtureClass> GetClassList() {

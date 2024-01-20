@@ -233,9 +233,10 @@ inline std::string ToString(FunctionType functionType) {
   return "?";
 }
 
-inline bool IsColor(FunctionType type) {
+inline constexpr bool IsColor(FunctionType type) {
   switch (type) {
     case FunctionType::ColorMacro:
+    case FunctionType::ColorTemperature:
     case FunctionType::Effect:
     case FunctionType::Lightness:
     case FunctionType::Master:
@@ -258,10 +259,14 @@ inline bool IsColor(FunctionType type) {
     case FunctionType::Lime:
     case FunctionType::ColdWhite:
     case FunctionType::WarmWhite:
-    case FunctionType::ColorTemperature:
       return true;
   }
   return false;
+}
+
+inline constexpr bool IsRgb(FunctionType type) {
+  return type == FunctionType::Red || type == FunctionType::Green ||
+         type == FunctionType::Blue;
 }
 
 inline constexpr Color GetFunctionColor(FunctionType type) {
