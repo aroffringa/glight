@@ -1,6 +1,8 @@
 #ifndef THEATRE_FUNCTION_GENERATOR_EFFECT_H_
 #define THEATRE_FUNCTION_GENERATOR_EFFECT_H_
 
+#include <array>
+
 #include "../effect.h"
 
 #include "../timing.h"
@@ -9,7 +11,15 @@ namespace glight::theatre {
 
 class FunctionGeneratorEffect final : public Effect {
  public:
-  enum class Function { Sine, Cosine, Square, Sawtooth, Triangle, Staircase };
+  enum class Function {
+    Sine,
+    Cosine,
+    Square,
+    Sawtooth,
+    Triangle,
+    Staircase,
+    Strobe
+  };
 
   FunctionGeneratorEffect() : Effect(1) {}
 
@@ -19,6 +29,7 @@ class FunctionGeneratorEffect final : public Effect {
 
   void SetPeriod(double period) {
     period_ = std::clamp(period, 25.0, 24 * 60.0 * 60.0 * 1000.0);
+    next_strobe_time_ = {0.0, 0.0};
   }
   double GetPeriod() const { return period_; }
 
@@ -58,6 +69,14 @@ class FunctionGeneratorEffect final : public Effect {
       case Function::Staircase:
         output = std::floor(phase * 4.9999) * 0.5 - 1.0;
         break;
+      case Function::Strobe:
+        if (timing.TimeInMS() >= next_strobe_time_[primary]) {
+          next_strobe_time_[primary] = timing.TimeInMS() + period_;
+          output = 1.0;
+        } else {
+          output = -1.0;
+        }
+        break;
     }
     if (invert_) {
       output = -output;
@@ -75,6 +94,7 @@ class FunctionGeneratorEffect final : public Effect {
   ControlValue offset_ = ControlValue::Max() / 2;
   ControlValue amplitude_ = ControlValue::Max() / 2;
   double period_ = 750.0;
+  std::array<double, 2> next_strobe_time_ = {0.0, 0.0};
 };
 
 }  // namespace glight::theatre

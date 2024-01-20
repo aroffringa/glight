@@ -20,7 +20,7 @@ class FunctionGeneratorEffectPS final : public PropertySet {
                              {"sawtooth", "Sawtooth"},
                              {"triange", "Triangle"},
                              {"staircase", "Staircase"},
-                         }));
+                             {"strobe", "Strobe"}}));
     addProperty(Property("amplitude", "Amplitude", PropertyType::ControlValue));
     addProperty(Property("offset", "Offset", PropertyType::ControlValue));
     addProperty(Property("invert", "Invert", PropertyType::Boolean));
@@ -91,6 +91,8 @@ class FunctionGeneratorEffectPS final : public PropertySet {
           fgx.SetFunction(F::Triangle);
         else if (value == "staircase")
           fgx.SetFunction(F::Staircase);
+        else if (value == "strobe")
+          fgx.SetFunction(F::Strobe);
         break;
     }
   }
@@ -115,6 +117,8 @@ class FunctionGeneratorEffectPS final : public PropertySet {
             return "triange";
           case F::Staircase:
             return "staircase";
+          case F::Strobe:
+            return "strobe";
         }
         break;
     }
