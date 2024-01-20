@@ -99,6 +99,18 @@ class PropertySet {
                       const PropertySet &fromSet);
 
  protected:
+  /**
+   * Set the property
+   * Sub-classes should override this method if they have control value
+   * properties.
+   * @param object The object for which to change the property value.
+   * @param index The absolute index of this property. Note that other
+   * property types are also counted; a property set with a bool and
+   * a control value property will have index 0 for the bool and index
+   * 1 for the control value.
+   * @param value The new value of the property (between 0 and
+   * ControlValue::MaxUInt()).
+   */
   virtual void setControlValue(FolderObject &object, size_t index,
                                unsigned value) const {
     setterNotImplemented();

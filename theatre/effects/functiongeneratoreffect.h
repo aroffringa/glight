@@ -9,14 +9,7 @@ namespace glight::theatre {
 
 class FunctionGeneratorEffect final : public Effect {
  public:
-  enum class Function {
-    Sine,
-    Cosine,
-    Square,
-    Sawtooth,
-    ReverseSawtooth,
-    Triangle
-  };
+  enum class Function { Sine, Cosine, Square, Sawtooth, Triangle, Staircase };
 
   FunctionGeneratorEffect() : Effect(1) {}
 
@@ -35,45 +28,52 @@ class FunctionGeneratorEffect final : public Effect {
   void SetInvert(bool invert) { invert_ = invert; }
   bool GetInvert() const { return invert_; }
 
+  void SetAmplitude(ControlValue value) { amplitude_ = value; }
+  ControlValue GetAmplitude() const { return amplitude_; }
+
+  void SetOffset(ControlValue value) { offset_ = value; }
+  ControlValue GetOffset() const { return offset_; }
+
  protected:
   virtual void MixImplementation(const ControlValue *values,
                                  const Timing &timing, bool primary) override {
     const double phase = std::fmod(timing.TimeInMS(), period_) / period_;
-    const unsigned input = values[0].UInt();
-    unsigned output = 0;
+    double output = 0;
     switch (function_) {
       case Function::Sine:
-        output = static_cast<unsigned>(
-            (std::sin(phase * 2.0 * M_PI) * 0.5 + 0.5) * input);
+        output = std::sin(phase * 2.0 * M_PI);
         break;
       case Function::Cosine:
-        output = static_cast<unsigned>(
-            (std::cos(phase * 2.0 * M_PI) * 0.5 + 0.5) * input);
+        output = std::cos(phase * 2.0 * M_PI);
         break;
       case Function::Square:
-        output = phase < 0.5 ? input : 0.0;
+        output = phase < 0.5 ? 1.0 : -1.0;
         break;
       case Function::Sawtooth:
-        output = static_cast<unsigned>(phase * input);
-        break;
-      case Function::ReverseSawtooth:
-        output = static_cast<unsigned>((1.0 - phase) * input);
+        output = phase * 2.0 - 1.0;
         break;
       case Function::Triangle:
-        output = phase < 0.5
-                     ? static_cast<unsigned>(2.0 * phase * input)
-                     : static_cast<unsigned>(2.0 * (1.0 - phase) * input);
+        output = phase < 0.5 ? 4.0 * phase - 1.0 : 3.0 - 4.0 * phase;
+        break;
+      case Function::Staircase:
+        output = std::floor(phase * 4.9999) * 0.5 - 1.0;
         break;
     }
     if (invert_) {
-      output = input - output;
+      output = -output;
     }
+    const unsigned input = values[0].UInt();
+    output =
+        std::clamp(output * amplitude_.Ratio() + offset_.Ratio(), 0.0, 1.0) *
+        input;
     setAllOutputs(ControlValue(output));
   }
 
  private:
   Function function_ = Function::Sine;
   bool invert_ = false;
+  ControlValue offset_ = ControlValue::Max() / 2;
+  ControlValue amplitude_ = ControlValue::Max() / 2;
   double period_ = 750.0;
 };
 

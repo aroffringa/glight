@@ -18,8 +18,11 @@ class FunctionGeneratorEffectPS final : public PropertySet {
                              {"cosine", "Cosine"},
                              {"square", "Square"},
                              {"sawtooth", "Sawtooth"},
-                             {"reverse_sawtooth", "Reverse sawtooth"},
-                             {"triange", "Triangle"}}));
+                             {"triange", "Triangle"},
+                             {"staircase", "Staircase"},
+                         }));
+    addProperty(Property("amplitude", "Amplitude", PropertyType::ControlValue));
+    addProperty(Property("offset", "Offset", PropertyType::ControlValue));
     addProperty(Property("invert", "Invert", PropertyType::Boolean));
     addProperty(Property("period", "Period", PropertyType::Duration));
   }
@@ -50,6 +53,25 @@ class FunctionGeneratorEffectPS final : public PropertySet {
     return fgx.GetInvert();
   }
 
+  void setControlValue(FolderObject &object, size_t index,
+                       unsigned value) const override {
+    FunctionGeneratorEffect &fgx =
+        static_cast<FunctionGeneratorEffect &>(object);
+    if (index == 1)
+      fgx.SetAmplitude(ControlValue(value));
+    else
+      fgx.SetOffset(ControlValue(value));
+  }
+  unsigned getControlValue(const FolderObject &object,
+                           size_t index) const override {
+    const FunctionGeneratorEffect &fgx =
+        static_cast<const FunctionGeneratorEffect &>(object);
+    if (index == 1)
+      return fgx.GetAmplitude().UInt();
+    else
+      return fgx.GetOffset().UInt();
+  }
+
   void setChoice(FolderObject &object, size_t index,
                  const std::string &value) const override {
     FunctionGeneratorEffect &fgx =
@@ -65,10 +87,10 @@ class FunctionGeneratorEffectPS final : public PropertySet {
           fgx.SetFunction(F::Square);
         else if (value == "sawtooth")
           fgx.SetFunction(F::Sawtooth);
-        else if (value == "reverse_sawtooth")
-          fgx.SetFunction(F::ReverseSawtooth);
         else if (value == "triange")
           fgx.SetFunction(F::Triangle);
+        else if (value == "staircase")
+          fgx.SetFunction(F::Staircase);
         break;
     }
   }
@@ -89,10 +111,10 @@ class FunctionGeneratorEffectPS final : public PropertySet {
             return "square";
           case F::Sawtooth:
             return "sawtooth";
-          case F::ReverseSawtooth:
-            return "reverse_sawtooth";
           case F::Triangle:
             return "triange";
+          case F::Staircase:
+            return "staircase";
         }
         break;
     }

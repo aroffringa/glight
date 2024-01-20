@@ -21,6 +21,10 @@ class AutoMasterFilter final : public Filter {
       for (size_t i = 0; i != input.size(); ++i) {
         if (IsColor(InputTypes()[i]) && input[i].UInt() > maximum) {
           maximum = input[i].UInt();
+        } else if ((InputTypes()[i] == FunctionType::ColorMacro ||
+                    InputTypes()[i] == FunctionType::ColorTemperature) &&
+                   input[i]) {
+          maximum = ControlValue::MaxUInt();
         }
       }
       maximum =

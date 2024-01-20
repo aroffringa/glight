@@ -4,6 +4,7 @@
 
 #include "../../theatre/fixturecontrol.h"
 #include "../../theatre/fixturetype.h"
+#include "../../theatre/fixturetypefunction.h"
 #include "../../theatre/folder.h"
 #include "../../theatre/management.h"
 #include "../../theatre/theatre.h"
@@ -15,6 +16,7 @@
 namespace glight::gui {
 
 using theatre::FixtureType;
+using theatre::FixtureTypeFunction;
 
 AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
                                    theatre::Management &management)
@@ -57,6 +59,7 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
   type_model_ = Gtk::ListStore::create(type_columns_);
   _typeCombo.set_model(type_model_);
   _typeCombo.pack_start(type_columns_.type_str_);
+  _typeCombo.signal_changed().connect([&]() { updateFilters(); });
   fillStock();
   _grid.attach(_typeCombo, 1, 1, 3, 1);
 
@@ -68,10 +71,9 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
   _grid.attach(_incCountButton, 3, 2, 1, 1);
 
   filters_box_.pack_start(auto_master_cb_);
-  auto_master_cb_.set_active(true);
   filters_box_.pack_start(rgb_cb_);
-  rgb_cb_.set_active(true);
   filters_box_.pack_start(monochrome_cb_);
+  updateFilters();
 
   filters_frame_.add(filters_box_);
   _grid.attach(filters_frame_, 0, 3, 4, 1);
@@ -94,6 +96,30 @@ void AddFixtureWindow::onStockProjectToggled() {
     fillStock();
   else
     fillFromProject();
+}
+
+void AddFixtureWindow::updateFilters() {
+  Gtk::TreeModel::const_iterator selected = _typeCombo.get_active();
+  bool enable_master = false;
+  bool enable_color = false;
+  bool enable_monochrome = false;
+  if (selected) {
+    const FixtureType *type = (*selected)[type_columns_.type_];
+    for (const FixtureTypeFunction &function : type->Functions()) {
+      if (function.Type() == theatre::FunctionType::Master)
+        enable_master = true;
+      else if (IsColor(function.Type()) && !IsRgb(function.Type()))
+        enable_color = true;
+      else if (IsColor(function.Type()) &&
+               function.Type() != theatre::FunctionType::White)
+        enable_monochrome = true;
+    }
+  }
+  auto_master_cb_.set_active(enable_master);
+  auto_master_cb_.set_sensitive(enable_master);
+  rgb_cb_.set_active(enable_color);
+  rgb_cb_.set_sensitive(enable_color);
+  monochrome_cb_.set_sensitive(enable_monochrome);
 }
 
 void AddFixtureWindow::fillStock() {
