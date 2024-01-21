@@ -9,87 +9,83 @@ namespace glight::theatre {
 
 class PulseEffect final : public Effect {
  public:
-  PulseEffect()
-      : Effect(1),
-        _isActive{false, false},
-        _startTime{0.0, 0.0},
-        _repeat(false),
-        _attack(300),
-        _hold(200),
-        _release(300),
-        _sleep(200) {}
+  PulseEffect() : Effect(1) {}
 
   virtual EffectType GetType() const override { return EffectType::Pulse; }
 
-  unsigned Attack() const { return _attack; }
-  void SetAttack(unsigned attack) { _attack = attack; }
+  Transition TransitionIn() const { return transition_in_; }
+  void SetTransitionIn(const Transition& t_in) { transition_in_ = t_in; }
 
-  unsigned Hold() const { return _hold; }
-  void SetHold(unsigned hold) { _hold = hold; }
+  unsigned Hold() const { return sustain_; }
+  void SetHold(unsigned hold) { sustain_ = hold; }
 
-  unsigned Release() const { return _release; }
-  void SetRelease(unsigned release) { _release = release; }
+  Transition TransitionOut() const { return transition_out_; }
+  void SetTransitionOut(const Transition& t_out) { transition_out_ = t_out; }
 
-  unsigned Sleep() const { return _sleep; }
-  void SetSleep(unsigned sleep) { _sleep = sleep; }
+  unsigned Sleep() const { return sleep_; }
+  void SetSleep(unsigned sleep) { sleep_ = sleep; }
 
   bool Repeat() const { return _repeat; }
   void SetRepeat(bool repeat) { _repeat = repeat; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue* values,
+                                 const Timing& timing, bool primary) override {
     if (values[0].UInt() == 0) {
-      _isActive[primary] = false;
+      is_active_[primary] = false;
     } else {
-      if (!_isActive[primary]) {
-        _startTime[primary] = timing.TimeInMS();
-        _isActive[primary] = true;
+      if (!is_active_[primary]) {
+        start_time_[primary] = timing.TimeInMS();
+        is_active_[primary] = true;
       }
-      double pos = timing.TimeInMS() - _startTime[primary];
-      size_t cycleDuration = _attack + _hold + _release + _sleep;
-      if (_repeat || pos < cycleDuration) {
-        pos = std::fmod(pos, cycleDuration);
+      double pos = timing.TimeInMS() - start_time_[primary];
+      size_t cycle_duration = transition_in_.LengthInMs() + sustain_ +
+                              transition_out_.LengthInMs() + sleep_;
+      if (_repeat || pos < cycle_duration) {
+        pos = std::fmod(pos, cycle_duration);
         bool handled = false;
 
-        if (_attack != 0) {
-          if (pos < _attack) {
+        if (transition_in_.LengthInMs() != 0) {
+          if (pos < transition_in_.LengthInMs()) {
             // Fade in
-            unsigned ratio = (unsigned)((pos / double(_attack)) * 256.0);
-            setAllOutputs(ControlValue((values[0].UInt() * ratio) >> 8));
+            const ControlValue value = transition_in_.InValue(pos, timing);
+            setAllOutputs(values[0] * value);
             handled = true;
-          } else
-            pos -= _attack;
+          } else {
+            pos -= transition_in_.LengthInMs();
+          }
         }
 
-        if (_hold != 0 && !handled) {
-          if (pos < _hold) {
+        if (sustain_ != 0 && !handled) {
+          if (pos < sustain_) {
             setAllOutputs(ControlValue(values[0].UInt()));
             handled = true;
           } else
-            pos -= _hold;
+            pos -= sustain_;
         }
 
-        if (_release != 0 && !handled) {
-          if (pos < _release) {
+        if (transition_out_.LengthInMs() != 0 && !handled) {
+          if (pos < transition_out_.LengthInMs()) {
             // Fade out
-            unsigned ratio = 255 - (unsigned)((pos / double(_release)) * 256.0);
-            setAllOutputs(ControlValue((values[0].UInt() * ratio) >> 8));
-            handled = true;
-          } else
-            pos -= _hold;
+            const ControlValue value = transition_out_.OutValue(pos, timing);
+            setAllOutputs(values[0] * value);
+          }
         }
       }
     }
   }
 
  private:
-  bool _isActive[2];
-  double _startTime[2];
+  bool is_active_[2] = {false, false};
+  double start_time_[2] = {0.0, 0.0};
 
-  bool _repeat;
-  // all in ms.
-  unsigned _attack, _hold, _release, _sleep;
+  bool _repeat = false;
+  Transition transition_in_;
+  // In ms.
+  unsigned sustain_ = 200;
+  Transition transition_out_;
+  // In ms.
+  unsigned sleep_ = 200;
 };
 
 }  // namespace glight::theatre

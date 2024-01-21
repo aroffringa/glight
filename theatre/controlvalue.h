@@ -3,6 +3,7 @@
 
 #include "mixstyle.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 
@@ -23,7 +24,8 @@ class ControlValue {
   constexpr static ControlValue Zero() { return ControlValue(0); }
   constexpr static ControlValue Max() { return ControlValue((1 << 24) - 1); }
   constexpr static ControlValue FromRatio(double ratio) {
-    return ControlValue(static_cast<unsigned>(ratio * MaxUInt()));
+    return ControlValue(
+        static_cast<unsigned>(std::clamp(ratio, 0.0, 1.0) * MaxUInt()));
   }
   constexpr static unsigned MaxUInt() { return (1 << 24) - 1; }
 

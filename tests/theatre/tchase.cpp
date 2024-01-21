@@ -1,12 +1,12 @@
-#include "../theatre/chase.h"
-#include "../theatre/dummydevice.h"
-#include "../theatre/fixturecontrol.h"
-#include "../theatre/folder.h"
-#include "../theatre/management.h"
-#include "../theatre/presetcollection.h"
-#include "../theatre/presetvalue.h"
-#include "../theatre/sequence.h"
-#include "../theatre/theatre.h"
+#include "theatre/chase.h"
+#include "theatre/dummydevice.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/presetcollection.h"
+#include "theatre/presetvalue.h"
+#include "theatre/sequence.h"
+#include "theatre/theatre.h"
 
 #include <boost/test/unit_test.hpp>
 

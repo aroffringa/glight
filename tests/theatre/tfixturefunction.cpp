@@ -1,5 +1,5 @@
-#include "../theatre/fixturefunction.h"
-#include "../theatre/theatre.h"
+#include "theatre/fixturefunction.h"
+#include "theatre/theatre.h"
 
 #include <boost/test/unit_test.hpp>
 

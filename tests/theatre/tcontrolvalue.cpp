@@ -1,4 +1,4 @@
-#include "../theatre/controlvalue.h"
+#include "theatre/controlvalue.h"
 
 #include <boost/test/unit_test.hpp>
 

@@ -1,6 +1,6 @@
-#include "../theatre/fixturegroup.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
+#include "theatre/fixturegroup.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
 
 #include <boost/test/unit_test.hpp>
 
