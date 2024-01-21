@@ -1,12 +1,12 @@
-#include "../theatre/fixturecontrol.h"
-#include "../theatre/folder.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
-#include "../theatre/timing.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
+#include "theatre/timing.h"
 
-#include "../theatre/filters/automasterfilter.h"
-#include "../theatre/filters/monochromefilter.h"
-#include "../theatre/filters/rgbfilter.h"
+#include "theatre/filters/automasterfilter.h"
+#include "theatre/filters/monochromefilter.h"
+#include "theatre/filters/rgbfilter.h"
 
 #include <boost/test/unit_test.hpp>
 

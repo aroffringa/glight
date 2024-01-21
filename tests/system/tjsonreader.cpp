@@ -1,4 +1,4 @@
-#include "../system/jsonreader.h"
+#include "system/jsonreader.h"
 
 #include <boost/test/unit_test.hpp>
 

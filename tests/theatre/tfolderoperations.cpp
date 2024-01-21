@@ -1,4 +1,4 @@
-#include "../theatre/folderoperations.h"
+#include "theatre/folderoperations.h"
 
 #include <boost/test/unit_test.hpp>
 

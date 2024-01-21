@@ -1,5 +1,5 @@
-#include "../theatre/presetcollection.h"
-#include "../theatre/presetvalue.h"
+#include "theatre/presetcollection.h"
+#include "theatre/presetvalue.h"
 
 #include <boost/test/unit_test.hpp>
 

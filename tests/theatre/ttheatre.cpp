@@ -1,8 +1,8 @@
-#include "../theatre/fixturecontrol.h"
-#include "../theatre/folder.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
-#include "../theatre/timing.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
+#include "theatre/timing.h"
 
 #include <boost/test/unit_test.hpp>
 

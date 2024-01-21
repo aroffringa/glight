@@ -1,4 +1,4 @@
-#include "../system/colortemperature.h"
+#include "system/colortemperature.h"
 
 #include <boost/test/unit_test.hpp>
 

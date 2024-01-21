@@ -1,24 +1,24 @@
-#include "../theatre/chase.h"
-#include "../theatre/fixture.h"
-#include "../theatre/fixturecontrol.h"
-#include "../theatre/fixturegroup.h"
-#include "../theatre/folder.h"
-#include "../theatre/management.h"
-#include "../theatre/presetcollection.h"
-#include "../theatre/theatre.h"
-#include "../theatre/timesequence.h"
+#include "theatre/chase.h"
+#include "theatre/fixture.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/fixturegroup.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/presetcollection.h"
+#include "theatre/theatre.h"
+#include "theatre/timesequence.h"
 
-#include "../theatre/scenes/scene.h"
+#include "theatre/scenes/scene.h"
 
-#include "../theatre/effects/audioleveleffect.h"
+#include "theatre/effects/audioleveleffect.h"
 
-#include "../theatre/filters/automasterfilter.h"
-#include "../theatre/filters/rgbfilter.h"
+#include "theatre/filters/automasterfilter.h"
+#include "theatre/filters/rgbfilter.h"
 
-#include "../gui/state/guistate.h"
+#include "gui/state/guistate.h"
 
-#include "../system/reader.h"
-#include "../system/writer.h"
+#include "system/reader.h"
+#include "system/writer.h"
 
 #include <boost/test/unit_test.hpp>
 

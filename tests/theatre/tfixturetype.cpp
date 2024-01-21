@@ -1,7 +1,7 @@
-#include "../theatre/fixture.h"
-#include "../theatre/fixturetype.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
+#include "theatre/fixture.h"
+#include "theatre/fixturetype.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
 
 #include <boost/test/unit_test.hpp>
 

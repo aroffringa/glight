@@ -73,7 +73,7 @@ class TwinkleEffect final : public Effect {
           const double transition_point =
               transition_out_.LengthInMs() - input.state_timer;
           const ControlValue transition_value =
-              transition_in_.TransitionValue(transition_point, timing);
+              transition_in_.InValue(transition_point, timing);
           connection.first->MixInput(connection.second,
                                      transition_value * value);
         }
@@ -93,7 +93,7 @@ class TwinkleEffect final : public Effect {
           input.state = State::Waiting;
         } else {
           const ControlValue transition_value =
-              transition_out_.TransitionValue(input.state_timer, timing);
+              transition_out_.InValue(input.state_timer, timing);
           connection.first->MixInput(connection.second,
                                      transition_value * value);
         }

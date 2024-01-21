@@ -1,4 +1,4 @@
-#include "../system/deletableptr.h"
+#include "system/deletableptr.h"
 
 #include <boost/test/unit_test.hpp>
 

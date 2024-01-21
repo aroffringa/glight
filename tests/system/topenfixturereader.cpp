@@ -1,8 +1,8 @@
-#include "../system/openfixturereader.h"
+#include "system/openfixturereader.h"
 
-#include "../theatre/fixturetypefunction.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
+#include "theatre/fixturetypefunction.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
 
 #include <boost/test/unit_test.hpp>
 

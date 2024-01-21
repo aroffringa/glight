@@ -1,10 +1,10 @@
-#include "../theatre/chase.h"
-#include "../theatre/fixturecontrol.h"
-#include "../theatre/folder.h"
-#include "../theatre/folderoperations.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
-#include "../theatre/timesequence.h"
+#include "theatre/chase.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/folder.h"
+#include "theatre/folderoperations.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
+#include "theatre/timesequence.h"
 
 #include <boost/test/unit_test.hpp>
 

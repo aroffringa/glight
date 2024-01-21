@@ -137,6 +137,7 @@ set(THEATREFILES
   theatre/presetvalue.cpp
   theatre/sourcevaluestore.cpp
   theatre/theatre.cpp
+  theatre/transition.cpp
   theatre/design/autodesign.cpp
   theatre/design/colorpreset.cpp
   theatre/design/rotation.cpp
@@ -177,29 +178,30 @@ if(Boost_FOUND)
   add_executable(runtests EXCLUDE_FROM_ALL
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
-    tests/tchase.cpp
-    tests/tcolortemperature.cpp
-    tests/tcontrolvalue.cpp
-    tests/tdeletableptr.cpp
-    tests/tfileformat.cpp
-    tests/tfixturecontrol.cpp
-    tests/tfixturefunction.cpp
-    tests/tfixturegroup.cpp
-    tests/tfixturetype.cpp
-    tests/tfixturetypefunction.cpp
-    tests/tfolder.cpp
-    tests/tfolderoperations.cpp
-    tests/tjsonreader.cpp
-    tests/tjsonwriter.cpp
-    tests/tmanagement.cpp
-    tests/topenfixturereader.cpp
-    tests/toptionalnumber.cpp
-    tests/tpresetcollection.cpp
-    tests/tpresetvalue.cpp
-    tests/tscene.cpp
-    tests/ttheatre.cpp
-    tests/tuniquewithoutordering.cpp
+    tests/system/tdeletableptr.cpp
+    tests/system/tfileformat.cpp
+    tests/system/tjsonreader.cpp
+    tests/system/tjsonwriter.cpp
+    tests/system/topenfixturereader.cpp
+    tests/system/toptionalnumber.cpp
+    tests/system/tuniquewithoutordering.cpp
+    tests/theatre/tchase.cpp
     tests/theatre/tcolordeduction.cpp
+    tests/theatre/tcolortemperature.cpp
+    tests/theatre/tcontrolvalue.cpp
+    tests/theatre/tfixturecontrol.cpp
+    tests/theatre/tfixturefunction.cpp
+    tests/theatre/tfixturegroup.cpp
+    tests/theatre/tfixturetype.cpp
+    tests/theatre/tfixturetypefunction.cpp
+    tests/theatre/tfolder.cpp
+    tests/theatre/tfolderoperations.cpp
+    tests/theatre/tmanagement.cpp
+    tests/theatre/tpresetcollection.cpp
+    tests/theatre/tpresetvalue.cpp
+    tests/theatre/tscene.cpp
+    tests/theatre/ttheatre.cpp
+    tests/theatre/ttransition.cpp
     tests/theatre/effects/trgbmastereffect.cpp
     tests/theatre/filters/tautomasterfilter.cpp
     tests/theatre/filters/tmonochromefilter.cpp

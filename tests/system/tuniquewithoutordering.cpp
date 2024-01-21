@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "../system/uniquewithoutordering.h"
+#include "system/uniquewithoutordering.h"
 
 BOOST_AUTO_TEST_SUITE(unique_without_ordering)
 
