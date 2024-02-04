@@ -8,6 +8,7 @@
 #include "../renderengine.h"
 
 #include "../../system/deletableptr.h"
+#include "../../system/midicontroller.h"
 
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/checkmenuitem.h>
@@ -103,6 +104,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
 
   void selectFixtures(const theatre::Position &a, const theatre::Position &b);
   void addFixtures(const theatre::Position &a, const theatre::Position &b);
+  system::MidiController midi_controller_;
 };
 
 }  // namespace glight::gui

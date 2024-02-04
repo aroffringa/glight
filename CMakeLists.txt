@@ -118,6 +118,7 @@ set(SYSTEMFILES
   system/flacdecoder.cpp
   system/jsonreader.cpp
   system/jsonwriter.cpp
+  system/midicontroller.cpp
   system/openfixturereader.cpp
   system/reader.cpp
   system/writer.cpp
