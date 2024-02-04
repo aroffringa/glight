@@ -178,6 +178,7 @@ if(Boost_FOUND)
   add_executable(runtests EXCLUDE_FROM_ALL
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
+    tests/system/tcolormap.cpp
     tests/system/tdeletableptr.cpp
     tests/system/tfileformat.cpp
     tests/system/tjsonreader.cpp

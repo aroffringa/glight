@@ -4,8 +4,8 @@
 
 #include "windows/mainwindow.h"
 
-#include "../theatre/dummydevice.h"
-#include "../theatre/oladevice.h"
+#include "theatre/dummydevice.h"
+#include "theatre/oladevice.h"
 
 namespace glight::gui {
 
