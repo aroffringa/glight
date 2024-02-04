@@ -2,6 +2,7 @@
 #define THEATRE_COLOR_H_
 
 #include <cmath>
+#include <string>
 #include <variant>
 
 namespace glight::theatre {
@@ -167,6 +168,12 @@ inline double ColorDistance(double r1, double g1, double b1, double r2,
   const double b = b1 - b2;
   return std::sqrt((((512.0 + rmean) * r * r) / 256.0) + 4.0 * g * g +
                    (((767.0 - rmean) * b * b) / 256.0));
+}
+
+inline std::string ToString(const Color &c) {
+  return std::string("Red=") + std::to_string(int(c.Red())) +
+         ", green=" + std::to_string(int(c.Green())) +
+         ", blue=" + std::to_string(int(c.Blue()));
 }
 
 using ColorOrVariable = std::variant<Color, VariableEffect *>;
