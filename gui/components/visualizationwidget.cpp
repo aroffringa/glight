@@ -171,25 +171,29 @@ void VisualizationWidget::drawFixtures(
     const Cairo::RefPtr<Cairo::Context> &cairo,
     const std::vector<theatre::Fixture *> &selection, size_t width,
     size_t height) {
-  
-  const glight::theatre::ValueSnapshot snapshot = _management->PrimarySnapshot();
+  const glight::theatre::ValueSnapshot snapshot =
+      _management->PrimarySnapshot();
   const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
       _management->GetTheatre().Fixtures();
-  size_t pad = 0;
-  for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
-    if (fixture->IsVisible()) {
-      const glight::theatre::FixtureType &type = fixture->Type();
-      const size_t shape_count = type.ShapeCount();
-      for (size_t shape_index = 0; shape_index != shape_count; ++shape_index) {
-        const theatre::Color color = fixture->GetColor(snapshot, shape_index);
-        midi_controller_.SetPixelColor(pad%8, pad/8, color, false);
-        ++pad;
-        if(pad >= 64) goto stop;
+  system::MidiController *controller = main_window_->GetMidiController();
+  if (controller) {
+    size_t pad = 0;
+    for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
+      if (fixture->IsVisible()) {
+        const glight::theatre::FixtureType &type = fixture->Type();
+        const size_t shape_count = type.ShapeCount();
+        for (size_t shape_index = 0; shape_index != shape_count;
+             ++shape_index) {
+          const theatre::Color color = fixture->GetColor(snapshot, shape_index);
+          controller->SetPixelColor(pad % 8, pad / 8, color, false);
+          ++pad;
+          if (pad >= 64) goto stop;
+        }
       }
     }
-  }  
-  stop:
-  
+  }
+stop:
+
   cairo->set_source_rgba(0, 0, 0, 1);
   cairo->rectangle(0, 0, width, height);
   cairo->fill();

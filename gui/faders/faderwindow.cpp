@@ -639,12 +639,20 @@ size_t FaderWindow::getFadeOutSpeed() const {
 }
 
 void FaderWindow::UpdateValues() {
-  if (_connectedInputUniverse) {
+  if (_connectedInputUniverse || _connectedMidiController) {
     const size_t n = _upperControls.size();
     _inputValues.resize(n);
     _previousInputValues.resize(n);
-    _management.Device()->GetInputValues(*_connectedInputUniverse,
-                                         _inputValues.data(), n);
+    if (_connectedInputUniverse) {
+      _management.Device()->GetInputValues(*_connectedInputUniverse,
+                                           _inputValues.data(), n);
+    } else {
+      for (size_t i = 0;
+           i != std::min(n, _connectedMidiController->GetNFaders()); ++i) {
+        unsigned char value = _connectedMidiController->GetFaderValue(i);
+        _inputValues[i] = std::min(value * 2, 255);
+      }
+    }
     for (size_t i = 0; i != n; ++i) {
       if (_upperControls[i]->GetSourceValues().size() == 1) {
         if (theatre::SourceValue *sv = _upperControls[i]->GetSourceValues()[0];

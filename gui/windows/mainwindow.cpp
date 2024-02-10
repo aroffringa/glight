@@ -33,7 +33,8 @@
 
 namespace glight::gui {
 
-MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
+MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device)
+    : midi_controller_(system::MidiController::GetController()) {
   set_title("Glight - show");
   set_default_icon_name("glight");
 
@@ -152,6 +153,9 @@ void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
   _faderWindows.emplace_back(std::make_unique<FaderWindow>(
       *this, _state, *_management, nextControlKeyRow()));
   FaderWindow *newWindow = _faderWindows.back().get();
+  if (_faderWindows.size() == 1 && midi_controller_) {
+    newWindow->SetMidiController(&*midi_controller_);
+  }
   if (stateOrNull == nullptr)
     newWindow->LoadNew();
   else
