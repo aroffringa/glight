@@ -1,17 +1,18 @@
 #include "faderwindow.h"
 
+#include "colorcontrolwidget.h"
 #include "controlmenu.h"
 #include "faderwidget.h"
 #include "togglewidget.h"
 
-#include "../eventtransmitter.h"
-#include "../state/guistate.h"
-#include "../dialogs/stringinputdialog.h"
+#include "gui/eventtransmitter.h"
+#include "gui/state/guistate.h"
+#include "gui/dialogs/stringinputdialog.h"
 
-#include "../../theatre/chase.h"
-#include "../../theatre/dmxdevice.h"
-#include "../../theatre/management.h"
-#include "../../theatre/presetvalue.h"
+#include "theatre/chase.h"
+#include "theatre/dmxdevice.h"
+#include "theatre/management.h"
+#include "theatre/presetvalue.h"
 
 #include <gtkmm/entry.h>
 #include <gtkmm/messagedialog.h>
@@ -108,6 +109,7 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
       _miAdd5Faders("Add 5 faders"),
       _miAddToggleButton("Add toggle control"),
       _miAdd5ToggleButtons("Add 5 toggle controls"),
+      _miAddColorButton("Add color button"),
       _miAddToggleColumn("Add toggle column"),
       _miRemoveFader("Remove 1"),
       _miRemove5Faders("Remove 5"),
@@ -318,6 +320,10 @@ void FaderWindow::initializeMenu() {
       [&]() { onAdd5ToggleControlsClicked(); });
   _popupMenu.append(_miAdd5ToggleButtons);
 
+  _miAddColorButton.signal_activate().connect(
+      [&]() { onAddColorButtonClicked(); });
+  _popupMenu.append(_miAddColorButton);
+
   _miAddToggleColumn.signal_activate().connect(
       [&]() { onAddToggleColumnClicked(); });
   _popupMenu.append(_miAddToggleColumn);
@@ -344,25 +350,29 @@ bool FaderWindow::onResize(GdkEventConfigure * /*event*/) {
 }
 
 void FaderWindow::onAddFaderClicked() {
-  addControlInLayout(_state->AddState(false, false));
+  addControlInLayout(_state->AddState(FaderControlType::Fader, false));
 }
 
 void FaderWindow::onAdd5FadersClicked() {
   for (size_t i = 0; i != 5; ++i)
-    addControlInLayout(_state->AddState(false, false));
+    addControlInLayout(_state->AddState(FaderControlType::Fader, false));
+}
+
+void FaderWindow::onAddToggleClicked() {
+  addControlInLayout(_state->AddState(FaderControlType::ToggleButton, false));
 }
 
 void FaderWindow::onAdd5ToggleControlsClicked() {
   for (size_t i = 0; i != 5; ++i)
-    addControlInLayout(_state->AddState(true, false));
+    addControlInLayout(_state->AddState(FaderControlType::ToggleButton, false));
 }
 
-void FaderWindow::onAddToggleClicked() {
-  addControlInLayout(_state->AddState(true, false));
+void FaderWindow::onAddColorButtonClicked() {
+  addControlInLayout(_state->AddState(FaderControlType::ColorButton, false));
 }
 
 void FaderWindow::onAddToggleColumnClicked() {
-  addControlInLayout(_state->AddState(true, true));
+  addControlInLayout(_state->AddState(FaderControlType::ToggleButton, true));
 }
 
 void FaderWindow::addControl(FaderState &state, bool isUpper) {
@@ -379,12 +389,20 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
   const bool isSecondary = !isUpper || _miSecondaryLayout.get_active();
   const ControlMode controlMode =
       isSecondary ? ControlMode::Secondary : ControlMode::Primary;
-  if (state.IsToggleButton()) {
-    control = std::make_unique<ToggleWidget>(*this, state, controlMode, key);
-    nameLabel = nullptr;
-  } else {
-    control = std::make_unique<FaderWidget>(*this, state, controlMode, key);
-    nameLabel = &static_cast<FaderWidget *>(control.get())->NameLabel();
+  switch (state.GetFaderType()) {
+    case FaderControlType::Fader:
+      control = std::make_unique<FaderWidget>(*this, state, controlMode, key);
+      nameLabel = &static_cast<FaderWidget *>(control.get())->NameLabel();
+      break;
+    case FaderControlType::ToggleButton:
+      control = std::make_unique<ToggleWidget>(*this, state, controlMode, key);
+      nameLabel = nullptr;
+      break;
+    case FaderControlType::ColorButton:
+      control =
+          std::make_unique<ColorControlWidget>(*this, state, controlMode, key);
+      nameLabel = nullptr;
+      break;
   }
 
   control->SetFadeDownSpeed(MapSliderToSpeed(getFadeOutSpeed()));
@@ -399,20 +417,27 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
 
   const size_t vpos = isUpper ? 0 : 3;
   const size_t hpos = controls.size() + column.size();
-  if (state.IsToggleButton()) {
-    if (newToggleColumn) {
-      _controlGrid.attach(column.emplace_back(), hpos * 2 + 1, vpos, 2, 1);
-      column.back().show();
-    }
-    column.back().pack_start(*control);
-  } else {
-    _controlGrid.attach(*control, hpos * 2 + 1, vpos, 2, 1);
+  switch (state.GetFaderType()) {
+    case FaderControlType::Fader:
+      _controlGrid.attach(*control, hpos * 2 + 1, vpos, 2, 1);
 
-    if (isUpper) {
-      nameLabel->set_hexpand(true);
-      const bool even = controls.size() % 2 == 0;
-      _controlGrid.attach(*nameLabel, hpos * 2, even ? 1 : 2, 4, 1);
-    }
+      if (isUpper) {
+        nameLabel->set_hexpand(true);
+        const bool even = controls.size() % 2 == 0;
+        _controlGrid.attach(*nameLabel, hpos * 2, even ? 1 : 2, 4, 1);
+      }
+      break;
+    case FaderControlType::ToggleButton:
+    case FaderControlType::ColorButton:
+      if (newToggleColumn) {
+        Gtk::VBox &new_box = column.emplace_back();
+        _controlGrid.attach(new_box, hpos * 2 + 1, vpos, 2, 1);
+        new_box.set_vexpand(false);
+        new_box.set_valign(Gtk::ALIGN_START);
+        column.back().show();
+      }
+      column.back().pack_start(*control);
+      break;
   }
 
   control->show();
@@ -422,7 +447,8 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
 void FaderWindow::removeFader() {
   FaderState &state = *_state->faders.back();
   const bool hasLower = _miDualLayout.get_active();
-  if (state.IsToggleButton() && state.NewToggleButtonColumn()) {
+  if (state.GetFaderType() != FaderControlType::Fader &&
+      state.NewToggleButtonColumn()) {
     _upperColumns.pop_back();
     if (hasLower) _lowerColumns.pop_back();
   }

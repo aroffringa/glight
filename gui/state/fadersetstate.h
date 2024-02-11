@@ -59,10 +59,10 @@ class FaderSetState {
     return false;
   }
 
-  FaderState &AddState(bool is_toggle_button, bool new_toggle_column) {
+  FaderState &AddState(FaderControlType fader_type, bool new_column) {
     FaderState &state = *faders.emplace_back(std::make_unique<FaderState>());
-    state.SetIsToggleButton(is_toggle_button);
-    state.SetNewToggleButtonColumn(new_toggle_column);
+    state.SetFaderType(fader_type);
+    state.SetColumn(new_column);
     return state;
   }
 

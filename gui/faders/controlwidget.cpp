@@ -87,7 +87,8 @@ void ControlWidget::OnTheatreUpdate() {
   }
 }
 
-theatre::SingleSourceValue& ControlWidget::GetSingleSourceValue(size_t index) {
+theatre::SingleSourceValue& ControlWidget::GetSingleSourceValue(
+    size_t index) const {
   return _mode == ControlMode::Primary ? sources_[index]->A()
                                        : sources_[index]->B();
 }

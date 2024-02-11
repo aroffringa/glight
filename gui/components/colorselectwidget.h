@@ -63,7 +63,6 @@ class ColorSelectWidget : public Gtk::HBox {
     if (allow_variables != allow_variables_) {
       allow_variables_ = allow_variables;
       if (allow_variables) {
-        remove(color_label_);
         pack_start(static_button_, false, false, 0);
         static_button_.show();
         pack_start(variable_button_, true, true, 0);
@@ -74,8 +73,6 @@ class ColorSelectWidget : public Gtk::HBox {
         static_button_.set_active(true);
         remove(static_button_);
         remove(variable_button_);
-        pack_end(color_label_, true, true, 0);
-        color_label_.show();
       }
       area_.set_visible(true);
       signal_color_changed_();
@@ -86,7 +83,6 @@ class ColorSelectWidget : public Gtk::HBox {
   Gtk::Window *parent_;
   Gtk::RadioButton static_button_;
   Gtk::RadioButton variable_button_;
-  Gtk::Label color_label_;
   Gtk::DrawingArea area_;
   Gtk::Label variable_label_;
   Gtk::Button set_button_;
@@ -98,7 +94,6 @@ class ColorSelectWidget : public Gtk::HBox {
   sigc::signal<void()> signal_color_changed_;
 
   void SetVariableLabel();
-  void OnSetClicked();
   bool OnColorAreaDraw(const Cairo::RefPtr<Cairo::Context> &cr) const;
 
   void OpenColorSelection();

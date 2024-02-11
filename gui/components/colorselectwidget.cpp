@@ -16,12 +16,12 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
     : parent_(parent),
       static_button_("Static"),
       variable_button_("Variable"),
-      color_label_("Color"),
       set_button_("Set...") {
   Gtk::RadioButton::Group group;
   static_button_.set_group(group);
   static_button_.signal_clicked().connect([&]() {
     if (variable_label_.get_parent()) {
+      remove(set_button_);
       remove(variable_label_);
       pack_end(area_, true, true, 5);
       area_.show();
@@ -37,6 +37,8 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
       remove(area_);
       pack_end(variable_label_);
       variable_label_.show();
+      pack_end(set_button_);
+      set_button_.show();
       signal_color_changed_();
     }
   });
@@ -50,13 +52,18 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
       OpenVariableSelection();
   });
 
-  pack_end(set_button_);
-  set_button_.show();
-
+  area_.set_size_request(35, 35);
   area_.signal_draw().connect(
       sigc::mem_fun(*this, &ColorSelectWidget::OnColorAreaDraw));
   pack_end(area_, true, true, 5);
+  area_.set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
+  area_.signal_button_release_event().connect([&](GdkEventButton *) {
+    OpenColorSelection();
+    return false;
+  });
   area_.show();
+
+  SetAllowVariables(allow_variable);
 }
 
 void ColorSelectWidget::OpenColorSelection() {
@@ -70,7 +77,7 @@ void ColorSelectWidget::OpenColorSelection() {
   dialog.set_transient_for(*parent_);
   dialog.set_rgba(color);
   dialog.set_use_alpha(false);
-  const std::vector<theatre::Color> color_set = theatre::Color::DefaultSet32();
+  const std::vector<theatre::Color> color_set = theatre::Color::DefaultSet40();
   std::vector<Gdk::RGBA> colors;
   colors.reserve(color_set.size());
   for (const theatre::Color &color : color_set) {
@@ -129,8 +136,18 @@ void ColorSelectWidget::SetVariableLabel() {
 
 bool ColorSelectWidget::OnColorAreaDraw(
     const Cairo::RefPtr<Cairo::Context> &cr) const {
+  constexpr int border = 7;
+  const int width = area_.get_width() - 2 * border;
+  const int height = area_.get_height() - 2 * border;
+  cr->rectangle(border, border, width, height);
   cr->set_source_rgb(red_, green_, blue_);
-  cr->paint();
+  cr->fill();
+  cr->rectangle(border + 1, border + 1, width - 2, height - 2);
+  cr->set_source_rgb(0.75, 0.75, 0.75);
+  cr->stroke();
+  cr->rectangle(border, border, width, height);
+  cr->set_source_rgb(0.5, 0.5, 0.5);
+  cr->stroke();
   return true;
 }
 

@@ -9,9 +9,7 @@ namespace glight::gui {
 using theatre::SourceValue;
 
 FaderState::FaderState(std::vector<SourceValue*> source_values)
-    : source_values_(std::move(source_values)),
-      is_toggle_button_(false),
-      new_toggle_button_column_(false) {
+    : source_values_(std::move(source_values)) {
   Connect();
 }
 
