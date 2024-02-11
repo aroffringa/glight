@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   setup->name = "testfader";
   glight::gui::FaderState &state =
       *setup->faders.emplace_back(std::make_unique<glight::gui::FaderState>());
-  state.SetSourceValue(write_management.SourceValues()[0].get());
+  state.SetSourceValues({write_management.SourceValues()[0].get()});
 
   glight::system::Write("tmp-testfileformat.gshow", write_management,
                         &guiState);

@@ -8,29 +8,44 @@ namespace glight::gui {
 
 using theatre::SourceValue;
 
-FaderState::FaderState(SourceValue *sourceValue)
-    : source_value_(sourceValue),
+FaderState::FaderState(std::vector<SourceValue*> source_values)
+    : source_values_(std::move(source_values)),
       is_toggle_button_(false),
       new_toggle_button_column_(false) {
-  if (sourceValue != nullptr)
-    source_value_deleted_connection_ =
-        sourceValue->SignalDelete().connect([&]() { onPresetValueDeleted(); });
+  Connect();
 }
 
-void FaderState::SetSourceValue(SourceValue *source_value) {
-  if (source_value != source_value_) {
-    source_value_deleted_connection_.disconnect();
-    source_value_ = source_value;
-    if (source_value != nullptr)
-      source_value_deleted_connection_ = source_value->SignalDelete().connect(
-          [&]() { onPresetValueDeleted(); });
+FaderState::~FaderState() { Disconnect(); }
+
+void FaderState::Connect() {
+  source_value_deleted_connections_.clear();
+  source_value_deleted_connections_.resize(source_values_.size());
+  for (size_t i = 0; i != source_values_.size(); ++i) {
+    if (source_values_[i]) {
+      source_value_deleted_connections_[i] =
+          source_values_[i]->SignalDelete().connect(
+              [&]() { onPresetValueDeleted(); });
+    }
+  }
+}
+
+void FaderState::Disconnect() {
+  for (sigc::connection& connection : source_value_deleted_connections_)
+    connection.disconnect();
+}
+
+void FaderState::SetSourceValues(std::vector<SourceValue*> source_values) {
+  if (source_values != source_values_) {
+    Disconnect();
+    source_values_ = std::move(source_values);
+    Connect();
     signal_change_();
   }
 }
 
 void FaderState::onPresetValueDeleted() {
-  source_value_deleted_connection_.disconnect();
-  source_value_ = nullptr;
+  Disconnect();
+  source_values_.clear();
   signal_change_();
 }
 

@@ -128,8 +128,8 @@ void FaderWidget::onOnButtonClicked() {
       _scale.set_value(0);
     _holdUpdates = false;
 
-    setImmediateValue(_scale.get_value());
-    SignalValueChange().emit(_scale.get_value());
+    setImmediateValue(0, _scale.get_value());
+    SignalValueChange().emit();
   }
 }
 
@@ -148,26 +148,25 @@ void FaderWidget::onScaleChange() {
     _holdUpdates = true;
     const double value = _scale.get_value();
     _checkButton.SetActive(value != 0);
-    if (_mouseIn && GetSourceValue() != nullptr &&
-        State().OverlayFadeButtons()) {
+    if (_mouseIn && GetSourceValue(0) && State().OverlayFadeButtons()) {
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
     }
     _holdUpdates = false;
 
-    setImmediateValue(_scale.get_value());
-    SignalValueChange().emit(_scale.get_value());
+    setImmediateValue(0, _scale.get_value());
+    SignalValueChange().emit();
   }
 }
 
 void FaderWidget::OnAssigned(bool moveFader) {
-  const theatre::SourceValue *source = GetSourceValue();
+  const theatre::SourceValue *source = GetSourceValue(0);
   if (source) {
-    _nameLabel.set_text(GetSourceValue()->Name());
+    _nameLabel.set_text(source->Name());
     if (moveFader) {
-      _scale.set_value(GetSingleSourceValue().Value().UInt());
+      _scale.set_value(GetSingleSourceValue(0).Value().UInt());
     } else {
-      setImmediateValue(_scale.get_value());
+      setImmediateValue(0, _scale.get_value());
     }
 
     const theatre::Controllable *controllable = &source->GetControllable();
@@ -182,16 +181,16 @@ void FaderWidget::OnAssigned(bool moveFader) {
     if (moveFader) {
       _scale.set_value(0);
     } else {
-      setImmediateValue(_scale.get_value());
+      setImmediateValue(0, _scale.get_value());
     }
   }
 }
 
-void FaderWidget::MoveSlider() {
-  if (GetSourceValue() != nullptr) {
+void FaderWidget::SyncFader() {
+  if (GetSourceValue(0) != nullptr) {
     const bool hold = _holdUpdates;
     _holdUpdates = true;
-    const unsigned value = GetSingleSourceValue().Value().UInt();
+    const unsigned value = GetSingleSourceValue(0).Value().UInt();
     _scale.set_value(value);
     _checkButton.SetActive(value != 0);
     if (_mouseIn && State().OverlayFadeButtons()) {
@@ -199,7 +198,7 @@ void FaderWidget::MoveSlider() {
       _fadeDownButton.set_visible(value >= ControlValue::MaxUInt() * 1 / 4);
     }
     _holdUpdates = hold;
-    SignalValueChange().emit(_scale.get_value());
+    SignalValueChange().emit();
   } else {
     _fadeUpButton.set_visible(false);
     _fadeDownButton.set_visible(false);
@@ -210,18 +209,18 @@ void FaderWidget::Toggle() {
   _checkButton.SetActive(!_checkButton.GetActive());
 }
 
-void FaderWidget::FullOn() { _scale.set_value(ControlValue::MaxUInt()); }
+void FaderWidget::FlashOn() { _scale.set_value(ControlValue::MaxUInt()); }
 
-void FaderWidget::FullOff() { _scale.set_value(0); }
+void FaderWidget::FlashOff() { _scale.set_value(0); }
 
-void FaderWidget::onFadeUp() { setTargetValue(ControlValue::MaxUInt()); }
+void FaderWidget::onFadeUp() { setTargetValue(0, ControlValue::MaxUInt()); }
 
-void FaderWidget::onFadeDown() { setTargetValue(0); }
+void FaderWidget::onFadeDown() { setTargetValue(0, 0); }
 
 void FaderWidget::ShowFadeButtons(bool mouse_in) {
   if (mouse_in != _mouseIn) {
     _mouseIn = mouse_in;
-    if (mouse_in && GetSourceValue() != nullptr &&
+    if (mouse_in && GetSourceValue(0) != nullptr &&
         State().OverlayFadeButtons()) {
       const double value = _scale.get_value();
       _fadeUpButton.set_visible(value < ControlValue::MaxUInt() * 3 / 4);

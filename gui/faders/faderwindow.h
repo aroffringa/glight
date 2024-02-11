@@ -81,7 +81,7 @@ class FaderWindow : public Gtk::Window {
   void unassign();
   void onSoloToggled();
   void onSetNameClicked();
-  void onControlValueChanged(double newValue, ControlWidget *widget);
+  void onControlValueChanged(ControlWidget *widget);
   void onControlAssigned(size_t widgetIndex);
   bool onResize(GdkEventConfigure *event);
   void onChangeUpSpeed();
@@ -105,6 +105,11 @@ class FaderWindow : public Gtk::Window {
   void loadState();
   size_t getFadeInSpeed() const;
   size_t getFadeOutSpeed() const;
+  /**
+   * Returns a list with indices to controls that have a
+   * default source count of 1.
+   */
+  std::vector<size_t> SingleSourceControls() const;
 
   /// The fader menu is stored here so that only one menu is allocated at one
   /// time (instead of each fader allocating its own menu)

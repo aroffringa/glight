@@ -20,9 +20,9 @@ class ToggleWidget final : public ControlWidget {
   ~ToggleWidget();
 
   virtual void Toggle() override;
-  virtual void FullOn() override;
-  virtual void FullOff() override;
-  virtual void MoveSlider() override;
+  virtual void FlashOn() override;
+  virtual void FlashOff() override;
+  virtual void SyncFader() override;
 
   virtual void Limit(double value) override;
 

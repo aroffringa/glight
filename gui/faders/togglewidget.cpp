@@ -85,8 +85,8 @@ void ToggleWidget::onIconClicked() {
     else
       value = 0;
 
-    setImmediateValue(value);
-    SignalValueChange().emit(value);
+    setImmediateValue(0, value);
+    SignalValueChange().emit();
   }
 }
 
@@ -109,20 +109,20 @@ bool ToggleWidget::onFlashButtonReleased(GdkEventButton *event) {
 }
 
 void ToggleWidget::OnAssigned(bool moveFader) {
-  if (GetSourceValue() != nullptr) {
-    _nameLabel.set_text(GetSourceValue()->Name());
-    const theatre::Controllable *controllable =
-        &GetSourceValue()->GetControllable();
+  const theatre::SourceValue *source = GetSourceValue(0);
+  if (source != nullptr) {
+    _nameLabel.set_text(source->Name());
+    const theatre::Controllable *controllable = &source->GetControllable();
     const std::vector<theatre::Color> colors =
-        controllable->InputColors(GetSourceValue()->InputIndex());
+        controllable->InputColors(source->InputIndex());
     _iconButton.SetColors(UniqueWithoutOrdering(colors));
     if (moveFader) {
-      _iconButton.SetActive(GetSingleSourceValue().Value().UInt() != 0);
+      _iconButton.SetActive(GetSingleSourceValue(0).Value().UInt() != 0);
     } else {
       if (_iconButton.GetActive())
-        setTargetValue(theatre::ControlValue::MaxUInt());
+        setTargetValue(0, theatre::ControlValue::MaxUInt());
       else
-        setTargetValue(0);
+        setTargetValue(0, 0);
     }
   } else {
     _nameLabel.set_text("<..>");
@@ -131,25 +131,20 @@ void ToggleWidget::OnAssigned(bool moveFader) {
       _iconButton.SetActive(false);
     } else {
       if (_iconButton.GetActive())
-        setTargetValue(theatre::ControlValue::MaxUInt());
+        setTargetValue(0, theatre::ControlValue::MaxUInt());
       else
-        setTargetValue(0);
+        setTargetValue(0, 0);
     }
   }
   if (moveFader) {
-    unsigned value;
-    if (_iconButton.GetActive())
-      value = theatre::ControlValue::MaxUInt();
-    else
-      value = 0;
-    SignalValueChange().emit(value);
+    SignalValueChange().emit();
   }
 }
 
-void ToggleWidget::MoveSlider() {
-  const theatre::SourceValue *source = GetSourceValue();
+void ToggleWidget::SyncFader() {
+  const theatre::SourceValue *source = GetSourceValue(0);
   if (source != nullptr) {
-    unsigned target_value = GetSingleSourceValue().TargetValue();
+    unsigned target_value = GetSingleSourceValue(0).TargetValue();
     // Most sliders will be off, so as a small optimization test this before
     // doing the more expensive dynamic_cast
     if (target_value) {
@@ -168,15 +163,15 @@ void ToggleWidget::MoveSlider() {
       }
     }
     _iconButton.SetActive(target_value != 0);
-    SignalValueChange().emit(target_value);
+    SignalValueChange().emit();
   }
 }
 
 void ToggleWidget::Toggle() { _iconButton.SetActive(!_iconButton.GetActive()); }
 
-void ToggleWidget::FullOn() { _iconButton.SetActive(true); }
+void ToggleWidget::FlashOn() { _iconButton.SetActive(true); }
 
-void ToggleWidget::FullOff() { _iconButton.SetActive(false); }
+void ToggleWidget::FlashOff() { _iconButton.SetActive(false); }
 
 void ToggleWidget::Limit(double value) {
   if (value < theatre::ControlValue::MaxUInt()) _iconButton.SetActive(false);

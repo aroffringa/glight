@@ -450,18 +450,40 @@ void ParseSourceValues(const Array &node, Management &management) {
 
 void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
                        Management &management) {
-  if (node.children.contains("name")) {
+  if (node.contains("name")) {
+    // Old way of storing inputs ; support to be removed at a later time
     const size_t input = ToNum(node["input-index"]).AsSize();
-    const size_t folderId = ToNum(node["folder"]).AsSize();
+    const size_t folder_id = ToNum(node["folder"]).AsSize();
     const std::string name = ToStr(node["name"]);
-    Folder *folder = management.Folders()[folderId].get();
+    Folder *folder = management.Folders()[folder_id].get();
     Controllable &controllable =
         static_cast<Controllable &>(folder->GetChild(name));
+    SourceValue *source = management.GetSourceValue(controllable, input);
     fader.faders.emplace_back(std::make_unique<gui::FaderState>(
-        management.GetSourceValue(controllable, input)));
+        std::vector<theatre::SourceValue *>{source}));
+  } else if (node.contains("source-values")) {
+    std::vector<SourceValue *> sources;
+    const Array &source_value_node = ToArr(node["source-values"]);
+    for (const Node &source_value_item : source_value_node) {
+      const Object &object = ToObj(source_value_item);
+      if (object.contains("name")) {
+        const size_t input = ToNum(object["input-index"]).AsSize();
+        const size_t folder_id = ToNum(object["folder"]).AsSize();
+        const std::string name = ToStr(object["name"]);
+        Folder *folder = management.Folders()[folder_id].get();
+        Controllable &controllable =
+            static_cast<Controllable &>(folder->GetChild(name));
+        sources.emplace_back(management.GetSourceValue(controllable, input));
+      } else {
+        sources.emplace_back(nullptr);
+      }
+    }
+    fader.faders.emplace_back(
+        std::make_unique<gui::FaderState>(std::move(sources)));
   } else {
-    fader.faders.emplace_back(std::make_unique<gui::FaderState>(nullptr));
+    fader.faders.emplace_back(std::make_unique<gui::FaderState>());
   }
+
   std::unique_ptr<gui::FaderState> &state = fader.faders.back();
   state->SetIsToggleButton(ToBool(node["is-toggle"]));
   if (state->IsToggleButton())

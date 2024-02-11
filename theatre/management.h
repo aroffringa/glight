@@ -60,7 +60,7 @@ class Management {
 
   PresetCollection &AddPresetCollection();
   void RemoveControllable(Controllable &controllable);
-  bool Contains(Controllable &controllable) const;
+  bool Contains(const Controllable &controllable) const;
   template <typename ControllableType>
   /**
    * Retrieve list of controllables of a specific type. Can for example
@@ -98,7 +98,7 @@ class Management {
   SourceValue &AddSourceValue(Controllable &controllable, size_t inputIndex);
 
   void RemoveSourceValue(SourceValue &sourceValue);
-  bool Contains(SourceValue &sourceValue) const;
+  bool Contains(const SourceValue &sourceValue) const;
 
   Chase &AddChase();
 

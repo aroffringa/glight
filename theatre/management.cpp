@@ -283,7 +283,7 @@ void Management::removeControllable(
   }
 }
 
-bool Management::Contains(Controllable &controllable) const {
+bool Management::Contains(const Controllable &controllable) const {
   for (const std::unique_ptr<Controllable> &contr : _controllables) {
     if (contr.get() == &controllable) return true;
   }
@@ -385,7 +385,7 @@ void Management::RemoveSourceValue(SourceValue &sourceValue) {
   assert(false);
 }
 
-bool Management::Contains(SourceValue &sourceValue) const {
+bool Management::Contains(const SourceValue &sourceValue) const {
   for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
     if (sv.get() == &sourceValue) return true;
   }
