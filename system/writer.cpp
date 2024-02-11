@@ -504,15 +504,19 @@ void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
     state.writer.Boolean("display-flash-button", fader->DisplayFlashButton());
     state.writer.Boolean("display-check-button", fader->DisplayCheckButton());
     state.writer.Boolean("overlay-fade-buttons", fader->OverlayFadeButtons());
-    if (fader->GetSourceValue() != nullptr) {
-      state.writer.Number("input-index", fader->GetSourceValue()->InputIndex());
-      state.writer.Number(
-          "folder",
-          state
-              .folderIds[&fader->GetSourceValue()->GetControllable().Parent()]);
-      state.writer.String("name",
-                          fader->GetSourceValue()->GetControllable().Name());
+    const std::vector<SourceValue *> &sources = fader->GetSourceValues();
+    state.writer.StartArray("source-values");
+    for (SourceValue *source : sources) {
+      state.writer.StartObject();
+      if (source != nullptr) {
+        state.writer.Number(
+            "folder", state.folderIds[&source->GetControllable().Parent()]);
+        state.writer.String("name", source->GetControllable().Name());
+        state.writer.Number("input-index", source->InputIndex());
+      }
+      state.writer.EndObject();
     }
+    state.writer.EndArray();
     state.writer.EndObject();
   }
   state.writer.EndArray();  // faders

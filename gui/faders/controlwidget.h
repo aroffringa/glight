@@ -35,40 +35,60 @@ class ControlWidget : public Gtk::Bin {
   virtual void Toggle() = 0;
 
   /**
-   * Turn this fader fully on. This is for example
+   * Turn this fader on. This is for example
    * used by the parent window when a key is pressed
    * to turn on the fader.
    */
-  virtual void FullOn() = 0;
+  virtual void FlashOn() = 0;
 
   /**
    * Turn this fader off.
    */
-  virtual void FullOff() = 0;
+  virtual void FlashOff() = 0;
 
   /**
-   * Link this control to the given source. If moveFader is true,
+   * Link this control to the given sources. If sync_fader is true,
    * the control will change its state to reflect the value of the
-   * source's value.
+   * source's value. Otherwise, the source value will be set to the
+   * value of the fader.
    */
-  void Assign(theatre::SourceValue *item, bool moveFader);
+  void Assign(const std::vector<theatre::SourceValue *> &sources,
+              bool sync_fader);
+
+  bool IsAssigned() const;
 
   /**
    * Resyncs the control with the source value.
    */
-  virtual void MoveSlider() = 0;
+  virtual void SyncFader() = 0;
   virtual void Limit(double value) = 0;
 
-  sigc::signal<void(double)> &SignalValueChange() { return _signalValueChange; }
+  sigc::signal<void> &SignalValueChange() { return _signalValueChange; }
   sigc::signal<void> &SignalAssigned() { return _signalAssigned; }
 
-  theatre::SourceValue *GetSourceValue() const { return _sourceValue; }
-  void Unassign() { Assign(nullptr, true); }
+  const std::vector<theatre::SourceValue *> &GetSourceValues() const {
+    return sources_;
+  }
+  theatre::SourceValue *GetSourceValue(size_t index) const {
+    return index < sources_.size() ? sources_[index] : nullptr;
+  }
+  void Unassign() { Assign({}, true); }
   void SetFadeUpSpeed(double fadePerSecond) { _fadeUpSpeed = fadePerSecond; }
   void SetFadeDownSpeed(double fadePerSecond) {
     _fadeDownSpeed = fadePerSecond;
   }
   ControlMode GetMode() const { return _mode; }
+
+  /**
+   * Number of source values that this controlwidget naturally
+   * connects too. For a single slider or single check button
+   * this is 1, but for choice or color selection wiget, this
+   * may be different.
+   * This does not need to match the number of assigned source values.
+   * It is used for example for automatically assigned the faders to
+   * unassigned source values.
+   */
+  size_t DefaultSourceCount() const { return default_source_count_; }
 
   static double MAX_SCALE_VALUE();
 
@@ -77,20 +97,28 @@ class ControlWidget : public Gtk::Bin {
   void ShowAssignDialog();
 
   /**
+   * Sub-classes can call this to set the default source count
+   * number. If not set, it defaults to 1.
+   */
+  void SetDefaultSourceCount(size_t default_source_count) {
+    default_source_count_ = default_source_count;
+  }
+
+  /**
    * Set the value after a fader change. This function
    * begins a fade if the corresponding fade up/down speed
    * are set.
    */
-  void setTargetValue(unsigned target);
+  void setTargetValue(size_t source_index, unsigned target);
 
   /**
    * Sets the value, skipping any requested fade.
    */
-  void setImmediateValue(unsigned value);
+  void setImmediateValue(size_t source_index, unsigned value);
 
   EventTransmitter &GetEventHub() { return _eventHub; }
   theatre::Management &GetManagement() { return _management; }
-  theatre::SingleSourceValue &GetSingleSourceValue();
+  theatre::SingleSourceValue &GetSingleSourceValue(size_t index);
   FaderWindow &GetFaderWindow() { return fader_window_; }
 
  protected:
@@ -102,12 +130,13 @@ class ControlWidget : public Gtk::Bin {
   double _fadeUpSpeed, _fadeDownSpeed;
   ControlMode _mode;
   FaderState &_state;
-  theatre::SourceValue *_sourceValue = nullptr;
+  size_t default_source_count_ = 1;
+  std::vector<theatre::SourceValue *> sources_;
   FaderWindow &fader_window_;
   theatre::Management &_management;
   EventTransmitter &_eventHub;
   sigc::connection _updateConnection;
-  sigc::signal<void(double)> _signalValueChange;
+  sigc::signal<void> _signalValueChange;
   sigc::signal<void> _signalAssigned;
   sigc::signal<void> _signalDisplayChanged;
 };

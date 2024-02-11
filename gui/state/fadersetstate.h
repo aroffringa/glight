@@ -1,6 +1,7 @@
 #ifndef GLIGHT_FADER_SET_STATE_H_
 #define GLIGHT_FADER_SET_STATE_H_
 
+#include <algorithm>
 #include <memory>
 
 #include "faderstate.h"
@@ -48,9 +49,13 @@ class FaderSetState {
   size_t width = 0;
   size_t height = 0;
 
-  bool IsAssigned(const theatre::SourceValue *p) const {
-    for (const std::unique_ptr<FaderState> &fader : faders)
-      if (p == fader->GetSourceValue()) return true;
+  bool IsAssigned(const theatre::SourceValue *source) const {
+    for (const std::unique_ptr<FaderState> &fader : faders) {
+      const std::vector<theatre::SourceValue *> &sources =
+          fader->GetSourceValues();
+      if (std::find(sources.begin(), sources.end(), source) != sources.end())
+        return true;
+    }
     return false;
   }
 

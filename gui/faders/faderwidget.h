@@ -28,10 +28,10 @@ class FaderWidget final : public ControlWidget {
   ~FaderWidget();
 
   void Toggle() override;
-  void FullOn() override;
-  void FullOff() override;
+  void FlashOn() override;
+  void FlashOff() override;
   void OnAssigned(bool moveFader) override;
-  void MoveSlider() override;
+  void SyncFader() override;
 
   void Limit(double value) override {
     if (_scale.get_value() > value) _scale.set_value(value);

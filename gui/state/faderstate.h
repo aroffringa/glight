@@ -16,18 +16,14 @@ namespace glight::gui {
 
 class FaderState {
  public:
-  explicit FaderState(theatre::SourceValue *source_value);
-  FaderState() : is_toggle_button_(false), new_toggle_button_column_(false) {}
+  FaderState() = default;
+  explicit FaderState(std::vector<theatre::SourceValue *> source_values);
   FaderState(const FaderState &source) = delete;
-  ~FaderState() { source_value_deleted_connection_.disconnect(); }
+  ~FaderState();
 
   FaderState &operator=(const FaderState &rhs) = delete;
 
-  void SetSourceValue(theatre::SourceValue *value);
-  void SetNoSourceValue() {
-    SetSourceValue(nullptr);
-    signal_change_();
-  }
+  void SetSourceValues(std::vector<theatre::SourceValue *> source_values);
   void SetIsToggleButton(bool is_toggle) {
     if (is_toggle != is_toggle_button_) {
       is_toggle_button_ = is_toggle;
@@ -41,8 +37,9 @@ class FaderState {
     }
   }
 
-  /// This might return a nullptr to indicate an unset control.
-  theatre::SourceValue *GetSourceValue() const { return source_value_; }
+  const std::vector<theatre::SourceValue *> &GetSourceValues() const {
+    return source_values_;
+  }
   bool IsToggleButton() const { return is_toggle_button_; }
   bool NewToggleButtonColumn() const { return new_toggle_button_column_; }
 
@@ -81,9 +78,11 @@ class FaderState {
   sigc::signal<void()> &SignalChange() { return signal_change_; }
 
  private:
+  void Connect();
+  void Disconnect();
   void onPresetValueDeleted();
 
-  theatre::SourceValue *source_value_ = nullptr;
+  std::vector<theatre::SourceValue *> source_values_;
   bool is_toggle_button_ = false;
   bool new_toggle_button_column_ = false;
   bool display_name_ = true;
@@ -91,7 +90,7 @@ class FaderState {
   bool display_check_button_ = true;
   bool overlay_fade_buttons_ = true;
   sigc::signal<void()> signal_change_;
-  sigc::connection source_value_deleted_connection_;
+  std::vector<sigc::connection> source_value_deleted_connections_;
 };
 
 }  // namespace glight::gui

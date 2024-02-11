@@ -217,9 +217,9 @@ void FaderWindow::loadState() {
   resize(_state->width, _state->height);
 
   for (size_t i = 0; i != _state->faders.size(); ++i) {
-    _upperControls[i]->Assign(_state->faders[i]->GetSourceValue(), true);
+    _upperControls[i]->Assign(_state->faders[i]->GetSourceValues(), true);
     if (_miDualLayout.get_active())
-      _lowerControls[i]->Assign(_state->faders[i]->GetSourceValue(), true);
+      _lowerControls[i]->Assign(_state->faders[i]->GetSourceValues(), true);
   }
 }
 
@@ -431,19 +431,30 @@ void FaderWindow::removeFader() {
   _state->faders.pop_back();
 }
 
+std::vector<size_t> FaderWindow::SingleSourceControls() const {
+  std::vector<size_t> single_source_controls;
+  for (size_t i = 0; i != _upperControls.size(); ++i) {
+    if (_upperControls[i]->DefaultSourceCount() == 1)
+      single_source_controls.emplace_back(i);
+  }
+  return single_source_controls;
+}
+
 void FaderWindow::onAssignClicked() {
   unassign();
   const bool hasLower = _miDualLayout.get_active();
-  if (!_upperControls.empty()) {
-    size_t controlIndex = 0;
+  const std::vector<size_t> single_source_controls = SingleSourceControls();
+  if (!single_source_controls.empty()) {
+    std::vector<size_t>::const_iterator control_iter =
+        single_source_controls.begin();
     const size_t n = _management.SourceValues().size();
     for (size_t i = 0; i != n; ++i) {
       theatre::SourceValue *source = _management.SourceValues()[i].get();
       if (!_guiState.IsAssigned(source)) {
-        _upperControls[controlIndex]->Assign(source, true);
-        if (hasLower) _lowerControls[controlIndex]->Assign(source, true);
-        ++controlIndex;
-        if (controlIndex == _upperControls.size()) break;
+        _upperControls[*control_iter]->Assign({source}, true);
+        if (hasLower) _lowerControls[*control_iter]->Assign({source}, true);
+        ++control_iter;
+        if (control_iter == single_source_controls.end()) break;
       }
     }
   }
@@ -457,17 +468,19 @@ void FaderWindow::unassign() {
 void FaderWindow::onAssignChasesClicked() {
   unassign();
   const bool hasLower = _miDualLayout.get_active();
-  if (!_upperControls.empty()) {
-    size_t controlIndex = 0;
+  const std::vector<size_t> single_source_controls = SingleSourceControls();
+  if (!single_source_controls.empty()) {
+    std::vector<size_t>::const_iterator control_iter =
+        single_source_controls.begin();
     for (const std::unique_ptr<theatre::SourceValue> &sv :
          _management.SourceValues()) {
       theatre::Chase *c =
           dynamic_cast<theatre::Chase *>(&sv->GetControllable());
       if (c != nullptr) {
-        _upperControls[controlIndex]->Assign(sv.get(), true);
-        if (hasLower) _lowerControls[controlIndex]->Assign(sv.get(), true);
-        ++controlIndex;
-        if (controlIndex == _upperControls.size()) break;
+        _upperControls[*control_iter]->Assign({sv.get()}, true);
+        if (hasLower) _lowerControls[*control_iter]->Assign({sv.get()}, true);
+        ++control_iter;
+        if (control_iter == single_source_controls.end()) break;
       }
     }
   }
@@ -479,15 +492,16 @@ void FaderWindow::onSoloToggled() {
   }
 }
 
-void FaderWindow::onControlValueChanged(double newValue,
-                                        ControlWidget *widget) {
+void FaderWindow::onControlValueChanged(ControlWidget *widget) {
   if (_miSolo.get_active()) {
     // Limitting the controls might generate another control value change, but
     // since it is an auto generated change we will not apply the limit of that
     // change to other faders.
     if (_recursionLock.IsFirst()) {
       RecursionLock::Token token(_recursionLock);
-      const double inverse = ControlWidget::MAX_SCALE_VALUE() - newValue -
+      theatre::SourceValue *source = widget->GetSourceValue(0);
+      unsigned new_value = source->A().Value().UInt();
+      const double inverse = ControlWidget::MAX_SCALE_VALUE() - new_value -
                              ControlWidget::MAX_SCALE_VALUE() * 0.01;
       const double limitValue = std::max(0.0, inverse);
       const bool isLower = widget->GetMode() == ControlMode::Secondary &&
@@ -503,11 +517,11 @@ void FaderWindow::onControlValueChanged(double newValue,
 
 void FaderWindow::onControlAssigned(size_t widgetIndex) {
   if (_recursionLock.IsFirst()) {
-    theatre::SourceValue *source =
-        _upperControls[widgetIndex]->GetSourceValue();
-    _state->faders[widgetIndex]->SetSourceValue(source);
+    const std::vector<theatre::SourceValue *> &sources =
+        _upperControls[widgetIndex]->GetSourceValues();
+    _state->faders[widgetIndex]->SetSourceValues(sources);
     if (_miDualLayout.get_active()) {
-      _lowerControls[widgetIndex]->Assign(source, true);
+      _lowerControls[widgetIndex]->Assign(sources, true);
     }
   }
 }
@@ -518,7 +532,7 @@ bool FaderWindow::HandleKeyDown(char key) {
   for (unsigned i = 0; i < 10; ++i) {
     if (_keyRowsUpper[_keyRowIndex][i] == key) {
       if (i < _upperControls.size()) {
-        _upperControls[i]->FullOn();
+        _upperControls[i]->FlashOn();
       }
       return true;
     } else if ((_keyRowsLower[_keyRowIndex][i]) == key) {
@@ -537,7 +551,7 @@ bool FaderWindow::HandleKeyUp(char key) {
   for (unsigned i = 0; i < 10; ++i) {
     if (_keyRowsUpper[_keyRowIndex][i] == key) {
       if (i < _upperControls.size()) {
-        _upperControls[i]->FullOff();
+        _upperControls[i]->FlashOff();
       }
       return true;
     }
@@ -545,9 +559,12 @@ bool FaderWindow::HandleKeyUp(char key) {
   return false;
 }
 
-bool FaderWindow::IsAssigned(theatre::SourceValue *sourceValue) const {
+bool FaderWindow::IsAssigned(theatre::SourceValue *source_value) const {
   for (const std::unique_ptr<ControlWidget> &c : _upperControls) {
-    if (c->GetSourceValue() == sourceValue) return true;
+    const std::vector<theatre::SourceValue *> &sources = c->GetSourceValues();
+    if (std::find(sources.begin(), sources.end(), source_value) !=
+        sources.end())
+      return true;
   }
   return false;
 }
@@ -603,9 +620,11 @@ void FaderWindow::UpdateValues() {
     _management.Device()->GetInputValues(*_connectedInputUniverse,
                                          _inputValues.data(), n);
     for (size_t i = 0; i != n; ++i) {
-      if (theatre::SourceValue *sv = _upperControls[i]->GetSourceValue();
-          _inputValues[i] != _previousInputValues[i] && sv) {
-        sv->A().Set(ControlValue::CharToValue(_inputValues[i]));
+      if (_upperControls[i]->GetSourceValues().size() == 1) {
+        if (theatre::SourceValue *sv = _upperControls[i]->GetSourceValues()[0];
+            _inputValues[i] != _previousInputValues[i] && sv) {
+          sv->A().Set(ControlValue::CharToValue(_inputValues[i]));
+        }
       }
     }
     std::swap(_previousInputValues, _inputValues);
@@ -613,13 +632,15 @@ void FaderWindow::UpdateValues() {
 
   theatre::SourceValue *assigned_source_value = nullptr;
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
-    cw->MoveSlider();
-    if (theatre::SourceValue *sv = cw->GetSourceValue(); sv) {
-      assigned_source_value = sv;
+    cw->SyncFader();
+    for (theatre::SourceValue *sv : cw->GetSourceValues()) {
+      if (sv) {
+        assigned_source_value = sv;
+      }
     }
   }
   for (std::unique_ptr<ControlWidget> &cw : _lowerControls) {
-    cw->MoveSlider();
+    cw->SyncFader();
   }
   if (_crossFader && assigned_source_value) {
     const unsigned x_value = assigned_source_value->CrossFader().Value().UInt();
@@ -636,9 +657,10 @@ void FaderWindow::UpdateValues() {
 void FaderWindow::onCrossFaderChange() {
   if (_recursionLock.IsFirst()) {
     for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
-      glight::theatre::SourceValue *source = cw->GetSourceValue();
-      if (source) {
-        source->CrossFader().Set(_crossFader->get_value(), 0.0);
+      for (theatre::SourceValue *source : cw->GetSourceValues()) {
+        if (source) {
+          source->CrossFader().Set(_crossFader->get_value(), 0.0);
+        }
       }
     }
   }
@@ -649,9 +671,10 @@ void FaderWindow::FlipCrossFader() {
 
   for (const std::unique_ptr<glight::gui::ControlWidget> &upper :
        _upperControls) {
-    theatre::SourceValue *source = upper->GetSourceValue();
-    if (source) {
-      source->Swap();
+    for (theatre::SourceValue *source : upper->GetSourceValues()) {
+      if (source) {
+        source->Swap();
+      }
     }
   }
 }
@@ -659,9 +682,10 @@ void FaderWindow::FlipCrossFader() {
 void FaderWindow::onStartCrossFader() {
   if (_crossFader->get_value() < ControlValue::MaxUInt() / 2) FlipCrossFader();
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
-    glight::theatre::SourceValue *source = cw->GetSourceValue();
-    if (source) {
-      source->CrossFader().Set(0.0, MapSliderToSpeed(getFadeInSpeed()));
+    for (theatre::SourceValue *source : cw->GetSourceValues()) {
+      if (source) {
+        source->CrossFader().Set(0.0, MapSliderToSpeed(getFadeInSpeed()));
+      }
     }
   }
   _isCrossFaderStarted = true;
@@ -671,10 +695,11 @@ void FaderWindow::AssignTopToBottom() {
   std::vector<std::unique_ptr<glight::gui::ControlWidget>> &controls =
       _lowerControls.empty() ? _upperControls : _lowerControls;
   for (size_t i = 0; i != controls.size(); ++i) {
-    glight::theatre::SourceValue *value = controls[i]->GetSourceValue();
-    if (value) {
-      value->B() = value->A();
-      controls[i]->MoveSlider();
+    for (theatre::SourceValue *source : controls[i]->GetSourceValues()) {
+      if (source) {
+        source->B() = source->A();
+        controls[i]->SyncFader();
+      }
     }
   }
   _isCrossFaderStarted = false;
@@ -683,9 +708,10 @@ void FaderWindow::AssignTopToBottom() {
 void FaderWindow::CrossFadeImmediately() {
   if (_crossFader->get_value() < ControlValue::MaxUInt() / 2) FlipCrossFader();
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
-    glight::theatre::SourceValue *source = cw->GetSourceValue();
-    if (source) {
-      source->CrossFader().Set(0.0);
+    for (theatre::SourceValue *source : cw->GetSourceValues()) {
+      if (source) {
+        source->CrossFader().Set(0.0);
+      }
     }
   }
   AssignTopToBottom();
