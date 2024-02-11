@@ -124,6 +124,7 @@ set(SYSTEMFILES
 
 set(THEATREFILES
   theatre/beatfinder.cpp
+  theatre/color.cpp
   theatre/colordeduction.cpp
   theatre/effect.cpp
   theatre/fixture.cpp

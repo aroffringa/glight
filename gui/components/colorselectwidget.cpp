@@ -70,28 +70,13 @@ void ColorSelectWidget::OpenColorSelection() {
   dialog.set_transient_for(*parent_);
   dialog.set_rgba(color);
   dialog.set_use_alpha(false);
-  const std::vector<Gdk::RGBA> colors{
-      Gdk::RGBA("#FF0000"), Gdk::RGBA("#FF4000"), Gdk::RGBA("#FF8000"),
-      Gdk::RGBA("#FFC000"), Gdk::RGBA("#FFFF00"), Gdk::RGBA("#C0FF00"),
-      Gdk::RGBA("#80FF00"), Gdk::RGBA("#00FF00"), Gdk::RGBA("#00FF80"),
-      Gdk::RGBA("#00FFC0"),  // 10
-      Gdk::RGBA("#FF0080"), Gdk::RGBA("#FF00FF"), Gdk::RGBA("#C000FF"),
-      Gdk::RGBA("#8000FF"), Gdk::RGBA("#4000FF"), Gdk::RGBA("#0000FF"),
-      Gdk::RGBA("#0040FF"), Gdk::RGBA("#0080FF"), Gdk::RGBA("#00C0FF"),
-      Gdk::RGBA("#00FFFF"),  // 20
-      Gdk::RGBA("#FF8080"), Gdk::RGBA("#FF80FF"), Gdk::RGBA("#C080FF"),
-      Gdk::RGBA("#8080FF"), Gdk::RGBA("#80C0FF"), Gdk::RGBA("#80FFFF"),
-      Gdk::RGBA("#80FFC0"), Gdk::RGBA("#80FF80"), Gdk::RGBA("#C0FF80"),
-      Gdk::RGBA("#E0FF80"),  // 30
-      Gdk::RGBA("#FFFF80"), Gdk::RGBA("#FFFFC0"), Gdk::RGBA("#FFC0C0"),
-      Gdk::RGBA("#FFAA5F"),  // warm white (2700 K)
-      Gdk::RGBA("#FFBA81"),  // 3200 K
-      Gdk::RGBA("#FFD0AA"),  // 4000 K
-      Gdk::RGBA("#FFE2CA"),  // 4800 K
-      Gdk::RGBA("#FFFFFF"),  // sRGB neutral white (6500 K)
-      Gdk::RGBA("#D5E1FF"),  // 8500 K
-      Gdk::RGBA("#C5D7FF"),  // 10500 K
-  };
+  const std::vector<theatre::Color> color_set = theatre::Color::DefaultSet32();
+  std::vector<Gdk::RGBA> colors;
+  colors.reserve(color_set.size());
+  for (const theatre::Color &color : color_set) {
+    colors.emplace_back(color.RedRatio(), color.GreenRatio(),
+                        color.BlueRatio());
+  }
   dialog.add_palette(Gtk::Orientation::ORIENTATION_HORIZONTAL, 10, colors);
   const int result = dialog.run();
 

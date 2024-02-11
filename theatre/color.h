@@ -4,6 +4,7 @@
 #include <cmath>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace glight::theatre {
 
@@ -73,13 +74,18 @@ class Color {
   constexpr static Color WarmWhite() { return White3200K(); }
   constexpr static Color UV() { return Color(85, 0, 255); }
 
+  constexpr static Color White2700K() { return Color(255, 180, 116); }
   constexpr static Color White3000K() { return Color(255, 180, 116); }
   constexpr static Color White3200K() { return Color(255, 186, 129); }
   constexpr static Color White4000K() { return Color(255, 208, 170); }
   constexpr static Color White4800K() { return Color(255, 226, 202); }
+  constexpr static Color White6500K() { return White(); }
   constexpr static Color White7000K() { return Color(239, 240, 255); }
   constexpr static Color White8500K() { return Color(213, 225, 255); }
   constexpr static Color White10500K() { return Color(197, 215, 255); }
+
+  static std::vector<Color> DefaultSet32();
+  static std::vector<Color> DefaultSet40();
 
  private:
   unsigned char red_, green_, blue_;
