@@ -497,8 +497,8 @@ void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
   state.writer.StartArray("faders");
   for (const std::unique_ptr<gui::FaderState> &fader : guiState.faders) {
     state.writer.StartObject();
-    state.writer.Boolean("is-toggle", fader->IsToggleButton());
-    if (fader->IsToggleButton())
+    state.writer.String("fader-type", ToString(fader->GetFaderType()));
+    if (!IsFullColumnType(fader->GetFaderType()))
       state.writer.Boolean("new-toggle-column", fader->NewToggleButtonColumn());
     state.writer.Boolean("display-name", fader->DisplayName());
     state.writer.Boolean("display-flash-button", fader->DisplayFlashButton());

@@ -485,9 +485,16 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
   }
 
   std::unique_ptr<gui::FaderState> &state = fader.faders.back();
-  state->SetIsToggleButton(ToBool(node["is-toggle"]));
-  if (state->IsToggleButton())
-    state->SetNewToggleButtonColumn(ToBool(node["new-toggle-column"]));
+  if (node.contains("is-toggle")) {
+    // This is for older files and can be removed in the future
+    state->SetFaderType(ToBool(node["is-toggle"])
+                            ? gui::FaderControlType::ToggleButton
+                            : gui::FaderControlType::Fader);
+  } else {
+    state->SetFaderType(gui::GetFaderControlType(ToStr(node["fader-type"])));
+  }
+  if (!IsFullColumnType(state->GetFaderType()))
+    state->SetColumn(ToBool(node["new-toggle-column"]));
   state->SetDisplayName(
       OptionalBool(node, "display-name", state->DisplayName()));
   state->SetDisplayFlashButton(

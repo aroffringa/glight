@@ -92,6 +92,7 @@ set(GUIFILES
   gui/components/visualizationwidget.cpp
   gui/dialogs/inputselectdialog.cpp
   gui/dialogs/sceneselect.cpp
+  gui/faders/colorcontrolwidget.cpp
   gui/faders/controlmenu.cpp
   gui/faders/controlwidget.cpp
   gui/faders/faderwidget.cpp

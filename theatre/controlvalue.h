@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <sstream>
 
 namespace glight::theatre {
 
@@ -93,6 +94,9 @@ class ControlValue {
   constexpr double RoundedPercentage() const {
     return std::round(1000.0 * (double)_value / (double)((1 << 24) - 1)) * 0.1;
   }
+  constexpr unsigned char ToUChar() const {
+    return std::min(_value, ControlValue::MaxUInt()) >> 16;
+  }
 
  private:
   unsigned int _value;
@@ -156,6 +160,12 @@ inline ControlValue Mix(const ControlValue& firstValue,
                         const ControlValue& secondValue, MixStyle mixStyle) {
   return ControlValue(
       ControlValue::Mix(firstValue.UInt(), secondValue.UInt(), mixStyle));
+}
+
+inline std::string ToString(const ControlValue& value) {
+  std::ostringstream str;
+  str << value.UInt() << " (" << std::round(value.Ratio() * 100.0) << "%)";
+  return str.str();
 }
 
 }  // namespace glight::theatre

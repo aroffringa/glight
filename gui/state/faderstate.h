@@ -14,6 +14,37 @@ class SourceValue;
 
 namespace glight::gui {
 
+enum class FaderControlType { Fader, ToggleButton, ColorButton };
+
+constexpr inline bool IsFullColumnType(FaderControlType fader_type) {
+  return fader_type == FaderControlType::Fader;
+}
+
+constexpr inline FaderControlType GetFaderControlType(
+    const std::string &fader_type_str) {
+  if (fader_type_str == "fader")
+    return FaderControlType::Fader;
+  else if (fader_type_str == "toggle-button")
+    return FaderControlType::ToggleButton;
+  else if (fader_type_str == "color-button")
+    return FaderControlType::ColorButton;
+  else
+    throw std::runtime_error("Invalid fader control type");
+}
+
+inline std::string ToString(FaderControlType fader_type) {
+  switch (fader_type) {
+    case FaderControlType::Fader:
+      return "fader";
+    case FaderControlType::ToggleButton:
+      return "toggle-button";
+    case FaderControlType::ColorButton:
+      return "color-button";
+    default:
+      return "";
+  }
+}
+
 class FaderState {
  public:
   FaderState() = default;
@@ -24,15 +55,16 @@ class FaderState {
   FaderState &operator=(const FaderState &rhs) = delete;
 
   void SetSourceValues(std::vector<theatre::SourceValue *> source_values);
-  void SetIsToggleButton(bool is_toggle) {
-    if (is_toggle != is_toggle_button_) {
-      is_toggle_button_ = is_toggle;
+  FaderControlType GetFaderType() const { return fader_type_; }
+  void SetFaderType(FaderControlType fader_type) {
+    if (fader_type != fader_type_) {
+      fader_type_ = fader_type;
       signal_change_();
     }
   }
-  void SetNewToggleButtonColumn(bool new_column) {
-    if (new_column != new_toggle_button_column_) {
-      new_toggle_button_column_ = new_column;
+  void SetColumn(bool new_column) {
+    if (new_column != new_column_) {
+      new_column_ = new_column;
       signal_change_();
     }
   }
@@ -40,8 +72,7 @@ class FaderState {
   const std::vector<theatre::SourceValue *> &GetSourceValues() const {
     return source_values_;
   }
-  bool IsToggleButton() const { return is_toggle_button_; }
-  bool NewToggleButtonColumn() const { return new_toggle_button_column_; }
+  bool NewToggleButtonColumn() const { return new_column_; }
 
   bool DisplayName() const { return display_name_; }
   void SetDisplayName(bool display_name) {
@@ -83,8 +114,8 @@ class FaderState {
   void onPresetValueDeleted();
 
   std::vector<theatre::SourceValue *> source_values_;
-  bool is_toggle_button_ = false;
-  bool new_toggle_button_column_ = false;
+  FaderControlType fader_type_ = FaderControlType::Fader;
+  bool new_column_ = false;
   bool display_name_ = true;
   bool display_flash_button_ = true;
   bool display_check_button_ = true;

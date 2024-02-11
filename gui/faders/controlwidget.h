@@ -118,7 +118,7 @@ class ControlWidget : public Gtk::Bin {
 
   EventTransmitter &GetEventHub() { return _eventHub; }
   theatre::Management &GetManagement() { return _management; }
-  theatre::SingleSourceValue &GetSingleSourceValue(size_t index);
+  theatre::SingleSourceValue &GetSingleSourceValue(size_t index) const;
   FaderWindow &GetFaderWindow() { return fader_window_; }
 
  protected:
