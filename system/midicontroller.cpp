@@ -153,10 +153,15 @@ MidiController::MidiController(const std::string& device_name) {
       0x00, 0x00, // blue
       0xF7}; // termination symbol
     Check(snd_rawmidi_write(out_rmidi_, buffer.data(), buffer.size()));
-  }*/
+  }
   for (size_t i = 0; i != 8; ++i) {
     SetPixelColor(i, i, Color::Orange(), false);
     SetPixelColor(7 - i, i, Color::Purple(), false);
+  }*/
+  const std::vector<Color> colors = Color::DefaultSet32();
+  for (size_t i = 0; i != 32; ++i) {
+    SetPixelColor(i / 8, i % 8, colors[i], false);
+    SetPixelColor(i / 8 + 4, i % 8, colors[i], false);
   }
 }
 
