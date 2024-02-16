@@ -116,8 +116,8 @@ void ColorControlWidget::SyncFader() {
 
 void ColorControlWidget::Toggle() {
   const Color color = color_selector_.GetColor();
-  color_selector_.SetColor(previous_color);
-  previous_color = color;
+  color_selector_.SetColor(previous_color_);
+  previous_color_ = color;
 }
 
 void ColorControlWidget::FlashOn() { Toggle(); }

@@ -1,4 +1,4 @@
-#include "midicontroller.h"
+#include "controller.h"
 
 #include <boost/algorithm/string/case_conv.hpp>
 
@@ -7,9 +7,9 @@
 #include <fstream>
 #include <stdexcept>
 
-#include "jsonreader.h"
+#include "system/jsonreader.h"
 
-namespace glight::system {
+namespace glight::system::midi {
 
 using theatre::Color;
 
@@ -77,7 +77,7 @@ struct Device {
 
 }  // namespace
 
-std::vector<std::string> MidiController::DeviceNames() {
+std::vector<std::string> Controller::DeviceNames() {
   void** names;
   Check(snd_device_name_hint(-1, "rawmidi", &names));
   void** name_iterator = names;
@@ -93,7 +93,7 @@ std::vector<std::string> MidiController::DeviceNames() {
 
 std::vector<Device> DeviceList() {
   std::vector<Device> devices;
-  const std::vector<std::string> names = MidiController::DeviceNames();
+  const std::vector<std::string> names = Controller::DeviceNames();
   for (const std::string& device_name : names) {
     try {
       Device device;
@@ -120,8 +120,8 @@ std::vector<Device> DeviceList() {
   return devices;
 }
 
-MidiController::MidiController(const std::string& device_name) {
-  std::fill_n(current_colors_, 64, 0);
+Controller::Controller(const std::string& device_name) {
+  std::fill_n(current_colors_, 64, std::pair((unsigned char)(0), false));
   color_map_ = ColorMap(ReadColorList(), 8);
   Check(snd_rawmidi_open(&in_rmidi_, &out_rmidi_, device_name.c_str(), 0));
   Check(snd_rawmidi_nonblock(out_rmidi_, 1 /*non-block*/));
@@ -130,20 +130,6 @@ MidiController::MidiController(const std::string& device_name) {
     throw std::runtime_error("Failed to create pipe");
   input_thread_ = std::thread([&]() { HandleInput(); });
   /*
-  for(unsigned char pad = 0; pad!=0x40; ++pad) {
-    const unsigned char buffer[] = {0x96, pad, 0x20};
-    Check(snd_rawmidi_write(out_rmidi_, buffer, 3));
-  }
-  const unsigned char full_on = 0x1;
-  const unsigned char blink = 0x2;
-  for(unsigned char track_button = 0x64; track_button!=0x6C; ++track_button) {
-    const unsigned char buffer[] = {0x90, track_button, full_on};
-    Check(snd_rawmidi_write(out_rmidi_, buffer, 3));
-  }
-  for(unsigned char scene_button = 0x70; scene_button!=0x78; ++scene_button) {
-    const unsigned char buffer[] = {0x90, scene_button, full_on};
-    Check(snd_rawmidi_write(out_rmidi_, buffer, 3));
-  }
   for(unsigned char red =0; red!=0x78; red+=8) {
     std::vector<unsigned char> buffer{0xF0, 0x47, 0x7F, 0x4F, 0x24,
       0x0, 0x8, // nbytes to follow
@@ -154,18 +140,10 @@ MidiController::MidiController(const std::string& device_name) {
       0xF7}; // termination symbol
     Check(snd_rawmidi_write(out_rmidi_, buffer.data(), buffer.size()));
   }
-  for (size_t i = 0; i != 8; ++i) {
-    SetPixelColor(i, i, Color::Orange(), false);
-    SetPixelColor(7 - i, i, Color::Purple(), false);
-  }*/
-  const std::vector<Color> colors = Color::DefaultSet32();
-  for (size_t i = 0; i != 32; ++i) {
-    SetPixelColor(i / 8, i % 8, colors[i], false);
-    SetPixelColor(i / 8 + 4, i % 8, colors[i], false);
-  }
+*/
 }
 
-MidiController::~MidiController() noexcept {
+Controller::~Controller() noexcept {
   running_ = false;
   unsigned char signal_buffer = 0;
   write(signal_pipe_fd_[1], &signal_buffer, 1);
@@ -176,7 +154,7 @@ MidiController::~MidiController() noexcept {
   snd_rawmidi_close(out_rmidi_);
 }
 
-std::optional<MidiController> MidiController::GetController() {
+std::unique_ptr<Controller> Controller::GetController() {
   std::vector<Device> devices = DeviceList();
   std::vector<Device>::iterator apc_mini_mk2 =
       std::find_if(devices.begin(), devices.end(), [](const Device& device) {
@@ -184,17 +162,17 @@ std::optional<MidiController> MidiController::GetController() {
       });
 
   if (apc_mini_mk2 != devices.end()) {
-    return make_optional<MidiController>(apc_mini_mk2->device);
+    return make_unique<Controller>(apc_mini_mk2->device);
   } else {
     return {};
   }
 }
 
-void MidiController::SetPixelColor(size_t column, size_t row,
-                                   const theatre::Color& color, bool blink) {
+void Controller::SetPixelColor(size_t column, size_t row,
+                               const theatre::Color& color, bool blink) {
   const unsigned char color_index = color_map_.GetIndex(color);
   const unsigned char pad = column + row * 8;
-  if (current_colors_[pad] != color_index) {
+  if (current_colors_[pad] != std::pair(color_index, blink)) {
     constexpr unsigned char pad_full = 0x96;
     constexpr unsigned char pad_blink = 0x9F;
     const unsigned char buffer[] = {blink ? pad_blink : pad_full, pad,
@@ -202,11 +180,11 @@ void MidiController::SetPixelColor(size_t column, size_t row,
     // Return value is unchecked: errors are explicitly ignored
     snd_rawmidi_write(out_rmidi_, buffer, 3);
 
-    current_colors_[pad] = color_index;
+    current_colors_[pad] = std::pair(color_index, blink);
   }
 }
 
-void MidiController::HandleInput() {
+void Controller::HandleInput() {
   input_state_ = InputState::Empty;
   pressed_count_ = 0;
   std::fill_n(faders_, 9, 0);
@@ -234,7 +212,7 @@ void MidiController::HandleInput() {
   }
 }
 
-void MidiController::ProcessInput(unsigned char* data, size_t data_size) {
+void Controller::ProcessInput(unsigned char* data, size_t data_size) {
   for (size_t i = 0; i != data_size; ++i) {
     switch (input_state_) {
       case InputState::Empty:
@@ -287,13 +265,15 @@ void RemoveButton(unsigned char button, std::atomic<unsigned char>* list,
   }
 }
 
-void MidiController::ProcessMessage() {
+void Controller::ProcessMessage() {
   switch (input_state_) {
     case InputState::NoteOn:
       AddButton(input_data_[1], pressed_buttons_, std::size(pressed_buttons_),
                 pressed_count_);
       AddButton(input_data_[1], queued_buttons_, std::size(queued_buttons_),
                 queued_count_);
+      AddButton(input_data_[1], press_event_buttons_,
+                std::size(press_event_buttons_), press_event_count_);
       break;
     case InputState::NoteOff:
       RemoveButton(input_data_[1], pressed_buttons_, pressed_count_);
@@ -307,4 +287,36 @@ void MidiController::ProcessMessage() {
   }
 }
 
-}  // namespace glight::system
+void Controller::SetTrackButton(size_t index, ButtonState state) {
+  if (index < 8) {
+    SetButton(0x64 + index, state);
+  }
+}
+
+void Controller::SetSceneButton(size_t index, ButtonState state) {
+  if (index < 8) {
+    SetButton(0x70 + index, state);
+  }
+}
+
+void Controller::SetButton(unsigned char button_value, ButtonState state) {
+  constexpr unsigned char full_off = 0x0;
+  constexpr unsigned char full_on = 0x1;
+  constexpr unsigned char blink = 0x2;
+  unsigned char state_value = full_off;
+  switch (state) {
+    case ButtonState::Off:
+      state_value = full_off;
+      break;
+    case ButtonState::On:
+      state_value = full_on;
+      break;
+    case ButtonState::Blink:
+      state_value = blink;
+      break;
+  }
+  const unsigned char buffer[] = {0x90, button_value, state_value};
+  Check(snd_rawmidi_write(out_rmidi_, buffer, 3));
+}
+
+}  // namespace glight::system::midi
