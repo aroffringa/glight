@@ -8,7 +8,6 @@
 #include "../renderengine.h"
 
 #include "../../system/deletableptr.h"
-#include "../../system/midicontroller.h"
 
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/checkmenuitem.h>
