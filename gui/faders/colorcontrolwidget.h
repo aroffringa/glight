@@ -24,6 +24,11 @@ class ColorControlWidget final : public ControlWidget {
 
   virtual void Limit(double value) override;
 
+  void SetColor(theatre::Color color) {
+    previous_color_ = color_selector_.GetColor();
+    color_selector_.SetColor(color);
+  }
+
  private:
   virtual void OnAssigned(bool moveFader) override;
   void UpdateDisplaySettings();
@@ -40,7 +45,7 @@ class ColorControlWidget final : public ControlWidget {
   bool hold_updates_ = false;
 
   sigc::connection update_display_settings_connection_;
-  theatre::Color previous_color = theatre::Color::Black();
+  theatre::Color previous_color_ = theatre::Color::Black();
 };
 
 }  // namespace glight::gui

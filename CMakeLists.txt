@@ -121,6 +121,8 @@ set(SYSTEMFILES
   system/openfixturereader.cpp
   system/reader.cpp
   system/writer.cpp
+  system/midi/controller.cpp
+  system/midi/manager.cpp
 )
 
 set(THEATREFILES

@@ -22,6 +22,8 @@
 #include "system/reader.h"
 #include "system/writer.h"
 
+#include "system/midi/manager.h"
+
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/icontheme.h>
 #include <gtkmm/messagedialog.h>
@@ -49,6 +51,8 @@ MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
   _management->StartBeatFinder();
 
   _management->Run();
+
+  midi_manager_ = std::make_unique<system::midi::Manager>();
 
   _fixtureListWindow =
       std::make_unique<glight::gui::FixtureListWindow>(_fixtureSelection);
@@ -152,6 +156,9 @@ void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
   _faderWindows.emplace_back(std::make_unique<FaderWindow>(
       *this, _state, *_management, nextControlKeyRow()));
   FaderWindow *newWindow = _faderWindows.back().get();
+  if (_faderWindows.size() == 1 && midi_manager_->GetNFaders() != 0) {
+    newWindow->SetMidiManager(*midi_manager_);
+  }
   if (stateOrNull == nullptr)
     newWindow->LoadNew();
   else

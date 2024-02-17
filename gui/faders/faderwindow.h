@@ -19,6 +19,8 @@
 
 #include "../../theatre/forwards.h"
 
+#include "system/midi/manager.h"
+
 #include "../recursionlock.h"
 
 namespace glight::gui {
@@ -58,6 +60,9 @@ class FaderWindow : public Gtk::Window {
   EventTransmitter &GetEventTransmitter() { return _eventHub; }
   theatre::Management &GetManagement() { return _management; }
   std::unique_ptr<ControlMenu> &GetControlMenu();
+  void SetMidiManager(system::midi::Manager &manager) {
+    _connectedMidiManager = &manager;
+  }
 
  private:
   void initializeWidgets();
@@ -153,6 +158,7 @@ class FaderWindow : public Gtk::Window {
   static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
   bool _isCrossFaderStarted = false;
   std::optional<size_t> _connectedInputUniverse;
+  system::midi::Manager *_connectedMidiManager;
   std::vector<unsigned char> _inputValues;
   std::vector<unsigned char> _previousInputValues;
   // In dual mode

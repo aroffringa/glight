@@ -639,17 +639,34 @@ size_t FaderWindow::getFadeOutSpeed() const {
 }
 
 void FaderWindow::UpdateValues() {
-  if (_connectedInputUniverse) {
+  if (_connectedInputUniverse || _connectedMidiManager) {
+    _connectedMidiManager->Update();  // TODO This should move to a higher level
     const size_t n = _upperControls.size();
     _inputValues.resize(n);
     _previousInputValues.resize(n);
-    _management.Device()->GetInputValues(*_connectedInputUniverse,
-                                         _inputValues.data(), n);
+    if (_connectedInputUniverse) {
+      _management.Device()->GetInputValues(*_connectedInputUniverse,
+                                           _inputValues.data(), n);
+    } else {
+      for (size_t i = 0; i != std::min(n, _connectedMidiManager->GetNFaders());
+           ++i) {
+        unsigned char value = _connectedMidiManager->GetFaderValue(i);
+        _inputValues[i] = std::min(value * 2, 255);
+      }
+    }
+    size_t color_button_index = 0;
     for (size_t i = 0; i != n; ++i) {
       if (_upperControls[i]->GetSourceValues().size() == 1) {
         if (theatre::SourceValue *sv = _upperControls[i]->GetSourceValues()[0];
             _inputValues[i] != _previousInputValues[i] && sv) {
           sv->A().Set(ControlValue::CharToValue(_inputValues[i]));
+        }
+      } else if (ColorControlWidget *ccw = dynamic_cast<ColorControlWidget *>(
+                     _upperControls[i].get());
+                 ccw) {
+        if (color_button_index < 2) {
+          ccw->SetColor(_connectedMidiManager->GetColor(color_button_index));
+          ++color_button_index;
         }
       }
     }

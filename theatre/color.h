@@ -12,6 +12,7 @@ class VariableEffect;
 
 class Color {
  public:
+  constexpr Color() = default;
   constexpr Color(unsigned char red, unsigned char green,
                   unsigned char blue) noexcept
       : red_(red), green_(green), blue_(blue) {}
@@ -88,7 +89,9 @@ class Color {
   static std::vector<Color> DefaultSet40();
 
  private:
-  unsigned char red_, green_, blue_;
+  unsigned char red_ = 0;
+  unsigned char green_ = 0;
+  unsigned char blue_ = 0;
 };
 
 inline Color operator*(const Color &lhs, unsigned char rhs) {

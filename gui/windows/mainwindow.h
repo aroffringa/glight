@@ -3,10 +3,10 @@
 
 #include "mainmenu.h"
 
-#include "../eventtransmitter.h"
-#include "../fixtureselection.h"
-#include "../state/guistate.h"
-#include "../../theatre/forwards.h"
+#include "gui/eventtransmitter.h"
+#include "gui/fixtureselection.h"
+#include "gui/state/guistate.h"
+#include "theatre/forwards.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/notebook.h>
@@ -17,6 +17,10 @@
 #include <sigc++/signal.h>
 
 #include <vector>
+
+namespace glight::system::midi {
+class Manager;
+}
 
 namespace glight::gui {
 
@@ -54,6 +58,8 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   std::unique_ptr<DesignWizard> &GetDesignWizard() { return _designWizard; }
 
   PropertiesWindow &OpenPropertiesWindow(theatre::FolderObject &object);
+
+  system::midi::Manager &GetMidiManager() { return *midi_manager_; }
 
  private:
   void InitializeMenu();
@@ -120,6 +126,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   sigc::signal<void()> _signalUpdateControllables;
   MainMenu main_menu_;
+  std::unique_ptr<system::midi::Manager> midi_manager_;
 };
 
 }  // namespace glight::gui

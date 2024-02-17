@@ -1,18 +1,20 @@
 #include "visualizationwidget.h"
 
-#include "../windows/addfixturewindow.h"
-#include "../windows/fixtureproperties.h"
-#include "../windows/mainwindow.h"
+#include "gui/windows/addfixturewindow.h"
+#include "gui/windows/fixtureproperties.h"
+#include "gui/windows/mainwindow.h"
 
-#include "../designwizard.h"
-#include "../eventtransmitter.h"
+#include "gui/designwizard.h"
+#include "gui/eventtransmitter.h"
 
-#include "../../theatre/dmxdevice.h"
-#include "../../theatre/fixture.h"
-#include "../../theatre/fixturegroup.h"
-#include "../../theatre/management.h"
-#include "../../theatre/theatre.h"
-#include "../../theatre/valuesnapshot.h"
+#include "system/midi/manager.h"
+
+#include "theatre/dmxdevice.h"
+#include "theatre/fixture.h"
+#include "theatre/fixturegroup.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
+#include "theatre/valuesnapshot.h"
 
 #include <glibmm/main.h>
 
@@ -20,6 +22,7 @@
 #include <gtkmm/main.h>
 
 #include <cmath>
+#include <iostream>  //DEBUG
 #include <memory>
 
 namespace glight::gui {
@@ -171,6 +174,30 @@ void VisualizationWidget::drawFixtures(
     const Cairo::RefPtr<Cairo::Context> &cairo,
     const std::vector<theatre::Fixture *> &selection, size_t width,
     size_t height) {
+  const glight::theatre::ValueSnapshot snapshot =
+      _management->PrimarySnapshot();
+  const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
+      _management->GetTheatre().Fixtures();
+  system::midi::Manager &midi_manager = main_window_->GetMidiManager();
+  const size_t n_pads = midi_manager.GetNPads();
+  if (n_pads > 0) {
+    size_t pad = 0;
+    for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
+      if (fixture->IsVisible()) {
+        const glight::theatre::FixtureType &type = fixture->Type();
+        const size_t shape_count = type.ShapeCount();
+        for (size_t shape_index = 0; shape_index != shape_count;
+             ++shape_index) {
+          const theatre::Color color = fixture->GetColor(snapshot, shape_index);
+          midi_manager.SetFixtureColor(pad % 8, pad / 8, color, false);
+          ++pad;
+          if (pad >= n_pads) goto stop;
+        }
+      }
+    }
+  }
+stop:
+
   cairo->set_source_rgba(0, 0, 0, 1);
   cairo->rectangle(0, 0, width, height);
   cairo->fill();
