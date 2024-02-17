@@ -49,6 +49,7 @@ class FixtureTypesWindow : public Gtk::Window {
   void onSaveClicked();
   void onSelectionChanged();
   theatre::FixtureType *getSelected();
+  void Select(const theatre::FixtureType &selection);
 
   EventTransmitter *event_hub_;
   theatre::Management *management_;

@@ -144,6 +144,7 @@ FixtureTypesWindow::~FixtureTypesWindow() {
 
 void FixtureTypesWindow::fillList() {
   RecursionLock::Token token(recursion_lock_);
+  const theatre::FixtureType *selected_type = getSelected();
   list_model_->clear();
 
   std::lock_guard<std::mutex> lock(management_->Mutex());
@@ -156,6 +157,9 @@ void FixtureTypesWindow::fillList() {
     row[list_columns_.name_] = type->Name();
     row[list_columns_.functions_] = FunctionSummary(*type);
     row[list_columns_.in_use_] = management_->GetTheatre().IsUsed(*type);
+    if (selected_type && selected_type == type.get()) {
+      list_view_.get_selection()->select(row);
+    }
   }
 }
 
@@ -225,6 +229,19 @@ void FixtureTypesWindow::onSaveClicked() {
         theatre::FixtureType::NameToClass(class_combo_.get_active_text()));
   }
   event_hub_->EmitUpdate();
+  Select(*type);
+}
+
+void FixtureTypesWindow::Select(const theatre::FixtureType &selection) {
+  Gtk::TreeModel::Children children = list_model_->children();
+  for (Gtk::TreeIter iter = children.begin(), end = children.end(); iter != end;
+       ++iter) {
+    Gtk::TreeRow row = *iter;
+    if (row[list_columns_.fixture_type_] == &selection) {
+      list_view_.get_selection()->select(row);
+      break;
+    }
+  }
 }
 
 theatre::FixtureType *FixtureTypesWindow::getSelected() {
