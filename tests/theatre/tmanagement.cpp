@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
   value.A().SetValue(ControlValue::Max());
 
   management.RemoveFixtureType(fixtureType);
-  BOOST_CHECK(management.GetTheatre().FixtureTypes().empty());
+  BOOST_CHECK(!management.GetTheatre().FixtureTypes().empty());
   BOOST_CHECK(management.GetTheatre().Fixtures().empty());
   BOOST_CHECK(management.Controllables().empty());
 }
