@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(remove_fixture) {
   BOOST_CHECK_EQUAL(management.GetTheatre().Fixtures().size(), 0);
   BOOST_CHECK_EQUAL(management.Controllables().size(), 0);
   BOOST_CHECK_EQUAL(management.SourceValues().size(), 0);
-  BOOST_CHECK_EQUAL(management.RootFolder().Children().size(), 0);
+  BOOST_CHECK_EQUAL(management.RootFolder().Children().size(), 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

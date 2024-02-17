@@ -97,16 +97,8 @@ FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
 }
 
 void Theatre::RemoveFixture(const Fixture &fixture) {
-  const FixtureType *t = &fixture.Type();
-
   const size_t fIndex = FolderObject::FindIndex(_fixtures, &fixture);
   _fixtures.erase(_fixtures.begin() + fIndex);
-
-  if (!IsUsed(*t)) {
-    const size_t ftIndex = FolderObject::FindIndex(_fixtureTypes, t);
-    _fixtureTypes[ftIndex]->Parent().Remove(*_fixtureTypes[ftIndex]);
-    _fixtureTypes.erase(_fixtureTypes.begin() + ftIndex);
-  }
 }
 
 void Theatre::RemoveFixtureType(const FixtureType &fixtureType) {
