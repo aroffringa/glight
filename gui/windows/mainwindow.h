@@ -43,13 +43,9 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   void EmitUpdate() final override;
 
-  GUIState &State() { return _state; }
-
   sigc::signal<void()> &SignalUpdateControllables() final override {
     return _signalUpdateControllables;
   }
-
-  theatre::Management &GetManagement() const { return *_management; }
 
   void OpenFile(const std::string &filename);
 

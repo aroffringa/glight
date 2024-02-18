@@ -9,6 +9,7 @@ class Management;
 namespace gui {
 
 class EventTransmitter;
+class GUIState;
 
 /**
  * Class to store data that is unique to the instance and that
@@ -21,17 +22,21 @@ class Instance {
     return instance;
   }
 
-  theatre::Management& Management() { return *management_; }
+  static theatre::Management& Management() { return *Get().management_; }
   void SetManagement(theatre::Management& management) {
     management_ = &management;
   }
 
-  EventTransmitter& Events() { return *events_; }
+  static EventTransmitter& Events() { return *Get().events_; }
   void SetEvents(EventTransmitter& events) { events_ = &events; }
+
+  static GUIState& State() { return *Get().state_; }
+  void SetState(GUIState& state) { state_ = &state; }
 
  private:
   theatre::Management* management_;
   EventTransmitter* events_;
+  GUIState* state_;
 };
 
 }  // namespace gui

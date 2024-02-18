@@ -1,14 +1,15 @@
 #include "fixturelist.h"
 
-#include "../../theatre/fixture.h"
-#include "../../theatre/fixturegroup.h"
-#include "../../theatre/management.h"
-#include "../../theatre/theatre.h"
+#include "gui/instance.h"
+
+#include "theatre/fixture.h"
+#include "theatre/fixturegroup.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
 
 namespace glight::gui::components {
 
-FixtureList::FixtureList(theatre::Management &management, EventTransmitter &hub)
-    : management_(management), hub_(hub) {
+FixtureList::FixtureList() {
   model_ = Gtk::ListStore::create(columns_);
   view_.set_model(model_);
   view_.append_column("Fixture", columns_.title_);
@@ -23,6 +24,7 @@ FixtureList::FixtureList(theatre::Management &management, EventTransmitter &hub)
 void FixtureList::Fill() {
   model_->clear();
 
+  theatre::Management &management_ = Instance::Get().Management();
   std::lock_guard<std::mutex> lock(management_.Mutex());
   const std::vector<std::unique_ptr<theatre::FixtureGroup>> &groups =
       management_.FixtureGroups();

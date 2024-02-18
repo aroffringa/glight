@@ -20,7 +20,10 @@ class GUIState {
   }
 
   /**
-   * Emitted when fadersetupstates are added or removed from the list.
+   * Emitted when fader sets are added or removed from the list. This
+   * is not emitted when individual faders are changed; it is only for
+   * situations in which the list of fader sets are shown, e.g. as for
+   * the menu items in the main window.
    */
   sigc::signal<void()> &FaderSetSignalChange() {
     return fader_set_signal_change_;
@@ -44,6 +47,18 @@ class GUIState {
 
   bool LayoutLocked() const { return layout_locked_; }
   void SetLayoutLocked(bool layout_locked) { layout_locked_ = layout_locked; }
+
+  /**
+   * Returns the first unassigned controller. It only considers the types fader
+   * or toggle buttons.
+   */
+  FaderState *GetFirstUnassignedFader() {
+    for (std::unique_ptr<FaderSetState> &set : fader_sets_) {
+      FaderState *fader = set->GetFirstUnassigned();
+      if (fader) return fader;
+    }
+    return nullptr;
+  }
 
  private:
   bool layout_locked_ = false;

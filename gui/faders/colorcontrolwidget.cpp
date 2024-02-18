@@ -8,6 +8,7 @@
 #include "gui/dialogs/controllableselectdialog.h"
 
 #include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
 #include "theatre/controlvalue.h"
 #include "theatre/management.h"
@@ -149,12 +150,13 @@ void ColorControlWidget::ShowAssignControllableDialog() {
     if (controllable) {
       std::vector<theatre::SourceValue *> sources(3);
       for (size_t i = 0; i != controllable->NInputs(); ++i) {
+        theatre::Management &management = Instance::Management();
         if (controllable->InputType(i) == theatre::FunctionType::Red)
-          sources[0] = GetManagement().GetSourceValue(*controllable, i);
+          sources[0] = management.GetSourceValue(*controllable, i);
         else if (controllable->InputType(i) == theatre::FunctionType::Green)
-          sources[1] = GetManagement().GetSourceValue(*controllable, i);
+          sources[1] = management.GetSourceValue(*controllable, i);
         else if (controllable->InputType(i) == theatre::FunctionType::Blue)
-          sources[2] = GetManagement().GetSourceValue(*controllable, i);
+          sources[2] = management.GetSourceValue(*controllable, i);
       }
       Assign(sources, true);
     }

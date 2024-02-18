@@ -37,8 +37,7 @@ class FaderWindow : public Gtk::Window {
   /**
    * Construct a fader window with a new, empty fader setup.
    */
-  FaderWindow(EventTransmitter &event_hub, GUIState &guiState,
-              theatre::Management &management, size_t keyRowIndex);
+  FaderWindow(size_t keyRowIndex);
 
   ~FaderWindow();
 
@@ -57,8 +56,6 @@ class FaderWindow : public Gtk::Window {
 
   FaderSetState *State() { return _state; }
 
-  EventTransmitter &GetEventTransmitter() { return _eventHub; }
-  theatre::Management &GetManagement() { return _management; }
   std::unique_ptr<ControlMenu> &GetControlMenu();
   void SetMidiManager(system::midi::Manager &manager) {
     _connectedMidiManager = &manager;
@@ -120,7 +117,6 @@ class FaderWindow : public Gtk::Window {
   /// The fader menu is stored here so that only one menu is allocated at one
   /// time (instead of each fader allocating its own menu)
   std::unique_ptr<ControlMenu> control_menu_;
-  theatre::Management &_management;
   size_t _keyRowIndex;
 
   Gtk::HBox _hBox;
@@ -129,36 +125,44 @@ class FaderWindow : public Gtk::Window {
   Gtk::MenuButton _menuButton;
 
   Gtk::Menu _popupMenu, _layoutMenu, _fadeInMenu, _fadeOutMenu;
-  Gtk::MenuItem _miLayout, _miFadeIn, _miFadeOut;
-  Gtk::MenuItem _miName;
-  Gtk::CheckMenuItem _miSolo;
+  Gtk::MenuItem _miLayout{"Layout"};
+  Gtk::MenuItem _miFadeIn{"Fade in"};
+  Gtk::MenuItem _miFadeOut{"Fade out"};
+  Gtk::MenuItem _miName{"Set name..."};
+  Gtk::CheckMenuItem _miSolo{"Solo"};
   Gtk::RadioMenuItem _miFadeInOption[11], _miFadeOutOption[11];
   Gtk::SeparatorMenuItem _miSep1;
-  Gtk::MenuItem _miAssign, _miAssignChases, _miClear;
+  Gtk::MenuItem _miAssign{"Assign"};
+  Gtk::MenuItem _miAssignChases{"Assign to chases"};
+  Gtk::MenuItem _miClear{"Clear"};
   Gtk::SeparatorMenuItem _miSep2;
-  Gtk::MenuItem _miAddFader, _miAdd5Faders, _miAddToggleButton,
-      _miAdd5ToggleButtons, _miAddColorButton, _miAddToggleColumn,
-      _miRemoveFader, _miRemove5Faders;
-  Gtk::MenuItem _miInputDevice;
+  Gtk::MenuItem _miAddFader{"Add fader"};
+  Gtk::MenuItem _miAdd5Faders{"Add 5 faders"};
+  Gtk::MenuItem _miAddToggleButton{"Add toggle control"};
+  Gtk::MenuItem _miAdd5ToggleButtons{"Add 5 toggle controls"};
+  Gtk::MenuItem _miAddColorButton{"Add color button"};
+  Gtk::MenuItem _miAddToggleColumn{"Add toggle column"};
+  Gtk::MenuItem _miRemoveFader{"Remove 1"};
+  Gtk::MenuItem _miRemove5Faders{"Remove 5"};
+  Gtk::MenuItem _miInputDevice{"Input device..."};
 
   // Layout menu
-  Gtk::RadioMenuItem _miPrimaryLayout;
-  Gtk::RadioMenuItem _miSecondaryLayout;
-  Gtk::RadioMenuItem _miDualLayout;
+  Gtk::RadioMenuItem _miPrimaryLayout{"Primary"};
+  Gtk::RadioMenuItem _miSecondaryLayout{"Secondary"};
+  Gtk::RadioMenuItem _miDualLayout{"Dual"};
 
   std::vector<std::unique_ptr<ControlWidget>> _upperControls;
   std::vector<std::unique_ptr<ControlWidget>> _lowerControls;
   std::vector<Gtk::VBox> _upperColumns;
   std::vector<Gtk::VBox> _lowerColumns;
-  EventTransmitter &_eventHub;
-  GUIState &_guiState;
-  FaderSetState *_state;
+  FaderSetState *_state = nullptr;
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;
-  static const char _keyRowsUpper[3][10], _keyRowsLower[3][10];
+  static const char _keyRowsUpper[3][10];
+  static const char _keyRowsLower[3][10];
   bool _isCrossFaderStarted = false;
   std::optional<size_t> _connectedInputUniverse;
-  system::midi::Manager *_connectedMidiManager;
+  system::midi::Manager *_connectedMidiManager = nullptr;
   std::vector<unsigned char> _inputValues;
   std::vector<unsigned char> _previousInputValues;
   // In dual mode

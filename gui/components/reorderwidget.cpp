@@ -7,9 +7,7 @@
 
 namespace glight::gui::components {
 
-ReorderWidget::ReorderWidget(theatre::Management& management,
-                             EventTransmitter& hub)
-    : management_(management), hub_(hub) {
+ReorderWidget::ReorderWidget() {
   model_ = Gtk::ListStore::create(columns_);
   view_.set_model(model_);
   SetColumns();

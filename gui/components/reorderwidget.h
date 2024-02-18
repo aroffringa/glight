@@ -18,7 +18,7 @@ namespace glight::gui::components {
 
 class ReorderWidget : public Gtk::HBox {
  public:
-  ReorderWidget(theatre::Management &management, EventTransmitter &hub);
+  ReorderWidget();
 
   template <typename NObject>
   void SetList(const std::vector<NObject *> &objects);
@@ -39,9 +39,6 @@ class ReorderWidget : public Gtk::HBox {
   void MoveDown();
   void Remove();
   void SetColumns();
-
-  theatre::Management &management_;
-  EventTransmitter &hub_;
 
   Glib::RefPtr<Gtk::ListStore> model_;
   Gtk::TreeView view_;

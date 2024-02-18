@@ -44,6 +44,7 @@ MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
       std::filesystem::path(GLIGHT_INSTALL_PATH) / "share/icons";
   iconTheme->prepend_search_path(iconPath.string());
 
+  Instance::Get().SetState(_state);
   Instance::Get().SetEvents(*this);
   _management = std::make_unique<theatre::Management>();
   Instance::Get().SetManagement(*_management);
@@ -153,8 +154,8 @@ void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
       }
     }
   }
-  _faderWindows.emplace_back(std::make_unique<FaderWindow>(
-      *this, _state, *_management, nextControlKeyRow()));
+  _faderWindows.emplace_back(
+      std::make_unique<FaderWindow>(nextControlKeyRow()));
   FaderWindow *newWindow = _faderWindows.back().get();
   if (_faderWindows.size() == 1 && midi_manager_->GetNFaders() != 0) {
     newWindow->SetMidiManager(*midi_manager_);
@@ -448,7 +449,7 @@ theatre::Folder &MainWindow::SelectedFolder() const {
 
 void MainWindow::onMIDesignWizardClicked() {
   if (!_designWizard || !_designWizard->is_visible()) {
-    _designWizard = std::make_unique<DesignWizard>(*_management, *this);
+    _designWizard = std::make_unique<DesignWizard>();
   }
   _designWizard->SetCurrentPath(SelectedFolder().FullPath());
   _designWizard->present();

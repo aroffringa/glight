@@ -6,6 +6,7 @@
 
 #include "gui/designwizard.h"
 #include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
 #include "system/midi/manager.h"
 
@@ -317,7 +318,7 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
       queue_draw();
     } else if (event->button == 3) {
       queue_draw();
-      const bool enable = !main_window_->State().LayoutLocked();
+      const bool enable = !Instance::Get().State().LayoutLocked();
       _miAlignHorizontally.set_sensitive(enable &&
                                          _selectedFixtures.size() >= 2);
       _miAlignVertically.set_sensitive(enable && _selectedFixtures.size() >= 2);
@@ -359,7 +360,7 @@ bool VisualizationWidget::onMotion(GdkEventMotion *event) {
       case NotDragging:
         break;
       case DragFixture:
-        if (!main_window_->State().LayoutLocked()) {
+        if (!Instance::Get().State().LayoutLocked()) {
           for (theatre::Fixture *fixture : _selectedFixtures)
             fixture->GetPosition() += pos - _draggingStart;
           _draggingStart = pos;
@@ -521,8 +522,7 @@ void VisualizationWidget::onGroupFixtures() {
 
 void VisualizationWidget::onDesignFixtures() {
   std::unique_ptr<DesignWizard> &designWizard = main_window_->GetDesignWizard();
-  designWizard =
-      std::make_unique<DesignWizard>(*_management, *_eventTransmitter);
+  designWizard = std::make_unique<DesignWizard>();
   designWizard->SetCurrentPath(main_window_->SelectedFolder().FullPath());
   designWizard->Select(_selectedFixtures);
   designWizard->present();

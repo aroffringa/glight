@@ -17,7 +17,7 @@ namespace glight::gui::components {
 
 class FixtureList : public Gtk::ScrolledWindow {
  public:
-  FixtureList(theatre::Management &management, EventTransmitter &hub);
+  FixtureList();
 
   std::vector<theatre::Fixture *> Selection() const;
   void Select(const std::vector<theatre::Fixture *> &fixtures);
@@ -40,8 +40,6 @@ class FixtureList : public Gtk::ScrolledWindow {
     Gtk::TreeModelColumn<theatre::Fixture *> fixture_;
     Gtk::TreeModelColumn<theatre::FixtureGroup *> group_;
   } columns_;
-  theatre::Management &management_;
-  EventTransmitter &hub_;
 };
 
 }  // namespace glight::gui::components

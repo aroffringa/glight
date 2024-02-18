@@ -112,7 +112,11 @@ class FaderState {
   void Connect();
   void Disconnect();
   void onPresetValueDeleted();
-
+  /**
+   * Connected source values. Some buttons like color buttons can have multiple
+   * connected source values. If unassigned, the vector is empty. Elements shall
+   * not be nullptr.
+   */
   std::vector<theatre::SourceValue *> source_values_;
   FaderControlType fader_type_ = FaderControlType::Fader;
   bool new_column_ = false;
