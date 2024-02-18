@@ -69,6 +69,10 @@ class ControlWidget : public Gtk::Bin {
   const std::vector<theatre::SourceValue *> &GetSourceValues() const {
     return sources_;
   }
+  /**
+   * The respective source value or nullptr if that index does
+   * not exist (e.g. because it is unassigned).
+   */
   theatre::SourceValue *GetSourceValue(size_t index) const {
     return index < sources_.size() ? sources_[index] : nullptr;
   }
@@ -116,8 +120,6 @@ class ControlWidget : public Gtk::Bin {
    */
   void setImmediateValue(size_t source_index, unsigned value);
 
-  EventTransmitter &GetEventHub() { return _eventHub; }
-  theatre::Management &GetManagement() { return _management; }
   theatre::SingleSourceValue &GetSingleSourceValue(size_t index) const;
   FaderWindow &GetFaderWindow() { return fader_window_; }
 
@@ -126,16 +128,17 @@ class ControlWidget : public Gtk::Bin {
 
  private:
   void OnTheatreUpdate();
+  void OnStateChange();
 
   double _fadeUpSpeed, _fadeDownSpeed;
   ControlMode _mode;
   FaderState &_state;
   size_t default_source_count_ = 1;
+  // Should have no nullptr elements. The vector is empty if unassigned.
   std::vector<theatre::SourceValue *> sources_;
   FaderWindow &fader_window_;
-  theatre::Management &_management;
-  EventTransmitter &_eventHub;
   sigc::connection _updateConnection;
+  sigc::connection state_change_connection_;
   sigc::signal<void> _signalValueChange;
   sigc::signal<void> _signalAssigned;
   sigc::signal<void> _signalDisplayChanged;

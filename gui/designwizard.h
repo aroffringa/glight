@@ -31,7 +31,7 @@ class EventTransmitter;
 
 class DesignWizard : public Gtk::Window {
  public:
-  DesignWizard(theatre::Management &management, EventTransmitter &hub);
+  DesignWizard();
   ~DesignWizard();
 
   void SetCurrentPath(const std::string &currentPath) {
@@ -77,9 +77,8 @@ class DesignWizard : public Gtk::Window {
   void onControllableSelected();
 
   theatre::ColorDeduction colorDeduction() const;
+  void Assign(theatre::Controllable &controllable);
 
-  EventTransmitter &_eventHub;
-  theatre::Management &_management;
   std::string _currentPath;
 
   Gtk::VBox _mainBox;

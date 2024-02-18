@@ -1,14 +1,17 @@
 #include "controlwidget.h"
 
-#include "../eventtransmitter.h"
+#include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
-#include "../faders/faderwindow.h"
+#include "gui/dialogs/inputselectdialog.h"
 
-#include "../../theatre/management.h"
-#include "../../theatre/presetvalue.h"
-#include "../../theatre/sourcevalue.h"
+#include "gui/faders/faderwindow.h"
 
-#include "../dialogs/inputselectdialog.h"
+#include "gui/state/faderstate.h"
+
+#include "theatre/management.h"
+#include "theatre/presetvalue.h"
+#include "theatre/sourcevalue.h"
 
 namespace glight::gui {
 
@@ -19,12 +22,15 @@ ControlWidget::ControlWidget(FaderWindow& fader_window, FaderState& state,
     : _mode(mode),
       _state(state),
       fader_window_(fader_window),
-      _management(fader_window.GetManagement()),
-      _eventHub(fader_window.GetEventTransmitter()),
-      _updateConnection(_eventHub.SignalUpdateControllables().connect(
-          [&]() { OnTheatreUpdate(); })) {}
+      _updateConnection(Instance::Events().SignalUpdateControllables().connect(
+          [&]() { OnTheatreUpdate(); })),
+      state_change_connection_(
+          state.SignalChange().connect([&]() { OnStateChange(); })) {}
 
-ControlWidget::~ControlWidget() { _updateConnection.disconnect(); }
+ControlWidget::~ControlWidget() {
+  _updateConnection.disconnect();
+  state_change_connection_.disconnect();
+}
 
 bool ControlWidget::IsAssigned() const {
   for (const theatre::SourceValue* source : sources_) {
@@ -73,7 +79,7 @@ void ControlWidget::OnTheatreUpdate() {
     // The preset might be removed, if so send reassign
     bool all_sources_exist = true;
     for (const SourceValue* source : sources_) {
-      if (source && !_management.Contains(*source)) {
+      if (source && !Instance::Management().Contains(*source)) {
         all_sources_exist = false;
         break;
       }
@@ -94,9 +100,15 @@ theatre::SingleSourceValue& ControlWidget::GetSingleSourceValue(
 }
 
 void ControlWidget::ShowAssignDialog() {
-  InputSelectDialog dialog(GetManagement(), GetEventHub(), false);
+  InputSelectDialog dialog(Instance::Management(), Instance::Events(), false);
   if (dialog.run() == Gtk::RESPONSE_OK) {
     Assign({dialog.SelectedSourceValue()}, true);
+  }
+}
+
+void ControlWidget::OnStateChange() {
+  if (sources_ != _state.GetSourceValues()) {
+    Assign(_state.GetSourceValues(), true);
   }
 }
 

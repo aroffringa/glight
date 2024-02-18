@@ -6,6 +6,8 @@
 #include "togglewidget.h"
 
 #include "gui/eventtransmitter.h"
+#include "gui/instance.h"
+
 #include "gui/state/guistate.h"
 #include "gui/dialogs/stringinputdialog.h"
 
@@ -92,35 +94,7 @@ const char FaderWindow::_keyRowsLower[3][10] = {
     {'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';'},
     {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'}};
 
-FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
-                         theatre::Management &management, size_t keyRowIndex)
-    : _management(management),
-      _keyRowIndex(keyRowIndex),
-
-      _miLayout("Layout"),
-      _miFadeIn("Fade in"),
-      _miFadeOut("Fade out"),
-      _miName("Set name..."),
-      _miSolo("Solo"),
-      _miAssign("Assign"),
-      _miAssignChases("Assign to chases"),
-      _miClear("Clear"),
-      _miAddFader("Add fader"),
-      _miAdd5Faders("Add 5 faders"),
-      _miAddToggleButton("Add toggle control"),
-      _miAdd5ToggleButtons("Add 5 toggle controls"),
-      _miAddColorButton("Add color button"),
-      _miAddToggleColumn("Add toggle column"),
-      _miRemoveFader("Remove 1"),
-      _miRemove5Faders("Remove 5"),
-      _miInputDevice("Input device..."),
-      // Layout menu
-      _miPrimaryLayout("Primary"),
-      _miSecondaryLayout("Secondary"),
-      _miDualLayout("Dual"),
-      _eventHub(eventHub),
-      _guiState(guiState),
-      _state(nullptr) {
+FaderWindow::FaderWindow(size_t keyRowIndex) : _keyRowIndex(keyRowIndex) {
   initializeWidgets();
   initializeMenu();
 }
@@ -128,12 +102,13 @@ FaderWindow::FaderWindow(EventTransmitter &eventHub, GUIState &guiState,
 FaderWindow::~FaderWindow() {
   _timeoutConnection.disconnect();
   if (_state) _state->isActive = false;
-  _guiState.EmitFaderSetChangeSignal();
+  Instance::State().EmitFaderSetChangeSignal();
 }
 
 void FaderWindow::LoadNew() {
-  _guiState.FaderSets().emplace_back(std::make_unique<FaderSetState>());
-  _state = _guiState.FaderSets().back().get();
+  GUIState &state = Instance::State();
+  state.FaderSets().emplace_back(std::make_unique<FaderSetState>());
+  _state = state.FaderSets().back().get();
   _state->name = "Unnamed fader setup";
   for (size_t i = 0; i != 10; ++i)
     _state->faders.emplace_back(std::make_unique<FaderState>());
@@ -473,10 +448,11 @@ void FaderWindow::onAssignClicked() {
   if (!single_source_controls.empty()) {
     std::vector<size_t>::const_iterator control_iter =
         single_source_controls.begin();
-    const size_t n = _management.SourceValues().size();
+    const size_t n = Instance::Management().SourceValues().size();
     for (size_t i = 0; i != n; ++i) {
-      theatre::SourceValue *source = _management.SourceValues()[i].get();
-      if (!_guiState.IsAssigned(source)) {
+      theatre::SourceValue *source =
+          Instance::Management().SourceValues()[i].get();
+      if (!Instance::State().IsAssigned(source)) {
         _upperControls[*control_iter]->Assign({source}, true);
         if (hasLower) _lowerControls[*control_iter]->Assign({source}, true);
         ++control_iter;
@@ -499,7 +475,7 @@ void FaderWindow::onAssignChasesClicked() {
     std::vector<size_t>::const_iterator control_iter =
         single_source_controls.begin();
     for (const std::unique_ptr<theatre::SourceValue> &sv :
-         _management.SourceValues()) {
+         Instance::Management().SourceValues()) {
       theatre::Chase *c =
           dynamic_cast<theatre::Chase *>(&sv->GetControllable());
       if (c != nullptr) {
@@ -606,7 +582,7 @@ void FaderWindow::onSetNameClicked() {
   if (result == Gtk::RESPONSE_OK) {
     _state->name = entry.get_text();
     set_title(_state->name);
-    _guiState.EmitFaderSetChangeSignal();
+    Instance::State().EmitFaderSetChangeSignal();
   }
 }
 
@@ -645,8 +621,8 @@ void FaderWindow::UpdateValues() {
     _inputValues.resize(n);
     _previousInputValues.resize(n);
     if (_connectedInputUniverse) {
-      _management.Device()->GetInputValues(*_connectedInputUniverse,
-                                           _inputValues.data(), n);
+      Instance::Management().Device()->GetInputValues(*_connectedInputUniverse,
+                                                      _inputValues.data(), n);
     } else {
       for (size_t i = 0; i != std::min(n, _connectedMidiManager->GetNFaders());
            ++i) {
@@ -781,7 +757,7 @@ void FaderWindow::onInputDeviceClicked() {
       "1");
   if (dialog.run() == Gtk::RESPONSE_OK) {
     const size_t value = std::atoi(dialog.Value().c_str());
-    if (value >= 1 && value <= _management.Device()->NUniverses())
+    if (value >= 1 && value <= Instance::Management().Device()->NUniverses())
       _connectedInputUniverse = value - 1;
   }
 }

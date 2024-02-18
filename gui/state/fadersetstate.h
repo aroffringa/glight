@@ -66,6 +66,20 @@ class FaderSetState {
     return state;
   }
 
+  /**
+   * Returns the first unassigned controller. It only considers the types fader
+   * or toggle buttons.
+   */
+  FaderState *GetFirstUnassigned() {
+    for (std::unique_ptr<FaderState> &fader : faders) {
+      if (fader->GetSourceValues().empty() &&
+          (fader->GetFaderType() == FaderControlType::Fader ||
+           fader->GetFaderType() == FaderControlType::ToggleButton))
+        return fader.get();
+    }
+    return nullptr;
+  }
+
   std::vector<std::unique_ptr<FaderState>> faders;
 };
 

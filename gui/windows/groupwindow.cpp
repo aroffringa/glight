@@ -14,8 +14,8 @@ using theatre::NamedObject;
 GroupWindow::GroupWindow(theatre::FixtureGroup& group,
                          theatre::Management& management, EventTransmitter& hub)
     : group_(group),
-      fixture_list_(management, hub),
-      reorder_widget_(management, hub),
+      fixture_list_(),
+      reorder_widget_(),
       management_(management),
       hub_(hub) {
   box_.pack_start(fixture_list_);

@@ -1,11 +1,15 @@
 #include "designwizard.h"
 #include "eventtransmitter.h"
+#include "instance.h"
+
+#include "gui/state/guistate.h"
 
 #include "components/colorselectwidget.h"
 
 #include "../theatre/design/colorpreset.h"
 #include "../theatre/design/rotation.h"
 
+#include "../theatre/chase.h"
 #include "../theatre/colordeduction.h"
 #include "../theatre/fixture.h"
 #include "../theatre/fixturecontrol.h"
@@ -13,6 +17,7 @@
 #include "../theatre/folderoperations.h"
 #include "../theatre/management.h"
 #include "../theatre/theatre.h"
+#include "../theatre/timesequence.h"
 
 #include <memory>
 #include <ranges>
@@ -21,16 +26,12 @@ namespace glight::gui {
 
 using theatre::AutoDesign;
 
-DesignWizard::DesignWizard(theatre::Management &management,
-                           EventTransmitter &hub)
-    : _eventHub(hub),
-      _management(management),
-
-      _selectLabel("Select fixtures:"),
-      _fixtureList(management, hub),
+DesignWizard::DesignWizard()
+    : _selectLabel("Select fixtures:"),
+      _fixtureList(),
       _objectBrowser(),
 
-      _reorderWidget(management, hub),
+      _reorderWidget(),
 
       _typeFrameP3("Type"),
       _deductionFrameP3("Colour deduction"),
@@ -272,14 +273,16 @@ void DesignWizard::initPage4Destination(const std::string &name) {
 
 theatre::Folder &DesignWizard::getCurrentFolder() const {
   theatre::Folder *folder = dynamic_cast<theatre::Folder *>(
-      _management.GetObjectFromPathIfExists(_currentPath));
+      Instance::Get().Management().GetObjectFromPathIfExists(_currentPath));
   if (folder)
     return *folder;
   else
-    return _management.RootFolder();
+    return Instance::Get().Management().RootFolder();
 }
 
 void DesignWizard::onNextClicked() {
+  theatre::Management &management = Instance::Get().Management();
+  gui::EventTransmitter &events = Instance::Get().Events();
   switch (_currentPage) {
     case Page1_SelFixtures: {
       _selectedControllables.clear();
@@ -288,7 +291,7 @@ void DesignWizard::onNextClicked() {
                  _fixtureList.Selection();
              theatre::Fixture * fixture : fixtures) {
           _selectedControllables.emplace_back(
-              &_management.GetFixtureControl(*fixture));
+              &management.GetFixtureControl(*fixture));
         }
       } else {
         for (const auto &iter : _controllablesListModel->children()) {
@@ -389,21 +392,23 @@ void DesignWizard::onNextClicked() {
         runType = RunType::OutwardRun;
       else  // if(_randomRunRB.get_active())
         runType = RunType::RandomRun;
-      AutoDesign::MakeRunningLight(
-          _management, makeDestinationFolder(), _selectedControllables,
+      theatre::Chase &chase = AutoDesign::MakeRunningLight(
+          management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(), runType);
-      _eventHub.EmitUpdate();
+      events.EmitUpdate();
+      Assign(chase);
       hide();
     } break;
 
-    case Page4_2_SingleColor:
-      AutoDesign::MakeColorVariation(_management, makeDestinationFolder(),
-                                     _selectedControllables,
-                                     _colorsWidgetP4.GetSelection(),
-                                     colorDeduction(), _variation.get_value());
-      _eventHub.EmitUpdate();
+    case Page4_2_SingleColor: {
+      theatre::Chase &chase = AutoDesign::MakeColorVariation(
+          management, makeDestinationFolder(), _selectedControllables,
+          _colorsWidgetP4.GetSelection(), colorDeduction(),
+          _variation.get_value());
+      events.EmitUpdate();
+      Assign(chase);
       hide();
-      break;
+    } break;
 
     case Page4_3_ShiftingColors: {
       using theatre::ShiftType;
@@ -416,10 +421,11 @@ void DesignWizard::onNextClicked() {
         shiftType = ShiftType::BackAndForthShift;
       else
         shiftType = ShiftType::RandomShift;
-      AutoDesign::MakeColorShift(
-          _management, makeDestinationFolder(), _selectedControllables,
+      theatre::Chase &chase = AutoDesign::MakeColorShift(
+          management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(), shiftType);
-      _eventHub.EmitUpdate();
+      events.EmitUpdate();
+      Assign(chase);
       hide();
     } break;
 
@@ -434,23 +440,26 @@ void DesignWizard::onNextClicked() {
         direction = VUMeterDirection::VUInward;
       else  // if(_vuOutwardRunRB.get_active())
         direction = VUMeterDirection::VUOutward;
-      AutoDesign::MakeVUMeter(
-          _management, makeDestinationFolder(), _selectedControllables,
+      glight::theatre::Controllable &vu_meter = AutoDesign::MakeVUMeter(
+          management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(), direction);
-      _eventHub.EmitUpdate();
+      events.EmitUpdate();
+      Assign(vu_meter);
       hide();
     } break;
 
     case Page4_5_ColorPreset: {
-      if (_eachFixtureSeparatelyCB.get_active())
+      if (_eachFixtureSeparatelyCB.get_active()) {
         MakeColorPresetPerFixture(
-            _management, makeDestinationFolder(), _selectedControllables,
+            management, makeDestinationFolder(), _selectedControllables,
             _colorsWidgetP4.GetSelection(), colorDeduction());
-      else
-        MakeColorPreset(_management, makeDestinationFolder(),
-                        _selectedControllables, _colorsWidgetP4.GetSelection(),
-                        colorDeduction());
-      _eventHub.EmitUpdate();
+      } else {
+        glight::theatre::PresetCollection &preset = MakeColorPreset(
+            management, makeDestinationFolder(), _selectedControllables,
+            _colorsWidgetP4.GetSelection(), colorDeduction());
+        events.EmitUpdate();
+        Assign(preset);
+      }
       hide();
     } break;
 
@@ -465,10 +474,11 @@ void DesignWizard::onNextClicked() {
         incType = IncreasingType::IncForwardReturn;
       else  // if(_incBackwardReturnRB.get_active())
         incType = IncreasingType::IncBackwardReturn;
-      AutoDesign::MakeIncreasingChase(
-          _management, makeDestinationFolder(), _selectedControllables,
+      glight::theatre::Chase &chase = AutoDesign::MakeIncreasingChase(
+          management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(), incType);
-      _eventHub.EmitUpdate();
+      events.EmitUpdate();
+      Assign(chase);
       hide();
     } break;
 
@@ -481,9 +491,11 @@ void DesignWizard::onNextClicked() {
         type = RotationType::Backward;
       else  // if (_rotForwardReturnRB.get_active())
         type = RotationType::ForwardBackward;
-      MakeRotation(_management, makeDestinationFolder(), _selectedControllables,
-                   _colorsWidgetP4.GetSelection(), colorDeduction(), type);
-      _eventHub.EmitUpdate();
+      glight::theatre::TimeSequence &rotation = MakeRotation(
+          management, makeDestinationFolder(), _selectedControllables,
+          _colorsWidgetP4.GetSelection(), colorDeduction(), type);
+      events.EmitUpdate();
+      Assign(rotation);
       hide();
     } break;
   }
@@ -536,9 +548,24 @@ theatre::Folder &DesignWizard::makeDestinationFolder() const {
   theatre::Folder *folder = &_parentFolderCombo.Selection();
   if (_newFolderCB.get_active()) {
     const std::string new_name = _newFolderNameEntry.get_text();
-    folder = &_management.AddFolder(*folder, new_name);
+    theatre::Management &management = Instance::Get().Management();
+    folder = &management.AddFolder(*folder, new_name);
   }
   return *folder;
+}
+
+void DesignWizard::Assign(theatre::Controllable &controllable) {
+  if (controllable.NInputs() == 1) {
+    theatre::Management &management = Instance::Management();
+    glight::gui::FaderState *fader =
+        Instance::State().GetFirstUnassignedFader();
+    if (fader) {
+      theatre::SourceValue *source_value =
+          management.GetSourceValue(controllable, 0);
+      fader->SetSourceValues({source_value});
+      fader->SignalChange();
+    }
+  }
 }
 
 }  // namespace glight::gui
