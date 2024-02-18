@@ -1,6 +1,7 @@
 #ifndef COLOR_SELECT_WIDGET_H
 #define COLOR_SELECT_WIDGET_H
 
+#include <optional>
 #include <variant>
 
 #include <gtkmm/box.h>
@@ -42,8 +43,7 @@ class ColorSelectWidget : public Gtk::HBox {
       return {GetColor()};
   }
   theatre::Color GetColor() const {
-    return theatre::Color(unsigned(red_ * 255.4), unsigned(green_ * 255.4),
-                          unsigned(blue_ * 255.4));
+    return theatre::Color::FromRatio(red_, green_, blue_);
   }
   void SetColor(const theatre::Color &color) {
     static_button_.set_active(true);
