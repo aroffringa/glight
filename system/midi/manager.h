@@ -25,8 +25,13 @@ class Manager {
   unsigned char GetFaderValue(size_t fader_index);
 
   size_t GetNColors() const { return 2; }
-  theatre::Color GetColor(size_t index) const {
-    return selected_colors_[index].second;
+  std::optional<theatre::Color> GetColor(size_t index) {
+    if (std::get<1>(selected_colors_[index])) {
+      std::get<1>(selected_colors_[index]) = false;
+      return std::get<2>(selected_colors_[index]);
+    } else {
+      return {};
+    }
   }
 
   void SetFixtureColor(size_t column, size_t row, const theatre::Color& color,
@@ -35,16 +40,20 @@ class Manager {
 
  private:
   void SetTwoColorSelectionMode();
+  void HandleButtonPress(const ButtonSet& button_set);
+  void HandleButtonRelease(const ButtonSet& button_set);
 
   std::unique_ptr<Controller> controller_;
   MidiGridMode mode_ = MidiGridMode::TwoColorSelection;
   size_t n_faders_ = 0;
   size_t n_pads_ = 0;
   size_t grid_width_ = 0;
-  std::vector<unsigned char> fader_values_;
+  std::vector<std::pair<unsigned char, bool>> fader_values_;
   std::vector<theatre::Color> fixture_colors_;
   ButtonSet button_set_;
-  std::vector<std::pair<size_t, theatre::Color>> selected_colors_;
+  // 1) Index of button associated with selected color,
+  // 2) true if the value changed since the last update, 3) color.
+  std::vector<std::tuple<size_t, bool, theatre::Color>> selected_colors_;
 };
 
 }  // namespace glight::system::midi

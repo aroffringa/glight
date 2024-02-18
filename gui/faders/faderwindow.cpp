@@ -642,7 +642,9 @@ void FaderWindow::UpdateValues() {
                      _upperControls[i].get());
                  ccw) {
         if (color_button_index < 2) {
-          ccw->SetColor(_connectedMidiManager->GetColor(color_button_index));
+          const std::optional<theatre::Color> color =
+              _connectedMidiManager->GetColor(color_button_index);
+          if (color) ccw->SetColor(*color);
           ++color_button_index;
         }
       }

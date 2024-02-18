@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <thread>
@@ -43,23 +44,24 @@ class Controller {
   constexpr static size_t ButtonQueueSize() { return kButtonQueueSize; }
 
   void GetPressEvents(ButtonSet& button_set) {
-    button_set.SetSize(press_event_count_);
-    std::copy_n(press_event_buttons_, button_set.Size(), button_set.Data());
-    press_event_count_ = 0;
+    if (press_event_count_) {
+      std::lock_guard lock(mutex_);
+      button_set.SetSize(press_event_count_);
+      std::copy_n(press_event_buttons_, button_set.Size(), button_set.Data());
+      press_event_count_ = 0;
+    } else {
+      button_set.SetSize(0);
+    }
   }
 
-  /**
-   * Get the currently pressed buttons. If a button was pressed after
-   * the last call, but release before this call, it will still be
-   * returned as pressed in order not to lose a button press.
-   */
-  void GetPressedButtons(ButtonSet& button_set) {
-    button_set.SetSize(queued_count_);
-    std::copy_n(queued_buttons_, button_set.Size(), button_set.Data());
-    const unsigned char pressed = pressed_count_;
-    queued_count_ = pressed;
-    for (size_t i = 0; i != pressed; ++i) {
-      queued_buttons_[i] = pressed_buttons_[i].load();
+  void GetReleaseEvents(ButtonSet& button_set) {
+    if (release_event_count_) {
+      std::lock_guard lock(mutex_);
+      button_set.SetSize(release_event_count_);
+      std::copy_n(release_event_buttons_, button_set.Size(), button_set.Data());
+      release_event_count_ = 0;
+    } else {
+      button_set.SetSize(0);
     }
   }
 
@@ -80,6 +82,13 @@ class Controller {
 
   static char SceneButton(size_t index) { return 0x70 + index; }
   static char TrackButton(size_t index) { return 0x90 + index; }
+  static bool IsTrackButton(unsigned char button) {
+    // 0x7A is shift
+    return (button >= 0x64 && button < 0x6C) || button == 0x7A;
+  }
+  static size_t TrackButtonIndex(unsigned char button) {
+    return button == 0x7A ? 8 : button - 0x64;
+  }
 
  private:
   void HandleInput();
@@ -104,16 +113,11 @@ class Controller {
   int signal_pipe_fd_[2];
   std::atomic<bool> running_ = false;
   constexpr static size_t kButtonQueueSize = 16;
+  std::mutex mutex_;
   std::atomic<unsigned char> press_event_count_ = 0;
-  std::atomic<unsigned char> press_event_buttons_[kButtonQueueSize];
-  // There are two queues maintained to make sure that a button is never 'lost'.
-  // When pressed, the button is added to both queues. When release, it is only
-  // removed from the 'pressed' queue. Only when the application reads the
-  // buttons, unpressed buttons are also removed from the 'queued' list.
-  std::atomic<unsigned char> pressed_count_ = 0;
-  std::atomic<unsigned char> pressed_buttons_[kButtonQueueSize];
-  std::atomic<unsigned char> queued_count_ = 0;
-  std::atomic<unsigned char> queued_buttons_[kButtonQueueSize];
+  unsigned char press_event_buttons_[kButtonQueueSize];
+  std::atomic<unsigned char> release_event_count_ = 0;
+  unsigned char release_event_buttons_[kButtonQueueSize];
   std::atomic<unsigned char> faders_[9];
 };
 
