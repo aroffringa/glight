@@ -7,6 +7,7 @@
 #include "gui/designwizard.h"
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
+#include "gui/tools.h"
 
 #include "system/midi/manager.h"
 
@@ -14,6 +15,7 @@
 #include "theatre/fixture.h"
 #include "theatre/fixturegroup.h"
 #include "theatre/management.h"
+#include "theatre/managementtools.h"
 #include "theatre/theatre.h"
 #include "theatre/valuesnapshot.h"
 
@@ -82,6 +84,20 @@ VisualizationWidget::~VisualizationWidget() {
 void VisualizationWidget::inializeContextMenu() {
   std::vector<theatre::FixtureSymbol::Symbol> symbols(
       theatre::FixtureSymbol::List());
+
+  mi_set_full_on_.signal_activate().connect([&]() {
+    theatre::SetAllFixtures(*_management, _selectedFixtures, Color::White());
+  });
+  set_menu_.add(mi_set_full_on_);
+  mi_set_off_.signal_activate().connect([&]() {
+    theatre::SetAllFixtures(*_management, _selectedFixtures, Color::Black());
+  });
+  set_menu_.add(mi_set_off_);
+  mi_set_color_.signal_activate().connect([&]() { OnSetColor(); });
+  set_menu_.add(mi_set_color_);
+  mi_set_menu_.set_submenu(set_menu_);
+  _popupMenu.add(mi_set_menu_);
+
   _miSymbols.reserve(symbols.size());
   for (theatre::FixtureSymbol::Symbol symbol : symbols) {
     _miSymbols.emplace_back(theatre::FixtureSymbol(symbol).Name());
@@ -319,15 +335,17 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
     } else if (event->button == 3) {
       queue_draw();
       const bool enable = !Instance::Get().State().LayoutLocked();
-      _miAlignHorizontally.set_sensitive(enable &&
-                                         _selectedFixtures.size() >= 2);
-      _miAlignVertically.set_sensitive(enable && _selectedFixtures.size() >= 2);
-      _miDistributeEvenly.set_sensitive(enable &&
-                                        _selectedFixtures.size() >= 2);
+      const bool has_selection = !_selectedFixtures.empty();
+      const bool selection_enabled = enable && has_selection;
+      const bool dual_enabled = enable && _selectedFixtures.size() >= 2;
+      mi_set_menu_.set_sensitive(has_selection);
+      _miAlignHorizontally.set_sensitive(dual_enabled);
+      _miAlignVertically.set_sensitive(dual_enabled);
+      _miDistributeEvenly.set_sensitive(dual_enabled);
       _miAdd.set_sensitive(enable);
-      _miRemove.set_sensitive(enable && !_selectedFixtures.empty());
-      _miSymbolMenu.set_sensitive(enable && !_selectedFixtures.empty());
-      _miProperties.set_sensitive(enable && !_selectedFixtures.empty());
+      _miRemove.set_sensitive(selection_enabled);
+      _miSymbolMenu.set_sensitive(selection_enabled);
+      _miProperties.set_sensitive(selection_enabled);
       _popupMenu.popup_at_pointer(reinterpret_cast<GdkEvent *>(event));
     }
   }
@@ -574,6 +592,14 @@ void VisualizationWidget::onSetSymbol(theatre::FixtureSymbol::Symbol symbol) {
 void VisualizationWidget::onGlobalSelectionChanged() {
   _selectedFixtures = _globalSelection->Selection();
   queue_draw();
+}
+
+void VisualizationWidget::OnSetColor() {
+  std::optional<theatre::Color> color =
+      OpenColorDialog(*main_window_, theatre::Color::RedC());
+  if (color) {
+    theatre::SetAllFixtures(*_management, _selectedFixtures, *color);
+  }
 }
 
 }  // namespace glight::gui

@@ -63,6 +63,11 @@ class VisualizationWidget : public Gtk::DrawingArea {
 
   Gtk::Menu _popupMenu;
   Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
+  Gtk::MenuItem mi_set_menu_{"Set"};
+  Gtk::Menu set_menu_;
+  Gtk::MenuItem mi_set_full_on_{"Full on"};
+  Gtk::MenuItem mi_set_off_{"Off"};
+  Gtk::MenuItem mi_set_color_{"Set color..."};
   Gtk::MenuItem _miSymbolMenu, _miDryModeStyle, _miAlignHorizontally,
       _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miGroup,
       _miDesign;
@@ -100,6 +105,8 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void onDesignFixtures();
   void onSetSymbol(theatre::FixtureSymbol::Symbol symbol);
   void onGlobalSelectionChanged();
+
+  void OnSetColor();
 
   void selectFixtures(const theatre::Position &a, const theatre::Position &b);
   void addFixtures(const theatre::Position &a, const theatre::Position &b);

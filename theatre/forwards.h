@@ -5,6 +5,7 @@ namespace glight::theatre {
 
 class BeatFinder;
 class Chase;
+class Color;
 class Controllable;
 class ControlSceneItem;
 class DmxDevice;

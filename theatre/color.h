@@ -19,6 +19,10 @@ class Color {
   constexpr Color(const Color &) noexcept = default;
   Color &operator=(const Color &) noexcept = default;
 
+  static constexpr Color FromRatio(double r, double g, double b) {
+    return theatre::Color(unsigned(r * 255.4), unsigned(g * 255.4),
+                          unsigned(b * 255.4));
+  }
   static constexpr Color FromHexString(const char *s) {
     const auto from_hex = [](char c) -> int {
       if (c >= '1' && c <= '9')

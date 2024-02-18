@@ -78,6 +78,7 @@ set(GUIFILES
   gui/nameframe.cpp
   gui/objectlistframe.cpp
   gui/renderengine.cpp
+  gui/tools.cpp
   gui/components/audiowidget.cpp
   gui/components/beatinput.cpp
   gui/components/colorselectwidget.cpp
@@ -136,6 +137,7 @@ set(THEATREFILES
   theatre/folder.cpp
   theatre/folderobject.cpp
   theatre/management.cpp
+  theatre/managementtools.cpp
   theatre/oladevice.cpp
   theatre/presetcollection.cpp
   theatre/presetvalue.cpp

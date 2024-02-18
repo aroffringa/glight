@@ -2,13 +2,12 @@
 
 #include "gui/instance.h"
 
+#include "gui/tools.h"
 #include "gui/dialogs/controllableselectdialog.h"
 #include "gui/dialogs/stringinputdialog.h"
 
 #include "theatre/effects/variableeffect.h"
 #include "theatre/management.h"
-
-#include <gtkmm/colorchooserdialog.h>
 
 namespace glight::gui {
 
@@ -67,33 +66,12 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
 }
 
 void ColorSelectWidget::OpenColorSelection() {
-  Gdk::RGBA color;
-  color.set_red(red_);
-  color.set_green(green_);
-  color.set_blue(blue_);
-  color.set_alpha(1.0);  // opaque
-
-  Gtk::ColorChooserDialog dialog("Select color for fixture");
-  dialog.set_transient_for(*parent_);
-  dialog.set_rgba(color);
-  dialog.set_use_alpha(false);
-  const std::vector<theatre::Color> color_set = theatre::Color::DefaultSet40();
-  std::vector<Gdk::RGBA> colors;
-  colors.reserve(color_set.size());
-  for (const theatre::Color &color : color_set) {
-    colors.emplace_back(color.RedRatio(), color.GreenRatio(),
-                        color.BlueRatio());
-  }
-  dialog.add_palette(Gtk::Orientation::ORIENTATION_HORIZONTAL, 10, colors);
-  const int result = dialog.run();
-
-  // Handle the response:
-  if (result == Gtk::RESPONSE_OK) {
-    // Store the chosen color:
-    color = dialog.get_rgba();
-    red_ = color.get_red();
-    green_ = color.get_green();
-    blue_ = color.get_blue();
+  const std::optional<theatre::Color> color =
+      OpenColorDialog(*parent_, theatre::Color::FromRatio(red_, green_, blue_));
+  if (color) {
+    red_ = color->RedRatio();
+    green_ = color->GreenRatio();
+    blue_ = color->BlueRatio();
     signal_color_changed_();
     area_.queue_draw();
   }
