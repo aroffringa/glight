@@ -115,6 +115,7 @@ void FaderWindow::LoadNew() {
 
   _state->width = std::max(100, get_width());
   _state->height = std::max(300, get_height());
+  _state->isActive = true;
   RecursionLock::Token token(_recursionLock);
   loadState();
 }
