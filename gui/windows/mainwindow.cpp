@@ -146,14 +146,6 @@ void MainWindow::InitializeMenu() {
 void MainWindow::EmitUpdate() { _signalUpdateControllables(); }
 
 void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
-  if (stateOrNull == nullptr) {
-    for (std::unique_ptr<FaderSetState> &setup : _state.FaderSets()) {
-      if (!setup->isActive) {
-        stateOrNull = setup.get();
-        break;
-      }
-    }
-  }
   _faderWindows.emplace_back(
       std::make_unique<FaderWindow>(nextControlKeyRow()));
   FaderWindow *newWindow = _faderWindows.back().get();
