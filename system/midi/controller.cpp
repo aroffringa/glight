@@ -186,7 +186,8 @@ void Controller::SetPixelColor(size_t column, size_t row,
 
 void Controller::HandleInput() {
   input_state_ = InputState::Empty;
-  pressed_count_ = 0;
+  press_event_count_ = 0;
+  release_event_count_ = 0;
   std::fill_n(faders_, 9, 0);
 
   const unsigned n_pfds = snd_rawmidi_poll_descriptors_count(in_rmidi_);
@@ -241,8 +242,8 @@ void Controller::ProcessInput(unsigned char* data, size_t data_size) {
   }
 }
 
-void AddButton(unsigned char button, std::atomic<unsigned char>* list,
-               size_t list_size, std::atomic<unsigned char>& button_count) {
+void AddButton(unsigned char button, unsigned char* list, size_t list_size,
+               std::atomic<unsigned char>& button_count) {
   for (size_t i = 0; i != button_count; ++i) {
     if (list[i] == button) return;
   }
@@ -252,32 +253,18 @@ void AddButton(unsigned char button, std::atomic<unsigned char>* list,
   }
 }
 
-void RemoveButton(unsigned char button, std::atomic<unsigned char>* list,
-                  std::atomic<unsigned char>& button_count) {
-  for (size_t i = 0; i != button_count; ++i) {
-    if (list[i] == button) {
-      for (size_t j = i; j != button_count - 1u; ++j) {
-        list[j] = list[j + 1].load();
-      }
-      --button_count;
-      return;
-    }
-  }
-}
-
 void Controller::ProcessMessage() {
   switch (input_state_) {
-    case InputState::NoteOn:
-      AddButton(input_data_[1], pressed_buttons_, std::size(pressed_buttons_),
-                pressed_count_);
-      AddButton(input_data_[1], queued_buttons_, std::size(queued_buttons_),
-                queued_count_);
+    case InputState::NoteOn: {
+      std::scoped_lock lock(mutex_);
       AddButton(input_data_[1], press_event_buttons_,
                 std::size(press_event_buttons_), press_event_count_);
-      break;
-    case InputState::NoteOff:
-      RemoveButton(input_data_[1], pressed_buttons_, pressed_count_);
-      break;
+    } break;
+    case InputState::NoteOff: {
+      std::scoped_lock lock(mutex_);
+      AddButton(input_data_[1], release_event_buttons_,
+                std::size(release_event_buttons_), release_event_count_);
+    } break;
     case InputState::Controller: {
       size_t fader = std::max<unsigned char>(48, input_data_[1]) - 48;
       faders_[fader] = input_data_[2];
