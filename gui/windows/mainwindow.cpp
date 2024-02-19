@@ -258,8 +258,11 @@ void MainWindow::onMINewClicked() {
     _state.Clear();
     lock.unlock();
 
-    UpdateLayoutLock();
+    // It's important to sent an update now, because windows might have
+    // references to removed fixtures.
     EmitUpdate();
+
+    UpdateLayoutLock();
 
     addFaderWindow();
   }
