@@ -80,37 +80,34 @@ class FixtureTypesWindow : public Gtk::Window {
   Gtk::VBox left_box_;
 
   Gtk::Grid right_grid_;
-  Gtk::Label name_label_;
+  Gtk::Label name_label_{"Name:"};
   Gtk::Entry name_entry_;
-  Gtk::Label short_name_label_;
+  Gtk::Label short_name_label_{"Short name:"};
   Gtk::Entry short_name_entry_;
-  Gtk::Label class_label_;
+  Gtk::Label class_label_{"Class:"};
   Gtk::ComboBoxText class_combo_;
 
-  Gtk::Label min_beam_angle_label_;
+  Gtk::Label beam_angle_label_{"Beam angle range:"};
   Gtk::Entry min_beam_angle_entry_;
-  Gtk::Label max_beam_angle_label_;
   Gtk::Entry max_beam_angle_entry_;
 
-  Gtk::Label min_pan_label_;
+  Gtk::Label pan_label_{"Pan range:"};
   Gtk::Entry min_pan_entry_;
-  Gtk::Label max_pan_label_;
   Gtk::Entry max_pan_entry_;
 
-  Gtk::Label min_tilt_label_;
+  Gtk::Label tilt_label_{"Tilt range:"};
   Gtk::Entry min_beam_tilt_entry_;
-  Gtk::Label max_tilt_label_;
   Gtk::Entry max_beam_tilt_entry_;
 
-  Gtk::Label brightness_label_;
+  Gtk::Label brightness_label_{"Brightness:"};
   Gtk::Entry brightness_entry_;
 
   FixtureTypeFunctionsFrame functions_frame_;
 
   Gtk::Box button_box_;
-  Gtk::Button new_button_;
-  Gtk::Button remove_button_;
-  Gtk::Button save_button_;
+  Gtk::Button new_button_{"New"};
+  Gtk::Button remove_button_{"Remove"};
+  Gtk::Button save_button_{"Save"};
 
   bool layout_locked_ = false;
 };

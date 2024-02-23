@@ -20,21 +20,7 @@ namespace glight::gui {
 
 FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
                                        theatre::Management &management)
-    : event_hub_(eventHub),
-      management_(&management),
-      name_label_("Name:"),
-      short_name_label_("Short name:"),
-      class_label_("Class:"),
-      min_beam_angle_label_("Min beam angle:"),
-      max_beam_angle_label_("Max beam angle:"),
-      min_pan_label_("Min pan:"),
-      max_pan_label_("Max pan:"),
-      min_tilt_label_("Min tilt:"),
-      max_tilt_label_("Max tilt:"),
-      brightness_label_("Brightness:"),
-      new_button_("New"),
-      remove_button_("Remove"),
-      save_button_("Save") {
+    : event_hub_(eventHub), management_(&management) {
   set_title("Glight - fixture types");
   set_size_request(200, 400);
 
@@ -63,11 +49,11 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
 
   // Right part
   right_grid_.attach(name_label_, 0, 0);
-  right_grid_.attach(name_entry_, 1, 0);
+  right_grid_.attach(name_entry_, 1, 0, 2, 1);
   name_entry_.set_hexpand(true);
 
   right_grid_.attach(short_name_label_, 0, 1);
-  right_grid_.attach(short_name_entry_, 1, 1);
+  right_grid_.attach(short_name_entry_, 1, 1, 2, 1);
   short_name_entry_.set_hexpand(true);
 
   right_grid_.attach(class_label_, 0, 2);
@@ -75,31 +61,25 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
       theatre::FixtureType::GetClassList();
   for (theatre::FixtureClass c : classes)
     class_combo_.append(theatre::FixtureType::ClassName(c));
-  right_grid_.attach(class_combo_, 1, 2);
+  right_grid_.attach(class_combo_, 1, 2, 2, 1);
   class_combo_.set_hexpand(true);
 
-  right_grid_.attach(min_beam_angle_label_, 0, 3);
+  right_grid_.attach(beam_angle_label_, 0, 3);
   right_grid_.attach(min_beam_angle_entry_, 1, 3);
+  right_grid_.attach(max_beam_angle_entry_, 2, 3);
 
-  right_grid_.attach(max_beam_angle_label_, 0, 4);
-  right_grid_.attach(max_beam_angle_entry_, 1, 4);
+  right_grid_.attach(pan_label_, 0, 4);
+  right_grid_.attach(min_pan_entry_, 1, 4);
+  right_grid_.attach(max_pan_entry_, 2, 4);
 
-  right_grid_.attach(min_pan_label_, 0, 5);
-  right_grid_.attach(min_pan_entry_, 1, 5);
+  right_grid_.attach(tilt_label_, 0, 5);
+  right_grid_.attach(min_beam_tilt_entry_, 1, 5);
+  right_grid_.attach(max_beam_tilt_entry_, 2, 5);
 
-  right_grid_.attach(max_pan_label_, 0, 6);
-  right_grid_.attach(max_pan_entry_, 1, 6);
+  right_grid_.attach(brightness_label_, 0, 6);
+  right_grid_.attach(brightness_entry_, 1, 6, 2, 1);
 
-  right_grid_.attach(min_tilt_label_, 0, 7);
-  right_grid_.attach(min_beam_tilt_entry_, 1, 7);
-
-  right_grid_.attach(max_tilt_label_, 0, 8);
-  right_grid_.attach(max_beam_tilt_entry_, 1, 8);
-
-  right_grid_.attach(brightness_label_, 0, 9);
-  right_grid_.attach(brightness_entry_, 1, 9);
-
-  right_grid_.attach(functions_frame_, 0, 10, 2, 1);
+  right_grid_.attach(functions_frame_, 0, 10, 3, 1);
   functions_frame_.set_vexpand(true);
   functions_frame_.set_hexpand(true);
 

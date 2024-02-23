@@ -311,13 +311,14 @@ void FixtureType::UpdateFunctions() {
   max_values[1] = 0;
   max_values[2] = 0;
   for (const FixtureTypeFunction &f : functions_) {
-    const Color c = GetFunctionColor(f.Type());
-    max_values[0] += c.Red();
-    max_values[1] += c.Green();
-    max_values[2] += c.Blue();
+    if (IsColor(f.Type())) {
+      const Color c = GetFunctionColor(f.Type());
+      max_values[0] += c.Red();
+      max_values[1] += c.Green();
+      max_values[2] += c.Blue();
+    }
   }
-  scaling_value_ = std::max(std::max(max_values[0], max_values[1]),
-                            std::max(max_values[2], 1U));
+  scaling_value_ = std::max({max_values[0], max_values[1], max_values[2], 1U});
 }
 
 Color FixtureType::GetColor(const Fixture &fixture,

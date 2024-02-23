@@ -23,16 +23,17 @@ std::vector<Color> PresetCollection::InputColors(size_t /*index*/) const {
     const FixtureControl* fixture_control =
         dynamic_cast<const FixtureControl*>(&controllable);
     if (fixture_control) {
-      const Color color =
-          GetFunctionColor(fixture_control->InputType(preset->InputIndex()));
-      FixtureColorSum& sum = fixture_sum[fixture_control];
-      sum.red +=
-          color.Red() * value.UInt() / glight::theatre::ControlValue::MaxUInt();
-      sum.green += color.Green() * value.UInt() /
-                   glight::theatre::ControlValue::MaxUInt();
-      sum.blue += color.Blue() * value.UInt() /
-                  glight::theatre::ControlValue::MaxUInt();
-      sum.n = fixture_control->GetFixture().Type().ColorScalingValue();
+      const FunctionType input_type =
+          fixture_control->InputType(preset->InputIndex());
+      if (IsColor(input_type)) {
+        const Color color = GetFunctionColor(input_type);
+        FixtureColorSum& sum = fixture_sum[fixture_control];
+        constexpr unsigned m = glight::theatre::ControlValue::MaxUInt();
+        sum.red += color.Red() * std::min(m, value.UInt()) / m;
+        sum.green += color.Green() * std::min(m, value.UInt()) / m;
+        sum.blue += color.Blue() * std::min(m, value.UInt()) / m;
+        sum.n = fixture_control->GetFixture().Type().ColorScalingValue();
+      }
     } else {
       const std::vector<Color> colors =
           controllable.InputColors(preset->InputIndex());
@@ -42,8 +43,8 @@ std::vector<Color> PresetCollection::InputColors(size_t /*index*/) const {
   for (const std::pair<const FixtureControl* const, FixtureColorSum>& p :
        fixture_sum) {
     const FixtureColorSum& sum = p.second;
-    result.emplace_back(sum.red * 255 / sum.n, sum.green * 255 / sum.n,
-                        sum.blue * 255 / sum.n);
+    result.emplace_back(std::min(255u, sum.red), std::min(255u, sum.green),
+                        std::min(255u, sum.blue));
   }
   return result;
 }

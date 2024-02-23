@@ -229,7 +229,6 @@ void ParseFixtureControl(const Object &node, Management &management) {
     for (const Node &node : filters) {
       const Object &filter = ToObj(node);
       const FilterType type = GetFilterType(ToStr(filter["type"]));
-      std::cout << "FILTER=" << ToString(type) << '\n';
       control.AddFilter(Filter::Make(type));
     }
   }
