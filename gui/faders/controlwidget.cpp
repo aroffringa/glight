@@ -5,6 +5,7 @@
 
 #include "gui/dialogs/inputselectdialog.h"
 
+#include "gui/faders/controlmenu.h"
 #include "gui/faders/faderwindow.h"
 
 #include "gui/state/faderstate.h"
@@ -95,14 +96,25 @@ void ControlWidget::OnTheatreUpdate() {
 
 theatre::SingleSourceValue& ControlWidget::GetSingleSourceValue(
     size_t index) const {
-  return _mode == ControlMode::Primary ? sources_[index]->A()
-                                       : sources_[index]->B();
+  return sources_[index]->AorB(_mode == ControlMode::Primary);
+}
+
+theatre::SingleSourceValue& ControlWidget::GetSingleSourceValue(
+    theatre::SourceValue& source) const {
+  return source.AorB(_mode == ControlMode::Primary);
 }
 
 void ControlWidget::ShowAssignDialog() {
-  InputSelectDialog dialog(Instance::Management(), Instance::Events(), false);
+  InputSelectDialog dialog(false);
   if (dialog.run() == Gtk::RESPONSE_OK) {
-    Assign({dialog.SelectedSourceValue()}, true);
+    const bool allow_multi = DefaultSourceCount() == 1;
+    if (allow_multi) {
+      std::vector<SourceValue*> sources = GetSourceValues();
+      sources.emplace_back(dialog.SelectedSourceValue());
+      Assign(sources, true);
+    } else {
+      Assign({dialog.SelectedSourceValue()}, true);
+    }
   }
 }
 
@@ -110,6 +122,16 @@ void ControlWidget::OnStateChange() {
   if (sources_ != _state.GetSourceValues()) {
     Assign(_state.GetSourceValues(), true);
   }
+}
+
+std::unique_ptr<ControlMenu>& ControlWidget::PrepareMenu() {
+  std::unique_ptr<ControlMenu>& menu = GetFaderWindow().GetControlMenu();
+  menu = std::make_unique<ControlMenu>(State());
+  menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
+  menu->SignalUnassign().connect([&]() { Assign({}, true); });
+  menu->SignalToggleName().connect(
+      [&]() { State().SetDisplayName(menu->DisplayName()); });
+  return menu;
 }
 
 }  // namespace glight::gui

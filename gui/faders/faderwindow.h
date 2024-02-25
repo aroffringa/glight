@@ -56,7 +56,10 @@ class FaderWindow : public Gtk::Window {
 
   FaderSetState *State() { return _state; }
 
+  /// The fader menu is stored here so that only one menu is allocated at one
+  /// time (instead of each fader allocating its own menu)
   std::unique_ptr<ControlMenu> &GetControlMenu();
+
   void SetMidiManager(system::midi::Manager &manager) {
     _connectedMidiManager = &manager;
   }
@@ -71,6 +74,7 @@ class FaderWindow : public Gtk::Window {
   void onAddToggleClicked();
   void onAddToggleColumnClicked();
   void onAddColorButtonClicked();
+  void onAddComboButtonClicked();
   void removeFader();
   void onRemoveFaderClicked() {
     if (!_upperControls.empty()) removeFader();
@@ -141,6 +145,7 @@ class FaderWindow : public Gtk::Window {
   Gtk::MenuItem _miAddToggleButton{"Add toggle control"};
   Gtk::MenuItem _miAdd5ToggleButtons{"Add 5 toggle controls"};
   Gtk::MenuItem _miAddColorButton{"Add color button"};
+  Gtk::MenuItem _miAddComboButton{"Add combo button"};
   Gtk::MenuItem _miAddToggleColumn{"Add toggle column"};
   Gtk::MenuItem _miRemoveFader{"Remove 1"};
   Gtk::MenuItem _miRemove5Faders{"Remove 5"};

@@ -14,7 +14,7 @@ class SourceValue;
 
 namespace glight::gui {
 
-enum class FaderControlType { Fader, ToggleButton, ColorButton };
+enum class FaderControlType { Fader, ToggleButton, ColorButton, ComboButton };
 
 constexpr inline bool IsFullColumnType(FaderControlType fader_type) {
   return fader_type == FaderControlType::Fader;
@@ -28,6 +28,8 @@ constexpr inline FaderControlType GetFaderControlType(
     return FaderControlType::ToggleButton;
   else if (fader_type_str == "color-button")
     return FaderControlType::ColorButton;
+  else if (fader_type_str == "combo-button")
+    return FaderControlType::ComboButton;
   else
     throw std::runtime_error("Invalid fader control type");
 }
@@ -40,6 +42,8 @@ inline std::string ToString(FaderControlType fader_type) {
       return "toggle-button";
     case FaderControlType::ColorButton:
       return "color-button";
+    case FaderControlType::ComboButton:
+      return "combo-button";
     default:
       return "";
   }
@@ -106,6 +110,14 @@ class FaderState {
     }
   }
 
+  std::string Label() const { return label_; }
+  void SetLabel(const std::string &label) {
+    if (label != label_) {
+      label_ = label;
+      signal_change_();
+    }
+  }
+
   sigc::signal<void()> &SignalChange() { return signal_change_; }
 
  private:
@@ -124,6 +136,7 @@ class FaderState {
   bool display_flash_button_ = true;
   bool display_check_button_ = true;
   bool overlay_fade_buttons_ = true;
+  std::string label_;
   sigc::signal<void()> signal_change_;
   std::vector<sigc::connection> source_value_deleted_connections_;
 };

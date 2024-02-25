@@ -484,6 +484,32 @@ void writeControllable(WriteState &state, const Controllable &controllable) {
   state.controllablesWritten.insert(&controllable);
 }
 
+void writeFaderState(WriteState &state, const gui::FaderState &fader) {
+  state.writer.StartObject();
+  state.writer.String("fader-type", ToString(fader.GetFaderType()));
+  if (!IsFullColumnType(fader.GetFaderType()))
+    state.writer.Boolean("new-toggle-column", fader.NewToggleButtonColumn());
+  state.writer.Boolean("display-name", fader.DisplayName());
+  state.writer.Boolean("display-flash-button", fader.DisplayFlashButton());
+  state.writer.Boolean("display-check-button", fader.DisplayCheckButton());
+  state.writer.Boolean("overlay-fade-buttons", fader.OverlayFadeButtons());
+  if (!fader.Label().empty()) state.writer.String("label", fader.Label());
+  const std::vector<SourceValue *> &sources = fader.GetSourceValues();
+  state.writer.StartArray("source-values");
+  for (SourceValue *source : sources) {
+    state.writer.StartObject();
+    if (source != nullptr) {
+      state.writer.Number("folder",
+                          state.folderIds[&source->GetControllable().Parent()]);
+      state.writer.String("name", source->GetControllable().Name());
+      state.writer.Number("input-index", source->InputIndex());
+    }
+    state.writer.EndObject();
+  }
+  state.writer.EndArray();
+  state.writer.EndObject();
+}
+
 void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
   state.writer.StartObject();
   state.writer.String("name", guiState.name);
@@ -496,28 +522,7 @@ void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
   state.writer.Number("height", guiState.height);
   state.writer.StartArray("faders");
   for (const std::unique_ptr<gui::FaderState> &fader : guiState.faders) {
-    state.writer.StartObject();
-    state.writer.String("fader-type", ToString(fader->GetFaderType()));
-    if (!IsFullColumnType(fader->GetFaderType()))
-      state.writer.Boolean("new-toggle-column", fader->NewToggleButtonColumn());
-    state.writer.Boolean("display-name", fader->DisplayName());
-    state.writer.Boolean("display-flash-button", fader->DisplayFlashButton());
-    state.writer.Boolean("display-check-button", fader->DisplayCheckButton());
-    state.writer.Boolean("overlay-fade-buttons", fader->OverlayFadeButtons());
-    const std::vector<SourceValue *> &sources = fader->GetSourceValues();
-    state.writer.StartArray("source-values");
-    for (SourceValue *source : sources) {
-      state.writer.StartObject();
-      if (source != nullptr) {
-        state.writer.Number(
-            "folder", state.folderIds[&source->GetControllable().Parent()]);
-        state.writer.String("name", source->GetControllable().Name());
-        state.writer.Number("input-index", source->InputIndex());
-      }
-      state.writer.EndObject();
-    }
-    state.writer.EndArray();
-    state.writer.EndObject();
+    writeFaderState(state, *fader);
   }
   state.writer.EndArray();  // faders
   state.writer.EndObject();

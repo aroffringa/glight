@@ -12,7 +12,6 @@
 
 #include "theatre/controlvalue.h"
 #include "theatre/management.h"
-#include "theatre/presetvalue.h"
 #include "theatre/sourcevalue.h"
 
 namespace glight::gui {
@@ -43,6 +42,8 @@ ColorControlWidget::ColorControlWidget(FaderWindow &fader_window,
 
   add(box_);
   box_.show();
+
+  SetDefaultSourceCount(3);
 
   UpdateDisplaySettings();
   update_display_settings_connection_ =

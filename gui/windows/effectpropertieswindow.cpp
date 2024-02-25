@@ -106,7 +106,7 @@ void EffectPropertiesWindow::onSelectedConnectionChanged() {
 }
 
 void EffectPropertiesWindow::onAddConnectionClicked() {
-  InputSelectDialog dialog(*_management, _parentWindow, true);
+  InputSelectDialog dialog(true);
   bool stay_open;
   do {
     stay_open = false;
