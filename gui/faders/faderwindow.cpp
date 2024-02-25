@@ -116,6 +116,7 @@ void FaderWindow::LoadNew() {
 
   _state->width = std::max(100, get_width());
   _state->height = std::max(300, get_height());
+  get_position(_state->position_x, _state->position_y);
   _state->isActive = true;
   RecursionLock::Token token(_recursionLock);
   loadState();
@@ -194,6 +195,7 @@ void FaderWindow::loadState() {
 
   set_title(_state->name);
   resize(_state->width, _state->height);
+  move(_state->position_x, _state->position_y);
 
   for (size_t i = 0; i != _state->faders.size(); ++i) {
     _upperControls[i]->Assign(_state->faders[i]->GetSourceValues(), true);
@@ -326,6 +328,7 @@ bool FaderWindow::onResize(GdkEventConfigure * /*event*/) {
   if (_recursionLock.IsFirst()) {
     _state->height = get_height();
     _state->width = get_width();
+    get_position(_state->position_x, _state->position_y);
   }
   return false;
 }
