@@ -1,6 +1,7 @@
 #include "faderwindow.h"
 
 #include "colorcontrolwidget.h"
+#include "combocontrolwidget.h"
 #include "controlmenu.h"
 #include "faderwidget.h"
 #include "togglewidget.h"
@@ -300,6 +301,10 @@ void FaderWindow::initializeMenu() {
       [&]() { onAddColorButtonClicked(); });
   _popupMenu.append(_miAddColorButton);
 
+  _miAddComboButton.signal_activate().connect(
+      [&]() { onAddComboButtonClicked(); });
+  _popupMenu.append(_miAddComboButton);
+
   _miAddToggleColumn.signal_activate().connect(
       [&]() { onAddToggleColumnClicked(); });
   _popupMenu.append(_miAddToggleColumn);
@@ -347,6 +352,10 @@ void FaderWindow::onAddColorButtonClicked() {
   addControlInLayout(_state->AddState(FaderControlType::ColorButton, false));
 }
 
+void FaderWindow::onAddComboButtonClicked() {
+  addControlInLayout(_state->AddState(FaderControlType::ComboButton, false));
+}
+
 void FaderWindow::onAddToggleColumnClicked() {
   addControlInLayout(_state->AddState(FaderControlType::ToggleButton, true));
 }
@@ -379,6 +388,11 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
           std::make_unique<ColorControlWidget>(*this, state, controlMode, key);
       nameLabel = nullptr;
       break;
+    case FaderControlType::ComboButton:
+      control =
+          std::make_unique<ComboControlWidget>(*this, state, controlMode, key);
+      nameLabel = nullptr;
+      break;
   }
 
   control->SetFadeDownSpeed(MapSliderToSpeed(getFadeOutSpeed()));
@@ -405,6 +419,7 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
       break;
     case FaderControlType::ToggleButton:
     case FaderControlType::ColorButton:
+    case FaderControlType::ComboButton:
       if (newToggleColumn) {
         Gtk::VBox &new_box = column.emplace_back();
         _controlGrid.attach(new_box, hpos * 2 + 1, vpos, 2, 1);

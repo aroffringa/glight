@@ -6,6 +6,7 @@ namespace glight::gui {
 
 ControlMenu::ControlMenu(const FaderState& state) {
   append(_miAssign);
+  append(_miUnassign);
   append(_miSeperator1);
   _miDisplayName.set_active(state.DisplayName());
   append(_miDisplayName);

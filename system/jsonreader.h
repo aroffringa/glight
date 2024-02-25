@@ -119,6 +119,12 @@ inline const std::string &ToStr(const Node &node) {
   return dynamic_cast<const String &>(node).value;
 }
 
+inline std::string OptionalString(const Object &parent, const char *name,
+                                  const std::string &default_value) {
+  const Object::const_iterator iter = parent.find(name);
+  return iter == parent.end() ? default_value : ToStr(*iter);
+}
+
 namespace details {
 bool ReadNumber(char first, std::istream &stream, std::string &data);
 bool ReadString(std::istream &stream, std::string &data);

@@ -502,6 +502,7 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
       OptionalBool(node, "display-check-button", state->DisplayCheckButton()));
   state->SetOverlayFadeButtons(
       OptionalBool(node, "overlay-fade-buttons", state->OverlayFadeButtons()));
+  state->SetLabel(OptionalString(node, "label", state->Label()));
 }
 
 void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,

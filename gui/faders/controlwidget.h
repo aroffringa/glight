@@ -9,6 +9,7 @@
 
 namespace glight::gui {
 
+class ControlMenu;
 class EventTransmitter;
 class FaderState;
 class FaderWindow;
@@ -98,11 +99,13 @@ class ControlWidget : public Gtk::Bin {
 
  protected:
   virtual void OnAssigned(bool moveFader) = 0;
+
   void ShowAssignDialog();
 
   /**
    * Sub-classes can call this to set the default source count
-   * number. If not set, it defaults to 1.
+   * number. If not set, it defaults to 1. It is for example
+   * used when auto assigning faders to inputs.
    */
   void SetDefaultSourceCount(size_t default_source_count) {
     default_source_count_ = default_source_count;
@@ -121,10 +124,14 @@ class ControlWidget : public Gtk::Bin {
   void setImmediateValue(size_t source_index, unsigned value);
 
   theatre::SingleSourceValue &GetSingleSourceValue(size_t index) const;
-  FaderWindow &GetFaderWindow() { return fader_window_; }
+  theatre::SingleSourceValue &GetSingleSourceValue(
+      theatre::SourceValue &source) const;
 
- protected:
-  FaderState &State() { return _state; }
+  FaderWindow &GetFaderWindow() const { return fader_window_; }
+
+  FaderState &State() const { return _state; }
+
+  std::unique_ptr<ControlMenu> &PrepareMenu();
 
  private:
   void OnTheatreUpdate();

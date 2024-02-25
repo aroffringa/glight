@@ -1,6 +1,8 @@
 #ifndef GUI_CONTROL_MENU_H_
 #define GUI_CONTROL_MENU_H_
 
+#include <vector>
+
 #include <gtkmm/checkmenuitem.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -22,6 +24,9 @@ class ControlMenu : public Gtk::Menu {
   Glib::SignalProxy<void> SignalHide() { return signal_hide(); }
 
   Glib::SignalProxy<void> SignalAssign() { return _miAssign.signal_activate(); }
+  Glib::SignalProxy<void> SignalUnassign() {
+    return _miUnassign.signal_activate();
+  }
 
   Glib::SignalProxy<void> SignalToggleName() {
     return _miDisplayName.signal_activate();
@@ -39,8 +44,19 @@ class ControlMenu : public Gtk::Menu {
     return _miOverlayFadeButtons.signal_activate();
   }
 
+  template <typename Function>
+  void AddExtraItem(const std::string& label, Function function) {
+    Gtk::MenuItem& item = extra_items_.emplace_back(label);
+    item.signal_activate().connect(function);
+    // Add the item before the first separator (after assign & unasssign)
+    insert(item, 1 + extra_items_.size());
+    item.show();
+  }
+
  private:
   Gtk::MenuItem _miAssign{"Assign..."};
+  Gtk::MenuItem _miUnassign{"Unassign"};
+  std::vector<Gtk::MenuItem> extra_items_;
   Gtk::SeparatorMenuItem _miSeperator1;
   Gtk::CheckMenuItem _miDisplayName{"Display label"};
   Gtk::CheckMenuItem _miDisplayFlashButton{"Display flash button"};

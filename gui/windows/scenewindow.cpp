@@ -393,7 +393,7 @@ void SceneWindow::addKey(theatre::KeySceneLevel level) {
 }
 
 void SceneWindow::onSelectControllable() {
-  InputSelectDialog dialog(_management, _eventHub, false);
+  InputSelectDialog dialog(false);
   if (dialog.run() == Gtk::RESPONSE_OK) {
     _latestSelectedControllable = dialog.SelectedInput().GetControllable();
     fillControllablesList();

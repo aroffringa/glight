@@ -109,6 +109,9 @@ class SourceValue {
   SingleSourceValue& B() { return b_; }
   const SingleSourceValue& B() const { return b_; }
 
+  SingleSourceValue& AorB(bool a) { return a ? a_ : b_; }
+  const SingleSourceValue& AorB(bool a) const { return a ? a_ : b_; }
+
   SingleSourceValue& CrossFader() { return cross_fader_; }
   const SingleSourceValue& CrossFader() const { return cross_fader_; }
 

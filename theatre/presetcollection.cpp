@@ -10,7 +10,6 @@ struct FixtureColorSum {
   unsigned red = 0;
   unsigned green = 0;
   unsigned blue = 0;
-  size_t n = 0;
 };
 
 std::vector<Color> PresetCollection::InputColors(size_t /*index*/) const {
@@ -32,7 +31,8 @@ std::vector<Color> PresetCollection::InputColors(size_t /*index*/) const {
         sum.red += color.Red() * std::min(m, value.UInt()) / m;
         sum.green += color.Green() * std::min(m, value.UInt()) / m;
         sum.blue += color.Blue() * std::min(m, value.UInt()) / m;
-        sum.n = fixture_control->GetFixture().Type().ColorScalingValue();
+        // Ignore the color scaling, because it leads to darker colors
+        // sum.n = fixture_control->GetFixture().Type().ColorScalingValue();
       }
     } else {
       const std::vector<Color> colors =
