@@ -112,7 +112,6 @@ class VisualizationWidget : public Gtk::DrawingArea {
   std::vector<Gtk::MenuItem> _miSymbols;
   Gtk::RadioMenuItem _miDMSPrimary, _miDMSSecondary, _miDMSVertical,
       _miDMSHorizontal, _miDMSShadow;
-
 };
 
 }  // namespace glight::gui

@@ -10,18 +10,20 @@ namespace glight::theatre {
 class ValueUniverseSnapshot {
  public:
   unsigned char GetValue(size_t channel) const { return values_[channel]; }
-  void SetValues(const unsigned char *values, size_t size) {
+  void SetValues(const unsigned char* values, size_t size) {
     std::copy_n(values, std::min<size_t>(512, size), values_.begin());
   }
 
-  friend bool operator==(const ValueUniverseSnapshot& left, const ValueUniverseSnapshot& right) {
+  friend bool operator==(const ValueUniverseSnapshot& left,
+                         const ValueUniverseSnapshot& right) {
     return left.values_ == right.values_;
   }
-  
-  friend bool operator!=(const ValueUniverseSnapshot& left, const ValueUniverseSnapshot& right) {
+
+  friend bool operator!=(const ValueUniverseSnapshot& left,
+                         const ValueUniverseSnapshot& right) {
     return left.values_ != right.values_;
   }
-  
+
  private:
   std::array<unsigned char, 512> values_;
 };

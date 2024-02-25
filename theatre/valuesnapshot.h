@@ -12,7 +12,7 @@ namespace glight::theatre {
 class ValueSnapshot {
  public:
   ValueSnapshot() = default;
-   
+
   ValueSnapshot(bool primary, size_t universeCount) : primary_(primary) {
     SetUniverseCount(universeCount);
   }
@@ -24,13 +24,12 @@ class ValueSnapshot {
   ValueSnapshot(ValueSnapshot &&source) = default;
 
   ValueSnapshot &operator=(const ValueSnapshot &rhs) {
-    if(_universeValues.size() == rhs._universeValues.size()) {
+    if (_universeValues.size() == rhs._universeValues.size()) {
       // This is an optimization to avoid allocations
-      for(size_t i=0; i!=_universeValues.size(); ++i) {
+      for (size_t i = 0; i != _universeValues.size(); ++i) {
         *_universeValues[i] = *rhs._universeValues[i];
       }
-    }
-    else {
+    } else {
       _universeValues = copy(rhs._universeValues);
     }
     primary_ = rhs.primary_;
@@ -58,23 +57,23 @@ class ValueSnapshot {
     std::swap(left._universeValues, right._universeValues);
     std::swap(left.primary_, right.primary_);
   }
-  
-  friend bool operator==(const ValueSnapshot &left, const ValueSnapshot &right) {
-    if(left.primary_ != right.primary_)
+
+  friend bool operator==(const ValueSnapshot &left,
+                         const ValueSnapshot &right) {
+    if (left.primary_ != right.primary_) return false;
+    if (left._universeValues.size() != right._universeValues.size())
       return false;
-    if(left._universeValues.size() != right._universeValues.size())
-      return false;
-    for(size_t i=0; i!=left._universeValues.size(); ++i) {
-      if(*left._universeValues[i] != *right._universeValues[i])
-        return false;
+    for (size_t i = 0; i != left._universeValues.size(); ++i) {
+      if (*left._universeValues[i] != *right._universeValues[i]) return false;
     }
     return true;
   }
 
-  friend bool operator!=(const ValueSnapshot &left, const ValueSnapshot &right) {
+  friend bool operator!=(const ValueSnapshot &left,
+                         const ValueSnapshot &right) {
     return !(left == right);
   }
-  
+
  private:
   static std::vector<std::unique_ptr<ValueUniverseSnapshot>> copy(
       const std::vector<std::unique_ptr<ValueUniverseSnapshot>> &source) {

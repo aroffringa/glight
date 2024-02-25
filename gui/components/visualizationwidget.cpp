@@ -75,7 +75,8 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
   inializeContextMenu();
   primary_snapshot_ = _management->PrimarySnapshot();
   secondary_snapshot_ = _management->SecondarySnapshot();
-  update_connection_ = _eventTransmitter->SignalUpdateControllables().connect([&](){ Update(); });
+  update_connection_ = _eventTransmitter->SignalUpdateControllables().connect(
+      [&]() { Update(); });
 }
 
 VisualizationWidget::~VisualizationWidget() {
@@ -203,7 +204,8 @@ void VisualizationWidget::updateMidiColors() {
         const size_t shape_count = type.ShapeCount();
         for (size_t shape_index = 0; shape_index != shape_count;
              ++shape_index) {
-          const theatre::Color color = fixture->GetColor(primary_snapshot_, shape_index);
+          const theatre::Color color =
+              fixture->GetColor(primary_snapshot_, shape_index);
           midi_manager.SetFixtureColor(pad % 8, pad / 8, color, false);
           ++pad;
           if (pad >= n_pads) return;
@@ -217,9 +219,8 @@ void VisualizationWidget::drawFixtures(
     const Cairo::RefPtr<Cairo::Context> &cairo,
     const std::vector<theatre::Fixture *> &selection, size_t width,
     size_t height) {
-  
   updateMidiColors();
-  
+
   cairo->set_source_rgba(0, 0, 0, 1);
   cairo->rectangle(0, 0, width, height);
   cairo->fill();
@@ -234,40 +235,32 @@ void VisualizationWidget::drawFixtures(
                   .timeSince = time - previousTime};
   previousTime = time;
   if (_miDMSPrimary.get_active()) {
-    render_engine_.DrawSnapshot(cairo, primary_snapshot_, style,
-                                selection);
+    render_engine_.DrawSnapshot(cairo, primary_snapshot_, style, selection);
   } else if (_miDMSHorizontal.get_active()) {
     style.xOffset = 0;
     style.width = width / 2;
-    render_engine_.DrawSnapshot(cairo, primary_snapshot_, style,
-                                selection);
+    render_engine_.DrawSnapshot(cairo, primary_snapshot_, style, selection);
     style.xOffset = style.width;
     style.width = width - style.width;
-    render_engine_.DrawSnapshot(cairo, secondary_snapshot_, style,
-                                selection);
+    render_engine_.DrawSnapshot(cairo, secondary_snapshot_, style, selection);
   } else if (_miDMSVertical.get_active()) {
     style.yOffset = 0;
     style.height = height / 2;
-    render_engine_.DrawSnapshot(cairo, primary_snapshot_, style,
-                                selection);
+    render_engine_.DrawSnapshot(cairo, primary_snapshot_, style, selection);
     style.yOffset = style.height;
     style.height = height - style.height;
-    render_engine_.DrawSnapshot(cairo, secondary_snapshot_, style,
-                                selection);
+    render_engine_.DrawSnapshot(cairo, secondary_snapshot_, style, selection);
   } else if (_miDMSShadow.get_active()) {
     style.xOffset = width * 1 / 100;
     style.yOffset = height * 1 / 100;
     style.width = width * 99 / 100;
     style.height = height * 99 / 100;
-    render_engine_.DrawSnapshot(cairo, primary_snapshot_, style,
-                                selection);
+    render_engine_.DrawSnapshot(cairo, primary_snapshot_, style, selection);
     style.xOffset = 0;
     style.yOffset = 0;
-    render_engine_.DrawSnapshot(cairo, secondary_snapshot_, style,
-                                selection);
+    render_engine_.DrawSnapshot(cairo, secondary_snapshot_, style, selection);
   } else {  // Secondary
-    render_engine_.DrawSnapshot(cairo, secondary_snapshot_, style,
-                                selection);
+    render_engine_.DrawSnapshot(cairo, secondary_snapshot_, style, selection);
   }
 }
 
@@ -612,7 +605,8 @@ bool VisualizationWidget::onTimeout() {
       _management->PrimarySnapshot();
   const glight::theatre::ValueSnapshot secondary_snapshot =
       _management->SecondarySnapshot();
-  if(render_engine_.IsMoving() || primary_snapshot_ != primary_snapshot || secondary_snapshot_ != secondary_snapshot) {
+  if (render_engine_.IsMoving() || primary_snapshot_ != primary_snapshot ||
+      secondary_snapshot_ != secondary_snapshot) {
     primary_snapshot_ = primary_snapshot;
     secondary_snapshot_ = secondary_snapshot;
     Update();
