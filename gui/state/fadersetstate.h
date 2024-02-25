@@ -46,6 +46,8 @@ class FaderSetState {
   // 0 (fastest) -- 10 (slowest)
   size_t fadeInSpeed = 7;
   size_t fadeOutSpeed = 7;
+  int position_x = 0;
+  int position_y = 0;
   size_t width = 0;
   size_t height = 0;
 

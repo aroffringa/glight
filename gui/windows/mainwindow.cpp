@@ -280,7 +280,8 @@ void MainWindow::OpenFile(const std::string &filename) {
   lock.unlock();
 
   EmitUpdate();
-
+  resize(_state.WindowWidth(), _state.WindowHeight());
+  move(_state.WindowPositionX(), _state.WindowPositionY());
   UpdateLayoutLock();
   if (_state.Empty()) {
     std::cout << "File did not contain GUI state info: will start with default "
@@ -348,7 +349,10 @@ void MainWindow::onMISaveClicked() {
   if (result == Gtk::RESPONSE_OK) {
     Glib::ustring filename(dialog.get_filename());
     if (filename.find('.') == Glib::ustring::npos) filename += ".gshow";
-
+    int x;
+    int y;
+    get_position(x, y);
+    _state.SetWindowPosition(x, y, get_width(), get_height());
     std::lock_guard<std::mutex> lock(_management->Mutex());
     system::Write(filename, *_management, &_state);
   }
