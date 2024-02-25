@@ -5,11 +5,14 @@
 #include "valueuniversesnapshot.h"
 
 #include <memory>
+#include <vector>
 
 namespace glight::theatre {
 
 class ValueSnapshot {
  public:
+  ValueSnapshot() = default;
+   
   ValueSnapshot(bool primary, size_t universeCount) : primary_(primary) {
     SetUniverseCount(universeCount);
   }
@@ -21,7 +24,16 @@ class ValueSnapshot {
   ValueSnapshot(ValueSnapshot &&source) = default;
 
   ValueSnapshot &operator=(const ValueSnapshot &rhs) {
-    _universeValues = copy(rhs._universeValues);
+    if(_universeValues.size() == rhs._universeValues.size()) {
+      // This is an optimization to avoid allocations
+      for(size_t i=0; i!=_universeValues.size(); ++i) {
+        *_universeValues[i] = *rhs._universeValues[i];
+      }
+    }
+    else {
+      _universeValues = copy(rhs._universeValues);
+    }
+    primary_ = rhs.primary_;
     return *this;
   }
 
@@ -31,6 +43,7 @@ class ValueSnapshot {
 
   void Clear() { _universeValues.clear(); }
 
+  size_t UniverseCount() const { return _universeValues.size(); }
   void SetUniverseCount(size_t count) { resize(_universeValues, count); }
 
   unsigned char GetValue(const DmxChannel &channel) const {
@@ -45,7 +58,23 @@ class ValueSnapshot {
     std::swap(left._universeValues, right._universeValues);
     std::swap(left.primary_, right.primary_);
   }
+  
+  friend bool operator==(const ValueSnapshot &left, const ValueSnapshot &right) {
+    if(left.primary_ != right.primary_)
+      return false;
+    if(left._universeValues.size() != right._universeValues.size())
+      return false;
+    for(size_t i=0; i!=left._universeValues.size(); ++i) {
+      if(*left._universeValues[i] != *right._universeValues[i])
+        return false;
+    }
+    return true;
+  }
 
+  friend bool operator!=(const ValueSnapshot &left, const ValueSnapshot &right) {
+    return !(left == right);
+  }
+  
  private:
   static std::vector<std::unique_ptr<ValueUniverseSnapshot>> copy(
       const std::vector<std::unique_ptr<ValueUniverseSnapshot>> &source) {
@@ -69,7 +98,7 @@ class ValueSnapshot {
   }
 
   std::vector<std::unique_ptr<ValueUniverseSnapshot>> _universeValues;
-  bool primary_;
+  bool primary_ = true;
 };
 
 }  // namespace glight::theatre
