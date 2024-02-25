@@ -1,20 +1,21 @@
 #include "fixturetypeswindow.h"
 
-#include "../eventtransmitter.h"
-#include "../fixtureselection.h"
+#include <algorithm>
+#include <format>
 
 #include <gtkmm/main.h>
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
-#include "../../theatre/fixture.h"
-#include "../../theatre/fixturecontrol.h"
-#include "../../theatre/folder.h"
-#include "../../theatre/management.h"
-#include "../../theatre/theatre.h"
+#include "gui/eventtransmitter.h"
+#include "gui/fixtureselection.h"
+#include "gui/instance.h"
 
-#include <algorithm>
-#include <format>
+#include "theatre/fixture.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
 
 namespace glight::gui {
 
@@ -233,6 +234,17 @@ theatre::FixtureType *FixtureTypesWindow::getSelected() {
     return nullptr;
 }
 
+void FixtureTypesWindow::SelectFixtures(const theatre::FixtureType &type) {
+  const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
+      Instance::Management().GetTheatre().Fixtures();
+  std::vector<theatre::Fixture *> selected_fixtures;
+  for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
+    if (&fixture->Type() == &type)
+      selected_fixtures.emplace_back(fixture.get());
+  }
+  Instance::Selection().SetSelection(std::move(selected_fixtures));
+}
+
 void FixtureTypesWindow::onSelectionChanged() {
   if (recursion_lock_.IsFirst()) {
     RecursionLock::Token token(recursion_lock_);
@@ -247,6 +259,7 @@ void FixtureTypesWindow::onSelectionChanged() {
     save_button_.set_sensitive(has_selection && !layout_locked_);
     right_grid_.set_sensitive(has_selection && !layout_locked_);
     if (type) {
+      SelectFixtures(*type);
       const bool is_used = management_->GetTheatre().IsUsed(*type);
       name_entry_.set_text(type->Name());
       short_name_entry_.set_text(type->ShortName());

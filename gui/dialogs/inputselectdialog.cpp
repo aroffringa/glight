@@ -7,7 +7,7 @@ namespace glight::gui {
 
 InputSelectDialog::InputSelectDialog(bool allow_stay_open)
     : Dialog("Select input", true),
-      _inputSelector(Instance::Get().Management(), Instance::Get().Events()),
+      _inputSelector(Instance::Management(), Instance::Events()),
       _stayOpenCheckButton("Stay open") {
   set_size_request(600, 400);
 
@@ -25,7 +25,7 @@ InputSelectDialog::InputSelectDialog(bool allow_stay_open)
 }
 
 theatre::SourceValue* InputSelectDialog::SelectedSourceValue() const {
-  theatre::Management& management = Instance::Get().Management();
+  theatre::Management& management = Instance::Management();
   return management.GetSourceValue(*_inputSelector.SelectedObject(),
                                    _inputSelector.SelectedInput());
 }

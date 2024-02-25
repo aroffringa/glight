@@ -3,9 +3,9 @@
 
 #include "fixturetypefunctionsframe.h"
 
-#include "../../theatre/forwards.h"
+#include "theatre/forwards.h"
 
-#include "../recursionlock.h"
+#include "gui/recursionlock.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/comboboxtext.h>
@@ -50,6 +50,7 @@ class FixtureTypesWindow : public Gtk::Window {
   void onSelectionChanged();
   theatre::FixtureType *getSelected();
   void Select(const theatre::FixtureType &selection);
+  void SelectFixtures(const theatre::FixtureType &type);
 
   EventTransmitter *event_hub_;
   theatre::Management *management_;

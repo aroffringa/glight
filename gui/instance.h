@@ -9,6 +9,7 @@ class Management;
 namespace gui {
 
 class EventTransmitter;
+class FixtureSelection;
 class GUIState;
 
 /**
@@ -30,12 +31,16 @@ class Instance {
   static EventTransmitter& Events() { return *Get().events_; }
   void SetEvents(EventTransmitter& events) { events_ = &events; }
 
+  static FixtureSelection& Selection() { return *Get().selection_; }
+  void SetSelection(FixtureSelection& selection) { selection_ = &selection; }
+
   static GUIState& State() { return *Get().state_; }
   void SetState(GUIState& state) { state_ = &state; }
 
  private:
   theatre::Management* management_;
   EventTransmitter* events_;
+  FixtureSelection* selection_;
   GUIState* state_;
 };
 

@@ -15,7 +15,7 @@ using theatre::Folder;
 using theatre::FolderObject;
 
 FolderCombo::FolderCombo() : Gtk::ComboBox(false) {
-  Instance::Get().Events().SignalUpdateControllables().connect(
+  Instance::Events().SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &FolderCombo::fillList));
 
   _listModel = Gtk::ListStore::create(_listColumns);
@@ -37,7 +37,7 @@ void FolderCombo::fillList() {
                : nullptr;
   _listModel->clear();
 
-  theatre::Management &management = Instance::Get().Management();
+  theatre::Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
 
   Gtk::TreeModel::iterator iter = _listModel->append();

@@ -27,7 +27,7 @@ class FixtureSelection;
  */
 class FixtureListWindow : public Gtk::Window {
  public:
-  FixtureListWindow(FixtureSelection &globalSelection);
+  FixtureListWindow();
   ~FixtureListWindow();
 
   void SetLayoutLocked(bool locked) {
@@ -57,8 +57,6 @@ class FixtureListWindow : public Gtk::Window {
   void onUpClicked();
   void onDownClicked();
   void onReassignClicked();
-
-  FixtureSelection &_globalSelection;
 
   std::unique_ptr<AddFixtureWindow> add_fixture_window_;
 

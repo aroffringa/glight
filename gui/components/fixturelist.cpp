@@ -24,7 +24,7 @@ FixtureList::FixtureList() {
 void FixtureList::Fill() {
   model_->clear();
 
-  theatre::Management &management_ = Instance::Get().Management();
+  theatre::Management &management_ = Instance::Management();
   std::lock_guard<std::mutex> lock(management_.Mutex());
   const std::vector<std::unique_ptr<theatre::FixtureGroup>> &groups =
       management_.FixtureGroups();

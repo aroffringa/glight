@@ -332,7 +332,7 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
       queue_draw();
     } else if (event->button == 3) {
       queue_draw();
-      const bool enable = !Instance::Get().State().LayoutLocked();
+      const bool enable = !Instance::State().LayoutLocked();
       const bool has_selection = !_selectedFixtures.empty();
       const bool selection_enabled = enable && has_selection;
       const bool dual_enabled = enable && _selectedFixtures.size() >= 2;
@@ -376,7 +376,7 @@ bool VisualizationWidget::onMotion(GdkEventMotion *event) {
       case NotDragging:
         break;
       case DragFixture:
-        if (!Instance::Get().State().LayoutLocked()) {
+        if (!Instance::State().LayoutLocked()) {
           for (theatre::Fixture *fixture : _selectedFixtures)
             fixture->GetPosition() += pos - _draggingStart;
           _draggingStart = pos;
