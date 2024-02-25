@@ -43,11 +43,13 @@ class RenderEngine {
   }
   theatre::Position MouseToPosition(double mouse_x, double mouse_y,
                                     double width, double height) const;
+  bool IsMoving() const { return is_moving_; }
 
  private:
   const theatre::Management &management_;
   std::vector<FixtureState> state_;
   double scale_ = 1.0;
+  bool is_moving_ = false;
 };
 
 }  // namespace glight::gui

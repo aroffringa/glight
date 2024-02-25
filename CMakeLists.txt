@@ -210,6 +210,7 @@ if(Boost_FOUND)
     tests/theatre/tscene.cpp
     tests/theatre/ttheatre.cpp
     tests/theatre/ttransition.cpp
+    tests/theatre/tvaluesnapshot.cpp
     tests/theatre/effects/trgbmastereffect.cpp
     tests/theatre/filters/tautomasterfilter.cpp
     tests/theatre/filters/tmonochromefilter.cpp

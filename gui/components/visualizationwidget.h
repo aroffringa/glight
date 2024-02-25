@@ -1,13 +1,14 @@
 #ifndef GLIGHT_GUI_VISUALIZATION_WINDOW_H_
 #define GLIGHT_GUI_VISUALIZATION_WINDOW_H_
 
-#include "../../theatre/fixturesymbol.h"
-#include "../../theatre/forwards.h"
-#include "../../theatre/position.h"
+#include "theatre/fixturesymbol.h"
+#include "theatre/forwards.h"
+#include "theatre/position.h"
+#include "theatre/valuesnapshot.h"
 
-#include "../renderengine.h"
+#include "gui/renderengine.h"
 
-#include "../../system/deletableptr.h"
+#include "system/deletableptr.h"
 
 #include <gdkmm/pixbuf.h>
 #include <gtkmm/checkmenuitem.h>
@@ -40,6 +41,37 @@ class VisualizationWidget : public Gtk::DrawingArea {
   VisualizationWidget(const VisualizationWidget &) = delete;
   VisualizationWidget &operator=(const VisualizationWidget &) = delete;
 
+  void inializeContextMenu();
+  void initialize();
+  void drawAll(const Cairo::RefPtr<Cairo::Context> &cairo);
+  void drawFixtures(const Cairo::RefPtr<Cairo::Context> &cairo,
+                    const std::vector<theatre::Fixture *> &selection,
+                    size_t width, size_t height);
+  void updateMidiColors();
+  void onTheatreChanged();
+  bool onButtonPress(GdkEventButton *event);
+  bool onButtonRelease(GdkEventButton *event);
+  bool onMotion(GdkEventMotion *event);
+  bool onExpose(const Cairo::RefPtr<Cairo::Context> &context);
+  bool onTimeout();
+
+  void onFixtureProperties();
+  void onSaveImage();
+  void onAlignHorizontally();
+  void onAlignVertically();
+  void onDistributeEvenly();
+  void onAddFixtures();
+  void onRemoveFixtures();
+  void onGroupFixtures();
+  void onDesignFixtures();
+  void onSetSymbol(theatre::FixtureSymbol::Symbol symbol);
+  void onGlobalSelectionChanged();
+
+  void OnSetColor();
+
+  void selectFixtures(const theatre::Position &a, const theatre::Position &b);
+  void addFixtures(const theatre::Position &a, const theatre::Position &b);
+
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;
   FixtureSelection *_globalSelection;
@@ -49,6 +81,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
       _propertiesWindow;
   bool _isInitialized, _isTimerRunning;
   sigc::connection _timeoutConnection;
+  sigc::connection update_connection_;
   enum DragType {
     NotDragging,
     DragFixture,
@@ -59,6 +92,8 @@ class VisualizationWidget : public Gtk::DrawingArea {
       _selectedFixturesBeforeDrag;
   theatre::Position _draggingStart, _draggingTo;
   RenderEngine render_engine_;
+  theatre::ValueSnapshot primary_snapshot_;
+  theatre::ValueSnapshot secondary_snapshot_;
   std::unique_ptr<Gtk::Window> sub_window_;
 
   Gtk::Menu _popupMenu;
@@ -77,39 +112,6 @@ class VisualizationWidget : public Gtk::DrawingArea {
   std::vector<Gtk::MenuItem> _miSymbols;
   Gtk::RadioMenuItem _miDMSPrimary, _miDMSSecondary, _miDMSVertical,
       _miDMSHorizontal, _miDMSShadow;
-
-  void inializeContextMenu();
-  void initialize();
-  void drawAll(const Cairo::RefPtr<Cairo::Context> &cairo);
-  void drawFixtures(const Cairo::RefPtr<Cairo::Context> &cairo,
-                    const std::vector<theatre::Fixture *> &selection,
-                    size_t width, size_t height);
-  void onTheatreChanged();
-  bool onButtonPress(GdkEventButton *event);
-  bool onButtonRelease(GdkEventButton *event);
-  bool onMotion(GdkEventMotion *event);
-  bool onExpose(const Cairo::RefPtr<Cairo::Context> &context);
-  bool onTimeout() {
-    Update();
-    return true;
-  }
-
-  void onFixtureProperties();
-  void onSaveImage();
-  void onAlignHorizontally();
-  void onAlignVertically();
-  void onDistributeEvenly();
-  void onAddFixtures();
-  void onRemoveFixtures();
-  void onGroupFixtures();
-  void onDesignFixtures();
-  void onSetSymbol(theatre::FixtureSymbol::Symbol symbol);
-  void onGlobalSelectionChanged();
-
-  void OnSetColor();
-
-  void selectFixtures(const theatre::Position &a, const theatre::Position &b);
-  void addFixtures(const theatre::Position &a, const theatre::Position &b);
 };
 
 }  // namespace glight::gui

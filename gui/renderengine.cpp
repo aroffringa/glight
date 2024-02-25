@@ -49,6 +49,7 @@ struct DrawData {
   const theatre::ValueSnapshot &snapshot;
   const DrawStyle &style;
   double scale;
+  bool is_moving = false;
 };
 
 void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
@@ -112,7 +113,7 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
   }
 }
 
-void DrawFixture(const DrawData &data, const theatre::Fixture &fixture,
+void DrawFixture(DrawData &data, const theatre::Fixture &fixture,
                  FixtureState &fixture_state) {
   size_t shapeCount = fixture.Type().ShapeCount();
   for (size_t i = 0; i != shapeCount; ++i) {
@@ -141,6 +142,7 @@ void DrawFixture(const DrawData &data, const theatre::Fixture &fixture,
     const int rotation_speed =
         fixture.GetRotationSpeed(data.snapshot, shapeIndex);
     if (rotation_speed != 0) {
+      data.is_moving = true;
       const double displayed_rotation =
           M_PI * static_cast<double>(rotation_speed) * data.style.timeSince /
           (10.0 * (1U << 24U));
@@ -178,7 +180,7 @@ void RenderEngine::DrawSnapshot(
   scale_ = GetScale(management_, style.width, style.height);
   cairo->scale(scale_, scale_);
 
-  const DrawData draw_data{cairo, snapshot, style, scale_};
+  DrawData draw_data{cairo, snapshot, style, scale_, false};
 
   for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
     if (fixture->IsVisible()) {
@@ -195,6 +197,7 @@ void RenderEngine::DrawSnapshot(
       DrawFixture(draw_data, fixture, fixture_state);
     }
   }
+  is_moving_ = draw_data.is_moving;
 
   cairo->set_source_rgb(0.2, 0.2, 1.0);
   cairo->set_line_width(4.0 / scale_);
