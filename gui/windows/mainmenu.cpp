@@ -4,26 +4,7 @@
 
 namespace glight::gui {
 
-MainMenu::MainMenu()
-    : _miFile("_File", true),
-      _miDesign("_Design", true),
-      _miWindow("_Window", true),
-      _miNew("New"),
-      _miOpen("_Open...", true),
-      _miSave("Save _as...", true),
-      _miImport("_Import fixtures...", true),
-      _miQuit("_Quit", true),
-      _miBlackOut("Black-out"),
-      _miLockLayout("Lock layout"),
-      _miProtectBlackout("Protect black-out"),
-      _miDesignWizard("Design wizard"),
-      _miSideBar("Side bar"),
-      _miFullScreen("Full screen"),
-      _miFixtureListWindow("Fixtures"),
-      _miFixtureTypesWindow("Fixture types"),
-      _miFaderWindowMenu("Fader windows"),
-      _miNewFaderWindow("New"),
-      _miSceneWindow("Scene") {
+MainMenu::MainMenu() {
   _miNew.signal_activate().connect(New);
   _menuFile.append(_miNew);
 

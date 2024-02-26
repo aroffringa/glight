@@ -64,22 +64,29 @@ class MainMenu : public Gtk::MenuBar {
  private:
   Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
 
-  Gtk::MenuItem _miFile, _miDesign, _miWindow;
-  Gtk::MenuItem _miNew, _miOpen, _miSave, _miImport, _miQuit;
-  Gtk::MenuItem _miBlackOut;
-  Gtk::CheckMenuItem _miLockLayout;
-  Gtk::CheckMenuItem _miProtectBlackout;
-  Gtk::SeparatorMenuItem _miDesignSep1, _miDesignSep2;
-  Gtk::MenuItem _miDesignWizard;
-  Gtk::CheckMenuItem _miSideBar;
-  Gtk::CheckMenuItem _miFullScreen;
-  Gtk::CheckMenuItem _miFixtureListWindow;
-  Gtk::CheckMenuItem _miFixtureTypesWindow;
-  Gtk::MenuItem _miFaderWindowMenu;
-  Gtk::MenuItem _miNewFaderWindow;
+  Gtk::MenuItem _miFile{"_File", true};
+  Gtk::MenuItem _miDesign{"_Design", true};
+  Gtk::MenuItem _miWindow{"_Window", true};
+  Gtk::MenuItem _miNew{"New"};
+  Gtk::MenuItem _miOpen{"_Open...", true};
+  Gtk::MenuItem _miSave{"Save _as...", true};
+  Gtk::MenuItem _miImport{"_Import fixtures...", true};
+  Gtk::MenuItem _miQuit{"_Quit", true};
+  Gtk::MenuItem _miBlackOut{"Black-out"};
+  Gtk::CheckMenuItem _miLockLayout{"Lock layout"};
+  Gtk::CheckMenuItem _miProtectBlackout{"Protect black-out"};
+  Gtk::SeparatorMenuItem _miDesignSep1;
+  Gtk::SeparatorMenuItem _miDesignSep2;
+  Gtk::MenuItem _miDesignWizard{"Design wizard"};
+  Gtk::CheckMenuItem _miSideBar{"Side bar"};
+  Gtk::CheckMenuItem _miFullScreen{"Full screen"};
+  Gtk::CheckMenuItem _miFixtureListWindow{"Fixtures"};
+  Gtk::CheckMenuItem _miFixtureTypesWindow{"Fixture types"};
+  Gtk::MenuItem _miFaderWindowMenu{"Fader windows"};
+  Gtk::MenuItem _miNewFaderWindow{"New"};
   Gtk::SeparatorMenuItem _miFaderWindowSeperator;
   std::vector<Gtk::CheckMenuItem> _miFaderWindows;
-  Gtk::CheckMenuItem _miSceneWindow;
+  Gtk::CheckMenuItem _miSceneWindow{"Scene"};
 };
 
 }  // namespace glight::gui

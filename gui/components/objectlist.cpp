@@ -32,6 +32,7 @@ ObjectList::ObjectList()
   _listView.set_model(_listModel);
   _listView.append_column("", _listColumns._icon);
   _listView.append_column("object", _listColumns._title);
+  _listView.set_enable_search(false);
   _listView.get_selection()->signal_changed().connect([&]() {
     if (_avoidRecursion.IsFirst()) _signalSelectionChange.emit();
   });
