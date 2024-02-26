@@ -8,6 +8,7 @@
 #include "gui/windows/designwizard.h"
 #include "gui/windows/fixtureproperties.h"
 
+#include "gui/mainwindow/actions.h"
 #include "gui/mainwindow/mainwindow.h"
 
 #include "system/midi/manager.h"
@@ -42,23 +43,7 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
       _isTimerRunning(false),
       _dragType(NotDragging),
 
-      render_engine_(*management),
-      _miSymbolMenu("Symbol"),
-      _miDryModeStyle("Dry mode style"),
-      _miAlignHorizontally("Align horizontally"),
-      _miAlignVertically("Align vertically"),
-      _miDistributeEvenly("Distribute evenly"),
-      _miAdd("Add..."),
-      _miRemove("Remove"),
-      _miGroup("Group..."),
-      _miDesign("Design..."),
-      _miProperties("Properties"),
-      _miSaveImage("Save image..."),
-      _miDMSPrimary("Primary"),
-      _miDMSSecondary("Secondary"),
-      _miDMSVertical("Vertical"),
-      _miDMSHorizontal("Horizontal"),
-      _miDMSShadow("Shadow") {
+      render_engine_(*management) {
   set_size_request(600, 200);
 
   _globalSelectionConnection = _globalSelection->SignalChange().connect(
@@ -144,6 +129,9 @@ void VisualizationWidget::inializeContextMenu() {
 
   _miAdd.signal_activate().connect([&] { onAddFixtures(); });
   _popupMenu.add(_miAdd);
+
+  _miAddPreset.signal_activate().connect([&] { onAddPreset(); });
+  _popupMenu.add(_miAddPreset);
 
   _miRemove.signal_activate().connect([&] { onRemoveFixtures(); });
   _popupMenu.add(_miRemove);
@@ -342,6 +330,7 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
       _miAlignVertically.set_sensitive(dual_enabled);
       _miDistributeEvenly.set_sensitive(dual_enabled);
       _miAdd.set_sensitive(enable);
+      _miAddPreset.set_sensitive(enable);
       _miRemove.set_sensitive(selection_enabled);
       _miSymbolMenu.set_sensitive(selection_enabled);
       _miProperties.set_sensitive(selection_enabled);
@@ -513,6 +502,13 @@ void VisualizationWidget::onAddFixtures() {
   sub_window_->set_transient_for(*main_window_);
   sub_window_->set_modal(true);
   sub_window_->show();
+}
+
+void VisualizationWidget::onAddPreset() {
+  const std::set<theatre::Fixture *> fixture_set(_selectedFixtures.begin(),
+                                                 _selectedFixtures.end());
+  theatre::Folder &folder = main_window_->SelectedFolder();
+  mainwindow::NewPresetFromFixtures(folder, fixture_set);
 }
 
 void VisualizationWidget::onRemoveFixtures() {

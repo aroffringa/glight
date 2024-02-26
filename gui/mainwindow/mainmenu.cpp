@@ -5,6 +5,7 @@
 namespace glight::gui {
 
 MainMenu::MainMenu() {
+  // File menu
   _miNew.signal_activate().connect(New);
   _menuFile.append(_miNew);
 
@@ -23,6 +24,7 @@ MainMenu::MainMenu() {
   _miFile.set_submenu(_menuFile);
   append(_miFile);
 
+  // Design menu
   _miLockLayout.signal_activate().connect(LockLayout);
   _menuDesign.append(_miLockLayout);
 
@@ -39,8 +41,13 @@ MainMenu::MainMenu() {
 
   _menuDesign.append(_miDesignSep1);
 
-  _miAddPreset.signal_activate().connect(AddPreset);
+  _miAddPreset.set_submenu(preset_sub_menu_);
   _menuDesign.append(_miAddPreset);
+  _miAddEmptyPreset.signal_activate().connect(AddEmptyPreset);
+  preset_sub_menu_.append(_miAddEmptyPreset);
+  _miAddCurrentPreset.signal_activate().connect(AddCurrentPreset);
+  preset_sub_menu_.append(_miAddCurrentPreset);
+
   _miAddChase.signal_activate().connect(AddChase);
   _menuDesign.append(_miAddChase);
   _miAddSequence.signal_activate().connect(AddTimeSequence);
@@ -65,6 +72,7 @@ MainMenu::MainMenu() {
   _miDesign.set_submenu(_menuDesign);
   append(_miDesign);
 
+  // Window menu
   _miSideBar.set_active(true);
   _miSideBar.signal_activate().connect(SideBar);
   _menuWindow.append(_miSideBar);
