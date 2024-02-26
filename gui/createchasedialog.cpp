@@ -87,7 +87,7 @@ void CreateChaseDialog::onAddObjectToChaseButtonClicked() {
         dynamic_cast<theatre::Controllable *>(selectedObj);
     if (object) {
       Gtk::TreeModel::iterator newRow = _newChaseListModel->append();
-      std::lock_guard<std::mutex> lock(Instance::Get().Management().Mutex());
+      std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
       (*newRow)[_newChaseListColumns._title] = object->Name();
       (*newRow)[_newChaseListColumns._controllable] = object;
       _makeChaseButton->set_sensitive(true);
@@ -104,7 +104,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
   if (!_newChaseListModel->children().empty()) {
     // Determine folder
     theatre::Folder &folder = _list.SelectedFolder();
-    theatre::Management &management = Instance::Get().Management();
+    theatre::Management &management = Instance::Management();
     std::unique_lock<std::mutex> lock(management.Mutex());
 
     _newChase = &management.AddChase();

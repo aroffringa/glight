@@ -45,6 +45,7 @@ MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
   iconTheme->prepend_search_path(iconPath.string());
 
   Instance::Get().SetState(_state);
+  Instance::Get().SetSelection(_fixtureSelection);
   Instance::Get().SetEvents(*this);
   _management = std::make_unique<theatre::Management>();
   Instance::Get().SetManagement(*_management);
@@ -55,8 +56,7 @@ MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
 
   midi_manager_ = std::make_unique<system::midi::Manager>();
 
-  _fixtureListWindow =
-      std::make_unique<glight::gui::FixtureListWindow>(_fixtureSelection);
+  _fixtureListWindow = std::make_unique<glight::gui::FixtureListWindow>();
   _fixtureListWindow->signal_key_press_event().connect(
       sigc::mem_fun(*this, &MainWindow::onKeyDown));
   _fixtureListWindow->signal_key_release_event().connect(

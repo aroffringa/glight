@@ -89,11 +89,11 @@ void ColorSelectWidget::OpenVariableSelection() {
           std::make_unique<theatre::VariableEffect>();
       theatre::Folder &parent = dialog.SelectedFolder();
       effect->SetName(string_dialog.Value());
-      theatre::Management &management = Instance::Get().Management();
+      theatre::Management &management = Instance::Management();
       theatre::Effect &added = management.AddEffect(std::move(effect), parent);
       for (size_t i = 0; i != added.NInputs(); ++i)
         management.AddSourceValue(added, i);
-      Instance::Get().Events().EmitUpdate();
+      Instance::Events().EmitUpdate();
       dialog.SelectObject(added);
     }
   });

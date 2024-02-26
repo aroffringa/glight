@@ -273,16 +273,16 @@ void DesignWizard::initPage4Destination(const std::string &name) {
 
 theatre::Folder &DesignWizard::getCurrentFolder() const {
   theatre::Folder *folder = dynamic_cast<theatre::Folder *>(
-      Instance::Get().Management().GetObjectFromPathIfExists(_currentPath));
+      Instance::Management().GetObjectFromPathIfExists(_currentPath));
   if (folder)
     return *folder;
   else
-    return Instance::Get().Management().RootFolder();
+    return Instance::Management().RootFolder();
 }
 
 void DesignWizard::onNextClicked() {
-  theatre::Management &management = Instance::Get().Management();
-  gui::EventTransmitter &events = Instance::Get().Events();
+  theatre::Management &management = Instance::Management();
+  gui::EventTransmitter &events = Instance::Events();
   switch (_currentPage) {
     case Page1_SelFixtures: {
       _selectedControllables.clear();
@@ -548,7 +548,7 @@ theatre::Folder &DesignWizard::makeDestinationFolder() const {
   theatre::Folder *folder = &_parentFolderCombo.Selection();
   if (_newFolderCB.get_active()) {
     const std::string new_name = _newFolderNameEntry.get_text();
-    theatre::Management &management = Instance::Get().Management();
+    theatre::Management &management = Instance::Management();
     folder = &management.AddFolder(*folder, new_name);
   }
   return *folder;

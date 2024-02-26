@@ -23,9 +23,8 @@ using theatre::Folder;
 using theatre::FolderObject;
 
 ObjectList::ObjectList()
-    : _openFolder(&Instance::Get().Management().RootFolder()),
-      _listView(*this) {
-  Instance::Get().Events().SignalUpdateControllables().connect(
+    : _openFolder(&Instance::Management().RootFolder()), _listView(*this) {
+  Instance::Events().SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &ObjectList::fillList));
 
   _listModel = Gtk::ListStore::create(_listColumns);
@@ -85,7 +84,7 @@ void ObjectList::fillList() {
       objectColumn->set_title("variables");
       break;
   }
-  std::unique_lock<std::mutex> lock(Instance::Get().Management().Mutex());
+  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
   fillListFolder(*_openFolder, selectedObj);
   lock.unlock();
   if (selectedObj &&
@@ -200,7 +199,7 @@ void ObjectList::constructContextMenu() {
   _contextMenu = Gtk::Menu();
 
   FolderObject *obj = SelectedObject();
-  if (obj != &Instance::Get().Management().RootFolder()) {
+  if (obj != &Instance::Management().RootFolder()) {
     // Move up & down
     std::unique_ptr<Gtk::MenuItem> miMoveUp(
         new Gtk::MenuItem("Move _up", true));
@@ -224,7 +223,7 @@ void ObjectList::constructContextMenu() {
     _contextMenu.append(*miMove);
     miMove->show();
 
-    constructFolderMenu(*menuMove, Instance::Get().Management().RootFolder());
+    constructFolderMenu(*menuMove, Instance::Management().RootFolder());
     miMove->set_submenu(*menuMove);
 
     _contextMenuItems.emplace_back(std::move(miMove));
@@ -279,17 +278,17 @@ bool ObjectList::TreeViewWithMenu::on_button_press_event(
 void ObjectList::onMoveSelected(Folder *destination) {
   FolderObject *object = SelectedObject();
   Folder::Move(*object, *destination);
-  Instance::Get().Events().EmitUpdate();
+  Instance::Events().EmitUpdate();
 }
 
 void ObjectList::onMoveUpSelected() {
   SelectedObject()->Parent().MoveUp(*SelectedObject());
-  Instance::Get().Events().EmitUpdate();
+  Instance::Events().EmitUpdate();
 }
 
 void ObjectList::onMoveDownSelected() {
   SelectedObject()->Parent().MoveDown(*SelectedObject());
-  Instance::Get().Events().EmitUpdate();
+  Instance::Events().EmitUpdate();
 }
 
 }  // namespace glight::gui
