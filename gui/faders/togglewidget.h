@@ -27,24 +27,27 @@ class ToggleWidget final : public ControlWidget {
   virtual void Limit(double value) override;
 
  private:
-  Gtk::HBox _box;
-  Gtk::VBox _flashButtonBox;
-  Gtk::Button _flashButton;
-  IconButton _iconButton;
-  Gtk::EventBox _eventBox;
-  Gtk::Label _nameLabel;
+  Gtk::HBox box_;
+  Gtk::Label flash_button_label_;
+  Gtk::Button flash_button_;
+  Gtk::Button fade_button_;
+  IconButton icon_button_;
+  Gtk::EventBox event_box_;
+  Gtk::Label name_label_{"<..>"};
 
-  bool _holdUpdates;
+  bool hold_updates_ = false;
 
   sigc::connection update_display_settings_connection_;
   size_t counter_ = 0;
 
   virtual void OnAssigned(bool moveFader) override;
-  void onIconClicked();
-  bool onFlashButtonPressed(GdkEventButton *event);
-  bool onFlashButtonReleased(GdkEventButton *event);
+  void OnIconClicked();
+  bool OnFlashButtonPressed(GdkEventButton *event);
+  bool OnFlashButtonReleased(GdkEventButton *event);
+  void OnFade();
   bool HandleRightRelease(GdkEventButton *event);
   void UpdateDisplaySettings();
+  void UpdateActivated(const theatre::SingleSourceValue &value);
 };
 
 }  // namespace glight::gui

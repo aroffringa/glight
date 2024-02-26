@@ -25,7 +25,7 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
                  0, 0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
                  (ControlValue::MaxUInt() + 1) / 100),
              Gtk::ORIENTATION_VERTICAL),
-      _flashButton(std::string(1, key)) {
+      flash_button_label_(std::string(1, key)) {
   if (GetMode() == ControlMode::Primary) {
     _fadeUpButton.set_image_from_icon_name("go-up");
     _fadeUpButton.signal_clicked().connect([&]() { onFadeUp(); });
@@ -82,6 +82,11 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
     _fadeDownButton.set_margin_bottom(10);
     _overlay.add_overlay(_fadeDownButton);
 
+    // The flash button label is added manually because it takes less space
+    // like this.
+    _flashButton.add(flash_button_label_);
+    flash_button_label_.show();
+    flash_button_label_.set_hexpand(false);
     _flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
     _flashButton.signal_button_press_event().connect(
         sigc::mem_fun(*this, &FaderWidget::onFlashButtonPressed), false);
@@ -90,6 +95,7 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
         sigc::mem_fun(*this, &FaderWidget::onFlashButtonReleased), false);
     _box.pack_start(_flashButton, false, false, 0);
     _flashButton.set_visible(state.DisplayFlashButton());
+    _flashButton.set_hexpand(false);
   }
 
   _checkButton.set_halign(Gtk::ALIGN_CENTER);
@@ -257,7 +263,8 @@ bool FaderWidget::HandleRightRelease(GdkEventButton *event) {
 
 void FaderWidget::UpdateDisplaySettings() {
   _nameLabel.set_visible(State().DisplayName());
-  _flashButton.set_visible(State().DisplayFlashButton());
+  _flashButton.set_visible(State().DisplayFlashButton() &&
+                           GetMode() == ControlMode::Primary);
   _checkButton.set_visible(State().DisplayCheckButton());
 }
 

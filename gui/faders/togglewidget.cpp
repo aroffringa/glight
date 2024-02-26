@@ -21,9 +21,7 @@ namespace glight::gui {
 ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
                            ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode),
-      _flashButton(std::string(1, key)),
-      _nameLabel("<..>"),
-      _holdUpdates(false) {
+      flash_button_label_(std::string(1, key)) {
   auto right_press = [&](GdkEventButton *event) { return event->button == 3; };
   auto right_release = [&](GdkEventButton *event) {
     if (event->button == 3)
@@ -32,41 +30,53 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
       return false;
   };
 
-  _flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
-  _flashButton.signal_button_press_event().connect(
-      sigc::mem_fun(*this, &ToggleWidget::onFlashButtonPressed), false);
-  _flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
-  _flashButton.signal_button_release_event().connect(
-      sigc::mem_fun(*this, &ToggleWidget::onFlashButtonReleased), false);
-  _flashButtonBox.pack_start(_flashButton, false, false, 0);
-  _flashButton.show();
+  // The flash button label is added manually because it takes less space
+  // like this.
+  flash_button_.add(flash_button_label_);
+  flash_button_label_.show();
+  flash_button_.set_events(Gdk::BUTTON_PRESS_MASK);
+  flash_button_.signal_button_press_event().connect(
+      sigc::mem_fun(*this, &ToggleWidget::OnFlashButtonPressed), false);
+  flash_button_.signal_button_release_event().connect(
+      sigc::mem_fun(*this, &ToggleWidget::OnFlashButtonReleased), false);
+  box_.pack_start(flash_button_, false, false, 0);
+  flash_button_.set_valign(Gtk::ALIGN_CENTER);
+  flash_button_.set_vexpand(false);
+  flash_button_.show();
 
-  _box.pack_start(_flashButtonBox, false, false, 0);
-  _flashButtonBox.set_valign(Gtk::ALIGN_CENTER);
-  _flashButtonBox.show();
+  fade_button_.set_events(Gdk::BUTTON_PRESS_MASK);
+  fade_button_.signal_button_release_event().connect(right_release, false);
+  fade_button_.signal_clicked().connect([&]() { OnFade(); });
+  fade_button_.set_image_from_icon_name("go-up");
+  box_.pack_start(fade_button_, false, false, 0);
+  fade_button_.set_vexpand(false);
+  fade_button_.show();
 
-  _iconButton.SignalChanged().connect(
-      sigc::mem_fun(*this, &ToggleWidget::onIconClicked));
-  _iconButton.signal_button_press_event().connect(right_press, false);
-  _iconButton.signal_button_release_event().connect(right_release, false);
-  _box.pack_start(_iconButton, false, false, 3);
-  _iconButton.show();
+  icon_button_.SignalChanged().connect([&]() { OnIconClicked(); });
+  icon_button_.signal_button_press_event().connect(right_press, false);
+  icon_button_.signal_button_release_event().connect(right_release, false);
+  box_.pack_start(icon_button_, false, false, 3);
+  icon_button_.show();
 
-  _nameLabel.set_halign(Gtk::ALIGN_START);
-  _nameLabel.set_justify(Gtk::JUSTIFY_LEFT);
-  _eventBox.add(_nameLabel);
-  _nameLabel.show();
+  name_label_.set_halign(Gtk::ALIGN_START);
+  name_label_.set_justify(Gtk::JUSTIFY_LEFT);
+  event_box_.add(name_label_);
+  name_label_.show();
+  name_label_.set_hexpand(true);
 
-  _eventBox.set_events(Gdk::BUTTON_PRESS_MASK);
-  _eventBox.signal_button_press_event().connect([&](GdkEventButton *) {
-    ToggleWidget::ShowAssignDialog();
+  event_box_.set_events(Gdk::BUTTON_PRESS_MASK);
+  event_box_.signal_button_press_event().connect([&](GdkEventButton *event) {
+    if (event->button == 3)
+      HandleRightRelease(event);
+    else
+      ShowAssignDialog();
     return true;
   });
-  _eventBox.show();
-  _box.pack_start(_eventBox, true, true, 0);
+  box_.pack_start(event_box_, true, true, 0);
+  event_box_.show();
 
-  add(_box);
-  _box.show();
+  add(box_);
+  box_.show();
 
   UpdateDisplaySettings();
   update_display_settings_connection_ =
@@ -77,10 +87,10 @@ ToggleWidget::~ToggleWidget() {
   update_display_settings_connection_.disconnect();
 }
 
-void ToggleWidget::onIconClicked() {
-  if (!_holdUpdates) {
+void ToggleWidget::OnIconClicked() {
+  if (!hold_updates_) {
     unsigned value;
-    if (_iconButton.GetActive())
+    if (icon_button_.GetActive())
       value = theatre::ControlValue::MaxUInt();
     else
       value = 0;
@@ -90,47 +100,67 @@ void ToggleWidget::onIconClicked() {
   }
 }
 
-bool ToggleWidget::onFlashButtonPressed(GdkEventButton *event) {
+bool ToggleWidget::OnFlashButtonPressed(GdkEventButton *event) {
   if (event->button == 3) {
     return true;
   } else {
-    _iconButton.SetActive(true);
+    icon_button_.SetActive(true);
     return false;
   }
 }
 
-bool ToggleWidget::onFlashButtonReleased(GdkEventButton *event) {
+bool ToggleWidget::OnFlashButtonReleased(GdkEventButton *event) {
   if (event->button == 3) {
     return HandleRightRelease(event);
   } else {
-    _iconButton.SetActive(false);
+    icon_button_.SetActive(false);
     return false;
+  }
+}
+
+void ToggleWidget::OnFade() {
+  if (icon_button_.GetActive()) {
+    setTargetValue(0, 0);
+  } else {
+    setTargetValue(0, theatre::ControlValue::MaxUInt());
+  }
+}
+
+void ToggleWidget::UpdateActivated(const theatre::SingleSourceValue &value) {
+  if (!hold_updates_) {
+    hold_updates_ = true;
+    icon_button_.SetActive(static_cast<bool>(value.Value()));
+    if (value.TargetValue() != 0)
+      fade_button_.set_image_from_icon_name("go-down");
+    else
+      fade_button_.set_image_from_icon_name("go-up");
+    hold_updates_ = false;
   }
 }
 
 void ToggleWidget::OnAssigned(bool moveFader) {
-  const theatre::SourceValue *source = GetSourceValue(0);
-  if (source != nullptr) {
-    _nameLabel.set_text(source->Name());
+  theatre::SourceValue *source = GetSourceValue(0);
+  if (source) {
+    name_label_.set_text(source->Name());
     const theatre::Controllable *controllable = &source->GetControllable();
     const std::vector<theatre::Color> colors =
         controllable->InputColors(source->InputIndex());
-    _iconButton.SetColors(UniqueWithoutOrdering(colors));
+    icon_button_.SetColors(UniqueWithoutOrdering(colors));
     if (moveFader) {
-      _iconButton.SetActive(GetSingleSourceValue(0).Value().UInt() != 0);
+      UpdateActivated(GetSingleSourceValue(*source));
     } else {
-      if (_iconButton.GetActive())
+      if (icon_button_.GetActive())
         setTargetValue(0, theatre::ControlValue::MaxUInt());
       else
         setTargetValue(0, 0);
     }
   } else {
-    _nameLabel.set_text("<..>");
-    _iconButton.SetColors({});
+    name_label_.set_text("<..>");
+    icon_button_.SetColors({});
     if (moveFader) {
-      _iconButton.SetActive(false);
+      UpdateActivated(GetSingleSourceValue(*source));
     } else {
-      if (_iconButton.GetActive())
+      if (icon_button_.GetActive())
         setTargetValue(0, theatre::ControlValue::MaxUInt());
       else
         setTargetValue(0, 0);
@@ -142,12 +172,12 @@ void ToggleWidget::OnAssigned(bool moveFader) {
 }
 
 void ToggleWidget::SyncFader() {
-  const theatre::SourceValue *source = GetSourceValue(0);
+  theatre::SourceValue *source = GetSourceValue(0);
   if (source != nullptr) {
-    unsigned target_value = GetSingleSourceValue(0).TargetValue();
+    theatre::SingleSourceValue &source_value = GetSingleSourceValue(*source);
     // Most sliders will be off, so as a small optimization test this before
     // doing the more expensive dynamic_cast
-    if (target_value) {
+    if (source_value.Value()) {
       const theatre::Scene *scene =
           dynamic_cast<const theatre::Scene *>(&source->GetControllable());
       // If the control is connected to a scene, uncheck control if scene has
@@ -157,24 +187,26 @@ void ToggleWidget::SyncFader() {
         // because the management thread hasn't started the scene yet.
         ++counter_;
         if (counter_ > 5) {
-          target_value = 0;
+          source_value.Set(0);
           counter_ = 0;
         }
       }
     }
-    _iconButton.SetActive(target_value != 0);
+    UpdateActivated(source_value);
     SignalValueChange().emit();
   }
 }
 
-void ToggleWidget::Toggle() { _iconButton.SetActive(!_iconButton.GetActive()); }
+void ToggleWidget::Toggle() {
+  icon_button_.SetActive(!icon_button_.GetActive());
+}
 
-void ToggleWidget::FlashOn() { _iconButton.SetActive(true); }
+void ToggleWidget::FlashOn() { icon_button_.SetActive(true); }
 
-void ToggleWidget::FlashOff() { _iconButton.SetActive(false); }
+void ToggleWidget::FlashOff() { icon_button_.SetActive(false); }
 
 void ToggleWidget::Limit(double value) {
-  if (value < theatre::ControlValue::MaxUInt()) _iconButton.SetActive(false);
+  if (value < theatre::ControlValue::MaxUInt()) icon_button_.SetActive(false);
 }
 
 bool ToggleWidget::HandleRightRelease(GdkEventButton *event) {
@@ -194,9 +226,10 @@ bool ToggleWidget::HandleRightRelease(GdkEventButton *event) {
 }
 
 void ToggleWidget::UpdateDisplaySettings() {
-  _nameLabel.set_visible(State().DisplayName());
-  _flashButton.set_visible(State().DisplayFlashButton());
-  _iconButton.set_visible(State().DisplayCheckButton());
+  name_label_.set_visible(State().DisplayName());
+  flash_button_.set_visible(State().DisplayFlashButton());
+  fade_button_.set_visible(State().OverlayFadeButtons());
+  icon_button_.set_visible(State().DisplayCheckButton());
 }
 
 }  // namespace glight::gui
