@@ -68,8 +68,9 @@ void writeFolderAttributes(WriteState &state, const FolderObject &obj) {
   state.writer.Number("parent", state.folderIds.find(&obj.Parent())->second);
 }
 
-void writeDmxChannel(WriteState &state, const DmxChannel &dmxChannel) {
-  state.writer.StartObject("dmx-channel");
+void writeDmxChannel(WriteState &state, const DmxChannel &dmxChannel,
+                     const char *name) {
+  state.writer.StartObject(name);
   state.writer.Number("universe", dmxChannel.Universe());
   state.writer.Number("channel", dmxChannel.Channel());
   state.writer.EndObject();
@@ -80,7 +81,10 @@ void writeFixtureFunction(WriteState &state,
   state.writer.StartObject();
   state.writer.String("name", fixtureFunction.Name());
   state.writer.String("type", ToString(fixtureFunction.Type()));
-  writeDmxChannel(state, fixtureFunction.MainChannel());
+  writeDmxChannel(state, fixtureFunction.MainChannel(), "dmx-channel");
+  if (fixtureFunction.FineChannel()) {
+    writeDmxChannel(state, *fixtureFunction.FineChannel(), "dmx-fine-channel");
+  }
   state.writer.EndObject();
 }
 

@@ -27,6 +27,14 @@ namespace windows {
 class FixtureProperties;
 }
 
+enum class MouseState {
+  Normal,
+  DragFixture,
+  DragRectangle,
+  DragAddRectangle,
+  TrackPan
+};
+
 class VisualizationWidget : public Gtk::DrawingArea {
  public:
   VisualizationWidget(theatre::Management *management,
@@ -69,9 +77,11 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void onGlobalSelectionChanged();
 
   void OnSetColor();
+  void OnTrackWithPan();
 
   void selectFixtures(const theatre::Position &a, const theatre::Position &b);
   void addFixtures(const theatre::Position &a, const theatre::Position &b);
+  void SetPan(const theatre::Position &position);
 
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;
@@ -83,12 +93,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   bool _isInitialized, _isTimerRunning;
   sigc::connection _timeoutConnection;
   sigc::connection update_connection_;
-  enum DragType {
-    NotDragging,
-    DragFixture,
-    DragRectangle,
-    DragAddRectangle
-  } _dragType;
+  MouseState _dragType;
   std::vector<theatre::Fixture *> _selectedFixtures,
       _selectedFixturesBeforeDrag;
   theatre::Position _draggingStart, _draggingTo;
@@ -104,6 +109,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   Gtk::MenuItem mi_set_full_on_{"Full on"};
   Gtk::MenuItem mi_set_off_{"Off"};
   Gtk::MenuItem mi_set_color_{"Set color..."};
+  Gtk::MenuItem mi_track_pan_{"Track with pan"};
   Gtk::MenuItem _miSymbolMenu{"Symbol"};
   Gtk::MenuItem _miDryModeStyle{"Dry mode style"};
   Gtk::MenuItem _miAlignHorizontally{"Align horizontally"};

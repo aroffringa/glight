@@ -39,6 +39,7 @@ namespace glight::gui {
 MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
   set_title("Glight - show");
   set_default_icon_name("glight");
+  set_default_size(800, 500);
 
   Glib::RefPtr<Gtk::IconTheme> iconTheme = Gtk::IconTheme::get_default();
   std::filesystem::path iconPath =
