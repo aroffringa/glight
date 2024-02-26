@@ -101,6 +101,21 @@ void NewPresetFromCurrent(ObjectBrowser &browser) {
   browser.SelectObject(preset_collection);
 }
 
+void NewPresetFromFixtures(theatre::Folder &parent_folder,
+                           const std::set<theatre::Fixture *> &fixtures) {
+  Management &management = Instance::Management();
+  std::unique_lock<std::mutex> lock(management.Mutex());
+  theatre::PresetCollection &preset_collection =
+      management.AddPresetCollection();
+  preset_collection.SetName(parent_folder.GetAvailableName("Preset"));
+  parent_folder.Add(preset_collection);
+  preset_collection.SetFromCurrentFixtures(management, fixtures);
+  management.AddSourceValue(preset_collection, 0);
+  lock.unlock();
+
+  Instance::Events().EmitUpdate();
+}
+
 void NewChase(ObjectBrowser &browser,
               WindowList<PropertiesWindow> &property_windows,
               Gtk::Window &parent) {

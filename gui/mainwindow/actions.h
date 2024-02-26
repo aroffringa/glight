@@ -1,7 +1,10 @@
 #ifndef GLIGHT_GUI_MAINWINDOW_ACTIONS_H_
 #define GLIGHT_GUI_MAINWINDOW_ACTIONS_H_
 
+#include <set>
+
 #include "theatre/effecttype.h"
+#include "theatre/fixture.h"
 #include "theatre/folderobject.h"
 
 #include "gui/components/objectbrowser.h"
@@ -18,6 +21,8 @@ void NewEmptyPreset(ObjectBrowser& browser,
                     WindowList<PropertiesWindow>& property_windows,
                     Gtk::Window& parent);
 void NewPresetFromCurrent(ObjectBrowser& browser);
+void NewPresetFromFixtures(theatre::Folder& parent_folder,
+                           const std::set<theatre::Fixture*>& fixtures);
 void NewChase(ObjectBrowser& browser,
               WindowList<PropertiesWindow>& property_windows,
               Gtk::Window& parent);

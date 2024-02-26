@@ -2,6 +2,7 @@
 #define THEATRE_PRESETCOLLECTION_H_
 
 #include <memory>
+#include <set>
 #include <vector>
 
 #include "controllable.h"
@@ -11,6 +12,7 @@
 
 namespace glight::theatre {
 
+class Fixture;
 class Management;
 
 /**
@@ -24,7 +26,11 @@ class PresetCollection final : public Controllable {
   ~PresetCollection() { Clear(); }
 
   void Clear() { _presetValues.clear(); }
-  inline void SetFromCurrentSituation(Management &management);
+
+  void SetFromCurrentSituation(Management &management);
+
+  void SetFromCurrentFixtures(Management &management,
+                              const std::set<Fixture *> &fixtures);
 
   size_t NInputs() const override { return 1; }
 
@@ -76,25 +82,6 @@ class PresetCollection final : public Controllable {
   ControlValue _inputValue;
   std::vector<std::unique_ptr<PresetValue>> _presetValues;
 };
-
-}  // namespace glight::theatre
-
-#include "management.h"
-
-namespace glight::theatre {
-
-void PresetCollection::SetFromCurrentSituation(Management &management) {
-  Clear();
-  std::vector<std::unique_ptr<SourceValue>> &values = management.SourceValues();
-  for (std::unique_ptr<SourceValue> &sv : values) {
-    if (!sv->A().IsIgnorable() && (&sv->GetControllable()) != this) {
-      std::unique_ptr<PresetValue> &value =
-          _presetValues.emplace_back(std::make_unique<PresetValue>(
-              sv->GetControllable(), sv->InputIndex()));
-      value->SetValue(sv->A().Value());
-    }
-  }
-}
 
 }  // namespace glight::theatre
 

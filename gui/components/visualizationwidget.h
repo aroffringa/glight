@@ -61,6 +61,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void onAlignVertically();
   void onDistributeEvenly();
   void onAddFixtures();
+  void onAddPreset();
   void onRemoveFixtures();
   void onGroupFixtures();
   void onDesignFixtures();
@@ -108,7 +109,8 @@ class VisualizationWidget : public Gtk::DrawingArea {
   Gtk::MenuItem _miAlignHorizontally{"Align horizontally"};
   Gtk::MenuItem _miAlignVertically{"Align vertically"};
   Gtk::MenuItem _miDistributeEvenly{"Distribute evenly"};
-  Gtk::MenuItem _miAdd{"Add..."};
+  Gtk::MenuItem _miAdd{"Add fixture..."};
+  Gtk::MenuItem _miAddPreset{"Add preset"};
   Gtk::MenuItem _miRemove{"Remove"};
   Gtk::MenuItem _miGroup{"Group..."};
   Gtk::MenuItem _miDesign{"Design..."};

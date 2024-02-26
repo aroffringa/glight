@@ -2,26 +2,27 @@
 
 #include "writer.h"
 
-#include "../theatre/properties/propertyset.h"
+#include "theatre/chase.h"
+#include "theatre/controllable.h"
+#include "theatre/effect.h"
+#include "theatre/fixture.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/fixturefunction.h"
+#include "theatre/fixturegroup.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/presetvalue.h"
+#include "theatre/theatre.h"
+#include "theatre/timesequence.h"
 
-#include "../theatre/scenes/blackoutsceneitem.h"
-#include "../theatre/scenes/controlsceneitem.h"
-#include "../theatre/scenes/keysceneitem.h"
-#include "../theatre/scenes/scene.h"
+#include "theatre/properties/propertyset.h"
 
-#include "../theatre/chase.h"
-#include "../theatre/controllable.h"
-#include "../theatre/effect.h"
-#include "../theatre/fixture.h"
-#include "../theatre/fixturecontrol.h"
-#include "../theatre/fixturefunction.h"
-#include "../theatre/fixturegroup.h"
-#include "../theatre/folder.h"
-#include "../theatre/presetvalue.h"
-#include "../theatre/theatre.h"
-#include "../theatre/timesequence.h"
+#include "theatre/scenes/blackoutsceneitem.h"
+#include "theatre/scenes/controlsceneitem.h"
+#include "theatre/scenes/keysceneitem.h"
+#include "theatre/scenes/scene.h"
 
-#include "../gui/state/guistate.h"
+#include "gui/state/guistate.h"
 
 namespace glight::system {
 namespace {

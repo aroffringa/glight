@@ -1,6 +1,7 @@
 #include "presetcollection.h"
 
 #include "fixturecontrol.h"
+#include "management.h"
 
 #include <map>
 
@@ -47,6 +48,39 @@ std::vector<Color> PresetCollection::InputColors(size_t /*index*/) const {
                         std::min(255u, sum.blue));
   }
   return result;
+}
+
+void PresetCollection::SetFromCurrentSituation(Management& management) {
+  Clear();
+  std::vector<std::unique_ptr<SourceValue>>& values = management.SourceValues();
+  for (std::unique_ptr<SourceValue>& sv : values) {
+    if (!sv->A().IsIgnorable() && (&sv->GetControllable()) != this) {
+      std::unique_ptr<PresetValue>& value =
+          _presetValues.emplace_back(std::make_unique<PresetValue>(
+              sv->GetControllable(), sv->InputIndex()));
+      value->SetValue(sv->A().Value());
+    }
+  }
+}
+
+void PresetCollection::SetFromCurrentFixtures(
+    Management& management, const std::set<Fixture*>& fixtures) {
+  Clear();
+  std::vector<std::unique_ptr<SourceValue>>& values = management.SourceValues();
+  for (std::unique_ptr<SourceValue>& sv : values) {
+    if (!sv->A().IsIgnorable() && (&sv->GetControllable()) != this) {
+      FixtureControl* control =
+          dynamic_cast<FixtureControl*>(&sv->GetControllable());
+      if (control) {
+        if (fixtures.contains(&control->GetFixture())) {
+          std::unique_ptr<PresetValue>& value =
+              _presetValues.emplace_back(std::make_unique<PresetValue>(
+                  sv->GetControllable(), sv->InputIndex()));
+          value->SetValue(sv->A().Value());
+        }
+      }
+    }
+  }
 }
 
 }  // namespace glight::theatre

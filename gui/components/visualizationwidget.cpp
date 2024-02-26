@@ -8,6 +8,7 @@
 #include "gui/windows/designwizard.h"
 #include "gui/windows/fixtureproperties.h"
 
+#include "gui/mainwindow/actions.h"
 #include "gui/mainwindow/mainwindow.h"
 
 #include "system/midi/manager.h"
@@ -128,6 +129,9 @@ void VisualizationWidget::inializeContextMenu() {
 
   _miAdd.signal_activate().connect([&] { onAddFixtures(); });
   _popupMenu.add(_miAdd);
+
+  _miAddPreset.signal_activate().connect([&] { onAddPreset(); });
+  _popupMenu.add(_miAddPreset);
 
   _miRemove.signal_activate().connect([&] { onRemoveFixtures(); });
   _popupMenu.add(_miRemove);
@@ -326,6 +330,7 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
       _miAlignVertically.set_sensitive(dual_enabled);
       _miDistributeEvenly.set_sensitive(dual_enabled);
       _miAdd.set_sensitive(enable);
+      _miAddPreset.set_sensitive(enable);
       _miRemove.set_sensitive(selection_enabled);
       _miSymbolMenu.set_sensitive(selection_enabled);
       _miProperties.set_sensitive(selection_enabled);
@@ -497,6 +502,13 @@ void VisualizationWidget::onAddFixtures() {
   sub_window_->set_transient_for(*main_window_);
   sub_window_->set_modal(true);
   sub_window_->show();
+}
+
+void VisualizationWidget::onAddPreset() {
+  const std::set<theatre::Fixture *> fixture_set(_selectedFixtures.begin(),
+                                                 _selectedFixtures.end());
+  theatre::Folder &folder = main_window_->SelectedFolder();
+  mainwindow::NewPresetFromFixtures(folder, fixture_set);
 }
 
 void VisualizationWidget::onRemoveFixtures() {
