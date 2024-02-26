@@ -73,10 +73,7 @@ include_directories(${AUBIO_INCLUDE_DIR})
 
 set(GUIFILES
   gui/application.cpp
-  gui/createchasedialog.cpp
-  gui/designwizard.cpp
-  gui/nameframe.cpp
-  gui/objectlistframe.cpp
+  gui/components/nameframe.cpp
   gui/renderengine.cpp
   gui/tools.cpp
   gui/components/audiowidget.cpp
@@ -91,6 +88,7 @@ set(GUIFILES
   gui/components/propertiesbox.cpp
   gui/components/reorderwidget.cpp
   gui/components/visualizationwidget.cpp
+  gui/dialogs/createchasedialog.cpp
   gui/dialogs/inputselectdialog.cpp
   gui/dialogs/sceneselect.cpp
   gui/faders/colorcontrolwidget.cpp
@@ -100,17 +98,20 @@ set(GUIFILES
   gui/faders/faderwidget.cpp
   gui/faders/faderwindow.cpp
   gui/faders/togglewidget.cpp
+  gui/mainwindow/actions.cpp
+  gui/mainwindow/mainmenu.cpp
+  gui/mainwindow/mainwindow.cpp
+  gui/mainwindow/objectlistframe.cpp
   gui/state/faderstate.cpp
   gui/windows/addfixturewindow.cpp  
   gui/windows/chasepropertieswindow.cpp
+  gui/windows/designwizard.cpp
   gui/windows/effectpropertieswindow.cpp
   gui/windows/fixturelistwindow.cpp
   gui/windows/fixtureproperties.cpp
   gui/windows/fixturetypeswindow.cpp
   gui/windows/fixturetypefunctionsframe.cpp
   gui/windows/groupwindow.cpp
-  gui/windows/mainmenu.cpp
-  gui/windows/mainwindow.cpp
   gui/windows/presetcollectionwindow.cpp
   gui/windows/scenewindow.cpp
   gui/windows/timesequencepropertieswindow.cpp)

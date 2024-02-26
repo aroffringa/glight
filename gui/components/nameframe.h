@@ -6,7 +6,7 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
 
-#include "../theatre/forwards.h"
+#include "theatre/forwards.h"
 
 namespace glight::gui {
 
@@ -14,7 +14,7 @@ class MainWindow;
 
 class NameFrame : public Gtk::HBox {
  public:
-  NameFrame(theatre::Management &management, MainWindow &showWindow);
+  NameFrame();
   ~NameFrame();
 
   void SetNamedObject(theatre::FolderObject &namedObject) {
@@ -27,16 +27,11 @@ class NameFrame : public Gtk::HBox {
     update();
   }
   sigc::signal<void> &SignalNameChange() { return _signalNameChange; }
-  void ChangeManagement(theatre::Management &management) {
-    _management = &management;
-  }
 
  private:
   void onButtonClicked();
   void update();
 
-  theatre::Management *_management;
-  MainWindow &_showWindow;
   theatre::FolderObject *_namedObject;
 
   Gtk::Entry _entry;

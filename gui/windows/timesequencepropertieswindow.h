@@ -3,16 +3,6 @@
 
 #include "propertieswindow.h"
 
-#include "../components/durationinput.h"
-#include "../components/inputselectwidget.h"
-#include "../components/transitiontypebox.h"
-
-#include "../recursionlock.h"
-
-#include "../../theatre/forwards.h"
-#include "../../theatre/timesequence.h"
-#include "../../theatre/transition.h"
-
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/frame.h>
@@ -25,6 +15,17 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
+#include "gui/connectionmanager.h"
+#include "gui/recursionlock.h"
+
+#include "gui/components/durationinput.h"
+#include "gui/components/inputselectwidget.h"
+#include "gui/components/transitiontypebox.h"
+
+#include "theatre/forwards.h"
+#include "theatre/timesequence.h"
+#include "theatre/transition.h"
+
 namespace glight::gui {
 
 class EventTransmitter;
@@ -34,10 +35,7 @@ class EventTransmitter;
  */
 class TimeSequencePropertiesWindow final : public PropertiesWindow {
  public:
-  TimeSequencePropertiesWindow(theatre::TimeSequence &timeSequence,
-                               theatre::Management &management,
-                               EventTransmitter &eventHub);
-  ~TimeSequencePropertiesWindow();
+  TimeSequencePropertiesWindow(theatre::TimeSequence &timeSequence);
 
   theatre::FolderObject &GetObject() override;
   theatre::TimeSequence &GetTimeSequence() { return *_timeSequence; }
@@ -107,9 +105,7 @@ class TimeSequencePropertiesWindow final : public PropertiesWindow {
   RecursionLock _recursionLock;
 
   theatre::TimeSequence *_timeSequence;
-  theatre::Management *_management;
-  EventTransmitter &_eventHub;
-  sigc::connection _changeManagementConnection, _updateControllablesConnection;
+  ConnectionManager connections_;
 };
 
 }  // namespace glight::gui

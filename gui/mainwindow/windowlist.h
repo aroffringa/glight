@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-#include "../theatre/forwards.h"
+#include "theatre/forwards.h"
 
 namespace glight::gui {
 

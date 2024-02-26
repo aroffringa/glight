@@ -3,8 +3,8 @@
 
 #include <gtkmm/stock.h>
 
+#include "gui/eventtransmitter.h"
 #include "gui/instance.h"
-#include "gui/windows/mainwindow.h"
 
 #include "theatre/chase.h"
 #include "theatre/folder.h"
@@ -15,14 +15,13 @@
 
 namespace glight::gui {
 
-CreateChaseDialog::CreateChaseDialog(MainWindow &parentWindow)
+CreateChaseDialog::CreateChaseDialog()
     : Dialog("Create chase", true),
       _listFrame("Object list"),
       _list(),
       _newChaseFrame("Chase objects"),
       _addObjectToChaseButton(),
       _clearChaseButton("Clear"),
-      _parentWindow(parentWindow),
       _newChase(nullptr) {
   set_size_request(600, 400);
 
@@ -121,7 +120,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
 
     lock.unlock();
 
-    _parentWindow.EmitUpdate();
+    Instance::Events().EmitUpdate();
     _newChaseListModel->clear();
     _makeChaseButton->set_sensitive(false);
   }

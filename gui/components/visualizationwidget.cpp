@@ -1,13 +1,14 @@
 #include "visualizationwidget.h"
 
-#include "gui/windows/addfixturewindow.h"
-#include "gui/windows/fixtureproperties.h"
-#include "gui/windows/mainwindow.h"
-
-#include "gui/designwizard.h"
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
 #include "gui/tools.h"
+
+#include "gui/windows/addfixturewindow.h"
+#include "gui/windows/designwizard.h"
+#include "gui/windows/fixtureproperties.h"
+
+#include "gui/mainwindow/mainwindow.h"
 
 #include "system/midi/manager.h"
 

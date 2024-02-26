@@ -1,22 +1,18 @@
 #include "nameframe.h"
 
-#include "windows/mainwindow.h"
-
-#include "../theatre/folder.h"
-#include "../theatre/folderobject.h"
-#include "../theatre/management.h"
-
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
+#include "gui/eventtransmitter.h"
+#include "gui/instance.h"
+
+#include "theatre/folder.h"
+#include "theatre/folderobject.h"
+#include "theatre/management.h"
+
 namespace glight::gui {
 
-NameFrame::NameFrame(theatre::Management &management, MainWindow &showWindow)
-    : _management(&management),
-      _showWindow(showWindow),
-      _namedObject(nullptr),
-      _label("Name:"),
-      _button() {
+NameFrame::NameFrame() : _namedObject(nullptr), _label("Name:"), _button() {
   pack_start(_label, false, false, 2);
   _label.show();
 
@@ -43,7 +39,7 @@ void NameFrame::update() {
   if (_namedObject == nullptr) {
     _entry.set_text("");
     set_sensitive(false);
-  } else if (_namedObject == &_management->RootFolder()) {
+  } else if (_namedObject == &Instance::Management().RootFolder()) {
     _entry.set_text("Root");
     set_sensitive(false);
   } else {
@@ -67,11 +63,12 @@ void NameFrame::onButtonClicked() {
             false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
         dialog.run();
       } else {
-        std::unique_lock<std::mutex> lock(_management->Mutex());
+        theatre::Management &management = Instance::Management();
+        std::unique_lock<std::mutex> lock(management.Mutex());
         _namedObject->SetName(newName);
         lock.unlock();
 
-        _showWindow.EmitUpdate();
+        Instance::Events().EmitUpdate();
         _signalNameChange();
       }
     }

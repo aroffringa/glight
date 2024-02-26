@@ -1,26 +1,22 @@
 #include "presetcollectionwindow.h"
 
-#include "../eventtransmitter.h"
+#include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
-#include "../../theatre/management.h"
+#include "theatre/management.h"
 
 #include <gtkmm/messagedialog.h>
 
 namespace glight::gui {
 
 PresetCollectionWindow::PresetCollectionWindow(
-    theatre::PresetCollection &presetCollection,
-    theatre::Management &management, EventTransmitter &eventHub)
+    theatre::PresetCollection &presetCollection)
     : PropertiesWindow(),
-      _inputSelector(management, eventHub),
-
+      _inputSelector(),
       _controlValueLabel("Value:"),
-
-      _presetCollection(&presetCollection),
-      _management(&management),
-      _eventHub(eventHub) {
-  _updateControllablesConnection = eventHub.SignalUpdateControllables().connect(
-      sigc::mem_fun(*this, &PresetCollectionWindow::onUpdateControllables));
+      _presetCollection(&presetCollection) {
+  connections_.Add(Instance::Events().SignalUpdateControllables().connect(
+      sigc::mem_fun(*this, &PresetCollectionWindow::onUpdateControllables)));
 
   set_title("glight - " + presetCollection.Name());
 
@@ -76,10 +72,6 @@ PresetCollectionWindow::PresetCollectionWindow(
 
   load();
   onSelectedPresetChanged();
-}
-
-PresetCollectionWindow::~PresetCollectionWindow() {
-  _updateControllablesConnection.disconnect();
 }
 
 void PresetCollectionWindow::load() { fillPresetsList(); }
@@ -141,10 +133,11 @@ void PresetCollectionWindow::onAddPreset() {
   theatre::Controllable *object = _inputSelector.SelectedObject();
   size_t input = _inputSelector.SelectedInput();
   if (object && input != InputSelectWidget::NO_INPUT_SELECTED) {
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    theatre::Management &management = Instance::Management();
+    std::unique_lock<std::mutex> lock(management.Mutex());
     theatre::PresetValue &preset =
         _presetCollection->AddPresetValue(*object, input);
-    if (_management->HasCycle()) {
+    if (management.HasCycle()) {
       _presetCollection->RemovePresetValue(_presetCollection->Size() - 1);
       lock.unlock();
       Gtk::MessageDialog dialog(
@@ -166,7 +159,7 @@ void PresetCollectionWindow::onRemovePreset() {
       _presetsView.get_selection()->get_selected();
   if (selIter) {
     size_t index = (*selIter)[_presetListColumns._presetIndex];
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
     _presetCollection->RemovePresetValue(index);
     lock.unlock();
 
@@ -187,7 +180,7 @@ void PresetCollectionWindow::onSelectedPresetChanged() {
 }
 
 void PresetCollectionWindow::loadPreset(size_t index) {
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
   theatre::ControlValue controlValue =
       _presetCollection->PresetValues()[index]->Value();
   lock.unlock();
@@ -202,14 +195,14 @@ void PresetCollectionWindow::setPresetSensitive(bool sensitive) {
 }
 
 void PresetCollectionWindow::onUpdateControllables() {
-  if (_management->Contains(*_presetCollection))
+  if (Instance::Management().Contains(*_presetCollection))
     load();
   else
     hide();
 }
 
 void PresetCollectionWindow::onControlValueChanged() {
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
   size_t index = 0;
   if (selectedPresetIndex(index)) {
     double percentage = std::atof(_controlValueEntry.get_text().c_str());

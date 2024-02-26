@@ -3,9 +3,10 @@
 
 #include "propertieswindow.h"
 
-#include "../../theatre/forwards.h"
+#include "theatre/forwards.h"
 
-#include "../components/propertiesbox.h"
+#include "gui/connectionmanager.h"
+#include "gui/components/propertiesbox.h"
 
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
@@ -15,13 +16,9 @@
 
 namespace glight::gui {
 
-class MainWindow;
-
 class EffectPropertiesWindow : public PropertiesWindow {
  public:
-  EffectPropertiesWindow(theatre::Effect &effect,
-                         theatre::Management &management,
-                         MainWindow &parentWindow);
+  EffectPropertiesWindow(theatre::Effect &effect);
 
   theatre::FolderObject &GetObject() final override;
 
@@ -55,14 +52,13 @@ class EffectPropertiesWindow : public PropertiesWindow {
   Gtk::Frame _connectionsFrame, _propertiesFrame;
   std::unique_ptr<theatre::PropertySet> _propertySet;
   PropertiesBox _propertiesBox;
+  ConnectionManager connections_;
 
   Gtk::ScrolledWindow _connectionsScrolledWindow;
   Gtk::Box _connectionsButtonBox;
   Gtk::Button _addConnectionButton, _removeConnectionButton;
 
   theatre::Effect *_effect;
-  theatre::Management *_management;
-  MainWindow &_parentWindow;
 };
 
 }  // namespace glight::gui

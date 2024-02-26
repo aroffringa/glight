@@ -1,6 +1,6 @@
 #include "mainmenu.h"
 
-#include "../state/fadersetstate.h"
+#include "gui/state/fadersetstate.h"
 
 namespace glight::gui {
 
@@ -23,8 +23,6 @@ MainMenu::MainMenu() {
   _miFile.set_submenu(_menuFile);
   append(_miFile);
 
-  _menuDesign.append(_miDesignSep1);
-
   _miLockLayout.signal_activate().connect(LockLayout);
   _menuDesign.append(_miLockLayout);
 
@@ -39,7 +37,27 @@ MainMenu::MainMenu() {
   _miBlackOut.set_sensitive(false);
   _menuDesign.append(_miBlackOut);
 
-  _menuDesign.append(_miDesignSep2);
+  _menuDesign.append(_miDesignSep1);
+
+  _miAddPreset.signal_activate().connect(AddPreset);
+  _menuDesign.append(_miAddPreset);
+  _miAddChase.signal_activate().connect(AddChase);
+  _menuDesign.append(_miAddChase);
+  _miAddSequence.signal_activate().connect(AddTimeSequence);
+  _menuDesign.append(_miAddSequence);
+  _miAddEffect.set_submenu(effect_sub_menu_);
+  _menuDesign.append(_miAddEffect);
+  std::vector<theatre::EffectType> effect_types = theatre::GetEffectTypes();
+  for (theatre::EffectType t : effect_types) {
+    Gtk::MenuItem& mi = effect_menu_items_.emplace_back(EffectTypeToName(t));
+    mi.signal_activate().connect([&, t]() { AddEffect(t); });
+    effect_sub_menu_.append(mi);
+  }
+  _miAddFolder.signal_activate().connect(AddFolder);
+  _menuDesign.append(_miAddFolder);
+  _miDeleteObject.set_sensitive(false);
+  _miDeleteObject.signal_activate().connect(DeleteObject);
+  _menuDesign.append(_miDeleteObject);
 
   _miDesignWizard.signal_activate().connect(DesignWizard);
   _menuDesign.append(_miDesignWizard);

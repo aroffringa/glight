@@ -1,3 +1,5 @@
+#include "scenewindow.h"
+
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -8,19 +10,17 @@
 
 #include <glibmm/main.h>
 
-#include "../../theatre/folder.h"
-#include "../../theatre/management.h"
-#include "../../theatre/sourcevalue.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/sourcevalue.h"
 
-#include "../../theatre/scenes/scene.h"
+#include "theatre/scenes/scene.h"
 
-#include "../eventtransmitter.h"
+#include "gui/eventtransmitter.h"
 
-#include "../dialogs/inputselectdialog.h"
-#include "../dialogs/stringinputdialog.h"
-#include "../dialogs/sceneselect.h"
-
-#include "scenewindow.h"
+#include "gui/dialogs/inputselectdialog.h"
+#include "gui/dialogs/stringinputdialog.h"
+#include "gui/dialogs/sceneselect.h"
 
 using glight::theatre::Controllable;
 using glight::theatre::Scene;
@@ -61,7 +61,6 @@ SceneWindow::SceneWindow(theatre::Management &management,
           Gtk::Adjustment::create(0, 0, theatre::ControlValue::MaxUInt() + 1,
                                   theatre::ControlValue::MaxUInt() / 100.0),
           Gtk::ORIENTATION_VERTICAL),
-      _nameFrame(management, parentWindow),
       _selectedScene(nullptr),
       _sourceValue(nullptr),
       _isUpdating(false) {

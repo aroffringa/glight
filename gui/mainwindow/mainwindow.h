@@ -57,6 +57,8 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   system::midi::Manager &GetMidiManager() { return *midi_manager_; }
 
+  MainMenu &Menu() { return main_menu_; }
+
  private:
   void InitializeMenu();
 

@@ -1,14 +1,16 @@
 #ifndef GUI_MAIN_MENU_H_
 #define GUI_MAIN_MENU_H_
 
+#include <memory>
+#include <vector>
+
 #include <gtkmm/checkmenuitem.h>
 #include <gtkmm/imagemenuitem.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menubar.h>
 #include <gtkmm/separatormenuitem.h>
 
-#include <memory>
-#include <vector>
+#include "theatre/effecttype.h"
 
 namespace glight::gui {
 
@@ -28,6 +30,14 @@ class MainMenu : public Gtk::MenuBar {
   // Design menu
   sigc::signal<void()> LockLayout;
   sigc::signal<void()> BlackOut;
+
+  sigc::signal<void()> AddPreset;
+  sigc::signal<void()> AddChase;
+  sigc::signal<void()> AddTimeSequence;
+  sigc::signal<void(theatre::EffectType)> AddEffect;
+  sigc::signal<void()> AddFolder;
+  sigc::signal<void()> DeleteObject;
+
   sigc::signal<void()> DesignWizard;
 
   // Window menu
@@ -61,23 +71,36 @@ class MainMenu : public Gtk::MenuBar {
   bool IsLayoutLocked() const { return _miLockLayout.get_active(); }
   void SetLayoutLocked(bool lock) { _miLockLayout.set_active(lock); }
 
+  void SetIsObjectSelected(bool is_selected) {
+    _miDeleteObject.set_sensitive(is_selected);
+  }
+
  private:
   Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
 
   Gtk::MenuItem _miFile{"_File", true};
-  Gtk::MenuItem _miDesign{"_Design", true};
-  Gtk::MenuItem _miWindow{"_Window", true};
   Gtk::MenuItem _miNew{"New"};
   Gtk::MenuItem _miOpen{"_Open...", true};
   Gtk::MenuItem _miSave{"Save _as...", true};
   Gtk::MenuItem _miImport{"_Import fixtures...", true};
   Gtk::MenuItem _miQuit{"_Quit", true};
-  Gtk::MenuItem _miBlackOut{"Black-out"};
+
+  Gtk::MenuItem _miDesign{"_Design", true};
   Gtk::CheckMenuItem _miLockLayout{"Lock layout"};
   Gtk::CheckMenuItem _miProtectBlackout{"Protect black-out"};
+  Gtk::MenuItem _miBlackOut{"Black-out"};
   Gtk::SeparatorMenuItem _miDesignSep1;
-  Gtk::SeparatorMenuItem _miDesignSep2;
-  Gtk::MenuItem _miDesignWizard{"Design wizard"};
+  Gtk::MenuItem _miAddPreset{"Add preset"};
+  Gtk::MenuItem _miAddChase{"Add chase"};
+  Gtk::MenuItem _miAddSequence{"Add sequence"};
+  Gtk::MenuItem _miAddEffect{"Add effect"};
+  Gtk::Menu effect_sub_menu_;
+  std::vector<Gtk::MenuItem> effect_menu_items_;
+  Gtk::MenuItem _miAddFolder{"Add folder"};
+  Gtk::MenuItem _miDeleteObject{"Delete"};
+  Gtk::MenuItem _miDesignWizard{"Design wizard..."};
+
+  Gtk::MenuItem _miWindow{"_Window", true};
   Gtk::CheckMenuItem _miSideBar{"Side bar"};
   Gtk::CheckMenuItem _miFullScreen{"Full screen"};
   Gtk::CheckMenuItem _miFixtureListWindow{"Fixtures"};

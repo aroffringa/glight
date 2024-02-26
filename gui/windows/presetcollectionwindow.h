@@ -3,14 +3,6 @@
 
 #include "propertieswindow.h"
 
-#include "../recursionlock.h"
-
-#include "../components/inputselectwidget.h"
-
-#include "../../theatre/forwards.h"
-#include "../../theatre/presetcollection.h"
-#include "../../theatre/transition.h"
-
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/frame.h>
@@ -22,16 +14,22 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
+#include "gui/connectionmanager.h"
+#include "gui/recursionlock.h"
+
+#include "gui/components/inputselectwidget.h"
+
+#include "theatre/forwards.h"
+#include "theatre/presetcollection.h"
+#include "theatre/transition.h"
+
 namespace glight::gui {
 
 class EventTransmitter;
 
 class PresetCollectionWindow : public PropertiesWindow {
  public:
-  PresetCollectionWindow(theatre::PresetCollection &presetCollection,
-                         theatre::Management &management,
-                         EventTransmitter &eventHub);
-  ~PresetCollectionWindow();
+  PresetCollectionWindow(theatre::PresetCollection &presetCollection);
 
   theatre::FolderObject &GetObject() final override;
   theatre::PresetCollection &GetPresetCollection() {
@@ -81,9 +79,7 @@ class PresetCollectionWindow : public PropertiesWindow {
   RecursionLock _recursionLock;
 
   theatre::PresetCollection *_presetCollection;
-  theatre::Management *_management;
-  EventTransmitter &_eventHub;
-  sigc::connection _updateControllablesConnection;
+  ConnectionManager connections_;
 };
 
 }  // namespace glight::gui
