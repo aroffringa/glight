@@ -42,23 +42,7 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
       _isTimerRunning(false),
       _dragType(NotDragging),
 
-      render_engine_(*management),
-      _miSymbolMenu("Symbol"),
-      _miDryModeStyle("Dry mode style"),
-      _miAlignHorizontally("Align horizontally"),
-      _miAlignVertically("Align vertically"),
-      _miDistributeEvenly("Distribute evenly"),
-      _miAdd("Add..."),
-      _miRemove("Remove"),
-      _miGroup("Group..."),
-      _miDesign("Design..."),
-      _miProperties("Properties"),
-      _miSaveImage("Save image..."),
-      _miDMSPrimary("Primary"),
-      _miDMSSecondary("Secondary"),
-      _miDMSVertical("Vertical"),
-      _miDMSHorizontal("Horizontal"),
-      _miDMSShadow("Shadow") {
+      render_engine_(*management) {
   set_size_request(600, 200);
 
   _globalSelectionConnection = _globalSelection->SignalChange().connect(

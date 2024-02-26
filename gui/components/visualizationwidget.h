@@ -103,15 +103,24 @@ class VisualizationWidget : public Gtk::DrawingArea {
   Gtk::MenuItem mi_set_full_on_{"Full on"};
   Gtk::MenuItem mi_set_off_{"Off"};
   Gtk::MenuItem mi_set_color_{"Set color..."};
-  Gtk::MenuItem _miSymbolMenu, _miDryModeStyle, _miAlignHorizontally,
-      _miAlignVertically, _miDistributeEvenly, _miAdd, _miRemove, _miGroup,
-      _miDesign;
+  Gtk::MenuItem _miSymbolMenu{"Symbol"};
+  Gtk::MenuItem _miDryModeStyle{"Dry mode style"};
+  Gtk::MenuItem _miAlignHorizontally{"Align horizontally"};
+  Gtk::MenuItem _miAlignVertically{"Align vertically"};
+  Gtk::MenuItem _miDistributeEvenly{"Distribute evenly"};
+  Gtk::MenuItem _miAdd{"Add..."};
+  Gtk::MenuItem _miRemove{"Remove"};
+  Gtk::MenuItem _miGroup{"Group..."};
+  Gtk::MenuItem _miDesign{"Design..."};
   Gtk::Menu _symbolMenu, _dryModeStyleMenu;
-  Gtk::MenuItem _miProperties;
-  Gtk::MenuItem _miSaveImage;
+  Gtk::MenuItem _miProperties{"Properties"};
+  Gtk::MenuItem _miSaveImage{"Save image..."};
   std::vector<Gtk::MenuItem> _miSymbols;
-  Gtk::RadioMenuItem _miDMSPrimary, _miDMSSecondary, _miDMSVertical,
-      _miDMSHorizontal, _miDMSShadow;
+  Gtk::RadioMenuItem _miDMSPrimary{"Primary"};
+  Gtk::RadioMenuItem _miDMSSecondary{"Secondary"};
+  Gtk::RadioMenuItem _miDMSVertical{"Vertical"};
+  Gtk::RadioMenuItem _miDMSHorizontal{"Horizontal"};
+  Gtk::RadioMenuItem _miDMSShadow{"Shadow"};
 };
 
 }  // namespace glight::gui

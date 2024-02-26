@@ -24,7 +24,10 @@ ObjectListFrame::ObjectListFrame(MainWindow &parentWindow)
   pack_start(_nameFrame, false, false, 2);
 
   MainMenu &menu = parentWindow.Menu();
-  menu.AddPreset.connect([&]() { mainwindow::NewPreset(_list); });
+  menu.AddEmptyPreset.connect(
+      [&]() { mainwindow::NewEmptyPreset(_list, _windowList, _parentWindow); });
+  menu.AddCurrentPreset.connect(
+      [&]() { mainwindow::NewPresetFromCurrent(_list); });
   menu.AddChase.connect(
       [&]() { mainwindow::NewChase(_list, _windowList, _parentWindow); });
   menu.AddTimeSequence.connect([&]() {

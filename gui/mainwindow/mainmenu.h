@@ -31,7 +31,8 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> LockLayout;
   sigc::signal<void()> BlackOut;
 
-  sigc::signal<void()> AddPreset;
+  sigc::signal<void()> AddEmptyPreset;
+  sigc::signal<void()> AddCurrentPreset;
   sigc::signal<void()> AddChase;
   sigc::signal<void()> AddTimeSequence;
   sigc::signal<void(theatre::EffectType)> AddEffect;
@@ -76,8 +77,7 @@ class MainMenu : public Gtk::MenuBar {
   }
 
  private:
-  Gtk::Menu _menuFile, _menuDesign, _menuWindow, _menuFaderWindows;
-
+  Gtk::Menu _menuFile;
   Gtk::MenuItem _miFile{"_File", true};
   Gtk::MenuItem _miNew{"New"};
   Gtk::MenuItem _miOpen{"_Open...", true};
@@ -85,12 +85,16 @@ class MainMenu : public Gtk::MenuBar {
   Gtk::MenuItem _miImport{"_Import fixtures...", true};
   Gtk::MenuItem _miQuit{"_Quit", true};
 
+  Gtk::Menu _menuDesign;
   Gtk::MenuItem _miDesign{"_Design", true};
   Gtk::CheckMenuItem _miLockLayout{"Lock layout"};
   Gtk::CheckMenuItem _miProtectBlackout{"Protect black-out"};
   Gtk::MenuItem _miBlackOut{"Black-out"};
   Gtk::SeparatorMenuItem _miDesignSep1;
+  Gtk::Menu preset_sub_menu_;
   Gtk::MenuItem _miAddPreset{"Add preset"};
+  Gtk::MenuItem _miAddEmptyPreset{"Empty"};
+  Gtk::MenuItem _miAddCurrentPreset{"From current"};
   Gtk::MenuItem _miAddChase{"Add chase"};
   Gtk::MenuItem _miAddSequence{"Add sequence"};
   Gtk::MenuItem _miAddEffect{"Add effect"};
@@ -100,11 +104,13 @@ class MainMenu : public Gtk::MenuBar {
   Gtk::MenuItem _miDeleteObject{"Delete"};
   Gtk::MenuItem _miDesignWizard{"Design wizard..."};
 
+  Gtk::Menu _menuWindow;
   Gtk::MenuItem _miWindow{"_Window", true};
   Gtk::CheckMenuItem _miSideBar{"Side bar"};
   Gtk::CheckMenuItem _miFullScreen{"Full screen"};
   Gtk::CheckMenuItem _miFixtureListWindow{"Fixtures"};
   Gtk::CheckMenuItem _miFixtureTypesWindow{"Fixture types"};
+  Gtk::Menu _menuFaderWindows;
   Gtk::MenuItem _miFaderWindowMenu{"Fader windows"};
   Gtk::MenuItem _miNewFaderWindow{"New"};
   Gtk::SeparatorMenuItem _miFaderWindowSeperator;

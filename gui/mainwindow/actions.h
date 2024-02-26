@@ -14,7 +14,10 @@ PropertiesWindow& OpenPropertiesWindow(
     WindowList<PropertiesWindow>& property_windows,
     theatre::FolderObject& object, Gtk::Window& parent);
 
-void NewPreset(ObjectBrowser& browser);
+void NewEmptyPreset(ObjectBrowser& browser,
+                    WindowList<PropertiesWindow>& property_windows,
+                    Gtk::Window& parent);
+void NewPresetFromCurrent(ObjectBrowser& browser);
 void NewChase(ObjectBrowser& browser,
               WindowList<PropertiesWindow>& property_windows,
               Gtk::Window& parent);

@@ -67,20 +67,38 @@ PropertiesWindow &OpenPropertiesWindow(
   return *window;
 }
 
-void NewPreset(ObjectBrowser &browser) {
-  Folder &parent = browser.SelectedFolder();
+void NewEmptyPreset(ObjectBrowser &browser,
+                    WindowList<PropertiesWindow> &property_windows,
+                    Gtk::Window &parent) {
+  Folder &parent_folder = browser.SelectedFolder();
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
-  theatre::PresetCollection &presetCollection =
+  theatre::PresetCollection &preset_collection =
       management.AddPresetCollection();
-  presetCollection.SetName(parent.GetAvailableName("Preset"));
-  parent.Add(presetCollection);
-  presetCollection.SetFromCurrentSituation(management);
-  management.AddSourceValue(presetCollection, 0);
+  preset_collection.SetName(parent_folder.GetAvailableName("Preset"));
+  parent_folder.Add(preset_collection);
+  management.AddSourceValue(preset_collection, 0);
   lock.unlock();
 
   Instance::Events().EmitUpdate();
-  browser.SelectObject(presetCollection);
+  browser.SelectObject(preset_collection);
+  OpenPropertiesWindow(property_windows, preset_collection, parent);
+}
+
+void NewPresetFromCurrent(ObjectBrowser &browser) {
+  Folder &parent = browser.SelectedFolder();
+  Management &management = Instance::Management();
+  std::unique_lock<std::mutex> lock(management.Mutex());
+  theatre::PresetCollection &preset_collection =
+      management.AddPresetCollection();
+  preset_collection.SetName(parent.GetAvailableName("Preset"));
+  parent.Add(preset_collection);
+  preset_collection.SetFromCurrentSituation(management);
+  management.AddSourceValue(preset_collection, 0);
+  lock.unlock();
+
+  Instance::Events().EmitUpdate();
+  browser.SelectObject(preset_collection);
 }
 
 void NewChase(ObjectBrowser &browser,
@@ -99,15 +117,15 @@ void NewTimeSequence(ObjectBrowser &browser,
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
   Folder &parent_folder = browser.SelectedFolder();
-  theatre::TimeSequence &tSequence = management.AddTimeSequence();
-  tSequence.SetName(parent_folder.GetAvailableName("Seq"));
-  parent_folder.Add(tSequence);
-  management.AddSourceValue(tSequence, 0);
+  theatre::TimeSequence &time_sequence = management.AddTimeSequence();
+  time_sequence.SetName(parent_folder.GetAvailableName("Seq"));
+  parent_folder.Add(time_sequence);
+  management.AddSourceValue(time_sequence, 0);
   lock.unlock();
 
   Instance::Events().EmitUpdate();
-  browser.SelectObject(tSequence);
-  OpenPropertiesWindow(property_windows, tSequence, parent);
+  browser.SelectObject(time_sequence);
+  OpenPropertiesWindow(property_windows, time_sequence, parent);
 }
 
 void NewEffect(theatre::EffectType effect_type, ObjectBrowser &browser,
