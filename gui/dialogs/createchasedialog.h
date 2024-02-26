@@ -10,12 +10,11 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 
-#include "../theatre/forwards.h"
+#include "theatre/forwards.h"
 
-#include "nameframe.h"
-#include "recursionlock.h"
-
-#include "components/objectbrowser.h"
+#include "gui/recursionlock.h"
+#include "gui/components/nameframe.h"
+#include "gui/components/objectbrowser.h"
 
 namespace glight::gui {
 
@@ -23,7 +22,7 @@ class MainWindow;
 
 class CreateChaseDialog : public Gtk::Dialog {
  public:
-  CreateChaseDialog(MainWindow &parentWindow);
+  CreateChaseDialog();
 
   theatre::Chase &CreatedChase() { return *_newChase; }
 
@@ -65,7 +64,6 @@ class CreateChaseDialog : public Gtk::Dialog {
 
   Gtk::Button *_makeChaseButton;
 
-  MainWindow &_parentWindow;
   RecursionLock _delayUpdates;
   theatre::Chase *_newChase;
 };

@@ -1,18 +1,19 @@
 #include "chasepropertieswindow.h"
 
-#include "../eventtransmitter.h"
+#include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
-#include "../../theatre/chase.h"
-#include "../../theatre/folder.h"
-#include "../../theatre/functiontype.h"
-#include "../../theatre/management.h"
-#include "../../theatre/timesequence.h"
+#include "theatre/chase.h"
+#include "theatre/folder.h"
+#include "theatre/functiontype.h"
+#include "theatre/management.h"
+#include "theatre/timesequence.h"
 
 namespace glight::gui {
 
-ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
-                                             theatre::Management &management,
-                                             EventTransmitter &eventHub)
+using theatre::Management;
+
+ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase)
     : PropertiesWindow(),
       _delayTriggerCheckButton("Delayed trigger"),
       _triggerDuration("Trigger duration:", 500.0),
@@ -30,11 +31,9 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase,
       _toTimeSequenceButton("Convert to time sequence"),
       _closeButton("Close"),
 
-      _chase(&chase),
-      _management(&management),
-      _eventHub(eventHub) {
-  _eventHub.SignalUpdateControllables().connect(
-      sigc::mem_fun(*this, &ChasePropertiesWindow::onUpdateControllables));
+      _chase(&chase) {
+  connections_.Add(Instance::Events().SignalUpdateControllables().connect(
+      sigc::mem_fun(*this, &ChasePropertiesWindow::onUpdateControllables)));
 
   set_title(chase.Name() + " — glight");
 
@@ -108,7 +107,8 @@ ChasePropertiesWindow::~ChasePropertiesWindow() = default;
 theatre::FolderObject &ChasePropertiesWindow::GetObject() { return GetChase(); }
 
 void ChasePropertiesWindow::onTriggerTypeChanged() {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  Management &management = Instance::Management();
+  std::lock_guard<std::mutex> lock(management.Mutex());
   if (_delayTriggerCheckButton.get_active())
     _chase->GetTrigger().SetType(theatre::TriggerType::Delay);
   else if (_synchronizedTriggerCheckButton.get_active())
@@ -118,49 +118,51 @@ void ChasePropertiesWindow::onTriggerTypeChanged() {
 }
 
 void ChasePropertiesWindow::onTriggerSpeedChanged(double newValue) {
-  double curTime = _management->GetOffsetTimeInMS();
+  Management &management = Instance::Management();
+  double curTime = management.GetOffsetTimeInMS();
   double transitionValue = _transitionDuration.Value();
   if (newValue == 0.0 && transitionValue == 0.0) {
     _transitionDuration.SetValue(40.0);
-    std::lock_guard<std::mutex> lock(_management->Mutex());
+    std::lock_guard<std::mutex> lock(management.Mutex());
     _chase->ShiftDelayTrigger(newValue, 40.0, curTime);
   } else {
-    std::lock_guard<std::mutex> lock(_management->Mutex());
+    std::lock_guard<std::mutex> lock(management.Mutex());
     _chase->ShiftDelayTrigger(newValue, transitionValue, curTime);
   }
 }
 
 void ChasePropertiesWindow::onTransitionSpeedChanged(double newValue) {
-  double curTime = _management->GetOffsetTimeInMS();
+  Management &management = Instance::Management();
+  double curTime = management.GetOffsetTimeInMS();
   double triggerValue = _triggerDuration.Value();
   if (triggerValue == 0.0 && newValue == 0.0) {
     _triggerDuration.SetValue(40.0);
-    std::lock_guard<std::mutex> lock(_management->Mutex());
+    std::lock_guard<std::mutex> lock(management.Mutex());
     _chase->ShiftDelayTrigger(40.0, newValue, curTime);
   } else {
-    std::lock_guard<std::mutex> lock(_management->Mutex());
+    std::lock_guard<std::mutex> lock(management.Mutex());
     _chase->ShiftDelayTrigger(triggerValue, newValue, curTime);
   }
 }
 
 void ChasePropertiesWindow::onTransitionTypeChanged(
     theatre::TransitionType type) {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   _chase->GetTransition().SetType(type);
 }
 
 void ChasePropertiesWindow::onSyncCountChanged() {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   _chase->GetTrigger().SetDelayInSyncs(_synchronizationsCount.get_value());
 }
 
 void ChasePropertiesWindow::onBeatSpeedChanged(double value) {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   _chase->GetTrigger().SetDelayInBeats(value);
 }
 
 void ChasePropertiesWindow::loadChaseInfo(theatre::Chase &chase) {
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
   theatre::TriggerType triggerType = chase.GetTrigger().Type();
   theatre::TransitionType transitionType = chase.GetTransition().Type();
   double triggerSpeed = chase.GetTrigger().DelayInMs();
@@ -187,14 +189,14 @@ void ChasePropertiesWindow::loadChaseInfo(theatre::Chase &chase) {
 }
 
 void ChasePropertiesWindow::onUpdateControllables() {
-  if (_management->Contains(*_chase))
+  if (Instance::Management().Contains(*_chase))
     loadChaseInfo(*_chase);
   else
     hide();
 }
 
 void ChasePropertiesWindow::onToTimeSequenceClicked() {
-  theatre::TimeSequence &tSequence = _management->AddTimeSequence();
+  theatre::TimeSequence &tSequence = Instance::Management().AddTimeSequence();
   tSequence.SetRepeatCount(0);
   size_t index = 0;
   for (theatre::Input &input : _chase->GetSequence().List()) {
@@ -209,13 +211,13 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   }
   theatre::Folder &folder = _chase->Parent();
   std::string name = _chase->Name();
-  theatre::SourceValue *source = _management->GetSourceValue(*_chase, 0);
+  theatre::SourceValue *source =
+      Instance::Management().GetSourceValue(*_chase, 0);
   source->Reconnect(tSequence, 0);
-  _management->RemoveControllable(*_chase);
+  Instance::Management().RemoveControllable(*_chase);
   tSequence.SetName(name);
   folder.Add(tSequence);
-  //_management->AddPreset(tSequence, 0);
-  _eventHub.EmitUpdate();
+  Instance::Events().EmitUpdate();
 }
 
 }  // namespace glight::gui

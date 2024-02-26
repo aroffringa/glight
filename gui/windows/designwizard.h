@@ -1,15 +1,14 @@
 #ifndef GUI_CHASE_WIZARD_H_
 #define GUI_CHASE_WIZARD_H_
 
-#include "components/colorsequencewidget.h"
-#include "components/fixturelist.h"
-#include "components/foldercombo.h"
-#include "components/objectbrowser.h"
-#include "components/reorderwidget.h"
+#include "gui/components/colorsequencewidget.h"
+#include "gui/components/fixturelist.h"
+#include "gui/components/foldercombo.h"
+#include "gui/components/objectbrowser.h"
+#include "gui/components/reorderwidget.h"
 
-#include "../theatre/design/autodesign.h"
-
-#include "../theatre/forwards.h"
+#include "theatre/forwards.h"
+#include "theatre/design/autodesign.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>

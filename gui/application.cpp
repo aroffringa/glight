@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "windows/mainwindow.h"
+#include "gui/mainwindow/mainwindow.h"
 
 #include "theatre/dummydevice.h"
 #include "theatre/oladevice.h"

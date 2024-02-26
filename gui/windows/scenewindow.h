@@ -15,15 +15,14 @@
 #include <gtkmm/toolbutton.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/window.h>
 
-#include "../components/audiowidget.h"
+#include "gui/components/audiowidget.h"
 
-#include "../../theatre/forwards.h"
+#include "theatre/forwards.h"
 
-#include "../../theatre/scenes/blackoutsceneitem.h"
-#include "../../theatre/scenes/keysceneitem.h"
-
-#include "../nameframe.h"
+#include "theatre/scenes/blackoutsceneitem.h"
+#include "theatre/scenes/keysceneitem.h"
 
 namespace glight::gui {
 
@@ -126,8 +125,6 @@ class SceneWindow : public Gtk::Window {
   sigc::connection _timeoutConnection;
 
   std::string _audioFile;
-
-  NameFrame _nameFrame;
 
   theatre::Scene *_selectedScene;
   theatre::SourceValue *_sourceValue;

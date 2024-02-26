@@ -3,12 +3,6 @@
 
 #include "propertieswindow.h"
 
-#include "../../theatre/forwards.h"
-
-#include "../components/beatinput.h"
-#include "../components/durationinput.h"
-#include "../components/transitiontypebox.h"
-
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/frame.h>
@@ -19,14 +13,18 @@
 #include <gtkmm/separator.h>
 #include <gtkmm/window.h>
 
-namespace glight::gui {
+#include "theatre/forwards.h"
 
-class EventTransmitter;
+#include "gui/connectionmanager.h"
+#include "gui/components/beatinput.h"
+#include "gui/components/durationinput.h"
+#include "gui/components/transitiontypebox.h"
+
+namespace glight::gui {
 
 class ChasePropertiesWindow : public PropertiesWindow {
  public:
-  ChasePropertiesWindow(theatre::Chase &chase, theatre::Management &management,
-                        EventTransmitter &eventHub);
+  ChasePropertiesWindow(theatre::Chase &chase);
   ~ChasePropertiesWindow();
 
   theatre::FolderObject &GetObject() final override;
@@ -64,10 +62,9 @@ class ChasePropertiesWindow : public PropertiesWindow {
 
   Gtk::Box _buttonBox;
   Gtk::Button _toTimeSequenceButton, _closeButton;
+  ConnectionManager connections_;
 
   theatre::Chase *_chase;
-  theatre::Management *_management;
-  EventTransmitter &_eventHub;
 };
 
 }  // namespace glight::gui

@@ -1,18 +1,18 @@
 #include "timesequencepropertieswindow.h"
 
-#include "../eventtransmitter.h"
+#include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
-#include "../../theatre/management.h"
+#include "theatre/management.h"
 
 #include <gtkmm/messagedialog.h>
 
 namespace glight::gui {
 
 TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
-    theatre::TimeSequence &timeSequence, theatre::Management &management,
-    EventTransmitter &eventHub)
+    theatre::TimeSequence &timeSequence)
     : PropertiesWindow(),
-      _inputSelector(management, eventHub),
+      _inputSelector(),
 
       _sustainCB("Sustain"),
       _maxRepeatCB("Max repeats:"),
@@ -33,12 +33,10 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
       _transitionSpeedLabel("Transition speed"),
       _transitionDuration("Duration (s):", 500.0),
 
-      _timeSequence(&timeSequence),
-      _management(&management),
-      _eventHub(eventHub) {
-  _updateControllablesConnection =
-      eventHub.SignalUpdateControllables().connect(sigc::mem_fun(
-          *this, &TimeSequencePropertiesWindow::onUpdateControllables));
+      _timeSequence(&timeSequence) {
+  connections_.Add(
+      Instance::Events().SignalUpdateControllables().connect(sigc::mem_fun(
+          *this, &TimeSequencePropertiesWindow::onUpdateControllables)));
 
   set_title("glight - " + timeSequence.Name());
 
@@ -131,11 +129,6 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
   onSelectedStepChanged();
 }
 
-TimeSequencePropertiesWindow::~TimeSequencePropertiesWindow() {
-  _changeManagementConnection.disconnect();
-  _updateControllablesConnection.disconnect();
-}
-
 void TimeSequencePropertiesWindow::load() {
   _sustainCB.set_active(_timeSequence->Sustain());
   if (_timeSequence->RepeatCount() == 0)
@@ -201,9 +194,9 @@ void TimeSequencePropertiesWindow::onAddStep() {
   theatre::Controllable *object = _inputSelector.SelectedObject();
   size_t input = _inputSelector.SelectedInput();
   if (object && input != InputSelectWidget::NO_INPUT_SELECTED) {
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
     _timeSequence->AddStep(*object, input);
-    if (_management->HasCycle()) {
+    if (Instance::Management().HasCycle()) {
       _timeSequence->RemoveStep(_timeSequence->Size() - 1);
       lock.unlock();
       Gtk::MessageDialog dialog(
@@ -223,7 +216,7 @@ void TimeSequencePropertiesWindow::onRemoveStep() {
   Gtk::TreeModel::iterator selIter = _stepsView.get_selection()->get_selected();
   if (selIter) {
     size_t index = (*selIter)[_stepsListColumns._step];
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
     _timeSequence->RemoveStep(index);
     lock.unlock();
 
@@ -232,12 +225,12 @@ void TimeSequencePropertiesWindow::onRemoveStep() {
 }
 
 void TimeSequencePropertiesWindow::onSustainChanged() {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   _timeSequence->SetSustain(_sustainCB.get_active());
 }
 
 void TimeSequencePropertiesWindow::onRepeatChanged() {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   if (_maxRepeatCB.get_active())
     _timeSequence->SetRepeatCount(_maxRepeatCount.get_value());
   else
@@ -245,7 +238,7 @@ void TimeSequencePropertiesWindow::onRepeatChanged() {
 }
 
 void TimeSequencePropertiesWindow::onTriggerTypeChanged() {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     if (_delayTriggerCheckButton.get_active())
@@ -259,7 +252,7 @@ void TimeSequencePropertiesWindow::onTriggerTypeChanged() {
 }
 
 void TimeSequencePropertiesWindow::onTriggerSpeedChanged(double newValue) {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->trigger.SetDelayInMs(newValue);
@@ -268,7 +261,7 @@ void TimeSequencePropertiesWindow::onTriggerSpeedChanged(double newValue) {
 }
 
 void TimeSequencePropertiesWindow::onTransitionSpeedChanged(double newValue) {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->transition.SetLengthInMs(newValue);
@@ -278,7 +271,7 @@ void TimeSequencePropertiesWindow::onTransitionSpeedChanged(double newValue) {
 
 void TimeSequencePropertiesWindow::onTransitionTypeChanged(
     theatre::TransitionType type) {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->transition.SetType(type);
@@ -287,7 +280,7 @@ void TimeSequencePropertiesWindow::onTransitionTypeChanged(
 }
 
 void TimeSequencePropertiesWindow::onSyncCountChanged() {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->trigger.SetDelayInSyncs(_synchronizationsCount.get_value());
@@ -296,7 +289,7 @@ void TimeSequencePropertiesWindow::onSyncCountChanged() {
 }
 
 void TimeSequencePropertiesWindow::onBeatSpeedChanged() {
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   theatre::TimeSequence::Step *step = selectedStep();
   if (step) {
     step->trigger.SetDelayInBeats(_beatSpeed.get_value());
@@ -318,7 +311,7 @@ void TimeSequencePropertiesWindow::onSelectedStepChanged() {
 
 void TimeSequencePropertiesWindow::loadStep(
     const theatre::TimeSequence::Step &step) {
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
   theatre::TriggerType triggerType = step.trigger.Type();
   theatre::TransitionType transitionType = step.transition.Type();
   double triggerSpeed = step.trigger.DelayInMs();
@@ -357,7 +350,7 @@ void TimeSequencePropertiesWindow::setStepSensitive(bool sensitive) {
 }
 
 void TimeSequencePropertiesWindow::onUpdateControllables() {
-  if (_management->Contains(*_timeSequence))
+  if (Instance::Management().Contains(*_timeSequence))
     load();
   else
     hide();

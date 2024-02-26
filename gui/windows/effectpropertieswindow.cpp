@@ -1,20 +1,20 @@
 #include "effectpropertieswindow.h"
-#include "mainwindow.h"
-
-#include "../dialogs/inputselectdialog.h"
-
-#include "../../theatre/effect.h"
-#include "../../theatre/management.h"
-#include "../../theatre/sourcevalue.h"
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
+#include "gui/eventtransmitter.h"
+#include "gui/instance.h"
+#include "gui/dialogs/inputselectdialog.h"
+#include "gui/mainwindow/mainwindow.h"
+
+#include "theatre/effect.h"
+#include "theatre/management.h"
+#include "theatre/sourcevalue.h"
+
 namespace glight::gui {
 
-EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
-                                               theatre::Management &management,
-                                               MainWindow &parentWindow)
+EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect)
     : PropertiesWindow(),
 
       _titleLabel("Effect " + effect.Name() + " (" +
@@ -24,14 +24,12 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect,
       _addConnectionButton("Add"),
       _removeConnectionButton("Remove"),
 
-      _effect(&effect),
-      _management(&management),
-      _parentWindow(parentWindow) {
+      _effect(&effect) {
   set_title("glight - " + effect.Name());
   set_size_request(650, 250);
 
-  parentWindow.SignalUpdateControllables().connect(
-      sigc::mem_fun(*this, &EffectPropertiesWindow::onUpdateControllables));
+  connections_.Add(Instance::Events().SignalUpdateControllables().connect(
+      sigc::mem_fun(*this, &EffectPropertiesWindow::onUpdateControllables)));
 
   _topBox.pack_start(_titleLabel);
 
@@ -85,7 +83,7 @@ theatre::FolderObject &EffectPropertiesWindow::GetObject() { return *_effect; }
 void EffectPropertiesWindow::fillConnectionsList() {
   _connectionsListModel->clear();
 
-  std::lock_guard<std::mutex> lock(_management->Mutex());
+  std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   for (size_t index = 0; index != _effect->Connections().size(); ++index) {
     Gtk::TreeModel::iterator iter = _connectionsListModel->append();
     const Gtk::TreeModel::Row &row = *iter;
@@ -128,10 +126,10 @@ void EffectPropertiesWindow::onRemoveConnectionClicked() {
 
 void EffectPropertiesWindow::onInputSelected(
     theatre::SourceValue *sourceValue) {
-  std::unique_lock<std::mutex> lock(_management->Mutex());
+  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
   _effect->AddConnection(sourceValue->GetControllable(),
                          sourceValue->InputIndex());
-  if (_management->HasCycle()) {
+  if (Instance::Management().HasCycle()) {
     _effect->RemoveConnection(_effect->Connections().size() - 1);
     lock.unlock();
     Gtk::MessageDialog dialog(
@@ -146,7 +144,7 @@ void EffectPropertiesWindow::onInputSelected(
 }
 
 void EffectPropertiesWindow::onUpdateControllables() {
-  if (_management->Contains(*_effect)) {
+  if (Instance::Management().Contains(*_effect)) {
     fillConnectionsList();
     _propertySet = theatre::PropertySet::Make(*_effect);
     _propertiesBox.SetPropertySet(_propertySet.get());

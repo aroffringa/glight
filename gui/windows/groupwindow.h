@@ -5,16 +5,15 @@
 
 #include "propertieswindow.h"
 
-#include "../components/fixturelist.h"
-#include "../components/reorderwidget.h"
+#include "gui/connectionmanager.h"
+#include "gui/components/fixturelist.h"
+#include "gui/components/reorderwidget.h"
 
 namespace glight::gui::windows {
 
 class GroupWindow final : public PropertiesWindow {
  public:
-  GroupWindow(theatre::FixtureGroup &group, theatre::Management &management,
-              EventTransmitter &hub);
-  ~GroupWindow();
+  GroupWindow(theatre::FixtureGroup &group);
 
   theatre::FolderObject &GetObject() override;
 
@@ -28,9 +27,7 @@ class GroupWindow final : public PropertiesWindow {
   components::FixtureList fixture_list_;
   Gtk::Button add_button_;
   components::ReorderWidget reorder_widget_;
-  theatre::Management &management_;
-  EventTransmitter &hub_;
-  sigc::connection group_deleted_connection_;
+  ConnectionManager connections_;
 };
 
 }  // namespace glight::gui::windows

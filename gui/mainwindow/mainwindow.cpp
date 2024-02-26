@@ -1,16 +1,26 @@
 #include "mainwindow.h"
 
-#include "fixturelistwindow.h"
-#include "fixturetypeswindow.h"
-#include "scenewindow.h"
+#include <filesystem>
+#include <fstream>
+#include <memory>
 
-#include "gui/designwizard.h"
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/icontheme.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
+
 #include "gui/instance.h"
-#include "gui/objectlistframe.h"
 
 #include "gui/components/visualizationwidget.h"
 
 #include "gui/faders/faderwindow.h"
+
+#include "gui/mainwindow/objectlistframe.h"
+
+#include "gui/windows/designwizard.h"
+#include "gui/windows/fixturelistwindow.h"
+#include "gui/windows/fixturetypeswindow.h"
+#include "gui/windows/scenewindow.h"
 
 #include "theatre/dmxdevice.h"
 #include "theatre/fixture.h"
@@ -23,15 +33,6 @@
 #include "system/writer.h"
 
 #include "system/midi/manager.h"
-
-#include <gtkmm/filechooserdialog.h>
-#include <gtkmm/icontheme.h>
-#include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
-
-#include <filesystem>
-#include <fstream>
-#include <memory>
 
 namespace glight::gui {
 
@@ -76,7 +77,7 @@ MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
   _state.FaderSetSignalChange().connect([&]() { onFaderListChange(); });
   addFaderWindow();
 
-  _objectListFrame = std::make_unique<ObjectListFrame>(*_management, *this);
+  _objectListFrame = std::make_unique<ObjectListFrame>(*this);
   revealer_.add(*_objectListFrame);
   revealer_.set_reveal_child(true);
   revealer_.set_transition_type(

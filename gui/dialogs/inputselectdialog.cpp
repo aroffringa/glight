@@ -7,7 +7,7 @@ namespace glight::gui {
 
 InputSelectDialog::InputSelectDialog(bool allow_stay_open)
     : Dialog("Select input", true),
-      _inputSelector(Instance::Management(), Instance::Events()),
+      _inputSelector(),
       _stayOpenCheckButton("Stay open") {
   set_size_request(600, 400);
 

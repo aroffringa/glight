@@ -1,26 +1,27 @@
 #include "designwizard.h"
-#include "eventtransmitter.h"
-#include "instance.h"
-
-#include "gui/state/guistate.h"
-
-#include "components/colorselectwidget.h"
-
-#include "../theatre/design/colorpreset.h"
-#include "../theatre/design/rotation.h"
-
-#include "../theatre/chase.h"
-#include "../theatre/colordeduction.h"
-#include "../theatre/fixture.h"
-#include "../theatre/fixturecontrol.h"
-#include "../theatre/folder.h"
-#include "../theatre/folderoperations.h"
-#include "../theatre/management.h"
-#include "../theatre/theatre.h"
-#include "../theatre/timesequence.h"
 
 #include <memory>
 #include <ranges>
+
+#include "gui/eventtransmitter.h"
+#include "gui/instance.h"
+
+#include "gui/components/colorselectwidget.h"
+
+#include "gui/state/guistate.h"
+
+#include "theatre/chase.h"
+#include "theatre/colordeduction.h"
+#include "theatre/fixture.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/folder.h"
+#include "theatre/folderoperations.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
+#include "theatre/timesequence.h"
+
+#include "theatre/design/colorpreset.h"
+#include "theatre/design/rotation.h"
 
 namespace glight::gui {
 
