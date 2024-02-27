@@ -555,8 +555,7 @@ void VisualizationWidget::onDesignFixtures() {
 
 void VisualizationWidget::onFixtureProperties() {
   if (!_propertiesWindow) {
-    _propertiesWindow = system::MakeDeletable<windows::FixtureProperties>(
-        *_eventTransmitter, *_management, *_globalSelection);
+    _propertiesWindow = system::MakeDeletable<windows::FixtureProperties>();
   }
   _propertiesWindow->present();
 }

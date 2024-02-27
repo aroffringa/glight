@@ -14,8 +14,8 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
-#include "gui/connectionmanager.h"
 #include "gui/recursionlock.h"
+#include "gui/scopedconnection.h"
 
 #include "gui/components/inputselectwidget.h"
 
@@ -79,7 +79,7 @@ class PresetCollectionWindow : public PropertiesWindow {
   RecursionLock _recursionLock;
 
   theatre::PresetCollection *_presetCollection;
-  ConnectionManager connections_;
+  ScopedConnection update_connection_;
 };
 
 }  // namespace glight::gui

@@ -28,8 +28,8 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect)
   set_title("glight - " + effect.Name());
   set_size_request(650, 250);
 
-  connections_.Add(Instance::Events().SignalUpdateControllables().connect(
-      sigc::mem_fun(*this, &EffectPropertiesWindow::onUpdateControllables)));
+  update_connection_ = Instance::Events().SignalUpdateControllables().connect(
+      sigc::mem_fun(*this, &EffectPropertiesWindow::onUpdateControllables));
 
   _topBox.pack_start(_titleLabel);
 

@@ -15,7 +15,7 @@
 
 #include "theatre/forwards.h"
 
-#include "gui/connectionmanager.h"
+#include "gui/scopedconnection.h"
 #include "gui/components/beatinput.h"
 #include "gui/components/durationinput.h"
 #include "gui/components/transitiontypebox.h"
@@ -62,7 +62,7 @@ class ChasePropertiesWindow : public PropertiesWindow {
 
   Gtk::Box _buttonBox;
   Gtk::Button _toTimeSequenceButton, _closeButton;
-  ConnectionManager connections_;
+  ScopedConnection update_connection_;
 
   theatre::Chase *_chase;
 };

@@ -95,7 +95,9 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   state.writer.Number("position-x", fixture.GetPosition().X());
   state.writer.Number("position-y", fixture.GetPosition().Y());
   state.writer.Number("direction", fixture.Direction());
-  state.writer.Number("tilt", fixture.Tilt());
+  if (fixture.Tilt() != 0.0) state.writer.Number("tilt", fixture.Tilt());
+  if (fixture.IsUpsideDown())
+    state.writer.Boolean("upside-down", fixture.IsUpsideDown());
   state.writer.String("symbol", fixture.Symbol().Name());
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =
       fixture.Functions();
