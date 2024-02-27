@@ -167,18 +167,23 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
   }
 }
 
-void ParseDmxChannel(const Object &node, DmxChannel &dmxChannel) {
-  dmxChannel.SetUniverse(ToNum(node["universe"]).AsInt());
-  dmxChannel.SetChannel(ToNum(node["channel"]).AsInt());
+DmxChannel ParseDmxChannel(const Object &node) {
+  DmxChannel channel;
+  channel.SetUniverse(ToNum(node["universe"]).AsInt());
+  channel.SetChannel(ToNum(node["channel"]).AsInt());
+  return channel;
 }
 
 void ParseFixtureFunction(const Object &node, Fixture &parentFixture) {
   FixtureFunction &function =
       parentFixture.AddFunction(GetFunctionType(ToStr(node["type"])));
   ParseNameAttr(node, function);
-  DmxChannel channel;
-  ParseDmxChannel(ToObj(node["dmx-channel"]), channel);
-  function.SetChannel(channel);
+  DmxChannel main_channel = ParseDmxChannel(ToObj(node["dmx-channel"]));
+  std::optional<DmxChannel> fine_channel;
+  if (node.contains("dmx-fine-channel")) {
+    fine_channel = ParseDmxChannel(ToObj(node["dmx-fine-channel"]));
+  }
+  function.SetChannel(main_channel, fine_channel);
 }
 
 void ParseFixtures(const json::Array &node, Theatre &theatre) {

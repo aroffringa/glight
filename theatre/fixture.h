@@ -75,12 +75,16 @@ class Fixture : public NamedObject {
   double Tilt() const { return tilt_; }
   void SetTilt(double tilt) { tilt_ = tilt; }
 
+  bool IsUpsideDown() const { return is_upside_down_; }
+  void SetUpsideDown(bool is_upside_down) { is_upside_down_ = is_upside_down; }
+
  private:
   Theatre &theatre_;
   const FixtureType &type_;
   Position position_;
   double direction_ = 0.5 * M_PI;
   double tilt_ = 0.0;
+  bool is_upside_down_ = false;
   FixtureSymbol symbol_;
   std::vector<std::unique_ptr<FixtureFunction>> functions_;
 };

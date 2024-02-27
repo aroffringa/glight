@@ -218,11 +218,11 @@ void RenderEngine::DrawSnapshot(
 void RenderEngine::DrawSelectionRectangle(
     const Cairo::RefPtr<Cairo::Context> &cairo, const theatre::Position &from,
     const theatre::Position &to) const {
-  const std::pair<double, double> size = to - from;
+  const theatre::Position size = to - from;
   cairo->save();
   cairo->scale(scale_, scale_);
   cairo->set_line_width(2.0 / scale_);
-  cairo->rectangle(from.X(), from.Y(), size.first, size.second);
+  cairo->rectangle(from.X(), from.Y(), size.X(), size.Y());
   cairo->set_source_rgba(0.2, 0.2, 1.0, 0.5);
   cairo->fill_preserve();
   cairo->set_source_rgba(0.5, 0.5, 1.0, 0.8);

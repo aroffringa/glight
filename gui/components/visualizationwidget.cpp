@@ -15,6 +15,7 @@
 
 #include "theatre/dmxdevice.h"
 #include "theatre/fixture.h"
+#include "theatre/fixturecontrol.h"
 #include "theatre/fixturegroup.h"
 #include "theatre/management.h"
 #include "theatre/managementtools.h"
@@ -41,10 +42,10 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
       main_window_(showWindow),
       _isInitialized(false),
       _isTimerRunning(false),
-      _dragType(NotDragging),
+      _dragType(MouseState::Normal),
 
       render_engine_(*management) {
-  set_size_request(600, 200);
+  set_size_request(64, 64);
 
   _globalSelectionConnection = _globalSelection->SignalChange().connect(
       [&]() { onGlobalSelectionChanged(); });
@@ -85,6 +86,10 @@ void VisualizationWidget::inializeContextMenu() {
   set_menu_.add(mi_set_off_);
   mi_set_color_.signal_activate().connect([&]() { OnSetColor(); });
   set_menu_.add(mi_set_color_);
+
+  mi_track_pan_.signal_activate().connect([&]() { OnTrackWithPan(); });
+  set_menu_.add(mi_track_pan_);
+
   mi_set_menu_.set_submenu(set_menu_);
   _popupMenu.add(mi_set_menu_);
 
@@ -259,7 +264,8 @@ void VisualizationWidget::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
 
   drawFixtures(cairo, _selectedFixtures, width, height);
 
-  if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
+  if (_dragType == MouseState::DragRectangle ||
+      _dragType == MouseState::DragAddRectangle) {
     render_engine_.DrawSelectionRectangle(cairo, _draggingStart, _draggingTo);
   }
 }
@@ -309,13 +315,13 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
     if (event->button == 1) {
       _draggingStart = pos;
       if (shift) {
-        _dragType = DragAddRectangle;
+        _dragType = MouseState::DragAddRectangle;
         _draggingTo = pos;
         _selectedFixturesBeforeDrag = _selectedFixtures;
       } else if (!_selectedFixtures.empty()) {
-        _dragType = DragFixture;
+        _dragType = MouseState::DragFixture;
       } else {
-        _dragType = DragRectangle;
+        _dragType = MouseState::DragRectangle;
         _draggingTo = pos;
       }
       queue_draw();
@@ -342,43 +348,49 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
 
 bool VisualizationWidget::onButtonRelease(GdkEventButton *event) {
   if (event->button == 1) {
-    if (_dragType == DragFixture) {
+    if (_dragType == MouseState::DragFixture) {
       // TODO correct width/height for layout
       _draggingStart = render_engine_.MouseToPosition(
           event->x, event->y, get_width(), get_height());
-    } else if (_dragType == DragRectangle || _dragType == DragAddRectangle) {
     }
-    _globalSelection->SetSelection(_selectedFixtures);
-    _dragType = NotDragging;
-    _selectedFixturesBeforeDrag.clear();
-    queue_draw();
+    if (_dragType == MouseState::TrackPan) {
+      _dragType = MouseState::Normal;
+    } else {
+      _globalSelection->SetSelection(_selectedFixtures);
+      _dragType = MouseState::Normal;
+      _selectedFixturesBeforeDrag.clear();
+      queue_draw();
+    }
   }
   return true;
 }
 
 bool VisualizationWidget::onMotion(GdkEventMotion *event) {
-  if (_dragType != NotDragging) {
+  if (_dragType != MouseState::Normal) {
     const double width = get_width();
     const double height = get_height();
     const theatre::Position pos =
         render_engine_.MouseToPosition(event->x, event->y, width, height);
     switch (_dragType) {
-      case NotDragging:
+      case MouseState::Normal:
         break;
-      case DragFixture:
+      case MouseState::DragFixture:
         if (!Instance::State().LayoutLocked()) {
           for (theatre::Fixture *fixture : _selectedFixtures)
             fixture->GetPosition() += pos - _draggingStart;
           _draggingStart = pos;
         }
         break;
-      case DragRectangle:
+      case MouseState::DragRectangle:
         _draggingTo = pos;
         selectFixtures(_draggingStart, _draggingTo);
         break;
-      case DragAddRectangle:
+      case MouseState::DragAddRectangle:
         _draggingTo = pos;
         addFixtures(_draggingStart, _draggingTo);
+        break;
+      case MouseState::TrackPan:
+        SetPan(pos);
         break;
     }
     queue_draw();
@@ -609,6 +621,43 @@ bool VisualizationWidget::onTimeout() {
     Update();
   }
   return true;
+}
+
+void VisualizationWidget::OnTrackWithPan() { _dragType = MouseState::TrackPan; }
+
+void VisualizationWidget::SetPan(const theatre::Position &position) {
+  theatre::Management &management = Instance::Management();
+  bool is_changed = false;
+  for (theatre::Fixture *fixture : _selectedFixtures) {
+    if (fixture->Type().CanBeamRotate()) {
+      constexpr theatre::Position offset(0.5, 0.5);
+      const theatre::Position direction =
+          position - fixture->GetPosition() - offset;
+      const bool is_zero = direction.Y() == 0.0 && direction.X() == 0.0;
+      const double angle =
+          is_zero ? 0.0 : std::atan2(direction.Y(), direction.X());
+      double d_angle = angle - fixture->Direction();
+      double min_pan = fixture->Type().MinPan();
+      double max_pan = fixture->Type().MaxPan();
+      if (fixture->IsUpsideDown()) {
+        std::swap(min_pan, max_pan);
+      }
+      if (d_angle > std::max(min_pan, max_pan))
+        d_angle -= 2.0 * M_PI;
+      else if (d_angle < std::min(min_pan, max_pan))
+        d_angle += 2.0 * M_PI;
+      const double scaling = d_angle / (max_pan - min_pan) + 0.5;
+      theatre::FixtureControl &control = management.GetFixtureControl(*fixture);
+      for (size_t i = 0; i != control.NInputs(); ++i) {
+        if (control.InputType(i) == theatre::FunctionType::Pan) {
+          theatre::SourceValue *source = management.GetSourceValue(control, i);
+          source->A().Set(theatre::ControlValue::FromRatio(scaling).UInt());
+          is_changed = true;
+        }
+      }
+    }
+  }
+  if (is_changed) Update();
 }
 
 }  // namespace glight::gui
