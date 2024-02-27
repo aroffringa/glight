@@ -32,8 +32,8 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase)
       _closeButton("Close"),
 
       _chase(&chase) {
-  connections_.Add(Instance::Events().SignalUpdateControllables().connect(
-      sigc::mem_fun(*this, &ChasePropertiesWindow::onUpdateControllables)));
+  update_connection_ = Instance::Events().SignalUpdateControllables().connect(
+      sigc::mem_fun(*this, &ChasePropertiesWindow::onUpdateControllables));
 
   set_title(chase.Name() + " — glight");
 

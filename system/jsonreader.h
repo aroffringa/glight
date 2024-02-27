@@ -112,6 +112,12 @@ inline bool OptionalBool(const Object &parent, const char *name,
 inline const Number &ToNum(const Node &node) {
   return dynamic_cast<const Number &>(node);
 }
+inline bool OptionalDouble(const Object &parent, const char *name,
+                           double default_value) {
+  const Object::const_iterator iter = parent.find(name);
+  return iter == parent.end() ? default_value : ToNum(*iter).AsDouble();
+}
+
 inline const Object &ToObj(const Node &node) {
   return dynamic_cast<const Object &>(node);
 }

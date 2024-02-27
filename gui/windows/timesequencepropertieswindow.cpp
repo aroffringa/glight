@@ -34,9 +34,9 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
       _transitionDuration("Duration (s):", 500.0),
 
       _timeSequence(&timeSequence) {
-  connections_.Add(
+  update_connection_ =
       Instance::Events().SignalUpdateControllables().connect(sigc::mem_fun(
-          *this, &TimeSequencePropertiesWindow::onUpdateControllables)));
+          *this, &TimeSequencePropertiesWindow::onUpdateControllables));
 
   set_title("glight - " + timeSequence.Name());
 

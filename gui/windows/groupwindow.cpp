@@ -22,7 +22,7 @@ GroupWindow::GroupWindow(theatre::FixtureGroup& group)
   add_button_.set_image_from_icon_name("go-next");
   box_.pack_start(reorder_widget_);
   reorder_widget_.SignalChanged().connect([&]() { StoreGroup(); });
-  connections_.Add(group.SignalDelete().connect([&]() { hide(); }));
+  group_delete_connection_ = group.SignalDelete().connect([&]() { hide(); });
   add(box_);
   show_all_children();
   LoadGroup();

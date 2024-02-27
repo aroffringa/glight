@@ -15,8 +15,8 @@ PresetCollectionWindow::PresetCollectionWindow(
       _inputSelector(),
       _controlValueLabel("Value:"),
       _presetCollection(&presetCollection) {
-  connections_.Add(Instance::Events().SignalUpdateControllables().connect(
-      sigc::mem_fun(*this, &PresetCollectionWindow::onUpdateControllables)));
+  update_connection_ = Instance::Events().SignalUpdateControllables().connect(
+      sigc::mem_fun(*this, &PresetCollectionWindow::onUpdateControllables));
 
   set_title("glight - " + presetCollection.Name());
 

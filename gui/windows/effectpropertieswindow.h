@@ -5,7 +5,7 @@
 
 #include "theatre/forwards.h"
 
-#include "gui/connectionmanager.h"
+#include "gui/scopedconnection.h"
 #include "gui/components/propertiesbox.h"
 
 #include <gtkmm/frame.h>
@@ -52,7 +52,7 @@ class EffectPropertiesWindow : public PropertiesWindow {
   Gtk::Frame _connectionsFrame, _propertiesFrame;
   std::unique_ptr<theatre::PropertySet> _propertySet;
   PropertiesBox _propertiesBox;
-  ConnectionManager connections_;
+  ScopedConnection update_connection_;
 
   Gtk::ScrolledWindow _connectionsScrolledWindow;
   Gtk::Box _connectionsButtonBox;

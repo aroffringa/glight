@@ -60,7 +60,11 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
     if (c != theatre::Color::Black() && type.MinBeamAngle() > 0.0) {
       double direction = fixture.Direction();
       if (type.CanBeamRotate()) {
-        direction += type.GetPan(fixture, data.snapshot, shape_index);
+        const double pan = type.GetPan(fixture, data.snapshot, shape_index);
+        if (fixture.IsUpsideDown())
+          direction -= pan;
+        else
+          direction += pan;
       }
 
       const double beam_angle =
