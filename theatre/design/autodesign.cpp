@@ -2,16 +2,17 @@
 
 #include "colorpreset.h"
 
-#include "../chase.h"
-#include "../color.h"
-#include "../controllable.h"
-#include "../folder.h"
-#include "../management.h"
-#include "../presetcollection.h"
-#include "../sequence.h"
+#include "theatre/chase.h"
+#include "theatre/color.h"
+#include "theatre/controllable.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/presetcollection.h"
+#include "theatre/sequence.h"
 
-#include "../effects/audioleveleffect.h"
-#include "../effects/thresholdeffect.h"
+#include "theatre/effects/audioleveleffect.h"
+#include "theatre/effects/flickereffect.h"
+#include "theatre/effects/thresholdeffect.h"
 
 #include <algorithm>
 #include <random>
@@ -349,6 +350,35 @@ Chase &AutoDesign::MakeIncreasingChase(
     management.AddSourceValue(pc, 0);
   }
   return chase;
+}
+
+Effect &AutoDesign::MakeFire(Management &management, Folder &destination,
+                             const std::vector<Controllable *> &controllables,
+                             const std::vector<ColorOrVariable> &colors,
+                             const ColorDeduction &deduction) {
+  std::unique_ptr<FlickerEffect> flicker = std::make_unique<FlickerEffect>();
+  flicker->SetSpeed(ControlValue::MaxUInt() / 333);
+  flicker->SetName(destination.GetAvailableName("Fire"));
+  Effect &parent = management.AddEffect(std::move(flicker), destination);
+  for (size_t inp = 0; inp != parent.NInputs(); ++inp)
+    management.AddSourceValue(parent, inp);
+  for (size_t i = 0; i != controllables.size(); ++i) {
+    Controllable *controllable = controllables[i];
+    if (colors.size() == 1) {
+      PresetCollection &preset = MakeColorPreset(
+          management, destination, {controllable}, colors, deduction);
+      parent.AddConnection(preset, 0);
+    } else {
+      Chase &chase =
+          MakeColorShift(management, destination, {controllable}, colors,
+                         deduction, ShiftType::IncreasingShift);
+      parent.AddConnection(chase, 0);
+      chase.GetTransition().SetType(TransitionType::Fade);
+      chase.GetTransition().SetLengthInMs(300 + i);
+      chase.GetTrigger().SetDelayInMs(0);
+    }
+  }
+  return parent;
 }
 
 }  // namespace glight::theatre

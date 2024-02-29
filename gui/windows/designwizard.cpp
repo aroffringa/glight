@@ -12,6 +12,7 @@
 
 #include "theatre/chase.h"
 #include "theatre/colordeduction.h"
+#include "theatre/effect.h"
 #include "theatre/fixture.h"
 #include "theatre/fixturecontrol.h"
 #include "theatre/folder.h"
@@ -43,6 +44,7 @@ DesignWizard::DesignWizard()
       _increaseBtn("Increasing colours"),
       _rotationBtn("Rotating colours"),
       _vuMeterBtn("VU meter"),
+      _fireBtn("Fire"),
       _deduceWhite("White from RGB"),
       _deduceAmber("Amber from RGB"),
       _deduceUV("UV from RGB"),
@@ -154,6 +156,8 @@ void DesignWizard::initPage2() {
   _vBoxPage3Type.pack_start(_rotationBtn);
   _vuMeterBtn.set_group(group);
   _vBoxPage3Type.pack_start(_vuMeterBtn);
+  _fireBtn.set_group(group);
+  _vBoxPage3Type.pack_start(_fireBtn);
 
   _typeFrameP3.add(_vBoxPage3Type);
   _vBoxPage3.pack_start(_typeFrameP3);
@@ -256,6 +260,11 @@ void DesignWizard::initPage4_7Rotation() {
   _vBoxPage4.pack_start(_rotBackwardRB, false, false);
   _rotForwardReturnRB.set_group(group);
   _vBoxPage4.pack_start(_rotForwardReturnRB, false, false);
+}
+
+void DesignWizard::initPage4_8Fire() {
+  initPage4Destination("Fire");
+  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
 }
 
 void DesignWizard::initPage4Destination(const std::string &name) {
@@ -368,13 +377,20 @@ void DesignWizard::onNextClicked() {
         _mainBox.pack_start(_vBoxPage4, true, true);
         _vBoxPage4.show_all();
         _currentPage = Page4_6_Increasing;
-      } else {  // _rotationBtn.get_active()
+      } else if (_rotationBtn.get_active()) {
         initPage4_7Rotation();
         _colorsWidgetP4.SetMinCount(_selectedControllables.size());
         _colorsWidgetP4.SetMaxCount(0);
         _mainBox.pack_start(_vBoxPage4, true, true);
         _vBoxPage4.show_all();
         _currentPage = Page4_7_Rotation;
+      } else {
+        initPage4_8Fire();
+        _colorsWidgetP4.SetMinCount(1);
+        _colorsWidgetP4.SetMaxCount(0);
+        _mainBox.pack_start(_vBoxPage4, true, true);
+        _vBoxPage4.show_all();
+        _currentPage = Page4_8_Fire;
       }
       break;
 
@@ -497,6 +513,16 @@ void DesignWizard::onNextClicked() {
           _colorsWidgetP4.GetSelection(), colorDeduction(), type);
       events.EmitUpdate();
       Assign(rotation);
+      hide();
+    } break;
+
+    case Page4_8_Fire: {
+      using theatre::RotationType;
+      theatre::Effect &fire = AutoDesign::MakeFire(
+          management, makeDestinationFolder(), _selectedControllables,
+          _colorsWidgetP4.GetSelection(), colorDeduction());
+      events.EmitUpdate();
+      Assign(fire);
       hide();
     } break;
   }

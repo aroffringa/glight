@@ -71,6 +71,11 @@ class AutoDesign {
       const std::vector<Controllable *> &controllables,
       const std::vector<ColorOrVariable> &colors,
       const ColorDeduction &deduction, IncreasingType incType);
+
+  static Effect &MakeFire(Management &management, Folder &destination,
+                          const std::vector<Controllable *> &controllables,
+                          const std::vector<ColorOrVariable> &colors,
+                          const ColorDeduction &deduction);
 };
 
 }  // namespace glight::theatre

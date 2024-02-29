@@ -52,7 +52,8 @@ class DesignWizard : public Gtk::Window {
     Page4_4_VUMeter,
     Page4_5_ColorPreset,
     Page4_6_Increasing,
-    Page4_7_Rotation
+    Page4_7_Rotation,
+    Page4_8_Fire
   };
 
   void onNextClicked();
@@ -65,6 +66,7 @@ class DesignWizard : public Gtk::Window {
   void initPage4_5ColorPreset();
   void initPage4_6Increasing();
   void initPage4_7Rotation();
+  void initPage4_8Fire();
   void initPage4Destination(const std::string &name);
   theatre::Folder &getCurrentFolder() const;
   theatre::Folder &makeDestinationFolder() const;
@@ -100,7 +102,7 @@ class DesignWizard : public Gtk::Window {
   Gtk::VBox _vBoxPage3, _vBoxPage3Type, _vBoxPage3Deduction;
   Gtk::Frame _typeFrameP3, _deductionFrameP3;
   Gtk::RadioButton _colorPresetBtn, _runningLightBtn, _singleColorBtn,
-      _shiftColorsBtn, _increaseBtn, _rotationBtn, _vuMeterBtn;
+      _shiftColorsBtn, _increaseBtn, _rotationBtn, _vuMeterBtn, _fireBtn;
   Gtk::CheckButton _deduceWhite, _deduceAmber, _deduceUV, _deduceLime;
 
   // Page 4 common widgets
