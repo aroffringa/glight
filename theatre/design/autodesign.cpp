@@ -362,6 +362,8 @@ Effect &AutoDesign::MakeFire(Management &management, Folder &destination,
   Effect &parent = management.AddEffect(std::move(flicker), destination);
   for (size_t inp = 0; inp != parent.NInputs(); ++inp)
     management.AddSourceValue(parent, inp);
+  std::mt19937 mt;
+  std::uniform_int_distribution uniform(0, 10);
   for (size_t i = 0; i != controllables.size(); ++i) {
     Controllable *controllable = controllables[i];
     if (colors.size() == 1) {
@@ -374,7 +376,7 @@ Effect &AutoDesign::MakeFire(Management &management, Folder &destination,
                          deduction, ShiftType::IncreasingShift);
       parent.AddConnection(chase, 0);
       chase.GetTransition().SetType(TransitionType::Fade);
-      chase.GetTransition().SetLengthInMs(300 + i);
+      chase.GetTransition().SetLengthInMs(300 + i + uniform(mt) * 10);
       chase.GetTrigger().SetDelayInMs(0);
     }
   }

@@ -9,7 +9,7 @@
 namespace glight::theatre {
 
 std::vector<std::string> GetDefaultColorSequences() {
-  return {"Primary", "Fire", "Pastel", "Rainbow"};
+  return {"Primary", "Fire", "Pastel", "Rainbow", "Sea"};
 }
 
 std::vector<std::pair<unsigned, Color>> GetDefaultColorSequence(
@@ -26,6 +26,11 @@ std::vector<std::pair<unsigned, Color>> GetDefaultColorSequence(
             {3, Color(255, 128, 0)},   {4, Color(255, 32, 0)},
             {6, Color(255, 255, 0)},   {8, Color(255, 0, 0)},
             {9, Color(255, 192, 0)},   {10, Color(255, 32, 32)}};
+  } else if (name == "Sea") {
+    return {{0, Color(0, 0, 255)},   {1, Color(0, 255, 128)},
+            {2, Color(0, 128, 255)}, {3, Color(0, 255, 255)},
+            {5, Color(0, 0, 255)},   {4, Color(0, 255, 128)},
+            {6, Color(0, 64, 255)},  {7, Color(0, 255, 192)}};
   } else if (name == "Pastel") {
     return {{6, Color(255, 192, 128)}, {5, Color(128, 255, 255)},
             {0, Color(255, 128, 128)}, {1, Color(128, 255, 128)},
