@@ -33,7 +33,9 @@ class ObjectList : public Gtk::ScrolledWindow {
     fillList();
   }
 
-  theatre::FolderObject *SelectedObject();
+  theatre::FolderObject *SelectedObject() const;
+
+  std::vector<theatre::FolderObject *> Selection() const;
 
   sigc::signal<void()> &SignalSelectionChange() {
     return _signalSelectionChange;
@@ -58,6 +60,13 @@ class ObjectList : public Gtk::ScrolledWindow {
 
   void SetShowTypeColumn(bool showTypeColumn);
   bool ShowTypeColumn() const { return _showTypeColumn; }
+
+  void SetAllowMultiSelection(bool allow_multi_selection) {
+    _listView.get_selection()->set_mode(allow_multi_selection
+                                            ? Gtk::SELECTION_MULTIPLE
+                                            : Gtk::SELECTION_SINGLE);
+    _listView.set_rubber_banding(allow_multi_selection);
+  }
 
  private:
   enum ObjectListType _displayType = ObjectListType::AllExceptFixtures;

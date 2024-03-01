@@ -5,14 +5,11 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/frame.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/separator.h>
 #include <gtkmm/treeview.h>
-#include <gtkmm/window.h>
 
 #include "gui/recursionlock.h"
 #include "gui/scopedconnection.h"
@@ -20,8 +17,6 @@
 #include "gui/components/inputselectwidget.h"
 
 #include "theatre/forwards.h"
-#include "theatre/presetcollection.h"
-#include "theatre/transition.h"
 
 namespace glight::gui {
 

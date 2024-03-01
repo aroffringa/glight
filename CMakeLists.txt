@@ -90,6 +90,7 @@ set(GUIFILES
   gui/components/visualizationwidget.cpp
   gui/dialogs/createchasedialog.cpp
   gui/dialogs/inputselectdialog.cpp
+  gui/dialogs/multicontrollableselectiondialog.cpp
   gui/dialogs/sceneselect.cpp
   gui/faders/colorcontrolwidget.cpp
   gui/faders/combocontrolwidget.cpp

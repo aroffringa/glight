@@ -30,13 +30,16 @@ class ControlValue {
     return ControlValue(
         static_cast<unsigned>(std::clamp(ratio, 0.0, 1.0) * MaxUInt()));
   }
+  constexpr static ControlValue FromChar(char value) noexcept {
+    return ControlValue(static_cast<unsigned>(value) * MaxUInt() / 255);
+  }
   constexpr static unsigned MaxUInt() noexcept { return (1 << 24) - 1; }
 
   constexpr static unsigned Invert(unsigned value) noexcept {
     return MaxUInt() - value;
   }
   constexpr static unsigned CharToValue(unsigned char value) noexcept {
-    return (static_cast<unsigned>(value) * MaxUInt()) >> 8;
+    return (static_cast<unsigned>(value) * MaxUInt()) / 255;
   }
 
   static unsigned Mix(unsigned firstValue, unsigned secondValue,

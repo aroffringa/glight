@@ -5,7 +5,7 @@
 
 #include "gui/state/faderstate.h"
 
-#include "gui/dialogs/controllableselectdialog.h"
+#include "gui/dialogs/controllableselectiondialog.h"
 
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
@@ -143,7 +143,7 @@ void ColorControlWidget::UpdateDisplaySettings() {
 }
 
 void ColorControlWidget::ShowAssignControllableDialog() {
-  ControllableSelectDialog dialog("Select item for color control", false);
+  ControllableSelectionDialog dialog("Select item for color control", false);
   dialog.SetFilter(ObjectListType::All);
   if (dialog.run() == Gtk::RESPONSE_OK) {
     theatre::Controllable *controllable =

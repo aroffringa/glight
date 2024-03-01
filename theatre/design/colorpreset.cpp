@@ -14,70 +14,104 @@ namespace glight::theatre {
 void AddPresetValue(Management &management, Controllable &control,
                     PresetCollection &pc, const Color &color,
                     const ColorDeduction &deduction) {
-  const unsigned red = color.Red() * ((1 << 24) - 1) / 255;
-  const unsigned green = color.Green() * ((1 << 24) - 1) / 255;
-  const unsigned blue = color.Blue() * ((1 << 24) - 1) / 255;
-  const bool is_zero = (red == 0 && green == 0 && blue == 0);
+  const ControlValue red = ControlValue::FromChar(color.Red());
+  const ControlValue green = ControlValue::FromChar(color.Green());
+  const ControlValue blue = ControlValue::FromChar(color.Blue());
+  const bool is_zero = !red && !green && !blue;
   const unsigned master = is_zero ? 0 : (1 << 24) - 1;
 
   for (size_t i = 0; i != control.NInputs(); ++i) {
-    const std::vector<Color> colors = control.InputColors(i);
-    Color c = Color::Black();
-    if (!colors.empty()) c = colors[0];
+    const FunctionType type = control.InputType(i);
     SourceValue *sourceValue = management.GetSourceValue(control, i);
-    if (control.InputType(i) == FunctionType::Master && master != 0) {
-      pc.AddPresetValue(sourceValue->GetControllable(),
-                        sourceValue->InputIndex())
-          .SetValue(ControlValue(master));
-    } else if (c == Color::White()) {
-      if (deduction.whiteFromRGB) {
-        const unsigned white = std::min(red, std::min(green, blue));
-        if (white != 0) {
-          pc.AddPresetValue(sourceValue->GetControllable(),
-                            sourceValue->InputIndex())
-              .SetValue(ControlValue(white));
+    switch (type) {
+      case FunctionType::Master:
+        if (master != 0) {
+          pc.AddPresetValue(control, sourceValue->InputIndex())
+              .SetValue(ControlValue(master));
         }
-      }
-    } else if (c == Color::Amber()) {
-      if (deduction.amberFromRGB) {
-        const unsigned amber = std::min(red / 2, green) * 2;
-        if (amber != 0) {
-          pc.AddPresetValue(sourceValue->GetControllable(),
-                            sourceValue->InputIndex())
-              .SetValue(ControlValue(amber));
+        break;
+      case FunctionType::Red:
+        if (red) {
+          pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(red);
         }
-      }
-    } else if (c == Color::UV()) {
-      if (deduction.uvFromRGB) {
-        const unsigned uv = std::min(blue / 3, red) * 3;
-        if (uv != 0) {
-          pc.AddPresetValue(sourceValue->GetControllable(),
-                            sourceValue->InputIndex())
-              .SetValue(ControlValue(uv));
+        break;
+      case FunctionType::Green:
+        if (green) {
+          pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(green);
         }
-      }
-    } else if (c == Color::Lime()) {
-      if (deduction.limeFromRGB) {
-        const unsigned lime = std::min(green / 2, red) * 2;
-        if (lime != 0) {
-          pc.AddPresetValue(sourceValue->GetControllable(),
-                            sourceValue->InputIndex())
-              .SetValue(ControlValue(lime));
+        break;
+      case FunctionType::Blue:
+        if (blue) {
+          pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(blue);
         }
-      }
-    } else {
-      if (c.Red() != 0 && red != 0)
-        pc.AddPresetValue(sourceValue->GetControllable(),
-                          sourceValue->InputIndex())
-            .SetValue(ControlValue(red));
-      if (c.Green() != 0 && green != 0)
-        pc.AddPresetValue(sourceValue->GetControllable(),
-                          sourceValue->InputIndex())
-            .SetValue(ControlValue(green));
-      if (c.Blue() != 0 && blue != 0)
-        pc.AddPresetValue(sourceValue->GetControllable(),
-                          sourceValue->InputIndex())
-            .SetValue(ControlValue(blue));
+        break;
+      case FunctionType::White:
+        if (deduction.whiteFromRGB) {
+          const ControlValue white = DeduceWhite(red, green, blue);
+          if (white) {
+            pc.AddPresetValue(control, sourceValue->InputIndex())
+                .SetValue(ControlValue(white));
+          }
+        }
+        break;
+      case FunctionType::WarmWhite:
+        if (deduction.whiteFromRGB) {
+          const ControlValue ww = DeduceWarmWhite(red, green, blue);
+          if (ww) {
+            pc.AddPresetValue(control, sourceValue->InputIndex())
+                .SetValue(ControlValue(ww));
+          }
+        }
+        break;
+      case FunctionType::ColdWhite:
+        if (deduction.whiteFromRGB) {
+          const ControlValue cw = DeduceColdWhite(red, green, blue);
+          if (cw) {
+            pc.AddPresetValue(control, sourceValue->InputIndex())
+                .SetValue(ControlValue(cw));
+          }
+        }
+        break;
+      case FunctionType::Amber:
+        if (deduction.amberFromRGB) {
+          const ControlValue amber = DeduceAmber(red, green, blue);
+          if (amber) {
+            pc.AddPresetValue(control, sourceValue->InputIndex())
+                .SetValue(amber);
+          }
+        }
+        break;
+      case FunctionType::UV:
+        if (deduction.uvFromRGB) {
+          const ControlValue uv = DeduceUv(red, green, blue);
+          if (uv) {
+            pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(uv);
+          }
+        }
+        break;
+      case FunctionType::Lime:
+        if (deduction.limeFromRGB) {
+          const ControlValue lime = DeduceLime(red, green, blue);
+          if (lime) {
+            pc.AddPresetValue(control, sourceValue->InputIndex())
+                .SetValue(lime);
+          }
+        }
+        break;
+      case FunctionType::ColorMacro:
+      case FunctionType::Strobe:
+      case FunctionType::Pulse:
+      case FunctionType::RotationSpeed:
+      case FunctionType::Pan:
+      case FunctionType::Tilt:
+      case FunctionType::Zoom:
+      case FunctionType::Effect:
+      case FunctionType::ColorTemperature:
+      case FunctionType::Hue:
+      case FunctionType::Saturation:
+      case FunctionType::Lightness:
+      case FunctionType::Unknown:
+        break;
     }
   }
 }
