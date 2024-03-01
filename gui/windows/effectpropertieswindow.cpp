@@ -6,6 +6,7 @@
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
 #include "gui/dialogs/inputselectdialog.h"
+#include "gui/dialogs/multicontrollableselectiondialog.h"
 #include "gui/mainwindow/mainwindow.h"
 
 #include "theatre/effect.h"
@@ -14,16 +15,10 @@
 
 namespace glight::gui {
 
-EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect)
+EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect& effect)
     : PropertiesWindow(),
-
       _titleLabel("Effect " + effect.Name() + " (" +
                   EffectTypeToName(effect.GetType()) + ")"),
-      _connectionsFrame("Connections"),
-      _propertiesFrame("Properties"),
-      _addConnectionButton("Add"),
-      _removeConnectionButton("Remove"),
-
       _effect(&effect) {
   set_title("glight - " + effect.Name());
   set_size_request(650, 250);
@@ -39,6 +34,11 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect)
   _connectionsButtonBox.set_homogeneous(true);
   _connectionsButtonBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
   _connectionsButtonBox.pack_start(_addConnectionButton);
+
+  _connectControllablesButton.set_image_from_icon_name("folder");
+  _connectControllablesButton.signal_clicked().connect(sigc::mem_fun(
+      *this, &EffectPropertiesWindow::onConnectControllableClicked));
+  _connectionsButtonBox.pack_start(_connectControllablesButton);
 
   _removeConnectionButton.set_image_from_icon_name("list-remove");
   _removeConnectionButton.signal_clicked().connect(
@@ -78,7 +78,7 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect &effect)
   show_all_children();
 }
 
-theatre::FolderObject &EffectPropertiesWindow::GetObject() { return *_effect; }
+theatre::FolderObject& EffectPropertiesWindow::GetObject() { return *_effect; }
 
 void EffectPropertiesWindow::fillConnectionsList() {
   _connectionsListModel->clear();
@@ -86,7 +86,7 @@ void EffectPropertiesWindow::fillConnectionsList() {
   std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   for (size_t index = 0; index != _effect->Connections().size(); ++index) {
     Gtk::TreeModel::iterator iter = _connectionsListModel->append();
-    const Gtk::TreeModel::Row &row = *iter;
+    const Gtk::TreeModel::Row& row = *iter;
     row[_connectionsListColumns._title] =
         _effect->Connections()[index].first->InputName(
             _effect->Connections()[index].second);
@@ -109,10 +109,29 @@ void EffectPropertiesWindow::onAddConnectionClicked() {
   do {
     stay_open = false;
     if (dialog.run() == Gtk::RESPONSE_OK) {
-      onInputSelected(dialog.SelectedSourceValue());
+      onInputsSelected({dialog.SelectedSourceValue()});
       stay_open = dialog.StayOpenRequested();
     }
   } while (stay_open);
+}
+
+void EffectPropertiesWindow::onConnectControllableClicked() {
+  MultiControllableSelectionDialog dialog;
+  if (dialog.run() == Gtk::RESPONSE_OK) {
+    std::vector<theatre::SourceValue*> sources;
+    for (theatre::Controllable* controllable : dialog.GetSelection()) {
+      for (size_t i = 0; i != controllable->NInputs(); ++i) {
+        const theatre::FunctionType input_type = controllable->InputType(i);
+        if (IsColor(input_type) ||
+            input_type == theatre::FunctionType::Master) {
+          glight::theatre::SourceValue* source_value =
+              Instance::Management().GetSourceValue(*controllable, i);
+          sources.emplace_back(source_value);
+        }
+      }
+    }
+    onInputsSelected(sources);
+  }
 }
 
 void EffectPropertiesWindow::onRemoveConnectionClicked() {
@@ -124,23 +143,26 @@ void EffectPropertiesWindow::onRemoveConnectionClicked() {
   fillConnectionsList();
 }
 
-void EffectPropertiesWindow::onInputSelected(
-    theatre::SourceValue *sourceValue) {
-  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  _effect->AddConnection(sourceValue->GetControllable(),
-                         sourceValue->InputIndex());
-  if (Instance::Management().HasCycle()) {
-    _effect->RemoveConnection(_effect->Connections().size() - 1);
-    lock.unlock();
-    Gtk::MessageDialog dialog(
-        "Can not add this connection to this effect: "
-        "this would create a cycle in the connections.",
-        false, Gtk::MESSAGE_ERROR);
-    dialog.run();
-  } else {
-    lock.unlock();
-    fillConnectionsList();
+void EffectPropertiesWindow::onInputsSelected(
+    const std::vector<theatre::SourceValue*>& sources) {
+  {
+    std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
+    for (theatre::SourceValue* source_value : sources) {
+      _effect->AddConnection(source_value->GetControllable(),
+                             source_value->InputIndex());
+      if (Instance::Management().HasCycle()) {
+        _effect->RemoveConnection(_effect->Connections().size() - 1);
+        lock.unlock();
+        Gtk::MessageDialog dialog(
+            "Can not add this connection to this effect: "
+            "this would create a cycle in the connections.",
+            false, Gtk::MESSAGE_ERROR);
+        dialog.run();
+        break;
+      }
+    }
   }
+  fillConnectionsList();
 }
 
 void EffectPropertiesWindow::onUpdateControllables() {

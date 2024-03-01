@@ -48,7 +48,13 @@ class ObjectBrowser : public Gtk::VBox {
   }
   bool ShowTypeColumn() const { return _list.ShowTypeColumn(); }
 
-  theatre::FolderObject *SelectedObject() { return _list.SelectedObject(); }
+  theatre::FolderObject *SelectedObject() const {
+    return _list.SelectedObject();
+  }
+
+  std::vector<theatre::FolderObject *> Selection() const {
+    return _list.Selection();
+  }
 
   theatre::Folder &SelectedFolder() { return _folderCombo.Selection(); }
 
@@ -69,6 +75,10 @@ class ObjectBrowser : public Gtk::VBox {
 
   void OpenFolder(const theatre::Folder &folder) {
     _folderCombo.Select(folder);
+  }
+
+  void SetAllowMultiSelection(bool allow_multi_selection) {
+    _list.SetAllowMultiSelection(allow_multi_selection);
   }
 
  private:

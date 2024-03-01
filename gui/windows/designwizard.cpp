@@ -470,6 +470,7 @@ void DesignWizard::onNextClicked() {
         MakeColorPresetPerFixture(
             management, makeDestinationFolder(), _selectedControllables,
             _colorsWidgetP4.GetSelection(), colorDeduction());
+        events.EmitUpdate();
       } else {
         glight::theatre::PresetCollection &preset = MakeColorPreset(
             management, makeDestinationFolder(), _selectedControllables,

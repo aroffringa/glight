@@ -3,7 +3,7 @@
 #include "gui/instance.h"
 
 #include "gui/tools.h"
-#include "gui/dialogs/controllableselectdialog.h"
+#include "gui/dialogs/controllableselectiondialog.h"
 #include "gui/dialogs/stringinputdialog.h"
 
 #include "theatre/effects/variableeffect.h"
@@ -78,7 +78,7 @@ void ColorSelectWidget::OpenColorSelection() {
 }
 
 void ColorSelectWidget::OpenVariableSelection() {
-  ControllableSelectDialog dialog("Select color variable", true);
+  ControllableSelectionDialog dialog("Select color variable", true);
   dialog.SetFilter(ObjectListType::OnlyVariables);
   dialog.ShowNewButton(true);
   dialog.SignalNewClicked().connect([&]() {

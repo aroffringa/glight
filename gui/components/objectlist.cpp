@@ -168,13 +168,28 @@ void ObjectList::fillListFolder(const Folder &folder,
   }
 }
 
-FolderObject *ObjectList::SelectedObject() {
-  Glib::RefPtr<Gtk::TreeSelection> selection = _listView.get_selection();
-  Gtk::TreeModel::iterator selected = selection->get_selected();
-  if (selected)
-    return (*selected)[_listColumns._object];
-  else
+FolderObject *ObjectList::SelectedObject() const {
+  Glib::RefPtr<const Gtk::TreeSelection> selection = _listView.get_selection();
+  const std::vector<Gtk::TreeModel::Path> selected =
+      selection->get_selected_rows();
+  if (selected.size() == 1) {
+    const Gtk::TreeModel::Path path = selected[0];
+    return (*_listModel->get_iter(path))[_listColumns._object];
+  } else {
     return nullptr;
+  }
+}
+
+std::vector<FolderObject *> ObjectList::Selection() const {
+  Glib::RefPtr<const Gtk::TreeSelection> selection = _listView.get_selection();
+  const std::vector<Gtk::TreeModel::Path> selected =
+      selection->get_selected_rows();
+  std::vector<FolderObject *> objects;
+  objects.reserve(selected.size());
+  for (Gtk::TreeModel::Path path : selected) {
+    objects.emplace_back((*_listModel->get_iter(path))[_listColumns._object]);
+  }
+  return objects;
 }
 
 void ObjectList::SelectObject(const FolderObject &object) {

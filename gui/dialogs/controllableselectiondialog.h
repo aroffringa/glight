@@ -14,9 +14,9 @@ namespace glight::gui {
 
 class EventTransmitter;
 
-class ControllableSelectDialog : public Gtk::Dialog {
+class ControllableSelectionDialog : public Gtk::Dialog {
  public:
-  ControllableSelectDialog(const std::string& title, bool show_new_button)
+  ControllableSelectionDialog(const std::string& title, bool show_new_button)
       : Dialog(title, true), object_browser_(), new_button_("New...") {
     set_size_request(600, 400);
 

@@ -27,9 +27,10 @@ class EffectPropertiesWindow : public PropertiesWindow {
   void fillConnectionsList();
 
   void onAddConnectionClicked();
+  void onConnectControllableClicked();
   void onRemoveConnectionClicked();
   void onSelectedConnectionChanged();
-  void onInputSelected(theatre::SourceValue *preset);
+  void onInputsSelected(const std::vector<theatre::SourceValue *> &sources);
   void onUpdateControllables();
 
   Gtk::Label _titleLabel;
@@ -49,14 +50,17 @@ class EffectPropertiesWindow : public PropertiesWindow {
 
   Gtk::VBox _topBox;
   Gtk::HBox _mainHBox, _connectionsBox;
-  Gtk::Frame _connectionsFrame, _propertiesFrame;
+  Gtk::Frame _connectionsFrame{"Connections"};
+  Gtk::Frame _propertiesFrame{"Properties"};
   std::unique_ptr<theatre::PropertySet> _propertySet;
   PropertiesBox _propertiesBox;
   ScopedConnection update_connection_;
 
   Gtk::ScrolledWindow _connectionsScrolledWindow;
   Gtk::Box _connectionsButtonBox;
-  Gtk::Button _addConnectionButton, _removeConnectionButton;
+  Gtk::Button _addConnectionButton{"Add"};
+  Gtk::Button _connectControllablesButton{};
+  Gtk::Button _removeConnectionButton{"Remove"};
 
   theatre::Effect *_effect;
 };

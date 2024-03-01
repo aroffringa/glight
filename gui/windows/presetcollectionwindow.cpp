@@ -4,6 +4,7 @@
 #include "gui/instance.h"
 
 #include "theatre/management.h"
+#include "theatre/presetcollection.h"
 
 #include <gtkmm/messagedialog.h>
 
