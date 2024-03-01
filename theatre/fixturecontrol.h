@@ -93,9 +93,11 @@ class FixtureControl final : public Controllable {
          ++iterator) {
       std::unique_ptr<Filter> &filter = *iterator;
       scratch_.resize(filter->OutputTypes().size());
+      values_.resize(filter->InputTypes().size());
       filter->Apply(values_, scratch_);
       std::swap(scratch_, values_);
     }
+    values_.resize(NInputs());
   }
 
   void GetChannelValues(unsigned *channelValues, unsigned universe) const {
@@ -122,6 +124,7 @@ class FixtureControl final : public Controllable {
       filters_.emplace_back(std::move(filter));
       filters_.back()->SetOutputTypes(previous_last->InputTypes());
     }
+    values_.resize(NInputs());
   }
 
   const std::vector<std::unique_ptr<Filter>> &Filters() const {
