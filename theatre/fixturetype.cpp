@@ -11,185 +11,208 @@ namespace glight::theatre {
 
 FixtureType::FixtureType(StockFixture stock_fixture)
     : FolderObject(StockName(stock_fixture)) {
-  OptionalNumber<size_t> fine_channel;
+  OptionalNumber<size_t> empty_channel;
   switch (stock_fixture) {
     case StockFixture::Light1Ch:
-      functions_.emplace_back(FunctionType::White, 0, fine_channel, 0);
+      functions_.emplace_back(FunctionType::White, 0, empty_channel, 0);
       short_name_ = "Light";
       break;
     case StockFixture::Rgb3Ch:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
       short_name_ = "RGB";
       break;
     case StockFixture::Rgb4Ch:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Master, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Master, 3, empty_channel, 0);
       short_name_ = "RGB";
       break;
     case StockFixture::Rgba4Ch:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Amber, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Amber, 3, empty_channel, 0);
       short_name_ = "RGBA";
       break;
     case StockFixture::Rgba5Ch:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Amber, 3, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Master, 4, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Amber, 3, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Master, 4, empty_channel, 0);
       short_name_ = "RGBA";
       break;
     case StockFixture::Rgbw4Ch:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::White, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::White, 3, empty_channel, 0);
       short_name_ = "RGBW";
       break;
     case StockFixture::RgbUv4Ch:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::UV, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::UV, 3, empty_channel, 0);
       short_name_ = "RGBUV";
       break;
     case StockFixture::Rgbaw5Ch:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Amber, 3, fine_channel, 0);
-      functions_.emplace_back(FunctionType::White, 4, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Amber, 3, empty_channel, 0);
+      functions_.emplace_back(FunctionType::White, 4, empty_channel, 0);
       short_name_ = "RGBAW";
       break;
     case StockFixture::RgbawUv6Ch:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Amber, 3, fine_channel, 0);
-      functions_.emplace_back(FunctionType::White, 4, fine_channel, 0);
-      functions_.emplace_back(FunctionType::UV, 5, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Amber, 3, empty_channel, 0);
+      functions_.emplace_back(FunctionType::White, 4, empty_channel, 0);
+      functions_.emplace_back(FunctionType::UV, 5, empty_channel, 0);
       short_name_ = "RGBAWUV";
       break;
     case StockFixture::Rgbl4Ch:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Lime, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Lime, 3, empty_channel, 0);
       short_name_ = "RGBL";
       break;
     case StockFixture::CWWW2Ch:
-      functions_.emplace_back(FunctionType::ColdWhite, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::WarmWhite, 1, fine_channel, 0);
+      functions_.emplace_back(FunctionType::ColdWhite, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::WarmWhite, 1, empty_channel, 0);
       short_name_ = "CW/WW";
       break;
     case StockFixture::CWWW4Ch:
-      functions_.emplace_back(FunctionType::Master, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::ColdWhite, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::WarmWhite, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Strobe, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Master, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::ColdWhite, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::WarmWhite, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Strobe, 3, empty_channel, 0);
       short_name_ = "CW/WW";
       break;
     case StockFixture::CWWWA3Ch:
-      functions_.emplace_back(FunctionType::ColdWhite, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::WarmWhite, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Amber, 2, fine_channel, 0);
+      functions_.emplace_back(FunctionType::ColdWhite, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::WarmWhite, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Amber, 2, empty_channel, 0);
       short_name_ = "CW/WW/A";
       break;
     case StockFixture::Uv3Ch:
-      functions_.emplace_back(FunctionType::UV, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Strobe, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Pulse, 2, fine_channel, 0);
+      functions_.emplace_back(FunctionType::UV, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Strobe, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Pulse, 2, empty_channel, 0);
       short_name_ = "UV";
       break;
     case StockFixture::H2ODmxPro: {
-      functions_.emplace_back(FunctionType::Master, 0, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Master, 0, empty_channel, 0);
       FixtureTypeFunction &rotation = functions_.emplace_back(
-          FunctionType::RotationSpeed, 1, fine_channel, 0);
+          FunctionType::RotationSpeed, 1, empty_channel, 0);
       std::vector<RotationSpeedParameters::Range> &ranges =
           rotation.GetRotationParameters().GetRanges();
       constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
       ranges.emplace_back(9, 121, 0, max_speed);
       ranges.emplace_back(134, 256, 0, -max_speed);
-      FixtureTypeFunction &macro =
-          functions_.emplace_back(FunctionType::ColorMacro, 2, fine_channel, 0);
+      FixtureTypeFunction &macro = functions_.emplace_back(
+          FunctionType::ColorMacro, 2, empty_channel, 0);
       SetH2OMacroParameters(macro.GetMacroParameters());
       short_name_ = "H2O";
     } break;
-    case StockFixture::AyraTDCSunrise: {
-      functions_.emplace_back(FunctionType::Master, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Red, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 3, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Strobe, 4, fine_channel, 0);
+    case StockFixture::AdjStarBurst: {
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::White, 3, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Amber, 4, empty_channel, 0);
+      functions_.emplace_back(FunctionType::UV, 5, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Strobe, 6, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Master, 7, empty_channel, 0);
       FixtureTypeFunction &rotation = functions_.emplace_back(
-          FunctionType::RotationSpeed, 5, fine_channel, 0);
+          FunctionType::RotationSpeed, 8, empty_channel, 0);
+      functions_.emplace_back(FunctionType::ColorMacro, 9, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Effect, 10, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Effect, 11, empty_channel, 0);
+      std::vector<RotationSpeedParameters::Range> &ranges =
+          rotation.GetRotationParameters().GetRanges();
+      constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
+      ranges.emplace_back(31, 141, max_speed, 0);
+      ranges.emplace_back(146, 256, 0, -max_speed);
+      short_name_ = "Starbrst";
+      min_beam_angle_ = 2.0 * M_PI;
+      brightness_ = 3.0;
+    } break;
+    case StockFixture::AyraTDCSunrise: {
+      functions_.emplace_back(FunctionType::Master, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 3, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
+      FixtureTypeFunction &rotation = functions_.emplace_back(
+          FunctionType::RotationSpeed, 5, empty_channel, 0);
       constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
       std::vector<RotationSpeedParameters::Range> &ranges =
           rotation.GetRotationParameters().GetRanges();
       // [ 5 - 128 ) is static positioning
       ranges.emplace_back(128, 256, -max_speed, max_speed);
-      functions_.emplace_back(FunctionType::ColorMacro, 6, fine_channel, 0);
+      functions_.emplace_back(FunctionType::ColorMacro, 6, empty_channel, 0);
       short_name_ = "TDC Sunr";
       min_beam_angle_ = 2.0 * M_PI;
       brightness_ = 1.0;
     } break;
     case StockFixture::RGB_ADJ_6CH: {
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      FixtureTypeFunction &macro =
-          functions_.emplace_back(FunctionType::ColorMacro, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      FixtureTypeFunction &macro = functions_.emplace_back(
+          FunctionType::ColorMacro, 3, empty_channel, 0);
       SetRgbAdj6chMacroParameters(macro.GetMacroParameters());
-      functions_.emplace_back(FunctionType::Strobe, 4, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Pulse, 5, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Pulse, 5, empty_channel, 0);
       short_name_ = "ADJ RGB";
     } break;
     case StockFixture::RGB_ADJ_7CH: {
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      FixtureTypeFunction &macro =
-          functions_.emplace_back(FunctionType::ColorMacro, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      FixtureTypeFunction &macro = functions_.emplace_back(
+          FunctionType::ColorMacro, 3, empty_channel, 0);
       SetRgbAdj6chMacroParameters(macro.GetMacroParameters());
-      functions_.emplace_back(FunctionType::Strobe, 4, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Pulse, 5, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Master, 6, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Pulse, 5, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Master, 6, empty_channel, 0);
       short_name_ = "ADJ RGB";
     } break;
     case StockFixture::BT_VINTAGE_5CH:
-      functions_.emplace_back(FunctionType::White, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Master, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Red, 2, fine_channel, 1);
-      functions_.emplace_back(FunctionType::Green, 3, fine_channel, 1);
-      functions_.emplace_back(FunctionType::Blue, 4, fine_channel, 1);
+      functions_.emplace_back(FunctionType::White, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Master, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 2, empty_channel, 1);
+      functions_.emplace_back(FunctionType::Green, 3, empty_channel, 1);
+      functions_.emplace_back(FunctionType::Blue, 4, empty_channel, 1);
       class_ = FixtureClass::RingedPar;
       short_name_ = "BTVint";
       break;
     case StockFixture::BT_VINTAGE_6CH:
-      functions_.emplace_back(FunctionType::White, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Master, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Strobe, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Red, 3, fine_channel, 1);
-      functions_.emplace_back(FunctionType::Green, 4, fine_channel, 1);
-      functions_.emplace_back(FunctionType::Blue, 5, fine_channel, 1);
+      functions_.emplace_back(FunctionType::White, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Master, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Strobe, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 3, empty_channel, 1);
+      functions_.emplace_back(FunctionType::Green, 4, empty_channel, 1);
+      functions_.emplace_back(FunctionType::Blue, 5, empty_channel, 1);
       class_ = FixtureClass::RingedPar;
       short_name_ = "BTVint";
       break;
     case StockFixture::BT_VINTAGE_7CH: {
-      functions_.emplace_back(FunctionType::White, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Master, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Strobe, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Red, 3, fine_channel, 1);
-      functions_.emplace_back(FunctionType::Green, 4, fine_channel, 1);
-      functions_.emplace_back(FunctionType::Blue, 5, fine_channel, 1);
-      FixtureTypeFunction &macro =
-          functions_.emplace_back(FunctionType::ColorMacro, 6, fine_channel, 1);
+      functions_.emplace_back(FunctionType::White, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Master, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Strobe, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 3, empty_channel, 1);
+      functions_.emplace_back(FunctionType::Green, 4, empty_channel, 1);
+      functions_.emplace_back(FunctionType::Blue, 5, empty_channel, 1);
+      FixtureTypeFunction &macro = functions_.emplace_back(
+          FunctionType::ColorMacro, 6, empty_channel, 1);
       SetBTMacroParameters(macro.GetMacroParameters());
       class_ = FixtureClass::RingedPar;
       short_name_ = "BTVint";
@@ -204,20 +227,20 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       short_name_ = "RGB";
       break;
     case StockFixture::ZoomLight:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Zoom, 3, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Zoom, 3, empty_channel, 0);
       min_beam_angle_ = 10.0 * M_PI / 180.0;
       max_beam_angle_ = 50.0 * M_PI / 180.0;
       short_name_ = "Zoom";
       break;
     case StockFixture::MovingHead:
-      functions_.emplace_back(FunctionType::Red, 0, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Green, 1, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Blue, 2, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Pan, 3, fine_channel, 0);
-      functions_.emplace_back(FunctionType::Tilt, 4, fine_channel, 0);
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Pan, 3, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Tilt, 4, empty_channel, 0);
       min_pan_ = 0.0;
       max_pan_ = 2.0 * M_PI;
       min_tilt_ = -0.25 * M_PI;

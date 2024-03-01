@@ -29,6 +29,7 @@ enum class StockFixture {
   Uv3Ch,
   H2ODmxPro,
   AyraTDCSunrise,
+  AdjStarBurst,
   RGB_ADJ_6CH,
   RGB_ADJ_7CH,
   BT_VINTAGE_5CH,
@@ -97,6 +98,8 @@ class FixtureType : public FolderObject {
         return "UV light (3ch)";
       case StockFixture::H2ODmxPro:
         return "H2O DMX Pro";
+      case StockFixture::AdjStarBurst:
+        return "ADJ Starburst";
       case StockFixture::AyraTDCSunrise:
         return "Ayra TDC Sunrise";
       case StockFixture::RGB_ADJ_6CH:
@@ -131,15 +134,31 @@ class FixtureType : public FolderObject {
 
   static std::vector<StockFixture> GetStockList() {
     using SF = StockFixture;
-    return std::vector<SF>{
-        SF::Light1Ch,          SF::Rgb3Ch,         SF::Rgb4Ch,
-        SF::Rgba4Ch,           SF::Rgba5Ch,        SF::Rgbw4Ch,
-        SF::RgbUv4Ch,          SF::Rgbaw5Ch,       SF::RgbawUv6Ch,
-        SF::Rgbl4Ch,           SF::CWWW2Ch,        SF::CWWW4Ch,
-        SF::CWWWA3Ch,          SF::Uv3Ch,          SF::H2ODmxPro,
-        SF::AyraTDCSunrise,    SF::RGB_ADJ_6CH,    SF::RGB_ADJ_7CH,
-        SF::BT_VINTAGE_5CH,    SF::BT_VINTAGE_6CH, SF::BT_VINTAGE_7CH,
-        SF::RGBLight6Ch_16bit, SF::ZoomLight,      SF::MovingHead};
+    return std::vector<SF>{SF::Light1Ch,
+                           SF::Rgb3Ch,
+                           SF::Rgb4Ch,
+                           SF::Rgba4Ch,
+                           SF::Rgba5Ch,
+                           SF::Rgbw4Ch,
+                           SF::RgbUv4Ch,
+                           SF::Rgbaw5Ch,
+                           SF::RgbawUv6Ch,
+                           SF::Rgbl4Ch,
+                           SF::CWWW2Ch,
+                           SF::CWWW4Ch,
+                           SF::CWWWA3Ch,
+                           SF::Uv3Ch,
+                           SF::H2ODmxPro,
+                           SF::AdjStarBurst,
+                           SF::AyraTDCSunrise,
+                           SF::RGB_ADJ_6CH,
+                           SF::RGB_ADJ_7CH,
+                           SF::BT_VINTAGE_5CH,
+                           SF::BT_VINTAGE_6CH,
+                           SF::BT_VINTAGE_7CH,
+                           SF::RGBLight6Ch_16bit,
+                           SF::ZoomLight,
+                           SF::MovingHead};
   }
 
   static std::vector<FixtureClass> GetClassList() {
