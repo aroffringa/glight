@@ -7,7 +7,7 @@
 
 #include "system/optionalnumber.h"
 
-#include "../colordeduction.h"
+#include "theatre/colordeduction.h"
 
 namespace glight::theatre {
 

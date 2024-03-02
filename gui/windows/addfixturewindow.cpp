@@ -1,17 +1,18 @@
 #include "addfixturewindow.h"
 
-#include "../eventtransmitter.h"
+#include "gui/eventtransmitter.h"
 
-#include "../../theatre/fixturecontrol.h"
-#include "../../theatre/fixturetype.h"
-#include "../../theatre/fixturetypefunction.h"
-#include "../../theatre/folder.h"
-#include "../../theatre/management.h"
-#include "../../theatre/theatre.h"
+#include "theatre/fixturecontrol.h"
+#include "theatre/fixturetype.h"
+#include "theatre/fixturetypefunction.h"
+#include "theatre/folder.h"
+#include "theatre/management.h"
+#include "theatre/theatre.h"
 
-#include "../../theatre/filters/automasterfilter.h"
-#include "../../theatre/filters/monochromefilter.h"
-#include "../../theatre/filters/rgbfilter.h"
+#include "theatre/filters/automasterfilter.h"
+#include "theatre/filters/colortemperaturefilter.h"
+#include "theatre/filters/monochromefilter.h"
+#include "theatre/filters/rgbfilter.h"
 
 namespace glight::gui {
 
@@ -20,20 +21,7 @@ using theatre::FixtureTypeFunction;
 
 AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
                                    theatre::Management &management)
-    : stock_button_("Stock"),
-      project_button_("Project"),
-      _typeLabel("Type:"),
-      _countLabel("Count:"),
-
-      _decCountButton("-"),
-      _incCountButton("+"),
-      filters_frame_("Filters"),
-      auto_master_cb_("Auto master channel"),
-      rgb_cb_("RGB colorspace"),
-      monochrome_cb_("Monochrome"),
-      _cancelButton("Cancel"),
-      _addButton("Add"),
-      _eventHub(*eventHub),
+    : _eventHub(*eventHub),
       _management(&management),
       stock_list_(theatre::FixtureType::GetStockTypes()) {
   _grid.set_row_spacing(5);
@@ -73,6 +61,7 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
   filters_box_.pack_start(auto_master_cb_);
   filters_box_.pack_start(rgb_cb_);
   filters_box_.pack_start(monochrome_cb_);
+  filters_box_.pack_start(temperature_cb_);
   updateFilters();
 
   filters_frame_.add(filters_box_);
@@ -103,20 +92,34 @@ void AddFixtureWindow::updateFilters() {
   bool enable_master = false;
   bool enable_color = false;
   bool enable_monochrome = false;
+  bool has_color = false;
+  bool has_temperature = false;
   if (selected) {
     const FixtureType *type = (*selected)[type_columns_.type_];
     for (const FixtureTypeFunction &function : type->Functions()) {
       if (function.Type() == theatre::FunctionType::Master)
         enable_master = true;
-      else if (IsColor(function.Type()) && !IsRgb(function.Type()))
-        enable_color = true;
-      else if (IsColor(function.Type()) &&
-               function.Type() != theatre::FunctionType::White)
-        enable_monochrome = true;
+      else if (IsColor(function.Type())) {
+        has_color = true;
+        if (!IsRgb(function.Type()))
+          enable_color = true;
+        else if (function.Type() != theatre::FunctionType::White)
+          enable_monochrome = true;
+      } else if (function.Type() == theatre::FunctionType::ColorTemperature) {
+        has_temperature = true;
+      }
     }
+  }
+  has_temperature = has_temperature && enable_master;
+  if (!has_color || has_temperature) {
+    // Don't enable master if there are no colour channels, because the filter
+    // needs the colour to deduce the master channel
+    enable_master = false;
   }
   auto_master_cb_.set_active(enable_master);
   auto_master_cb_.set_sensitive(enable_master);
+  temperature_cb_.set_active(has_temperature && !has_color);
+  temperature_cb_.set_sensitive(has_temperature);
   rgb_cb_.set_active(enable_color);
   rgb_cb_.set_sensitive(enable_color);
   monochrome_cb_.set_sensitive(enable_monochrome);
@@ -174,11 +177,15 @@ void AddFixtureWindow::onAdd() {
 
       theatre::FixtureControl &control = _management->AddFixtureControl(
           fixture, _management->RootFolder() /* TODO */);
-      if (auto_master_cb_.get_active()) {
-        control.AddFilter(std::make_unique<theatre::AutoMasterFilter>());
-      }
-      if (rgb_cb_.get_active()) {
-        control.AddFilter(std::make_unique<theatre::RgbFilter>());
+      if (temperature_cb_.get_active()) {
+        control.AddFilter(std::make_unique<theatre::ColorTemperatureFilter>());
+      } else {
+        if (auto_master_cb_.get_active()) {
+          control.AddFilter(std::make_unique<theatre::AutoMasterFilter>());
+        }
+        if (rgb_cb_.get_active()) {
+          control.AddFilter(std::make_unique<theatre::RgbFilter>());
+        }
       }
       if (monochrome_cb_.get_active()) {
         control.AddFilter(std::make_unique<theatre::MonochromeFilter>());

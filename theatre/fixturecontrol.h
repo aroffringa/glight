@@ -108,6 +108,9 @@ class FixtureControl final : public Controllable {
     }
   }
 
+  /**
+   * Add a filter in front of the already filtered fixture.
+   */
   void AddFilter(std::unique_ptr<Filter> &&filter) {
     assert(filter);
     if (filters_.empty()) {
@@ -137,7 +140,7 @@ class FixtureControl final : public Controllable {
   std::vector<ControlValue> scratch_;
   // The filters, in backward order. Therefore, filters_.back()
   // defines the inputs of this fixture, and the result of filters_.back()
-  // is transferred to the previous filter, unless filters_.front() is reached.
+  // is sent to the previous filter, unless filters_.front() is reached.
   std::vector<std::unique_ptr<Filter>> filters_;
 };
 

@@ -1,6 +1,7 @@
 #include "filter.h"
 
 #include "automasterfilter.h"
+#include "colortemperaturefilter.h"
 #include "monochromefilter.h"
 #include "rgbfilter.h"
 
@@ -10,6 +11,8 @@ std::string ToString(FilterType type) {
   switch (type) {
     case FilterType::AutoMaster:
       return "auto-master";
+    case FilterType::ColorTemperature:
+      return "color-temperature";
     case FilterType::Monochrome:
       return "monochrome";
     case FilterType::RgbColorspace:
@@ -21,6 +24,8 @@ std::string ToString(FilterType type) {
 FilterType GetFilterType(const std::string& filter_type_string) {
   if (filter_type_string == "auto-master")
     return FilterType::AutoMaster;
+  else if (filter_type_string == "color-temperature")
+    return FilterType::ColorTemperature;
   else if (filter_type_string == "monochrome")
     return FilterType::AutoMaster;
   else
@@ -31,6 +36,8 @@ std::unique_ptr<Filter> Filter::Make(FilterType type) {
   switch (type) {
     case FilterType::AutoMaster:
       return std::make_unique<AutoMasterFilter>();
+    case FilterType::ColorTemperature:
+      return std::make_unique<ColorTemperatureFilter>();
     case FilterType::Monochrome:
       return std::make_unique<MonochromeFilter>();
     case FilterType::RgbColorspace:

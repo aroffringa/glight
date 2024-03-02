@@ -2,6 +2,7 @@
 
 #include <boost/test/unit_test.hpp>
 
+using glight::system::RgbToTemperature;
 using glight::system::TemperatureToRgb;
 using glight::theatre::Color;
 
@@ -89,6 +90,20 @@ BOOST_AUTO_TEST_CASE(very_cold) {
   BOOST_CHECK_EQUAL(180, c.Red());    // 0xb4
   BOOST_CHECK_EQUAL(204, c.Green());  // 0xcc
   BOOST_CHECK_EQUAL(255, c.Blue());
+}
+
+void CheckTemperature(double expected, double result, double margin) {
+  BOOST_CHECK_GT(result, expected - margin);
+  BOOST_CHECK_LT(result, expected + margin);
+}
+
+BOOST_AUTO_TEST_CASE(rgb_to_temperature) {
+  // Clearly these large margins are undesirable, but back and forth
+  // calculation of color temperature is not yet very accurate...
+  CheckTemperature(RgbToTemperature(Color(255, 186, 129)), 3200, 150);
+  CheckTemperature(RgbToTemperature(Color(255, 226, 202)), 4800, 100);
+  CheckTemperature(RgbToTemperature(Color(255, 255, 255)), 6500, 10);
+  CheckTemperature(RgbToTemperature(Color(213, 225, 255)), 8500, 700);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
