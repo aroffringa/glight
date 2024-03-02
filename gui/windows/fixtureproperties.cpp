@@ -71,6 +71,7 @@ void FixtureProperties::onSetClicked() {
   const double tilt_degrees = std::atof(tilt_entry_.get_text().c_str());
   const double tilt = std::clamp(tilt_degrees, -180.0, 180.0) * M_PI / 180.0;
   const bool upside_down = upside_down_cb_.get_active();
+  std::unique_lock lock(Instance::Management().Mutex());
   const std::vector<theatre::Fixture *> &fixtures =
       Instance::Selection().Selection();
   for (theatre::Fixture *fixture : fixtures) {
@@ -78,6 +79,8 @@ void FixtureProperties::onSetClicked() {
     fixture->SetTilt(tilt);
     fixture->SetUpsideDown(upside_down);
   }
+  lock.unlock();
+  Instance::Events().EmitUpdate();
 }
 
 }  // namespace glight::gui::windows

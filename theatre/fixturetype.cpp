@@ -1,6 +1,7 @@
 #include "fixturetype.h"
 #include "fixture.h"
 
+#include "system/colortemperature.h"
 #include "system/optionalnumber.h"
 
 #include <array>
@@ -354,6 +355,8 @@ Color FixtureType::GetColor(const Fixture &fixture,
   std::optional<Color> macro_color;
   for (size_t i = 0; i != functions_.size(); ++i) {
     if (functions_[i].Shape() == shapeIndex) {
+      // We immediately ignore a fine channel if it is present, because we can't
+      // visualize 16-bit rgb values anyway...
       const unsigned channel_value =
           fixture.Functions()[i]->GetCharValue(snapshot);
       const FunctionType type = functions_[i].Type();
@@ -362,6 +365,13 @@ Color FixtureType::GetColor(const Fixture &fixture,
       } else if (type == FunctionType::ColorMacro) {
         macro_color =
             functions_[i].GetMacroParameters().GetColor(channel_value);
+      } else if (type == FunctionType::ColorTemperature) {
+        constexpr unsigned min_temperature = 2800;
+        constexpr unsigned max_temperature = 8000;
+        const unsigned temperature =
+            channel_value * (max_temperature - min_temperature) / 255 +
+            min_temperature;
+        macro_color = system::TemperatureToRgb(temperature);
       } else {
         const Color c = GetFunctionColor(functions_[i].Type()) * channel_value;
         red += c.Red();

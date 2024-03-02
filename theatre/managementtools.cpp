@@ -12,18 +12,25 @@ void SetAllFixtures(Management& management,
   for (Fixture* fixture : fixtures) {
     FixtureControl& control = management.GetFixtureControl(*fixture);
     for (size_t i = 0; i != control.NInputs(); ++i) {
-      if (IsColor(control.InputType(i))) {
+      const FunctionType type = control.InputType(i);
+      if (IsColor(type)) {
         SourceValue* source = management.GetSourceValue(control, i);
         if (color == Color::Black())
           source->A().Set(0);
         else if (color == Color::White())
           source->A().Set(ControlValue::MaxUInt());
-        else if (control.InputType(i) == FunctionType::Red)
+        else if (type == FunctionType::Red)
           source->A().Set(ControlValue::CharToValue(color.Red()));
-        else if (control.InputType(i) == FunctionType::Green)
+        else if (type == FunctionType::Green)
           source->A().Set(ControlValue::CharToValue(color.Green()));
-        else if (control.InputType(i) == FunctionType::Blue)
+        else if (type == FunctionType::Blue)
           source->A().Set(ControlValue::CharToValue(color.Blue()));
+      } else if (type == FunctionType::Master) {
+        SourceValue* source = management.GetSourceValue(control, i);
+        if (color == Color::Black())
+          source->A().Set(0);
+        else
+          source->A().Set(ControlValue::MaxUInt());
       }
     }
   }
