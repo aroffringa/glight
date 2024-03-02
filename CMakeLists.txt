@@ -188,6 +188,7 @@ if(Boost_FOUND)
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
     tests/system/tcolormap.cpp
+    tests/system/tcolortemperature.cpp
     tests/system/tdeletableptr.cpp
     tests/system/tfileformat.cpp
     tests/system/tjsonreader.cpp
@@ -197,7 +198,6 @@ if(Boost_FOUND)
     tests/system/tuniquewithoutordering.cpp
     tests/theatre/tchase.cpp
     tests/theatre/tcolordeduction.cpp
-    tests/theatre/tcolortemperature.cpp
     tests/theatre/tcontrolvalue.cpp
     tests/theatre/tfixturecontrol.cpp
     tests/theatre/tfixturefunction.cpp

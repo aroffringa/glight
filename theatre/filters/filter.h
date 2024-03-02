@@ -9,7 +9,12 @@
 
 namespace glight::theatre {
 
-enum class FilterType { AutoMaster, Monochrome, RgbColorspace };
+enum class FilterType {
+  AutoMaster,
+  ColorTemperature,
+  Monochrome,
+  RgbColorspace
+};
 
 std::string ToString(FilterType type);
 FilterType GetFilterType(const std::string& filter_type_string);

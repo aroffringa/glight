@@ -13,7 +13,7 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/window.h>
 
-#include "../../theatre/forwards.h"
+#include "theatre/forwards.h"
 
 namespace glight::gui {
 
@@ -42,23 +42,24 @@ class AddFixtureWindow : public Gtk::Window {
 
   Gtk::Grid _grid;
   Gtk::HBox stock_or_project_box_;
-  Gtk::RadioButton stock_button_;
-  Gtk::RadioButton project_button_;
-  Gtk::Label _typeLabel;
+  Gtk::RadioButton stock_button_{"Stock"};
+  Gtk::RadioButton project_button_{"Project"};
+  Gtk::Label _typeLabel{"Type:"};
   Glib::RefPtr<Gtk::ListStore> type_model_;
   Gtk::ComboBox _typeCombo;
-  Gtk::Label _countLabel;
+  Gtk::Label _countLabel{"Count:"};
   Gtk::Entry _countEntry;
-  Gtk::Button _decCountButton;
-  Gtk::Button _incCountButton;
-  Gtk::Frame filters_frame_;
+  Gtk::Button _decCountButton{"-"};
+  Gtk::Button _incCountButton{"+"};
+  Gtk::Frame filters_frame_{"Filters"};
   Gtk::VBox filters_box_;
-  Gtk::CheckButton auto_master_cb_;
-  Gtk::CheckButton rgb_cb_;
-  Gtk::CheckButton monochrome_cb_;
+  Gtk::CheckButton auto_master_cb_{"Auto master channel"};
+  Gtk::CheckButton rgb_cb_{"RGB colorspace"};
+  Gtk::CheckButton monochrome_cb_{"Monochrome"};
+  Gtk::CheckButton temperature_cb_{"Temperature to RGB"};
   Gtk::Box _buttonBox;
-  Gtk::Button _cancelButton;
-  Gtk::Button _addButton;
+  Gtk::Button _cancelButton{"Cancel"};
+  Gtk::Button _addButton{"Add"};
 
   EventTransmitter &_eventHub;
   theatre::Management *_management;

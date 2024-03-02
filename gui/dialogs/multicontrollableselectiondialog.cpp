@@ -57,8 +57,8 @@ MultiControllableSelectionDialog::MultiControllableSelectionDialog() {
   box_.pack_start(grid_, true, true, 4);
   get_content_area()->pack_start(box_);
   show_all_children();
-  add_button("Select", Gtk::RESPONSE_OK);
   add_button("Cancel", Gtk::RESPONSE_CANCEL);
+  add_button("Select", Gtk::RESPONSE_OK);
 }
 
 bool MultiControllableSelectionDialog::IsSelected(
