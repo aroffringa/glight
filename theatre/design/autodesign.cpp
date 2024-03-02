@@ -376,7 +376,7 @@ Effect &AutoDesign::MakeFire(Management &management, Folder &destination,
                          deduction, ShiftType::IncreasingShift);
       parent.AddConnection(chase, 0);
       chase.GetTransition().SetType(TransitionType::Fade);
-      chase.GetTransition().SetLengthInMs(300 + i + uniform(mt) * 10);
+      chase.GetTransition().SetLengthInMs(1000 + i + uniform(mt) * 10);
       chase.GetTrigger().SetDelayInMs(0);
     }
   }

@@ -124,10 +124,12 @@ inline FunctionType GetFunctionType(const std::string& name) {
       if (name == "Blue") return FunctionType::Blue;
       break;
     case 'C':
-      if (name == "Cold white")
-        return FunctionType::ColdWhite;
-      else if (name == "Color macro")
+      if (name == "Color macro")
         return FunctionType::ColorMacro;
+      else if (name == "Color temperature")
+        return FunctionType::ColorTemperature;
+      else if (name == "Cold white")
+        return FunctionType::ColdWhite;
       break;
     case 'E':
       if (name == "Effect") return FunctionType::Effect;
@@ -160,10 +162,7 @@ inline FunctionType GetFunctionType(const std::string& name) {
       if (name == "Strobe") return FunctionType::Strobe;
       break;
     case 'T':
-      if (name == "Temperature")
-        return FunctionType::ColorTemperature;
-      else if (name == "Tilt")
-        return FunctionType::Tilt;
+      if (name == "Tilt") return FunctionType::Tilt;
       break;
     case 'U':
       if (name == "UV") return FunctionType::UV;
