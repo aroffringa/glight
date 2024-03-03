@@ -115,4 +115,18 @@ unsigned char Manager::GetFaderValue(size_t fader_index) {
   return fader_values_[fader_index].second ? 255 : value;
 }
 
+void Manager::SetBeat(system::OptionalNumber<double> beat) {
+  bool has_changed = beat.HasValue() != beat_.HasValue();
+  if (beat_ && beat && std::floor(*beat_) != std::floor(*beat)) {
+    has_changed = true;
+  }
+  if (has_changed) {
+    const int beat_ = beat ? static_cast<int>(std::floor(*beat)) % 4 : 5;
+    for (int i = 0; i != 4; ++i)
+      controller_->SetSceneButton(
+          i + 4, i == beat_ ? ButtonState::On : ButtonState::Off);
+  }
+  beat_ = beat;
+}
+
 }  // namespace glight::system::midi

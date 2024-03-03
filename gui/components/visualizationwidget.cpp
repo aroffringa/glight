@@ -13,6 +13,7 @@
 
 #include "system/midi/manager.h"
 
+#include "theatre/beatfinder.h"
 #include "theatre/dmxdevice.h"
 #include "theatre/fixture.h"
 #include "theatre/fixturecontrol.h"
@@ -206,6 +207,14 @@ void VisualizationWidget::updateMidiColors() {
         }
       }
     }
+
+    double beat;
+    double confidence;
+    _management->GetBeatFinder().GetBeatValue(beat, confidence);
+    if (confidence > 0.0)
+      midi_manager.SetBeat(system::OptionalNumber<double>(beat));
+    else
+      midi_manager.SetBeat(system::OptionalNumber<double>());
   }
 }
 

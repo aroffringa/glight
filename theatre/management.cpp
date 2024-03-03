@@ -65,6 +65,7 @@ void Management::AddDevice(std::unique_ptr<DmxDevice> device) {
 }
 
 void Management::Run() {
+  assert(_beamFinder);
   if (_thread == nullptr) {
     _isQuitting = false;
     _thread = std::make_unique<std::thread>([&]() { ThreadLoop(); });

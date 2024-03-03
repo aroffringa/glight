@@ -4,6 +4,7 @@
 #include <optional>
 #include <vector>
 
+#include "system/optionalnumber.h"
 #include "system/midi/buttonset.h"
 
 #include "theatre/color.h"
@@ -38,6 +39,8 @@ class Manager {
                        bool blink);
   void Update();
 
+  void SetBeat(system::OptionalNumber<double> beat);
+
  private:
   void SetTwoColorSelectionMode();
   void HandleButtonPress(const ButtonSet& button_set);
@@ -54,6 +57,7 @@ class Manager {
   // 1) Index of button associated with selected color,
   // 2) true if the value changed since the last update, 3) color.
   std::vector<std::tuple<size_t, bool, theatre::Color>> selected_colors_;
+  system::OptionalNumber<double> beat_;
 };
 
 }  // namespace glight::system::midi
