@@ -35,6 +35,7 @@ class Management {
   void Run();
 
   void StartBeatFinder();
+  BeatFinder &GetBeatFinder() { return *_beatFinder; }
 
   Theatre &GetTheatre() { return *_theatre; }
   const Theatre &GetTheatre() const { return *_theatre; }
@@ -215,7 +216,7 @@ class Management {
   std::unique_ptr<Theatre> _theatre;
   ValueSnapshot _primarySnapshot = {true, 0};
   ValueSnapshot _secondarySnapshot = {false, 0};
-  std::shared_ptr<BeatFinder> _beatFinder;
+  std::unique_ptr<BeatFinder> _beatFinder;
 
   Folder *_rootFolder;
   std::vector<std::unique_ptr<Folder>> _folders;
