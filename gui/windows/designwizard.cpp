@@ -409,19 +409,23 @@ void DesignWizard::onNextClicked() {
         runType = RunType::OutwardRun;
       else  // if(_randomRunRB.get_active())
         runType = RunType::RandomRun;
+      std::unique_lock lock(management.Mutex());
       theatre::Chase &chase = AutoDesign::MakeRunningLight(
           management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(), runType);
+      lock.unlock();
       events.EmitUpdate();
       Assign(chase);
       hide();
     } break;
 
     case Page4_2_SingleColor: {
+      std::unique_lock lock(management.Mutex());
       theatre::Chase &chase = AutoDesign::MakeColorVariation(
           management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(),
           _variation.get_value());
+      lock.unlock();
       events.EmitUpdate();
       Assign(chase);
       hide();
@@ -438,9 +442,11 @@ void DesignWizard::onNextClicked() {
         shiftType = ShiftType::BackAndForthShift;
       else
         shiftType = ShiftType::RandomShift;
+      std::unique_lock lock(management.Mutex());
       theatre::Chase &chase = AutoDesign::MakeColorShift(
           management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(), shiftType);
+      lock.unlock();
       events.EmitUpdate();
       Assign(chase);
       hide();
@@ -457,24 +463,30 @@ void DesignWizard::onNextClicked() {
         direction = VUMeterDirection::VUInward;
       else  // if(_vuOutwardRunRB.get_active())
         direction = VUMeterDirection::VUOutward;
+      std::unique_lock lock(management.Mutex());
       glight::theatre::Controllable &vu_meter = AutoDesign::MakeVUMeter(
           management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(), direction);
+      lock.unlock();
       events.EmitUpdate();
       Assign(vu_meter);
       hide();
     } break;
 
     case Page4_5_ColorPreset: {
+      std::unique_lock lock(management.Mutex());
       if (_eachFixtureSeparatelyCB.get_active()) {
         MakeColorPresetPerFixture(
             management, makeDestinationFolder(), _selectedControllables,
             _colorsWidgetP4.GetSelection(), colorDeduction());
+        lock.unlock();
         events.EmitUpdate();
       } else {
+        std::unique_lock lock(management.Mutex());
         glight::theatre::PresetCollection &preset = MakeColorPreset(
             management, makeDestinationFolder(), _selectedControllables,
             _colorsWidgetP4.GetSelection(), colorDeduction());
+        lock.unlock();
         events.EmitUpdate();
         Assign(preset);
       }
@@ -492,9 +504,11 @@ void DesignWizard::onNextClicked() {
         incType = IncreasingType::IncForwardReturn;
       else  // if(_incBackwardReturnRB.get_active())
         incType = IncreasingType::IncBackwardReturn;
+      std::unique_lock lock(management.Mutex());
       glight::theatre::Chase &chase = AutoDesign::MakeIncreasingChase(
           management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(), incType);
+      lock.unlock();
       events.EmitUpdate();
       Assign(chase);
       hide();
@@ -509,9 +523,11 @@ void DesignWizard::onNextClicked() {
         type = RotationType::Backward;
       else  // if (_rotForwardReturnRB.get_active())
         type = RotationType::ForwardBackward;
+      std::unique_lock lock(management.Mutex());
       glight::theatre::TimeSequence &rotation = MakeRotation(
           management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction(), type);
+      lock.unlock();
       events.EmitUpdate();
       Assign(rotation);
       hide();
@@ -519,9 +535,11 @@ void DesignWizard::onNextClicked() {
 
     case Page4_8_Fire: {
       using theatre::RotationType;
+      std::unique_lock lock(management.Mutex());
       theatre::Effect &fire = AutoDesign::MakeFire(
           management, makeDestinationFolder(), _selectedControllables,
           _colorsWidgetP4.GetSelection(), colorDeduction());
+      lock.unlock();
       events.EmitUpdate();
       Assign(fire);
       hide();

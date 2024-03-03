@@ -9,10 +9,11 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
-#include "../../theatre/forwards.h"
-#include "../../theatre/fixturetype.h"
+#include "theatre/forwards.h"
+#include "theatre/fixturetype.h"
 
-#include "../recursionlock.h"
+#include "gui/scopedconnection.h"
+#include "gui/recursionlock.h"
 
 #include <memory>
 
@@ -42,6 +43,7 @@ class FixtureListWindow : public Gtk::Window {
   }
 
  private:
+  std::vector<theatre::Fixture *> GetSelection() const;
   void update() { fillFixturesList(); }
   void fillFixturesList();
   void onNewButtonClicked();
@@ -60,8 +62,8 @@ class FixtureListWindow : public Gtk::Window {
 
   std::unique_ptr<AddFixtureWindow> add_fixture_window_;
 
-  sigc::connection _updateControllablesConnection;
-  sigc::connection _globalSelectionConnection;
+  ScopedConnection _updateControllablesConnection;
+  ScopedConnection _globalSelectionConnection;
   RecursionLock _recursionLock;
 
   Gtk::TreeView _fixturesListView;
@@ -83,14 +85,14 @@ class FixtureListWindow : public Gtk::Window {
   Gtk::VBox _mainBox;
   Gtk::Box _buttonBox;
 
-  Gtk::Button _newButton;
-  Gtk::Button _removeButton;
-  Gtk::Button _incChannelButton;
-  Gtk::Button _decChannelButton;
-  Gtk::Button _setChannelButton;
+  Gtk::Button _newButton{"New"};
+  Gtk::Button _removeButton{"Remove"};
+  Gtk::Button _incChannelButton{"+channel"};
+  Gtk::Button _decChannelButton{"-channel"};
+  Gtk::Button _setChannelButton{"Set..."};
   Gtk::Button _upButton;
   Gtk::Button _downButton;
-  Gtk::Button _reassignButton;
+  Gtk::Button _reassignButton{"Reassign"};
 };
 
 }  // namespace glight::gui
