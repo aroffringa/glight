@@ -482,7 +482,6 @@ void DesignWizard::onNextClicked() {
         lock.unlock();
         events.EmitUpdate();
       } else {
-        std::unique_lock lock(management.Mutex());
         glight::theatre::PresetCollection &preset = MakeColorPreset(
             management, makeDestinationFolder(), _selectedControllables,
             _colorsWidgetP4.GetSelection(), colorDeduction());
