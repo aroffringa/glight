@@ -107,7 +107,7 @@ theatre::SingleSourceValue& ControlWidget::GetSingleSourceValue(
 void ControlWidget::ShowAssignDialog() {
   InputSelectDialog dialog(false);
   if (dialog.run() == Gtk::RESPONSE_OK) {
-    const bool allow_multi = DefaultSourceCount() == 1;
+    const bool allow_multi = DefaultSourceCount() != 1;
     if (allow_multi) {
       std::vector<SourceValue*> sources = GetSourceValues();
       sources.emplace_back(dialog.SelectedSourceValue());
