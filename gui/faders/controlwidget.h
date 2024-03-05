@@ -105,7 +105,8 @@ class ControlWidget : public Gtk::Bin {
   /**
    * Sub-classes can call this to set the default source count
    * number. If not set, it defaults to 1. It is for example
-   * used when auto assigning faders to inputs.
+   * used when auto assigning faders to inputs. If it can be
+   * variable, it should be set to 0.
    */
   void SetDefaultSourceCount(size_t default_source_count) {
     default_source_count_ = default_source_count;
