@@ -53,6 +53,7 @@ ComboControlWidget::ComboControlWidget(FaderWindow &fader_window,
   add(event_box_);
   event_box_.show();
 
+  SetDefaultSourceCount(0);
   UpdateDisplaySettings();
   update_display_settings_connection_ =
       State().SignalChange().connect([&]() { UpdateDisplaySettings(); });
