@@ -109,7 +109,10 @@ void ColorSelectWidget::OpenVariableSelection() {
 }
 
 void ColorSelectWidget::SetVariableLabel() {
-  variable_label_.set_text(variable_->Name());
+  if (variable_)
+    variable_label_.set_text(variable_->Name());
+  else
+    variable_label_.set_text("");
 }
 
 bool ColorSelectWidget::OnColorAreaDraw(
