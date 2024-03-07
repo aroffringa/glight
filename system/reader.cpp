@@ -66,6 +66,10 @@ void ParseFolders(const Array &node, Management &management) {
       management.RootFolder().SetName(name);
     } else {
       const size_t p = ToNum(*parent->second).AsSize();
+      if (p >= management.Folders().size())
+        throw std::runtime_error("Reference to folder index " +
+                                 std::to_string(p) + ", only have " +
+                                 std::to_string(management.Folders().size()));
       management.AddFolder(*management.Folders()[p], name);
     }
   }

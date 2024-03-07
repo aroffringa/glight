@@ -1,4 +1,5 @@
 #include <fstream>
+#include <queue>
 
 #include "writer.h"
 
@@ -42,16 +43,32 @@ void writeControllable(WriteState &state, const Controllable &controllable);
 
 void writeFolders(WriteState &state) {
   state.writer.StartArray("folders");
-  for (size_t i = 0; i != state.management.Folders().size(); ++i) {
-    const Folder &folder = *state.management.Folders()[i];
-    state.folderIds.emplace(&folder, i);
-    state.writer.StartObject();
-    state.writer.Number("id", i);
-    state.writer.String("name", folder.Name());
-    if (!folder.IsRoot())
-      state.writer.Number("parent",
-                          state.folderIds.find(&folder.Parent())->second);
-    state.writer.EndObject();
+  std::queue<const Folder *> folders;
+  for (const std::unique_ptr<Folder> &folder : state.management.Folders())
+    folders.emplace(folder.get());
+  size_t next_folder_id = 0;
+  while (!folders.empty()) {
+    const Folder &folder = *folders.front();
+    folders.pop();
+    std::map<const Folder *, size_t>::iterator iter;
+    if (!folder.IsRoot()) {
+      iter = state.folderIds.find(&folder.Parent());
+    }
+    if (folder.IsRoot() || iter != state.folderIds.end()) {
+      state.folderIds.emplace(&folder, next_folder_id);
+      state.writer.StartObject();
+      state.writer.Number("id", next_folder_id);
+      ++next_folder_id;
+      state.writer.String("name", folder.Name());
+      if (!folder.IsRoot()) {
+        state.writer.Number("parent", iter->second);
+      }
+      state.writer.EndObject();
+    } else {
+      // Put folder at back of queue: the parent has not been written
+      // yet.
+      folders.emplace(&folder);
+    }
   }
   state.writer.EndArray();
 }
