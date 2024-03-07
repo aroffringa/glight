@@ -180,7 +180,6 @@ void FixtureListWindow::onDecChannelButtonClicked() {
 }
 
 void FixtureListWindow::onSetChannelButtonClicked() {
-  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
   const std::vector<theatre::Fixture *> selection = GetSelection();
   if (selection.size() == 1) {
     theatre::Fixture *fixture = selection[0];
@@ -198,6 +197,7 @@ void FixtureListWindow::onSetChannelButtonClicked() {
       std::string dmxChannel = entry.get_text();
       unsigned value = std::atoi(dmxChannel.c_str());
       if (value > 0 && value <= 512) {
+        std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
         if (!fixture->IsVisible())
           fixture->SetSymbol(theatre::FixtureSymbol::Normal);
         const unsigned universe = 0;  // TODO
