@@ -170,7 +170,7 @@ void Scene::RecalculateControllables() {
 }
 
 void Scene::BlackOut(double fade_speed) {
-  if(_storedSourceValues.Empty()) {
+  if (_storedSourceValues.Empty()) {
     _storedSourceValues = _management.StoreSourceValues(true);
   }
   _management.BlackOut(true, fade_speed);

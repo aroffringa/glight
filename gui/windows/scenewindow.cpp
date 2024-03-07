@@ -196,7 +196,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
   else {
     NewScene();
   }
-  fillControllablesList();
+  Update();
 }
 
 SceneWindow::~SceneWindow() {
