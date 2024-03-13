@@ -60,10 +60,12 @@ PropertiesWindow &OpenPropertiesWindow(
       new_window =
           std::make_unique<TimeSequencePropertiesWindow>(*timeSequence);
     }
-    window = new_window.get();
-    property_windows.Add(std::move(new_window));
+    if (new_window) {
+      window = new_window.get();
+      property_windows.Add(std::move(new_window));
+    }
   }
-  window->present();
+  if (window) window->present();
   return *window;
 }
 

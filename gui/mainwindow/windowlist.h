@@ -14,14 +14,16 @@ template <typename T>
 class WindowList {
  public:
   void Add(std::unique_ptr<T> window) {
-    window->signal_hide().connect([&]() { onHideWindow(window.get()); });
-    _list.emplace_back(std::move(window));
+    T *window_ptr = window.get();
+    window->signal_hide().connect(
+        [&, window_ptr]() { onHideWindow(window_ptr); });
+    list_.emplace_back(std::move(window));
   }
 
-  const std::vector<std::unique_ptr<T>> &List() const { return _list; }
+  const std::vector<std::unique_ptr<T>> &List() const { return list_; }
 
   T *GetOpenWindow(theatre::FolderObject &object) const {
-    for (auto &window : _list) {
+    for (auto &window : list_) {
       if (&window->GetObject() == &object) return window.get();
     }
     return nullptr;
@@ -29,15 +31,15 @@ class WindowList {
 
  private:
   void onHideWindow(T *window) {
-    for (auto iter = _list.begin(); iter != _list.end(); ++iter) {
+    for (auto iter = list_.begin(); iter != list_.end(); ++iter) {
       if (iter->get() == window) {
-        _list.erase(iter);
+        list_.erase(iter);
         break;
       }
     }
   }
 
-  std::vector<std::unique_ptr<T>> _list;
+  std::vector<std::unique_ptr<T>> list_;
 };
 
 }  // namespace glight::gui
