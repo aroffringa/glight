@@ -196,7 +196,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
   else {
     NewScene();
   }
-  fillControllablesList();
+  Update();
 }
 
 SceneWindow::~SceneWindow() {
@@ -568,8 +568,7 @@ bool SceneWindow::HandleKeyDown(char key) {
 void SceneWindow::SetSelectedScene(theatre::Scene &scene) {
   _selectedScene = &scene;
   _sourceValue = _management.GetSourceValue(scene, 0);
-  updateAudio();
-  UpdateAudioWidgetKeys();
+  Update();
   set_sensitive(true);
 }
 
@@ -578,7 +577,7 @@ void SceneWindow::SetNoSelectedScene() {
   _selectedScene = nullptr;
   _sourceValue = nullptr;
   _audioWidget.SetNoScene();
-  updateAudio();
+  Update();
 }
 
 void SceneWindow::onScalesChanged() {

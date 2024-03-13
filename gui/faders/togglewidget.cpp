@@ -158,7 +158,10 @@ void ToggleWidget::OnAssigned(bool moveFader) {
     name_label_.set_text("<..>");
     icon_button_.SetColors({});
     if (moveFader) {
-      UpdateActivated(GetSingleSourceValue(*source));
+      hold_updates_ = true;
+      icon_button_.SetActive(false);
+      fade_button_.set_image_from_icon_name("go-down");
+      hold_updates_ = false;
     } else {
       if (icon_button_.GetActive())
         setTargetValue(0, theatre::ControlValue::MaxUInt());
