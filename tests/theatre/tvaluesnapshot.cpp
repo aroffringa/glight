@@ -20,8 +20,8 @@ BOOST_AUTO_TEST_CASE(basic) {
   values[6] = 42;
   v1.GetUniverseSnapshot(0).SetValues(values.data(), values.size());
   v1.GetUniverseSnapshot(0).SetValues(values.data() + 2, 5);
-  BOOST_CHECK_EQUAL(v1.GetUniverseSnapshot(0).GetValue(5), 255);
-  BOOST_CHECK_EQUAL(v1.GetUniverseSnapshot(0).GetValue(6), 42);
+  BOOST_CHECK_EQUAL(v1.GetUniverseSnapshot(0)[5], 255);
+  BOOST_CHECK_EQUAL(v1.GetUniverseSnapshot(0)[6], 42);
   BOOST_CHECK_EQUAL(v1.GetValue(DmxChannel(5, 0)), 255);
   BOOST_CHECK_EQUAL(v1.GetValue(DmxChannel(6, 0)), 42);
 

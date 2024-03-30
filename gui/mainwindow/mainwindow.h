@@ -31,6 +31,7 @@ class FixtureTypesWindow;
 class ObjectListFrame;
 class PropertiesWindow;
 class SceneWindow;
+class SettingsWindow;
 class VisualizationWidget;
 
 /**
@@ -38,7 +39,7 @@ class VisualizationWidget;
  */
 class MainWindow : public Gtk::Window, public EventTransmitter {
  public:
-  MainWindow(std::unique_ptr<theatre::DmxDevice> dmxDevice);
+  MainWindow();
   ~MainWindow();
 
   void EmitUpdate() final override;
@@ -84,6 +85,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   void onMIOpenClicked();
   void onMISaveClicked();
   void onMIImportClicked();
+  void onMISettingsClicked();
   void onMIQuitClicked();
 
   void onMIBlackOutAndDryMode();
@@ -118,6 +120,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   Gtk::Revealer revealer_;
   std::unique_ptr<ObjectListFrame> _objectListFrame;
   std::unique_ptr<VisualizationWidget> _visualizationWidget;
+  std::unique_ptr<SettingsWindow> settings_window_;
 
   GUIState _state;
   FixtureSelection _fixtureSelection;

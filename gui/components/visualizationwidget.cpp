@@ -13,14 +13,14 @@
 
 #include "system/midi/manager.h"
 
-#include "theatre/beatfinder.h"
-#include "theatre/dmxdevice.h"
 #include "theatre/fixture.h"
 #include "theatre/fixturecontrol.h"
 #include "theatre/fixturegroup.h"
 #include "theatre/management.h"
 #include "theatre/managementtools.h"
 #include "theatre/theatre.h"
+
+#include "theatre/devices/beatfinder.h"
 
 #include <glibmm/main.h>
 

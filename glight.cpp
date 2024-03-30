@@ -1,8 +1,6 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "theatre/dmxdevice.h"
-
 #include "gui/application.h"
 
 #include "system/writer.h"

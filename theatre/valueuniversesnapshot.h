@@ -7,12 +7,17 @@
 
 namespace glight::theatre {
 
+constexpr unsigned kChannelsPerUniverse = 512;
+
 class ValueUniverseSnapshot {
  public:
-  unsigned char GetValue(size_t channel) const { return values_[channel]; }
   void SetValues(const unsigned char* values, size_t size) {
-    std::copy_n(values, std::min<size_t>(512, size), values_.begin());
+    std::copy_n(values, std::min<size_t>(kChannelsPerUniverse, size),
+                values_.begin());
   }
+  const unsigned char* Data() const { return values_.data(); }
+  unsigned char& operator[](size_t index) { return values_[index]; }
+  const unsigned char& operator[](size_t index) const { return values_[index]; }
 
   friend bool operator==(const ValueUniverseSnapshot& left,
                          const ValueUniverseSnapshot& right) {
@@ -25,7 +30,7 @@ class ValueUniverseSnapshot {
   }
 
  private:
-  std::array<unsigned char, 512> values_;
+  std::array<unsigned char, kChannelsPerUniverse> values_;
 };
 
 }  // namespace glight::theatre

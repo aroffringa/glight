@@ -1,5 +1,4 @@
 #include "theatre/chase.h"
-#include "theatre/dummydevice.h"
 #include "theatre/fixturecontrol.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
@@ -18,7 +17,6 @@ BOOST_AUTO_TEST_SUITE(chase)
 
 BOOST_AUTO_TEST_CASE(remove_indirect) {
   Management management;
-  management.AddDevice(std::unique_ptr<DmxDevice>(new DummyDevice()));
   Folder &root = management.RootFolder();
   FixtureType &ft =
       management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);

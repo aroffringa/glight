@@ -43,6 +43,9 @@ class Theatre {
   void SwapFixturePositions(const Fixture &fixture_a, const Fixture &fixture_b);
   bool IsUsed(const FixtureType &fixtureType) const;
 
+  /**
+   * Highest channel used (over all universes).
+   */
   unsigned HighestChannel() const { return _highestChannel; }
   DmxChannel FirstFreeChannel() const {
     // TODO support multiple universes

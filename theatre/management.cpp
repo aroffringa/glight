@@ -4,11 +4,8 @@
 
 #include <ranges>
 
-#include "beatfinder.h"
 #include "chase.h"
 #include "controllable.h"
-#include "dmxdevice.h"
-#include "dummydevice.h"
 #include "effect.h"
 #include "fixturecontrol.h"
 #include "fixturegroup.h"
@@ -21,6 +18,8 @@
 #include "theatre.h"
 #include "timesequence.h"
 #include "valuesnapshot.h"
+
+#include "devices/beatfinder.h"
 
 #include "scenes/scene.h"
 
@@ -56,30 +55,28 @@ void Management::Clear() {
   _theatre->Clear();
 }
 
-void Management::AddDevice(std::unique_ptr<DmxDevice> device) {
+void Management::UpdateUniverses() {
   std::lock_guard<std::mutex> lock(_mutex);
-  _device = std::move(device);
-  const size_t n_universes = _device->NUniverses();
+  const size_t n_universes = universe_map_.NUniverses();
   _primarySnapshot.SetUniverseCount(n_universes);
   _secondarySnapshot.SetUniverseCount(n_universes);
 }
 
 void Management::Run() {
-  assert(_beamFinder);
+  assert(_beatFinder);
   if (_thread == nullptr) {
+    UpdateUniverses();
     _isQuitting = false;
     _thread = std::make_unique<std::thread>([&]() { ThreadLoop(); });
   } else
     throw std::runtime_error("Invalid call to Run(): already running");
 }
 
-void Management::ProcessInputUniverse(unsigned universe,
-                                      ValueSnapshot &snapshot,
-                                      bool is_primary) {
-  unsigned values[512];
-  unsigned char values_char[512];
+void Management::InferInputUniverse(unsigned universe, ValueSnapshot &snapshot,
+                                    bool is_primary) {
+  unsigned values[kChannelsPerUniverse];
 
-  std::fill_n(values, 512, 0);
+  std::fill_n(values, kChannelsPerUniverse, 0);
 
   for (const std::unique_ptr<Controllable> &controllable : _controllables) {
     if (FixtureControl *fc =
@@ -88,7 +85,8 @@ void Management::ProcessInputUniverse(unsigned universe,
     }
   }
 
-  for (unsigned i = 0; i < 512; ++i) {
+  unsigned char values_char[kChannelsPerUniverse];
+  for (unsigned i = 0; i < kChannelsPerUniverse; ++i) {
     unsigned val = (values[i] >> 16);
     if (val > 255) val = 255;
     values_char[i] = static_cast<unsigned char>(val);
@@ -97,20 +95,32 @@ void Management::ProcessInputUniverse(unsigned universe,
   ValueUniverseSnapshot &universe_values =
       snapshot.GetUniverseSnapshot(universe);
   universe_values.SetValues(values_char, _theatre->HighestChannel() + 1);
+}
 
-  if (is_primary) {
-    _device->SetOutputValues(universe, values_char, 512);
+void Management::MergeInputUniverse(ValueSnapshot &snapshot,
+                                    size_t input_universe) {
+  unsigned char values[kChannelsPerUniverse];
+  universe_map_.GetInputValues(input_universe, values, kChannelsPerUniverse);
+  const system::OptionalNumber<size_t> destination_universe =
+      universe_map_.GetInputMapping(input_universe).merge_universe;
+  if (destination_universe &&
+      *destination_universe < snapshot.UniverseCount()) {
+    ValueUniverseSnapshot &universe_snapshot =
+        snapshot.GetUniverseSnapshot(*destination_universe);
+    for (size_t ch = 0; ch != kChannelsPerUniverse; ++ch) {
+      universe_snapshot[ch] = std::max(universe_snapshot[ch], values[ch]);
+    }
   }
 }
 
 void Management::ThreadLoop() {
-  const size_t n_universes = _device->NUniverses();
+  const size_t n_universes = universe_map_.NUniverses();
   ValueSnapshot next_primary(true, n_universes);
   ValueSnapshot next_secondary(false, n_universes);
   unsigned timestep_number = 0;
   while (!_isQuitting) {
     MixAll(timestep_number, next_primary, next_secondary);
-    _device->WaitForNextSync();
+    universe_map_.WaitForNextSync();
 
     std::lock_guard<std::mutex> lock(_mutex);
     swap(_primarySnapshot, next_primary);
@@ -120,7 +130,7 @@ void Management::ThreadLoop() {
   }
 }
 
-void Management::abortAllDevices() { _device->Abort(); }
+void Management::abortAllDevices() { universe_map_.Abort(); }
 
 void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
                         ValueSnapshot &secondary) {
@@ -188,11 +198,29 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
 
     // All controllables have provided their output; now obtain the DMX values
     // and store them in the ValueSnapshot.
-    const unsigned n_universes = _device->NUniverses();
+    const unsigned n_universes = universe_map_.NUniverses();
     ValueSnapshot &snapshot = is_primary ? primary : secondary;
     for (unsigned universe = 0; universe != n_universes; ++universe) {
-      if (_device->GetUniverseType(universe) == UniverseType::Output) {
-        ProcessInputUniverse(universe, snapshot, is_primary);
+      if (universe_map_.GetUniverseType(universe) == UniverseType::Output) {
+        InferInputUniverse(universe, snapshot, is_primary);
+      }
+    }
+
+    // Merge any input universes that are set to be merged
+    if (is_primary) {
+      for (unsigned universe = 0; universe != n_universes; ++universe) {
+        if (universe_map_.GetUniverseType(universe) == UniverseType::Input) {
+          MergeInputUniverse(snapshot, universe);
+        }
+      }
+
+      // Output universes
+      for (unsigned universe = 0; universe != n_universes; ++universe) {
+        if (universe_map_.GetUniverseType(universe) == UniverseType::Output) {
+          universe_map_.SetOutputValues(
+              universe, snapshot.GetUniverseSnapshot(universe).Data(),
+              kChannelsPerUniverse);
+        }
       }
     }
   }
