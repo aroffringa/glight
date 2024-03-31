@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <optional>
+#include <map>
 #include <memory>
 #include <semaphore>
 
@@ -27,8 +28,17 @@ class OlaConnection {
 
   void Open();
   size_t NUniverses() const { return universes_.size(); }
+  std::vector<size_t> GetUniverses() const {
+    std::vector<size_t> universes;
+    universes.reserve(universes_.size());
+    for (const std::pair<const size_t, OlaUniverse> &u : universes_) {
+      universes.emplace_back(u.first);
+    }
+    return universes;
+  }
   UniverseType GetUniverseType(size_t universe) const {
-    return universes_[universe].type;
+    assert(universes_.contains(universe));
+    return universes_.find(universe)->second.type;
   }
   void SetOutputValues(unsigned universe, const unsigned char *newValues,
                        size_t size);
@@ -51,8 +61,8 @@ class OlaConnection {
   std::mutex send_mutex_;
   std::mutex receive_mutex_;
   system::EventSynchronization send_event_;
-
-  std::vector<OlaUniverse> universes_;
+  // first value is the ola universe nr
+  std::map<size_t, OlaUniverse> universes_;
   std::unique_ptr<ola::client::OlaClientWrapper> client_;
   ola::client::SendDMXArgs send_dmx_args_;
   std::thread ola_thread_;

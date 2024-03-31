@@ -34,11 +34,10 @@ void OlaConnection::Open() {
 }
 
 bool OlaConnection::SendDmx() {
-  for (size_t universe = 0; universe != universes_.size(); ++universe) {
-    const OlaUniverse& ola_universe = universes_[universe];
+  for (const std::pair<const size_t, OlaUniverse>& u : universes_) {
+    const OlaUniverse& ola_universe = u.second;
     if (ola_universe.type == UniverseType::Output) {
-      // OLA's Universe index 1 is the first universe (i.e. not zero indexed)
-      client_->GetClient()->SendDMX(universe + 1, *ola_universe.send_buffer,
+      client_->GetClient()->SendDMX(u.first, *ola_universe.send_buffer,
                                     send_dmx_args_);
     }
   }
@@ -52,9 +51,6 @@ void OlaConnection::SetOutputValues(unsigned universe,
                                     size_t size) {
   const size_t n = std::min<size_t>(512, size);
   std::lock_guard<std::mutex> lock(receive_mutex_);
-  if (universe >= universes_.size()) {
-    universes_.resize(universe + 1);
-  }
   OlaUniverse& ola_universe = universes_[universe];
   if (ola_universe.type == UniverseType::Uninitialized) {
     ola_universe.type = UniverseType::Output;
@@ -85,8 +81,9 @@ void OlaConnection::GetOutputValues(unsigned universe,
 void OlaConnection::GetInputValues(unsigned universe,
                                    unsigned char* destination, size_t size) {
   std::lock_guard<std::mutex> lock(receive_mutex_);
-  if (universes_[universe].type == UniverseType::Input) {
-    std::vector<unsigned char>& buffer = universes_[universe].receive_buffer;
+  const OlaUniverse& ola_universe = universes_.find(universe)->second;
+  if (ola_universe.type == UniverseType::Input) {
+    const std::vector<unsigned char>& buffer = ola_universe.receive_buffer;
     std::copy_n(buffer.data(), std::min(buffer.size(), size), destination);
   } else {
     std::fill_n(destination, size, 0);
@@ -98,7 +95,7 @@ void OlaConnection::WaitForNextSync() { send_event_.Wait(); }
 void OlaConnection::ReceiveDmx(const ola::client::DMXMetadata& metadata,
                                const ola::DmxBuffer& data) {
   std::lock_guard<std::mutex> lock(receive_mutex_);
-  const unsigned universe = metadata.universe - 1;
+  const unsigned universe = metadata.universe;
   std::vector<unsigned char>& buffer = universes_[universe].receive_buffer;
   std::copy_n(data.GetRaw(), std::min<unsigned>(data.Size(), buffer.size()),
               buffer.data());
@@ -111,10 +108,9 @@ void OlaConnection::ReceiveUniverseList(
     const ola::client::Result& result,
     const std::vector<ola::client::OlaUniverse>& universes) {
   for (const ola::client::OlaUniverse& u : universes) {
-    OlaUniverse& ola_universe = universes_.emplace_back();
+    OlaUniverse& ola_universe = universes_[u.Id()];
     if (u.InputPortCount() != 0) {
-      std::cout << "Input universe " << universes_.size() << ": " << u.Name()
-                << '\n';
+      std::cout << "Input universe " << u.Id() << ": " << u.Name() << '\n';
       ola_universe.type = UniverseType::Input;
       ola_universe.receive_buffer.resize(512);
       client_->GetClient()->RegisterUniverse(
@@ -122,8 +118,7 @@ void OlaConnection::ReceiveUniverseList(
           ola::NewSingleCallback(this,
                                  &OlaConnection::RegisterUniverseCallback));
     } else {
-      std::cout << "Output universe " << universes_.size() << ": " << u.Name()
-                << '\n';
+      std::cout << "Output universe " << u.Id() << ": " << u.Name() << '\n';
       ola_universe.type = UniverseType::Output;
       ola_universe.send_buffer.emplace();
     }

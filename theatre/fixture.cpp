@@ -43,6 +43,10 @@ void Fixture::DecChannel() {
   theatre_.NotifyDmxChange();
 }
 
+DmxChannel Fixture::GetFirstChannel() const {
+  return functions_.front()->MainChannel();
+}
+
 void Fixture::SetChannel(DmxChannel dmx_channel) {
   for (size_t i = 0; i != functions_.size(); ++i) {
     std::unique_ptr<FixtureFunction> &ff = functions_[i];

@@ -173,6 +173,10 @@ void AddFixtureWindow::onAdd() {
           _management->GetTheatre().GetFreePosition();
       theatre::Fixture &fixture =
           _management->GetTheatre().AddFixture(*project_type);
+      theatre::DmxChannel channel(
+          fixture.GetFirstChannel().Channel(),
+          _management->GetUniverses().FirstOutputUniverse());
+      fixture.SetChannel(channel);
       fixture.GetPosition() = position;
 
       theatre::FixtureControl &control = _management->AddFixtureControl(

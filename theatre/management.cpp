@@ -99,12 +99,12 @@ void Management::InferInputUniverse(unsigned universe, ValueSnapshot &snapshot,
 
 void Management::MergeInputUniverse(ValueSnapshot &snapshot,
                                     size_t input_universe) {
-  unsigned char values[kChannelsPerUniverse];
-  universe_map_.GetInputValues(input_universe, values, kChannelsPerUniverse);
   const system::OptionalNumber<size_t> destination_universe =
       universe_map_.GetInputMapping(input_universe).merge_universe;
   if (destination_universe &&
       *destination_universe < snapshot.UniverseCount()) {
+    unsigned char values[kChannelsPerUniverse];
+    universe_map_.GetInputValues(input_universe, values, kChannelsPerUniverse);
     ValueUniverseSnapshot &universe_snapshot =
         snapshot.GetUniverseSnapshot(*destination_universe);
     for (size_t ch = 0; ch != kChannelsPerUniverse; ++ch) {

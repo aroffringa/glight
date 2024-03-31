@@ -15,7 +15,7 @@ namespace glight::theatre::devices {
 enum class InputMappingFunction {
   NoFunction,
   /// This input controls the faders of a fader window
-  FaderConnection,
+  FaderControl,
   /// The input channels are merged into the output.
   Merge
 };
@@ -49,26 +49,38 @@ class UniverseMap {
   void Open() {
     mappings_.clear();
     try {
+      bool has_output = false;
       ola_ = std::make_unique<OlaConnection>();
       ola_->Open();
-      mappings_.resize(ola_->NUniverses());
-      for (size_t i = 0; i != mappings_.size(); ++i) {
-        switch (ola_->GetUniverseType(i)) {
+      const std::vector<size_t> universes = ola_->GetUniverses();
+      mappings_.reserve(universes.size());
+      for (size_t universe : universes) {
+        switch (ola_->GetUniverseType(universe)) {
           case UniverseType::Input:
-            mappings_[i] =
-                InputMapping{InputMappingFunction::NoFunction, {}, {}};
+            mappings_.emplace_back(
+                InputMapping{InputMappingFunction::NoFunction,
+                             {},
+                             system::OptionalNumber<size_t>(universe)});
             break;
           case UniverseType::Output:
-            mappings_[i] = OutputMapping{system::OptionalNumber<size_t>(i)};
+            mappings_.emplace_back(
+                OutputMapping{system::OptionalNumber<size_t>(universe)});
+            has_output = true;
             break;
           case UniverseType::Uninitialized:
             break;
         }
       }
+      if (!has_output) {
+        // Add a dummy output; otherwise there's no univere to store the
+        // output channel values, and e.g. the visualization won't work.
+        mappings_.emplace_back(OutputMapping());
+      }
     } catch (std::exception& e) {
       std::cerr << "DMX device threw exception: " << e.what() << '\n';
       std::cerr << "No DMX device found, switching to dummy output.\n";
       ola_.reset();
+      mappings_.reserve(2);
       mappings_.emplace_back(OutputMapping());
       mappings_.emplace_back(
           InputMapping{InputMappingFunction::NoFunction, {}, {}});
@@ -87,6 +99,12 @@ class UniverseMap {
   }
   const OutputMapping& GetOutputMapping(size_t universe) const {
     return std::get<OutputMapping>(mappings_[universe]);
+  }
+  unsigned FirstOutputUniverse() const {
+    for (size_t i = 0; i != mappings_.size(); ++i) {
+      if (std::holds_alternative<OutputMapping>(mappings_[i])) return i;
+    }
+    return 0;
   }
 
   void SetOutputValues(unsigned universe, const unsigned char* new_values,
@@ -143,6 +161,8 @@ class UniverseMap {
   void Abort() {
     if (ola_) ola_->Abort();
   }
+
+  std::unique_ptr<OlaConnection>& GetOla() { return ola_; }
 
  private:
   std::vector<Mapping> mappings_;
