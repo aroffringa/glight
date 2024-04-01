@@ -28,23 +28,25 @@ SettingsWindow::SettingsWindow() {
   universe_list_view_.set_hexpand(true);
   universe_list_view_.set_vexpand(true);
   dmx_page_.attach(universe_list_view_, 0, 0, 2, 1);
+  reload_ola_button_.signal_clicked().connect([&]() { ReloadOla(); });
+  dmx_page_.attach(reload_ola_button_, 0, 1, 1, 1);
 
-  dmx_page_.attach(ola_universe_label_, 0, 1, 1, 1);
+  dmx_page_.attach(ola_universe_label_, 0, 2, 1, 1);
   ola_universe_combo_.signal_changed().connect(
       [&]() { SaveSelectedOlaUniverse(); });
-  dmx_page_.attach(ola_universe_combo_, 1, 1, 1, 1);
+  dmx_page_.attach(ola_universe_combo_, 1, 2, 1, 1);
 
   auto save_universe = [&]() { SaveSelectedUniverse(); };
   Gtk::RadioButton::Group in_out_group;
 
   dmx_none_rb_.set_group(in_out_group);
   dmx_none_rb_.signal_clicked().connect(save_universe);
-  dmx_page_.attach(dmx_none_rb_, 0, 2, 2, 1);
+  dmx_page_.attach(dmx_none_rb_, 0, 3, 2, 1);
 
   // DMX input settings
   dmx_input_rb_.set_group(in_out_group);
   dmx_input_rb_.signal_clicked().connect(save_universe);
-  dmx_page_.attach(dmx_input_rb_, 0, 3, 2, 1);
+  dmx_page_.attach(dmx_input_rb_, 0, 4, 2, 1);
   Gtk::RadioButton::Group input_function_group;
   dmx_disconnected_input_rb_.set_group(input_function_group);
   dmx_disconnected_input_rb_.signal_clicked().connect(save_universe);
@@ -57,12 +59,12 @@ SettingsWindow::SettingsWindow() {
   dmx_input_function_box_.pack_start(dmx_merge_rb_);
   dmx_input_function_frame_.add(dmx_input_function_box_);
   dmx_input_function_frame_.set_hexpand(true);
-  dmx_page_.attach(dmx_input_function_frame_, 1, 4, 1, 1);
+  dmx_page_.attach(dmx_input_function_frame_, 1, 5, 1, 1);
 
   // DMX output settings
   dmx_output_rb_.set_group(in_out_group);
   dmx_output_rb_.signal_clicked().connect(save_universe);
-  dmx_page_.attach(dmx_output_rb_, 0, 5, 2, 1);
+  dmx_page_.attach(dmx_output_rb_, 0, 6, 2, 1);
   notebook_.append_page(dmx_page_, "DMX");
 
   notebook_.append_page(midi_page_, "MIDI");
@@ -192,6 +194,7 @@ void SettingsWindow::UpdateAfterSelection() {
 }
 
 void SettingsWindow::SaveSelectedUniverse() {
+  std::lock_guard lock(Instance::Management().Mutex());
   Gtk::TreeModel::iterator iter =
       universe_list_view_.get_selection()->get_selected();
   if (iter && recursion_lock_.IsFirst()) {
@@ -227,6 +230,7 @@ void SettingsWindow::SaveSelectedUniverse() {
 }
 
 void SettingsWindow::SaveSelectedOlaUniverse() {
+  std::lock_guard lock(Instance::Management().Mutex());
   Gtk::TreeModel::iterator iter =
       universe_list_view_.get_selection()->get_selected();
   if (iter && recursion_lock_.IsFirst() && ola_universe_combo_.get_active()) {
@@ -247,6 +251,14 @@ void SettingsWindow::SaveSelectedOlaUniverse() {
     universes.SetUniverseMapping(universe_index, mapping);
     SetUniverseRow(universes, universe_index, row);
   }
+}
+
+void SettingsWindow::ReloadOla() {
+  std::unique_lock lock(Instance::Management().Mutex());
+  Instance::Management().GetUniverses().Open();
+  lock.unlock();
+  FillUniverses();
+  UpdateAfterSelection();
 }
 
 }  // namespace glight::gui

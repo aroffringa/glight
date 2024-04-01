@@ -32,6 +32,7 @@ class SettingsWindow : public Gtk::Window {
   void UpdateAfterSelection();
   void SaveSelectedUniverse();
   void SaveSelectedOlaUniverse();
+  void ReloadOla();
 
   std::unique_ptr<SettingsWindow> self_;
   Gtk::Notebook notebook_;
@@ -49,6 +50,9 @@ class SettingsWindow : public Gtk::Window {
     Gtk::TreeModelColumn<Glib::ustring> ola_universe_;
     Gtk::TreeModelColumn<Glib::ustring> description_;
   } universe_columns_;
+  Glib::RefPtr<Gtk::ListStore> universe_list_store_;
+  Gtk::TreeView universe_list_view_;
+  Gtk::Button reload_ola_button_{"Reload ola"};
   Gtk::Label ola_universe_label_{"Ola universe:"};
   Gtk::ComboBoxText ola_universe_combo_;
   Gtk::RadioButton dmx_none_rb_{"None"};
@@ -60,8 +64,6 @@ class SettingsWindow : public Gtk::Window {
   Gtk::VBox dmx_input_function_box_;
 
   Gtk::RadioButton dmx_output_rb_{"Output"};
-  Glib::RefPtr<Gtk::ListStore> universe_list_store_;
-  Gtk::TreeView universe_list_view_;
 
   Gtk::VBox midi_page_;
 

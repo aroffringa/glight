@@ -130,7 +130,7 @@ void Management::ThreadLoop() {
   }
 }
 
-void Management::abortAllDevices() { universe_map_.Abort(); }
+void Management::abortAllDevices() { universe_map_.Close(); }
 
 void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
                         ValueSnapshot &secondary) {

@@ -45,8 +45,19 @@ class UniverseMap {
    * The reason for a separate Open() function instead of handling this in
    * the constructor, is to also have an "empty" UniverseMap, which can be
    * move from/to result.
+   *
+   * If called when already open, Ola will be closed and re-opened, which
+   * will cause the universe mapping to reset to a default mapping to the
+   * available Ola universes.
    */
   void Open();
+
+  void Close() {
+    if (ola_) {
+      ola_->Abort();
+      ola_.reset();
+    }
+  }
 
   size_t NUniverses() const { return mappings_.size(); }
 
@@ -123,10 +134,6 @@ class UniverseMap {
     else
       usleep(40000);
     ++sync_;
-  }
-
-  void Abort() {
-    if (ola_) ola_->Abort();
   }
 
   const std::unique_ptr<OlaConnection>& GetOla() const { return ola_; }

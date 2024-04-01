@@ -3,7 +3,9 @@
 namespace glight::theatre::devices {
 
 void UniverseMap::Open() {
+  Close();
   mappings_.clear();
+  sync_ = 0;
   try {
     bool has_output = false;
     ola_ = std::make_unique<OlaConnection>();
