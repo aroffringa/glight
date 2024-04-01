@@ -115,6 +115,7 @@ set(GUIFILES
   gui/windows/groupwindow.cpp
   gui/windows/presetcollectionwindow.cpp
   gui/windows/scenewindow.cpp
+  gui/windows/settingswindow.cpp
   gui/windows/timesequencepropertieswindow.cpp)
 
 set(SYSTEMFILES
@@ -130,7 +131,6 @@ set(SYSTEMFILES
 )
 
 set(THEATREFILES
-  theatre/beatfinder.cpp
   theatre/color.cpp
   theatre/colordeduction.cpp
   theatre/effect.cpp
@@ -141,7 +141,6 @@ set(THEATREFILES
   theatre/folderobject.cpp
   theatre/management.cpp
   theatre/managementtools.cpp
-  theatre/oladevice.cpp
   theatre/presetcollection.cpp
   theatre/presetvalue.cpp
   theatre/sourcevaluestore.cpp
@@ -150,6 +149,9 @@ set(THEATREFILES
   theatre/design/autodesign.cpp
   theatre/design/colorpreset.cpp
   theatre/design/rotation.cpp
+  theatre/devices/beatfinder.cpp
+  theatre/devices/olaconnection.cpp
+  theatre/devices/universemap.cpp
   theatre/effects/hue_saturation_lightness_effect.cpp
   theatre/filters/filter.cpp
   theatre/properties/propertyset.cpp

@@ -25,6 +25,7 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> Open;
   sigc::signal<void()> Save;
   sigc::signal<void()> Import;
+  sigc::signal<void()> Settings;
   sigc::signal<void()> Quit;
 
   // Design menu
@@ -77,12 +78,15 @@ class MainMenu : public Gtk::MenuBar {
   }
 
  private:
-  Gtk::Menu _menuFile;
+  Gtk::Menu file_menu_;
   Gtk::MenuItem _miFile{"_File", true};
   Gtk::MenuItem _miNew{"New"};
   Gtk::MenuItem _miOpen{"_Open...", true};
   Gtk::MenuItem _miSave{"Save _as...", true};
   Gtk::MenuItem _miImport{"_Import fixtures...", true};
+  Gtk::SeparatorMenuItem file_sep1_mi_;
+  Gtk::MenuItem settings_mi_{"_Settings...", true};
+  Gtk::SeparatorMenuItem file_sep2_mi_;
   Gtk::MenuItem _miQuit{"_Quit", true};
 
   Gtk::Menu _menuDesign;

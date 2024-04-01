@@ -13,11 +13,11 @@ Theatre::Theatre(const Theatre &source)
     : _highestChannel(source._highestChannel) {
   _fixtureTypes.reserve(source._fixtureTypes.size());
   for (const std::unique_ptr<FixtureType> &fixtureType : source._fixtureTypes)
-    _fixtureTypes.emplace_back(new FixtureType(*fixtureType));
+    _fixtureTypes.emplace_back(std::make_unique<FixtureType>(*fixtureType));
 
   _fixtures.reserve(source._fixtures.size());
   for (const std::unique_ptr<Fixture> &fixture : source._fixtures)
-    _fixtures.emplace_back(new Fixture(*fixture, *this));
+    _fixtures.emplace_back(std::make_unique<Fixture>(*fixture, *this));
 }
 
 void Theatre::Clear() {

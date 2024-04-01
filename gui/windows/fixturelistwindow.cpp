@@ -37,6 +37,7 @@ FixtureListWindow::FixtureListWindow() {
   _fixturesListView.set_model(_fixturesListModel);
   _fixturesListView.append_column("Fixture", _fixturesListColumns._title);
   _fixturesListView.append_column("Type", _fixturesListColumns._type);
+  _fixturesListView.append_column("Universe", _fixturesListColumns._universe);
   _fixturesListView.append_column("Channels", _fixturesListColumns._channels);
   _fixturesListView.append_column("Symbol", _fixturesListColumns._symbol);
   _fixturesListView.set_rubber_banding(true);
@@ -103,6 +104,7 @@ void FixtureListWindow::fillFixturesList() {
     const Gtk::TreeModel::Row &row = *iter;
     row[_fixturesListColumns._title] = fixture->Name();
     row[_fixturesListColumns._type] = fixture->Type().Name();
+    row[_fixturesListColumns._universe] = fixture->GetUniverse();
     row[_fixturesListColumns._channels] = getChannelString(*fixture);
     row[_fixturesListColumns._symbol] = fixture->Symbol().Name();
     row[_fixturesListColumns._fixture] = fixture.get();

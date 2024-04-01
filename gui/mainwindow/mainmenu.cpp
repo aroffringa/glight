@@ -7,21 +7,28 @@ namespace glight::gui {
 MainMenu::MainMenu() {
   // File menu
   _miNew.signal_activate().connect(New);
-  _menuFile.append(_miNew);
+  file_menu_.append(_miNew);
 
   _miOpen.signal_activate().connect(Open);
-  _menuFile.append(_miOpen);
+  file_menu_.append(_miOpen);
 
   _miSave.signal_activate().connect(Save);
-  _menuFile.append(_miSave);
+  file_menu_.append(_miSave);
 
   _miImport.signal_activate().connect(Import);
-  _menuFile.append(_miImport);
+  file_menu_.append(_miImport);
+
+  file_menu_.append(file_sep1_mi_);
+
+  settings_mi_.signal_activate().connect(Settings);
+  file_menu_.append(settings_mi_);
+
+  file_menu_.append(file_sep2_mi_);
 
   _miQuit.signal_activate().connect(Quit);
-  _menuFile.append(_miQuit);
+  file_menu_.append(_miQuit);
 
-  _miFile.set_submenu(_menuFile);
+  _miFile.set_submenu(file_menu_);
   append(_miFile);
 
   // Design menu

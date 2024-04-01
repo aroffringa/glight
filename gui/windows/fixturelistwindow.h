@@ -72,12 +72,15 @@ class FixtureListWindow : public Gtk::Window {
     FixturesListColumns() {
       add(_title);
       add(_type);
+      add(_universe);
       add(_channels);
       add(_symbol);
       add(_fixture);
     }
 
-    Gtk::TreeModelColumn<Glib::ustring> _title, _type, _channels, _symbol;
+    Gtk::TreeModelColumn<Glib::ustring> _title, _type;
+    Gtk::TreeModelColumn<unsigned> _universe;
+    Gtk::TreeModelColumn<Glib::ustring> _channels, _symbol;
     Gtk::TreeModelColumn<theatre::Fixture *> _fixture;
   } _fixturesListColumns;
   Gtk::ScrolledWindow _fixturesScrolledWindow;

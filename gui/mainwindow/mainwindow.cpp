@@ -21,8 +21,8 @@
 #include "gui/windows/fixturelistwindow.h"
 #include "gui/windows/fixturetypeswindow.h"
 #include "gui/windows/scenewindow.h"
+#include "gui/windows/settingswindow.h"
 
-#include "theatre/dmxdevice.h"
 #include "theatre/fixture.h"
 #include "theatre/management.h"
 #include "theatre/presetcollection.h"
@@ -36,7 +36,7 @@
 
 namespace glight::gui {
 
-MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
+MainWindow::MainWindow() {
   set_title("Glight - show");
   set_default_icon_name("glight");
   set_default_size(800, 500);
@@ -51,8 +51,8 @@ MainWindow::MainWindow(std::unique_ptr<theatre::DmxDevice> device) {
   Instance::Get().SetEvents(*this);
   _management = std::make_unique<theatre::Management>();
   Instance::Get().SetManagement(*_management);
-  _management->AddDevice(std::move(device));
   _management->StartBeatFinder();
+  _management->GetUniverses().Open();
 
   _management->Run();
 
@@ -123,6 +123,8 @@ void MainWindow::InitializeMenu() {
 
   main_menu_.Import.connect(
       sigc::mem_fun(*this, &MainWindow::onMIImportClicked));
+  main_menu_.Settings.connect(
+      sigc::mem_fun(*this, &MainWindow::onMISettingsClicked));
   main_menu_.Quit.connect(sigc::mem_fun(*this, &MainWindow::onMIQuitClicked));
 
   main_menu_.LockLayout.connect([&]() { UpdateLayoutLock(); });
@@ -393,6 +395,15 @@ void MainWindow::onMIImportClicked() {
     }
     EmitUpdate();
   }
+}
+
+void MainWindow::onMISettingsClicked() {
+  if (!settings_window_) {
+    settings_window_ = std::make_unique<SettingsWindow>();
+    settings_window_->signal_hide().connect(
+        [&]() { settings_window_.reset(); });
+  }
+  settings_window_->present();
 }
 
 void MainWindow::onMIQuitClicked() { hide(); }

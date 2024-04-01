@@ -1,5 +1,4 @@
 #include "theatre/chase.h"
-#include "theatre/dummydevice.h"
 #include "theatre/fixturecontrol.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
@@ -20,7 +19,6 @@ BOOST_AUTO_TEST_SUITE(management)
 
 BOOST_AUTO_TEST_CASE(Destruct) {
   Management management;
-  management.AddDevice(std::make_unique<DummyDevice>());
   management.Run();
   BOOST_CHECK_THROW(management.Run(), std::exception);
   management.StartBeatFinder();

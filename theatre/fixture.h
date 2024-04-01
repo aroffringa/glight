@@ -40,11 +40,17 @@ class Fixture : public NamedObject {
     return channels;
   }
 
+  unsigned GetUniverse() const {
+    return functions_.front()->MainChannel().Universe();
+  }
+
   void IncChannel();
 
   void DecChannel();
 
   void SetChannel(DmxChannel dmx_channel);
+
+  DmxChannel GetFirstChannel() const;
 
   void ClearFunctions() { functions_.clear(); }
   FixtureFunction &AddFunction(FunctionType type) {

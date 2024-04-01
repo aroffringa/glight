@@ -13,6 +13,8 @@
 #include "valuesnapshot.h"
 #include "sourcevaluestore.h"
 
+#include "devices/universemap.h"
+
 namespace glight::theatre {
 
 /**
@@ -30,7 +32,7 @@ class Management {
            _sourceValues.empty();
   }
 
-  void AddDevice(std::unique_ptr<DmxDevice> device);
+  void UpdateUniverses();
 
   void Run();
 
@@ -55,7 +57,7 @@ class Management {
   std::vector<std::unique_ptr<SourceValue>> &SourceValues() {
     return _sourceValues;
   }
-  const std::unique_ptr<DmxDevice> &Device() const { return _device; }
+  devices::UniverseMap &GetUniverses() { return universe_map_; }
 
   void RemoveObject(FolderObject &object);
 
@@ -184,8 +186,10 @@ class Management {
    * If this is the primary snapshot, the values are also send to the DMX
    * device.
    */
-  void ProcessInputUniverse(unsigned universe, ValueSnapshot &snapshot,
-                            bool is_primary);
+  void InferInputUniverse(unsigned universe, ValueSnapshot &snapshot,
+                          bool is_primary);
+
+  void MergeInputUniverse(ValueSnapshot &snapshot, size_t input_universe);
 
   void removeControllable(
       std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr);
@@ -223,7 +227,7 @@ class Management {
   std::vector<std::unique_ptr<Controllable>> _controllables;
   std::vector<std::unique_ptr<FixtureGroup>> _groups;
   std::vector<std::unique_ptr<SourceValue>> _sourceValues;
-  std::unique_ptr<DmxDevice> _device;
+  devices::UniverseMap universe_map_;
 };
 
 }  // namespace glight::theatre

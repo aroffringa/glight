@@ -46,7 +46,7 @@ class ValueSnapshot {
   void SetUniverseCount(size_t count) { resize(_universeValues, count); }
 
   unsigned char GetValue(const DmxChannel &channel) const {
-    return GetUniverseSnapshot(channel.Universe()).GetValue(channel.Channel());
+    return GetUniverseSnapshot(channel.Universe())[channel.Channel()];
   }
 
   ValueUniverseSnapshot &GetUniverseSnapshot(size_t index) const {

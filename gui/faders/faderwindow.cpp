@@ -13,7 +13,6 @@
 #include "gui/dialogs/stringinputdialog.h"
 
 #include "theatre/chase.h"
-#include "theatre/dmxdevice.h"
 #include "theatre/management.h"
 #include "theatre/presetvalue.h"
 
@@ -635,20 +634,22 @@ size_t FaderWindow::getFadeOutSpeed() const {
 
 void FaderWindow::UpdateValues() {
   if (_connectedInputUniverse || _connectedMidiManager) {
-    _connectedMidiManager->Update();  // TODO This should move to a higher level
     const size_t n = _upperControls.size();
     _inputValues.resize(n);
     _previousInputValues.resize(n);
     if (_connectedInputUniverse) {
-      Instance::Management().Device()->GetInputValues(*_connectedInputUniverse,
-                                                      _inputValues.data(), n);
+      Instance::Management().GetUniverses().GetInputValues(
+          *_connectedInputUniverse, _inputValues.data(), n);
     } else {
+      _connectedMidiManager
+          ->Update();  // TODO This should move to a higher level
       for (size_t i = 0; i != std::min(n, _connectedMidiManager->GetNFaders());
            ++i) {
         unsigned char value = _connectedMidiManager->GetFaderValue(i);
         _inputValues[i] = std::min(value * 2, 255);
       }
     }
+    // Set the faders according to the input
     size_t color_button_index = 0;
     for (size_t i = 0; i != n; ++i) {
       if (_upperControls[i]->GetSourceValues().size() == 1) {
@@ -659,7 +660,7 @@ void FaderWindow::UpdateValues() {
       } else if (ColorControlWidget *ccw = dynamic_cast<ColorControlWidget *>(
                      _upperControls[i].get());
                  ccw) {
-        if (color_button_index < 2) {
+        if (color_button_index < 2 && _connectedMidiManager) {
           const std::optional<theatre::Color> color =
               _connectedMidiManager->GetColor(color_button_index);
           if (color) ccw->SetColor(*color);
@@ -778,7 +779,8 @@ void FaderWindow::onInputDeviceClicked() {
       "1");
   if (dialog.run() == Gtk::RESPONSE_OK) {
     const size_t value = std::atoi(dialog.Value().c_str());
-    if (value >= 1 && value <= Instance::Management().Device()->NUniverses())
+    if (value >= 1 &&
+        value <= Instance::Management().GetUniverses().NUniverses())
       _connectedInputUniverse = value - 1;
   }
 }
