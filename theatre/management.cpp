@@ -209,7 +209,9 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
     // Merge any input universes that are set to be merged
     if (is_primary) {
       for (unsigned universe = 0; universe != n_universes; ++universe) {
-        if (universe_map_.GetUniverseType(universe) == UniverseType::Input) {
+        if (universe_map_.GetUniverseType(universe) == UniverseType::Input &&
+            universe_map_.GetInputMapping(universe).function ==
+                devices::InputMappingFunction::Merge) {
           MergeInputUniverse(snapshot, universe);
         }
       }

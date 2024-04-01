@@ -151,6 +151,7 @@ set(THEATREFILES
   theatre/design/rotation.cpp
   theatre/devices/beatfinder.cpp
   theatre/devices/olaconnection.cpp
+  theatre/devices/universemap.cpp
   theatre/effects/hue_saturation_lightness_effect.cpp
   theatre/filters/filter.cpp
   theatre/properties/propertyset.cpp

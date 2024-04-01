@@ -33,7 +33,7 @@ struct OutputMapping {
   system::OptionalNumber<size_t> ola_universe;
 };
 
-using Mapping = std::variant<InputMapping, OutputMapping>;
+using UniverseMapping = std::variant<InputMapping, OutputMapping>;
 
 class UniverseMap {
  public:
@@ -46,49 +46,13 @@ class UniverseMap {
    * the constructor, is to also have an "empty" UniverseMap, which can be
    * move from/to result.
    */
-  void Open() {
-    mappings_.clear();
-    try {
-      bool has_output = false;
-      ola_ = std::make_unique<OlaConnection>();
-      ola_->Open();
-      const std::vector<size_t> universes = ola_->GetUniverses();
-      mappings_.reserve(universes.size());
-      for (size_t universe : universes) {
-        switch (ola_->GetUniverseType(universe)) {
-          case UniverseType::Input:
-            mappings_.emplace_back(
-                InputMapping{InputMappingFunction::NoFunction,
-                             {},
-                             system::OptionalNumber<size_t>(universe)});
-            break;
-          case UniverseType::Output:
-            mappings_.emplace_back(
-                OutputMapping{system::OptionalNumber<size_t>(universe)});
-            has_output = true;
-            break;
-          case UniverseType::Uninitialized:
-            break;
-        }
-      }
-      if (!has_output) {
-        // Add a dummy output; otherwise there's no univere to store the
-        // output channel values, and e.g. the visualization won't work.
-        mappings_.emplace_back(OutputMapping());
-      }
-    } catch (std::exception& e) {
-      std::cerr << "DMX device threw exception: " << e.what() << '\n';
-      std::cerr << "No DMX device found, switching to dummy output.\n";
-      ola_.reset();
-      mappings_.reserve(2);
-      mappings_.emplace_back(OutputMapping());
-      mappings_.emplace_back(
-          InputMapping{InputMappingFunction::NoFunction, {}, {}});
-    }
-  }
+  void Open();
 
   size_t NUniverses() const { return mappings_.size(); }
 
+  void SetUniverseMapping(size_t universe, UniverseMapping& mapping) {
+    mappings_[universe] = mapping;
+  }
   UniverseType GetUniverseType(size_t universe) const {
     return std::holds_alternative<InputMapping>(mappings_[universe])
                ? UniverseType::Input
@@ -99,6 +63,9 @@ class UniverseMap {
   }
   const OutputMapping& GetOutputMapping(size_t universe) const {
     return std::get<OutputMapping>(mappings_[universe]);
+  }
+  const UniverseMapping& GetMapping(size_t universe) const {
+    return mappings_[universe];
   }
   unsigned FirstOutputUniverse() const {
     for (size_t i = 0; i != mappings_.size(); ++i) {
@@ -162,10 +129,10 @@ class UniverseMap {
     if (ola_) ola_->Abort();
   }
 
-  std::unique_ptr<OlaConnection>& GetOla() { return ola_; }
+  const std::unique_ptr<OlaConnection>& GetOla() const { return ola_; }
 
  private:
-  std::vector<Mapping> mappings_;
+  std::vector<UniverseMapping> mappings_;
   std::unique_ptr<OlaConnection> ola_;
   size_t sync_ = 0;
 };
