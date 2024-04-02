@@ -154,7 +154,9 @@ void SettingsWindow::UpdateAfterSelection() {
         Instance::Management().GetUniverses();
     const UniverseType type = universes.GetUniverseType(universe);
     ola_universe_combo_.append("-");
-    for (size_t u : universes.GetOla()->GetUniverses()) {
+    std::vector<size_t> ola_universes;
+    if (universes.GetOla()) ola_universes = universes.GetOla()->GetUniverses();
+    for (size_t u : ola_universes) {
       if (universes.GetOla()->GetUniverseType(u) == type) {
         ola_universe_combo_.append(std::to_string(u));
       }
