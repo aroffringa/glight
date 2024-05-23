@@ -19,8 +19,8 @@ std::optional<theatre::Color> OpenColorDialog(
   std::vector<Gdk::RGBA> colors;
   colors.reserve(color_set.size());
   for (const theatre::Color& color : color_set) {
-    colors.emplace_back(color.RedRatio(), color.GreenRatio(),
-                        color.BlueRatio());
+    colors.emplace_back().set_rgba(color.RedRatio(), color.GreenRatio(),
+                                   color.BlueRatio());
   }
   dialog.add_palette(Gtk::Orientation::ORIENTATION_HORIZONTAL, 10, colors);
   const int result = dialog.run();
