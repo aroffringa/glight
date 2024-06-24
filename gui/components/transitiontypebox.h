@@ -59,7 +59,12 @@ class TransitionTypeBox : public Gtk::VBox {
     _blackRB.set_group(transTypeGroup);
     _blackRB.signal_clicked().connect(
         [&]() { Change(theatre::TransitionType::Black); });
-    _bottomBox.pack_start(_blackRB);
+    _centreBox.pack_start(_blackRB);
+
+    _fullRB.set_group(transTypeGroup);
+    _fullRB.signal_clicked().connect(
+        [&]() { Change(theatre::TransitionType::Full); });
+    _centreBox.pack_start(_fullRB);
 
     _fadeFromBlackRB.set_group(transTypeGroup);
     _fadeFromBlackRB.signal_clicked().connect(
@@ -70,6 +75,16 @@ class TransitionTypeBox : public Gtk::VBox {
     _fadeToBlackRB.signal_clicked().connect(
         [&]() { Change(theatre::TransitionType::FadeToBlack); });
     _bottomBox.pack_start(_fadeToBlackRB);
+
+    _fadeFromFullRB.set_group(transTypeGroup);
+    _fadeFromFullRB.signal_clicked().connect(
+        [&]() { Change(theatre::TransitionType::FadeFromFull); });
+    _bottomBox.pack_start(_fadeFromFullRB);
+
+    _fadeToFullRB.set_group(transTypeGroup);
+    _fadeToFullRB.signal_clicked().connect(
+        [&]() { Change(theatre::TransitionType::FadeToFull); });
+    _bottomBox.pack_start(_fadeToFullRB);
 
     pack_start(_topBox);
     pack_start(_centreBox);
@@ -112,11 +127,20 @@ class TransitionTypeBox : public Gtk::VBox {
       case TransitionType::Black:
         _blackRB.set_active();
         break;
+      case TransitionType::Full:
+        _fullRB.set_active();
+        break;
       case TransitionType::FadeFromBlack:
         _fadeFromBlackRB.set_active();
         break;
       case TransitionType::FadeToBlack:
         _fadeToBlackRB.set_active();
+        break;
+      case TransitionType::FadeFromFull:
+        _fadeFromFullRB.set_active();
+        break;
+      case TransitionType::FadeToFull:
+        _fadeToFullRB.set_active();
         break;
     }
   }
@@ -140,8 +164,11 @@ class TransitionTypeBox : public Gtk::VBox {
   Gtk::RadioButton _randomRB{"Random"};
   Gtk::RadioButton _erraticRB{"Erratic"};
   Gtk::RadioButton _blackRB{"Black out"};
+  Gtk::RadioButton _fullRB{"Full on"};
   Gtk::RadioButton _fadeFromBlackRB{"From black"};
   Gtk::RadioButton _fadeToBlackRB{"To black"};
+  Gtk::RadioButton _fadeFromFullRB{"From full"};
+  Gtk::RadioButton _fadeToFullRB{"To full"};
   sigc::signal<void(theatre::TransitionType)> _signalChanged;
   theatre::TransitionType _value;
 };
