@@ -12,6 +12,7 @@ ControlValue Transition::InValue(double transition_time,
         return ControlValue::Max();
     case TransitionType::Fade:
     case TransitionType::FadeFromBlack:
+    case TransitionType::FadeToFull:
       return ControlValue::FromRatio(transition_time / length_in_ms_);
     case TransitionType::FadeThroughBlack: {
       const double ratio = transition_time / length_in_ms_;
@@ -65,6 +66,9 @@ ControlValue Transition::InValue(double transition_time,
     }
     case TransitionType::Black:
       return ControlValue::Zero();
+    case TransitionType::Full:
+    case TransitionType::FadeFromFull:
+      return ControlValue::Max();
     case TransitionType::FadeToBlack: {
       const unsigned ratio = (unsigned)((transition_time / length_in_ms_) *
                                         ControlValue::MaxUInt());
@@ -86,7 +90,8 @@ ControlValue Transition::OutValue(double transition_time,
         return ControlValue::Zero();
       else
         return ControlValue::Max();
-    case TransitionType::Fade: {
+    case TransitionType::Fade:
+    case TransitionType::FadeFromFull: {
       const double ratio = 1.0 - (transition_time / length_in_ms_);
       return ControlValue::FromRatio(ratio);
     }
@@ -148,7 +153,10 @@ ControlValue Transition::OutValue(double transition_time,
     case TransitionType::FadeToBlack: {
       const double ratio = 1.0 - (transition_time / length_in_ms_);
       return ControlValue::FromRatio(ratio);
-    } break;
+    }
+    case TransitionType::Full:
+    case TransitionType::FadeToFull:
+      return ControlValue::Max();
   }
   assert(false);
   return ControlValue::Zero();
@@ -256,6 +264,10 @@ void Transition::Mix(Controllable &first, size_t first_input,
     } break;
     case TransitionType::Black:
       break;
+    case TransitionType::Full:
+      first.MixInput(first_input, value);
+      second.MixInput(second_input, value);
+      break;
     case TransitionType::FadeFromBlack: {
       unsigned ratioValue =
           (unsigned)((transition_time / length_in_ms_) * 256.0);
@@ -267,6 +279,20 @@ void Transition::Mix(Controllable &first, size_t first_input,
           255 - (unsigned)((transition_time / length_in_ms_) * 256.0);
       first.MixInput(second_input,
                      ControlValue((value.UInt() * ratioValue) >> 8));
+    } break;
+    case TransitionType::FadeFromFull: {
+      const unsigned ratio_value =
+          255 - (unsigned)((transition_time / length_in_ms_) * 256.0);
+      first.MixInput(first_input,
+                     ControlValue((value.UInt() * ratio_value) >> 8));
+      second.MixInput(second_input, ControlValue::Max());
+    } break;
+    case TransitionType::FadeToFull: {
+      unsigned ratio_value =
+          (unsigned)((transition_time / length_in_ms_) * 256.0);
+      first.MixInput(first_input, ControlValue::Max());
+      second.MixInput(second_input,
+                      ControlValue((value.UInt() * ratio_value) >> 8));
     } break;
   }
 }

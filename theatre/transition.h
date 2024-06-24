@@ -18,8 +18,11 @@ enum class TransitionType {
   Stepped,
   Erratic,
   Black,
+  Full,
   FadeFromBlack,
-  FadeToBlack
+  FadeToBlack,
+  FadeFromFull,
+  FadeToFull
 };
 
 inline std::string ToString(TransitionType mix_style) {
@@ -43,10 +46,16 @@ inline std::string ToString(TransitionType mix_style) {
       return "erratic";
     case TransitionType::Black:
       return "black";
+    case TransitionType::Full:
+      return "full";
     case TransitionType::FadeFromBlack:
       return "fade_from_black";
     case TransitionType::FadeToBlack:
       return "fade_to_black";
+    case TransitionType::FadeFromFull:
+      return "fade_from_full";
+    case TransitionType::FadeToFull:
+      return "fade_to_full";
   }
 }
 
@@ -67,10 +76,16 @@ inline TransitionType GetTransitionType(const std::string &str) {
     return TransitionType::Erratic;
   else if (str == "black")
     return TransitionType::Black;
+  else if (str == "full")
+    return TransitionType::Full;
   else if (str == "fade_from_black")
     return TransitionType::FadeFromBlack;
   else if (str == "fade_to_black")
     return TransitionType::FadeToBlack;
+  else if (str == "fade_from_full")
+    return TransitionType::FadeFromFull;
+  else if (str == "fade_to_full")
+    return TransitionType::FadeToFull;
   else  // "none"
     return TransitionType::None;
 }
