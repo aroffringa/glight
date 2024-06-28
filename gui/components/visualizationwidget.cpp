@@ -31,6 +31,18 @@
 #include <iostream>  //DEBUG
 #include <memory>
 
+namespace {
+double RadialDistance(double angle_a, double angle_b) {
+  double distance = std::fmod(angle_a - angle_b, 2.0 * M_PI);
+  if (distance < -M_PI)
+    distance += 2.0 * M_PI;
+  else if (distance > M_PI)
+    distance -= 2.0 * M_PI;
+  return std::fabs(distance);
+}
+
+}  // namespace
+
 namespace glight::gui {
 
 VisualizationWidget::VisualizationWidget(theatre::Management *management,
@@ -645,16 +657,30 @@ void VisualizationWidget::SetPan(const theatre::Position &position) {
       const double angle =
           is_zero ? 0.0 : std::atan2(direction.Y(), direction.X());
       double d_angle = angle - fixture->Direction();
-      double min_pan = fixture->Type().MinPan();
-      double max_pan = fixture->Type().MaxPan();
+      double begin_pan = fixture->Type().MinPan();
+      double end_pan = fixture->Type().MaxPan();
       if (fixture->IsUpsideDown()) {
-        std::swap(min_pan, max_pan);
+        std::swap(begin_pan, end_pan);
       }
-      if (d_angle > std::max(min_pan, max_pan))
-        d_angle -= 2.0 * M_PI;
-      else if (d_angle < std::min(min_pan, max_pan))
-        d_angle += 2.0 * M_PI;
-      const double scaling = d_angle / (max_pan - min_pan) + 0.5;
+      const double min_value = std::min(begin_pan, end_pan);
+      const double max_value = std::max(begin_pan, end_pan);
+      if (d_angle > max_value) {
+        do {
+          d_angle -= 2.0 * M_PI;
+        } while (d_angle > max_value);
+      } else
+        while (d_angle < min_value) {
+          d_angle += 2.0 * M_PI;
+        }
+      if (d_angle < min_value || d_angle > max_value) {
+        // Chose closest side
+        if (RadialDistance(d_angle, min_value) >
+            RadialDistance(d_angle, max_value))
+          d_angle = max_value;
+        else
+          d_angle = min_value;
+      }
+      const double scaling = (d_angle - begin_pan) / (end_pan - begin_pan);
       theatre::FixtureControl &control = management.GetFixtureControl(*fixture);
       for (size_t i = 0; i != control.NInputs(); ++i) {
         if (control.InputType(i) == theatre::FunctionType::Pan) {
