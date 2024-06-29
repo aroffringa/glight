@@ -645,7 +645,6 @@ void VisualizationWidget::SetPan(const theatre::Position &position) {
       const bool is_zero = direction.Y() == 0.0 && direction.X() == 0.0;
       const double angle =
           is_zero ? 0.0 : std::atan2(direction.Y(), direction.X());
-      double d_angle = angle - fixture->Direction();
       double begin_pan = fixture->Type().MinPan();
       double end_pan = fixture->Type().MaxPan();
       if (fixture->IsUpsideDown()) {
@@ -653,7 +652,8 @@ void VisualizationWidget::SetPan(const theatre::Position &position) {
       }
       const double min_value = std::min(begin_pan, end_pan);
       const double max_value = std::max(begin_pan, end_pan);
-      d_angle = system::RadialClamp(d_angle, min_value, max_value);
+      const double d_angle = system::RadialClamp(angle - fixture->Direction(),
+                                                 min_value, max_value);
       const double scaling = (d_angle - begin_pan) / (end_pan - begin_pan);
       theatre::FixtureControl &control = management.GetFixtureControl(*fixture);
       for (size_t i = 0; i != control.NInputs(); ++i) {
