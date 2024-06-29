@@ -11,6 +11,7 @@
 #include "gui/mainwindow/actions.h"
 #include "gui/mainwindow/mainwindow.h"
 
+#include "system/math.h"
 #include "system/midi/manager.h"
 
 #include "theatre/fixture.h"
@@ -30,18 +31,6 @@
 #include <cmath>
 #include <iostream>  //DEBUG
 #include <memory>
-
-namespace {
-double RadialDistance(double angle_a, double angle_b) {
-  double distance = std::fmod(angle_a - angle_b, 2.0 * M_PI);
-  if (distance < -M_PI)
-    distance += 2.0 * M_PI;
-  else if (distance > M_PI)
-    distance -= 2.0 * M_PI;
-  return std::fabs(distance);
-}
-
-}  // namespace
 
 namespace glight::gui {
 
@@ -656,7 +645,6 @@ void VisualizationWidget::SetPan(const theatre::Position &position) {
       const bool is_zero = direction.Y() == 0.0 && direction.X() == 0.0;
       const double angle =
           is_zero ? 0.0 : std::atan2(direction.Y(), direction.X());
-      double d_angle = angle - fixture->Direction();
       double begin_pan = fixture->Type().MinPan();
       double end_pan = fixture->Type().MaxPan();
       if (fixture->IsUpsideDown()) {
@@ -664,22 +652,8 @@ void VisualizationWidget::SetPan(const theatre::Position &position) {
       }
       const double min_value = std::min(begin_pan, end_pan);
       const double max_value = std::max(begin_pan, end_pan);
-      if (d_angle > max_value) {
-        do {
-          d_angle -= 2.0 * M_PI;
-        } while (d_angle > max_value);
-      } else
-        while (d_angle < min_value) {
-          d_angle += 2.0 * M_PI;
-        }
-      if (d_angle < min_value || d_angle > max_value) {
-        // Chose closest side
-        if (RadialDistance(d_angle, min_value) >
-            RadialDistance(d_angle, max_value))
-          d_angle = max_value;
-        else
-          d_angle = min_value;
-      }
+      const double d_angle = system::RadialClamp(angle - fixture->Direction(),
+                                                 min_value, max_value);
       const double scaling = (d_angle - begin_pan) / (end_pan - begin_pan);
       theatre::FixtureControl &control = management.GetFixtureControl(*fixture);
       for (size_t i = 0; i != control.NInputs(); ++i) {
