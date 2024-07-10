@@ -285,12 +285,12 @@ void Transition::Mix(Controllable &first, size_t first_input,
           255 - (unsigned)((transition_time / length_in_ms_) * 256.0);
       first.MixInput(first_input,
                      ControlValue((value.UInt() * ratio_value) >> 8));
-      second.MixInput(second_input, ControlValue::Max());
+      second.MixInput(second_input, value);
     } break;
     case TransitionType::FadeToFull: {
       unsigned ratio_value =
           (unsigned)((transition_time / length_in_ms_) * 256.0);
-      first.MixInput(first_input, ControlValue::Max());
+      first.MixInput(first_input, value);
       second.MixInput(second_input,
                       ControlValue((value.UInt() * ratio_value) >> 8));
     } break;
