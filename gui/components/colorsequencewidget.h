@@ -102,7 +102,9 @@ class ColorSequenceWidget : public Gtk::VBox {
   Gtk::Frame _frame;
   Gtk::ScrolledWindow _scrolledWindow;
   Gtk::VBox _box;
+  Gtk::HBox _sequencingBox;
   Gtk::CheckButton _allEqual;
+  Gtk::Button _oddEvenButton;
   std::vector<std::unique_ptr<ColorSelectWidget>> _widgets;
   Gtk::Box _buttonBox;
   Gtk::Button _plusButton, _gradientButton, _shuffleButton, _minButton;
@@ -151,6 +153,7 @@ class ColorSequenceWidget : public Gtk::VBox {
 
   void OnGradient();
   void OnGradientSelected();
+  void OnOddEven();
   void Shuffle();
 
   void onFirstColorChange() {
