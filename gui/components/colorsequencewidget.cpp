@@ -19,6 +19,7 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
                                          bool showShuffleButton)
     : _frame("Colors"),
       _allEqual("Use one color for all"),
+      _oddEvenButton("Odd/even"),
       _plusButton("+"),
       _gradientButton("Gradient"),
       _shuffleButton("Shuffle"),
@@ -29,8 +30,12 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
       _maxCount(0) {
   _allEqual.signal_clicked().connect(
       sigc::mem_fun(*this, &ColorSequenceWidget::onToggleEqual));
-  pack_start(_allEqual, false, false);
-  _allEqual.show();
+  _sequencingBox.pack_start(_allEqual, false, false);
+  _oddEvenButton.signal_clicked().connect([&]() { OnOddEven(); });
+  _sequencingBox.pack_end(_oddEvenButton, false, false);
+
+  pack_start(_sequencingBox, false, false);
+  _sequencingBox.show_all();
 
   _buttonBox.set_homogeneous(true);
 
@@ -139,6 +144,17 @@ void ColorSequenceWidget::LoadDefault() {
   const std::vector<theatre::Color> colors =
       theatre::GetDefaultColorSequence(default_name, _widgets.size());
   if (!colors.empty()) SetColors(colors);
+}
+
+void ColorSequenceWidget::OnOddEven() {
+  if (_widgets.size() > 2) {
+    _allEqual.set_active(false);
+    const Color odd_color = _widgets[0]->GetColor();
+    const Color even_color = _widgets[1]->GetColor();
+    for (size_t i = 2; i != _widgets.size(); ++i) {
+      _widgets[i]->SetColor(i % 2 == 0 ? odd_color : even_color);
+    }
+  }
 }
 
 }  // namespace glight::gui
