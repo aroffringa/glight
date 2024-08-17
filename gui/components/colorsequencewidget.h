@@ -39,23 +39,7 @@ class ColorSequenceWidget : public Gtk::VBox {
     SetSelection(values);
   }
 
-  void SetSelection(const std::vector<ColorOrVariable> &values) {
-    if (_maxCount < values.size()) _maxCount = 0;
-    if (values.size() < _minCount) _minCount = values.size();
-    _allEqual.set_active(false);
-    _widgets.clear();
-    for (size_t i = 0; i != values.size(); ++i) {
-      _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
-      if (i == 0) {
-        _widgets.back()->SignalColorChanged().connect(
-            sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
-      }
-      _widgets.back()->SetSelection(values[i]);
-      _widgets.back()->SetAllowVariables(allow_variables_);
-      _box.pack_start(*_widgets.back(), true, false);
-      _widgets.back()->show();
-    }
-  }
+  void SetSelection(const std::vector<ColorOrVariable> &values);
 
   std::vector<Color> GetColors() const {
     std::vector<Color> result;
@@ -74,18 +58,18 @@ class ColorSequenceWidget : public Gtk::VBox {
   }
 
   void SetMinCount(size_t minCount) {
-    if (_maxCount < minCount && _maxCount != 0) SetMaxCount(minCount);
+    if (max_count_ < minCount && max_count_ != 0) SetMaxCount(minCount);
     while (_widgets.size() < minCount) onIncreaseColors();
-    _minCount = minCount;
+    min_count_ = minCount;
     updateSensitivities();
   }
 
   void SetMaxCount(size_t maxCount) {
-    if (_minCount > maxCount && maxCount != 0) SetMinCount(maxCount);
-    _maxCount = maxCount;
-    if (_maxCount != 0) {
-      if (_widgets.size() > _maxCount) {
-        _widgets.resize(_maxCount);
+    if (min_count_ > maxCount && maxCount != 0) SetMinCount(maxCount);
+    max_count_ = maxCount;
+    if (max_count_ != 0) {
+      if (_widgets.size() > max_count_) {
+        _widgets.resize(max_count_);
       }
     }
     updateSensitivities();
@@ -99,18 +83,26 @@ class ColorSequenceWidget : public Gtk::VBox {
   }
 
  private:
-  Gtk::Frame _frame;
+  Gtk::Frame _frame{"Colors"};
   Gtk::ScrolledWindow _scrolledWindow;
   Gtk::VBox _box;
-  Gtk::HBox _sequencingBox;
-  Gtk::CheckButton _allEqual;
-  Gtk::Button _oddEvenButton;
+  Gtk::HBox repeat_box_{"Repeat color:"};
+  Gtk::Label repeat_label_;
+  Gtk::ComboBox repeat_combo_;
+  Glib::RefPtr<Gtk::ListStore> repeat_list_;
+  struct RepeatColumns : public Gtk::TreeModelColumnRecord {
+    RepeatColumns() { add(description_); }
+    Gtk::TreeModelColumn<Glib::ustring> description_;
+  } repeat_columns_;
   std::vector<std::unique_ptr<ColorSelectWidget>> _widgets;
   Gtk::Box _buttonBox;
-  Gtk::Button _plusButton, _gradientButton, _shuffleButton, _minButton;
+  Gtk::Button _plusButton{"+"};
+  Gtk::Button _gradientButton{"Gradient"};
+  Gtk::Button _shuffleButton{"Shuffle"};
+  Gtk::Button _minButton{"-"};
   Gtk::HBox _loadDefaultBox;
   Gtk::ComboBox _loadDefaultCombo;
-  Gtk::Button _loadDefaultButton;
+  Gtk::Button _loadDefaultButton{"Load"};
   Glib::RefPtr<Gtk::ListStore> _loadDefaultList;
   struct ListColumns : public Gtk::TreeModelColumnRecord {
     ListColumns() { add(_title); }
@@ -118,22 +110,23 @@ class ColorSequenceWidget : public Gtk::VBox {
   } _listColumns;
   Gtk::Window *_parent;
   std::unique_ptr<GradientWindow> gradient_window_;
-  size_t _minCount, _maxCount;
+  size_t min_count_ = 1;
+  size_t max_count_ = 0;
   bool allow_variables_ = true;
 
   void LoadDefault();
 
   void onDecreaseColors() {
-    if (_widgets.size() > _minCount) {
+    if (_widgets.size() > min_count_) {
       _widgets.pop_back();
       updateSensitivities();
     }
   }
   void onIncreaseColors() {
-    if (_maxCount == 0 || _widgets.size() < _maxCount) {
+    if (max_count_ == 0 || _widgets.size() < max_count_) {
       _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
       _widgets.back()->SetAllowVariables(allow_variables_);
-      if (_allEqual.get_active()) {
+      if (repeat_combo_.get()) {
         _widgets.back()->SetSelection(_widgets.front()->GetSelection());
         _widgets.back()->set_sensitive(false);
       }
@@ -148,7 +141,7 @@ class ColorSequenceWidget : public Gtk::VBox {
     _minButton.set_sensitive(_widgets.size() > _minCount);
     _gradientButton.set_sensitive(_widgets.size() > 2);
     _shuffleButton.set_sensitive(_widgets.size() > 1);
-    _plusButton.set_sensitive(_maxCount == 0 || _widgets.size() < _maxCount);
+    _plusButton.set_sensitive(max_count_ == 0 || _widgets.size() < max_count_);
   }
 
   void OnGradient();
@@ -165,7 +158,7 @@ class ColorSequenceWidget : public Gtk::VBox {
       }
     }
   }
-  void onToggleEqual() {
+  void onChangeRepeat() {
     if (_allEqual.get_active()) {
       const ColorOrVariable value = _widgets.front()->GetColor();
       for (size_t i = 1; i != _widgets.size(); ++i) {

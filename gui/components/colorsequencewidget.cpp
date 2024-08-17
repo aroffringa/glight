@@ -17,25 +17,16 @@ namespace glight::gui {
 ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
                                          bool showGradientButton,
                                          bool showShuffleButton)
-    : _frame("Colors"),
-      _allEqual("Use one color for all"),
-      _oddEvenButton("Odd/even"),
-      _plusButton("+"),
-      _gradientButton("Gradient"),
-      _shuffleButton("Shuffle"),
-      _minButton("-"),
-      _loadDefaultButton("Load"),
-      _parent(parent),
-      _minCount(1),
-      _maxCount(0) {
-  _allEqual.signal_clicked().connect(
-      sigc::mem_fun(*this, &ColorSequenceWidget::onToggleEqual));
-  _sequencingBox.pack_start(_allEqual, false, false);
-  _oddEvenButton.signal_clicked().connect([&]() { OnOddEven(); });
-  _sequencingBox.pack_end(_oddEvenButton, false, false);
+    : _parent(parent) {
+  repeat_box_.pack_end(repeat_label_, false, false);
+  repeat_list_ = Gtk::ListStore::create(repeat_columns_);
+  repeat_combo_.set_model(repeat_list_);
+  repeat_combo_.signal_changed().connect(
+      sigc::mem_fun(*this, &ColorSequenceWidget::onChangeRepeat));
+  repeat_box_.pack_start(repeat_combo_, false, false);
 
-  pack_start(_sequencingBox, false, false);
-  _sequencingBox.show_all();
+  pack_start(repeat_box_, false, false);
+  repeat_box_.show_all();
 
   _buttonBox.set_homogeneous(true);
 
@@ -131,6 +122,21 @@ void ColorSequenceWidget::OnGradientSelected() {
   gradient_window_->close();
 }
 
+void ColorSequenceWidget::OnIncreaseColors() {
+  if (max_count_ == 0 || _widgets.size() < max_count_) {
+    _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
+    _widgets.back()->SetAllowVariables(allow_variables_);
+    if (repeat_combo_.get_active_row_number() > 0) {
+      _widgets.back()->SetSelection(_widgets.front()->GetSelection());
+      _widgets.back()->set_sensitive(false);
+    }
+    updateSensitivities();
+    _box.pack_start(*_widgets.back(), true, false);
+    _widgets.back()->show();
+    queue_resize();
+  }
+}
+
 void ColorSequenceWidget::Shuffle() {
   std::vector<glight::theatre::ColorOrVariable> selection = GetSelection();
   std::shuffle(selection.begin(), selection.end(), std::random_device());
@@ -154,6 +160,25 @@ void ColorSequenceWidget::OnOddEven() {
     for (size_t i = 2; i != _widgets.size(); ++i) {
       _widgets[i]->SetColor(i % 2 == 0 ? odd_color : even_color);
     }
+  }
+}
+
+void ColorSequenceWidget::SetSelection(
+    const std::vector<ColorOrVariable> &values) {
+  if (max_count_ < values.size()) max_count_ = 0;
+  if (values.size() < min_count_) min_count_ = values.size();
+  repeat_combo_.set_active(0);
+  _widgets.clear();
+  for (size_t i = 0; i != values.size(); ++i) {
+    _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
+    if (i == 0) {
+      _widgets.back()->SignalColorChanged().connect(
+          sigc::mem_fun(*this, &ColorSequenceWidget::onFirstColorChange));
+    }
+    _widgets.back()->SetSelection(values[i]);
+    _widgets.back()->SetAllowVariables(allow_variables_);
+    _box.pack_start(*_widgets.back(), true, false);
+    _widgets.back()->show();
   }
 }
 
