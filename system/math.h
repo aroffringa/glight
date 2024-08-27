@@ -5,8 +5,10 @@
 
 namespace glight::system {
 
+// In C++20, RadialDistance and RadialClamp can become constexpr
+
 template <typename T>
-constexpr inline T RadialDistance(T angle_a, T angle_b) {
+inline T RadialDistance(T angle_a, T angle_b) {
   double distance = std::fmod(angle_a - angle_b, 2.0 * M_PI);
   if (distance < -M_PI)
     distance += 2.0 * M_PI;
@@ -22,7 +24,7 @@ constexpr inline T RadialDistance(T angle_a, T angle_b) {
  * will set angle to either low or high, whichever is radially closer.
  */
 template <typename T>
-constexpr inline T RadialClamp(T angle, T low, T high) {
+inline T RadialClamp(T angle, T low, T high) {
   const T low_rotations = std::floor(low / (2.0 * M_PI));
   const T angle_rotations = std::floor(angle / (2.0 * M_PI));
   // Make sure that angle has at least as many rotations as low

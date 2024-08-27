@@ -3,6 +3,7 @@
 #include "gui/eventtransmitter.h"
 #include "gui/fixtureselection.h"
 #include "gui/instance.h"
+#include "gui/units.h"
 
 #include <gtkmm/main.h>
 #include <gtkmm/messagedialog.h>
@@ -15,7 +16,6 @@
 #include "theatre/theatre.h"
 
 #include <algorithm>
-#include <format>
 
 namespace glight::gui::windows {
 
@@ -55,10 +55,8 @@ void FixtureProperties::update() {
   } else {
     set_sensitive(true);
     const theatre::Fixture &first_fixture = *fixtures.front();
-    direction_entry_.set_text(
-        std::format("{:.1f}", first_fixture.Direction() * 180.0 / M_PI));
-    tilt_entry_.set_text(
-        std::format("{:.1f}", first_fixture.Tilt() * 180.0 / M_PI));
+    direction_entry_.set_text(AngleToNiceString(first_fixture.Direction()));
+    tilt_entry_.set_text(AngleToNiceString(first_fixture.Tilt()));
     upside_down_cb_.set_active(first_fixture.IsUpsideDown());
   }
 }

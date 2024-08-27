@@ -6,7 +6,7 @@ BOOST_AUTO_TEST_SUITE(math)
 
 BOOST_AUTO_TEST_CASE(radial_distance) {
   using glight::system::RadialDistance;
-  constexpr double result = RadialDistance(0.0, 0.0);
+  const double result = RadialDistance(0.0, 0.0);
   BOOST_CHECK_LT(result, 1e-6);
   BOOST_CHECK_LT(RadialDistance(1.0, 1.0), 1e-6);
   BOOST_CHECK_CLOSE_FRACTION(RadialDistance(0.0, 1.0), 1.0, 1e-6);
@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(radial_distance) {
 
 BOOST_AUTO_TEST_CASE(radial_clamp) {
   using glight::system::RadialClamp;
-  constexpr double result = RadialClamp(1.0, 0.0, 2.0);
+  const double result = RadialClamp(1.0, 0.0, 2.0);
   BOOST_CHECK_CLOSE_FRACTION(result, 1.0, 1e-6);
   BOOST_CHECK_CLOSE_FRACTION(RadialClamp(0.0, 1.0, 2.0), 1.0, 1e-6);
   BOOST_CHECK_CLOSE_FRACTION(RadialClamp(3.0, 1.0, 2.0), 2.0, 1e-6);
