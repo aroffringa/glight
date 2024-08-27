@@ -64,12 +64,12 @@ set(CMAKE_CXX_EXTENSIONS NO)
 
 add_definitions(-DGLIGHT_INSTALL_PATH="${CMAKE_INSTALL_PREFIX}")
 
-include_directories(${GTKMM_INCLUDE_DIRS})
-include_directories(${SIGCXX2_INCLUDE_DIRS})
-include_directories(${FLACPP_INCLUDE_DIRS})
-include_directories(${ALSA_INCLUDE_DIRS})
-include_directories(${LIBOLA_INCLUDE_DIRS})
-include_directories(${AUBIO_INCLUDE_DIR})
+include_directories(SYSTEM ${GTKMM_INCLUDE_DIRS})
+include_directories(SYSTEM ${SIGCXX2_INCLUDE_DIRS})
+include_directories(SYSTEM ${FLACPP_INCLUDE_DIRS})
+include_directories(SYSTEM ${ALSA_INCLUDE_DIRS})
+include_directories(SYSTEM ${LIBOLA_INCLUDE_DIRS})
+include_directories(SYSTEM ${AUBIO_INCLUDE_DIR})
 
 set(GUIFILES
   gui/application.cpp
@@ -185,10 +185,11 @@ target_link_libraries(glight ${GLIGHT_LIBRARIES})
   
 find_package(Boost COMPONENTS unit_test_framework)
 if(Boost_FOUND)
-	include_directories(${Boost_INCLUDE_DIR})
+	include_directories(SYSTEM ${Boost_INCLUDE_DIR})
   add_executable(runtests EXCLUDE_FROM_ALL
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
+    tests/gui/tunits.cpp
     tests/system/tcolormap.cpp
     tests/system/tcolortemperature.cpp
     tests/system/tdeletableptr.cpp

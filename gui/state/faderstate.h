@@ -20,8 +20,7 @@ constexpr inline bool IsFullColumnType(FaderControlType fader_type) {
   return fader_type == FaderControlType::Fader;
 }
 
-constexpr inline FaderControlType GetFaderControlType(
-    const std::string &fader_type_str) {
+inline FaderControlType GetFaderControlType(const std::string &fader_type_str) {
   if (fader_type_str == "fader")
     return FaderControlType::Fader;
   else if (fader_type_str == "toggle-button")

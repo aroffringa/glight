@@ -1,7 +1,6 @@
 #include "fixturetypeswindow.h"
 
 #include <algorithm>
-#include <format>
 
 #include <gtkmm/main.h>
 #include <gtkmm/messagedialog.h>
@@ -10,6 +9,7 @@
 #include "gui/eventtransmitter.h"
 #include "gui/fixtureselection.h"
 #include "gui/instance.h"
+#include "gui/units.h"
 
 #include "theatre/fixture.h"
 #include "theatre/fixturecontrol.h"
@@ -264,20 +264,14 @@ void FixtureTypesWindow::onSelectionChanged() {
       name_entry_.set_text(type->Name());
       short_name_entry_.set_text(type->ShortName());
 
-      min_beam_angle_entry_.set_text(
-          std::format("{:.1f}", type->MinBeamAngle() * 180.0 / M_PI));
-      max_beam_angle_entry_.set_text(
-          std::format("{:.1f}", type->MaxBeamAngle() * 180.0 / M_PI));
+      min_beam_angle_entry_.set_text(AngleToNiceString(type->MinBeamAngle()));
+      max_beam_angle_entry_.set_text(AngleToNiceString(type->MaxBeamAngle()));
 
-      min_pan_entry_.set_text(
-          std::format("{:.1f}", type->MinPan() * 180.0 / M_PI));
-      max_pan_entry_.set_text(
-          std::format("{:.1f}", type->MaxPan() * 180.0 / M_PI));
+      min_pan_entry_.set_text(AngleToNiceString(type->MinPan()));
+      max_pan_entry_.set_text(AngleToNiceString(type->MaxPan()));
 
-      min_beam_tilt_entry_.set_text(
-          std::format("{:.1f}", type->MinTilt() * 180.0 / M_PI));
-      max_beam_tilt_entry_.set_text(
-          std::format("{:.1f}", type->MaxTilt() * 180.0 / M_PI));
+      min_beam_tilt_entry_.set_text(AngleToNiceString(type->MinTilt()));
+      max_beam_tilt_entry_.set_text(AngleToNiceString(type->MaxTilt()));
 
       brightness_entry_.set_text(std::to_string(type->Brightness()));
       class_combo_.set_sensitive(!is_used && !layout_locked_);
