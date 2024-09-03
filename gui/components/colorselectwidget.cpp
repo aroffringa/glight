@@ -100,7 +100,7 @@ void ColorSelectWidget::OpenVariableSelection() {
   if (dialog.run() == Gtk::RESPONSE_OK) {
     theatre::VariableEffect *v =
         dynamic_cast<theatre::VariableEffect *>(dialog.SelectedObject());
-    if (v) {
+    if (v && v != variable_) {
       variable_ = v;
       SetVariableLabel();
       signal_color_changed_();
