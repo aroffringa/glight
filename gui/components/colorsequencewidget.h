@@ -6,6 +6,8 @@
 #include "theatre/color.h"
 #include "theatre/forwards.h"
 
+#include "system/optionalnumber.h"
+
 #include <gtkmm/box.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/combobox.h>
@@ -59,7 +61,7 @@ class ColorSequenceWidget : public Gtk::VBox {
 
   void SetMinCount(size_t minCount) {
     if (max_count_ < minCount && max_count_ != 0) SetMaxCount(minCount);
-    while (_widgets.size() < minCount) onIncreaseColors();
+    while (_widgets.size() < minCount) OnIncreaseColors();
     min_count_ = minCount;
     updateSensitivities();
   }
@@ -86,8 +88,8 @@ class ColorSequenceWidget : public Gtk::VBox {
   Gtk::Frame _frame{"Colors"};
   Gtk::ScrolledWindow _scrolledWindow;
   Gtk::VBox _box;
-  Gtk::HBox repeat_box_{"Repeat color:"};
-  Gtk::Label repeat_label_;
+  Gtk::HBox repeat_box_;
+  Gtk::Label repeat_label_{"Repeat color:"};
   Gtk::ComboBox repeat_combo_;
   Glib::RefPtr<Gtk::ListStore> repeat_list_;
   struct RepeatColumns : public Gtk::TreeModelColumnRecord {
@@ -122,23 +124,10 @@ class ColorSequenceWidget : public Gtk::VBox {
       updateSensitivities();
     }
   }
-  void onIncreaseColors() {
-    if (max_count_ == 0 || _widgets.size() < max_count_) {
-      _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
-      _widgets.back()->SetAllowVariables(allow_variables_);
-      if (repeat_combo_.get()) {
-        _widgets.back()->SetSelection(_widgets.front()->GetSelection());
-        _widgets.back()->set_sensitive(false);
-      }
-      updateSensitivities();
-      _box.pack_start(*_widgets.back(), true, false);
-      _widgets.back()->show();
-      queue_resize();
-    }
-  }
+  void OnIncreaseColors();
 
   void updateSensitivities() {
-    _minButton.set_sensitive(_widgets.size() > _minCount);
+    _minButton.set_sensitive(_widgets.size() > min_count_);
     _gradientButton.set_sensitive(_widgets.size() > 2);
     _shuffleButton.set_sensitive(_widgets.size() > 1);
     _plusButton.set_sensitive(max_count_ == 0 || _widgets.size() < max_count_);
@@ -148,29 +137,10 @@ class ColorSequenceWidget : public Gtk::VBox {
   void OnGradientSelected();
   void OnOddEven();
   void Shuffle();
+  system::OptionalNumber<size_t> RepeatCount() const;
 
-  void onFirstColorChange() {
-    if (_allEqual.get_active()) {
-      const ColorOrVariable value = _widgets.front()->GetSelection();
-      for (size_t i = 1; i != _widgets.size(); ++i) {
-        _widgets[i]->SetSelection(value);
-        _widgets[i]->set_sensitive(false);
-      }
-    }
-  }
-  void onChangeRepeat() {
-    if (_allEqual.get_active()) {
-      const ColorOrVariable value = _widgets.front()->GetColor();
-      for (size_t i = 1; i != _widgets.size(); ++i) {
-        _widgets[i]->SetSelection(value);
-        _widgets[i]->set_sensitive(false);
-      }
-    } else {
-      for (size_t i = 1; i != _widgets.size(); ++i) {
-        _widgets[i]->set_sensitive(true);
-      }
-    }
-  }
+  void OnColorChange(size_t index);
+  void OnChangeRepeat();
 };
 
 }  // namespace glight::gui

@@ -46,17 +46,39 @@ class ColorSelectWidget : public Gtk::HBox {
     return theatre::Color::FromRatio(red_, green_, blue_);
   }
   void SetColor(const theatre::Color &color) {
-    static_button_.set_active(true);
-    red_ = double(color.Red()) / 255.0;
-    green_ = double(color.Green()) / 255.0;
-    blue_ = double(color.Blue()) / 255.0;
-    signal_color_changed_();
-    area_.queue_draw();
+    bool is_changed = false;
+    if (!static_button_.get_active()) {
+      static_button_.set_active(true);
+      is_changed = true;
+    }
+    const auto change = [](double &old_value, double new_value, bool &change) {
+      if (old_value != new_value) {
+        old_value = new_value;
+        change = true;
+      }
+    };
+    change(red_, double(color.Red()) / 255.0, is_changed);
+    change(green_, double(color.Green()) / 255.0, is_changed);
+    change(blue_, double(color.Blue()) / 255.0, is_changed);
+    if (is_changed) {
+      signal_color_changed_();
+      area_.queue_draw();
+    }
   }
   void SetVariable(theatre::VariableEffect *variable) {
-    variable_button_.set_active(true);
-    variable_ = variable;
-    SetVariableLabel();
+    bool is_changed = false;
+    if (!variable_button_.get_active()) {
+      variable_button_.set_active(true);
+      is_changed = true;
+    }
+    if (variable_ != variable) {
+      variable_ = variable;
+      is_changed = true;
+    }
+    if (is_changed) {
+      signal_color_changed_();
+      SetVariableLabel();
+    }
   }
   sigc::signal<void()> &SignalColorChanged() { return signal_color_changed_; }
   void SetAllowVariables(bool allow_variables) {
