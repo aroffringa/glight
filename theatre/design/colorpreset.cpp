@@ -98,19 +98,7 @@ void AddPresetValue(Management &management, Controllable &control,
           }
         }
         break;
-      case FunctionType::ColorMacro:
-      case FunctionType::Strobe:
-      case FunctionType::Pulse:
-      case FunctionType::RotationSpeed:
-      case FunctionType::Pan:
-      case FunctionType::Tilt:
-      case FunctionType::Zoom:
-      case FunctionType::Effect:
-      case FunctionType::ColorTemperature:
-      case FunctionType::Hue:
-      case FunctionType::Saturation:
-      case FunctionType::Lightness:
-      case FunctionType::Unknown:
+      default:
         break;
     }
   }
