@@ -354,9 +354,9 @@ Color FixtureType::GetColor(const Fixture &fixture,
   unsigned master = 255;
   std::optional<Color> macro_color;
   for (size_t i = 0; i != functions_.size(); ++i) {
-    const FixtureTypeFunction& function = functions_[i];
+    const FixtureTypeFunction &function = functions_[i];
     if (function.Shape() == shapeIndex) {
-      const FixtureFunction& ff = *fixture.Functions()[i];
+      const FixtureFunction &ff = *fixture.Functions()[i];
       // Fine channel is ignored if it is present, because we can't
       // visualize 16-bit rgb values anyway...
       const unsigned channel_value = ff.GetCharValue(snapshot);
@@ -373,7 +373,7 @@ Color FixtureType::GetColor(const Fixture &fixture,
             channel_value * (max_temperature - min_temperature) / 255 +
             min_temperature;
         macro_color = system::TemperatureToRgb(temperature);
-      } else if(IsColor(type)) {
+      } else if (IsColor(type)) {
         const Color c = GetFunctionColor(function.Type()) * channel_value;
         red += c.Red();
         green += c.Green();

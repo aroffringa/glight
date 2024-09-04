@@ -114,7 +114,8 @@ class FixtureTypeFunction {
   void CopyParameters(const FixtureTypeFunction& source) {
     switch (type_) {
       case FunctionType::ColorMacro:
-        parameters_.SetColorRangeParameters(source.parameters_.parameters.Get<ColorRangeParameters>());
+        parameters_.SetColorRangeParameters(
+            source.parameters_.parameters.Get<ColorRangeParameters>());
         break;
       case FunctionType::RotationSpeed:
         parameters_.SetRotationSpeedParameters(

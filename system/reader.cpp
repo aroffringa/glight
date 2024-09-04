@@ -76,7 +76,7 @@ void ParseFolders(const Array &node, Management &management) {
 }
 
 void ParseColorRangeParameters(const json::Object &node,
-                          ColorRangeParameters &parameters) {
+                               ColorRangeParameters &parameters) {
   const json::Array &ranges = ToArr(node["ranges"]);
   for (json::Node &item : ranges) {
     const json::Object &obj = ToObj(item);
@@ -127,7 +127,7 @@ void ParseFixtureTypeFunctions(const json::Array &node,
     switch (ft) {
       case FunctionType::ColorMacro:
         ParseColorRangeParameters(ToObj(obj["parameters"]),
-                             new_function.GetColorRangeParameters());
+                                  new_function.GetColorRangeParameters());
         break;
       case FunctionType::RotationSpeed:
         ParseRotationParameters(ToObj(obj["parameters"]),
