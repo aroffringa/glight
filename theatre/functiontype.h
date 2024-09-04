@@ -16,8 +16,8 @@ enum class FunctionType {
   Blue,
   White,
   Amber,
-  UV,
   Lime,
+  UV,
   ColorMacro,
   Strobe,
   Pulse,
@@ -25,41 +25,31 @@ enum class FunctionType {
   Pan,
   Tilt,
   Zoom,
+  Focus,
   Effect,
   ColdWhite,
   WarmWhite,
   ColorTemperature,
+  ColorWheel,
+  GoboWheel,
+  Prism,
   Hue,
   Saturation,
   Lightness,
+  Combined,
   Unknown
 };
 
 inline std::vector<FunctionType> GetFunctionTypes() {
   using FT = FunctionType;
-  return std::vector<FunctionType>{FT::Master,
-                                   FT::Red,
-                                   FT::Green,
-                                   FT::Blue,
-                                   FT::White,
-                                   FT::Amber,
-                                   FT::UV,
-                                   FT::Lime,
-                                   FT::ColorMacro,
-                                   FT::Strobe,
-                                   FT::Pulse,
-                                   FT::RotationSpeed,
-                                   FT::Pan,
-                                   FT::Tilt,
-                                   FT::Zoom,
-                                   FT::Effect,
-                                   FT::ColdWhite,
-                                   FT::WarmWhite,
-                                   FT::ColorTemperature,
-                                   FT::Hue,
-                                   FT::Saturation,
-                                   FT::Lightness,
-                                   FT::Unknown};
+  return std::vector<FunctionType>{
+      FT::Master,     FT::Red,       FT::Green,     FT::Blue,
+      FT::White,      FT::Amber,     FT::Lime,      FT::UV,
+      FT::ColorMacro, FT::Strobe,    FT::Pulse,     FT::RotationSpeed,
+      FT::Pan,        FT::Tilt,      FT::Zoom,      FT::Focus,
+      FT::Effect,     FT::ColdWhite, FT::WarmWhite, FT::ColorTemperature,
+      FT::ColorWheel, FT::GoboWheel, FT::Prism,     FT::Hue,
+      FT::Saturation, FT::Lightness, FT::Combined,  FT::Unknown};
 }
 
 inline const char* AbbreviatedFunctionType(FunctionType functionType) {
@@ -74,8 +64,16 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
       return "C";
     case FunctionType::ColorTemperature:
       return "T";
+    case FunctionType::ColorWheel:
+      return "CWl";
+    case FunctionType::Combined:
+      return "+";
     case FunctionType::Effect:
       return "E";
+    case FunctionType::Focus:
+      return "Fo";
+    case FunctionType::GoboWheel:
+      return "Gob";
     case FunctionType::Green:
       return "G";
     case FunctionType::Hue:
@@ -83,9 +81,15 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
     case FunctionType::Lime:
       return "L";
     case FunctionType::Lightness:
-      return "LI";
+      return "Lit";
     case FunctionType::Master:
       return "M";
+    case FunctionType::Pan:
+      return "Pn";
+    case FunctionType::Prism:
+      return "Pr";
+    case FunctionType::Pulse:
+      return "Pls";
     case FunctionType::Red:
       return "R";
     case FunctionType::UV:
@@ -94,18 +98,14 @@ inline const char* AbbreviatedFunctionType(FunctionType functionType) {
       return "WW";
     case FunctionType::White:
       return "W";
-    case FunctionType::Pan:
-      return "PN";
-    case FunctionType::Pulse:
-      return "P";
     case FunctionType::RotationSpeed:
-      return "SP";
+      return "Sp";
     case FunctionType::Saturation:
-      return "SA";
+      return "Sat";
     case FunctionType::Strobe:
       return "S";
     case FunctionType::Tilt:
-      return "TL";
+      return "Tl";
     case FunctionType::Zoom:
       return "Z";
     case FunctionType::Unknown:
@@ -128,14 +128,24 @@ inline FunctionType GetFunctionType(const std::string& name) {
         return FunctionType::ColorMacro;
       else if (name == "Color temperature")
         return FunctionType::ColorTemperature;
+      else if (name == "Color wheel")
+        return FunctionType::ColorWheel;
       else if (name == "Cold white")
         return FunctionType::ColdWhite;
+      else if (name == "Combined")
+        return FunctionType::Combined;
       break;
     case 'E':
       if (name == "Effect") return FunctionType::Effect;
       break;
+    case 'F':
+      if (name == "Focus") return FunctionType::Focus;
+      break;
     case 'G':
-      if (name == "Green") return FunctionType::Green;
+      if (name == "Gobo wheel")
+        return FunctionType::GoboWheel;
+      else if (name == "Green")
+        return FunctionType::Green;
       break;
     case 'H':
       if (name == "Hue") return FunctionType::Hue;
@@ -150,6 +160,8 @@ inline FunctionType GetFunctionType(const std::string& name) {
     case 'P':
       if (name == "Pan")
         return FunctionType::Pan;
+      else if (name == "Prism")
+        return FunctionType::Prism;
       else if (name == "Pulse")
         return FunctionType::Pulse;
       break;
@@ -165,7 +177,10 @@ inline FunctionType GetFunctionType(const std::string& name) {
       if (name == "Tilt") return FunctionType::Tilt;
       break;
     case 'U':
-      if (name == "UV") return FunctionType::UV;
+      if (name == "Unknown")
+        return FunctionType::Unknown;
+      else if (name == "UV")
+        return FunctionType::UV;
       break;
     case 'W':
       if (name == "Warm white")
@@ -192,8 +207,16 @@ inline std::string ToString(FunctionType functionType) {
       return "Cold white";
     case FunctionType::ColorMacro:
       return "Color macro";
+    case FunctionType::ColorWheel:
+      return "Color wheel";
+    case FunctionType::Combined:
+      return "Combined";
     case FunctionType::Effect:
       return "Effect";
+    case FunctionType::Focus:
+      return "Focus";
+    case FunctionType::GoboWheel:
+      return "Gobo wheel";
     case FunctionType::Green:
       return "Green";
     case FunctionType::Hue:
@@ -206,6 +229,8 @@ inline std::string ToString(FunctionType functionType) {
       return "Master";
     case FunctionType::Pan:
       return "Pan";
+    case FunctionType::Prism:
+      return "Prism";
     case FunctionType::Pulse:
       return "Pulse";
     case FunctionType::Red:
@@ -236,12 +261,17 @@ inline constexpr bool IsColor(FunctionType type) {
   switch (type) {
     case FunctionType::ColorMacro:
     case FunctionType::ColorTemperature:
+    case FunctionType::ColorWheel:
+    case FunctionType::Combined:
     case FunctionType::Effect:
+    case FunctionType::Focus:
     case FunctionType::Lightness:
+    case FunctionType::GoboWheel:
     case FunctionType::Master:
+    case FunctionType::Pan:
+    case FunctionType::Prism:
     case FunctionType::Pulse:
     case FunctionType::RotationSpeed:
-    case FunctionType::Pan:
     case FunctionType::Saturation:
     case FunctionType::Strobe:
     case FunctionType::Tilt:
@@ -270,22 +300,28 @@ inline constexpr bool IsRgb(FunctionType type) {
 
 inline constexpr Color GetFunctionColor(FunctionType type) {
   switch (type) {
-    case FunctionType::ColorMacro:
+    case FunctionType::Combined:
     case FunctionType::Effect:
+    case FunctionType::Focus:
     case FunctionType::Lightness:
+    case FunctionType::GoboWheel:
     case FunctionType::Master:
+    case FunctionType::Pan:
+    case FunctionType::Prism:
     case FunctionType::Pulse:
     case FunctionType::RotationSpeed:
-    case FunctionType::Pan:
     case FunctionType::Saturation:
     case FunctionType::Strobe:
     case FunctionType::Tilt:
     case FunctionType::Zoom:
     case FunctionType::Unknown:
-      return Color::Black();
+      return Color::White();
     case FunctionType::Red:
-    case FunctionType::Hue:
       return Color::RedC();
+    case FunctionType::ColorMacro:
+    case FunctionType::ColorWheel:
+    case FunctionType::Hue:
+      return Color::WhiteOrange();
     case FunctionType::Green:
       return Color::GreenC();
     case FunctionType::Blue:
@@ -303,7 +339,7 @@ inline constexpr Color GetFunctionColor(FunctionType type) {
     case FunctionType::WarmWhite:
       return Color::WarmWhite();
     case FunctionType::ColorTemperature:
-      return Color::White();
+      return Color::WarmWhite();
   }
   return Color::Black();
 }

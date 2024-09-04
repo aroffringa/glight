@@ -210,6 +210,7 @@ if(Boost_FOUND)
     tests/theatre/tfixturetypefunction.cpp
     tests/theatre/tfolder.cpp
     tests/theatre/tfolderoperations.cpp
+    tests/theatre/tfunctiontype.cpp
     tests/theatre/tmanagement.cpp
     tests/theatre/tpresetcollection.cpp
     tests/theatre/tpresetvalue.cpp

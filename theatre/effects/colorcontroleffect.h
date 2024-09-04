@@ -87,20 +87,7 @@ class ColorControlEffect final : public Effect {
               values[0] * DeduceWarmWhite(values[1], values[2], values[3]);
           connection.first->MixInput(connection.second, v);
         } break;
-        case FunctionType::Master:
-        case FunctionType::ColorMacro:
-        case FunctionType::ColorTemperature:
-        case FunctionType::Strobe:
-        case FunctionType::Pulse:
-        case FunctionType::RotationSpeed:
-        case FunctionType::Unknown:
-        case FunctionType::Pan:
-        case FunctionType::Tilt:
-        case FunctionType::Zoom:
-        case FunctionType::Hue:
-        case FunctionType::Saturation:
-        case FunctionType::Lightness:
-        case FunctionType::Effect:
+        default:
           break;
       }
     }

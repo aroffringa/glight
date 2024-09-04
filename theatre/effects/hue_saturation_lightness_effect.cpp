@@ -143,17 +143,7 @@ void HueSaturationLightnessEffect::MixImplementation(const ControlValue *values,
       case FunctionType::Lightness:
         connection.first->MixInput(connection.second, values[2]);
         break;
-      case FunctionType::Master:
-      case FunctionType::ColorMacro:
-      case FunctionType::ColorTemperature:
-      case FunctionType::Strobe:
-      case FunctionType::Pulse:
-      case FunctionType::RotationSpeed:
-      case FunctionType::Unknown:
-      case FunctionType::Pan:
-      case FunctionType::Tilt:
-      case FunctionType::Zoom:
-      case FunctionType::Effect:
+      default:
         break;
     }
   }

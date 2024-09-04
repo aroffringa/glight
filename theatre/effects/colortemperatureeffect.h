@@ -76,20 +76,7 @@ class ColorTemperatureEffect final : public Effect {
         case FunctionType::WarmWhite:
           // TODO
           break;
-        case FunctionType::Master:
-        case FunctionType::ColorTemperature:
-        case FunctionType::ColorMacro:
-        case FunctionType::Strobe:
-        case FunctionType::Pulse:
-        case FunctionType::RotationSpeed:
-        case FunctionType::Unknown:
-        case FunctionType::Pan:
-        case FunctionType::Tilt:
-        case FunctionType::Zoom:
-        case FunctionType::Effect:
-        case FunctionType::Hue:
-        case FunctionType::Saturation:
-        case FunctionType::Lightness:
+        default:
           break;
       }
     }

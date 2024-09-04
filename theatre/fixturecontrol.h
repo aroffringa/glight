@@ -38,42 +38,7 @@ class FixtureControl final : public Controllable {
   }
 
   Color InputColor(size_t index) const {
-    using FT = FunctionType;
-    switch (InputType(index)) {
-      case FT::ColorMacro:
-      case FT::ColorTemperature:
-      case FT::Effect:
-      case FT::Lightness:
-      case FT::Master:
-      case FT::Pan:
-      case FT::Pulse:
-      case FT::RotationSpeed:
-      case FT::Saturation:
-      case FT::Strobe:
-      case FT::Tilt:
-      case FT::Zoom:
-      case FT::Unknown:
-      case FT::White:
-        return Color::White();
-      case FT::Hue:
-      case FT::Red:
-        return Color::RedC();
-      case FT::Green:
-        return Color::GreenC();
-      case FT::Blue:
-        return Color::BlueC();
-      case FT::Amber:
-        return Color::Amber();
-      case FT::UV:
-        return Color::UV();
-      case FT::Lime:
-        return Color::Lime();
-      case FT::ColdWhite:
-        return Color::ColdWhite();
-      case FT::WarmWhite:
-        return Color::WarmWhite();
-    }
-    return Color::Black();
+    return GetFunctionColor(InputType(index));
   }
 
   virtual std::vector<Color> InputColors(size_t index) const override {
