@@ -3,6 +3,8 @@
 
 #include "color.h"
 
+#include "system/indifferentptr.h"
+
 #include <algorithm>
 #include <optional>
 #include <vector>
@@ -24,7 +26,7 @@ const Range* GetParameterRange(unsigned input,
 }
 }  // namespace details
 
-struct MacroParameters {
+struct ColorRangeParameters {
   struct Range {
     constexpr Range(unsigned input_min_, unsigned input_max_,
                     const std::optional<Color>& color_)
@@ -89,24 +91,20 @@ struct RotationSpeedParameters {
 struct FixtureFunctionParameters {
   void SetRotationSpeedParameters(
       const RotationSpeedParameters& rotation_parameters) {
-    new (&parameters.rotation_speed)
-        RotationSpeedParameters(rotation_parameters);
+    parameters =
+        system::MakeIndifferent<RotationSpeedParameters>(rotation_parameters);
   }
   void UnsetRotationParameters() {
-    parameters.rotation_speed.~RotationSpeedParameters();
+    parameters.Reset<RotationSpeedParameters>();
   }
 
-  void SetMacroParameters(const MacroParameters& macro_parameters) {
-    new (&parameters.macro) MacroParameters(macro_parameters);
+  void SetColorRangeParameters(const ColorRangeParameters& macro_parameters) {
+    parameters =
+        system::MakeIndifferent<ColorRangeParameters>(macro_parameters);
   }
-  void UnsetMacroParameters() { parameters.macro.~MacroParameters(); }
+  void UnsetColorRangeParameters() { parameters.Reset<ColorRangeParameters>(); }
 
-  union Parameters {
-    Parameters() {}
-    ~Parameters() {}
-    MacroParameters macro;
-    RotationSpeedParameters rotation_speed;
-  } parameters;
+  system::IndifferentPtr parameters;
 };
 
 }  // namespace glight::theatre

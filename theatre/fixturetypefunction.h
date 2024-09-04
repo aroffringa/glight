@@ -71,22 +71,24 @@ class FixtureTypeFunction {
   unsigned Shape() const { return shape_; }
 
   RotationSpeedParameters& GetRotationParameters() {
-    return parameters_.parameters.rotation_speed;
+    return parameters_.parameters.Get<RotationSpeedParameters>();
   }
   const RotationSpeedParameters& GetRotationSpeedParameters() const {
-    return parameters_.parameters.rotation_speed;
+    return parameters_.parameters.Get<RotationSpeedParameters>();
   }
 
-  MacroParameters& GetMacroParameters() { return parameters_.parameters.macro; }
-  const MacroParameters& GetMacroParameters() const {
-    return parameters_.parameters.macro;
+  ColorRangeParameters& GetColorRangeParameters() {
+    return parameters_.parameters.Get<ColorRangeParameters>();
+  }
+  const ColorRangeParameters& GetColorRangeParameters() const {
+    return parameters_.parameters.Get<ColorRangeParameters>();
   }
 
  private:
   void ConstructParameters() {
     switch (type_) {
       case FunctionType::ColorMacro:
-        parameters_.SetMacroParameters(MacroParameters());
+        parameters_.SetColorRangeParameters(ColorRangeParameters());
         break;
       case FunctionType::RotationSpeed:
         parameters_.SetRotationSpeedParameters(RotationSpeedParameters());
@@ -99,7 +101,7 @@ class FixtureTypeFunction {
   void DestructParameters() {
     switch (type_) {
       case FunctionType::ColorMacro:
-        parameters_.UnsetMacroParameters();
+        parameters_.UnsetColorRangeParameters();
         break;
       case FunctionType::RotationSpeed:
         parameters_.UnsetRotationParameters();
@@ -112,11 +114,12 @@ class FixtureTypeFunction {
   void CopyParameters(const FixtureTypeFunction& source) {
     switch (type_) {
       case FunctionType::ColorMacro:
-        parameters_.SetMacroParameters(source.parameters_.parameters.macro);
+        parameters_.SetColorRangeParameters(
+            source.parameters_.parameters.Get<ColorRangeParameters>());
         break;
       case FunctionType::RotationSpeed:
         parameters_.SetRotationSpeedParameters(
-            source.parameters_.parameters.rotation_speed);
+            source.parameters_.parameters.Get<RotationSpeedParameters>());
         break;
       default:
         break;

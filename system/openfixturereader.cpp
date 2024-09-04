@@ -36,8 +36,8 @@ void ParseCapabilities(const json::Array& capabilities,
                                           OptionalNumber<size_t>(), 0))
                  .first->second;
       if (function->Type() == theatre::FunctionType::ColorMacro) {
-        std::vector<glight::theatre::MacroParameters::Range>& ranges =
-            function->GetMacroParameters().GetRanges();
+        std::vector<glight::theatre::ColorRangeParameters::Range>& ranges =
+            function->GetColorRangeParameters().GetRanges();
         if (!empty_ranges.empty()) {
           for (const std::pair<unsigned, unsigned>& r : empty_ranges) {
             ranges.emplace_back(r.first, r.second,

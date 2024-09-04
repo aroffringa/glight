@@ -119,7 +119,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       ranges.emplace_back(134, 256, 0, -max_speed);
       FixtureTypeFunction &macro = functions_.emplace_back(
           FunctionType::ColorMacro, 2, empty_channel, 0);
-      SetH2OMacroParameters(macro.GetMacroParameters());
+      SetH2OMacroParameters(macro.GetColorRangeParameters());
       short_name_ = "H2O";
     } break;
     case StockFixture::AdjStarBurst: {
@@ -169,7 +169,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
       FixtureTypeFunction &macro = functions_.emplace_back(
           FunctionType::ColorMacro, 3, empty_channel, 0);
-      SetRgbAdj6chMacroParameters(macro.GetMacroParameters());
+      SetRgbAdj6chMacroParameters(macro.GetColorRangeParameters());
       functions_.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
       functions_.emplace_back(FunctionType::Pulse, 5, empty_channel, 0);
       short_name_ = "ADJ RGB";
@@ -180,7 +180,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
       FixtureTypeFunction &macro = functions_.emplace_back(
           FunctionType::ColorMacro, 3, empty_channel, 0);
-      SetRgbAdj6chMacroParameters(macro.GetMacroParameters());
+      SetRgbAdj6chMacroParameters(macro.GetColorRangeParameters());
       functions_.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
       functions_.emplace_back(FunctionType::Pulse, 5, empty_channel, 0);
       functions_.emplace_back(FunctionType::Master, 6, empty_channel, 0);
@@ -214,7 +214,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions_.emplace_back(FunctionType::Blue, 5, empty_channel, 1);
       FixtureTypeFunction &macro = functions_.emplace_back(
           FunctionType::ColorMacro, 6, empty_channel, 1);
-      SetBTMacroParameters(macro.GetMacroParameters());
+      SetBTMacroParameters(macro.GetColorRangeParameters());
       class_ = FixtureClass::RingedPar;
       short_name_ = "BTVint";
     } break;
@@ -252,8 +252,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
   UpdateFunctions();
 }
 
-void FixtureType::SetRgbAdj6chMacroParameters(MacroParameters &macro) {
-  std::vector<MacroParameters::Range> &ranges = macro.GetRanges();
+void FixtureType::SetRgbAdj6chMacroParameters(ColorRangeParameters &macro) {
+  std::vector<ColorRangeParameters::Range> &ranges = macro.GetRanges();
   ranges.emplace_back(0, 8, std::optional<Color>());
   ranges.emplace_back(8, 12, Color::RedC());
   ranges.emplace_back(12, 18, Color::GreenC());
@@ -299,8 +299,8 @@ void FixtureType::SetRgbAdj6chMacroParameters(MacroParameters &macro) {
   ranges.emplace_back(252, 256, Color(20, 96, 96));
 }
 
-void FixtureType::SetH2OMacroParameters(MacroParameters &macro) {
-  std::vector<MacroParameters::Range> &ranges = macro.GetRanges();
+void FixtureType::SetH2OMacroParameters(ColorRangeParameters &macro) {
+  std::vector<ColorRangeParameters::Range> &ranges = macro.GetRanges();
   ranges.emplace_back(0, 10, Color::White());
   ranges.emplace_back(10, 21, Color::WhiteOrange());
   ranges.emplace_back(21, 32, Color::Orange());
@@ -316,8 +316,8 @@ void FixtureType::SetH2OMacroParameters(MacroParameters &macro) {
   ranges.emplace_back(128, 256, Color::White());
 }
 
-void FixtureType::SetBTMacroParameters(MacroParameters &macro) {
-  std::vector<MacroParameters::Range> &ranges = macro.GetRanges();
+void FixtureType::SetBTMacroParameters(ColorRangeParameters &macro) {
+  std::vector<ColorRangeParameters::Range> &ranges = macro.GetRanges();
   ranges.emplace_back(0, 8, std::optional<Color>());
   ranges.emplace_back(0, 28, Color::RedC());
   ranges.emplace_back(0, 48, Color::Orange());
@@ -354,17 +354,18 @@ Color FixtureType::GetColor(const Fixture &fixture,
   unsigned master = 255;
   std::optional<Color> macro_color;
   for (size_t i = 0; i != functions_.size(); ++i) {
-    if (functions_[i].Shape() == shapeIndex) {
-      // We immediately ignore a fine channel if it is present, because we can't
+    const FixtureTypeFunction &function = functions_[i];
+    if (function.Shape() == shapeIndex) {
+      const FixtureFunction &ff = *fixture.Functions()[i];
+      // Fine channel is ignored if it is present, because we can't
       // visualize 16-bit rgb values anyway...
-      const unsigned channel_value =
-          fixture.Functions()[i]->GetCharValue(snapshot);
-      const FunctionType type = functions_[i].Type();
+      const unsigned channel_value = ff.GetCharValue(snapshot);
+      const FunctionType type = function.Type();
       if (type == FunctionType::Master) {
         master = channel_value;
       } else if (type == FunctionType::ColorMacro) {
         macro_color =
-            functions_[i].GetMacroParameters().GetColor(channel_value);
+            function.GetColorRangeParameters().GetColor(channel_value);
       } else if (type == FunctionType::ColorTemperature) {
         constexpr unsigned min_temperature = 2800;
         constexpr unsigned max_temperature = 8000;
@@ -372,8 +373,8 @@ Color FixtureType::GetColor(const Fixture &fixture,
             channel_value * (max_temperature - min_temperature) / 255 +
             min_temperature;
         macro_color = system::TemperatureToRgb(temperature);
-      } else {
-        const Color c = GetFunctionColor(functions_[i].Type()) * channel_value;
+      } else if (IsColor(type)) {
+        const Color c = GetFunctionColor(function.Type()) * channel_value;
         red += c.Red();
         green += c.Green();
         blue += c.Blue();

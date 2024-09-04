@@ -668,8 +668,8 @@ BOOST_AUTO_TEST_CASE(read) {
   BOOST_REQUIRE_EQUAL(f1.Functions().size(), 1);
   BOOST_REQUIRE(f1.Functions()[0].Type() ==
                 glight::theatre::FunctionType::ColorMacro);
-  const glight::theatre::MacroParameters& parameters =
-      f1.Functions()[0].GetMacroParameters();
+  const glight::theatre::ColorRangeParameters& parameters =
+      f1.Functions()[0].GetColorRangeParameters();
   BOOST_CHECK_EQUAL(parameters.GetRanges().size(), 16);
   BOOST_CHECK(!parameters.GetRanges()[0].color);
   BOOST_CHECK_EQUAL(parameters.GetRanges()[0].input_min, 0);
