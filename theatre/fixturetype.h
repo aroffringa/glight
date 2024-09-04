@@ -284,9 +284,9 @@ class FixtureType : public FolderObject {
  private:
   void UpdateFunctions();
 
-  static void SetRgbAdj6chMacroParameters(MacroParameters &macro);
-  static void SetH2OMacroParameters(MacroParameters &macro);
-  static void SetBTMacroParameters(MacroParameters &macro);
+  static void SetRgbAdj6chMacroParameters(ColorRangeParameters &macro);
+  static void SetH2OMacroParameters(ColorRangeParameters &macro);
+  static void SetBTMacroParameters(ColorRangeParameters &macro);
 
   FixtureClass class_ = FixtureClass::Par;
   std::vector<FixtureTypeFunction> functions_;

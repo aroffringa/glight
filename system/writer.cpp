@@ -139,10 +139,10 @@ void writeFixtureGroup(WriteState &state, const FixtureGroup &group) {
   state.writer.EndObject();  // fixture-group
 }
 
-void witeMacroParameters(WriteState &state, const MacroParameters &pars) {
+void witeMacroParameters(WriteState &state, const ColorRangeParameters &pars) {
   state.writer.StartObject("parameters");
   state.writer.StartArray("ranges");
-  for (const MacroParameters::Range &range : pars.GetRanges()) {
+  for (const ColorRangeParameters::Range &range : pars.GetRanges()) {
     state.writer.StartObject();
     state.writer.Number("input-min", range.input_min);
     state.writer.Number("input-max", range.input_max);
@@ -187,7 +187,7 @@ void writeFixtureTypeFunction(WriteState &state,
   state.writer.Number("shape", function.Shape());
   switch (function.Type()) {
     case FunctionType::ColorMacro:
-      witeMacroParameters(state, function.GetMacroParameters());
+      witeMacroParameters(state, function.GetColorRangeParameters());
       break;
     case FunctionType::RotationSpeed:
       writeRotationParameters(state, function.GetRotationSpeedParameters());

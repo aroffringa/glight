@@ -194,6 +194,7 @@ if(Boost_FOUND)
     tests/system/tcolortemperature.cpp
     tests/system/tdeletableptr.cpp
     tests/system/tfileformat.cpp
+    tests/system/tindifferentptr.cpp
     tests/system/tjsonreader.cpp
     tests/system/tjsonwriter.cpp
     tests/system/tmath.cpp
