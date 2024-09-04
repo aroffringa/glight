@@ -27,7 +27,7 @@ The source of Glight can be downloaded from Github, currently from https://githu
 - [libola](https://www.openlighting.org/ola/). `libola-dev` and `libprotobuf-dev` on Debian and Ubuntu.
 - [libxml2](http://xmlsoft.org/). `libxml2-dev` on Debian and Ubuntu.
 
-Once these prerequisited are installed, glight can be compiled by running the following from the source directory:
+For compilation, gcc version 11 or newer (or a similar version of clang) is required. All requirements are available under Ubuntu 22. Once the prerequisited are installed, glight can be compiled by running the following from the source directory:
 
     mkdir build
     cd build
