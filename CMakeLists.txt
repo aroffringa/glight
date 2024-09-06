@@ -107,6 +107,7 @@ set(GUIFILES
   gui/windows/addfixturewindow.cpp  
   gui/windows/chasepropertieswindow.cpp
   gui/windows/designwizard.cpp
+  gui/windows/editcolorrange.cpp
   gui/windows/effectpropertieswindow.cpp
   gui/windows/fixturelistwindow.cpp
   gui/windows/fixtureproperties.cpp

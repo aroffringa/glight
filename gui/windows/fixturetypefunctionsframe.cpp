@@ -1,8 +1,14 @@
 #include "fixturetypefunctionsframe.h"
 
+#include <cassert>
+
+#include "editcolorrange.h"
+
 namespace glight::gui {
 
 using system::OptionalNumber;
+using theatre::FixtureTypeFunction;
+using theatre::FunctionType;
 
 namespace {
 std::string FineToString(OptionalNumber<size_t> fine_channel) {
@@ -21,13 +27,14 @@ OptionalNumber<size_t> GetFine(const std::string& str) {
 
 }  // namespace
 
-FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
+FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
     : Gtk::Frame("Functions"),
       add_function_button_("+"),
       remove_function_button_("-"),
       dmx_offset_label_("DMX offset:"),
       fine_channel_label_("Fine channel:"),
-      function_type_label_("Function type:") {
+      function_type_label_("Function type:"),
+      parent_window_(parent_window) {
   functions_model_ = Gtk::ListStore::create(functions_columns_);
 
   functions_view_.set_model(functions_model_);
@@ -40,13 +47,13 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
       [&]() { onSelectionChanged(); });
   functions_scrollbars_.add(functions_view_);
   functions_scrollbars_.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-  grid_.attach(functions_scrollbars_, 0, 0, 2, 1);
+  grid_.attach(functions_scrollbars_, 0, 0, 3, 1);
 
   add_function_button_.signal_clicked().connect([&]() { onAdd(); });
   functions_button_box_.pack_start(add_function_button_);
   remove_function_button_.signal_clicked().connect([&]() { onRemove(); });
   functions_button_box_.pack_end(remove_function_button_);
-  grid_.attach(functions_button_box_, 0, 1, 2, 1);
+  grid_.attach(functions_button_box_, 0, 1, 3, 1);
   grid_.set_hexpand(true);
   grid_.set_vexpand(true);
 
@@ -57,19 +64,22 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     if (selected) {
       const int val = std::atoi(dmx_offset_entry_.get_text().c_str());
       (*selected)[functions_columns_.dmx_offset_] = std::clamp(val, 0, 511);
+      (*(*selected)[functions_columns_.function_]).SetDmxOffset(val);
     }
   });
-  grid_.attach(dmx_offset_entry_, 1, 2);
+  grid_.attach(dmx_offset_entry_, 1, 2, 2, 1);
   fine_channel_entry_.signal_changed().connect([&]() {
     Gtk::TreeModel::iterator selected =
         functions_view_.get_selection()->get_selected();
     if (selected) {
-      (*selected)[functions_columns_.fine_channel_] =
-          FineToString(GetFine(fine_channel_entry_.get_text()));
+      const OptionalNumber<size_t> fine =
+          GetFine(fine_channel_entry_.get_text());
+      (*selected)[functions_columns_.fine_channel_] = FineToString(fine);
+      (*(*selected)[functions_columns_.function_]).SetFineChannelOffset(fine);
     }
   });
   grid_.attach(fine_channel_label_, 0, 3);
-  grid_.attach(fine_channel_entry_, 1, 3);
+  grid_.attach(fine_channel_entry_, 1, 3, 2, 1);
   grid_.attach(function_type_label_, 0, 4);
 
   function_type_model_ = Gtk::ListStore::create(function_type_columns_);
@@ -87,44 +97,39 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame()
     if (selected) {
       Gtk::TreeModel::const_iterator iter = function_type_combo_.get_active();
       if (iter) {
-        (*selected)[functions_columns_.function_type_] = theatre::FunctionType(
-            (*iter)[function_type_columns_.function_type_]);
-        (*selected)[functions_columns_.function_type_str_] =
-            Glib::ustring((*iter)[function_type_columns_.function_type_str_]);
+        FixtureTypeFunction* function =
+            (*selected)[functions_columns_.function_];
+        FunctionType type = (*iter)[function_type_columns_.function_type_];
+        // We should not update the type if no change is made, as it would
+        // also destroy the parameters of the type (like macro color range)
+        if (type != function->Type()) {
+          function->SetType(type);
+          (*selected)[functions_columns_.function_type_str_] =
+              Glib::ustring((*iter)[function_type_columns_.function_type_str_]);
+        }
       }
     }
   });
   grid_.attach(function_type_combo_, 1, 4);
+
+  function_parameters_button_.signal_clicked().connect(
+      [&]() { OpenFunctionParametersEditWindow(); });
+  function_parameters_button_.set_hexpand(false);
+  grid_.attach(function_parameters_button_, 2, 4);
 
   add(grid_);
 
   onSelectionChanged();
 }
 
-std::vector<theatre::FixtureTypeFunction>
-FixtureTypeFunctionsFrame::GetFunctions() const {
-  std::vector<theatre::FixtureTypeFunction> functions;
-  for (const Gtk::TreeRow& child : functions_model_->children()) {
-    const size_t dmx_offset = child[functions_columns_.dmx_offset_];
-    const theatre::FunctionType type = child[functions_columns_.function_type_];
-    const Glib::ustring fine_channel_str =
-        child[functions_columns_.fine_channel_];
-    const OptionalNumber<size_t> fine_channel = GetFine(fine_channel_str);
-    const size_t shape = 0;
-    functions.emplace_back(type, dmx_offset, fine_channel, shape);
-  }
-  return functions;
-}
-
-void FixtureTypeFunctionsFrame::SetFunctions(
-    const std::vector<theatre::FixtureTypeFunction>& functions) {
+void FixtureTypeFunctionsFrame::FillModel() {
   functions_model_->clear();
-  for (const theatre::FixtureTypeFunction& f : functions) {
+  for (FixtureTypeFunction& f : functions_) {
     Gtk::TreeModel::iterator iter = functions_model_->append();
     const Gtk::TreeModel::Row& row = *iter;
     row[functions_columns_.dmx_offset_] = f.DmxOffset();
     row[functions_columns_.fine_channel_] = FineToString(f.FineChannelOffset());
-    row[functions_columns_.function_type_] = f.Type();
+    row[functions_columns_.function_] = &f;
     row[functions_columns_.function_type_str_] = ToString(f.Type());
   }
 }
@@ -144,11 +149,15 @@ void FixtureTypeFunctionsFrame::onAdd() {
       dmx_offset = row[functions_columns_.dmx_offset_] + 1;
   }
 
+  FixtureTypeFunction& function =
+      functions_.emplace_back(theatre::FunctionType::White, dmx_offset,
+                              system::OptionalNumber<size_t>(), 0);
+
   Gtk::TreeModel::iterator iter = functions_model_->append();
   const Gtk::TreeModel::Row& row = *iter;
   row[functions_columns_.dmx_offset_] = dmx_offset;
   row[functions_columns_.fine_channel_] = "-";
-  row[functions_columns_.function_type_] = theatre::FunctionType::White;
+  row[functions_columns_.function_] = &function;
   row[functions_columns_.function_type_str_] =
       ToString(theatre::FunctionType::White);
 }
@@ -157,6 +166,14 @@ void FixtureTypeFunctionsFrame::onRemove() {
   Glib::RefPtr<Gtk::TreeSelection> selection = functions_view_.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
   if (selected) {
+    FixtureTypeFunction* function = (*selected)[functions_columns_.function_];
+    auto iter =
+        std::find_if(functions_.begin(), functions_.end(),
+                     [function](const FixtureTypeFunction& ftf) -> bool {
+                       return &ftf == function;
+                     });
+    assert(iter != functions_.end());
+    functions_.erase(iter);
     functions_model_->erase(selected);
   }
 }
@@ -172,16 +189,39 @@ void FixtureTypeFunctionsFrame::onSelectionChanged() {
   function_type_label_.set_sensitive(is_selected);
   function_type_combo_.set_sensitive(is_selected);
   if (is_selected) {
-    dmx_offset_entry_.set_text(
-        std::to_string((*selected)[functions_columns_.dmx_offset_]));
+    const FixtureTypeFunction& function =
+        *(*selected)[functions_columns_.function_];
+    dmx_offset_entry_.set_text(std::to_string(function.DmxOffset()));
     fine_channel_entry_.set_text((*selected)[functions_columns_.fine_channel_]);
-    const int ft_index = static_cast<int>(
-        theatre::FunctionType((*selected)[functions_columns_.function_type_]));
+    const int ft_index = static_cast<int>(function.Type());
     function_type_combo_.set_active(ft_index);
   } else {
     dmx_offset_entry_.set_text("");
     fine_channel_entry_.set_text("-");
     function_type_combo_.set_active(-1);
+  }
+}
+
+void FixtureTypeFunctionsFrame::OpenFunctionParametersEditWindow() {
+  Gtk::TreeModel::iterator selected =
+      functions_view_.get_selection()->get_selected();
+  const bool is_selected = static_cast<bool>(selected);
+  if (is_selected) {
+    FixtureTypeFunction& function = *(*selected)[functions_columns_.function_];
+    if (function.Type() == FunctionType::ColorMacro ||
+        function.Type() == FunctionType::ColorWheel) {
+      sub_window_ = std::make_unique<windows::EditColorRange>(
+          function.GetColorRangeParameters().GetRanges());
+      sub_window_->set_modal(true);
+      sub_window_->set_transient_for(parent_window_);
+      sub_window_->signal_hide().connect([&]() {
+        function.GetColorRangeParameters().GetRanges() =
+            static_cast<windows::EditColorRange*>(sub_window_.get())
+                ->GetRanges();
+        sub_window_.reset();
+      });
+      sub_window_->show();
+    }
   }
 }
 

@@ -6,7 +6,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
 #include <gtkmm/radiobutton.h>
 
@@ -14,6 +13,7 @@
 #include "theatre/forwards.h"
 
 #include "gui/eventtransmitter.h"
+#include "gui/components/colorbutton.h"
 
 namespace glight::theatre {
 class VariableEffect;
@@ -42,27 +42,19 @@ class ColorSelectWidget : public Gtk::HBox {
     else
       return {GetColor()};
   }
-  theatre::Color GetColor() const {
-    return theatre::Color::FromRatio(red_, green_, blue_);
-  }
+  theatre::Color GetColor() const { return color_button_.GetColor(); }
   void SetColor(const theatre::Color &color) {
     bool is_changed = false;
     if (!static_button_.get_active()) {
       static_button_.set_active(true);
       is_changed = true;
     }
-    const auto change = [](double &old_value, double new_value, bool &change) {
-      if (old_value != new_value) {
-        old_value = new_value;
-        change = true;
-      }
-    };
-    change(red_, double(color.Red()) / 255.0, is_changed);
-    change(green_, double(color.Green()) / 255.0, is_changed);
-    change(blue_, double(color.Blue()) / 255.0, is_changed);
+    if (color != color_button_.GetColor()) {
+      color_button_.SetColor(color);
+      is_changed = true;
+    }
     if (is_changed) {
       signal_color_changed_();
-      area_.queue_draw();
     }
   }
   void SetVariable(theatre::VariableEffect *variable) {
@@ -96,7 +88,7 @@ class ColorSelectWidget : public Gtk::HBox {
         remove(static_button_);
         remove(variable_button_);
       }
-      area_.set_visible(true);
+      color_button_.set_visible(true);
       signal_color_changed_();
     }
   }
@@ -105,18 +97,14 @@ class ColorSelectWidget : public Gtk::HBox {
   Gtk::Window *parent_;
   Gtk::RadioButton static_button_;
   Gtk::RadioButton variable_button_;
-  Gtk::DrawingArea area_;
+  components::ColorButton color_button_{theatre::Color::White()};
   Gtk::Label variable_label_;
   Gtk::Button set_button_;
   bool allow_variables_ = true;
-  double red_ = 1.0;
-  double green_ = 1.0;
-  double blue_ = 1.0;
   theatre::VariableEffect *variable_ = nullptr;
   sigc::signal<void()> signal_color_changed_;
 
   void SetVariableLabel();
-  bool OnColorAreaDraw(const Cairo::RefPtr<Cairo::Context> &cr) const;
 
   void OpenColorSelection();
   void OpenVariableSelection();

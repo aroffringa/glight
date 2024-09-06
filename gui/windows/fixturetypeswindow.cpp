@@ -21,7 +21,7 @@ namespace glight::gui {
 
 FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
                                        theatre::Management &management)
-    : event_hub_(eventHub), management_(&management) {
+    : event_hub_(eventHub), management_(&management), functions_frame_(*this) {
   set_title("Glight - fixture types");
   set_size_request(200, 400);
 

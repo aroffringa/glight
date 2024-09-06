@@ -22,8 +22,8 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
     if (variable_label_.get_parent()) {
       remove(set_button_);
       remove(variable_label_);
-      pack_end(area_, true, true, 5);
-      area_.show();
+      pack_end(color_button_, true, true, 5);
+      color_button_.show();
       signal_color_changed_();
     }
   });
@@ -32,8 +32,8 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
 
   variable_button_.set_group(group);
   variable_button_.signal_clicked().connect([&]() {
-    if (area_.get_parent()) {
-      remove(area_);
+    if (color_button_.get_parent()) {
+      remove(color_button_);
       pack_end(variable_label_);
       variable_label_.show();
       pack_end(set_button_);
@@ -51,29 +51,20 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
       OpenVariableSelection();
   });
 
-  area_.set_size_request(35, 35);
-  area_.signal_draw().connect(
-      sigc::mem_fun(*this, &ColorSelectWidget::OnColorAreaDraw));
-  pack_end(area_, true, true, 5);
-  area_.set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-  area_.signal_button_release_event().connect([&](GdkEventButton *) {
-    OpenColorSelection();
-    return false;
-  });
-  area_.show();
+  color_button_.set_size_request(35, 35);
+  pack_end(color_button_, true, true, 5);
+  color_button_.SignalClicked().connect([&]() { OpenColorSelection(); });
+  color_button_.show();
 
   SetAllowVariables(allow_variable);
 }
 
 void ColorSelectWidget::OpenColorSelection() {
   const std::optional<theatre::Color> color =
-      OpenColorDialog(*parent_, theatre::Color::FromRatio(red_, green_, blue_));
+      OpenColorDialog(*parent_, color_button_.GetColor());
   if (color) {
-    red_ = color->RedRatio();
-    green_ = color->GreenRatio();
-    blue_ = color->BlueRatio();
+    color_button_.SetColor(*color);
     signal_color_changed_();
-    area_.queue_draw();
   }
 }
 
@@ -113,23 +104,6 @@ void ColorSelectWidget::SetVariableLabel() {
     variable_label_.set_text(variable_->Name());
   else
     variable_label_.set_text("");
-}
-
-bool ColorSelectWidget::OnColorAreaDraw(
-    const Cairo::RefPtr<Cairo::Context> &cr) const {
-  constexpr int border = 7;
-  const int width = area_.get_width() - 2 * border;
-  const int height = area_.get_height() - 2 * border;
-  cr->rectangle(border, border, width, height);
-  cr->set_source_rgb(red_, green_, blue_);
-  cr->fill();
-  cr->rectangle(border + 1, border + 1, width - 2, height - 2);
-  cr->set_source_rgb(0.75, 0.75, 0.75);
-  cr->stroke();
-  cr->rectangle(border, border, width, height);
-  cr->set_source_rgb(0.5, 0.5, 0.5);
-  cr->stroke();
-  return true;
 }
 
 }  // namespace glight::gui

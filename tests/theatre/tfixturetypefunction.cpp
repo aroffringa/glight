@@ -4,9 +4,25 @@
 
 #include <memory>
 
-using namespace glight::theatre;
+namespace glight::theatre {
 
 BOOST_AUTO_TEST_SUITE(fixture_type_function)
+
+BOOST_AUTO_TEST_CASE(copy) {
+  FixtureTypeFunction a(FunctionType::ColorMacro, 12,
+                        system::OptionalNumber<size_t>(), 0);
+  a.GetColorRangeParameters().GetRanges().emplace_back(100, 200, Color::Lime());
+  a.GetColorRangeParameters().GetRanges().emplace_back(300, 500,
+                                                       std::optional<Color>());
+  FixtureTypeFunction b(FunctionType::White, 11,
+                        system::OptionalNumber<size_t>(), 0);
+  b = std::move(a);
+  BOOST_CHECK(b.Type() == FunctionType::ColorMacro);
+  BOOST_CHECK_EQUAL(b.DmxOffset(), 12);
+  BOOST_CHECK(!b.FineChannelOffset());
+  BOOST_CHECK_EQUAL(b.Shape(), 0);
+  BOOST_REQUIRE_EQUAL(b.GetColorRangeParameters().GetRanges().size(), 2);
+}
 
 BOOST_AUTO_TEST_CASE(range_function) {
   FixtureTypeFunction f(FunctionType::RotationSpeed, 37, {}, 2);
@@ -38,5 +54,7 @@ BOOST_AUTO_TEST_CASE(range_function) {
   BOOST_CHECK_EQUAL(details::GetParameterRange(255, ranges), &ranges[2]);
   BOOST_CHECK_EQUAL(f.GetRotationParameters().GetSpeed(255), -1);
 }
+
+}  // namespace glight::theatre
 
 BOOST_AUTO_TEST_SUITE_END()

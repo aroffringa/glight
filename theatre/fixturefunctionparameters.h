@@ -98,9 +98,8 @@ struct FixtureFunctionParameters {
     parameters.Reset<RotationSpeedParameters>();
   }
 
-  void SetColorRangeParameters(const ColorRangeParameters& macro_parameters) {
-    parameters =
-        system::MakeIndifferent<ColorRangeParameters>(macro_parameters);
+  void SetColorRangeParameters(const ColorRangeParameters& color_range) {
+    parameters = system::MakeIndifferent<ColorRangeParameters>(color_range);
   }
   void UnsetColorRangeParameters() { parameters.Reset<ColorRangeParameters>(); }
 
