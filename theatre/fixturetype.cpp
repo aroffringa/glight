@@ -363,7 +363,8 @@ Color FixtureType::GetColor(const Fixture &fixture,
       const FunctionType type = function.Type();
       if (type == FunctionType::Master) {
         master = channel_value;
-      } else if (type == FunctionType::ColorMacro) {
+      } else if (type == FunctionType::ColorMacro ||
+                 type == FunctionType::ColorWheel) {
         macro_color =
             function.GetColorRangeParameters().GetColor(channel_value);
       } else if (type == FunctionType::ColorTemperature) {

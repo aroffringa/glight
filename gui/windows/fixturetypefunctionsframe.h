@@ -16,14 +16,22 @@ namespace glight::gui {
 
 class FixtureTypeFunctionsFrame : public Gtk::Frame {
  public:
-  FixtureTypeFunctionsFrame();
-  std::vector<theatre::FixtureTypeFunction> GetFunctions() const;
-  void SetFunctions(const std::vector<theatre::FixtureTypeFunction> &functions);
+  FixtureTypeFunctionsFrame(Gtk::Window& parent_window);
+  const std::vector<theatre::FixtureTypeFunction>& GetFunctions() const {
+    return functions_;
+  }
+  void SetFunctions(
+      const std::vector<theatre::FixtureTypeFunction>& functions) {
+    functions_ = functions;
+    FillModel();
+  }
 
  private:
   void onAdd();
   void onRemove();
   void onSelectionChanged();
+  void OpenFunctionParametersEditWindow();
+  void FillModel();
 
   Gtk::ScrolledWindow functions_scrollbars_;
   Gtk::TreeView functions_view_;
@@ -32,13 +40,13 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
     FunctionsColumns() {
       add(dmx_offset_);
       add(fine_channel_);
-      add(function_type_);
+      add(function_);
       add(function_type_str_);
     }
 
     Gtk::TreeModelColumn<size_t> dmx_offset_;
     Gtk::TreeModelColumn<Glib::ustring> fine_channel_;
-    Gtk::TreeModelColumn<theatre::FunctionType> function_type_;
+    Gtk::TreeModelColumn<theatre::FixtureTypeFunction*> function_;
     Gtk::TreeModelColumn<Glib::ustring> function_type_str_;
   } functions_columns_;
 
@@ -54,6 +62,7 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
   Gtk::Label function_type_label_;
   Glib::RefPtr<Gtk::ListStore> function_type_model_;
   Gtk::ComboBox function_type_combo_;
+  Gtk::Button function_parameters_button_{"..."};
 
   struct FunctionTypeColumns : public Gtk::TreeModelColumnRecord {
     FunctionTypeColumns() {
@@ -63,6 +72,10 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
     Gtk::TreeModelColumn<theatre::FunctionType> function_type_;
     Gtk::TreeModelColumn<Glib::ustring> function_type_str_;
   } function_type_columns_;
+
+  Gtk::Window& parent_window_;
+  std::unique_ptr<Gtk::Window> sub_window_;
+  std::vector<theatre::FixtureTypeFunction> functions_;
 };
 
 }  // namespace glight::gui
