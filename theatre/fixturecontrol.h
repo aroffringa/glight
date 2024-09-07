@@ -32,9 +32,9 @@ class FixtureControl final : public Controllable {
 
   virtual FunctionType InputType(size_t index) const override {
     if (filters_.empty())
-      return fixture_->Functions()[index]->Type();
+      return fixture_->Type().Functions()[index].Type();
     else
-      return filters_.back()->InputTypes()[index];
+      return filters_.back()->InputTypes()[index].Type();
   }
 
   Color InputColor(size_t index) const {
@@ -80,13 +80,7 @@ class FixtureControl final : public Controllable {
     assert(filter);
     if (filters_.empty()) {
       filters_.emplace_back(std::move(filter));
-      std::vector<FunctionType> types;
-      types.reserve(fixture_->Functions().size());
-      for (const std::unique_ptr<FixtureFunction> &function :
-           fixture_->Functions()) {
-        types.emplace_back(function->Type());
-      }
-      filters_.back()->SetOutputTypes(std::move(types));
+      filters_.back()->SetOutputTypes(fixture_->Type().Functions());
     } else {
       Filter *previous_last = filters_.back().get();
       filters_.emplace_back(std::move(filter));

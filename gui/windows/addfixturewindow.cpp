@@ -107,6 +107,9 @@ void AddFixtureWindow::updateFilters() {
           enable_monochrome = true;
       } else if (function.Type() == theatre::FunctionType::ColorTemperature) {
         has_temperature = true;
+      } else if (function.Type() == theatre::FunctionType::ColorMacro ||
+                 function.Type() == theatre::FunctionType::ColorWheel) {
+        enable_color = true;
       }
     }
   }

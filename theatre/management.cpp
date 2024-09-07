@@ -63,7 +63,6 @@ void Management::UpdateUniverses() {
 }
 
 void Management::Run() {
-  assert(_beatFinder);
   if (_thread == nullptr) {
     UpdateUniverses();
     _isQuitting = false;

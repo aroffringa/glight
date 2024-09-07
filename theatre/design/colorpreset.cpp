@@ -14,9 +14,9 @@ namespace glight::theatre {
 void AddPresetValue(Management &management, Controllable &control,
                     PresetCollection &pc, const Color &color,
                     const ColorDeduction &deduction) {
-  const ControlValue red = ControlValue::FromChar(color.Red());
-  const ControlValue green = ControlValue::FromChar(color.Green());
-  const ControlValue blue = ControlValue::FromChar(color.Blue());
+  const ControlValue red = ControlValue::FromUChar(color.Red());
+  const ControlValue green = ControlValue::FromUChar(color.Green());
+  const ControlValue blue = ControlValue::FromUChar(color.Blue());
   const bool is_zero = !red && !green && !blue;
   const unsigned master = is_zero ? 0 : (1 << 24) - 1;
 

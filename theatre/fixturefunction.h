@@ -16,18 +16,19 @@ namespace glight::theatre {
 class Theatre;
 
 /**
- * @author Andre Offringa
+ * This class holds the dmx information and name of a fixture's function.
+ * Objects of this class are matched with a FixtureTypeFunction, which can
+ * be found through the Fixture class: function index i of a Fixture matches
+ * with FixtureTypeFunction i of the corresponding FixtureType.
  */
 class FixtureFunction final : public NamedObject {
  public:
-  FixtureFunction(Theatre &theatre, FunctionType type, const std::string &name);
+  FixtureFunction() = default;
 
-  FixtureFunction(Theatre &theatre, FunctionType type);
+  FixtureFunction(const std::string &name);
 
-  FixtureFunction(const FixtureFunction &source, Theatre &theatre);
-
-  FixtureFunction(const FixtureFunction &source) = delete;
-  FixtureFunction &operator=(const FixtureFunction &source) = delete;
+  FixtureFunction(const FixtureFunction &source) = default;
+  FixtureFunction &operator=(const FixtureFunction &source) = default;
 
   void MixChannels(unsigned value, MixStyle mixStyle, unsigned *channels,
                    unsigned universe) {
@@ -48,13 +49,17 @@ class FixtureFunction final : public NamedObject {
     }
   }
 
-  void SetChannel(const DmxChannel &channel,
-                  const std::optional<DmxChannel> &fine_channel = {});
   const std::optional<DmxChannel> &FineChannel() const { return fine_channel_; }
   const DmxChannel &MainChannel() const { return main_channel_; }
+
+  /** The caller must call theatre.NotifyDmxChange(); afterward. */
+  void SetChannel(const DmxChannel &channel,
+                  const std::optional<DmxChannel> &fine_channel = {});
+  /** The caller must call theatre.NotifyDmxChange(); afterward. */
   void IncChannel();
+  /** The caller must call theatre.NotifyDmxChange(); afterward. */
   void DecChannel();
-  FunctionType Type() const { return type_; }
+
   unsigned char GetCharValue(const ValueSnapshot &snapshot) const {
     return snapshot.GetValue(main_channel_);
   }
@@ -67,10 +72,8 @@ class FixtureFunction final : public NamedObject {
   }
 
  private:
-  Theatre &theatre_;
-  FunctionType type_;
-  DmxChannel main_channel_;
-  std::optional<DmxChannel> fine_channel_;
+  DmxChannel main_channel_{0, 0};
+  std::optional<DmxChannel> fine_channel_{};
 };
 
 }  // namespace glight::theatre

@@ -89,6 +89,7 @@ class FixtureTypeFunction {
   void ConstructParameters() {
     switch (type_) {
       case FunctionType::ColorMacro:
+      case FunctionType::ColorWheel:
         parameters_.SetColorRangeParameters(ColorRangeParameters());
         break;
       case FunctionType::RotationSpeed:
@@ -102,6 +103,7 @@ class FixtureTypeFunction {
   void DestructParameters() {
     switch (type_) {
       case FunctionType::ColorMacro:
+      case FunctionType::ColorWheel:
         parameters_.UnsetColorRangeParameters();
         break;
       case FunctionType::RotationSpeed:
@@ -115,6 +117,7 @@ class FixtureTypeFunction {
   void CopyParameters(const FixtureTypeFunction& source) {
     switch (type_) {
       case FunctionType::ColorMacro:
+      case FunctionType::ColorWheel:
         parameters_.SetColorRangeParameters(
             source.parameters_.parameters.Get<ColorRangeParameters>());
         break;

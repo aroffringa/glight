@@ -1,6 +1,10 @@
 #ifndef RECURSION_LOCK_H
 #define RECURSION_LOCK_H
 
+#ifndef NDEBUG
+#include <iostream>
+#endif
+
 namespace glight::gui {
 
 class RecursionLock {
@@ -23,9 +27,9 @@ class RecursionLock {
 
     ~Token() {
 #ifndef NDEBUG
-      if (_owned && !ar._isTaken)
-        throw std::runtime_error(
-            "Logical error: token was released from wrong scope");
+      if (_owned && !*_isTaken)
+        std::cerr << "Logical error: recursion lock token was released from "
+                     "wrong scope\n";
 #endif
       if (_owned) (*_isTaken) = false;
     }
@@ -38,7 +42,7 @@ class RecursionLock {
       if (!_owned)
         throw std::runtime_error(
             "Logical error: Release() was called twice for token");
-      if (!ar._isTaken)
+      if (!*_isTaken)
         throw std::runtime_error(
             "Logical error: token was released from wrong scope");
 #endif

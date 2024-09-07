@@ -126,6 +126,7 @@ void ParseFixtureTypeFunctions(const json::Array &node,
         functions.emplace_back(ft, dmx_offset, fine_channel, shape);
     switch (ft) {
       case FunctionType::ColorMacro:
+      case FunctionType::ColorWheel:
         ParseColorRangeParameters(ToObj(obj["parameters"]),
                                   new_function.GetColorRangeParameters());
         break;
@@ -179,8 +180,7 @@ DmxChannel ParseDmxChannel(const Object &node) {
 }
 
 void ParseFixtureFunction(const Object &node, Fixture &parentFixture) {
-  FixtureFunction &function =
-      parentFixture.AddFunction(GetFunctionType(ToStr(node["type"])));
+  FixtureFunction &function = parentFixture.AddFunction();
   ParseNameAttr(node, function);
   DmxChannel main_channel = ParseDmxChannel(ToObj(node["dmx-channel"]));
   std::optional<DmxChannel> fine_channel;

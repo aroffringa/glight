@@ -53,7 +53,7 @@ class ColorMap {
  private:
   int divisor_ = 0;
   // Maps a color to the palette index.
-  // The color components have been divided by 8 to limit the
+  // The color components have been divided by (e.g.) 8 to limit the
   // size of the map, and are indexed by r*divisor^2 + g*divisor + b;
   std::vector<unsigned short> map_;
 };

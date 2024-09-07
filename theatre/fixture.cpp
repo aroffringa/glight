@@ -10,8 +10,7 @@ Fixture::Fixture(Theatre &theatre, const FixtureType &type,
   for (size_t ci = 0; ci != type.Functions().size(); ++ci) {
     const FixtureTypeFunction function = type.Functions()[ci];
     const std::string name(AbbreviatedFunctionType(function.Type()));
-    functions_.emplace_back(
-        std::make_unique<FixtureFunction>(theatre_, function.Type(), name));
+    functions_.emplace_back(std::make_unique<FixtureFunction>(name));
     const DmxChannel main_channel(base_channel + function.DmxOffset());
     std::optional<DmxChannel> fine_channel;
     if (function.FineChannelOffset())
@@ -21,6 +20,7 @@ Fixture::Fixture(Theatre &theatre, const FixtureType &type,
   }
 }
 
+/*
 Fixture::Fixture(const Fixture &source, Theatre &theatre)
     : NamedObject(source),
       theatre_(theatre),
@@ -28,8 +28,9 @@ Fixture::Fixture(const Fixture &source, Theatre &theatre)
       position_(source.position_),
       symbol_(source.symbol_) {
   for (const std::unique_ptr<FixtureFunction> &ff : source.functions_)
-    functions_.emplace_back(new FixtureFunction(*ff, theatre));
+    functions_.emplace_back(new FixtureFunction(*ff));
 }
+*/
 
 void Fixture::IncChannel() {
   for (std::unique_ptr<FixtureFunction> &ff : functions_) ff->IncChannel();

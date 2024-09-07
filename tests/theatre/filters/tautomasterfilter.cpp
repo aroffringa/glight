@@ -3,32 +3,29 @@
 #include <boost/test/unit_test.hpp>
 
 #include "tests/tolerance_check.h"
+#include "tests/theatre/filters/outputexamples.h"
 
-using namespace glight::theatre;
+namespace glight::theatre {
 
 BOOST_AUTO_TEST_SUITE(auto_master_filter)
 
 BOOST_AUTO_TEST_CASE(types) {
   AutoMasterFilter filter;
-  filter.SetOutputTypes({FunctionType::Red, FunctionType::Green,
-                         FunctionType::Blue, FunctionType::Master,
-                         FunctionType::Strobe});
+  filter.SetOutputTypes(GetRGBMSFunctionsExample());
   BOOST_REQUIRE_EQUAL(filter.InputTypes().size(), 4);
-  BOOST_CHECK(filter.InputTypes()[0] == FunctionType::Red);
-  BOOST_CHECK(filter.InputTypes()[1] == FunctionType::Green);
-  BOOST_CHECK(filter.InputTypes()[2] == FunctionType::Blue);
-  BOOST_CHECK(filter.InputTypes()[3] == FunctionType::Strobe);
+  BOOST_CHECK(filter.InputTypes()[0].Type() == FunctionType::Red);
+  BOOST_CHECK(filter.InputTypes()[1].Type() == FunctionType::Green);
+  BOOST_CHECK(filter.InputTypes()[2].Type() == FunctionType::Blue);
+  BOOST_CHECK(filter.InputTypes()[3].Type() == FunctionType::Strobe);
 
-  filter.SetOutputTypes({FunctionType::White});
+  filter.SetOutputTypes(GetWhiteFunctionExample());
   BOOST_REQUIRE_EQUAL(filter.InputTypes().size(), 1);
-  BOOST_CHECK(filter.InputTypes()[0] == FunctionType::White);
+  BOOST_CHECK(filter.InputTypes()[0].Type() == FunctionType::White);
 }
 
 BOOST_AUTO_TEST_CASE(apply_full_on) {
   AutoMasterFilter filter;
-  filter.SetOutputTypes({FunctionType::Master, FunctionType::Red,
-                         FunctionType::Green, FunctionType::Blue,
-                         FunctionType::Strobe});
+  filter.SetOutputTypes(GetMRGBSFunctionsExample());
   std::vector<ControlValue> output(5);
   filter.Apply(
       {
@@ -47,8 +44,7 @@ BOOST_AUTO_TEST_CASE(apply_full_on) {
 
 BOOST_AUTO_TEST_CASE(apply_low_brightness) {
   AutoMasterFilter filter;
-  filter.SetOutputTypes({FunctionType::Red, FunctionType::Green,
-                         FunctionType::Blue, FunctionType::Master});
+  filter.SetOutputTypes(GetRGBMFunctionsExample());
   std::vector<ControlValue> output(5);
   filter.Apply(
       {
@@ -71,3 +67,5 @@ BOOST_AUTO_TEST_CASE(apply_low_brightness) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+}  // namespace glight::theatre

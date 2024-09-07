@@ -84,6 +84,10 @@ BOOST_AUTO_TEST_CASE(move_assignment) {
   BOOST_CHECK(b);
   BOOST_CHECK_EQUAL(n_constructions, 1);
   BOOST_CHECK_EQUAL(n_deletes, 0);
+  b.Reset<Tracker>();
+  BOOST_CHECK(!b);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 1);
 }
 
 BOOST_AUTO_TEST_CASE(make_indifferent_ptr) {

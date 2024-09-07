@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_SUITE(fixture_function)
 
 BOOST_AUTO_TEST_CASE(MixChannels_8bit) {
   Theatre theatre;
-  FixtureFunction ff(theatre, FunctionType::Red, "ff test");
+  FixtureFunction ff("ff test");
   ff.SetChannel(DmxChannel(3, 0), {});
   std::vector<unsigned> channelValues(512, 0);
   ff.MixChannels(1 << 8, MixStyle::HighestValue, channelValues.data(), 0);
@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(MixChannels_8bit) {
 
 BOOST_AUTO_TEST_CASE(MixChannels_16bit) {
   Theatre theatre;
-  FixtureFunction ff(theatre, FunctionType::Red, "ff test");
+  FixtureFunction ff("ff test");
   ff.SetChannel(DmxChannel(3, 0), DmxChannel(4, 0));
   std::vector<unsigned> channelValues(512, 0);
   ff.MixChannels(1 << 8, MixStyle::HighestValue, channelValues.data(), 0);
