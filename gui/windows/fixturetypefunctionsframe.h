@@ -31,6 +31,7 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
   void onRemove();
   void onSelectionChanged();
   void OpenFunctionParametersEditWindow();
+  void UpdateModel();
   void FillModel();
 
   Gtk::ScrolledWindow functions_scrollbars_;

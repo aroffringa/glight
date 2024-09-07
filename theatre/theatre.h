@@ -16,7 +16,7 @@ namespace glight::theatre {
 class Theatre {
  public:
   Theatre() = default;
-  Theatre(const Theatre &source);
+  // Theatre(const Theatre &source);
 
   void Clear();
 

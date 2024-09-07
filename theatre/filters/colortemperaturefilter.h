@@ -31,8 +31,8 @@ class ColorTemperatureFilter final : public Filter {
     }
     size_t input_index = 3;
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
-      if (OutputTypes()[i] != FunctionType::Master &&
-          OutputTypes()[i] != FunctionType::ColorTemperature) {
+      if (OutputTypes()[i].Type() != FunctionType::Master &&
+          OutputTypes()[i].Type() != FunctionType::ColorTemperature) {
         output[i] = input[input_index];
         ++input_index;
       }
@@ -43,16 +43,18 @@ class ColorTemperatureFilter final : public Filter {
   void DetermineInputTypes() override {
     system::OptionalNumber<size_t> master;
     system::OptionalNumber<size_t> temperature;
-    std::vector<FunctionType> input_types{
-        FunctionType::Red, FunctionType::Green, FunctionType::Blue};
+    std::vector<FixtureTypeFunction> input_types{
+        FixtureTypeFunction(FunctionType::Red, 0, {}, 0),
+        FixtureTypeFunction(FunctionType::Green, 0, {}, 0),
+        FixtureTypeFunction(FunctionType::Blue, 0, {}, 0)};
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
-      const FunctionType type = OutputTypes()[i];
+      const FunctionType type = OutputTypes()[i].Type();
       if (type == FunctionType::Master)
         master = i;
       else if (type == FunctionType::ColorTemperature)
         temperature = i;
       else
-        input_types.emplace_back(type);
+        input_types.emplace_back(OutputTypes()[i]);
     }
     enabled_ = master && temperature;
     if (enabled_) {

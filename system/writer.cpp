@@ -97,7 +97,6 @@ void writeFixtureFunction(WriteState &state,
                           const FixtureFunction &fixtureFunction) {
   state.writer.StartObject();
   state.writer.String("name", fixtureFunction.Name());
-  state.writer.String("type", ToString(fixtureFunction.Type()));
   writeDmxChannel(state, fixtureFunction.MainChannel(), "dmx-channel");
   if (fixtureFunction.FineChannel()) {
     writeDmxChannel(state, *fixtureFunction.FineChannel(), "dmx-fine-channel");
@@ -187,6 +186,7 @@ void writeFixtureTypeFunction(WriteState &state,
   state.writer.Number("shape", function.Shape());
   switch (function.Type()) {
     case FunctionType::ColorMacro:
+    case FunctionType::ColorWheel:
       witeMacroParameters(state, function.GetColorRangeParameters());
       break;
     case FunctionType::RotationSpeed:

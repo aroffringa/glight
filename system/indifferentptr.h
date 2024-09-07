@@ -36,7 +36,7 @@ class IndifferentPtr {
 
   constexpr explicit IndifferentPtr(void* object) : pointer_(object) {}
 
-  ~IndifferentPtr() noexcept { assert(pointer_); }
+  ~IndifferentPtr() noexcept { assert(pointer_ == nullptr); }
 
   IndifferentPtr& operator=(const IndifferentPtr& source) = delete;
 
@@ -45,7 +45,7 @@ class IndifferentPtr {
    * empty beforehand.
    */
   IndifferentPtr& operator=(IndifferentPtr&& source) {
-    assert(pointer_ == nulltr);
+    assert(pointer_ == nullptr);
     pointer_ = source.pointer_;
     source.pointer_ = nullptr;
     return *this;
@@ -53,7 +53,7 @@ class IndifferentPtr {
 
   template <typename T, typename... Args>
   void Emplace(Args&&... args) {
-    assert(pointer_ == nulltr);
+    assert(pointer_ == nullptr);
     pointer_ = new T(std::forward<Args>(args)...);
   }
 

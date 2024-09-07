@@ -30,7 +30,7 @@ class ControlValue {
     return ControlValue(
         static_cast<unsigned>(std::clamp(ratio, 0.0, 1.0) * MaxUInt()));
   }
-  constexpr static ControlValue FromChar(char value) noexcept {
+  constexpr static ControlValue FromUChar(unsigned char value) noexcept {
     return ControlValue(static_cast<unsigned>(value) * MaxUInt() / 255);
   }
   constexpr static unsigned MaxUInt() noexcept { return (1 << 24) - 1; }
@@ -96,7 +96,6 @@ class ControlValue {
     else
       return primaryStyle;
   }
-  void Set(unsigned int uintValue) noexcept { _value = uintValue; }
   constexpr double Ratio() const noexcept {
     return (double)_value / (double)((1 << 24) - 1);
   }
@@ -106,6 +105,11 @@ class ControlValue {
   constexpr unsigned char ToUChar() const noexcept {
     return std::min(_value, ControlValue::MaxUInt()) >> 16;
   }
+  void Set(unsigned int uintValue) noexcept { _value = uintValue; }
+  ControlValue& operator+=(ControlValue value) noexcept {
+    _value += value.UInt();
+    return *this;
+  }
 
  private:
   unsigned int _value;
@@ -114,6 +118,11 @@ class ControlValue {
 inline constexpr bool operator==(const ControlValue& lhs,
                                  const ControlValue& rhs) noexcept {
   return lhs.UInt() == rhs.UInt();
+}
+
+inline constexpr ControlValue operator+(const ControlValue& lhs,
+                                        const ControlValue& rhs) noexcept {
+  return ControlValue(lhs.UInt() + rhs.UInt());
 }
 
 inline constexpr ControlValue operator*(const ControlValue& lhs,

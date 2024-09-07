@@ -22,7 +22,7 @@ class ValueSnapshot;
 class Fixture : public NamedObject {
  public:
   Fixture(Theatre &theatre, const FixtureType &type, const std::string &name);
-  Fixture(const Fixture &source, Theatre &theatre);
+  // Fixture(const Fixture &source, Theatre &theatre);
 
   const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const {
     return functions_;
@@ -53,8 +53,8 @@ class Fixture : public NamedObject {
   DmxChannel GetFirstChannel() const;
 
   void ClearFunctions() { functions_.clear(); }
-  FixtureFunction &AddFunction(FunctionType type) {
-    functions_.emplace_back(new FixtureFunction(theatre_, type));
+  FixtureFunction &AddFunction() {
+    functions_.emplace_back(std::make_unique<FixtureFunction>());
     return *functions_.back();
   }
   inline Color GetColor(const ValueSnapshot &snapshot,

@@ -2,9 +2,11 @@
 #define GLIGHT_THEATRE_RGB_FILTER_H_
 
 #include <algorithm>
+#include <cassert>
 
 #include "filter.h"
 
+#include "system/colormap.h"
 #include "system/optionalnumber.h"
 
 #include "theatre/colordeduction.h"
@@ -32,7 +34,33 @@ class RgbFilter : public Filter {
     // The is for if there are more channels apart from composed
     // channels (like lime and amber), to leave some power in.
     constexpr unsigned ccf = 2;
-    if (cw_index_ && ww_index_ && amber_index_) {
+    if (macro_index_ && master_index_) {
+      const unsigned m = std::max({red, green, blue});
+      if (m != 0) {
+        red = ControlValue::Fraction(red, m);
+        green = ControlValue::Fraction(green, m);
+        blue = ControlValue::Fraction(blue, m);
+      }
+      const Color color(ControlValue(red).ToUChar(),
+                        ControlValue(green).ToUChar(),
+                        ControlValue(blue).ToUChar());
+      const unsigned short index = color_map_.GetIndex(color);
+      const std::vector<theatre::ColorRangeParameters::Range>& ranges =
+          OutputTypes()[*macro_index_].GetColorRangeParameters().GetRanges();
+      assert(index < ranges.size());
+      output[*macro_index_] = ControlValue::FromUChar(
+          (ranges[index].input_min + ranges[index].input_max) / 2);
+      output[*master_index_] = ControlValue(m);
+    } else if (macro_index_) {
+      const Color color(input[0].ToUChar(), input[1].ToUChar(),
+                        input[2].ToUChar());
+      const unsigned short index = color_map_.GetIndex(color);
+      const std::vector<theatre::ColorRangeParameters::Range>& ranges =
+          OutputTypes()[*macro_index_].GetColorRangeParameters().GetRanges();
+      assert(index < ranges.size());
+      output[*macro_index_] = ControlValue::FromUChar(
+          (ranges[index].input_min + ranges[index].input_max) / 2);
+    } else if (cw_index_ && ww_index_ && amber_index_) {
       unsigned ww;
       unsigned cw;
       unsigned amber;
@@ -123,7 +151,7 @@ class RgbFilter : public Filter {
     }
     size_t input_index = 3;
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
-      const FunctionType type = OutputTypes()[i];
+      const FunctionType type = OutputTypes()[i].Type();
       switch (type) {
         case FunctionType::Red:
         case FunctionType::Green:
@@ -133,7 +161,15 @@ class RgbFilter : public Filter {
         case FunctionType::White:
         case FunctionType::ColdWhite:
         case FunctionType::WarmWhite:
+        case FunctionType::ColorMacro:
+        case FunctionType::ColorWheel:
           // Do nothing
+          break;
+        case FunctionType::Master:
+          if (!macro_index_) {
+            output[i] = input[input_index];
+            ++input_index;
+          }
           break;
         default:
           output[i] = input[input_index];
@@ -153,11 +189,15 @@ class RgbFilter : public Filter {
     white_index_.Reset();
     cw_index_.Reset();
     ww_index_.Reset();
+    macro_index_.Reset();
+    master_index_.Reset();
 
-    std::vector<FunctionType> input_types{
-        FunctionType::Red, FunctionType::Green, FunctionType::Blue};
+    std::vector<FixtureTypeFunction> input_types{
+        FixtureTypeFunction(FunctionType::Red, 0, {}, 0),
+        FixtureTypeFunction(FunctionType::Green, 0, {}, 0),
+        FixtureTypeFunction(FunctionType::Blue, 0, {}, 0)};
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
-      const FunctionType type = OutputTypes()[i];
+      const FunctionType type = OutputTypes()[i].Type();
       switch (type) {
         case FunctionType::Red:
           red_index_ = i;
@@ -183,10 +223,48 @@ class RgbFilter : public Filter {
         case FunctionType::WarmWhite:
           ww_index_ = i;
           break;
+        case FunctionType::Master:
+          master_index_ = i;
+          input_types.emplace_back(OutputTypes()[i]);
+          break;
+        case FunctionType::ColorMacro:
+        case FunctionType::ColorWheel:
+          macro_index_ = i;
+          break;
         default:
-          input_types.emplace_back(type);
+          input_types.emplace_back(OutputTypes()[i]);
           break;
       }
+    }
+    if (macro_index_) {
+      // Macro is only used if there is no other means to set the color.
+      if (red_index_ || green_index_ || blue_index_ || lime_index_ ||
+          amber_index_ || white_index_ || cw_index_ || ww_index_) {
+        macro_index_.Reset();
+        master_index_.Reset();
+      } else {
+        const std::vector<ColorRangeParameters::Range>& ranges =
+            OutputTypes()[*macro_index_].GetColorRangeParameters().GetRanges();
+        std::vector<Color> colors;
+        for (const ColorRangeParameters::Range& range : ranges) {
+          if (range.color)
+            colors.emplace_back(*range.color);
+          else
+            colors.emplace_back(Color::Black());
+        }
+        color_map_ = system::ColorMap(colors, 8);
+        if (master_index_) {
+          for (auto iter = input_types.begin(); iter != input_types.end();
+               ++iter) {
+            if (iter->Type() == FunctionType::Master) {
+              input_types.erase(iter);
+              break;
+            }
+          }
+        }
+      }
+    } else {
+      master_index_.Reset();
     }
     SetInputTypes(std::move(input_types));
   }
@@ -201,6 +279,9 @@ class RgbFilter : public Filter {
   system::OptionalNumber<size_t> white_index_;
   system::OptionalNumber<size_t> cw_index_;
   system::OptionalNumber<size_t> ww_index_;
+  system::OptionalNumber<size_t> macro_index_;
+  system::OptionalNumber<size_t> master_index_;
+  system::ColorMap color_map_;
 };
 
 }  // namespace glight::theatre

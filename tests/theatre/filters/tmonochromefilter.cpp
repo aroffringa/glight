@@ -2,30 +2,28 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include "tests/theatre/filters/outputexamples.h"
+
 using namespace glight::theatre;
 
 BOOST_AUTO_TEST_SUITE(monochrome_filter)
 
 BOOST_AUTO_TEST_CASE(types) {
   MonochromeFilter filter;
-  filter.SetOutputTypes({FunctionType::Master, FunctionType::Red,
-                         FunctionType::Green, FunctionType::Blue,
-                         FunctionType::Strobe});
+  filter.SetOutputTypes(GetMRGBSFunctionsExample());
   BOOST_REQUIRE_EQUAL(filter.InputTypes().size(), 3);
-  BOOST_CHECK(filter.InputTypes()[0] == FunctionType::White);
-  BOOST_CHECK(filter.InputTypes()[1] == FunctionType::Master);
-  BOOST_CHECK(filter.InputTypes()[2] == FunctionType::Strobe);
+  BOOST_CHECK(filter.InputTypes()[0].Type() == FunctionType::White);
+  BOOST_CHECK(filter.InputTypes()[1].Type() == FunctionType::Master);
+  BOOST_CHECK(filter.InputTypes()[2].Type() == FunctionType::Strobe);
 
-  filter.SetOutputTypes({FunctionType::White});
+  filter.SetOutputTypes(GetWhiteFunctionExample());
   BOOST_REQUIRE_EQUAL(filter.InputTypes().size(), 1);
-  BOOST_CHECK(filter.InputTypes()[0] == FunctionType::White);
+  BOOST_CHECK(filter.InputTypes()[0].Type() == FunctionType::White);
 }
 
 BOOST_AUTO_TEST_CASE(apply) {
   MonochromeFilter filter;
-  filter.SetOutputTypes({FunctionType::Master, FunctionType::Red,
-                         FunctionType::Green, FunctionType::Blue,
-                         FunctionType::Strobe});
+  filter.SetOutputTypes(GetMRGBSFunctionsExample());
   std::vector<ControlValue> output(5);
   filter.Apply(
       {

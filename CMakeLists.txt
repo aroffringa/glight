@@ -54,7 +54,7 @@ if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm" OR ${CMAKE_SYSTEM_PROCESSOR} MATCHES 
   add_compile_options(-Wno-psabi)
 endif()
 
-if (NOT CMAKE_BUILD_TYPE EQUAL "DEBUG")
+if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_compile_options(-DNDEBUG)
 endif()
 

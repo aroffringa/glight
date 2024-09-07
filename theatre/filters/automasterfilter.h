@@ -19,10 +19,10 @@ class AutoMasterFilter final : public Filter {
     if (master_channel_index_) {
       maximum = 0;
       for (size_t i = 0; i != input.size(); ++i) {
-        if (IsColor(InputTypes()[i]) && input[i].UInt() > maximum) {
+        if (IsColor(InputTypes()[i].Type()) && input[i].UInt() > maximum) {
           maximum = input[i].UInt();
-        } else if ((InputTypes()[i] == FunctionType::ColorMacro ||
-                    InputTypes()[i] == FunctionType::ColorTemperature) &&
+        } else if ((InputTypes()[i].Type() == FunctionType::ColorMacro ||
+                    InputTypes()[i].Type() == FunctionType::ColorTemperature) &&
                    input[i]) {
           maximum = ControlValue::MaxUInt();
         }
@@ -34,9 +34,9 @@ class AutoMasterFilter final : public Filter {
     }
     size_t input_index = 0;
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
-      if (OutputTypes()[i] == FunctionType::Master) {
+      if (OutputTypes()[i].Type() == FunctionType::Master) {
         output[i] = ControlValue(maximum);
-      } else if (IsColor(OutputTypes()[i])) {
+      } else if (IsColor(OutputTypes()[i].Type())) {
         output[i] = ControlValue(
             ControlValue::Fraction(input[input_index].UInt(), maximum));
         ++input_index;
@@ -50,16 +50,16 @@ class AutoMasterFilter final : public Filter {
  protected:
   void DetermineInputTypes() override {
     master_channel_index_.Reset();
-    std::vector<FunctionType> input_types;
+    std::vector<FixtureTypeFunction> input_functions;
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
-      const FunctionType type = OutputTypes()[i];
+      const FunctionType type = OutputTypes()[i].Type();
       if (type == FunctionType::Master) {
         master_channel_index_ = i;
       } else {
-        input_types.emplace_back(type);
+        input_functions.emplace_back(OutputTypes()[i]);
       }
     }
-    SetInputTypes(std::move(input_types));
+    SetInputTypes(std::move(input_functions));
   }
 
  private:

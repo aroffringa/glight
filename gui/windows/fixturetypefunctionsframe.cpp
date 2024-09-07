@@ -134,6 +134,18 @@ void FixtureTypeFunctionsFrame::FillModel() {
   }
 }
 
+void FixtureTypeFunctionsFrame::UpdateModel() {
+  auto row_iter = functions_model_->children().begin();
+  for (FixtureTypeFunction& f : functions_) {
+    const Gtk::TreeModel::Row& row = *row_iter;
+    row[functions_columns_.dmx_offset_] = f.DmxOffset();
+    row[functions_columns_.fine_channel_] = FineToString(f.FineChannelOffset());
+    row[functions_columns_.function_] = &f;
+    row[functions_columns_.function_type_str_] = ToString(f.Type());
+    ++row_iter;
+  }
+}
+
 void FixtureTypeFunctionsFrame::onAdd() {
   size_t dmx_offset = 0;
   if (!functions_model_->children().empty()) {
@@ -149,17 +161,12 @@ void FixtureTypeFunctionsFrame::onAdd() {
       dmx_offset = row[functions_columns_.dmx_offset_] + 1;
   }
 
-  FixtureTypeFunction& function =
-      functions_.emplace_back(theatre::FunctionType::White, dmx_offset,
-                              system::OptionalNumber<size_t>(), 0);
-
-  Gtk::TreeModel::iterator iter = functions_model_->append();
-  const Gtk::TreeModel::Row& row = *iter;
-  row[functions_columns_.dmx_offset_] = dmx_offset;
-  row[functions_columns_.fine_channel_] = "-";
-  row[functions_columns_.function_] = &function;
-  row[functions_columns_.function_type_str_] =
-      ToString(theatre::FunctionType::White);
+  // This might change the address of the functions, so we need
+  // to call UpdateModel() after adding the element.
+  functions_.emplace_back(theatre::FunctionType::White, dmx_offset,
+                          system::OptionalNumber<size_t>(), 0);
+  functions_model_->append();
+  UpdateModel();
 }
 
 void FixtureTypeFunctionsFrame::onRemove() {
@@ -173,8 +180,11 @@ void FixtureTypeFunctionsFrame::onRemove() {
                        return &ftf == function;
                      });
     assert(iter != functions_.end());
+    // This might change the address of functions, so we need
+    // to call UpdateModel() after removing the element.
     functions_.erase(iter);
     functions_model_->erase(selected);
+    UpdateModel();
   }
 }
 
