@@ -12,7 +12,7 @@
 #include "gui/recursionlock.h"
 #include "gui/components/nameframe.h"
 #include "gui/components/objectbrowser.h"
-#include "gui/mainwindow/windowlist.h"
+#include "gui/mainwindow/objectwindowlist.h"
 #include "gui/windows/propertieswindow.h"
 
 #include "theatre/forwards.h"
@@ -36,7 +36,7 @@ class ObjectListFrame : public Gtk::VBox {
 
   ObjectBrowser _list;
 
-  WindowList<PropertiesWindow> _windowList;
+  ObjectWindowList<PropertiesWindow> _windowList;
 
   MainWindow &_parentWindow;
   NameFrame _nameFrame;

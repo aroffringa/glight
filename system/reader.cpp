@@ -226,6 +226,13 @@ void ParseFixtureGroups(const json::Array &node, Management &management) {
 }
 
 void ParseTheatre(const Object &node, Management &management) {
+  Theatre &theatre = management.GetTheatre();
+  theatre.SetWidth(OptionalDouble(node, "width", 10.0));
+  theatre.SetDepth(OptionalDouble(node, "depth", 10.0));
+  theatre.SetHeight(OptionalDouble(node, "height", 10.0));
+  theatre.SetFixtureSymbolSize(
+      OptionalDouble(node, "fixture-symbol-size", 0.5));
+
   ParseFixtureTypes(ToArr(node["fixture-types"]), management);
   ParseFixtures(ToArr(node["fixtures"]), management.GetTheatre());
 }

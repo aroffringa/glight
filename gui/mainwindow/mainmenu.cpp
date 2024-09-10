@@ -75,6 +75,10 @@ MainMenu::MainMenu() {
 
   _miDesignWizard.signal_activate().connect(DesignWizard);
   _menuDesign.append(_miDesignWizard);
+  _menuDesign.append(_miDesignSep2);
+
+  _miTheatreDimensions.signal_activate().connect(TheatreDimensions);
+  _menuDesign.append(_miTheatreDimensions);
 
   _miDesign.set_submenu(_menuDesign);
   append(_miDesign);

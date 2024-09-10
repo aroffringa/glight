@@ -22,6 +22,7 @@
 #include "gui/windows/fixturetypeswindow.h"
 #include "gui/windows/scenewindow.h"
 #include "gui/windows/settingswindow.h"
+#include "gui/windows/theatredimensions.h"
 
 #include "theatre/fixture.h"
 #include "theatre/management.h"
@@ -58,21 +59,6 @@ MainWindow::MainWindow() {
 
   midi_manager_ = std::make_unique<system::midi::Manager>();
 
-  _fixtureListWindow = std::make_unique<glight::gui::FixtureListWindow>();
-  _fixtureListWindow->signal_key_press_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyDown));
-  _fixtureListWindow->signal_key_release_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyUp));
-  _fixtureListWindow->signal_hide().connect([&]() { onHideFixtureList(); });
-
-  _fixtureTypesWindow =
-      std::make_unique<FixtureTypesWindow>(this, *_management);
-  _fixtureTypesWindow->signal_key_press_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyDown));
-  _fixtureTypesWindow->signal_key_release_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyUp));
-  _fixtureTypesWindow->signal_hide().connect([&]() { onHideFixtureTypes(); });
-
   InitializeMenu();
 
   _state.FaderSetSignalChange().connect([&]() { onFaderListChange(); });
@@ -108,8 +94,7 @@ MainWindow::MainWindow() {
 MainWindow::~MainWindow() {
   _sceneWindow.reset();
   _visualizationWidget.reset();
-  _fixtureListWindow.reset();
-  _fixtureTypesWindow.reset();
+  child_windows_.Clear();
 
   _faderWindows.clear();
 
@@ -124,13 +109,14 @@ void MainWindow::InitializeMenu() {
   main_menu_.Import.connect(
       sigc::mem_fun(*this, &MainWindow::onMIImportClicked));
   main_menu_.Settings.connect(
-      sigc::mem_fun(*this, &MainWindow::onMISettingsClicked));
-  main_menu_.Quit.connect(sigc::mem_fun(*this, &MainWindow::onMIQuitClicked));
+      [&]() { child_windows_.Open<windows::SettingsWindow>(); });
+  main_menu_.Quit.connect([&]() { hide(); });
 
   main_menu_.LockLayout.connect([&]() { UpdateLayoutLock(); });
   main_menu_.BlackOut.connect([&]() { onMIBlackOut(); });
-  main_menu_.DesignWizard.connect(
-      sigc::mem_fun(*this, &MainWindow::onMIDesignWizardClicked));
+  main_menu_.DesignWizard.connect([&]() { onMIDesignWizardClicked(); });
+  main_menu_.TheatreDimensions.connect(
+      [&]() { onMITheatreDimensionsClicked(); });
 
   main_menu_.SideBar.connect([&]() { onSideBarButtonClicked(); });
   main_menu_.FullScreen.connect([&]() { onFullscreen(); });
@@ -172,18 +158,32 @@ void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
 
 void MainWindow::onFixtureListButtonClicked() {
   const bool show = main_menu_.FixtureListActive();
-  if (show)
-    _fixtureListWindow->show();
-  else
-    _fixtureListWindow->hide();
+  if (show) {
+    windows::FixtureListWindow &window =
+        child_windows_.Open<windows::FixtureListWindow>(
+            [&]() { main_menu_.SetFixtureListActive(false); });
+    window.signal_key_press_event().connect(
+        sigc::mem_fun(*this, &MainWindow::onKeyDown));
+    window.signal_key_release_event().connect(
+        sigc::mem_fun(*this, &MainWindow::onKeyUp));
+  } else {
+    child_windows_.Hide<windows::FixtureListWindow>();
+  }
 }
 
 void MainWindow::onFixtureTypesButtonClicked() {
   const bool show = main_menu_.FixtureTypesActive();
-  if (show)
-    _fixtureTypesWindow->show();
-  else
-    _fixtureTypesWindow->hide();
+  if (show) {
+    windows::FixtureTypesWindow &window =
+        child_windows_.Open<windows::FixtureTypesWindow>(
+            [&]() { main_menu_.SetFixtureTypesActive(false); });
+    window.signal_key_press_event().connect(
+        sigc::mem_fun(*this, &MainWindow::onKeyDown));
+    window.signal_key_release_event().connect(
+        sigc::mem_fun(*this, &MainWindow::onKeyUp));
+  } else {
+    child_windows_.Hide<windows::FixtureTypesWindow>();
+  }
 }
 
 void MainWindow::onSideBarButtonClicked() {
@@ -397,17 +397,6 @@ void MainWindow::onMIImportClicked() {
   }
 }
 
-void MainWindow::onMISettingsClicked() {
-  if (!settings_window_) {
-    settings_window_ = std::make_unique<SettingsWindow>();
-    settings_window_->signal_hide().connect(
-        [&]() { settings_window_.reset(); });
-  }
-  settings_window_->present();
-}
-
-void MainWindow::onMIQuitClicked() { hide(); }
-
 void MainWindow::onFaderWindowHidden(FaderWindow *window) {
   for (std::vector<std::unique_ptr<FaderWindow>>::iterator i =
            _faderWindows.begin();
@@ -467,15 +456,13 @@ void MainWindow::onMIDesignWizardClicked() {
   _designWizard->present();
 }
 
+void MainWindow::onMITheatreDimensionsClicked() {
+  child_windows_.Open<windows::TheatreDimensions>();
+}
+
 void MainWindow::onMIBlackOut() {
   _management->BlackOut(false, 0.0);
   for (std::unique_ptr<FaderWindow> &fw : _faderWindows) fw->UpdateValues();
-}
-
-void MainWindow::onHideFixtureList() { main_menu_.SetFixtureListActive(false); }
-
-void MainWindow::onHideFixtureTypes() {
-  main_menu_.SetFixtureTypesActive(false);
 }
 
 PropertiesWindow &MainWindow::OpenPropertiesWindow(
@@ -505,8 +492,7 @@ void MainWindow::onFullscreen() {
 void MainWindow::UpdateLayoutLock() {
   const bool layout_locked = main_menu_.IsLayoutLocked();
   _state.SetLayoutLocked(layout_locked);
-  _fixtureListWindow->SetLayoutLocked(layout_locked);
-  _fixtureTypesWindow->SetLayoutLocked(layout_locked);
+  child_windows_.SetLayoutLocked(layout_locked);
 }
 
 }  // namespace glight::gui

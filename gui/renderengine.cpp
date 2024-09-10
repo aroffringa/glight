@@ -6,46 +6,35 @@
 namespace glight::gui {
 
 namespace {
-constexpr double GetRadius(theatre::FixtureSymbol::Symbol symbol) {
+constexpr double GetRadiusFactor(theatre::FixtureSymbol::Symbol symbol) {
   switch (symbol) {
     case theatre::FixtureSymbol::Hidden:
       return 0.0;
     case theatre::FixtureSymbol::Small:
-      return 0.3;
+      return 0.6;
     case theatre::FixtureSymbol::Normal:
-      return 0.4;
+      return 0.8;
     case theatre::FixtureSymbol::Large:
-      return 0.5;
+      return 1.0;
   }
-  return 0.4;
-}
-
-constexpr double GetRadiusSquared(theatre::FixtureSymbol::Symbol symbol) {
-  const double r = GetRadius(symbol);
-  return r * r;
+  return 0.8;
 }
 
 double GetScale(const theatre::Management &management, double width,
                 double height) {
   const theatre::Theatre &theatre = management.GetTheatre();
-  theatre::Position extend = theatre.Extend();
+  theatre::Position extend(theatre.Width(), theatre.Depth());
+  constexpr double margin = 16.0;
   if (extend.X() == 0.0 || extend.Y() == 0.0)
     return 1.0;
   else
-    return std::min(width / extend.X(), height / extend.Y());
-}
-
-double GetInvScale(const theatre::Management &management, double width,
-                   double height) {
-  const double sc = GetScale(management, width, height);
-  if (sc == 0.0)
-    return 1.0;
-  else
-    return 1.0 / sc;
+    return std::min((width - margin) / extend.X(),
+                    (height - margin) / extend.Y());
 }
 
 struct DrawData {
   const Cairo::RefPtr<Cairo::Context> &cairo;
+  const theatre::Management &management;
   const theatre::ValueSnapshot &snapshot;
   const DrawStyle &style;
   double scale;
@@ -72,15 +61,14 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
                          : type.MinBeamAngle();
       const double direction_1 = direction - beam_angle * 0.5;
       const double direction_2 = direction + beam_angle * 0.5;
-      const double radius = GetRadius(fixture.Symbol().Value());
+      const double radius = GetRadiusFactor(fixture.Symbol().Value()) *
+                            data.management.GetTheatre().FixtureSymbolSize();
       const double beam_start_radius = radius * 1.2;
       const double beam_factor = type.MinBeamAngle() / beam_angle;
       const double beam_end_radius =
           radius * (1.2 + type.Brightness() * beam_factor);
-      const double x =
-          fixture.GetPosition().X() + 0.5 + data.style.xOffset / data.scale;
-      const double y =
-          fixture.GetPosition().Y() + 0.5 + data.style.yOffset / data.scale;
+      const double x = fixture.GetPosition().X() + 0.5;
+      const double y = fixture.GetPosition().Y() + 0.5;
       Cairo::RefPtr<Cairo::RadialGradient> gradient =
           Cairo::RadialGradient::create(x, y, beam_start_radius, x, y,
                                         beam_end_radius);
@@ -128,15 +116,16 @@ void DrawFixture(DrawData &data, const theatre::Fixture &fixture,
                                static_cast<double>(c.Green()) / 224.0 + 0.125,
                                static_cast<double>(c.Blue()) / 224.0 + 0.125);
 
-    const double single_radius = GetRadius(fixture.Symbol().Value());
+    const double single_radius =
+        GetRadiusFactor(fixture.Symbol().Value()) *
+        data.management.GetTheatre().FixtureSymbolSize();
+    ;
     const double radius =
         shapeCount == 1
             ? single_radius
             : 0.33 + 0.07 * static_cast<double>(shapeIndex) / (shapeCount - 1);
-    const double x =
-        fixture.GetPosition().X() + 0.5 + data.style.xOffset / data.scale;
-    const double y =
-        fixture.GetPosition().Y() + 0.5 + data.style.yOffset / data.scale;
+    const double x = fixture.GetPosition().X() + 0.5;
+    const double y = fixture.GetPosition().Y() + 0.5;
     data.cairo->arc(x, y, radius, 0.0, 2.0 * M_PI);
     data.cairo->fill();
 
@@ -156,14 +145,10 @@ void DrawFixture(DrawData &data, const theatre::Fixture &fixture,
       const double c = std::cos(fixture_state.continuous_rotation);
       data.cairo->set_line_width(radius * 0.2);
       data.cairo->set_source_rgb(0, 0, 0);
-      data.cairo->move_to(x + c * radius + data.style.xOffset / data.scale,
-                          y + s * radius + data.style.yOffset / data.scale);
-      data.cairo->line_to(x - c * radius + data.style.xOffset / data.scale,
-                          y - s * radius + data.style.yOffset / data.scale);
-      data.cairo->move_to(x + s * radius + data.style.xOffset / data.scale,
-                          y - c * radius + data.style.yOffset / data.scale);
-      data.cairo->line_to(x - s * radius + data.style.xOffset / data.scale,
-                          y + c * radius + data.style.yOffset / data.scale);
+      data.cairo->move_to(x + c * radius, y + s * radius);
+      data.cairo->line_to(x - c * radius, y - s * radius);
+      data.cairo->move_to(x + s * radius, y - c * radius);
+      data.cairo->line_to(x - s * radius, y + c * radius);
       data.cairo->stroke();
     }
   }
@@ -183,8 +168,26 @@ void RenderEngine::DrawSnapshot(
   cairo->save();
   scale_ = GetScale(management_, style.width, style.height);
   cairo->scale(scale_, scale_);
+  x_padding_ = scale_ == 0.0
+                   ? 0.0
+                   : std::max(0.0, style.width / scale_ -
+                                       management_.GetTheatre().Width());
+  y_padding_ = scale_ == 0.0
+                   ? 0.0
+                   : std::max(0.0, style.height / scale_ -
+                                       management_.GetTheatre().Depth());
+  cairo->translate(x_padding_ * 0.5 + style.xOffset / scale_,
+                   y_padding_ * 0.5 + style.yOffset / scale_);
 
-  DrawData draw_data{cairo, snapshot, style, scale_, false};
+  cairo->set_source_rgba(0, 0, 0, 1);
+  cairo->rectangle(0, 0, management_.GetTheatre().Width(),
+                   management_.GetTheatre().Depth());
+  cairo->fill_preserve();
+  cairo->set_source_rgba(0.5, 0.5, 0.5, 1);
+  cairo->set_line_width(1.0 / scale_);
+  cairo->stroke();
+
+  DrawData draw_data{cairo, management_, snapshot, style, scale_, false};
 
   for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
     if (fixture->IsVisible()) {
@@ -207,11 +210,12 @@ void RenderEngine::DrawSnapshot(
   cairo->set_line_width(4.0 / scale_);
   for (const theatre::Fixture *f : selected_fixtures) {
     if (f->IsVisible()) {
-      double rad = GetRadius(f->Symbol().Value());
-      double x = f->GetPosition().X() + 0.5;
-      double y = f->GetPosition().Y() + 0.5;
-      cairo->arc(x + style.xOffset / scale_, y + style.yOffset / scale_, rad,
-                 0.0, 2.0 * M_PI);
+      const double rad = GetRadiusFactor(f->Symbol().Value()) *
+                         management_.GetTheatre().FixtureSymbolSize();
+      ;
+      const double x = f->GetPosition().X() + 0.5;
+      const double y = f->GetPosition().Y() + 0.5;
+      cairo->arc(x, y, rad, 0.0, 2.0 * M_PI);
       cairo->stroke();
     }
   }
@@ -225,6 +229,7 @@ void RenderEngine::DrawSelectionRectangle(
   const theatre::Position size = to - from;
   cairo->save();
   cairo->scale(scale_, scale_);
+  cairo->translate(x_padding_ * 0.5, y_padding_ * 0.5);
   cairo->set_line_width(2.0 / scale_);
   cairo->rectangle(from.X(), from.Y(), size.X(), size.Y());
   cairo->set_source_rgba(0.2, 0.2, 1.0, 0.5);
@@ -245,10 +250,12 @@ theatre::Fixture *RenderEngine::FixtureAt(
     if (f->IsVisible() &&
         position.InsideRectangle(f->GetPosition(),
                                  f->GetPosition().Add(1.0, 1.0))) {
-      double distanceSq =
+      const double distanceSq =
           position.SquaredDistance(f->GetPosition().Add(0.5, 0.5));
-      double radSq = GetRadiusSquared(f->Symbol().Value());
-      if (distanceSq <= radSq && distanceSq < closest) {
+      const double radius = GetRadiusFactor(f->Symbol().Value()) *
+                            management_.GetTheatre().FixtureSymbolSize();
+      const double radius_squared = radius * radius;
+      if (distanceSq <= radius_squared && distanceSq < closest) {
         fixture = f.get();
         closest = distanceSq;
       }
@@ -260,8 +267,12 @@ theatre::Fixture *RenderEngine::FixtureAt(
 theatre::Position RenderEngine::MouseToPosition(double mouse_x, double mouse_y,
                                                 double width,
                                                 double height) const {
-  const double sc = GetInvScale(management_, width, height);
-  return theatre::Position(mouse_x, mouse_y) * sc;
+  const double scale = GetScale(management_, width, height);
+  if (scale == 0.0) return theatre::Position(0.0, 0.0);
+  const theatre::Position padding(
+      std::max(0.0 / scale, width / scale - management_.GetTheatre().Width()),
+      std::max(0.0 / scale, height / scale - management_.GetTheatre().Depth()));
+  return theatre::Position(mouse_x, mouse_y) / scale - padding * 0.5;
 }
 
 }  // namespace glight::gui

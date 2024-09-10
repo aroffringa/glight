@@ -30,7 +30,7 @@ using theatre::FolderObject;
 using theatre::Management;
 
 PropertiesWindow &OpenPropertiesWindow(
-    WindowList<PropertiesWindow> &property_windows, FolderObject &object,
+    ObjectWindowList<PropertiesWindow> &property_windows, FolderObject &object,
     Gtk::Window &parent) {
   PropertiesWindow *window = property_windows.GetOpenWindow(object);
   if (!window) {
@@ -70,7 +70,7 @@ PropertiesWindow &OpenPropertiesWindow(
 }
 
 void NewEmptyPreset(ObjectBrowser &browser,
-                    WindowList<PropertiesWindow> &property_windows,
+                    ObjectWindowList<PropertiesWindow> &property_windows,
                     Gtk::Window &parent) {
   Folder &parent_folder = browser.SelectedFolder();
   Management &management = Instance::Management();
@@ -119,7 +119,7 @@ void NewPresetFromFixtures(theatre::Folder &parent_folder,
 }
 
 void NewChase(ObjectBrowser &browser,
-              WindowList<PropertiesWindow> &property_windows,
+              ObjectWindowList<PropertiesWindow> &property_windows,
               Gtk::Window &parent) {
   CreateChaseDialog dialog;
   if (dialog.run() == Gtk::RESPONSE_OK) {
@@ -129,7 +129,7 @@ void NewChase(ObjectBrowser &browser,
 }
 
 void NewTimeSequence(ObjectBrowser &browser,
-                     WindowList<PropertiesWindow> &property_windows,
+                     ObjectWindowList<PropertiesWindow> &property_windows,
                      Gtk::Window &parent) {
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
@@ -146,7 +146,7 @@ void NewTimeSequence(ObjectBrowser &browser,
 }
 
 void NewEffect(theatre::EffectType effect_type, ObjectBrowser &browser,
-               WindowList<PropertiesWindow> &property_windows,
+               ObjectWindowList<PropertiesWindow> &property_windows,
                Gtk::Window &parent) {
   std::unique_ptr<Effect> effect(Effect::Make(effect_type));
   Management &management = Instance::Management();

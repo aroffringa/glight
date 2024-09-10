@@ -70,6 +70,21 @@ class GUIState {
   int WindowPositionY() const { return window_position_y; }
   size_t WindowWidth() const { return window_width; }
   size_t WindowHeight() const { return window_height; }
+  void SetTheatreDimensions(double width, double depth, double height) {
+    theatre_width = width;
+    theatre_depth = depth;
+    theatre_height = height;
+  }
+  double TheatreWidth() const { return theatre_width; }
+  double TheatreDepth() const { return theatre_depth; }
+  double TheatreHeight() const { return theatre_height; }
+  void SetFixtureSize(double size) { fixture_size = size; }
+
+  /**
+   * The size (diameter) with which fixtures are displayed in
+   * the schematic view, in meters.
+   */
+  double FixtureSize() const { return fixture_size; }
 
  private:
   bool layout_locked_ = false;
@@ -77,6 +92,10 @@ class GUIState {
   int window_position_y = 0;
   size_t window_width = 0;
   size_t window_height = 0;
+  double theatre_width = 0;
+  double theatre_depth = 0;
+  double theatre_height = 0;
+  double fixture_size = 0;
   sigc::signal<void()> fader_set_signal_change_;
   std::vector<std::unique_ptr<FaderSetState>> fader_sets_;
 };

@@ -117,6 +117,7 @@ set(GUIFILES
   gui/windows/presetcollectionwindow.cpp
   gui/windows/scenewindow.cpp
   gui/windows/settingswindow.cpp
+  gui/windows/theatredimensions.cpp
   gui/windows/timesequencepropertieswindow.cpp)
 
 set(SYSTEMFILES

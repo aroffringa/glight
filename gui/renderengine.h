@@ -11,6 +11,9 @@
 
 namespace glight::gui {
 
+/**
+ * This struct holds the "cairo" screen sizes and other drawing info.
+ */
 struct DrawStyle {
   size_t xOffset;
   size_t yOffset;
@@ -49,6 +52,8 @@ class RenderEngine {
   const theatre::Management &management_;
   std::vector<FixtureState> state_;
   double scale_ = 1.0;
+  double x_padding_ = 0.0;
+  double y_padding_ = 0.0;
   bool is_moving_ = false;
 };
 

@@ -16,7 +16,7 @@
 #include "theatre/management.h"
 #include "theatre/theatre.h"
 
-namespace glight::gui {
+namespace glight::gui::windows {
 
 FixtureListWindow::FixtureListWindow() {
   set_title("Glight - fixtures");
@@ -309,4 +309,4 @@ void FixtureListWindow::onReassignClicked() {
   Instance::Events().EmitUpdate();
 }
 
-}  // namespace glight::gui
+}  // namespace glight::gui::windows
