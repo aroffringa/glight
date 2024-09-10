@@ -16,8 +16,10 @@
 #include "theatre/forwards.h"
 
 namespace glight::gui {
-
 class EventTransmitter;
+}
+
+namespace glight::gui::windows {
 
 /**
  * @author Andre Offringa
@@ -75,6 +77,6 @@ class AddFixtureWindow : public Gtk::Window {
   void onAdd();
 };
 
-}  // namespace glight::gui
+}  // namespace glight::gui::windows
 
 #endif

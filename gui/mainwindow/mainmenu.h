@@ -41,6 +41,7 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> DeleteObject;
 
   sigc::signal<void()> DesignWizard;
+  sigc::signal<void()> TheatreDimensions;
 
   // Window menu
   sigc::signal<void()> FullScreen;
@@ -107,6 +108,8 @@ class MainMenu : public Gtk::MenuBar {
   Gtk::MenuItem _miAddFolder{"Add folder"};
   Gtk::MenuItem _miDeleteObject{"Delete"};
   Gtk::MenuItem _miDesignWizard{"Design wizard..."};
+  Gtk::SeparatorMenuItem _miDesignSep2;
+  Gtk::MenuItem _miTheatreDimensions{"Theatre dimensions..."};
 
   Gtk::Menu _menuWindow;
   Gtk::MenuItem _miWindow{"_Window", true};

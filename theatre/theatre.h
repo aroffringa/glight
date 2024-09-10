@@ -54,10 +54,24 @@ class Theatre {
   void NotifyDmxChange();
 
   Position GetFreePosition() const;
-
   Position Extend() const;
 
+  double Width() const { return width_; }
+  void SetWidth(double width) { width_ = width; }
+  double Depth() const { return depth_; }
+  void SetDepth(double depth) { depth_ = depth; }
+  double Height() const { return height_; }
+  void SetHeight(double height) { height_ = height; }
+  double FixtureSymbolSize() const { return fixture_symbol_size_; }
+  void SetFixtureSymbolSize(double fixture_symbol_size) {
+    fixture_symbol_size_ = fixture_symbol_size;
+  }
+
  private:
+  double width_ = 10.0;
+  double depth_ = 10.0;
+  double height_ = 10.0;
+  double fixture_symbol_size_ = 0.5;
   std::vector<std::unique_ptr<Fixture>> _fixtures;
   std::vector<std::unique_ptr<FixtureType>> _fixtureTypes;
   unsigned _highestChannel = 0;

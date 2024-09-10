@@ -14,7 +14,7 @@
 #include "theatre/filters/monochromefilter.h"
 #include "theatre/filters/rgbfilter.h"
 
-namespace glight::gui {
+namespace glight::gui::windows {
 
 using theatre::FixtureType;
 using theatre::FixtureTypeFunction;
@@ -223,4 +223,4 @@ void AddFixtureWindow::onIncCount() {
   _countEntry.set_text(std::to_string(count));
 }
 
-}  // namespace glight::gui
+}  // namespace glight::gui::windows

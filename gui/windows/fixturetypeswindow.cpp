@@ -17,16 +17,14 @@
 #include "theatre/management.h"
 #include "theatre/theatre.h"
 
-namespace glight::gui {
+namespace glight::gui::windows {
 
-FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
-                                       theatre::Management &management)
-    : event_hub_(eventHub), management_(&management), functions_frame_(*this) {
+FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   set_title("Glight - fixture types");
   set_size_request(200, 400);
 
   update_controllables_connection_ =
-      event_hub_->SignalUpdateControllables().connect(
+      Instance::Events().SignalUpdateControllables().connect(
           [&]() { FixtureTypesWindow::update(); });
 
   // Left part
@@ -119,25 +117,22 @@ FixtureTypesWindow::FixtureTypesWindow(EventTransmitter *eventHub,
   onSelectionChanged();
 }
 
-FixtureTypesWindow::~FixtureTypesWindow() {
-  update_controllables_connection_.disconnect();
-}
-
 void FixtureTypesWindow::fillList() {
   RecursionLock::Token token(recursion_lock_);
   const theatre::FixtureType *selected_type = getSelected();
   list_model_->clear();
 
-  std::lock_guard<std::mutex> lock(management_->Mutex());
+  theatre::Management &management = Instance::Management();
+  std::lock_guard<std::mutex> lock(management.Mutex());
   const std::vector<std::unique_ptr<theatre::FixtureType>> &types =
-      management_->GetTheatre().FixtureTypes();
+      management.GetTheatre().FixtureTypes();
   for (const std::unique_ptr<theatre::FixtureType> &type : types) {
     Gtk::TreeModel::iterator iter = list_model_->append();
     const Gtk::TreeModel::Row &row = *iter;
     row[list_columns_.fixture_type_] = type.get();
     row[list_columns_.name_] = type->Name();
     row[list_columns_.functions_] = FunctionSummary(*type);
-    row[list_columns_.in_use_] = management_->GetTheatre().IsUsed(*type);
+    row[list_columns_.in_use_] = management.GetTheatre().IsUsed(*type);
     if (selected_type && selected_type == type.get()) {
       list_view_.get_selection()->select(row);
     }
@@ -163,8 +158,8 @@ void FixtureTypesWindow::onNewButtonClicked() {
 void FixtureTypesWindow::onRemoveClicked() {
   theatre::FixtureType *type = getSelected();
   if (type) {
-    management_->RemoveFixtureType(*type);
-    event_hub_->EmitUpdate();
+    Instance::Management().RemoveFixtureType(*type);
+    Instance::Events().EmitUpdate();
   } else {
     const Gtk::TreeModel::const_iterator selected =
         list_view_.get_selection()->get_selected();
@@ -176,11 +171,11 @@ void FixtureTypesWindow::onSaveClicked() {
   theatre::FixtureType *type = getSelected();
   bool is_used = false;
   if (type) {
-    is_used = management_->GetTheatre().IsUsed(*type);
+    is_used = Instance::Management().GetTheatre().IsUsed(*type);
   } else {
     theatre::FixtureType ft;
-    type = &management_->GetTheatre().AddFixtureType(ft);
-    management_->RootFolder().Add(*type);
+    type = &Instance::Management().GetTheatre().AddFixtureType(ft);
+    Instance::Management().RootFolder().Add(*type);
   }
   type->SetName(name_entry_.get_text());
   type->SetShortName(short_name_entry_.get_text());
@@ -209,7 +204,7 @@ void FixtureTypesWindow::onSaveClicked() {
     type->SetFixtureClass(
         theatre::FixtureType::NameToClass(class_combo_.get_active_text()));
   }
-  event_hub_->EmitUpdate();
+  Instance::Events().EmitUpdate();
   Select(*type);
 }
 
@@ -260,7 +255,7 @@ void FixtureTypesWindow::onSelectionChanged() {
     right_grid_.set_sensitive(has_selection && !layout_locked_);
     if (type) {
       SelectFixtures(*type);
-      const bool is_used = management_->GetTheatre().IsUsed(*type);
+      const bool is_used = Instance::Management().GetTheatre().IsUsed(*type);
       name_entry_.set_text(type->Name());
       short_name_entry_.set_text(type->ShortName());
 
@@ -298,4 +293,4 @@ void FixtureTypesWindow::onSelectionChanged() {
   }
 }
 
-}  // namespace glight::gui
+}  // namespace glight::gui::windows

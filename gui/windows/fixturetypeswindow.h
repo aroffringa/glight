@@ -6,6 +6,8 @@
 #include "theatre/forwards.h"
 
 #include "gui/recursionlock.h"
+#include "gui/scopedconnection.h"
+#include "gui/windows/childwindow.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/comboboxtext.h>
@@ -21,19 +23,16 @@
 
 #include <memory>
 
-namespace glight::gui {
-
-class EventTransmitter;
 class FixtureSelection;
+
+namespace glight::gui::windows {
 
 /**
  * @author Andre Offringa
  */
-class FixtureTypesWindow : public Gtk::Window {
+class FixtureTypesWindow : public ChildWindow {
  public:
-  FixtureTypesWindow(EventTransmitter *eventHub,
-                     theatre::Management &management);
-  ~FixtureTypesWindow();
+  FixtureTypesWindow();
 
   void SetLayoutLocked(bool locked) {
     layout_locked_ = locked;
@@ -52,10 +51,7 @@ class FixtureTypesWindow : public Gtk::Window {
   void Select(const theatre::FixtureType &selection);
   void SelectFixtures(const theatre::FixtureType &type);
 
-  EventTransmitter *event_hub_;
-  theatre::Management *management_;
-
-  sigc::connection update_controllables_connection_;
+  ScopedConnection update_controllables_connection_;
   RecursionLock recursion_lock_;
 
   Gtk::TreeView list_view_;
@@ -113,6 +109,6 @@ class FixtureTypesWindow : public Gtk::Window {
   bool layout_locked_ = false;
 };
 
-}  // namespace glight::gui
+}  // namespace glight::gui::windows
 
 #endif

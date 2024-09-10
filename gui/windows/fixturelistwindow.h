@@ -7,26 +7,29 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/treeview.h>
-#include <gtkmm/window.h>
 
 #include "theatre/forwards.h"
 #include "theatre/fixturetype.h"
 
 #include "gui/scopedconnection.h"
 #include "gui/recursionlock.h"
+#include "gui/windows/childwindow.h"
 
 #include <memory>
 
 namespace glight::gui {
-
-class AddFixtureWindow;
 class EventTransmitter;
 class FixtureSelection;
+}  // namespace glight::gui
+
+namespace glight::gui::windows {
+
+class AddFixtureWindow;
 
 /**
  * @author Andre Offringa
  */
-class FixtureListWindow : public Gtk::Window {
+class FixtureListWindow : public ChildWindow {
  public:
   FixtureListWindow();
   ~FixtureListWindow();
@@ -97,6 +100,6 @@ class FixtureListWindow : public Gtk::Window {
   Gtk::Button _reassignButton{"Reassign"};
 };
 
-}  // namespace glight::gui
+}  // namespace glight::gui::windows
 
 #endif

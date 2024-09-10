@@ -43,7 +43,7 @@ class Position {
     return Position(x_ / rhs, y_ / rhs);
   }
 
-  constexpr Position operator+(Position &rhs) const {
+  constexpr Position operator+(const Position &rhs) const {
     return Position(x_ + rhs.x_, y_ + rhs.y_);
   }
 

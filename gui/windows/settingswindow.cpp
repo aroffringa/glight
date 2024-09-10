@@ -6,7 +6,7 @@
 
 #include "theatre/management.h"
 
-namespace glight::gui {
+namespace glight::gui::windows {
 
 using theatre::UniverseType;
 using theatre::devices::InputMapping;
@@ -263,4 +263,4 @@ void SettingsWindow::ReloadOla() {
   UpdateAfterSelection();
 }
 
-}  // namespace glight::gui
+}  // namespace glight::gui::windows

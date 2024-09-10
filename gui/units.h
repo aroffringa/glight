@@ -13,6 +13,12 @@ inline std::string AngleToNiceString(double angle_in_rad) {
   return std::string(str);
 }
 
+inline std::string MetersToString(double meters) {
+  char str[20];
+  snprintf(str, sizeof(str), "%.3f", meters);
+  return std::string(str);
+}
+
 }  // namespace glight::gui
 
 #endif

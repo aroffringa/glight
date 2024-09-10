@@ -9,21 +9,17 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/treeview.h>
-#include <gtkmm/window.h>
 
 #include "gui/recursionlock.h"
+#include "gui/windows/childwindow.h"
 
 #include "theatre/devices/universemap.h"
 
-namespace glight::gui {
+namespace glight::gui::windows {
 
-class SettingsWindow : public Gtk::Window {
+class SettingsWindow : public ChildWindow {
  public:
   SettingsWindow();
-
-  void SetPointer(std::unique_ptr<SettingsWindow> self) {
-    self_ = std::move(self);
-  }
 
  private:
   void FillUniverses();
@@ -34,7 +30,6 @@ class SettingsWindow : public Gtk::Window {
   void SaveSelectedOlaUniverse();
   void ReloadOla();
 
-  std::unique_ptr<SettingsWindow> self_;
   Gtk::Notebook notebook_;
   Gtk::Grid dmx_page_;
   struct UniverseListColumns : public Gtk::TreeModelColumnRecord {
@@ -70,6 +65,6 @@ class SettingsWindow : public Gtk::Window {
   RecursionLock recursion_lock_;
 };
 
-}  // namespace glight::gui
+}  // namespace glight::gui::windows
 
 #endif

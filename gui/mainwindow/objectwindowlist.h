@@ -11,7 +11,7 @@
 namespace glight::gui {
 
 template <typename T>
-class WindowList {
+class ObjectWindowList {
  public:
   void Add(std::unique_ptr<T> window) {
     T *window_ptr = window.get();

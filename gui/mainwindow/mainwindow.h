@@ -6,6 +6,7 @@
 #include "gui/eventtransmitter.h"
 #include "gui/fixtureselection.h"
 #include "gui/state/guistate.h"
+#include "gui/windows/childwindowlist.h"
 #include "theatre/forwards.h"
 
 #include <gtkmm/box.h>
@@ -22,16 +23,17 @@ namespace glight::system::midi {
 class Manager;
 }
 
+namespace glight::gui::windows {
+class FixtureListWindow;
+}
+
 namespace glight::gui {
 
 class DesignWizard;
 class FaderWindow;
-class FixtureListWindow;
-class FixtureTypesWindow;
 class ObjectListFrame;
 class PropertiesWindow;
 class SceneWindow;
-class SettingsWindow;
 class VisualizationWidget;
 
 /**
@@ -78,21 +80,17 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   bool onKeyUp(GdkEventKey *event);
   bool onDelete(GdkEventAny *event);
 
-  void onHideFixtureList();
-  void onHideFixtureTypes();
-
   void onMINewClicked();
   void onMIOpenClicked();
   void onMISaveClicked();
   void onMIImportClicked();
-  void onMISettingsClicked();
-  void onMIQuitClicked();
 
   void onMIBlackOutAndDryMode();
   void onMIBlackOut();
   void onMIProtectBlackOut();
 
   void onMIDesignWizardClicked();
+  void onMITheatreDimensionsClicked();
 
   void onFullscreen();
   void onFaderWindowHidden(FaderWindow *window);
@@ -110,17 +108,15 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   Gtk::HBox revealer_box_;
 
   std::vector<std::unique_ptr<FaderWindow>> _faderWindows;
-  std::unique_ptr<FixtureListWindow> _fixtureListWindow;
-  std::unique_ptr<FixtureTypesWindow> _fixtureTypesWindow;
   std::unique_ptr<DesignWizard> _designWizard;
   std::unique_ptr<SceneWindow> _sceneWindow;
+  windows::ChildWindowList child_windows_;
 
   std::unique_ptr<theatre::Management> _management;
 
   Gtk::Revealer revealer_;
   std::unique_ptr<ObjectListFrame> _objectListFrame;
   std::unique_ptr<VisualizationWidget> _visualizationWidget;
-  std::unique_ptr<SettingsWindow> settings_window_;
 
   GUIState _state;
   FixtureSelection _fixtureSelection;

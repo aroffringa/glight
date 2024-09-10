@@ -109,14 +109,19 @@ void VisualizationWidget::inializeContextMenu() {
   Gtk::RadioMenuItem::Group dryModeStyleGroup;
   _miDMSPrimary.set_group(dryModeStyleGroup);
   _miDMSPrimary.set_active(true);
+  _miDMSPrimary.signal_activate().connect([&]() { Update(); });
   _dryModeStyleMenu.add(_miDMSPrimary);
   _miDMSSecondary.set_group(dryModeStyleGroup);
+  _miDMSSecondary.signal_activate().connect([&]() { Update(); });
   _dryModeStyleMenu.add(_miDMSSecondary);
   _miDMSHorizontal.set_group(dryModeStyleGroup);
+  _miDMSPrimary.signal_activate().connect([&]() { Update(); });
   _dryModeStyleMenu.add(_miDMSHorizontal);
   _miDMSVertical.set_group(dryModeStyleGroup);
+  _miDMSVertical.signal_activate().connect([&]() { Update(); });
   _dryModeStyleMenu.add(_miDMSVertical);
   _miDMSShadow.set_group(dryModeStyleGroup);
+  _miDMSShadow.signal_activate().connect([&]() { Update(); });
   _dryModeStyleMenu.add(_miDMSShadow);
 
   _miDryModeStyle.set_submenu(_dryModeStyleMenu);
@@ -225,7 +230,7 @@ void VisualizationWidget::drawFixtures(
     size_t height) {
   updateMidiColors();
 
-  cairo->set_source_rgba(0, 0, 0, 1);
+  cairo->set_source_rgba(0.1, 0.1, 0.2, 1);
   cairo->rectangle(0, 0, width, height);
   cairo->fill();
 
@@ -519,8 +524,8 @@ void VisualizationWidget::onDistributeEvenly() {
 }
 
 void VisualizationWidget::onAddFixtures() {
-  sub_window_ =
-      std::make_unique<AddFixtureWindow>(_eventTransmitter, *_management);
+  sub_window_ = std::make_unique<windows::AddFixtureWindow>(_eventTransmitter,
+                                                            *_management);
   sub_window_->set_transient_for(*main_window_);
   sub_window_->set_modal(true);
   sub_window_->show();

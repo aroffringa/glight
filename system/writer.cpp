@@ -579,6 +579,11 @@ void writeGlightShow(WriteState &state) {
 
   Theatre &theatre = state.management.GetTheatre();
 
+  state.writer.Number("width", theatre.Width());
+  state.writer.Number("depth", theatre.Depth());
+  state.writer.Number("height", theatre.Height());
+  state.writer.Number("fixture-symbol-size", theatre.FixtureSymbolSize());
+
   const std::vector<std::unique_ptr<FixtureType>> &fixtureTypes =
       theatre.FixtureTypes();
 
