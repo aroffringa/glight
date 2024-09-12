@@ -15,11 +15,12 @@ namespace glight::gui {
  * This struct holds the "cairo" screen sizes and other drawing info.
  */
 struct DrawStyle {
-  size_t xOffset;
-  size_t yOffset;
-  size_t width;
-  size_t height;
-  double timeSince;
+  size_t x_offset = 0;
+  size_t y_offset = 0;
+  size_t width = 0;
+  size_t height = 0;
+  double time_since_previous = 0.0;
+  bool draw_background = false;
 };
 
 struct FixtureState {

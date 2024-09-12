@@ -137,8 +137,8 @@ void DrawFixture(DrawData &data, const theatre::Fixture &fixture,
     if (rotation_speed != 0) {
       data.is_moving = true;
       const double displayed_rotation =
-          M_PI * static_cast<double>(rotation_speed) * data.style.timeSince /
-          (10.0 * (1U << 24U));
+          M_PI * static_cast<double>(rotation_speed) *
+          data.style.time_since_previous / (10.0 * (1U << 24U));
       fixture_state.continuous_rotation = std::fmod(
           displayed_rotation + fixture_state.continuous_rotation, M_PI);
       const double s = std::sin(fixture_state.continuous_rotation);
@@ -176,16 +176,18 @@ void RenderEngine::DrawSnapshot(
                    ? 0.0
                    : std::max(0.0, style.height / scale_ -
                                        management_.GetTheatre().Depth());
-  cairo->translate(x_padding_ * 0.5 + style.xOffset / scale_,
-                   y_padding_ * 0.5 + style.yOffset / scale_);
+  cairo->translate(x_padding_ * 0.5 + style.x_offset / scale_,
+                   y_padding_ * 0.5 + style.y_offset / scale_);
 
-  cairo->set_source_rgba(0, 0, 0, 1);
-  cairo->rectangle(0, 0, management_.GetTheatre().Width(),
-                   management_.GetTheatre().Depth());
-  cairo->fill_preserve();
-  cairo->set_source_rgba(0.5, 0.5, 0.5, 1);
-  cairo->set_line_width(1.0 / scale_);
-  cairo->stroke();
+  if (style.draw_background) {
+    cairo->set_source_rgba(0, 0, 0, 1);
+    cairo->rectangle(0, 0, management_.GetTheatre().Width(),
+                     management_.GetTheatre().Depth());
+    cairo->fill_preserve();
+    cairo->set_source_rgba(0.5, 0.5, 0.5, 1);
+    cairo->set_line_width(1.0 / scale_);
+    cairo->stroke();
+  }
 
   DrawData draw_data{cairo, management_, snapshot, style, scale_, false};
 

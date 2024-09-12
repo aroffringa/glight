@@ -35,6 +35,8 @@ enum class MouseState {
   TrackPan
 };
 
+enum class DryModeStyle { Primary, Secondary, Vertical, Horizontal, Shadow };
+
 class VisualizationWidget : public Gtk::DrawingArea {
  public:
   VisualizationWidget(theatre::Management *management,
@@ -49,10 +51,11 @@ class VisualizationWidget : public Gtk::DrawingArea {
   VisualizationWidget(const VisualizationWidget &) = delete;
   VisualizationWidget &operator=(const VisualizationWidget &) = delete;
 
+  DryModeStyle GetDryModeStyle() const;
   void inializeContextMenu();
   void initialize();
   void drawAll(const Cairo::RefPtr<Cairo::Context> &cairo);
-  void drawFixtures(const Cairo::RefPtr<Cairo::Context> &cairo,
+  void DrawFixtures(const Cairo::RefPtr<Cairo::Context> &cairo,
                     const std::vector<theatre::Fixture *> &selection,
                     size_t width, size_t height);
   void updateMidiColors();
