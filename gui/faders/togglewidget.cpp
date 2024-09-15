@@ -83,10 +83,6 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
       State().SignalChange().connect([&]() { UpdateDisplaySettings(); });
 }
 
-ToggleWidget::~ToggleWidget() {
-  update_display_settings_connection_.disconnect();
-}
-
 void ToggleWidget::OnIconClicked() {
   if (!hold_updates_) {
     unsigned value;

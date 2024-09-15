@@ -1,6 +1,7 @@
 #ifndef GLIGHT_FADER_STATE_H_
 #define GLIGHT_FADER_STATE_H_
 
+#include <cassert>
 #include <string>
 #include <vector>
 
@@ -14,7 +15,13 @@ class SourceValue;
 
 namespace glight::gui {
 
-enum class FaderControlType { Fader, ToggleButton, ColorButton, ComboButton };
+enum class FaderControlType {
+  Fader,
+  ToggleButton,
+  ColorButton,
+  ComboButton,
+  MoverControl
+};
 
 constexpr inline bool IsFullColumnType(FaderControlType fader_type) {
   return fader_type == FaderControlType::Fader;
@@ -29,6 +36,8 @@ inline FaderControlType GetFaderControlType(const std::string &fader_type_str) {
     return FaderControlType::ColorButton;
   else if (fader_type_str == "combo-button")
     return FaderControlType::ComboButton;
+  else if (fader_type_str == "mover-control")
+    return FaderControlType::MoverControl;
   else
     throw std::runtime_error("Invalid fader control type");
 }
@@ -43,7 +52,10 @@ inline std::string ToString(FaderControlType fader_type) {
       return "color-button";
     case FaderControlType::ComboButton:
       return "combo-button";
+    case FaderControlType::MoverControl:
+      return "mover-control";
     default:
+      assert(false);
       return "";
   }
 }

@@ -98,6 +98,7 @@ set(GUIFILES
   gui/faders/controlwidget.cpp
   gui/faders/faderwidget.cpp
   gui/faders/faderwindow.cpp
+  gui/faders/moverwidget.cpp
   gui/faders/togglewidget.cpp
   gui/mainwindow/actions.cpp
   gui/mainwindow/mainmenu.cpp
