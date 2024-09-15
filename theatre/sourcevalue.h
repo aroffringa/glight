@@ -22,7 +22,7 @@ class SingleSourceValue {
   void ApplyFade(double time_passed) {
     unsigned fading_value = value_.UInt();
     if (target_value_ != fading_value) {
-      double fadeSpeed = fade_speed_;
+      const double fadeSpeed = fade_speed_;
       if (fadeSpeed == 0.0) {
         fading_value = target_value_;
       } else {
@@ -59,15 +59,22 @@ class SingleSourceValue {
     }
   }
 
+  /** Same as @ref Set(const ControlValue&). */
+  void Set(unsigned immediate_target_value) {
+    target_value_ = immediate_target_value;
+    fade_speed_ = 0.0;
+    value_ = ControlValue(immediate_target_value);
+  }
+
   /**
    * Set the current and target value directly (without
    * fade) to the given value and resets the fade. This
    * is equivalent with Set(value, 0.0).
    */
-  void Set(unsigned immediate_target_value) {
-    target_value_ = immediate_target_value;
+  void Set(const ControlValue& immediate_target_value) {
+    target_value_ = immediate_target_value.UInt();
     fade_speed_ = 0.0;
-    value_ = ControlValue(immediate_target_value);
+    value_ = immediate_target_value;
   }
 
   /**

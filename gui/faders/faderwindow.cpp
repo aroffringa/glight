@@ -4,6 +4,7 @@
 #include "combocontrolwidget.h"
 #include "controlmenu.h"
 #include "faderwidget.h"
+#include "moverwidget.h"
 #include "togglewidget.h"
 
 #include "gui/eventtransmitter.h"
@@ -27,7 +28,7 @@ namespace glight::gui {
 using theatre::ControlValue;
 
 namespace {
-double MapSliderToSpeed(int sliderVal) {
+constexpr double MapSliderToSpeed(int sliderVal) {
   switch (sliderVal) {
     default:
     case 0:
@@ -306,6 +307,10 @@ void FaderWindow::initializeMenu() {
       [&]() { onAddComboButtonClicked(); });
   _popupMenu.append(_miAddComboButton);
 
+  _miAddMoverControl.signal_activate().connect(
+      [&]() { onAddMoverButtonClicked(); });
+  _popupMenu.append(_miAddMoverControl);
+
   _miAddToggleColumn.signal_activate().connect(
       [&]() { onAddToggleColumnClicked(); });
   _popupMenu.append(_miAddToggleColumn);
@@ -358,6 +363,10 @@ void FaderWindow::onAddComboButtonClicked() {
   addControlInLayout(_state->AddState(FaderControlType::ComboButton, false));
 }
 
+void FaderWindow::onAddMoverButtonClicked() {
+  addControlInLayout(_state->AddState(FaderControlType::MoverControl, false));
+}
+
 void FaderWindow::onAddToggleColumnClicked() {
   addControlInLayout(_state->AddState(FaderControlType::ToggleButton, true));
 }
@@ -395,6 +404,10 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
           std::make_unique<ComboControlWidget>(*this, state, controlMode, key);
       nameLabel = nullptr;
       break;
+    case FaderControlType::MoverControl:
+      control = std::make_unique<MoverWidget>(*this, state, controlMode, key);
+      nameLabel = nullptr;
+      break;
   }
 
   control->SetFadeDownSpeed(MapSliderToSpeed(getFadeOutSpeed()));
@@ -422,6 +435,7 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
     case FaderControlType::ToggleButton:
     case FaderControlType::ColorButton:
     case FaderControlType::ComboButton:
+    case FaderControlType::MoverControl:
       if (newToggleColumn) {
         Gtk::VBox &new_box = column.emplace_back();
         _controlGrid.attach(new_box, hpos * 2 + 1, vpos, 2, 1);

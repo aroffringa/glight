@@ -4,6 +4,7 @@
 #include "controlwidget.h"
 
 #include "../components/iconbutton.h"
+#include "../scopedconnection.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
@@ -17,7 +18,6 @@ class ToggleWidget final : public ControlWidget {
  public:
   ToggleWidget(FaderWindow &fader_window, FaderState &state, ControlMode mode,
                char key);
-  ~ToggleWidget();
 
   virtual void Toggle() override;
   virtual void FlashOn() override;
@@ -37,7 +37,7 @@ class ToggleWidget final : public ControlWidget {
 
   bool hold_updates_ = false;
 
-  sigc::connection update_display_settings_connection_;
+  ScopedConnection update_display_settings_connection_;
   size_t counter_ = 0;
 
   virtual void OnAssigned(bool moveFader) override;

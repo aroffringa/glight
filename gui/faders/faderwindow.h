@@ -75,6 +75,7 @@ class FaderWindow : public Gtk::Window {
   void onAddToggleColumnClicked();
   void onAddColorButtonClicked();
   void onAddComboButtonClicked();
+  void onAddMoverButtonClicked();
   void removeFader();
   void onRemoveFaderClicked() {
     if (!_upperControls.empty()) removeFader();
@@ -146,6 +147,7 @@ class FaderWindow : public Gtk::Window {
   Gtk::MenuItem _miAdd5ToggleButtons{"Add 5 toggle controls"};
   Gtk::MenuItem _miAddColorButton{"Add color button"};
   Gtk::MenuItem _miAddComboButton{"Add combo button"};
+  Gtk::MenuItem _miAddMoverControl{"Add mover control"};
   Gtk::MenuItem _miAddToggleColumn{"Add toggle column"};
   Gtk::MenuItem _miRemoveFader{"Remove 1"};
   Gtk::MenuItem _miRemove5Faders{"Remove 5"};
