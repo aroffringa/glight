@@ -114,6 +114,8 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   if (fixture.Tilt() != 0.0) state.writer.Number("tilt", fixture.Tilt());
   if (fixture.IsUpsideDown())
     state.writer.Boolean("upside-down", fixture.IsUpsideDown());
+  if (fixture.ElectricPhase() != 0)
+    state.writer.Number("electric-phase", fixture.ElectricPhase());
   state.writer.String("symbol", fixture.Symbol().Name());
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =
       fixture.Functions();

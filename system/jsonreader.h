@@ -112,6 +112,13 @@ inline bool OptionalBool(const Object &parent, const char *name,
 inline const Number &ToNum(const Node &node) {
   return dynamic_cast<const Number &>(node);
 }
+
+inline size_t OptionalSize(const Object &parent, const char *name,
+                           size_t default_value) {
+  const Object::const_iterator iter = parent.find(name);
+  return iter == parent.end() ? default_value : ToNum(*iter).AsSize();
+}
+
 inline double OptionalDouble(const Object &parent, const char *name,
                              double default_value) {
   const Object::const_iterator iter = parent.find(name);

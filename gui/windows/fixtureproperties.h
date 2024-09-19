@@ -44,6 +44,8 @@ class FixtureProperties : public Gtk::Window {
   Gtk::Label tilt_label_{"Tilt:"};
   Gtk::Entry tilt_entry_;
   Gtk::CheckButton upside_down_cb_{"Is upside down"};
+  Gtk::Label phase_label_{"Electic phase:"};
+  Gtk::Entry phase_entry_;
   Gtk::Box button_box_;
   Gtk::Button set_button_{"Set"};
 };

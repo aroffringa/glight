@@ -84,8 +84,8 @@ class Fixture : public NamedObject {
   bool IsUpsideDown() const { return is_upside_down_; }
   void SetUpsideDown(bool is_upside_down) { is_upside_down_ = is_upside_down; }
 
-  size_t PowerPhase() const { return power_phase_; }
-  void SetPowerPhase(size_t phase) { power_phase_ = phase; }
+  size_t ElectricPhase() const { return electric_phase_; }
+  void SetElectricPhase(size_t phase) { electric_phase_ = phase; }
 
  private:
   Theatre &theatre_;
@@ -95,7 +95,7 @@ class Fixture : public NamedObject {
   double tilt_ = 0.0;
   bool is_upside_down_ = false;
   FixtureSymbol symbol_;
-  size_t power_phase_ = 0;
+  size_t electric_phase_ = 0;
   std::vector<std::unique_ptr<FixtureFunction>> functions_;
 };
 
