@@ -53,17 +53,20 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
 
   Gtk::Grid grid_;
   Gtk::HBox functions_button_box_;
-  Gtk::Button add_function_button_;
-  Gtk::Button remove_function_button_;
+  Gtk::Button add_function_button_{"+"};
+  Gtk::Button remove_function_button_{"-"};
 
-  Gtk::Label dmx_offset_label_;
+  Gtk::Label dmx_offset_label_{"DMX offset:"};
   Gtk::Entry dmx_offset_entry_;
-  Gtk::Label fine_channel_label_;
+  Gtk::Label fine_channel_label_{"Fine channel:"};
   Gtk::Entry fine_channel_entry_;
-  Gtk::Label function_type_label_;
+  Gtk::Label function_type_label_{"Function type:"};
   Glib::RefPtr<Gtk::ListStore> function_type_model_;
   Gtk::ComboBox function_type_combo_;
   Gtk::Button function_parameters_button_{"..."};
+
+  Gtk::Label power_label_{"Power:"};
+  Gtk::Entry power_entry_;
 
   struct FunctionTypeColumns : public Gtk::TreeModelColumnRecord {
     FunctionTypeColumns() {

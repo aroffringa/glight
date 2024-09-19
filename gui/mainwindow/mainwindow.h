@@ -5,6 +5,7 @@
 
 #include "gui/eventtransmitter.h"
 #include "gui/fixtureselection.h"
+#include "gui/components/powermonitor.h"
 #include "gui/state/guistate.h"
 #include "gui/windows/childwindowlist.h"
 #include "theatre/forwards.h"
@@ -68,6 +69,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   void onFixtureListButtonClicked();
   void onFixtureTypesButtonClicked();
   void onSideBarButtonClicked();
+  void onPowerMonitorButtonClicked();
 
   /**
    * If stateOrNull is nullptr, the first inactive state is selected, or
@@ -106,6 +108,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   Gtk::VBox _box;
   Gtk::HBox revealer_box_;
+  Gtk::VBox right_box_;
 
   std::vector<std::unique_ptr<FaderWindow>> _faderWindows;
   std::unique_ptr<DesignWizard> _designWizard;
@@ -114,6 +117,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
   std::unique_ptr<theatre::Management> _management;
 
+  components::PowerMonitor power_monitor_;
   Gtk::Revealer revealer_;
   std::unique_ptr<ObjectListFrame> _objectListFrame;
   std::unique_ptr<VisualizationWidget> _visualizationWidget;

@@ -28,13 +28,7 @@ OptionalNumber<size_t> GetFine(const std::string& str) {
 }  // namespace
 
 FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
-    : Gtk::Frame("Functions"),
-      add_function_button_("+"),
-      remove_function_button_("-"),
-      dmx_offset_label_("DMX offset:"),
-      fine_channel_label_("Fine channel:"),
-      function_type_label_("Function type:"),
-      parent_window_(parent_window) {
+    : Gtk::Frame("Functions"), parent_window_(parent_window) {
   functions_model_ = Gtk::ListStore::create(functions_columns_);
 
   functions_view_.set_model(functions_model_);
@@ -62,8 +56,9 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
     Gtk::TreeModel::iterator selected =
         functions_view_.get_selection()->get_selected();
     if (selected) {
-      const int val = std::atoi(dmx_offset_entry_.get_text().c_str());
-      (*selected)[functions_columns_.dmx_offset_] = std::clamp(val, 0, 511);
+      const int val =
+          std::clamp(std::atoi(dmx_offset_entry_.get_text().c_str()), 0, 511);
+      (*selected)[functions_columns_.dmx_offset_] = val;
       (*(*selected)[functions_columns_.function_]).SetDmxOffset(val);
     }
   });
@@ -116,6 +111,17 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
       [&]() { OpenFunctionParametersEditWindow(); });
   function_parameters_button_.set_hexpand(false);
   grid_.attach(function_parameters_button_, 2, 4);
+
+  grid_.attach(power_label_, 0, 5);
+  grid_.attach(power_entry_, 1, 5, 2, 1);
+  power_entry_.signal_changed().connect([&]() {
+    Gtk::TreeModel::iterator selected =
+        functions_view_.get_selection()->get_selected();
+    if (selected) {
+      const double val = std::atof(power_entry_.get_text().c_str());
+      (*(*selected)[functions_columns_.function_]).SetPower(val);
+    }
+  });
 
   add(grid_);
 
@@ -198,6 +204,7 @@ void FixtureTypeFunctionsFrame::onSelectionChanged() {
   fine_channel_entry_.set_sensitive(is_selected);
   function_type_label_.set_sensitive(is_selected);
   function_type_combo_.set_sensitive(is_selected);
+  function_parameters_button_.set_sensitive(is_selected);
   if (is_selected) {
     const FixtureTypeFunction& function =
         *(*selected)[functions_columns_.function_];
@@ -205,10 +212,12 @@ void FixtureTypeFunctionsFrame::onSelectionChanged() {
     fine_channel_entry_.set_text((*selected)[functions_columns_.fine_channel_]);
     const int ft_index = static_cast<int>(function.Type());
     function_type_combo_.set_active(ft_index);
+    power_entry_.set_text(std::to_string(function.Power()));
   } else {
     dmx_offset_entry_.set_text("");
     fine_channel_entry_.set_text("-");
     function_type_combo_.set_active(-1);
+    power_entry_.set_text("-");
   }
 }
 

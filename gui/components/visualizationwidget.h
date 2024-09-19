@@ -1,5 +1,5 @@
-#ifndef GLIGHT_GUI_VISUALIZATION_WINDOW_H_
-#define GLIGHT_GUI_VISUALIZATION_WINDOW_H_
+#ifndef GLIGHT_GUI_VISUALIZATION_WIDGET_H_
+#define GLIGHT_GUI_VISUALIZATION_WIDGET_H_
 
 #include "theatre/fixturesymbol.h"
 #include "theatre/forwards.h"
@@ -7,6 +7,7 @@
 #include "theatre/valuesnapshot.h"
 
 #include "gui/renderengine.h"
+#include "gui/scopedconnection.h"
 
 #include "system/deletableptr.h"
 
@@ -43,7 +44,6 @@ class VisualizationWidget : public Gtk::DrawingArea {
                       EventTransmitter *eventTransmitter,
                       FixtureSelection *fixtureSelection,
                       MainWindow *showWindow);
-  ~VisualizationWidget();
 
   void Update() { queue_draw(); }
 
@@ -89,13 +89,13 @@ class VisualizationWidget : public Gtk::DrawingArea {
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;
   FixtureSelection *_globalSelection;
-  sigc::connection _globalSelectionConnection;
+  ScopedConnection _globalSelectionConnection;
   MainWindow *main_window_;
   system::DeletablePtr<glight::gui::windows::FixtureProperties>
       _propertiesWindow;
   bool _isInitialized, _isTimerRunning;
-  sigc::connection _timeoutConnection;
-  sigc::connection update_connection_;
+  ScopedConnection _timeoutConnection;
+  ScopedConnection update_connection_;
   MouseState _dragType;
   std::vector<theatre::Fixture *> _selectedFixtures,
       _selectedFixturesBeforeDrag;

@@ -99,6 +99,12 @@ class FixtureTypesWindow : public ChildWindow {
   Gtk::Label brightness_label_{"Brightness:"};
   Gtk::Entry brightness_entry_;
 
+  Gtk::Label max_power_label_{"Max power drawn:"};
+  Gtk::Entry max_power_entry_;
+
+  Gtk::Label idle_power_label_{"Idle power drawn:"};
+  Gtk::Entry idle_power_entry_;
+
   FixtureTypeFunctionsFrame functions_frame_;
 
   Gtk::Box button_box_;

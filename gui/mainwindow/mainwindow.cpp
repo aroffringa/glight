@@ -71,18 +71,23 @@ MainWindow::MainWindow() {
       Gtk::RevealerTransitionType::REVEALER_TRANSITION_TYPE_SLIDE_RIGHT);
   revealer_box_.pack_start(revealer_, false, false);
 
+  right_box_.pack_start(power_monitor_, false, false);
+  power_monitor_.Start();
+
   _visualizationWidget = std::make_unique<VisualizationWidget>(
       _management.get(), this, &_fixtureSelection, this);
   _visualizationWidget->signal_key_press_event().connect(
       sigc::mem_fun(*this, &MainWindow::onKeyDown));
   _visualizationWidget->signal_key_release_event().connect(
       sigc::mem_fun(*this, &MainWindow::onKeyUp));
-  revealer_box_.pack_end(*_visualizationWidget, true, true);
+  right_box_.pack_start(*_visualizationWidget, true, true);
+  revealer_box_.pack_end(right_box_, true, true);
 
   _box.pack_start(revealer_box_, true, true);
 
   add(_box);
   _box.show_all();
+  power_monitor_.set_visible(false);
 
   signal_key_press_event().connect(
       sigc::mem_fun(*this, &MainWindow::onKeyDown));
@@ -119,6 +124,7 @@ void MainWindow::InitializeMenu() {
       [&]() { onMITheatreDimensionsClicked(); });
 
   main_menu_.SideBar.connect([&]() { onSideBarButtonClicked(); });
+  main_menu_.PowerMonitor.connect([&]() { onPowerMonitorButtonClicked(); });
   main_menu_.FullScreen.connect([&]() { onFullscreen(); });
   main_menu_.NewFaderWindow.connect([&]() { addFaderWindow(); });
   main_menu_.FixtureList.connect(
@@ -190,6 +196,10 @@ void MainWindow::onSideBarButtonClicked() {
   if (revealer_.get_child_revealed() != main_menu_.SideBarActive()) {
     revealer_.set_reveal_child(main_menu_.SideBarActive());
   }
+}
+
+void MainWindow::onPowerMonitorButtonClicked() {
+  power_monitor_.set_visible(main_menu_.PowerMonitorActive());
 }
 
 void MainWindow::increaseManualBeat(int val) {

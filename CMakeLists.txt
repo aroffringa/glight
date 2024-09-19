@@ -85,6 +85,7 @@ set(GUIFILES
   gui/components/foldercombo.cpp
   gui/components/iconbutton.cpp
   gui/components/objectlist.cpp
+  gui/components/powermonitor.cpp
   gui/components/propertiesbox.cpp
   gui/components/reorderwidget.cpp
   gui/components/visualizationwidget.cpp
