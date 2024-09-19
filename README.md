@@ -13,7 +13,8 @@ Glight is specifically aimed at shows or events in which the lighting is control
 * The interface is carefully designed, with clearly visible key-bindings to adjust sliders, for careful and precise live control of lights.
 * Faders can be grouped, fader groups can be quickly hidden and shown, and faders can be set to auto-fade (up/down separately) and solo (for cross-fading).
 * Lights can be visualized on-screen. This makes it possible to follow their state on the screen (although the real lights are much more exiting to watch!), and also allows dry testing without having a DMX interface connected.
-* It is possible to 'disconnect' the real lighting fixtures from the controls. In those mode, the real lights continue their show (chases, etc.) while the use can change faders until happy with the new config, and only then affect the real lights.
+* It is possible to 'disconnect' the real lighting fixtures from the controls. In those mode, the real lights continue their show (chases, etc.) while the user can change faders until happy with the new config, and only then switch or fade the real lights.
+* Glight includes a power monitor. By setting the electric phase, idle power and power per function of a fixture (class), Glight is able to monitor the drawn power.
 
 <img src="https://raw.githubusercontent.com/aroffringa/glight/master/doc/Screenshot-2023-03-11-glight-0.9.png" alt="Screenshot" title="Screenshot of Glight in action" />
 
