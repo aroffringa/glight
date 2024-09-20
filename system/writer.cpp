@@ -114,6 +114,8 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   if (fixture.Tilt() != 0.0) state.writer.Number("tilt", fixture.Tilt());
   if (fixture.IsUpsideDown())
     state.writer.Boolean("upside-down", fixture.IsUpsideDown());
+  if (fixture.ElectricPhase() != 0)
+    state.writer.Number("electric-phase", fixture.ElectricPhase());
   state.writer.String("symbol", fixture.Symbol().Name());
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =
       fixture.Functions();
@@ -184,6 +186,7 @@ void writeFixtureTypeFunction(WriteState &state,
   if (function.FineChannelOffset())
     state.writer.Number("fine-channel-offset", *function.FineChannelOffset());
   state.writer.Number("shape", function.Shape());
+  if (function.Power() != 0.0) state.writer.Number("power", function.Power());
   switch (function.Type()) {
     case FunctionType::ColorMacro:
     case FunctionType::ColorWheel:
@@ -212,6 +215,10 @@ void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
   state.writer.Number("min-tilt", fixtureType.MinTilt());
   state.writer.Number("max-tilt", fixtureType.MaxTilt());
   state.writer.Number("brightness", fixtureType.Brightness());
+  if (fixtureType.MaxPower() != 0.0)
+    state.writer.Number("max-power", fixtureType.MaxPower());
+  if (fixtureType.IdlePower() != 0.0)
+    state.writer.Number("idle-power", fixtureType.IdlePower());
   state.writer.StartArray("functions");
   for (const FixtureTypeFunction &f : fixtureType.Functions()) {
     writeFixtureTypeFunction(state, f);

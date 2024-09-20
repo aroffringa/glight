@@ -124,6 +124,7 @@ void ParseFixtureTypeFunctions(const json::Array &node,
     const unsigned shape = ToNum(obj["shape"]).AsUInt();
     FixtureTypeFunction &new_function =
         functions.emplace_back(ft, dmx_offset, fine_channel, shape);
+    new_function.SetPower(OptionalUInt(obj, "power", 0));
     switch (ft) {
       case FunctionType::ColorMacro:
       case FunctionType::ColorWheel:
@@ -163,6 +164,8 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
       ft.SetMaxTilt(ToNum(ft_node["max-tilt"]).AsDouble());
     }
     ft.SetBrightness(ToNum(ft_node["brightness"]).AsDouble());
+    ft.SetMaxPower(OptionalUInt(ft_node, "max-power", 0));
+    ft.SetIdlePower(OptionalUInt(ft_node, "idle-power", 0));
     FixtureType &new_type = management.GetTheatre().AddFixtureType(ft);
     if (management.RootFolder().GetChildIfExists(new_type.Name())) {
       throw std::runtime_error("Error in file: fixture type listed twice");
@@ -201,6 +204,7 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     fixture.SetDirection(ToNum(f_node["direction"]).AsDouble());
     fixture.SetTilt(OptionalDouble(f_node, "tilt", 0.0));
     fixture.SetUpsideDown(OptionalBool(f_node, "upside-down", false));
+    fixture.SetElectricPhase(OptionalSize(f_node, "electric-phase", 0));
     fixture.SetSymbol(FixtureSymbol(ToStr(f_node["symbol"])));
     fixture.ClearFunctions();
 

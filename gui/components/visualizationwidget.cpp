@@ -69,12 +69,6 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
       [&]() { Update(); });
 }
 
-VisualizationWidget::~VisualizationWidget() {
-  _timeoutConnection.disconnect();
-  update_connection_.disconnect();
-  _globalSelectionConnection.disconnect();
-}
-
 void VisualizationWidget::inializeContextMenu() {
   std::vector<theatre::FixtureSymbol::Symbol> symbols(
       theatre::FixtureSymbol::List());

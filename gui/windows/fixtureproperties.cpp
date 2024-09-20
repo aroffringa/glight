@@ -34,12 +34,14 @@ FixtureProperties::FixtureProperties() {
   main_grid_.attach(tilt_label_, 0, 1);
   main_grid_.attach(tilt_entry_, 1, 1);
   main_grid_.attach(upside_down_cb_, 0, 2, 2, 1);
+  main_grid_.attach(phase_label_, 0, 3);
+  main_grid_.attach(phase_entry_, 1, 3);
 
   button_box_.set_homogeneous(true);
 
   set_button_.signal_clicked().connect([&]() { onSetClicked(); });
   button_box_.pack_start(set_button_);
-  main_grid_.attach(button_box_, 0, 3, 2, 1);
+  main_grid_.attach(button_box_, 0, 4, 2, 1);
 
   add(main_grid_);
   main_grid_.show_all();
@@ -58,6 +60,7 @@ void FixtureProperties::update() {
     direction_entry_.set_text(AngleToNiceString(first_fixture.Direction()));
     tilt_entry_.set_text(AngleToNiceString(first_fixture.Tilt()));
     upside_down_cb_.set_active(first_fixture.IsUpsideDown());
+    phase_entry_.set_text(std::to_string(first_fixture.ElectricPhase()));
   }
 }
 
@@ -76,6 +79,7 @@ void FixtureProperties::onSetClicked() {
     fixture->SetDirection(direction);
     fixture->SetTilt(tilt);
     fixture->SetUpsideDown(upside_down);
+    fixture->SetElectricPhase(std::atoi(phase_entry_.get_text().c_str()));
   }
   lock.unlock();
   Instance::Events().EmitUpdate();

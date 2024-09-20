@@ -35,7 +35,8 @@ class FixtureTypeFunction {
       : type_(source.type_),
         dmx_offset_(source.dmx_offset_),
         fine_channel_(source.fine_channel_),
-        shape_(source.shape_) {
+        shape_(source.shape_),
+        power_(source.power_) {
     CopyParameters(source);
   }
 
@@ -45,6 +46,7 @@ class FixtureTypeFunction {
     dmx_offset_ = source.dmx_offset_;
     fine_channel_ = source.fine_channel_;
     shape_ = source.shape_;
+    power_ = source.power_;
     CopyParameters(source);
     return *this;
   }
@@ -57,6 +59,10 @@ class FixtureTypeFunction {
     type_ = type;
     ConstructParameters();
   }
+  /// Power (in Watts) drawn by this feature when fully enabled
+  unsigned Power() const { return power_; }
+  void SetPower(unsigned power) { power_ = power; }
+
   /**
    * Optional dmx channel offset from fixture starting channel, of the
    * fine channel that corresponds to this function. If set, it implies 16 bits
@@ -134,6 +140,7 @@ class FixtureTypeFunction {
   size_t dmx_offset_;
   system::OptionalNumber<size_t> fine_channel_;
   unsigned shape_;
+  unsigned power_ = 0;
   FixtureFunctionParameters parameters_;
 };
 

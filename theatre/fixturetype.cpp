@@ -249,6 +249,14 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       short_name_ = "Move";
       break;
   }
+  max_power_ = 0;
+  for (FixtureTypeFunction &function : functions_) {
+    if (IsColor(function.Type())) {
+      function.SetPower(10);
+    }
+    max_power_ += function.Power();
+  }
+  idle_power_ = 3;
   UpdateFunctions();
 }
 
@@ -451,6 +459,31 @@ double FixtureType::GetZoom(const Fixture &fixture,
     }
   }
   return min_beam_angle_;
+}
+
+double FixtureType::GetPower(const Fixture &fixture,
+                             const ValueSnapshot &snapshot) const {
+  double power = IdlePower();
+  double master_value = 1.0;
+  for (size_t i = 0; i != functions_.size(); ++i) {
+    const FixtureTypeFunction &function = functions_[i];
+    if (function.Type() == FunctionType::Master) {
+      master_value =
+          ControlValue(fixture.Functions()[i]->GetControlValue(snapshot))
+              .Ratio();
+      power += master_value * function.Power();
+    }
+  }
+  for (size_t i = 0; i != functions_.size(); ++i) {
+    const FixtureTypeFunction &function = functions_[i];
+    if (IsColor(function.Type())) {
+      const unsigned channel_value =
+          fixture.Functions()[i]->GetControlValue(snapshot);
+      power +=
+          ControlValue(channel_value).Ratio() * function.Power() * master_value;
+    }
+  }
+  return std::min(power, static_cast<double>(MaxPower()));
 }
 
 }  // namespace glight::theatre

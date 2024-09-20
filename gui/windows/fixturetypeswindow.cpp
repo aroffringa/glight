@@ -78,6 +78,12 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   right_grid_.attach(brightness_label_, 0, 6);
   right_grid_.attach(brightness_entry_, 1, 6, 2, 1);
 
+  right_grid_.attach(max_power_label_, 0, 7);
+  right_grid_.attach(max_power_entry_, 1, 7, 2, 1);
+
+  right_grid_.attach(idle_power_label_, 0, 8);
+  right_grid_.attach(idle_power_entry_, 1, 8, 2, 1);
+
   right_grid_.attach(functions_frame_, 0, 10, 3, 1);
   functions_frame_.set_vexpand(true);
   functions_frame_.set_hexpand(true);
@@ -199,6 +205,12 @@ void FixtureTypesWindow::onSaveClicked() {
 
   const double brightness = std::atof(brightness_entry_.get_text().c_str());
   type->SetBrightness(std::clamp(brightness, 0.0, 100.0));
+  const unsigned max_power =
+      std::max(0LL, std::atoll(max_power_entry_.get_text().c_str()));
+  type->SetMaxPower(max_power);
+  const unsigned idle_power =
+      std::max(0LL, std::atoll(idle_power_entry_.get_text().c_str()));
+  type->SetIdlePower(idle_power);
   if (!is_used) {
     type->SetFunctions(functions_frame_.GetFunctions());
     type->SetFixtureClass(
@@ -272,6 +284,10 @@ void FixtureTypesWindow::onSelectionChanged() {
       class_combo_.set_sensitive(!is_used && !layout_locked_);
       class_combo_.set_active_text(
           theatre::FixtureType::ClassName(type->GetFixtureClass()));
+
+      max_power_entry_.set_text(std::to_string(type->MaxPower()));
+      idle_power_entry_.set_text(std::to_string(type->IdlePower()));
+
       functions_frame_.set_sensitive(!is_used && !layout_locked_);
       functions_frame_.SetFunctions(type->Functions());
     } else {
@@ -287,6 +303,8 @@ void FixtureTypesWindow::onSelectionChanged() {
       class_combo_.set_sensitive(!layout_locked_);
       class_combo_.set_active_text(
           theatre::FixtureType::ClassName(theatre::FixtureClass::Par));
+      max_power_entry_.set_text("0");
+      idle_power_entry_.set_text("0");
       functions_frame_.set_sensitive(!layout_locked_);
       functions_frame_.SetFunctions({});
     }

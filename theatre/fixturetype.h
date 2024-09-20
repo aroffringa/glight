@@ -202,6 +202,8 @@ class FixtureType : public FolderObject {
   double GetZoom(const Fixture &fixture, const ValueSnapshot &snapshot,
                  size_t shape_index) const;
 
+  double GetPower(const Fixture &fixture, const ValueSnapshot &snapshot) const;
+
   FixtureClass GetFixtureClass() const { return class_; }
 
   void SetFixtureClass(FixtureClass new_class) { class_ = new_class; }
@@ -281,6 +283,13 @@ class FixtureType : public FolderObject {
   double Brightness() const { return brightness_; }
   void SetBrightness(double brightness) { brightness_ = brightness; }
 
+  /// Maximum power drawn by this fixture, in watts.
+  unsigned MaxPower() const { return max_power_; }
+  void SetMaxPower(unsigned max_power) { max_power_ = max_power; }
+
+  unsigned IdlePower() const { return idle_power_; }
+  void SetIdlePower(unsigned idle_power) { idle_power_ = idle_power; }
+
  private:
   void UpdateFunctions();
 
@@ -299,6 +308,8 @@ class FixtureType : public FolderObject {
   double min_tilt_ = 0.0;
   double max_tilt_ = 0.0;
   double brightness_ = 10.0;
+  unsigned max_power_ = 0;
+  unsigned idle_power_ = 0;
 };
 
 inline std::string FunctionSummary(const FixtureType &fixture_type) {

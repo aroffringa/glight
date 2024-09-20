@@ -20,18 +20,6 @@ Fixture::Fixture(Theatre &theatre, const FixtureType &type,
   }
 }
 
-/*
-Fixture::Fixture(const Fixture &source, Theatre &theatre)
-    : NamedObject(source),
-      theatre_(theatre),
-      type_(theatre.GetFixtureType(source.type_.Name())),
-      position_(source.position_),
-      symbol_(source.symbol_) {
-  for (const std::unique_ptr<FixtureFunction> &ff : source.functions_)
-    functions_.emplace_back(new FixtureFunction(*ff));
-}
-*/
-
 void Fixture::IncChannel() {
   for (std::unique_ptr<FixtureFunction> &ff : functions_) ff->IncChannel();
 

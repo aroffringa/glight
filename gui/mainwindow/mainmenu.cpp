@@ -88,6 +88,9 @@ MainMenu::MainMenu() {
   _miSideBar.signal_activate().connect(SideBar);
   _menuWindow.append(_miSideBar);
 
+  _miPowerMonitor.signal_activate().connect(PowerMonitor);
+  _menuWindow.append(_miPowerMonitor);
+
   _miFullScreen.signal_activate().connect(FullScreen);
   _menuWindow.append(_miFullScreen);
 

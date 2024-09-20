@@ -491,12 +491,12 @@ size_t Management::SourceValueIndex(const SourceValue *sourceValue) const {
   return NamedObject::FindIndex(_sourceValues, sourceValue);
 }
 
-ValueSnapshot Management::PrimarySnapshot() {
+ValueSnapshot Management::PrimarySnapshot() const {
   std::lock_guard<std::mutex> lock(_mutex);
   return _primarySnapshot;
 }
 
-ValueSnapshot Management::SecondarySnapshot() {
+ValueSnapshot Management::SecondarySnapshot() const {
   std::lock_guard<std::mutex> lock(_mutex);
   return _secondarySnapshot;
 }

@@ -49,6 +49,7 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> FixtureList;
   sigc::signal<void()> FixtureTypes;
   sigc::signal<void()> SideBar;
+  sigc::signal<void()> PowerMonitor;
   sigc::signal<void(bool active)> SceneWindow;
   sigc::signal<void(FaderSetState& fader_set)> FaderWindow;
 
@@ -64,6 +65,11 @@ class MainMenu : public Gtk::MenuBar {
 
   bool SideBarActive() const { return _miSideBar.get_active(); }
   void SetSideBarActive(bool active) { _miSideBar.set_active(active); }
+
+  bool PowerMonitorActive() const { return _miPowerMonitor.get_active(); }
+  void SetPowerMonitorActive(bool active) {
+    _miPowerMonitor.set_active(active);
+  }
 
   void SetSceneWindowActive(bool active) { _miSceneWindow.set_active(active); }
 
@@ -114,6 +120,7 @@ class MainMenu : public Gtk::MenuBar {
   Gtk::Menu _menuWindow;
   Gtk::MenuItem _miWindow{"_Window", true};
   Gtk::CheckMenuItem _miSideBar{"Side bar"};
+  Gtk::CheckMenuItem _miPowerMonitor{"Power monitor"};
   Gtk::CheckMenuItem _miFullScreen{"Full screen"};
   Gtk::CheckMenuItem _miFixtureListWindow{"Fixtures"};
   Gtk::CheckMenuItem _miFixtureTypesWindow{"Fixture types"};

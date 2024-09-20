@@ -135,8 +135,8 @@ class Management {
   }
   size_t SourceValueIndex(const SourceValue *sourceValue) const;
   ValueSnapshot Snapshot(bool primary);
-  ValueSnapshot PrimarySnapshot();
-  ValueSnapshot SecondarySnapshot();
+  ValueSnapshot PrimarySnapshot() const;
+  ValueSnapshot SecondarySnapshot() const;
 
   double GetOffsetTimeInMS() const {
     const std::chrono::time_point<std::chrono::steady_clock> current_time =
@@ -207,7 +207,7 @@ class Management {
 
   std::unique_ptr<std::thread> _thread;
   std::atomic<bool> _isQuitting = false;
-  std::mutex _mutex;
+  mutable std::mutex _mutex;
   std::chrono::time_point<std::chrono::steady_clock> _createTime =
       std::chrono::steady_clock::now();
   std::mt19937 _randomGenerator;
