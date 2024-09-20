@@ -205,9 +205,11 @@ void FixtureTypesWindow::onSaveClicked() {
 
   const double brightness = std::atof(brightness_entry_.get_text().c_str());
   type->SetBrightness(std::clamp(brightness, 0.0, 100.0));
-  const double max_power = std::atof(max_power_entry_.get_text().c_str());
+  const unsigned max_power =
+      std::max(0LL, std::atoll(max_power_entry_.get_text().c_str()));
   type->SetMaxPower(max_power);
-  const double idle_power = std::atof(idle_power_entry_.get_text().c_str());
+  const unsigned idle_power =
+      std::max(0LL, std::atoll(idle_power_entry_.get_text().c_str()));
   type->SetIdlePower(idle_power);
   if (!is_used) {
     type->SetFunctions(functions_frame_.GetFunctions());

@@ -118,7 +118,8 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
     Gtk::TreeModel::iterator selected =
         functions_view_.get_selection()->get_selected();
     if (selected) {
-      const double val = std::atof(power_entry_.get_text().c_str());
+      const unsigned val =
+          std::max(0LL, std::atoll(power_entry_.get_text().c_str()));
       (*(*selected)[functions_columns_.function_]).SetPower(val);
     }
   });

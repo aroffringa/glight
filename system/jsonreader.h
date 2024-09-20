@@ -119,6 +119,12 @@ inline size_t OptionalSize(const Object &parent, const char *name,
   return iter == parent.end() ? default_value : ToNum(*iter).AsSize();
 }
 
+inline unsigned OptionalUInt(const Object &parent, const char *name,
+                             unsigned default_value) {
+  const Object::const_iterator iter = parent.find(name);
+  return iter == parent.end() ? default_value : ToNum(*iter).AsUInt();
+}
+
 inline double OptionalDouble(const Object &parent, const char *name,
                              double default_value) {
   const Object::const_iterator iter = parent.find(name);

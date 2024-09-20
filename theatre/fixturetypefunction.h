@@ -60,8 +60,8 @@ class FixtureTypeFunction {
     ConstructParameters();
   }
   /// Power (in Watts) drawn by this feature when fully enabled
-  double Power() const { return power_; }
-  void SetPower(double power) { power_ = power; }
+  unsigned Power() const { return power_; }
+  void SetPower(unsigned power) { power_ = power; }
 
   /**
    * Optional dmx channel offset from fixture starting channel, of the
@@ -140,7 +140,7 @@ class FixtureTypeFunction {
   size_t dmx_offset_;
   system::OptionalNumber<size_t> fine_channel_;
   unsigned shape_;
-  double power_ = 0.0;
+  unsigned power_ = 0;
   FixtureFunctionParameters parameters_;
 };
 

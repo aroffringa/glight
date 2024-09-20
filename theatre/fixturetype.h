@@ -284,11 +284,11 @@ class FixtureType : public FolderObject {
   void SetBrightness(double brightness) { brightness_ = brightness; }
 
   /// Maximum power drawn by this fixture, in watts.
-  double MaxPower() const { return max_power_; }
-  void SetMaxPower(double max_power) { max_power_ = max_power; }
+  unsigned MaxPower() const { return max_power_; }
+  void SetMaxPower(unsigned max_power) { max_power_ = max_power; }
 
-  double IdlePower() const { return idle_power_; }
-  void SetIdlePower(double idle_power) { idle_power_ = idle_power; }
+  unsigned IdlePower() const { return idle_power_; }
+  void SetIdlePower(unsigned idle_power) { idle_power_ = idle_power; }
 
  private:
   void UpdateFunctions();
@@ -308,8 +308,8 @@ class FixtureType : public FolderObject {
   double min_tilt_ = 0.0;
   double max_tilt_ = 0.0;
   double brightness_ = 10.0;
-  double max_power_ = 0.0;
-  double idle_power_ = 0.0;
+  unsigned max_power_ = 0;
+  unsigned idle_power_ = 0;
 };
 
 inline std::string FunctionSummary(const FixtureType &fixture_type) {

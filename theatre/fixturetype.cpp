@@ -249,14 +249,14 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       short_name_ = "Move";
       break;
   }
-  max_power_ = 0.0;
+  max_power_ = 0;
   for (FixtureTypeFunction &function : functions_) {
     if (IsColor(function.Type())) {
-      function.SetPower(10.0);
+      function.SetPower(10);
     }
     max_power_ += function.Power();
   }
-  idle_power_ = 3.0;
+  idle_power_ = 3;
   UpdateFunctions();
 }
 
@@ -483,7 +483,7 @@ double FixtureType::GetPower(const Fixture &fixture,
           ControlValue(channel_value).Ratio() * function.Power() * master_value;
     }
   }
-  return std::min(power, MaxPower());
+  return std::min(power, static_cast<double>(MaxPower()));
 }
 
 }  // namespace glight::theatre
