@@ -187,7 +187,9 @@ set(GLIGHT_LIBRARIES
 
 target_link_libraries(glight ${GLIGHT_LIBRARIES})
 
-cmake_policy(SET CMP0167 NEW)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.30")
+    cmake_policy(SET CMP0167 NEW)
+endif()
 find_package(Boost COMPONENTS unit_test_framework)
 if(Boost_FOUND)
 	include_directories(SYSTEM ${Boost_INCLUDE_DIR})
