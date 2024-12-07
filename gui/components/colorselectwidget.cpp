@@ -2,7 +2,7 @@
 
 #include "gui/instance.h"
 
-#include "gui/tools.h"
+#include "gui/functions.h"
 #include "gui/dialogs/controllableselectiondialog.h"
 #include "gui/dialogs/stringinputdialog.h"
 

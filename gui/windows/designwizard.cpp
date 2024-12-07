@@ -4,6 +4,7 @@
 #include <ranges>
 
 #include "gui/eventtransmitter.h"
+#include "gui/functions.h"
 #include "gui/instance.h"
 
 #include "gui/components/colorselectwidget.h"
@@ -415,7 +416,7 @@ void DesignWizard::onNextClicked() {
           _colorsWidgetP4.GetSelection(), colorDeduction(), runType);
       lock.unlock();
       events.EmitUpdate();
-      Assign(chase);
+      AssignFader(chase);
       hide();
     } break;
 
@@ -427,7 +428,7 @@ void DesignWizard::onNextClicked() {
           _variation.get_value());
       lock.unlock();
       events.EmitUpdate();
-      Assign(chase);
+      AssignFader(chase);
       hide();
     } break;
 
@@ -448,7 +449,7 @@ void DesignWizard::onNextClicked() {
           _colorsWidgetP4.GetSelection(), colorDeduction(), shiftType);
       lock.unlock();
       events.EmitUpdate();
-      Assign(chase);
+      AssignFader(chase);
       hide();
     } break;
 
@@ -469,7 +470,7 @@ void DesignWizard::onNextClicked() {
           _colorsWidgetP4.GetSelection(), colorDeduction(), direction);
       lock.unlock();
       events.EmitUpdate();
-      Assign(vu_meter);
+      AssignFader(vu_meter);
       hide();
     } break;
 
@@ -487,7 +488,7 @@ void DesignWizard::onNextClicked() {
             _colorsWidgetP4.GetSelection(), colorDeduction());
         lock.unlock();
         events.EmitUpdate();
-        Assign(preset);
+        AssignFader(preset);
       }
       hide();
     } break;
@@ -509,7 +510,7 @@ void DesignWizard::onNextClicked() {
           _colorsWidgetP4.GetSelection(), colorDeduction(), incType);
       lock.unlock();
       events.EmitUpdate();
-      Assign(chase);
+      AssignFader(chase);
       hide();
     } break;
 
@@ -528,7 +529,7 @@ void DesignWizard::onNextClicked() {
           _colorsWidgetP4.GetSelection(), colorDeduction(), type);
       lock.unlock();
       events.EmitUpdate();
-      Assign(rotation);
+      AssignFader(rotation);
       hide();
     } break;
 
@@ -540,7 +541,7 @@ void DesignWizard::onNextClicked() {
           _colorsWidgetP4.GetSelection(), colorDeduction());
       lock.unlock();
       events.EmitUpdate();
-      Assign(fire);
+      AssignFader(fire);
       hide();
     } break;
   }
@@ -597,20 +598,6 @@ theatre::Folder &DesignWizard::makeDestinationFolder() const {
     folder = &management.AddFolder(*folder, new_name);
   }
   return *folder;
-}
-
-void DesignWizard::Assign(theatre::Controllable &controllable) {
-  if (controllable.NInputs() == 1) {
-    theatre::Management &management = Instance::Management();
-    glight::gui::FaderState *fader =
-        Instance::State().GetFirstUnassignedFader();
-    if (fader) {
-      theatre::SourceValue *source_value =
-          management.GetSourceValue(controllable, 0);
-      fader->SetSourceValues({source_value});
-      fader->SignalChange();
-    }
-  }
 }
 
 }  // namespace glight::gui
