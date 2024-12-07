@@ -186,7 +186,8 @@ set(GLIGHT_LIBRARIES
   ${CMAKE_THREAD_LIBS_INIT})
 
 target_link_libraries(glight ${GLIGHT_LIBRARIES})
-  
+
+cmake_policy(SET CMP0167 NEW)
 find_package(Boost COMPONENTS unit_test_framework)
 if(Boost_FOUND)
 	include_directories(SYSTEM ${Boost_INCLUDE_DIR})
