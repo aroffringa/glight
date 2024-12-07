@@ -74,8 +74,8 @@ include_directories(SYSTEM ${AUBIO_INCLUDE_DIR})
 set(GUIFILES
   gui/application.cpp
   gui/components/nameframe.cpp
+  gui/functions.cpp
   gui/renderengine.cpp
-  gui/tools.cpp
   gui/components/audiowidget.cpp
   gui/components/beatinput.cpp
   gui/components/colorselectwidget.cpp

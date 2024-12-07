@@ -1,8 +1,8 @@
 #include "visualizationwidget.h"
 
 #include "gui/eventtransmitter.h"
+#include "gui/functions.h"
 #include "gui/instance.h"
-#include "gui/tools.h"
 
 #include "gui/windows/addfixturewindow.h"
 #include "gui/windows/designwizard.h"

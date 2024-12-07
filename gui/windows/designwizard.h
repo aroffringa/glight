@@ -78,7 +78,6 @@ class DesignWizard : public Gtk::Window {
   void onControllableSelected();
 
   theatre::ColorDeduction colorDeduction() const;
-  void Assign(theatre::Controllable &controllable);
 
   std::string _currentPath;
 

@@ -1,6 +1,7 @@
 #include "actions.h"
 
 #include "gui/eventtransmitter.h"
+#include "gui/functions.h"
 #include "gui/instance.h"
 
 #include "gui/dialogs/createchasedialog.h"
@@ -84,6 +85,7 @@ void NewEmptyPreset(ObjectBrowser &browser,
 
   Instance::Events().EmitUpdate();
   browser.SelectObject(preset_collection);
+  AssignFader(preset_collection);
   OpenPropertiesWindow(property_windows, preset_collection, parent);
 }
 
@@ -101,6 +103,7 @@ void NewPresetFromCurrent(ObjectBrowser &browser) {
 
   Instance::Events().EmitUpdate();
   browser.SelectObject(preset_collection);
+  AssignFader(preset_collection);
 }
 
 void NewPresetFromFixtures(theatre::Folder &parent_folder,
@@ -115,6 +118,7 @@ void NewPresetFromFixtures(theatre::Folder &parent_folder,
   management.AddSourceValue(preset_collection, 0);
   lock.unlock();
 
+  AssignFader(preset_collection);
   Instance::Events().EmitUpdate();
 }
 
@@ -123,8 +127,10 @@ void NewChase(ObjectBrowser &browser,
               Gtk::Window &parent) {
   CreateChaseDialog dialog;
   if (dialog.run() == Gtk::RESPONSE_OK) {
-    browser.SelectObject(dialog.CreatedChase());
-    OpenPropertiesWindow(property_windows, dialog.CreatedChase(), parent);
+    theatre::Chase &new_chase = dialog.CreatedChase();
+    browser.SelectObject(new_chase);
+    AssignFader(new_chase);
+    OpenPropertiesWindow(property_windows, new_chase, parent);
   }
 }
 
@@ -142,6 +148,7 @@ void NewTimeSequence(ObjectBrowser &browser,
 
   Instance::Events().EmitUpdate();
   browser.SelectObject(time_sequence);
+  AssignFader(time_sequence);
   OpenPropertiesWindow(property_windows, time_sequence, parent);
 }
 
@@ -160,6 +167,7 @@ void NewEffect(theatre::EffectType effect_type, ObjectBrowser &browser,
   lock.unlock();
   Instance::Events().EmitUpdate();
   browser.SelectObject(*added);
+  AssignFader(*added);
   OpenPropertiesWindow(property_windows, *added, parent);
 }
 
