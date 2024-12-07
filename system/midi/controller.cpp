@@ -146,7 +146,8 @@ Controller::Controller(const std::string& device_name) {
 Controller::~Controller() noexcept {
   running_ = false;
   unsigned char signal_buffer = 0;
-  [[maybe_unused]] ssize_t write_result = write(signal_pipe_fd_[1], &signal_buffer, 1);
+  [[maybe_unused]] ssize_t write_result =
+      write(signal_pipe_fd_[1], &signal_buffer, 1);
   input_thread_.join();
   close(signal_pipe_fd_[1]);
   close(signal_pipe_fd_[0]);
