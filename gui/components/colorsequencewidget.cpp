@@ -224,6 +224,7 @@ void ColorSequenceWidget::SetSelection(
     _box.pack_start(*_widgets.back(), true, false);
     _widgets.back()->show();
   }
+  updateSensitivities();
 }
 
 }  // namespace glight::gui
