@@ -14,18 +14,18 @@ class Observer;
  * std::weak_ptr, an observer won't stop the object from being
  * destructed. The difference with a std::shared_ptr is
  * that there can be only one unique owning pointer to an object:
- * all other pointers are observers. 
- * 
+ * all other pointers are observers.
+ *
  * While the same behaviour can be obtained by using a single
  * std::shared_ptr with std::weak_ptrs, for cases that match with
  * the behaviour of the ObservablePtr, it offers a stricter way of
  * accessing the pointer, which may simplify structure and clarify
  * intend.
- * 
+ *
  * An advantage of this class over a std::shared_ptr is that an
  * ObservablePtr never requires heap allocation and destroys the
  * object immediately when the owning pointer is destructed or reset.
- * 
+ *
  * This class is not thread safe: if the owner and its observers are
  * accessed in different threads, they need to be synchronized.
  */
@@ -35,18 +35,22 @@ class ObservablePtr {
   constexpr ObservablePtr() noexcept {}
   constexpr ObservablePtr(std::nullptr_t) noexcept {}
   constexpr ObservablePtr(T* object) noexcept : ptr_(object) {}
-  constexpr ObservablePtr(std::unique_ptr<T> object) noexcept : ptr_(std::move(object)) {}
+  constexpr ObservablePtr(std::unique_ptr<T> object) noexcept
+      : ptr_(std::move(object)) {}
   constexpr ObservablePtr(const ObservablePtr&) noexcept = delete;
   constexpr ObservablePtr(ObservablePtr<T>&& source) noexcept;
   ~ObservablePtr() noexcept { Reset(); }
-  
+
   ObservablePtr<T>& operator=(ObservablePtr<T>&& rhs) noexcept;
   ObservablePtr<T>& operator=(const ObservablePtr<T>& rhs) noexcept = delete;
-  
+
   void Reset() noexcept;
   void Reset(std::nullptr_t) noexcept { Reset(); }
-  void Reset(T* object) noexcept { Reset(); ptr_.reset(object); }
-  
+  void Reset(T* object) noexcept {
+    Reset();
+    ptr_.reset(object);
+  }
+
   T* Get() const noexcept { return ptr_.get(); }
   constexpr T& operator*() const noexcept { return *ptr_; }
   constexpr T* operator->() const noexcept { return ptr_.get(); }
@@ -63,11 +67,11 @@ class ObservablePtr {
     return lhs.ptr_ != rhs.ptr_;
   }
   constexpr friend bool operator<(const ObservablePtr<T>& lhs,
-                                   const ObservablePtr<T>& rhs) noexcept {
+                                  const ObservablePtr<T>& rhs) noexcept {
     return lhs.ptr_ < rhs.ptr_;
   }
   constexpr friend bool operator>(const ObservablePtr<T>& lhs,
-                                   const ObservablePtr<T>& rhs) noexcept {
+                                  const ObservablePtr<T>& rhs) noexcept {
     return lhs.ptr_ > rhs.ptr_;
   }
   constexpr friend bool operator<=(const ObservablePtr<T>& lhs,
