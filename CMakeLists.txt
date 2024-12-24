@@ -205,6 +205,7 @@ if(Boost_FOUND)
     tests/system/tjsonreader.cpp
     tests/system/tjsonwriter.cpp
     tests/system/tmath.cpp
+    tests/system/tobservableptr.cpp
     tests/system/topenfixturereader.cpp
     tests/system/toptionalnumber.cpp
     tests/system/tuniquewithoutordering.cpp
