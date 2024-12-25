@@ -97,9 +97,9 @@ void FixtureListWindow::fillFixturesList() {
   _fixturesListModel->clear();
 
   std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
+  const std::vector<system::ObservablePtr<theatre::Fixture>> &fixtures =
       Instance::Management().GetTheatre().Fixtures();
-  for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
+  for (const system::ObservablePtr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = _fixturesListModel->append();
     const Gtk::TreeModel::Row &row = *iter;
     row[_fixturesListColumns._title] = fixture->Name();
@@ -107,7 +107,7 @@ void FixtureListWindow::fillFixturesList() {
     row[_fixturesListColumns._universe] = fixture->GetUniverse();
     row[_fixturesListColumns._channels] = getChannelString(*fixture);
     row[_fixturesListColumns._symbol] = fixture->Symbol().Name();
-    row[_fixturesListColumns._fixture] = fixture.get();
+    row[_fixturesListColumns._fixture] = fixture.Get();
   }
 }
 
@@ -256,16 +256,16 @@ void FixtureListWindow::onUpClicked() {
   const std::vector<theatre::Fixture *> selection = GetSelection();
   for (theatre::Fixture *fixture : selection) {
     theatre::Fixture *previous_fixture = nullptr;
-    for (const std::unique_ptr<theatre::Fixture> &f :
+    for (const system::ObservablePtr<theatre::Fixture> &f :
          Instance::Management().GetTheatre().Fixtures()) {
-      if (f.get() == fixture) {
+      if (f.Get() == fixture) {
         if (previous_fixture) {
           Instance::Management().GetTheatre().SwapFixturePositions(
               *previous_fixture, *fixture);
         }
         break;
       }
-      previous_fixture = f.get();
+      previous_fixture = f.Get();
     }
   }
   lock.unlock();
@@ -280,7 +280,7 @@ void FixtureListWindow::onDownClicked() {
     for (auto iterator = Instance::Management().GetTheatre().Fixtures().begin();
          iterator != Instance::Management().GetTheatre().Fixtures().end();
          ++iterator) {
-      if (iterator->get() == fixture) {
+      if (iterator->Get() == fixture) {
         ++iterator;
         if (iterator != Instance::Management().GetTheatre().Fixtures().end()) {
           Instance::Management().GetTheatre().SwapFixturePositions(**iterator,
@@ -298,7 +298,7 @@ void FixtureListWindow::onDownClicked() {
 void FixtureListWindow::onReassignClicked() {
   unsigned channel = 0;
   unsigned universe = 0;
-  for (const std::unique_ptr<theatre::Fixture> &fixture :
+  for (const system::ObservablePtr<theatre::Fixture> &fixture :
        Instance::Management().GetTheatre().Fixtures()) {
     fixture->SetChannel(theatre::DmxChannel(channel, universe));
     const std::vector<unsigned> channels = fixture->GetChannels();

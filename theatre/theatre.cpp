@@ -72,8 +72,8 @@ FixtureType &Theatre::AddFixtureType(const FixtureType &fixture_type) {
 }
 
 bool Theatre::Contains(Fixture &fixture) const {
-  for (const std::unique_ptr<Fixture> &f : _fixtures) {
-    if (f.get() == &fixture) return true;
+  for (const system::ObservablePtr<Fixture> &f : _fixtures) {
+    if (f.Get() == &fixture) return true;
   }
   return false;
 }
@@ -87,7 +87,7 @@ FixtureType &Theatre::GetFixtureType(const std::string &name) const {
 }
 
 FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
-  for (const std::unique_ptr<Fixture> &f : _fixtures) {
+  for (const system::ObservablePtr<Fixture> &f : _fixtures) {
     const std::vector<std::unique_ptr<FixtureFunction>> &functions =
         f->Functions();
     for (const std::unique_ptr<FixtureFunction> &function : functions) {
@@ -122,11 +122,11 @@ void Theatre::RemoveFixtureType(const FixtureType &fixtureType) {
 
 void Theatre::SwapFixturePositions(const Fixture &fixture_a,
                                    const Fixture &fixture_b) {
-  std::unique_ptr<Fixture> *a = nullptr;
-  std::unique_ptr<Fixture> *b = nullptr;
-  for (std::unique_ptr<Fixture> &f : _fixtures) {
-    if (f.get() == &fixture_a) a = &f;
-    if (f.get() == &fixture_b) b = &f;
+  system::ObservablePtr<Fixture> *a = nullptr;
+  system::ObservablePtr<Fixture> *b = nullptr;
+  for (system::ObservablePtr<Fixture> &f : _fixtures) {
+    if (f.Get() == &fixture_a) a = &f;
+    if (f.Get() == &fixture_b) b = &f;
   }
   assert(a);
   assert(b);
@@ -134,7 +134,7 @@ void Theatre::SwapFixturePositions(const Fixture &fixture_a,
 }
 
 bool Theatre::IsUsed(const FixtureType &fixtureType) const {
-  for (const std::unique_ptr<Fixture> &f : _fixtures) {
+  for (const system::ObservablePtr<Fixture> &f : _fixtures) {
     if (&f->Type() == &fixtureType) {
       return true;
     }
@@ -144,7 +144,7 @@ bool Theatre::IsUsed(const FixtureType &fixtureType) const {
 
 void Theatre::NotifyDmxChange() {
   unsigned highest = 0;
-  for (const std::unique_ptr<Fixture> &fixture : _fixtures) {
+  for (const system::ObservablePtr<Fixture> &fixture : _fixtures) {
     std::vector<unsigned> channels = fixture->GetChannels();
     for (unsigned channel : channels) {
       if (channel > highest) highest = channel;
@@ -159,7 +159,7 @@ Position Theatre::GetFreePosition() const {
   std::unique_ptr<bool[]> available(new bool[n]);
   std::fill_n(available.get(), n, true);
 
-  for (const std::unique_ptr<Fixture> &fixture : _fixtures) {
+  for (const system::ObservablePtr<Fixture> &fixture : _fixtures) {
     double x = fixture->GetPosition().X();
     if (x < rowLength) {
       double index = x + fixture->GetPosition().Y() * rowLength;
@@ -182,7 +182,7 @@ Position Theatre::GetFreePosition() const {
 
 Position Theatre::Extend() const {
   Position extend;
-  for (const std::unique_ptr<Fixture> &fixture : _fixtures) {
+  for (const system::ObservablePtr<Fixture> &fixture : _fixtures) {
     const double right = fixture->GetPosition().X() + 1.0;
     const double bottom = fixture->GetPosition().Y() + 1.0;
     if (right > extend.X()) extend.X() = right;

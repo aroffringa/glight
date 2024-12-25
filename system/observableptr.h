@@ -1,6 +1,7 @@
 #ifndef GLIGHT_SYSTEM_OBSERVABLE_PTR_H_
 #define GLIGHT_SYSTEM_OBSERVABLE_PTR_H_
 
+#include <cassert>
 #include <cstddef>
 #include <memory>
 
@@ -33,27 +34,66 @@ template <typename T>
 class ObservablePtr {
  public:
   constexpr ObservablePtr() noexcept {}
-  constexpr ObservablePtr(std::nullptr_t) noexcept {}
-  constexpr ObservablePtr(T* object) noexcept : ptr_(object) {}
-  constexpr ObservablePtr(std::unique_ptr<T> object) noexcept
+  constexpr explicit ObservablePtr(std::nullptr_t) noexcept {}
+  /**
+   * The new ObservablePtr will become the owner of the pointer and
+   * make sure it is destructed.
+   */
+  constexpr explicit ObservablePtr(T* object) noexcept : ptr_(object) {}
+  constexpr explicit ObservablePtr(std::unique_ptr<T> object) noexcept
       : ptr_(std::move(object)) {}
-  constexpr ObservablePtr(const ObservablePtr&) noexcept = delete;
+  /**
+   * Move construct an ObservablePtr. The @p source will be reset, and all
+   * observers that track the source beforehand, will track the newly
+   * constructed object afterwards.
+   */
   constexpr ObservablePtr(ObservablePtr<T>&& source) noexcept;
-  ~ObservablePtr() noexcept { Reset(); }
+  constexpr ~ObservablePtr() noexcept { Reset(); }
 
+  /**
+   * Move assign an ObservablePtr. The @p rhs will be reset, and all observers
+   * that track the rhs beforehand, will track the destination object
+   * afterwards.
+   */
   ObservablePtr<T>& operator=(ObservablePtr<T>&& rhs) noexcept;
-  ObservablePtr<T>& operator=(const ObservablePtr<T>& rhs) noexcept = delete;
 
+  constexpr ObservablePtr(const ObservablePtr&) noexcept = delete;
+  constexpr ObservablePtr<T>& operator=(const ObservablePtr<T>& rhs) noexcept =
+      delete;
+
+  /**
+   * If set, destroys the object being pointed to and unlinks
+   * all the observers. This means that if this pointer is
+   * later set again, it won't affect the current observers:
+   * their Get() function will still return @c nullptr.
+   */
   void Reset() noexcept;
+  /** Same as @ref Reset(). */
   void Reset(std::nullptr_t) noexcept { Reset(); }
+  /**
+   * Resets the objects and assigns the object afterwards.
+   * Any observers will not be tracking the new object. This
+   * ObservablePtr will become the owner of the pointer and
+   * make sure it is destructed.
+   */
   void Reset(T* object) noexcept {
     Reset();
     ptr_.reset(object);
   }
+  void Reset(std::unique_ptr<T> object_ptr) noexcept {
+    Reset();
+    ptr_ = std::move(object_ptr);
+  }
 
   T* Get() const noexcept { return ptr_.get(); }
-  constexpr T& operator*() const noexcept { return *ptr_; }
-  constexpr T* operator->() const noexcept { return ptr_.get(); }
+  constexpr T& operator*() const noexcept {
+    assert(ptr_);
+    return *ptr_;
+  }
+  constexpr T* operator->() const noexcept {
+    assert(ptr_);
+    return ptr_.get();
+  }
 
   constexpr explicit operator bool() const noexcept {
     return static_cast<bool>(ptr_);
@@ -83,11 +123,33 @@ class ObservablePtr {
     return lhs.ptr_ >= rhs.ptr_;
   }
   Observer<T> GetObserver() const noexcept;
+
+  /**
+   * Number of observers that track this pointer.
+   */
   size_t ShareCount() const noexcept;
-  T* Release() noexcept {
-    T* object = ptr_.release();
+
+  /**
+   * Transfers ownership of the pointer. After this call, this
+   * ObservablePtr will be in a reset state.
+   */
+  std::unique_ptr<T> Release() noexcept {
+    std::unique_ptr<T> object = std::move(ptr_);
     Reset();
     return object;
+  }
+
+  friend void swap(ObservablePtr<T>& a, ObservablePtr<T>& b) {
+    std::swap(a.ptr_, b.ptr_);
+    std::swap(a.observer_list_, b.observer_list_);
+    const auto set_list = [](Observer<T>* list, ObservablePtr<T>& new_parent) {
+      while (list) {
+        list->parent_ = &new_parent;
+        list = list->next_;
+      }
+    };
+    set_list(a.observer_list_, a);
+    set_list(b.observer_list_, b);
   }
 
  private:
@@ -99,7 +161,10 @@ class ObservablePtr {
 template <typename T>
 class Observer {
  public:
-  Observer(const Observer& source) noexcept
+  constexpr Observer() noexcept
+      : parent_(nullptr), previous_(nullptr), next_(nullptr) {}
+  constexpr Observer(std::nullptr_t) noexcept : Observer() {}
+  constexpr Observer(const Observer& source) noexcept
       : parent_(source.parent_), previous_(nullptr), next_(nullptr) {
     if (parent_) {
       parent_->observer_list_->previous_ = this;
@@ -107,7 +172,7 @@ class Observer {
       parent_->observer_list_ = this;
     }
   }
-  Observer(Observer&& source) noexcept
+  constexpr Observer(Observer&& source) noexcept
       : parent_(source.parent_),
         previous_(source.previous_),
         next_(source.next_) {
@@ -120,7 +185,7 @@ class Observer {
       parent_->observer_list_ = this;
     if (next_) next_->previous_ = this;
   }
-  ~Observer() noexcept {
+  constexpr ~Observer() noexcept {
     if (previous_) {
       previous_->next_ = next_;
     } else if (parent_) {
@@ -130,7 +195,7 @@ class Observer {
       next_->previous_ = previous_;
     }
   }
-  Observer<T>& operator=(const Observer<T>& rhs) noexcept {
+  constexpr Observer<T>& operator=(const Observer<T>& rhs) noexcept {
     parent_ = rhs.parent_;
     previous_ = nullptr;
     if (parent_) {
@@ -142,7 +207,7 @@ class Observer {
     }
     return *this;
   }
-  Observer<T>& operator=(Observer<T>&& rhs) noexcept {
+  constexpr Observer<T>& operator=(Observer<T>&& rhs) noexcept {
     parent_ = rhs.parent_;
     previous_ = rhs.previous_;
     next_ = rhs.next_;
@@ -159,19 +224,42 @@ class Observer {
     }
     return *this;
   }
-  operator bool() const { return Get() != nullptr; }
-  bool operator==(const Observer& rhs) const { return Get() == rhs.Get(); }
-  bool operator!=(const Observer& rhs) const { return Get() != rhs.Get(); }
-  T* Get() const {
+  constexpr operator bool() const { return Get() != nullptr; }
+  constexpr bool operator==(const Observer& rhs) const {
+    return Get() == rhs.Get();
+  }
+  constexpr bool operator!=(const Observer& rhs) const {
+    return Get() != rhs.Get();
+  }
+  constexpr T* Get() const {
     if (parent_)
       return parent_->Get();
     else
       return nullptr;
   }
 
+  constexpr friend void swap(Observer<T>& a, Observer<T>& b) {
+    std::swap(a.parent_, b.parent_);
+    if (a.parent_ != b.parent_) {
+      std::swap(a.previous_, b.previous_);
+      std::swap(a.next_, b.next_);
+      if (a.next_) a.next_->previous_ = &a;
+      if (a.previous_)
+        a.previous_->next_ = &a;
+      else if (a.parent_)
+        a.parent_->observer_list_ = &a;
+
+      if (b.next_) b.next_->previous_ = &b;
+      if (b.previous_)
+        b.previous_->next_ = &b;
+      else if (b.parent_)
+        b.parent_->observer_list_ = &b;
+    }
+  }
+
  private:
-  Observer(const ObservablePtr<T>* parent, Observer<T>* previous,
-           Observer<T>* next)
+  constexpr Observer(const ObservablePtr<T>* parent, Observer<T>* previous,
+                     Observer<T>* next)
       : parent_(parent), previous_(previous), next_(next) {}
 
   friend class ObservablePtr<T>;

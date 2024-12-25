@@ -10,7 +10,7 @@ namespace {
 size_t n_constructions;
 size_t n_deletes;
 
-void reset() {
+void ResetTracker() {
   n_constructions = 0;
   n_deletes = 0;
 }
@@ -26,7 +26,7 @@ class Tracker {
 BOOST_AUTO_TEST_SUITE(indifferent_ptr)
 
 BOOST_AUTO_TEST_CASE(empty_construct) {
-  reset();
+  ResetTracker();
   IndifferentPtr a;
   BOOST_CHECK(!a);
   BOOST_CHECK_EQUAL(n_constructions, 0);
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(empty_construct) {
 }
 
 BOOST_AUTO_TEST_CASE(pointer_construct) {
-  reset();
+  ResetTracker();
   {
     Tracker* tracker = new Tracker();
     IndifferentPtr a(tracker);
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(pointer_construct) {
 }
 
 BOOST_AUTO_TEST_CASE(move_construct) {
-  reset();
+  ResetTracker();
   Tracker* tracker = new Tracker();
   IndifferentPtr a(tracker);
   IndifferentPtr b(std::move(a));
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(move_construct) {
 }
 
 BOOST_AUTO_TEST_CASE(move_assignment) {
-  reset();
+  ResetTracker();
   Tracker* tracker = new Tracker();
   IndifferentPtr a(tracker);
   IndifferentPtr b;
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(move_assignment) {
 }
 
 BOOST_AUTO_TEST_CASE(make_indifferent_ptr) {
-  reset();
+  ResetTracker();
   IndifferentPtr a = MakeIndifferent<Tracker>();
   BOOST_CHECK(bool(a));
 

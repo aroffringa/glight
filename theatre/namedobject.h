@@ -7,6 +7,8 @@
 
 #include <sigc++/signal.h>
 
+#include "system/observableptr.h"
+
 namespace glight::theatre {
 
 /**
@@ -51,6 +53,16 @@ class NamedObject {
 
   template <typename NamedObjectType>
   static NamedObjectType *FindNamedObjectIfExists(
+      const std::vector<system::ObservablePtr<NamedObjectType>> &container,
+      const std::string &name) {
+    for (const system::ObservablePtr<NamedObjectType> &obj : container) {
+      if (obj->_name == name) return obj.Get();
+    }
+    return nullptr;
+  }
+
+  template <typename NamedObjectType>
+  static NamedObjectType *FindNamedObjectIfExists(
       const std::vector<NamedObjectType *> &container,
       const std::string &name) {
     for (NamedObjectType *obj : container) {
@@ -62,6 +74,18 @@ class NamedObject {
   template <typename NamedObjectType>
   static NamedObjectType &FindNamedObject(
       const std::vector<std::unique_ptr<NamedObjectType>> &container,
+      const std::string &name) {
+    NamedObjectType *obj = FindNamedObjectIfExists(container, name);
+    if (obj)
+      return *obj;
+    else
+      throw std::runtime_error("Could not find named object " + name +
+                               " in container.");
+  }
+
+  template <typename NamedObjectType>
+  static NamedObjectType &FindNamedObject(
+      const std::vector<system::ObservablePtr<NamedObjectType>> &container,
       const std::string &name) {
     NamedObjectType *obj = FindNamedObjectIfExists(container, name);
     if (obj)
@@ -96,6 +120,18 @@ class NamedObject {
   }
 
   template <typename ObjectType>
+  static size_t FindIndex(
+      const std::vector<system::ObservablePtr<ObjectType>> &container,
+      const ObjectType *element) {
+    for (size_t i = 0; i != container.size(); ++i) {
+      if (container[i].Get() == element) {
+        return i;
+      }
+    }
+    throw std::runtime_error("Could not find object in container.");
+  }
+
+  template <typename ObjectType>
   static bool Contains(
       const std::vector<std::unique_ptr<ObjectType>> &container,
       const ObjectType *element) {
@@ -107,9 +143,29 @@ class NamedObject {
 
   template <typename ObjectType>
   static bool Contains(
+      const std::vector<system::ObservablePtr<ObjectType>> &container,
+      const ObjectType *element) {
+    for (const std::unique_ptr<ObjectType> &obj : container) {
+      if (obj.Get() == &element) return true;
+    }
+    return false;
+  }
+
+  template <typename ObjectType>
+  static bool Contains(
       const std::vector<std::unique_ptr<ObjectType>> &container,
       const std::string &name) {
     for (const std::unique_ptr<ObjectType> &obj : container) {
+      if (obj->_name == name) return true;
+    }
+    return false;
+  }
+
+  template <typename ObjectType>
+  static bool Contains(
+      const std::vector<system::ObservablePtr<ObjectType>> &container,
+      const std::string &name) {
+    for (const system::ObservablePtr<ObjectType> &obj : container) {
       if (obj->_name == name) return true;
     }
     return false;
