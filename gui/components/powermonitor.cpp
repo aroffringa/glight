@@ -59,7 +59,7 @@ std::map<size_t, std::pair<double, double>> GetPowerPerPhase(
     const theatre::ValueSnapshot& snapshot) {
   const theatre::Theatre& theatre = Instance::Management().GetTheatre();
   std::map<size_t, std::pair<double, double>> phases;
-  for (const system::ObservablePtr<theatre::Fixture>& fixture :
+  for (const system::TrackablePtr<theatre::Fixture>& fixture :
        theatre.Fixtures()) {
     const double fixture_power = fixture->Type().GetPower(*fixture, snapshot);
     std::pair<double, double>& phase_power = phases[fixture->ElectricPhase()];

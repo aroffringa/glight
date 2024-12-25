@@ -8,7 +8,7 @@
 namespace glight::system {
 
 template <typename T>
-class Observer;
+class ObservingPtr;
 
 /**
  * An owning smart pointer that can be observed. Comparable to
@@ -19,46 +19,46 @@ class Observer;
  *
  * While the same behaviour can be obtained by using a single
  * std::shared_ptr with std::weak_ptrs, for cases that match with
- * the behaviour of the ObservablePtr, it offers a stricter way of
+ * the behaviour of the TrackablePtr, it offers a stricter way of
  * accessing the pointer, which may simplify structure and clarify
  * intend.
  *
  * An advantage of this class over a std::shared_ptr is that an
- * ObservablePtr never requires heap allocation and destroys the
+ * TrackablePtr never requires heap allocation and destroys the
  * object immediately when the owning pointer is destructed or reset.
  *
  * This class is not thread safe: if the owner and its observers are
  * accessed in different threads, they need to be synchronized.
  */
 template <typename T>
-class ObservablePtr {
+class TrackablePtr {
  public:
-  constexpr ObservablePtr() noexcept {}
-  constexpr explicit ObservablePtr(std::nullptr_t) noexcept {}
+  constexpr TrackablePtr() noexcept {}
+  constexpr explicit TrackablePtr(std::nullptr_t) noexcept {}
   /**
-   * The new ObservablePtr will become the owner of the pointer and
+   * The new TrackablePtr will become the owner of the pointer and
    * make sure it is destructed.
    */
-  constexpr explicit ObservablePtr(T* object) noexcept : ptr_(object) {}
-  constexpr explicit ObservablePtr(std::unique_ptr<T> object) noexcept
+  constexpr explicit TrackablePtr(T* object) noexcept : ptr_(object) {}
+  constexpr explicit TrackablePtr(std::unique_ptr<T> object) noexcept
       : ptr_(std::move(object)) {}
   /**
-   * Move construct an ObservablePtr. The @p source will be reset, and all
+   * Move construct an TrackablePtr. The @p source will be reset, and all
    * observers that track the source beforehand, will track the newly
    * constructed object afterwards.
    */
-  constexpr ObservablePtr(ObservablePtr<T>&& source) noexcept;
-  constexpr ~ObservablePtr() noexcept { Reset(); }
+  constexpr TrackablePtr(TrackablePtr<T>&& source) noexcept;
+  constexpr ~TrackablePtr() noexcept { Reset(); }
 
   /**
-   * Move assign an ObservablePtr. The @p rhs will be reset, and all observers
+   * Move assign an TrackablePtr. The @p rhs will be reset, and all observers
    * that track the rhs beforehand, will track the destination object
    * afterwards.
    */
-  ObservablePtr<T>& operator=(ObservablePtr<T>&& rhs) noexcept;
+  TrackablePtr<T>& operator=(TrackablePtr<T>&& rhs) noexcept;
 
-  constexpr ObservablePtr(const ObservablePtr&) noexcept = delete;
-  constexpr ObservablePtr<T>& operator=(const ObservablePtr<T>& rhs) noexcept =
+  constexpr TrackablePtr(const TrackablePtr&) noexcept = delete;
+  constexpr TrackablePtr<T>& operator=(const TrackablePtr<T>& rhs) noexcept =
       delete;
 
   /**
@@ -73,7 +73,7 @@ class ObservablePtr {
   /**
    * Resets the objects and assigns the object afterwards.
    * Any observers will not be tracking the new object. This
-   * ObservablePtr will become the owner of the pointer and
+   * TrackablePtr will become the owner of the pointer and
    * make sure it is destructed.
    */
   void Reset(T* object) noexcept {
@@ -98,31 +98,31 @@ class ObservablePtr {
   constexpr explicit operator bool() const noexcept {
     return static_cast<bool>(ptr_);
   }
-  constexpr friend bool operator==(const ObservablePtr<T>& lhs,
-                                   const ObservablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator==(const TrackablePtr<T>& lhs,
+                                   const TrackablePtr<T>& rhs) noexcept {
     return lhs.ptr_ == rhs.ptr_;
   }
-  constexpr friend bool operator!=(const ObservablePtr<T>& lhs,
-                                   const ObservablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator!=(const TrackablePtr<T>& lhs,
+                                   const TrackablePtr<T>& rhs) noexcept {
     return lhs.ptr_ != rhs.ptr_;
   }
-  constexpr friend bool operator<(const ObservablePtr<T>& lhs,
-                                  const ObservablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator<(const TrackablePtr<T>& lhs,
+                                  const TrackablePtr<T>& rhs) noexcept {
     return lhs.ptr_ < rhs.ptr_;
   }
-  constexpr friend bool operator>(const ObservablePtr<T>& lhs,
-                                  const ObservablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator>(const TrackablePtr<T>& lhs,
+                                  const TrackablePtr<T>& rhs) noexcept {
     return lhs.ptr_ > rhs.ptr_;
   }
-  constexpr friend bool operator<=(const ObservablePtr<T>& lhs,
-                                   const ObservablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator<=(const TrackablePtr<T>& lhs,
+                                   const TrackablePtr<T>& rhs) noexcept {
     return lhs.ptr_ <= rhs.ptr_;
   }
-  constexpr friend bool operator>=(const ObservablePtr<T>& lhs,
-                                   const ObservablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator>=(const TrackablePtr<T>& lhs,
+                                   const TrackablePtr<T>& rhs) noexcept {
     return lhs.ptr_ >= rhs.ptr_;
   }
-  Observer<T> GetObserver() const noexcept;
+  ObservingPtr<T> GetObserver() const noexcept;
 
   /**
    * Number of observers that track this pointer.
@@ -131,7 +131,7 @@ class ObservablePtr {
 
   /**
    * Transfers ownership of the pointer. After this call, this
-   * ObservablePtr will be in a reset state.
+   * TrackablePtr will be in a reset state.
    */
   std::unique_ptr<T> Release() noexcept {
     std::unique_ptr<T> object = std::move(ptr_);
@@ -139,10 +139,11 @@ class ObservablePtr {
     return object;
   }
 
-  friend void swap(ObservablePtr<T>& a, ObservablePtr<T>& b) {
+  friend void swap(TrackablePtr<T>& a, TrackablePtr<T>& b) {
     std::swap(a.ptr_, b.ptr_);
     std::swap(a.observer_list_, b.observer_list_);
-    const auto set_list = [](Observer<T>* list, ObservablePtr<T>& new_parent) {
+    const auto set_list = [](ObservingPtr<T>* list,
+                             TrackablePtr<T>& new_parent) {
       while (list) {
         list->parent_ = &new_parent;
         list = list->next_;
@@ -153,18 +154,18 @@ class ObservablePtr {
   }
 
  private:
-  friend class Observer<T>;
+  friend class ObservingPtr<T>;
   std::unique_ptr<T> ptr_;
-  mutable Observer<T>* observer_list_ = nullptr;
+  mutable ObservingPtr<T>* observer_list_ = nullptr;
 };
 
 template <typename T>
-class Observer {
+class ObservingPtr {
  public:
-  constexpr Observer() noexcept
+  constexpr ObservingPtr() noexcept
       : parent_(nullptr), previous_(nullptr), next_(nullptr) {}
-  constexpr Observer(std::nullptr_t) noexcept : Observer() {}
-  constexpr Observer(const Observer& source) noexcept
+  constexpr ObservingPtr(std::nullptr_t) noexcept : ObservingPtr() {}
+  constexpr ObservingPtr(const ObservingPtr& source) noexcept
       : parent_(source.parent_), previous_(nullptr), next_(nullptr) {
     if (parent_) {
       parent_->observer_list_->previous_ = this;
@@ -172,7 +173,7 @@ class Observer {
       parent_->observer_list_ = this;
     }
   }
-  constexpr Observer(Observer&& source) noexcept
+  constexpr ObservingPtr(ObservingPtr&& source) noexcept
       : parent_(source.parent_),
         previous_(source.previous_),
         next_(source.next_) {
@@ -185,7 +186,7 @@ class Observer {
       parent_->observer_list_ = this;
     if (next_) next_->previous_ = this;
   }
-  constexpr ~Observer() noexcept {
+  constexpr ~ObservingPtr() noexcept {
     if (previous_) {
       previous_->next_ = next_;
     } else if (parent_) {
@@ -195,7 +196,7 @@ class Observer {
       next_->previous_ = previous_;
     }
   }
-  constexpr Observer<T>& operator=(const Observer<T>& rhs) noexcept {
+  constexpr ObservingPtr<T>& operator=(const ObservingPtr<T>& rhs) noexcept {
     parent_ = rhs.parent_;
     previous_ = nullptr;
     if (parent_) {
@@ -207,7 +208,7 @@ class Observer {
     }
     return *this;
   }
-  constexpr Observer<T>& operator=(Observer<T>&& rhs) noexcept {
+  constexpr ObservingPtr<T>& operator=(ObservingPtr<T>&& rhs) noexcept {
     parent_ = rhs.parent_;
     previous_ = rhs.previous_;
     next_ = rhs.next_;
@@ -225,10 +226,10 @@ class Observer {
     return *this;
   }
   constexpr operator bool() const { return Get() != nullptr; }
-  constexpr bool operator==(const Observer& rhs) const {
+  constexpr bool operator==(const ObservingPtr& rhs) const {
     return Get() == rhs.Get();
   }
-  constexpr bool operator!=(const Observer& rhs) const {
+  constexpr bool operator!=(const ObservingPtr& rhs) const {
     return Get() != rhs.Get();
   }
   constexpr T* Get() const {
@@ -238,7 +239,7 @@ class Observer {
       return nullptr;
   }
 
-  constexpr friend void swap(Observer<T>& a, Observer<T>& b) {
+  constexpr friend void swap(ObservingPtr<T>& a, ObservingPtr<T>& b) {
     std::swap(a.parent_, b.parent_);
     if (a.parent_ != b.parent_) {
       std::swap(a.previous_, b.previous_);
@@ -258,21 +259,21 @@ class Observer {
   }
 
  private:
-  constexpr Observer(const ObservablePtr<T>* parent, Observer<T>* previous,
-                     Observer<T>* next)
+  constexpr ObservingPtr(const TrackablePtr<T>* parent,
+                         ObservingPtr<T>* previous, ObservingPtr<T>* next)
       : parent_(parent), previous_(previous), next_(next) {}
 
-  friend class ObservablePtr<T>;
-  const ObservablePtr<T>* parent_;
-  Observer<T>* previous_;
-  Observer<T>* next_;
+  friend class TrackablePtr<T>;
+  const TrackablePtr<T>* parent_;
+  ObservingPtr<T>* previous_;
+  ObservingPtr<T>* next_;
 };
 
 template <typename T>
-void ObservablePtr<T>::Reset() noexcept {
-  Observer<T>* observer = observer_list_;
+void TrackablePtr<T>::Reset() noexcept {
+  ObservingPtr<T>* observer = observer_list_;
   while (observer) {
-    Observer<T>* next = observer->next_;
+    ObservingPtr<T>* next = observer->next_;
     observer->parent_ = nullptr;
     observer->previous_ = nullptr;
     observer->next_ = nullptr;
@@ -283,18 +284,18 @@ void ObservablePtr<T>::Reset() noexcept {
 }
 
 template <typename T>
-Observer<T> ObservablePtr<T>::GetObserver() const noexcept {
-  Observer<T> observer(this, nullptr, observer_list_);
+ObservingPtr<T> TrackablePtr<T>::GetObserver() const noexcept {
+  ObservingPtr<T> observer(this, nullptr, observer_list_);
   if (observer_list_) observer_list_->previous_ = &observer;
   observer_list_ = &observer;
   return observer;
 }
 
 template <typename T>
-constexpr ObservablePtr<T>::ObservablePtr(ObservablePtr<T>&& source) noexcept
+constexpr TrackablePtr<T>::TrackablePtr(TrackablePtr<T>&& source) noexcept
     : ptr_(std::move(source.ptr_)), observer_list_(source.observer_list_) {
   source.observer_list_ = nullptr;
-  Observer<T>* observer = observer_list_;
+  ObservingPtr<T>* observer = observer_list_;
   while (observer) {
     observer->parent_ = this;
     observer = observer->next_;
@@ -302,12 +303,12 @@ constexpr ObservablePtr<T>::ObservablePtr(ObservablePtr<T>&& source) noexcept
 }
 
 template <typename T>
-ObservablePtr<T>& ObservablePtr<T>::operator=(ObservablePtr<T>&& rhs) noexcept {
+TrackablePtr<T>& TrackablePtr<T>::operator=(TrackablePtr<T>&& rhs) noexcept {
   Reset();
   ptr_ = std::move(rhs.ptr_);
   observer_list_ = rhs.observer_list_;
   rhs.observer_list_ = nullptr;
-  Observer<T>* observer = observer_list_;
+  ObservingPtr<T>* observer = observer_list_;
   while (observer) {
     observer->parent_ = this;
     observer = observer->next_;
@@ -316,9 +317,9 @@ ObservablePtr<T>& ObservablePtr<T>::operator=(ObservablePtr<T>&& rhs) noexcept {
 }
 
 template <typename T>
-size_t ObservablePtr<T>::ShareCount() const noexcept {
+size_t TrackablePtr<T>::ShareCount() const noexcept {
   size_t count = 0;
-  Observer<T>* observer = observer_list_;
+  ObservingPtr<T>* observer = observer_list_;
   while (observer) {
     ++count;
     observer = observer->next_;
@@ -327,8 +328,8 @@ size_t ObservablePtr<T>::ShareCount() const noexcept {
 }
 
 template <typename T, typename... Args>
-ObservablePtr<T> MakeObservable(Args&&... args) {
-  return ObservablePtr<T>(new T(std::forward<Args>(args)...));
+TrackablePtr<T> MakeObservable(Args&&... args) {
+  return TrackablePtr<T>(new T(std::forward<Args>(args)...));
 }
 
 }  // namespace glight::system

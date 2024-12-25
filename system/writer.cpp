@@ -600,9 +600,9 @@ void writeGlightShow(WriteState &state) {
   state.writer.EndArray();  // fixture-types
 
   state.writer.StartArray("fixtures");
-  const std::vector<system::ObservablePtr<Fixture>> &fixtures =
+  const std::vector<system::TrackablePtr<Fixture>> &fixtures =
       theatre.Fixtures();
-  for (const system::ObservablePtr<Fixture> &f : fixtures)
+  for (const system::TrackablePtr<Fixture> &f : fixtures)
     writeFixture(state, *f);
   state.writer.EndArray();  // fixtures
 

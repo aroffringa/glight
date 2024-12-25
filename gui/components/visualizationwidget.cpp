@@ -188,13 +188,13 @@ bool VisualizationWidget::onExpose(
 }
 
 void VisualizationWidget::updateMidiColors() {
-  const std::vector<system::ObservablePtr<theatre::Fixture>> &fixtures =
+  const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       _management->GetTheatre().Fixtures();
   system::midi::Manager &midi_manager = main_window_->GetMidiManager();
   const size_t n_pads = midi_manager.GetNPads();
   if (n_pads > 0) {
     size_t pad = 0;
-    for (const system::ObservablePtr<theatre::Fixture> &fixture : fixtures) {
+    for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
       if (fixture->IsVisible()) {
         const glight::theatre::FixtureType &type = fixture->Type();
         const size_t shape_count = type.ShapeCount();
@@ -504,9 +504,9 @@ void VisualizationWidget::selectFixtures(const theatre::Position &a,
   theatre::Position first(x1 - 0.1, y1 - 0.1);
   theatre::Position second(x2 - 0.9, y2 - 0.9);
   if (second.X() - first.X() > 0.0 && second.Y() - first.Y() > 0.0) {
-    const std::vector<system::ObservablePtr<theatre::Fixture>> &fixtures =
+    const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
         _management->GetTheatre().Fixtures();
-    for (const system::ObservablePtr<theatre::Fixture> &fixture : fixtures) {
+    for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
       if (fixture->IsVisible() &&
           fixture->GetPosition().InsideRectangle(first, second))
         _selectedFixtures.emplace_back(fixture.Get());

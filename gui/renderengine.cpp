@@ -163,7 +163,7 @@ void RenderEngine::DrawSnapshot(
     const Cairo::RefPtr<Cairo::Context> &cairo,
     const theatre::ValueSnapshot &snapshot, const DrawStyle &style,
     const std::vector<theatre::Fixture *> &selected_fixtures) {
-  const std::vector<system::ObservablePtr<theatre::Fixture>> &fixtures =
+  const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       management_.GetTheatre().Fixtures();
   cairo->save();
   scale_ = GetScale(management_, style.width, style.height);
@@ -191,7 +191,7 @@ void RenderEngine::DrawSnapshot(
 
   DrawData draw_data{cairo, management_, snapshot, style, scale_, false};
 
-  for (const system::ObservablePtr<theatre::Fixture> &fixture : fixtures) {
+  for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
     if (fixture->IsVisible()) {
       DrawFixtureBeam(draw_data, *fixture);
     }
@@ -243,12 +243,12 @@ void RenderEngine::DrawSelectionRectangle(
 
 theatre::Fixture *RenderEngine::FixtureAt(
     const theatre::Position &position) const {
-  const std::vector<system::ObservablePtr<theatre::Fixture>> &fixtures =
+  const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       management_.GetTheatre().Fixtures();
 
   theatre::Fixture *fixture = nullptr;
   double closest = std::numeric_limits<double>::max();
-  for (const system::ObservablePtr<theatre::Fixture> &f : fixtures) {
+  for (const system::TrackablePtr<theatre::Fixture> &f : fixtures) {
     if (f->IsVisible() &&
         position.InsideRectangle(f->GetPosition(),
                                  f->GetPosition().Add(1.0, 1.0))) {

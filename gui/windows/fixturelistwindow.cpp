@@ -97,9 +97,9 @@ void FixtureListWindow::fillFixturesList() {
   _fixturesListModel->clear();
 
   std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<system::ObservablePtr<theatre::Fixture>> &fixtures =
+  const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       Instance::Management().GetTheatre().Fixtures();
-  for (const system::ObservablePtr<theatre::Fixture> &fixture : fixtures) {
+  for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = _fixturesListModel->append();
     const Gtk::TreeModel::Row &row = *iter;
     row[_fixturesListColumns._title] = fixture->Name();
@@ -256,7 +256,7 @@ void FixtureListWindow::onUpClicked() {
   const std::vector<theatre::Fixture *> selection = GetSelection();
   for (theatre::Fixture *fixture : selection) {
     theatre::Fixture *previous_fixture = nullptr;
-    for (const system::ObservablePtr<theatre::Fixture> &f :
+    for (const system::TrackablePtr<theatre::Fixture> &f :
          Instance::Management().GetTheatre().Fixtures()) {
       if (f.Get() == fixture) {
         if (previous_fixture) {
@@ -298,7 +298,7 @@ void FixtureListWindow::onDownClicked() {
 void FixtureListWindow::onReassignClicked() {
   unsigned channel = 0;
   unsigned universe = 0;
-  for (const system::ObservablePtr<theatre::Fixture> &fixture :
+  for (const system::TrackablePtr<theatre::Fixture> &fixture :
        Instance::Management().GetTheatre().Fixtures()) {
     fixture->SetChannel(theatre::DmxChannel(channel, universe));
     const std::vector<unsigned> channels = fixture->GetChannels();

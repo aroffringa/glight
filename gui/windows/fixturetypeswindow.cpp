@@ -242,10 +242,10 @@ theatre::FixtureType *FixtureTypesWindow::getSelected() {
 }
 
 void FixtureTypesWindow::SelectFixtures(const theatre::FixtureType &type) {
-  const std::vector<system::ObservablePtr<theatre::Fixture>> &fixtures =
+  const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       Instance::Management().GetTheatre().Fixtures();
   std::vector<theatre::Fixture *> selected_fixtures;
-  for (const system::ObservablePtr<theatre::Fixture> &fixture : fixtures) {
+  for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
     if (&fixture->Type() == &type)
       selected_fixtures.emplace_back(fixture.Get());
   }
