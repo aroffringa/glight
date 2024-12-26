@@ -146,7 +146,7 @@ class TrackablePtr {
                              TrackablePtr<T>& new_parent) {
       while (list) {
         new_parent.SetParent(list);
-        list = list->next_;
+        list = Next(*list);
       }
     };
     set_list(a.observer_list_, a);
@@ -160,6 +160,7 @@ class TrackablePtr {
     // support.'
     observer->parent_ = this;
   }
+  static ObservingPtr<T>* Next(ObservingPtr<T>& p) { return p.next_; }
   friend class ObservingPtr<T>;
   std::unique_ptr<T> ptr_;
   mutable ObservingPtr<T>* observer_list_ = nullptr;
