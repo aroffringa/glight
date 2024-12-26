@@ -8,6 +8,8 @@
 #include "fixturetype.h"
 #include "position.h"
 
+#include "system/trackableptr.h"
+
 namespace glight::theatre {
 
 /**
@@ -26,7 +28,7 @@ class Theatre {
 
   bool Contains(Fixture &fixture) const;
 
-  const std::vector<std::unique_ptr<Fixture>> &Fixtures() const {
+  const std::vector<system::TrackablePtr<Fixture>> &Fixtures() const {
     return _fixtures;
   }
   const std::vector<std::unique_ptr<FixtureType>> &FixtureTypes() const {
@@ -72,7 +74,7 @@ class Theatre {
   double depth_ = 10.0;
   double height_ = 10.0;
   double fixture_symbol_size_ = 0.5;
-  std::vector<std::unique_ptr<Fixture>> _fixtures;
+  std::vector<system::TrackablePtr<Fixture>> _fixtures;
   std::vector<std::unique_ptr<FixtureType>> _fixtureTypes;
   unsigned _highestChannel = 0;
 };

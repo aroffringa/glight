@@ -36,14 +36,14 @@ void FixtureList::Fill() {
     row[columns_.fixture_] = nullptr;
     row[columns_.group_] = group.get();
   }
-  const std::vector<std::unique_ptr<theatre::Fixture>> &fixtures =
+  const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       management_.GetTheatre().Fixtures();
-  for (const std::unique_ptr<theatre::Fixture> &fixture : fixtures) {
+  for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = model_->append();
     const Gtk::TreeModel::Row &row = *iter;
     row[columns_.title_] = fixture->Name();
     row[columns_.type_] = fixture->Type().Name();
-    row[columns_.fixture_] = fixture.get();
+    row[columns_.fixture_] = fixture.Get();
     row[columns_.group_] = nullptr;
   }
 }

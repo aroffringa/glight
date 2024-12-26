@@ -10,7 +10,7 @@ namespace {
 size_t n_constructions;
 size_t n_deletes;
 
-void reset() {
+void ResetTracker() {
   n_constructions = 0;
   n_deletes = 0;
 }
@@ -26,7 +26,7 @@ class Tracker {
 BOOST_AUTO_TEST_SUITE(deletable_ptr)
 
 BOOST_AUTO_TEST_CASE(empty_construct) {
-  reset();
+  ResetTracker();
   DeletablePtr<Tracker> a;
   BOOST_CHECK(!a);
   BOOST_CHECK(a.Get() == nullptr);
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(empty_construct) {
 }
 
 BOOST_AUTO_TEST_CASE(value_construct) {
-  reset();
+  ResetTracker();
   {
     Tracker* t = new Tracker();
     DeletablePtr<Tracker> b(t);
@@ -51,10 +51,21 @@ BOOST_AUTO_TEST_CASE(value_construct) {
   }
   BOOST_CHECK_EQUAL(n_constructions, 1);
   BOOST_CHECK_EQUAL(n_deletes, 1);
+  {
+    Tracker* t = new Tracker();
+    DeletablePtr<Tracker> b =
+        DeletablePtr<Tracker>(std::unique_ptr<Tracker>(t));
+    BOOST_CHECK(bool(b));
+    BOOST_CHECK_EQUAL(b.Get(), t);
+    BOOST_CHECK_EQUAL(n_constructions, 2);
+    BOOST_CHECK_EQUAL(n_deletes, 1);
+  }
+  BOOST_CHECK_EQUAL(n_constructions, 2);
+  BOOST_CHECK_EQUAL(n_deletes, 2);
 }
 
 BOOST_AUTO_TEST_CASE(delete_method) {
-  reset();
+  ResetTracker();
   {
     DeletablePtr<Tracker> c(new Tracker());
     c.Delete();
@@ -68,7 +79,7 @@ BOOST_AUTO_TEST_CASE(delete_method) {
 }
 
 BOOST_AUTO_TEST_CASE(copy_construct) {
-  reset();
+  ResetTracker();
   DeletablePtr<Tracker> a(new Tracker());
   DeletablePtr<Tracker> e(a);
   BOOST_CHECK_EQUAL(a.Get(), e.Get());
@@ -80,7 +91,7 @@ BOOST_AUTO_TEST_CASE(copy_construct) {
 }
 
 BOOST_AUTO_TEST_CASE(move_construct) {
-  reset();
+  ResetTracker();
   Tracker* tracker = new Tracker();
   DeletablePtr<Tracker> a(tracker);
   DeletablePtr<Tracker> e(std::move(a));
@@ -94,7 +105,7 @@ BOOST_AUTO_TEST_CASE(move_construct) {
 }
 
 BOOST_AUTO_TEST_CASE(copy_assignment) {
-  reset();
+  ResetTracker();
   Tracker* tracker_d = new Tracker();
   DeletablePtr<Tracker> a;
   DeletablePtr<Tracker> d(tracker_d);
@@ -108,7 +119,7 @@ BOOST_AUTO_TEST_CASE(copy_assignment) {
 }
 
 BOOST_AUTO_TEST_CASE(move_assignment) {
-  reset();
+  ResetTracker();
   DeletablePtr<Tracker> a;
   DeletablePtr<Tracker> f(new Tracker());
   a = std::move(f);
@@ -119,7 +130,7 @@ BOOST_AUTO_TEST_CASE(move_assignment) {
 }
 
 BOOST_AUTO_TEST_CASE(make_deletable_ptr) {
-  reset();
+  ResetTracker();
   DeletablePtr<Tracker> a = MakeDeletable<Tracker>();
   BOOST_CHECK(bool(a));
 

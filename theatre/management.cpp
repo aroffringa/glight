@@ -351,7 +351,8 @@ void Management::RemoveFixture(const Fixture &fixture) {
 }
 
 void Management::RemoveFixtureType(const FixtureType &fixtureType) {
-  const std::vector<std::unique_ptr<Fixture>> &fixtures = _theatre->Fixtures();
+  const std::vector<system::TrackablePtr<Fixture>> &fixtures =
+      _theatre->Fixtures();
   bool isUsed = false;
   size_t i = 0;
   while (i != fixtures.size()) {

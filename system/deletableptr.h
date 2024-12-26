@@ -21,6 +21,9 @@ class DeletablePtr {
   constexpr DeletablePtr() noexcept
       : pointer_(std::make_shared<std::unique_ptr<value_type>>()) {}
 
+  constexpr DeletablePtr(std::nullptr_t) noexcept
+      : pointer_(std::make_shared<std::unique_ptr<value_type>>()) {}
+
   DeletablePtr(const DeletablePtr& source) = default;
 
   DeletablePtr(DeletablePtr&& source) : pointer_(std::move(source.pointer_)) {
@@ -31,8 +34,13 @@ class DeletablePtr {
       : pointer_(std::make_shared<std::unique_ptr<value_type>>(
             std::unique_ptr<value_type>(pointer))) {}
 
-  DeletablePtr& operator=(const DeletablePtr& source) = default;
+  explicit DeletablePtr(std::unique_ptr<T> pointer)
+      : pointer_(
+            std::make_shared<std::unique_ptr<value_type>>(std::move(pointer))) {
+  }
 
+  DeletablePtr& operator=(const DeletablePtr& source) = default;
+  DeletablePtr& operator=(nullptr_t) { Reset(); }
   DeletablePtr& operator=(DeletablePtr&& source) {
     Reset();
     std::swap(source.pointer_, pointer_);
@@ -43,6 +51,14 @@ class DeletablePtr {
     if (*pointer_) {
       pointer_ = std::make_shared<std::unique_ptr<value_type>>();
     }
+  }
+  void Reset(std::nullptr_t) noexcept { Reset(); }
+  void Reset(pointer_type value) noexcept {
+    pointer_ = std::make_shared<std::unique_ptr<value_type>>(value);
+  }
+  void Reset(std::unique_ptr<value_type>&& value_ptr) noexcept {
+    pointer_ =
+        std::make_shared<std::unique_ptr<value_type>>(std::move(value_ptr));
   }
 
   void Delete() noexcept { pointer_->reset(); }
