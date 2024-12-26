@@ -275,13 +275,13 @@ class ObservingPtr {
       if (a.previous_)
         a.previous_->next_ = &a;
       else if (a.parent_)
-        a.parent_->observer_list_ = &a;
+        a.SetParentObserverList(a);
 
       if (b.next_) b.next_->previous_ = &b;
       if (b.previous_)
         b.previous_->next_ = &b;
       else if (b.parent_)
-        b.parent_->observer_list_ = &b;
+        b.SetParentObserverList(b);
     }
   }
 
@@ -289,6 +289,13 @@ class ObservingPtr {
   constexpr ObservingPtr(const TrackablePtr<T>* parent,
                          ObservingPtr<T>* previous, ObservingPtr<T>* next)
       : parent_(parent), previous_(previous), next_(next) {}
+
+  void SetParentObserverList(ObservingPtr<T>& new_head) const {
+    // This function is necessary to avoid access problems from friend functions
+    // into a private member of TrackablePtr, which some compilers don't
+    // support.'
+    parent_->observer_list_ = &new_head;
+  }
 
   friend class TrackablePtr<T>;
   const TrackablePtr<T>* parent_;
