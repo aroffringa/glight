@@ -145,7 +145,7 @@ class TrackablePtr {
     const auto set_list = [](ObservingPtr<T>* list,
                              TrackablePtr<T>& new_parent) {
       while (list) {
-        list->parent_ = &new_parent;
+        new_parent.SetParent(list);
         list = list->next_;
       }
     };
@@ -154,6 +154,12 @@ class TrackablePtr {
   }
 
  private:
+  void SetParent(ObservingPtr<T>* observer) const {
+    // This function is necessary to avoid access problems from friend functions
+    // into a private member of ObservingPtr, which some compilers don't
+    // support.'
+    observer->parent_ = this;
+  }
   friend class ObservingPtr<T>;
   std::unique_ptr<T> ptr_;
   mutable ObservingPtr<T>* observer_list_ = nullptr;
