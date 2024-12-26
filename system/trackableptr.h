@@ -159,12 +159,23 @@ class TrackablePtr {
   mutable ObservingPtr<T>* observer_list_ = nullptr;
 };
 
+/**
+ * A class that can observe a TrackablePtr. An ObservingPtr will not
+ * extend the lifetime of a pointer, similar to a std::weak_ptr. An
+ * ObservingPtr keeps track whether the object in a TrackablePtr is destructed.
+ * Once the object is destructed, the ObservingPtr is equivalent to nullptr
+ * and will no longer track the TrackablePtr.
+ */
 template <typename T>
 class ObservingPtr {
  public:
   constexpr ObservingPtr() noexcept
       : parent_(nullptr), previous_(nullptr), next_(nullptr) {}
   constexpr ObservingPtr(std::nullptr_t) noexcept : ObservingPtr() {}
+  /**
+   * Copy construct an ObservingPtr. The new ObservingPtr will track
+   * the same pointer as the @p source.
+   */
   constexpr ObservingPtr(const ObservingPtr& source) noexcept
       : parent_(source.parent_), previous_(nullptr), next_(nullptr) {
     if (parent_) {
@@ -173,6 +184,10 @@ class ObservingPtr {
       parent_->observer_list_ = this;
     }
   }
+  /**
+   * Move construct an ObservingPtr. The @p source will be
+   * equivalent to nullptr after the move.
+   */
   constexpr ObservingPtr(ObservingPtr&& source) noexcept
       : parent_(source.parent_),
         previous_(source.previous_),
@@ -231,6 +246,18 @@ class ObservingPtr {
   }
   constexpr bool operator!=(const ObservingPtr& rhs) const {
     return Get() != rhs.Get();
+  }
+  constexpr bool operator<(const ObservingPtr& rhs) const {
+    return Get() < rhs.Get();
+  }
+  constexpr bool operator>(const ObservingPtr& rhs) const {
+    return Get() > rhs.Get();
+  }
+  constexpr bool operator<=(const ObservingPtr& rhs) const {
+    return Get() <= rhs.Get();
+  }
+  constexpr bool operator>=(const ObservingPtr& rhs) const {
+    return Get() >= rhs.Get();
   }
   constexpr T* Get() const {
     if (parent_)
