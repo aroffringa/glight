@@ -31,13 +31,19 @@ void PowerMonitor::Start() {
   Update();
 }
 
+void PowerMonitor::Update() {
+  const theatre::Management& management = Instance::Management();
+  snapshot_ = management.PrimarySnapshot();
+  UpdateValues();
+}
+
 void PowerMonitor::TimeUpdate() {
   const theatre::Management& management = Instance::Management();
-  const glight::theatre::ValueSnapshot primary_snapshot =
+  glight::theatre::ValueSnapshot primary_snapshot =
       management.PrimarySnapshot();
   if (snapshot_ != primary_snapshot) {
-    snapshot_ = primary_snapshot;
-    Update();
+    snapshot_ = std::move(primary_snapshot);
+    UpdateValues();
   }
 }
 
@@ -69,7 +75,7 @@ std::map<size_t, std::pair<double, double>> GetPowerPerPhase(
   return phases;
 }
 
-void PowerMonitor::Update() {
+void PowerMonitor::UpdateValues() {
   const std::map<size_t, std::pair<double, double>> phases =
       GetPowerPerPhase(snapshot_);
   const size_t n_rows = phases.size() > 1 ? phases.size() + 1 : 1;

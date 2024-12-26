@@ -212,6 +212,14 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     for (const Node &f : functions) {
       ParseFixtureFunction(ToObj(f), fixture);
     }
+    if (fixture.Functions().size() != type.Functions().size()) {
+      throw std::runtime_error("Corrupted fixture found: " + fixture.Name() +
+                               " of type " + type.Name() + " has " +
+                               std::to_string(fixture.Functions().size()) +
+                               " functions, but should have " +
+                               std::to_string(type.Functions().size()) +
+                               " functions according to its type");
+    }
   }
 }
 
