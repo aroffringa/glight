@@ -31,6 +31,9 @@ class PowerMonitor : public Gtk::Grid {
   ScopedConnection update_connection_;
   std::vector<Row> rows_;
   theatre::ValueSnapshot snapshot_;
+
+ private:
+  void UpdateValues();
 };
 
 }  // namespace glight::gui::components
