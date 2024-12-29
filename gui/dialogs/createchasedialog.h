@@ -65,7 +65,7 @@ class CreateChaseDialog : public Gtk::Dialog {
   Gtk::Button *_makeChaseButton;
 
   RecursionLock _delayUpdates;
-  theatre::Chase *_newChase;
+  system::ObservingPtr<theatre::Chase> _newChase;
 };
 
 }  // namespace glight::gui

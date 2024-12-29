@@ -319,8 +319,8 @@ std::optional<DrawInfo> GetSecondaryStyleDimensions(DryModeStyle style,
 
 void VisualizationWidget::DrawFixtures(
     const Cairo::RefPtr<Cairo::Context> &cairo,
-    const std::vector<theatre::Fixture *> &selection, size_t width,
-    size_t height) {
+    const std::vector<system::ObservingPtr<theatre::Fixture>> &selection,
+    size_t width, size_t height) {
   updateMidiColors();
 
   cairo->set_source_rgba(0.1, 0.1, 0.2, 1);
@@ -371,7 +371,8 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
     if (info) {
       const theatre::Position pos = render_engine_.MouseToPosition(
           event->x, event->y, info->width, info->height);
-      theatre::Fixture *clicked_fixture = render_engine_.FixtureAt(pos);
+      system::ObservingPtr<theatre::Fixture> clicked_fixture =
+          render_engine_.FixtureAt(pos);
       if (shift) {
         if (clicked_fixture) {
           // Was a fixture clicked that was already selected? Then unselect.
@@ -469,7 +470,8 @@ bool VisualizationWidget::onMotion(GdkEventMotion *event) {
           break;
         case MouseState::DragFixture:
           if (!Instance::State().LayoutLocked()) {
-            for (theatre::Fixture *fixture : _selectedFixtures)
+            for (const system::ObservingPtr<theatre::Fixture> &fixture :
+                 _selectedFixtures)
               fixture->GetPosition() += pos - _draggingStart;
             _draggingStart = pos;
           }
@@ -509,7 +511,7 @@ void VisualizationWidget::selectFixtures(const theatre::Position &a,
     for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
       if (fixture->IsVisible() &&
           fixture->GetPosition().InsideRectangle(first, second))
-        _selectedFixtures.emplace_back(fixture.Get());
+        _selectedFixtures.emplace_back(fixture.GetObserver());
     }
   }
 }
@@ -517,7 +519,8 @@ void VisualizationWidget::selectFixtures(const theatre::Position &a,
 void VisualizationWidget::addFixtures(const theatre::Position &a,
                                       const theatre::Position &b) {
   selectFixtures(a, b);
-  for (theatre::Fixture *fixture : _selectedFixturesBeforeDrag) {
+  for (const system::ObservingPtr<theatre::Fixture> &fixture :
+       _selectedFixturesBeforeDrag) {
     auto iter =
         std::find(_selectedFixtures.begin(), _selectedFixtures.end(), fixture);
     if (iter == _selectedFixtures.end())
@@ -531,12 +534,14 @@ void VisualizationWidget::onAlignHorizontally() {
   if (_selectedFixtures.size() >= 2) {
     double y = 0.0;
 
-    for (const theatre::Fixture *fixture : _selectedFixtures)
+    for (const system::ObservingPtr<theatre::Fixture> &fixture :
+         _selectedFixtures)
       y += fixture->GetPosition().Y();
 
     y /= _selectedFixtures.size();
 
-    for (theatre::Fixture *fixture : _selectedFixtures)
+    for (const system::ObservingPtr<theatre::Fixture> &fixture :
+         _selectedFixtures)
       fixture->GetPosition().Y() = y;
   }
 }
@@ -545,12 +550,14 @@ void VisualizationWidget::onAlignVertically() {
   if (_selectedFixtures.size() >= 2) {
     double x = 0.0;
 
-    for (const theatre::Fixture *fixture : _selectedFixtures)
+    for (const system::ObservingPtr<theatre::Fixture> &fixture :
+         _selectedFixtures)
       x += fixture->GetPosition().X();
 
     x /= _selectedFixtures.size();
 
-    for (theatre::Fixture *fixture : _selectedFixtures)
+    for (const system::ObservingPtr<theatre::Fixture> &fixture :
+         _selectedFixtures)
       fixture->GetPosition().X() = x;
   }
 }
@@ -563,14 +570,18 @@ void VisualizationWidget::onDistributeEvenly() {
     double bottom = _selectedFixtures[0]->GetPosition().Y();
 
     for (size_t i = 1; i != _selectedFixtures.size(); ++i) {
-      const theatre::Fixture *fixture = _selectedFixtures[i];
+      const theatre::Fixture *fixture = _selectedFixtures[i].Get();
       left = std::min(fixture->GetPosition().X(), left);
       right = std::max(fixture->GetPosition().X(), right);
       top = std::min(fixture->GetPosition().Y(), top);
       bottom = std::max(fixture->GetPosition().Y(), bottom);
     }
 
-    std::vector<theatre::Fixture *> list = _selectedFixtures;
+    std::vector<theatre::Fixture *> list;
+    list.reserve(_selectedFixtures.size());
+    for (const system::ObservingPtr<theatre::Fixture> &fixture :
+         _selectedFixtures)
+      list.emplace_back(fixture.Get());
     if (left == right) {
       std::sort(list.begin(), list.end(),
                 [](const theatre::Fixture *a, const theatre::Fixture *b) {
@@ -611,14 +622,15 @@ void VisualizationWidget::onAddFixtures() {
 }
 
 void VisualizationWidget::onAddPreset() {
-  const std::set<theatre::Fixture *> fixture_set(_selectedFixtures.begin(),
-                                                 _selectedFixtures.end());
+  const std::set<system::ObservingPtr<theatre::Fixture>, std::less<>>
+      fixture_set(_selectedFixtures.begin(), _selectedFixtures.end());
   theatre::Folder &folder = main_window_->SelectedFolder();
   mainwindow::NewPresetFromFixtures(folder, fixture_set);
 }
 
 void VisualizationWidget::onRemoveFixtures() {
-  for (theatre::Fixture *fixture : _selectedFixtures) {
+  for (const system::ObservingPtr<theatre::Fixture> &fixture :
+       _selectedFixtures) {
     std::lock_guard<std::mutex> lock(_management->Mutex());
     _management->RemoveFixture(*fixture);
   }
@@ -630,9 +642,10 @@ void VisualizationWidget::onGroupFixtures() {
   std::unique_lock lock(_management->Mutex());
   theatre::Folder &parent = main_window_->SelectedFolder();
   const std::string name = parent.GetAvailableName("group");
-  theatre::FixtureGroup &group = _management->AddFixtureGroup(parent, name);
-  for (theatre::Fixture *fixture : _selectedFixtures) {
-    group.Insert(*fixture);
+  theatre::FixtureGroup &group = *_management->AddFixtureGroup(parent, name);
+  for (const system::ObservingPtr<theatre::Fixture> &fixture :
+       _selectedFixtures) {
+    group.Insert(fixture);
   }
   lock.unlock();
   _eventTransmitter->EmitUpdate();
@@ -682,7 +695,8 @@ void VisualizationWidget::onSaveImage() {
 }
 
 void VisualizationWidget::onSetSymbol(theatre::FixtureSymbol::Symbol symbol) {
-  for (theatre::Fixture *fixture : _selectedFixtures) {
+  for (const system::ObservingPtr<theatre::Fixture> &fixture :
+       _selectedFixtures) {
     fixture->SetSymbol(theatre::FixtureSymbol(symbol));
   }
   if (symbol == theatre::FixtureSymbol::Hidden) _selectedFixtures.clear();
@@ -721,7 +735,8 @@ void VisualizationWidget::OnTrackWithPan() { _dragType = MouseState::TrackPan; }
 void VisualizationWidget::SetPan(const theatre::Position &position) {
   theatre::Management &management = Instance::Management();
   bool is_changed = false;
-  for (theatre::Fixture *fixture : _selectedFixtures) {
+  for (const system::ObservingPtr<theatre::Fixture> &fixture :
+       _selectedFixtures) {
     if (fixture->Type().CanBeamRotate()) {
       constexpr theatre::Position offset(0.5, 0.5);
       const theatre::Position direction =
@@ -739,7 +754,8 @@ void VisualizationWidget::SetPan(const theatre::Position &position) {
       const double d_angle = system::RadialClamp(angle - fixture->Direction(),
                                                  min_value, max_value);
       const double scaling = (d_angle - begin_pan) / (end_pan - begin_pan);
-      theatre::FixtureControl &control = management.GetFixtureControl(*fixture);
+      theatre::FixtureControl &control =
+          *management.GetFixtureControl(*fixture);
       for (size_t i = 0; i != control.NInputs(); ++i) {
         if (control.InputType(i) == theatre::FunctionType::Pan) {
           theatre::SourceValue *source = management.GetSourceValue(control, i);

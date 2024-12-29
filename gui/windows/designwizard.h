@@ -37,7 +37,8 @@ class DesignWizard : public Gtk::Window {
     _currentPath = currentPath;
   }
 
-  void Select(const std::vector<theatre::Fixture *> &fixtures) {
+  void Select(
+      const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures) {
     _fixtureList.Select(fixtures);
   }
 
@@ -73,7 +74,8 @@ class DesignWizard : public Gtk::Window {
 
   // 1b
   void onAddControllable();
-  void addControllable(theatre::FolderObject &object);
+  void addControllable(
+      const system::ObservingPtr<theatre::FolderObject> &object);
   void onRemoveControllable();
   void onControllableSelected();
 
@@ -84,7 +86,8 @@ class DesignWizard : public Gtk::Window {
   Gtk::VBox _mainBox;
   Gtk::VBox _vBoxPage1, _vBoxPage1a, _vBoxPage1b;
   Gtk::Notebook _notebook;
-  std::vector<theatre::Controllable *> _selectedControllables;
+  std::vector<system::ObservingPtr<theatre::Controllable>>
+      _selectedControllables;
   // 1a
   Gtk::Label _selectLabel;
   components::FixtureList _fixtureList;
@@ -152,7 +155,8 @@ class DesignWizard : public Gtk::Window {
     }
 
     Gtk::TreeModelColumn<Glib::ustring> _title, _path;
-    Gtk::TreeModelColumn<theatre::Controllable *> _controllable;
+    Gtk::TreeModelColumn<system::ObservingPtr<theatre::Controllable>>
+        _controllable;
   } _controllablesListColumns;
   Gtk::ScrolledWindow _controllablesScrolledWindow;
 };

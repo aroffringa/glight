@@ -29,8 +29,9 @@ class PresetCollection final : public Controllable {
 
   void SetFromCurrentSituation(Management &management);
 
-  void SetFromCurrentFixtures(Management &management,
-                              const std::set<Fixture *> &fixtures);
+  void SetFromCurrentFixtures(
+      Management &management,
+      const std::set<system::ObservingPtr<Fixture>, std::less<>> &fixtures);
 
   size_t NInputs() const override { return 1; }
 

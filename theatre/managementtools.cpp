@@ -7,10 +7,12 @@
 
 namespace glight::theatre {
 
-void SetAllFixtures(Management& management,
-                    const std::vector<Fixture*> fixtures, const Color& color) {
-  for (Fixture* fixture : fixtures) {
-    FixtureControl& control = management.GetFixtureControl(*fixture);
+void SetAllFixtures(
+    Management& management,
+    const std::vector<system::ObservingPtr<theatre::Fixture>>& fixtures,
+    const Color& color) {
+  for (const system::ObservingPtr<Fixture>& fixture : fixtures) {
+    FixtureControl& control = *management.GetFixtureControl(*fixture);
     for (size_t i = 0; i != control.NInputs(); ++i) {
       const FunctionType type = control.InputType(i);
       if (IsColor(type)) {

@@ -9,23 +9,24 @@
 #include <memory>
 
 using namespace glight::theatre;
+using glight::system::TrackablePtr;
 
 BOOST_AUTO_TEST_SUITE(preset_collection)
 
 BOOST_AUTO_TEST_CASE(Add) {
   Management management;
   FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
-  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
-  FixtureControl &control = management.AddFixtureControl(fixture);
-  SourceValue &value = management.AddSourceValue(control, 0);
+      *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
+  Controllable *control = management.AddFixtureControl(fixture).Get();
+  SourceValue &value = management.AddSourceValue(*control, 0);
   value.A().SetValue(ControlValue::Max());
   BOOST_CHECK_EQUAL(value.A().Value().UInt(), ControlValue::MaxUInt());
-  PresetCollection &presetCollection = management.AddPresetCollection();
+  PresetCollection &presetCollection = *management.AddPresetCollectionPtr();
   presetCollection.SetFromCurrentSituation(management);
   BOOST_CHECK_EQUAL(presetCollection.PresetValues().size(), 1);
   BOOST_CHECK_EQUAL(&presetCollection.PresetValues()[0]->GetControllable(),
-                    &control);
+                    control);
   BOOST_CHECK_EQUAL(presetCollection.PresetValues()[0]->Value().UInt(),
                     ControlValue::MaxUInt());
 }
@@ -33,13 +34,13 @@ BOOST_AUTO_TEST_CASE(Add) {
 BOOST_AUTO_TEST_CASE(SetValue) {
   Management management;
   FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
-  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
+      *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
   fixture.SetChannel(DmxChannel(100, 0));
-  FixtureControl &fixtureControl = management.AddFixtureControl(fixture);
+  FixtureControl &fixtureControl = *management.AddFixtureControlPtr(fixture);
   SourceValue &value = management.AddSourceValue(fixtureControl, 0);
   value.A().SetValue(ControlValue::Max());
-  PresetCollection &presetCollection = management.AddPresetCollection();
+  PresetCollection &presetCollection = *management.AddPresetCollectionPtr();
   presetCollection.SetFromCurrentSituation(management);
 
   fixtureControl.InputValue(0) = ControlValue::Zero();

@@ -12,6 +12,8 @@
 
 namespace glight::gui {
 
+using system::ObservingPtr;
+
 enum class ObjectListType {
   AllExceptFixtures,
   All,
@@ -33,15 +35,16 @@ class ObjectList : public Gtk::ScrolledWindow {
     fillList();
   }
 
-  theatre::FolderObject *SelectedObject() const;
+  system::ObservingPtr<theatre::FolderObject> SelectedObject() const;
 
-  std::vector<theatre::FolderObject *> Selection() const;
+  std::vector<system::ObservingPtr<theatre::FolderObject>> Selection() const;
 
   sigc::signal<void()> &SignalSelectionChange() {
     return _signalSelectionChange;
   }
 
-  sigc::signal<void(theatre::FolderObject &object)> &SignalObjectActivated() {
+  sigc::signal<void(ObservingPtr<theatre::FolderObject> object)>
+      &SignalObjectActivated() {
     return _signalObjectActivated;
   }
 
@@ -95,7 +98,7 @@ class ObjectList : public Gtk::ScrolledWindow {
     Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> _icon;
     Gtk::TreeModelColumn<Glib::ustring> _type;
     Gtk::TreeModelColumn<Glib::ustring> _title;
-    Gtk::TreeModelColumn<theatre::FolderObject *> _object;
+    Gtk::TreeModelColumn<system::ObservingPtr<theatre::FolderObject>> _object;
   } _listColumns;
 
   void fillList();
@@ -110,7 +113,8 @@ class ObjectList : public Gtk::ScrolledWindow {
   void onMoveDownSelected();
 
   sigc::signal<void()> _signalSelectionChange;
-  sigc::signal<void(theatre::FolderObject &object)> _signalObjectActivated;
+  sigc::signal<void(system::ObservingPtr<theatre::FolderObject> object)>
+      _signalObjectActivated;
 
   RecursionLock _avoidRecursion;
   Gtk::Menu _contextMenu;

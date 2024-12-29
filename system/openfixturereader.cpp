@@ -140,9 +140,9 @@ void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
         ++dmx_channel;
     }
     fixture_type.SetFunctions(mode_functions);
-    FixtureType& added_type =
-        management.GetTheatre().AddFixtureType(fixture_type);
-    management.RootFolder().Add(added_type);
+    system::ObservingPtr<FixtureType> added_type =
+        management.GetTheatre().AddFixtureType(fixture_type).GetObserver();
+    management.RootFolder().Add(std::move(added_type));
   }
 }
 

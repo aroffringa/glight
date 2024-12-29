@@ -22,6 +22,8 @@ namespace glight::gui {
 using theatre::Folder;
 using theatre::FolderObject;
 
+using system::ObservingPtr;
+
 ObjectList::ObjectList()
     : _openFolder(&Instance::Management().RootFolder()), _listView(*this) {
   Instance::Events().SignalUpdateControllables().connect(
@@ -39,7 +41,7 @@ ObjectList::ObjectList()
   _listView.signal_row_activated().connect(
       [&](const Gtk::TreeModel::Path &path, Gtk::TreeViewColumn *) {
         Gtk::TreeModel::iterator iter = _listModel->get_iter(path);
-        if (iter) _signalObjectActivated.emit(*(*iter)[_listColumns._object]);
+        if (iter) _signalObjectActivated.emit((*iter)[_listColumns._object]);
       });
 
   fillList();
@@ -61,9 +63,13 @@ void ObjectList::fillList() {
   RecursionLock::Token token(_avoidRecursion);
   Glib::RefPtr<Gtk::TreeSelection> selection = _listView.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
-  FolderObject *selectedObj =
-      selected ? static_cast<FolderObject *>((*selected)[_listColumns._object])
-               : nullptr;
+  FolderObject *selectedObj;
+  if (selected) {
+    const ObservingPtr<FolderObject> &ptr = (*selected)[_listColumns._object];
+    selectedObj = ptr.Get();
+  } else {
+    selectedObj = nullptr;
+  }
   _listModel->clear();
   Gtk::TreeViewColumn *objectColumn =
       _showTypeColumn ? _listView.get_column(2) : _listView.get_column(1);
@@ -110,7 +116,8 @@ void ObjectList::fillListFolder(const Folder &folder,
   int icon_width = 16;
   int icon_height = 16;
   Gtk::IconSize::lookup(Gtk::ICON_SIZE_MENU, icon_width, icon_height);
-  for (FolderObject *obj : folder.Children()) {
+  for (ObservingPtr<FolderObject> child : folder.Children()) {
+    FolderObject *obj = child.Get();
     Folder *childFolder = showFolders ? dynamic_cast<Folder *>(obj) : nullptr;
     theatre::PresetCollection *presetCollection =
         showPresetCollections ? dynamic_cast<theatre::PresetCollection *>(obj)
@@ -157,7 +164,7 @@ void ObjectList::fillListFolder(const Folder &folder,
       else if (scene)
         childRow[_listColumns._type] = "S";
       childRow[_listColumns._title] = obj->Name();
-      childRow[_listColumns._object] = obj;
+      childRow[_listColumns._object] = child;
       if (!icon_name.empty()) {
         childRow[_listColumns._icon] = theme->load_icon(icon_name, icon_height);
       }
@@ -168,7 +175,7 @@ void ObjectList::fillListFolder(const Folder &folder,
   }
 }
 
-FolderObject *ObjectList::SelectedObject() const {
+ObservingPtr<FolderObject> ObjectList::SelectedObject() const {
   Glib::RefPtr<const Gtk::TreeSelection> selection = _listView.get_selection();
   const std::vector<Gtk::TreeModel::Path> selected =
       selection->get_selected_rows();
@@ -180,11 +187,11 @@ FolderObject *ObjectList::SelectedObject() const {
   }
 }
 
-std::vector<FolderObject *> ObjectList::Selection() const {
+std::vector<ObservingPtr<FolderObject>> ObjectList::Selection() const {
   Glib::RefPtr<const Gtk::TreeSelection> selection = _listView.get_selection();
   const std::vector<Gtk::TreeModel::Path> selected =
       selection->get_selected_rows();
-  std::vector<FolderObject *> objects;
+  std::vector<ObservingPtr<FolderObject>> objects;
   objects.reserve(selected.size());
   for (Gtk::TreeModel::Path path : selected) {
     objects.emplace_back((*_listModel->get_iter(path))[_listColumns._object]);
@@ -201,8 +208,10 @@ void ObjectList::SelectObject(const FolderObject &object) {
 bool ObjectList::selectObject(const FolderObject &object,
                               const Gtk::TreeModel::Children &children) {
   for (const Gtk::TreeRow &child : children) {
-    const FolderObject *rowObject = child[_listColumns._object];
-    if (rowObject == &object) {
+    const ObservingPtr<FolderObject> &row_object_ptr =
+        child[_listColumns._object];
+    const FolderObject *row_object = row_object_ptr.Get();
+    if (row_object == &object) {
       _listView.get_selection()->select(child);
       return true;
     }
@@ -214,7 +223,7 @@ void ObjectList::constructContextMenu() {
   _contextMenuItems.clear();
   _contextMenu = Gtk::Menu();
 
-  FolderObject *obj = SelectedObject();
+  FolderObject *obj = SelectedObject().Get();
   if (obj != &Instance::Management().RootFolder()) {
     // Move up & down
     std::unique_ptr<Gtk::MenuItem> miMoveUp(
@@ -255,8 +264,8 @@ void ObjectList::constructFolderMenu(Gtk::Menu &menu, Folder &folder) {
     item->set_sensitive(false);
   else {
     Gtk::Menu *subMenu = nullptr;
-    for (FolderObject *object : folder.Children()) {
-      Folder *subFolder = dynamic_cast<Folder *>(object);
+    for (const ObservingPtr<FolderObject> &object : folder.Children()) {
+      Folder *subFolder = dynamic_cast<Folder *>(object.Get());
       if (subFolder) {
         if (!subMenu) {
           _contextMenuItems.emplace_back(new Gtk::Menu());
@@ -292,8 +301,7 @@ bool ObjectList::TreeViewWithMenu::on_button_press_event(
 }
 
 void ObjectList::onMoveSelected(Folder *destination) {
-  FolderObject *object = SelectedObject();
-  Folder::Move(*object, *destination);
+  Folder::Move(SelectedObject(), *destination);
   Instance::Events().EmitUpdate();
 }
 

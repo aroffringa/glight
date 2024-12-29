@@ -26,6 +26,8 @@
 #include <memory>
 
 using namespace glight::theatre;
+using glight::system::ObservingPtr;
+using glight::system::TrackablePtr;
 
 namespace {
 void FillManagement(Management &management) {
@@ -34,19 +36,20 @@ void FillManagement(Management &management) {
   Folder &subFolder = management.AddFolder(root, "A subfolder");
 
   // Use the RGB_ADJ_6CH fixture to test storing macro parameters
-  root.Add(management.GetTheatre().AddFixtureType(StockFixture::RGB_ADJ_6CH));
+  root.Add(
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::RGB_ADJ_6CH));
   // Use the AyraTDCSunrise fixture to test rotation parameters:
   root.Add(
-      management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise));
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::AyraTDCSunrise));
 
   // Make a group with the two fixtures
   management.AddFixtureGroup(root, "Ayra and ADJ");
 
-  FixtureType &ft =
-      management.GetTheatre().AddFixtureType(StockFixture::Rgbw4Ch);
+  ObservingPtr<FixtureType> ft =
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgbw4Ch);
   root.Add(ft);
-  Fixture &f = management.GetTheatre().AddFixture(ft);
-  FixtureControl &fc = management.AddFixtureControl(f, subFolder);
+  Fixture &f = *management.GetTheatre().AddFixture(*ft);
+  FixtureControl &fc = *management.AddFixtureControlPtr(f, subFolder);
   fc.SetName("Control for RGBW fixture");
   fc.AddFilter(std::make_unique<RgbFilter>());
   fc.AddFilter(std::make_unique<AutoMasterFilter>());
@@ -54,57 +57,58 @@ void FillManagement(Management &management) {
   management.AddSourceValue(fc, 1);
   management.AddSourceValue(fc, 2).A().SetValue(ControlValue::Max());
   management.AddSourceValue(fc, 3);
-  BOOST_CHECK_EQUAL(
-      &management.GetFixtureControl(*management.GetTheatre().Fixtures()[0]),
-      &management.GetObjectFromPath(
-          "The root folder/A subfolder/Control for RGBW fixture"));
+  ObservingPtr<FixtureControl> found_fc =
+      management.GetFixtureControl(*management.GetTheatre().Fixtures()[0]);
+  FolderObject &path_fc = management.GetObjectFromPath(
+      "The root folder/A subfolder/Control for RGBW fixture");
+  BOOST_CHECK(found_fc.Get() == &path_fc);
 
-  PresetCollection &a = management.AddPresetCollection();
-  a.SetName("A preset collection");
+  ObservingPtr<PresetCollection> a = management.AddPresetCollectionPtr();
+  a->SetName("A preset collection");
   subFolder.Add(a);
-  a.AddPresetValue(fc, 0).SetValue(ControlValue::Max() / 2);
-  a.AddPresetValue(fc, 3).SetValue(ControlValue::Max());
-  management.AddSourceValue(a, 0).A().SetValue(ControlValue(42));
+  a->AddPresetValue(fc, 0).SetValue(ControlValue::Max() / 2);
+  a->AddPresetValue(fc, 3).SetValue(ControlValue::Max());
+  management.AddSourceValue(*a, 0).A().SetValue(ControlValue(42));
 
-  PresetCollection &b = management.AddPresetCollection();
-  b.SetName("Second preset collection");
+  ObservingPtr<PresetCollection> b = management.AddPresetCollectionPtr();
+  b->SetName("Second preset collection");
   subFolder.Add(b);
-  b.AddPresetValue(fc, 0).SetValue(ControlValue(12));
-  b.AddPresetValue(fc, 3).SetValue(ControlValue(13));
-  management.AddSourceValue(b, 0);
+  b->AddPresetValue(fc, 0).SetValue(ControlValue(12));
+  b->AddPresetValue(fc, 3).SetValue(ControlValue(13));
+  management.AddSourceValue(*b, 0);
 
-  Chase &chase = management.AddChase();
-  chase.SetName("A chase");
+  ObservingPtr<Chase> chase = management.AddChasePtr();
+  chase->SetName("A chase");
   subFolder.Add(chase);
-  chase.GetSequence().Add(a, 0);
-  chase.GetSequence().Add(b, 0);
-  management.AddSourceValue(chase, 0);
+  chase->GetSequence().Add(*a, 0);
+  chase->GetSequence().Add(*b, 0);
+  management.AddSourceValue(*chase, 0);
 
-  TimeSequence &timeSequence = management.AddTimeSequence();
-  timeSequence.SetName("A time sequence");
+  ObservingPtr<TimeSequence> timeSequence = management.AddTimeSequencePtr();
+  timeSequence->SetName("A time sequence");
   subFolder.Add(timeSequence);
-  timeSequence.AddStep(chase, 0);
-  timeSequence.AddStep(b, 0);
-  management.AddSourceValue(timeSequence, 0);
+  timeSequence->AddStep(*chase, 0);
+  timeSequence->AddStep(*b, 0);
+  management.AddSourceValue(*timeSequence, 0);
 
   Folder &effectFolder = management.AddFolder(root, "Effect folder");
   std::unique_ptr<AudioLevelEffect> effectPtr(new AudioLevelEffect());
-  Effect &effect = management.AddEffect(std::move(effectPtr));
-  effect.SetName("An audio effect");
+  ObservingPtr<Effect> effect = management.AddEffectPtr(std::move(effectPtr));
+  effect->SetName("An audio effect");
   effectFolder.Add(effect);
-  effect.AddConnection(a, 0);
-  effect.AddConnection(fc, 1);
+  effect->AddConnection(*a, 0);
+  effect->AddConnection(fc, 1);
 
-  Scene &scene = management.AddScene(true);
-  scene.SetName("Almost a movie");
-  scene.SetAudioFile("A flac music file.flac");
-  glight::theatre::KeySceneItem *key = scene.AddKeySceneItem(250.0);
+  ObservingPtr<Scene> scene = management.AddScenePtr(true);
+  scene->SetName("Almost a movie");
+  scene->SetAudioFile("A flac music file.flac");
+  glight::theatre::KeySceneItem *key = scene->AddKeySceneItem(250.0);
   key->SetDurationInMS(500.0);
   key->SetLevel(KeySceneLevel::Beat);
-  glight::theatre::BlackoutSceneItem &blackout = scene.AddBlackoutItem(250.0);
+  glight::theatre::BlackoutSceneItem &blackout = scene->AddBlackoutItem(250.0);
   blackout.SetFadeSpeed(2.0);
   blackout.SetOperation(BlackoutOperation::Blackout);
-  glight::theatre::BlackoutSceneItem &restore = scene.AddBlackoutItem(250.0);
+  glight::theatre::BlackoutSceneItem &restore = scene->AddBlackoutItem(250.0);
   restore.SetFadeSpeed(0.0);
   restore.SetOperation(BlackoutOperation::Restore);
 
@@ -170,32 +174,35 @@ void CheckEqual(const Management &a, const Management &b) {
                       b.GetTheatre().Fixtures().size());
 
   const Fixture &a_fixture = *a.GetTheatre().Fixtures()[0];
-  const FixtureControl &a_fixture_control = a.GetFixtureControl(a_fixture);
-  BOOST_CHECK_EQUAL(a_fixture_control.Name(), "Control for RGBW fixture");
-  BOOST_CHECK_EQUAL(a_fixture_control.NInputs(),
+  ObservingPtr<FixtureControl> a_fixture_control =
+      a.GetFixtureControl(a_fixture);
+  BOOST_CHECK_EQUAL(a_fixture_control->Name(), "Control for RGBW fixture");
+  BOOST_CHECK_EQUAL(a_fixture_control->NInputs(),
                     3);  // rgb filter will make it 3
-  BOOST_CHECK_EQUAL(a_fixture_control.NOutputs(), 0);
+  BOOST_CHECK_EQUAL(a_fixture_control->NOutputs(), 0);
   BOOST_CHECK_EQUAL(
-      &a.GetFixtureControl(a_fixture),
+      a.GetFixtureControl(a_fixture).Get(),
       &a.GetObjectFromPath(
           "The root folder/A subfolder/Control for RGBW fixture"));
 
-  BOOST_CHECK_EQUAL(a.GetSourceValue(a_fixture_control, 0)->A().Value().UInt(),
+  BOOST_CHECK_EQUAL(a.GetSourceValue(*a_fixture_control, 0)->A().Value().UInt(),
                     0);
-  BOOST_CHECK_EQUAL(a.GetSourceValue(a_fixture_control, 1)->A().Value().UInt(),
+  BOOST_CHECK_EQUAL(a.GetSourceValue(*a_fixture_control, 1)->A().Value().UInt(),
                     0);
-  BOOST_CHECK_EQUAL(a.GetSourceValue(a_fixture_control, 2)->A().Value().UInt(),
+  BOOST_CHECK_EQUAL(a.GetSourceValue(*a_fixture_control, 2)->A().Value().UInt(),
                     ControlValue::MaxUInt());
-  BOOST_CHECK_EQUAL(a.GetSourceValue(a_fixture_control, 3)->A().Value().UInt(),
+  BOOST_CHECK_EQUAL(a.GetSourceValue(*a_fixture_control, 3)->A().Value().UInt(),
                     0);
 
   BOOST_REQUIRE_EQUAL(a.FixtureGroups().size(), b.FixtureGroups().size());
   for (size_t i = 0; i != a.FixtureGroups().size(); ++i) {
     BOOST_CHECK_EQUAL(a.FixtureGroups()[i]->Size(),
                       b.FixtureGroups()[i]->Size());
-    std::vector<Fixture *> fixtures = a.FixtureGroups()[i]->Fixtures();
-    for (const Fixture *fixture_a : fixtures) {
-      Fixture &fixture_b = b.GetTheatre().GetFixture(fixture_a->Name());
+    const std::vector<ObservingPtr<Fixture>> &fixtures =
+        a.FixtureGroups()[i]->Fixtures();
+    for (const ObservingPtr<Fixture> &fixture_a : fixtures) {
+      ObservingPtr<Fixture> fixture_b =
+          b.GetTheatre().GetFixturePtr(fixture_a->Name());
       BOOST_CHECK(b.FixtureGroups()[i]->Contains(fixture_b));
     }
   }
@@ -209,12 +216,12 @@ void CheckEqual(const Management &a, const Management &b) {
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[0]->Value().UInt(),
                     ControlValue::MaxUInt() / 2);
   BOOST_CHECK_EQUAL(&readCollection.PresetValues()[0]->GetControllable(),
-                    &a_fixture_control);
+                    a_fixture_control.Get());
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[0]->InputIndex(), 0);
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[1]->Value().UInt(),
                     ControlValue::MaxUInt());
   BOOST_CHECK_EQUAL(&readCollection.PresetValues()[1]->GetControllable(),
-                    &a_fixture_control);
+                    a_fixture_control.Get());
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[1]->InputIndex(), 3);
   BOOST_CHECK_NE(a.GetSourceValue(readCollection, 0), nullptr);
   BOOST_CHECK_EQUAL(&a.GetSourceValue(readCollection, 0)->GetControllable(),
@@ -236,7 +243,8 @@ void CheckEqual(const Management &a, const Management &b) {
   BOOST_CHECK_EQUAL(readEffect->Connections().size(), 2);
   BOOST_CHECK_EQUAL(readEffect->Connections()[0].first, &readCollection);
   BOOST_CHECK_EQUAL(readEffect->Connections()[0].second, 0);
-  BOOST_CHECK_EQUAL(readEffect->Connections()[1].first, &a_fixture_control);
+  BOOST_CHECK_EQUAL(readEffect->Connections()[1].first,
+                    a_fixture_control.Get());
   BOOST_CHECK_EQUAL(readEffect->Connections()[1].second, 1);
 
   BOOST_REQUIRE_EQUAL(a.Controllables().size(), b.Controllables().size());

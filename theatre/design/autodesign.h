@@ -6,6 +6,8 @@
 #include "theatre/color.h"
 #include "theatre/forwards.h"
 
+#include "system/trackableptr.h"
+
 namespace glight::theatre {
 
 class Chase;
@@ -44,38 +46,39 @@ class AutoDesign {
  public:
   static Chase &MakeRunningLight(
       Management &management, Folder &destination,
-      const std::vector<Controllable *> &controllables,
+      const std::vector<system::ObservingPtr<Controllable>> &controllables,
       const std::vector<ColorOrVariable> &colors,
       const ColorDeduction &deduction, RunType runType);
 
   static Chase &MakeColorVariation(
       Management &management, Folder &destination,
-      const std::vector<Controllable *> &controllables,
+      const std::vector<system::ObservingPtr<Controllable>> &controllables,
       const std::vector<ColorOrVariable> &colors,
       const ColorDeduction &deduction, double variation);
 
-  static Chase &MakeColorShift(Management &management, Folder &destination,
-                               const std::vector<Controllable *> &controllables,
-                               const std::vector<ColorOrVariable> &colors,
-                               const ColorDeduction &deduction,
-                               ShiftType shiftType);
+  static Chase &MakeColorShift(
+      Management &management, Folder &destination,
+      const std::vector<system::ObservingPtr<Controllable>> &controllables,
+      const std::vector<ColorOrVariable> &colors,
+      const ColorDeduction &deduction, ShiftType shiftType);
 
   static Controllable &MakeVUMeter(
       Management &management, Folder &destination,
-      const std::vector<Controllable *> &controllables,
+      const std::vector<system::ObservingPtr<Controllable>> &controllables,
       const std::vector<ColorOrVariable> &colors,
       const ColorDeduction &deduction, VUMeterDirection direction);
 
   static Chase &MakeIncreasingChase(
       Management &management, Folder &destination,
-      const std::vector<Controllable *> &controllables,
+      const std::vector<system::ObservingPtr<Controllable>> &controllables,
       const std::vector<ColorOrVariable> &colors,
       const ColorDeduction &deduction, IncreasingType incType);
 
-  static Effect &MakeFire(Management &management, Folder &destination,
-                          const std::vector<Controllable *> &controllables,
-                          const std::vector<ColorOrVariable> &colors,
-                          const ColorDeduction &deduction);
+  static Effect &MakeFire(
+      Management &management, Folder &destination,
+      const std::vector<system::ObservingPtr<Controllable>> &controllables,
+      const std::vector<ColorOrVariable> &colors,
+      const ColorDeduction &deduction);
 };
 
 }  // namespace glight::theatre

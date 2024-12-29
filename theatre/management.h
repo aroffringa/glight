@@ -42,13 +42,13 @@ class Management {
   Theatre &GetTheatre() { return *_theatre; }
   const Theatre &GetTheatre() const { return *_theatre; }
 
-  const std::vector<std::unique_ptr<Folder>> &Folders() const {
+  const std::vector<system::TrackablePtr<Folder>> &Folders() const {
     return _folders;
   }
-  const std::vector<std::unique_ptr<FixtureGroup>> &FixtureGroups() const {
+  const std::vector<system::TrackablePtr<FixtureGroup>> &FixtureGroups() const {
     return _groups;
   }
-  const std::vector<std::unique_ptr<Controllable>> &Controllables() const {
+  const std::vector<system::TrackablePtr<Controllable>> &Controllables() const {
     return _controllables;
   }
   const std::vector<std::unique_ptr<SourceValue>> &SourceValues() const {
@@ -61,7 +61,11 @@ class Management {
 
   void RemoveObject(FolderObject &object);
 
-  PresetCollection &AddPresetCollection();
+  const system::TrackablePtr<Controllable> &AddPresetCollection();
+  system::ObservingPtr<PresetCollection> AddPresetCollectionPtr() {
+    return AddPresetCollection().GetObserver<PresetCollection>();
+  }
+
   void RemoveControllable(Controllable &controllable);
   bool Contains(const Controllable &controllable) const;
   template <typename ControllableType>
@@ -71,8 +75,8 @@ class Management {
    */
   std::vector<ControllableType *> GetSpecificControllables() const {
     std::vector<ControllableType *> list;
-    for (const std::unique_ptr<Controllable> &c : _controllables) {
-      if (ControllableType *t = dynamic_cast<ControllableType *>(c.get()); t) {
+    for (const system::TrackablePtr<Controllable> &c : _controllables) {
+      if (ControllableType *t = dynamic_cast<ControllableType *>(c.Get()); t) {
         list.emplace_back(t);
       }
     }
@@ -83,16 +87,26 @@ class Management {
   Folder &GetFolder(const std::string &path);
   void RemoveFolder(Folder &folder);
 
-  FixtureControl &AddFixtureControl(const Fixture &fixture);
-  FixtureControl &AddFixtureControl(const Fixture &fixture,
-                                    const Folder &parent);
-  FixtureControl &GetFixtureControl(const Fixture &fixture);
-  const FixtureControl &GetFixtureControl(const Fixture &fixture) const {
-    return const_cast<Management &>(*this).GetFixtureControl(fixture);
+  const system::TrackablePtr<Controllable> &AddFixtureControl(
+      const Fixture &fixture);
+  system::ObservingPtr<FixtureControl> AddFixtureControlPtr(
+      const Fixture &fixture) {
+    return AddFixtureControl(fixture).GetObserver<FixtureControl>();
   }
 
-  FixtureGroup &AddFixtureGroup();
-  FixtureGroup &AddFixtureGroup(const Folder &parent, const std::string &name);
+  const system::TrackablePtr<Controllable> &AddFixtureControl(
+      const Fixture &fixture, const Folder &parent);
+  system::ObservingPtr<FixtureControl> AddFixtureControlPtr(
+      const Fixture &fixture, const Folder &parent) {
+    return AddFixtureControl(fixture, parent).GetObserver<FixtureControl>();
+  };
+
+  system::ObservingPtr<FixtureControl> GetFixtureControl(
+      const Fixture &fixture) const;
+
+  const system::TrackablePtr<FixtureGroup> &AddFixtureGroup();
+  const system::TrackablePtr<FixtureGroup> &AddFixtureGroup(
+      const Folder &parent, const std::string &name);
 
   void RemoveFixture(const Fixture &fixture);
   void RemoveFixtureType(const FixtureType &type);
@@ -103,21 +117,36 @@ class Management {
   void RemoveSourceValue(SourceValue &sourceValue);
   bool Contains(const SourceValue &sourceValue) const;
 
-  Chase &AddChase();
+  const system::TrackablePtr<Controllable> &AddChase();
+  system::ObservingPtr<Chase> AddChasePtr() {
+    return AddChase().GetObserver<Chase>();
+  }
 
-  TimeSequence &AddTimeSequence();
+  const system::TrackablePtr<Controllable> &AddTimeSequence();
+  system::ObservingPtr<TimeSequence> AddTimeSequencePtr() {
+    return AddTimeSequence().GetObserver<TimeSequence>();
+  }
 
   /**
    * Add an effect and do not place it in a folder. The caller needs to
    * manually place the effect in a folder.
    */
-  Effect &AddEffect(std::unique_ptr<Effect> effect);
+  const system::TrackablePtr<Controllable> &AddEffect(
+      std::unique_ptr<Effect> effect);
+  system::ObservingPtr<Effect> AddEffectPtr(std::unique_ptr<Effect> effect);
+
   /**
    * Add an effect and place it in a folder.
    */
-  Effect &AddEffect(std::unique_ptr<Effect> effect, Folder &folder);
+  const system::TrackablePtr<Controllable> &AddEffect(
+      std::unique_ptr<Effect> effect, Folder &folder);
+  system::ObservingPtr<Effect> AddEffectPtr(std::unique_ptr<Effect> effect,
+                                            Folder &folder);
 
-  Scene &AddScene(bool in_folder);
+  const system::TrackablePtr<Controllable> &AddScene(bool in_folder);
+  system::ObservingPtr<Scene> AddScenePtr(bool in_folder) {
+    return AddScene(in_folder).GetObserver<Scene>();
+  }
 
   std::mutex &Mutex() { return _mutex; }
 
@@ -192,7 +221,8 @@ class Management {
   void MergeInputUniverse(ValueSnapshot &snapshot, size_t input_universe);
 
   void removeControllable(
-      std::vector<std::unique_ptr<Controllable>>::iterator controllablePtr);
+      std::vector<system::TrackablePtr<Controllable>>::iterator
+          controllablePtr);
 
   void abortAllDevices();
 
@@ -223,9 +253,9 @@ class Management {
   std::unique_ptr<BeatFinder> _beatFinder;
 
   Folder *_rootFolder;
-  std::vector<std::unique_ptr<Folder>> _folders;
-  std::vector<std::unique_ptr<Controllable>> _controllables;
-  std::vector<std::unique_ptr<FixtureGroup>> _groups;
+  std::vector<system::TrackablePtr<Folder>> _folders;
+  std::vector<system::TrackablePtr<Controllable>> _controllables;
+  std::vector<system::TrackablePtr<FixtureGroup>> _groups;
   std::vector<std::unique_ptr<SourceValue>> _sourceValues;
   devices::UniverseMap universe_map_;
 };

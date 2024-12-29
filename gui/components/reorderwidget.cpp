@@ -33,21 +33,22 @@ ReorderWidget::ReorderWidget() {
   show_all_children();
 }
 
-void ReorderWidget::Append(theatre::NamedObject& object) {
+void ReorderWidget::Append(system::ObservingPtr<theatre::NamedObject> object) {
   Gtk::TreeModel::iterator iter = model_->append();
   const Gtk::TreeModel::Row& row = *iter;
-  row[columns_.title_] = object.Name();
-  if (theatre::Fixture* fixture = dynamic_cast<theatre::Fixture*>(&object);
+  row[columns_.title_] = object->Name();
+  if (theatre::Fixture* fixture = dynamic_cast<theatre::Fixture*>(object.Get());
       fixture) {
     row[columns_.type_] = fixture->Type().Name();
   }
-  row[columns_.object_] = &object;
+  row[columns_.object_] = std::move(object);
   signal_changed_();
 }
 
-std::vector<theatre::NamedObject*> ReorderWidget::GetList() const {
+std::vector<system::ObservingPtr<theatre::NamedObject>> ReorderWidget::GetList()
+    const {
   const auto children = model_->children();
-  std::vector<theatre::NamedObject*> list;
+  std::vector<system::ObservingPtr<theatre::NamedObject>> list;
   for (const Gtk::TreeRow& row : children) {
     list.emplace_back(row[columns_.object_]);
   }

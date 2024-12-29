@@ -10,6 +10,7 @@
 
 namespace glight::gui {
 
+using system::ObservingPtr;
 using theatre::Controllable;
 
 MultiControllableSelectionDialog::MultiControllableSelectionDialog() {
@@ -103,10 +104,10 @@ void MultiControllableSelectionDialog::OnViewSelectionChanged() {
 }
 
 void MultiControllableSelectionDialog::OnAdd() {
-  const std::vector<theatre::FolderObject*> objects =
+  const std::vector<ObservingPtr<theatre::FolderObject>> objects =
       object_browser_.Selection();
-  for (theatre::FolderObject* object : objects) {
-    Controllable* controllable = dynamic_cast<Controllable*>(object);
+  for (ObservingPtr<theatre::FolderObject> object : objects) {
+    Controllable* controllable = dynamic_cast<Controllable*>(object.Get());
     if (controllable && !IsSelected(*controllable)) {
       Gtk::TreeModel::iterator iter = selection_store_->append();
       const Gtk::TreeModel::Row& row = *iter;

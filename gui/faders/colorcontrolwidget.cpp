@@ -147,7 +147,7 @@ void ColorControlWidget::ShowAssignControllableDialog() {
   dialog.SetFilter(ObjectListType::All);
   if (dialog.run() == Gtk::RESPONSE_OK) {
     theatre::Controllable *controllable =
-        dynamic_cast<theatre::Controllable *>(dialog.SelectedObject());
+        dynamic_cast<theatre::Controllable *>(dialog.SelectedObject().Get());
     if (controllable) {
       std::vector<theatre::SourceValue *> sources(3);
       for (size_t i = 0; i != controllable->NInputs(); ++i) {

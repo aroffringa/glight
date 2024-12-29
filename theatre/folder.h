@@ -7,6 +7,8 @@
 
 #include "folderobject.h"
 
+#include "system/trackableptr.h"
+
 namespace glight::theatre {
 
 class Folder : public FolderObject {
@@ -15,59 +17,63 @@ class Folder : public FolderObject {
 
   Folder(const std::string &name) : FolderObject(name) {}
 
-  Folder *CopyHierarchy(
+  /*Folder *CopyHierarchy(
       std::vector<std::unique_ptr<Folder>> &newFolders) const {
     newFolders.emplace_back(std::make_unique<Folder>(_name));
     Folder *copy = newFolders.back().get();
-    for (const FolderObject *object : _objects) {
-      const Folder *child = dynamic_cast<const Folder *>(object);
+    for (const system::ObservingPtr<FolderObject>& object : _objects) {
+      const Folder *child = dynamic_cast<const Folder *>(object.Get());
       if (child) {
         copy->_objects.emplace_back(child->CopyHierarchy(newFolders));
         copy->_objects.back()->SetParent(*copy);
       }
     }
     return copy;
-  }
+  }*/
 
   /**
    * This also sets the parent of the specified object to this.
    */
-  void Add(FolderObject &object) {
-    if (GetChildIfExists(object.Name()))
+  void Add(system::ObservingPtr<FolderObject> object) {
+    FolderObject *ptr = object.Get();
+    if (GetChildIfExists(ptr->Name()))
       throw std::runtime_error(
-          "Trying to add object " + object.Name() + " to folder " + Name() +
+          "Trying to add object " + ptr->Name() + " to folder " + Name() +
           ", but an object with that name already exists in this folder");
-    _objects.emplace_back(&object);
-    _objects.back()->SetParent(*this);
+    _objects.emplace_back(std::move(object));
+    ptr->SetParent(*this);
   }
 
   void Remove(FolderObject &object) {
-    std::vector<FolderObject *>::iterator srciter =
+    std::vector<system::ObservingPtr<FolderObject>>::iterator srciter =
         std::find(_objects.begin(), _objects.end(), &object);
     _objects.erase(srciter);
   }
 
   void MoveUp(FolderObject &object) {
-    std::vector<FolderObject *>::iterator srciter =
+    std::vector<system::ObservingPtr<FolderObject>>::iterator srciter =
         std::find(_objects.begin(), _objects.end(), &object);
     if (srciter != _objects.begin() && srciter != _objects.end()) {
-      std::vector<FolderObject *>::iterator previous = srciter;
+      std::vector<system::ObservingPtr<FolderObject>>::iterator previous =
+          srciter;
       --previous;
       std::swap(*previous, *srciter);
     }
   }
 
   void MoveDown(FolderObject &object) {
-    std::vector<FolderObject *>::iterator srciter =
+    std::vector<system::ObservingPtr<FolderObject>>::iterator srciter =
         std::find(_objects.begin(), _objects.end(), &object);
     if (srciter != _objects.end()) {
-      std::vector<FolderObject *>::iterator next = srciter;
+      std::vector<system::ObservingPtr<FolderObject>>::iterator next = srciter;
       ++next;
       if (_objects.end() != next) std::swap(*next, *srciter);
     }
   }
 
-  const std::vector<FolderObject *> Children() const { return _objects; }
+  const std::vector<system::ObservingPtr<FolderObject>> Children() const {
+    return _objects;
+  }
 
   Folder *FollowDown(const std::string &path) {
     if (path.empty())
@@ -87,19 +93,19 @@ class Folder : public FolderObject {
   FolderObject *FollowRelPath(std::string &&path);
 
   FolderObject &GetChild(const std::string &name) {
-    return FindNamedObject(_objects, name);
+    return *FindNamedObject(_objects, name);
   }
 
   FolderObject *GetChildIfExists(const std::string &name) {
-    return FindNamedObjectIfExists(_objects, name);
+    return FindNamedObjectIfExists(_objects, name).Get();
   }
 
   const FolderObject &GetChild(const std::string &name) const {
-    return FindNamedObject(_objects, name);
+    return *FindNamedObject(_objects, name);
   }
 
   const FolderObject *GetChildIfExists(const std::string &name) const {
-    return FindNamedObjectIfExists(_objects, name);
+    return FindNamedObjectIfExists(_objects, name).Get();
   }
 
   std::string GetAvailableName(const std::string &prefix) const {
@@ -108,7 +114,7 @@ class Folder : public FolderObject {
     do {
       nameAvailable = true;
       ++nameNumber;
-      for (const FolderObject *object : _objects) {
+      for (const system::ObservingPtr<FolderObject> &object : _objects) {
         if (object->Name() == prefix + std::to_string(nameNumber)) {
           nameAvailable = false;
           break;
@@ -118,16 +124,18 @@ class Folder : public FolderObject {
     return prefix + std::to_string(nameNumber);
   }
 
-  static void Move(FolderObject &object, Folder &destination) {
-    if (&destination != &object.Parent()) {
-      if (destination.GetChildIfExists(object.Name()))
+  static void Move(system::ObservingPtr<FolderObject> object,
+                   Folder &destination) {
+    FolderObject *ptr = object.Get();
+    if (&destination != &ptr->Parent()) {
+      if (destination.GetChildIfExists(ptr->Name()))
         throw std::runtime_error(
             "Can't move object: the destination folder already contains an "
             "object with the same name");
-      object._parent->Remove(object);
+      ptr->_parent->Remove(*ptr);
 
-      destination._objects.emplace_back(&object);
-      object._parent = &destination;
+      destination._objects.emplace_back(std::move(object));
+      ptr->_parent = &destination;
     }
   }
 
@@ -137,11 +145,13 @@ class Folder : public FolderObject {
     std::string subpath;
     if (sep == path.end()) {
       FolderObject *obj =
-          FindNamedObjectIfExists(_objects, path.substr(strPos));
+          FindNamedObjectIfExists(_objects, path.substr(strPos)).Get();
       return dynamic_cast<Folder *>(obj);
     } else {
-      FolderObject *obj = FindNamedObjectIfExists(
-          _objects, path.substr(strPos, sep - path.begin() - strPos));
+      FolderObject *obj =
+          FindNamedObjectIfExists(
+              _objects, path.substr(strPos, sep - path.begin() - strPos))
+              .Get();
       Folder *folder = dynamic_cast<Folder *>(obj);
       if (folder)
         return folder->followDown(path, sep + 1 - path.begin());
@@ -155,11 +165,14 @@ class Folder : public FolderObject {
     std::string subpath;
     if (sep == path.end()) {
       FolderObject *obj =
-          FindNamedObjectIfExists(_objects, std::move(path).substr(strPos));
+          FindNamedObjectIfExists(_objects, std::move(path).substr(strPos))
+              .Get();
       return dynamic_cast<Folder *>(obj);
     } else {
-      FolderObject *obj = FindNamedObjectIfExists(
-          _objects, path.substr(strPos, sep - path.begin() - strPos));
+      FolderObject *obj =
+          FindNamedObjectIfExists(
+              _objects, path.substr(strPos, sep - path.begin() - strPos))
+              .Get();
       Folder *folder = dynamic_cast<Folder *>(obj);
       if (folder)
         return folder->followDown(std::move(path), sep + 1 - path.begin());
@@ -168,7 +181,7 @@ class Folder : public FolderObject {
     }
   }
 
-  std::vector<FolderObject *> _objects;
+  std::vector<system::ObservingPtr<FolderObject>> _objects;
 };
 
 }  // namespace glight::theatre

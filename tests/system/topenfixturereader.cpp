@@ -8,9 +8,11 @@
 
 #include <sstream>
 
-using glight::system::ReadOpenFixture;
-using glight::theatre::FunctionType;
-using glight::theatre::Management;
+namespace glight {
+
+using system::ReadOpenFixture;
+using theatre::FunctionType;
+using theatre::Management;
 
 namespace {
 const char* kFlatParQA12 = R"(
@@ -660,16 +662,16 @@ BOOST_AUTO_TEST_SUITE(open_fixture_reader)
 BOOST_AUTO_TEST_CASE(read) {
   Management management;
   std::istringstream data_stream(kFlatParQA12);
-  std::unique_ptr<glight::json::Node> root = glight::json::Parse(data_stream);
-  glight::theatre::Theatre& theatre = management.GetTheatre();
+  std::unique_ptr<json::Node> root = json::Parse(data_stream);
+  theatre::Theatre& theatre = management.GetTheatre();
   ReadOpenFixture(management, *root);
-  glight::theatre::FixtureType& f1 =
-      theatre.GetFixtureType("Flat Par QA12 (1-channel)");
-  BOOST_REQUIRE_EQUAL(f1.Functions().size(), 1);
-  BOOST_REQUIRE(f1.Functions()[0].Type() ==
-                glight::theatre::FunctionType::ColorMacro);
-  const glight::theatre::ColorRangeParameters& parameters =
-      f1.Functions()[0].GetColorRangeParameters();
+  system::ObservingPtr<theatre::FixtureType> f1 =
+      theatre.GetFixtureType("Flat Par QA12 (1-channel)")
+          .GetObserver<theatre::FixtureType>();
+  BOOST_REQUIRE_EQUAL(f1->Functions().size(), 1);
+  BOOST_REQUIRE(f1->Functions()[0].Type() == theatre::FunctionType::ColorMacro);
+  const theatre::ColorRangeParameters& parameters =
+      f1->Functions()[0].GetColorRangeParameters();
   BOOST_CHECK_EQUAL(parameters.GetRanges().size(), 16);
   BOOST_CHECK(!parameters.GetRanges()[0].color);
   BOOST_CHECK_EQUAL(parameters.GetRanges()[0].input_min, 0);
@@ -687,3 +689,5 @@ BOOST_AUTO_TEST_CASE(read) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+}  // namespace glight

@@ -33,7 +33,9 @@ class ObjectBrowser : public Gtk::VBox {
 
     _list.SignalSelectionChange().connect([&]() { onSelectionChanged(); });
     _list.SignalObjectActivated().connect(
-        [&](theatre::FolderObject &object) { onObjectActivated(object); });
+        [&](ObservingPtr<theatre::FolderObject> object) {
+          onObjectActivated(object);
+        });
     pack_start(_list, true, true);
     _list.show();
   }
@@ -48,11 +50,11 @@ class ObjectBrowser : public Gtk::VBox {
   }
   bool ShowTypeColumn() const { return _list.ShowTypeColumn(); }
 
-  theatre::FolderObject *SelectedObject() const {
+  system::ObservingPtr<theatre::FolderObject> SelectedObject() const {
     return _list.SelectedObject();
   }
 
-  std::vector<theatre::FolderObject *> Selection() const {
+  std::vector<system::ObservingPtr<theatre::FolderObject>> Selection() const {
     return _list.Selection();
   }
 
@@ -64,7 +66,8 @@ class ObjectBrowser : public Gtk::VBox {
 
   sigc::signal<void()> &SignalFolderChange() { return _signalFolderChange; }
 
-  sigc::signal<void(theatre::FolderObject &object)> &SignalObjectActivated() {
+  sigc::signal<void(system::ObservingPtr<theatre::FolderObject> object)>
+      &SignalObjectActivated() {
     return _signalObjectActivated;
   }
 
@@ -89,8 +92,8 @@ class ObjectBrowser : public Gtk::VBox {
     _list.SetFolder(folder);
     _signalFolderChange.emit();
   }
-  void onObjectActivated(theatre::FolderObject &object) {
-    theatre::Folder *folder = dynamic_cast<theatre::Folder *>(&object);
+  void onObjectActivated(system::ObservingPtr<theatre::FolderObject> object) {
+    theatre::Folder *folder = dynamic_cast<theatre::Folder *>(object.Get());
     if (folder == nullptr)
       _signalObjectActivated.emit(object);
     else
@@ -108,7 +111,8 @@ class ObjectBrowser : public Gtk::VBox {
 
   sigc::signal<void()> _signalSelectionChange;
   sigc::signal<void()> _signalFolderChange;
-  sigc::signal<void(theatre::FolderObject &object)> _signalObjectActivated;
+  sigc::signal<void(system::ObservingPtr<theatre::FolderObject> object)>
+      _signalObjectActivated;
 };
 
 }  // namespace glight::gui

@@ -4,7 +4,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-using glight::system::MakeObservable;
+using glight::system::MakeTrackable;
 using glight::system::ObservingPtr;
 using glight::system::TrackablePtr;
 
@@ -12,6 +12,7 @@ namespace {
 
 size_t n_constructions;
 size_t n_deletes;
+constexpr size_t kFieldStart = 1337;
 
 void ResetTracker() {
   n_constructions = 0;
@@ -22,7 +23,7 @@ struct Tracker {
   Tracker() { ++n_constructions; }
   Tracker(int, int) { ++n_constructions; }
   ~Tracker() { ++n_deletes; }
-  int field = 1337 + n_constructions;
+  int field = kFieldStart + n_constructions;
 };
 }  // namespace
 
@@ -30,7 +31,7 @@ namespace glight::system {
 template class TrackablePtr<Tracker>;
 }
 
-BOOST_AUTO_TEST_SUITE(observable_ptr)
+BOOST_AUTO_TEST_SUITE(trackable_ptr)
 
 BOOST_AUTO_TEST_CASE(empty_construct) {
   ResetTracker();
@@ -217,6 +218,110 @@ BOOST_AUTO_TEST_CASE(move_assignment) {
   BOOST_CHECK_EQUAL(n_deletes, 1);
 }
 
+BOOST_AUTO_TEST_CASE(self_assignment_trackable_ptr) {
+  ResetTracker();
+  TrackablePtr<Tracker> empty;
+  TrackablePtr<Tracker>* copy = &empty;
+  *copy = std::move(empty);
+  BOOST_CHECK(!empty);
+
+  Tracker* tracker = new Tracker();
+  TrackablePtr<Tracker> a(tracker);
+  copy = &a;
+  *copy = std::move(a);
+  BOOST_CHECK_EQUAL(a.Get(), tracker);
+
+  ObservingPtr<Tracker> x = a.GetObserver();
+  ObservingPtr<Tracker> y = x;
+  ObservingPtr<Tracker> z = a.GetObserver();
+  *copy = std::move(a);
+  BOOST_CHECK_EQUAL(a.Get(), tracker);
+  BOOST_CHECK_EQUAL(x.Get(), tracker);
+  BOOST_CHECK_EQUAL(y.Get(), tracker);
+  BOOST_CHECK_EQUAL(z.Get(), tracker);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 3);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 0);
+  a.Reset();
+  BOOST_CHECK(!a && !x && !y && !z);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 1);
+}
+
+BOOST_AUTO_TEST_CASE(self_copy_assignment_observing_ptr) {
+  ResetTracker();
+  ObservingPtr<Tracker> empty;
+  ObservingPtr<Tracker>& empty_alias = empty;
+  empty_alias = empty;
+  BOOST_CHECK(!empty_alias);
+
+  Tracker* tracker = new Tracker();
+  TrackablePtr<Tracker> a(tracker);
+
+  ObservingPtr<Tracker> x = a.GetObserver();
+  ObservingPtr<Tracker> y = x;
+  ObservingPtr<Tracker> z = a.GetObserver();
+  ObservingPtr<Tracker>& x_alias = x;
+  x_alias = x;
+  BOOST_CHECK_EQUAL(x.Get(), tracker);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 3);
+  BOOST_CHECK_EQUAL(a.Get(), tracker);
+  BOOST_CHECK_EQUAL(y.Get(), tracker);
+  BOOST_CHECK_EQUAL(z.Get(), tracker);
+  ObservingPtr<Tracker>& y_alias = y;
+  y_alias = y;
+  ObservingPtr<Tracker>& z_alias = z;
+  z_alias = z;
+  BOOST_CHECK_EQUAL(a.ShareCount(), 3);
+  BOOST_CHECK_EQUAL(a.Get(), tracker);
+  BOOST_CHECK_EQUAL(x.Get(), tracker);
+  BOOST_CHECK_EQUAL(y.Get(), tracker);
+  BOOST_CHECK_EQUAL(z.Get(), tracker);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 0);
+  a.Reset();
+  BOOST_CHECK(!a && !x && !y && !z);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 1);
+}
+
+BOOST_AUTO_TEST_CASE(self_move_assignment_observing_ptr) {
+  ResetTracker();
+  ObservingPtr<Tracker> empty;
+  ObservingPtr<Tracker>& empty_alias = empty;
+  empty_alias = std::move(empty);
+  BOOST_CHECK(!empty_alias);
+
+  Tracker* tracker = new Tracker();
+  TrackablePtr<Tracker> a(tracker);
+
+  ObservingPtr<Tracker> x = a.GetObserver();
+  ObservingPtr<Tracker> y = x;
+  ObservingPtr<Tracker> z = a.GetObserver();
+  ObservingPtr<Tracker>& x_alias = x;
+  x_alias = std::move(x);
+  BOOST_CHECK_EQUAL(x.Get(), tracker);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 3);
+  BOOST_CHECK_EQUAL(a.Get(), tracker);
+  BOOST_CHECK_EQUAL(y.Get(), tracker);
+  BOOST_CHECK_EQUAL(z.Get(), tracker);
+  ObservingPtr<Tracker>& y_alias = y;
+  y_alias = std::move(y);
+  ObservingPtr<Tracker>& z_alias = z;
+  z_alias = std::move(z);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 3);
+  BOOST_CHECK_EQUAL(a.Get(), tracker);
+  BOOST_CHECK_EQUAL(x.Get(), tracker);
+  BOOST_CHECK_EQUAL(y.Get(), tracker);
+  BOOST_CHECK_EQUAL(z.Get(), tracker);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 0);
+  a.Reset();
+  BOOST_CHECK(!a && !x && !y && !z);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 1);
+}
+
 BOOST_AUTO_TEST_CASE(get_observer) {
   ResetTracker();
   Tracker* tracker = new Tracker();
@@ -274,6 +379,90 @@ BOOST_AUTO_TEST_CASE(swap_functions) {
   BOOST_CHECK(x.Get() == tracker_a);
   BOOST_CHECK(y.Get() == tracker_a);
   BOOST_CHECK(z.Get() == tracker_b);
+}
+
+BOOST_AUTO_TEST_CASE(self_swap_trackable_ptr) {
+  ResetTracker();
+  TrackablePtr<Tracker> empty;
+  swap(empty, empty);
+  BOOST_CHECK(!empty);
+  BOOST_CHECK_EQUAL(empty.ShareCount(), 0);
+
+  Tracker* tracker_a = new Tracker();
+  TrackablePtr<Tracker> a(tracker_a);
+  swap(a, a);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 0);
+  BOOST_CHECK_EQUAL(a->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(a.Get(), tracker_a);
+
+  ObservingPtr<Tracker> x = a.GetObserver();
+  swap(a, a);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 1);
+  BOOST_CHECK_EQUAL(a->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(x->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(a.Get(), tracker_a);
+  BOOST_CHECK_EQUAL(x.Get(), tracker_a);
+
+  ObservingPtr<Tracker> y = a.GetObserver();
+  ObservingPtr<Tracker> z = y;
+  swap(a, a);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 3);
+  BOOST_CHECK_EQUAL(a->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(x->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(y->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(z->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(a.Get(), tracker_a);
+  BOOST_CHECK_EQUAL(x.Get(), tracker_a);
+  BOOST_CHECK_EQUAL(y.Get(), tracker_a);
+  BOOST_CHECK_EQUAL(z.Get(), tracker_a);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 0);
+  a.Reset();
+  BOOST_CHECK(!a);
+  BOOST_CHECK(!x);
+  BOOST_CHECK(!y);
+  BOOST_CHECK(!z);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 1);
+}
+
+BOOST_AUTO_TEST_CASE(self_swap_observing_ptr) {
+  ResetTracker();
+  ObservingPtr<Tracker> empty;
+  swap(empty, empty);
+  BOOST_CHECK(!empty);
+
+  Tracker* tracker_a = new Tracker();
+  TrackablePtr<Tracker> a(tracker_a);
+  ObservingPtr<Tracker> x = a.GetObserver();
+  swap(x, x);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 1);
+  BOOST_CHECK_EQUAL(a->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(x->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(a.Get(), tracker_a);
+  BOOST_CHECK_EQUAL(x.Get(), tracker_a);
+
+  ObservingPtr<Tracker> y = x;
+  ObservingPtr<Tracker> z = a.GetObserver();
+  swap(y, y);
+  swap(z, z);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 3);
+  BOOST_CHECK_EQUAL(a->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(x->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(y->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(z->field - kFieldStart, 0);
+  BOOST_CHECK_EQUAL(a.Get(), tracker_a);
+  BOOST_CHECK_EQUAL(x.Get(), tracker_a);
+  BOOST_CHECK_EQUAL(y.Get(), tracker_a);
+  BOOST_CHECK_EQUAL(z.Get(), tracker_a);
+
+  a.Reset();
+  BOOST_CHECK(!a);
+  BOOST_CHECK(!x);
+  BOOST_CHECK(!y);
+  BOOST_CHECK(!z);
+  BOOST_CHECK_EQUAL(n_constructions, 1);
+  BOOST_CHECK_EQUAL(n_deletes, 1);
 }
 
 BOOST_AUTO_TEST_CASE(swap_different_ptr_observers) {
@@ -363,12 +552,59 @@ BOOST_AUTO_TEST_CASE(move_observer_after_ptr_destroyed) {
   BOOST_CHECK(!y);
 }
 
-BOOST_AUTO_TEST_CASE(make_observable_ptr) {
+BOOST_AUTO_TEST_CASE(in_container) {
   ResetTracker();
-  TrackablePtr a = MakeObservable<Tracker>();
+  std::vector<TrackablePtr<Tracker>> owners;
+  std::vector<ObservingPtr<Tracker>> observers;
+  for (size_t i = 0; i != 9; ++i) {
+    const TrackablePtr<Tracker>& tracker =
+        owners.emplace_back(MakeTrackable<Tracker>());
+    observers.emplace_back(tracker.GetObserver());
+    observers.emplace_back(tracker.GetObserver());
+    BOOST_CHECK_EQUAL(owners[i].ShareCount(), 2);
+  }
+  observers.erase(observers.begin() + 1);
+  for (size_t i = 0; i != 9; ++i) {
+    BOOST_CHECK_EQUAL(owners[i].ShareCount(), i == 0 ? 1 : 2);
+  }
+  observers.erase(observers.begin() + 1);
+  for (size_t i = 0; i != 9; ++i) {
+    BOOST_CHECK_EQUAL(owners[i].ShareCount(), i < 2 ? 1 : 2);
+  }
+
+  observers.erase(observers.begin() + 5);
+  observers.erase(observers.begin() + 2);
+  observers.erase(observers.begin() + 5);
+  observers.erase(observers.begin() + 5);
+  observers.erase(observers.begin() + 9);
+  observers.erase(observers.begin() + 6);
+  observers.erase(observers.begin() + 9);
+  for (size_t i = 0; i != 9; ++i) {
+    BOOST_REQUIRE(owners[i]);
+    BOOST_CHECK_EQUAL(owners[i]->field - kFieldStart, i);
+    BOOST_CHECK_EQUAL(owners[i].ShareCount(), 1);
+    BOOST_REQUIRE(observers[i]);
+    BOOST_CHECK_EQUAL(observers[i]->field - kFieldStart, i);
+  }
+  owners.erase(owners.begin() + 4);
+  owners.erase(owners.begin() + 0);
+  owners.erase(owners.begin() + 6);
+  owners.erase(owners.begin() + 1);
+  owners.erase(owners.begin() + 3);
+  BOOST_CHECK_EQUAL(owners[0]->field, kFieldStart + 1);
+  BOOST_CHECK_EQUAL(owners[1]->field, kFieldStart + 3);
+  BOOST_CHECK_EQUAL(owners[2]->field, kFieldStart + 5);
+  BOOST_CHECK_EQUAL(owners[3]->field, kFieldStart + 7);
+  for (size_t i = 0; i != 10; i += 2) BOOST_CHECK(!observers[i]);
+  for (size_t i = 1; i != 9; i += 2) BOOST_CHECK(observers[i]);
+}
+
+BOOST_AUTO_TEST_CASE(make_trackable_ptr) {
+  ResetTracker();
+  TrackablePtr a = MakeTrackable<Tracker>();
   BOOST_CHECK(bool(a));
 
-  TrackablePtr b = MakeObservable<Tracker>(3, 5);
+  TrackablePtr b = MakeTrackable<Tracker>(3, 5);
   BOOST_CHECK(bool(b));
   BOOST_CHECK(a != b);
   BOOST_CHECK_EQUAL(n_constructions, 2);

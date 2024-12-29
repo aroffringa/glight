@@ -36,11 +36,14 @@ using json::Node;
 using json::Object;
 using json::String;
 
+using system::ObservingPtr;
+
 void ParseNameAttr(const Object &node, NamedObject &object) {
   object.SetName(static_cast<const String &>(node["name"]).value);
 }
 
-void ParseFolderAttr(const Object &node, FolderObject &object,
+void ParseFolderAttr(const Object &node,
+                     const ObservingPtr<FolderObject> &object,
                      Management &management, bool hasFolder) {
   if (hasFolder) {
     size_t parent = ToNum(node["parent"]).AsSize();
@@ -49,10 +52,11 @@ void ParseFolderAttr(const Object &node, FolderObject &object,
                                " specified in file");
     management.Folders()[parent]->Add(object);
   }
-  ParseNameAttr(node, object);
+  ParseNameAttr(node, *object);
 }
 
-void ParseFolderAttr(const Object &node, FolderObject &object,
+void ParseFolderAttr(const Object &node,
+                     const ObservingPtr<FolderObject> &object,
                      Management &management) {
   ParseFolderAttr(node, object, management, true);
 }
@@ -166,12 +170,13 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
     ft.SetBrightness(ToNum(ft_node["brightness"]).AsDouble());
     ft.SetMaxPower(OptionalUInt(ft_node, "max-power", 0));
     ft.SetIdlePower(OptionalUInt(ft_node, "idle-power", 0));
-    FixtureType &new_type = management.GetTheatre().AddFixtureType(ft);
-    if (management.RootFolder().GetChildIfExists(new_type.Name())) {
+    const TrackablePtr<FixtureType> &new_type =
+        management.GetTheatre().AddFixtureType(ft);
+    if (management.RootFolder().GetChildIfExists(new_type->Name())) {
       throw std::runtime_error("Error in file: fixture type listed twice");
     }
-    ParseFolderAttr(ft_node, new_type, management);
-    ParseFixtureTypeFunctions(ToArr(ft_node["functions"]), new_type);
+    ParseFolderAttr(ft_node, new_type.GetObserver(), management);
+    ParseFixtureTypeFunctions(ToArr(ft_node["functions"]), *new_type);
   }
 }
 
@@ -196,8 +201,8 @@ void ParseFixtureFunction(const Object &node, Fixture &parentFixture) {
 void ParseFixtures(const json::Array &node, Theatre &theatre) {
   for (const Node &child : node) {
     const Object &f_node = ToObj(child);
-    FixtureType &type = theatre.GetFixtureType(ToStr(f_node["type"]));
-    Fixture &fixture = theatre.AddFixture(type);
+    FixtureType &type = *theatre.GetFixtureType(ToStr(f_node["type"]));
+    Fixture &fixture = *theatre.AddFixture(type);
     ParseNameAttr(f_node, fixture);
     fixture.GetPosition().X() = ToNum(f_node["position-x"]).AsDouble();
     fixture.GetPosition().Y() = ToNum(f_node["position-y"]).AsDouble();
@@ -226,13 +231,15 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
 void ParseFixtureGroups(const json::Array &node, Management &management) {
   for (const Node &child : node) {
     const Object &f_node = ToObj(child);
-    FixtureGroup &group = management.AddFixtureGroup();
+    ObservingPtr<FixtureGroup> group =
+        management.AddFixtureGroup().GetObserver();
     ParseFolderAttr(f_node, group, management);
 
     const Array &fixtures = ToArr(f_node["fixtures"]);
     for (const Node &f : fixtures) {
-      Fixture &fixture = management.GetTheatre().GetFixture(ToStr(f));
-      group.Insert(fixture);
+      ObservingPtr<Fixture> fixture =
+          management.GetTheatre().GetFixturePtr(ToStr(f));
+      group->Insert(std::move(fixture));
     }
   }
 }
@@ -252,8 +259,10 @@ void ParseTheatre(const Object &node, Management &management) {
 void ParseFixtureControl(const Object &node, Management &management) {
   Fixture &fixture =
       management.GetTheatre().GetFixture(ToStr(node["fixture-ref"]));
-  FixtureControl &control = management.AddFixtureControl(fixture);
-  ParseFolderAttr(node, control, management);
+  ObservingPtr<FixtureControl> control_ptr =
+      management.AddFixtureControl(fixture).GetObserver<FixtureControl>();
+  ParseFolderAttr(node, control_ptr, management);
+  FixtureControl &control = *control_ptr;
   if (node.contains("filters")) {
     const glight::json::Array &filters = ToArr(node["filters"]);
     for (const Node &node : filters) {
@@ -265,8 +274,10 @@ void ParseFixtureControl(const Object &node, Management &management) {
 }
 
 void ParsePresetCollection(const Object &node, Management &management) {
-  PresetCollection &collection = management.AddPresetCollection();
-  ParseFolderAttr(node, collection, management);
+  ObservingPtr<PresetCollection> collection_ptr =
+      management.AddPresetCollection().GetObserver<PresetCollection>();
+  ParseFolderAttr(node, collection_ptr, management);
+  PresetCollection &collection = *collection_ptr;
   const Array &values = ToArr(node["values"]);
   for (const Node &value : values) {
     const Object &v = ToObj(value);
@@ -313,39 +324,42 @@ Transition ParseTransition(const Object &node) {
 }
 
 void ParseChase(const Object &node, Management &management) {
-  Chase &chase = management.AddChase();
-  ParseFolderAttr(node, chase, management);
+  ObservingPtr<Chase> chase_ptr = management.AddChase().GetObserver<Chase>();
+  ParseFolderAttr(node, chase_ptr, management);
+  Chase &chase = *chase_ptr;
   ParseTrigger(ToObj(node["trigger"]), chase.GetTrigger());
   chase.GetTransition() = ParseTransition(ToObj(node["transition"]));
   ParseSequence(ToObj(node["sequence"]), chase.GetSequence(), management);
 }
 
 void ParseTimeSequence(const Object &node, Management &management) {
-  TimeSequence &timeSequence = management.AddTimeSequence();
-  ParseFolderAttr(node, timeSequence, management);
-  timeSequence.SetSustain(ToBool(node["sustain"]));
-  timeSequence.SetRepeatCount(ToNum(node["repeat-count"]).AsSize());
-  ParseSequence(ToObj(node["sequence"]), timeSequence.Sequence(), management);
+  ObservingPtr<TimeSequence> time_sequence_ptr =
+      management.AddTimeSequence().GetObserver<TimeSequence>();
+  ParseFolderAttr(node, time_sequence_ptr, management);
+  TimeSequence &time_sequence = *time_sequence_ptr;
+  time_sequence.SetSustain(ToBool(node["sustain"]));
+  time_sequence.SetRepeatCount(ToNum(node["repeat-count"]).AsSize());
+  ParseSequence(ToObj(node["sequence"]), time_sequence.Sequence(), management);
   const Array &steps = ToArr(node["steps"]);
   size_t stepIndex = 0;
   for (Node &item : steps) {
     const Object &step_obj = ToObj(item);
-    TimeSequence::Step &step = timeSequence.Steps().emplace_back();
+    TimeSequence::Step &step = time_sequence.Steps().emplace_back();
     ParseTrigger(ToObj(step_obj["trigger"]), step.trigger);
     step.transition = ParseTransition(ToObj(step_obj["transition"]));
     ++stepIndex;
   }
-  if (timeSequence.Steps().size() != timeSequence.Sequence().Size())
+  if (time_sequence.Steps().size() != time_sequence.Sequence().Size())
     throw std::runtime_error(
         "nr of steps in time sequence doesn't match sequence size");
 }
 
 void ParseEffect(const Object &node, Management &management) {
   EffectType type = NameToEffectType(ToStr(node["effect_type"]));
-  std::unique_ptr<Effect> effect = Effect::Make(type);
-  ParseFolderAttr(node, *effect, management);
-  Effect *effectPtr = &management.AddEffect(std::move(effect));
-  std::unique_ptr<PropertySet> ps = PropertySet::Make(*effectPtr);
+  const TrackablePtr<Controllable> &effect_ptr =
+      management.AddEffect(Effect::Make(type));
+  ParseFolderAttr(node, effect_ptr.GetObserver<Effect>(), management);
+  std::unique_ptr<PropertySet> ps = PropertySet::Make(*effect_ptr);
   const Array &properties = ToArr(node["properties"]);
   for (const Node &item : properties) {
     const Object &p_node = ToObj(item);
@@ -373,14 +387,15 @@ void ParseEffect(const Object &node, Management &management) {
     }
   }
   const Array &connections = ToArr(node["connections"]);
+  Effect &effect = static_cast<Effect &>(*effect_ptr);
   for (const Node &item : connections) {
     const Object &c_node = ToObj(item);
     const std::string &cName = ToStr(c_node["name"]);
     const size_t cInputIndex = ToNum(c_node["input-index"]).AsSize();
     const size_t folderId = ToNum(c_node["folder"]).AsSize();
-    Folder *folder = management.Folders()[folderId].get();
-    effectPtr->AddConnection(
-        dynamic_cast<Controllable &>(folder->GetChild(cName)), cInputIndex);
+    Folder *folder = management.Folders()[folderId].Get();
+    effect.AddConnection(dynamic_cast<Controllable &>(folder->GetChild(cName)),
+                         cInputIndex);
   }
 }
 
@@ -393,7 +408,7 @@ KeySceneItem &ParseKeySceneItem(const Object &node, Scene &scene) {
 ControlSceneItem &ParseControlSceneItem(const Object &node, Scene &scene,
                                         Management &management) {
   const size_t folderId = ToNum(node["folder"]).AsSize();
-  Folder *folder = management.Folders()[folderId].get();
+  Folder *folder = management.Folders()[folderId].Get();
   Controllable &controllable = static_cast<Controllable &>(
       folder->GetChild(ToStr(node["controllable-ref"])));
   ControlSceneItem *item = scene.AddControlSceneItem(
@@ -427,8 +442,10 @@ void ParseSceneItem(const Object &node, Scene &scene, Management &management) {
 }
 
 void ParseScene(const Object &scene_node, Management &management) {
-  Scene &scene = management.AddScene(false);
-  ParseFolderAttr(scene_node, scene, management);
+  const ObservingPtr<Scene> &scene_ptr =
+      management.AddScene(false).GetObserver<Scene>();
+  ParseFolderAttr(scene_node, scene_ptr, management);
+  Scene &scene = *scene_ptr;
   scene.SetAudioFile(ToStr(scene_node["audio-file"]));
   const Array &items = ToArr(scene_node["items"]);
   for (const Node &item_node : items) {
@@ -467,7 +484,7 @@ void ParseSourceValues(const Array &node, Management &management) {
     const Object &object = ToObj(element);
     size_t folderId = ToNum(object["folder"]).AsSize();
     const std::string name = ToStr(object["controllable-ref"]);
-    Folder *folder = management.Folders()[folderId].get();
+    Folder *folder = management.Folders()[folderId].Get();
     Controllable &controllable =
         dynamic_cast<Controllable &>(folder->GetChild(name));
     const size_t inputIndex = ToNum(object["input-index"]).AsSize();
@@ -484,7 +501,7 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
     const size_t input = ToNum(node["input-index"]).AsSize();
     const size_t folder_id = ToNum(node["folder"]).AsSize();
     const std::string name = ToStr(node["name"]);
-    Folder *folder = management.Folders()[folder_id].get();
+    Folder *folder = management.Folders()[folder_id].Get();
     Controllable &controllable =
         static_cast<Controllable &>(folder->GetChild(name));
     SourceValue *source = management.GetSourceValue(controllable, input);
@@ -499,7 +516,7 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
         const size_t input = ToNum(object["input-index"]).AsSize();
         const size_t folder_id = ToNum(object["folder"]).AsSize();
         const std::string name = ToStr(object["name"]);
-        Folder *folder = management.Folders()[folder_id].get();
+        Folder *folder = management.Folders()[folder_id].Get();
         Controllable &controllable =
             static_cast<Controllable &>(folder->GetChild(name));
         sources.emplace_back(management.GetSourceValue(controllable, input));
@@ -610,13 +627,13 @@ void ImportFixtureTypes(const std::string &filename,
                         theatre::Management &management) {
   theatre::Management file_management;
   system::Read(filename, file_management);
-  const std::vector<std::unique_ptr<theatre::FixtureType>> &new_types =
+  const std::vector<TrackablePtr<theatre::FixtureType>> &new_types =
       file_management.GetTheatre().FixtureTypes();
-  for (const std::unique_ptr<theatre::FixtureType> &type : new_types) {
+  for (const TrackablePtr<theatre::FixtureType> &type : new_types) {
     if (!management.RootFolder().GetChildIfExists(type->Name())) {
-      glight::theatre::FixtureType &added_type =
+      const TrackablePtr<theatre::FixtureType> &added_type =
           management.GetTheatre().AddFixtureType(*type);
-      management.RootFolder().Add(added_type);
+      management.RootFolder().Add(added_type.GetObserver());
     }
   }
 }

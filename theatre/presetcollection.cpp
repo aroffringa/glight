@@ -64,7 +64,8 @@ void PresetCollection::SetFromCurrentSituation(Management& management) {
 }
 
 void PresetCollection::SetFromCurrentFixtures(
-    Management& management, const std::set<Fixture*>& fixtures) {
+    Management& management,
+    const std::set<system::ObservingPtr<Fixture>, std::less<>>& fixtures) {
   Clear();
   std::vector<std::unique_ptr<SourceValue>>& values = management.SourceValues();
   for (std::unique_ptr<SourceValue>& sv : values) {

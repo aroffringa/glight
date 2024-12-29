@@ -9,13 +9,15 @@
 
 namespace glight::gui {
 
+using system::ObservingPtr;
+
 ObjectListFrame::ObjectListFrame(MainWindow &parentWindow)
     : _list(), _parentWindow(parentWindow), _nameFrame() {
   _list.SignalSelectionChange().connect(
       sigc::mem_fun(this, &ObjectListFrame::onSelectedObjectChanged));
   _list.SignalObjectActivated().connect(
-      [&](glight::theatre::FolderObject &object) {
-        mainwindow::OpenPropertiesWindow(_windowList, object, _parentWindow);
+      [&](ObservingPtr<theatre::FolderObject> object) {
+        mainwindow::OpenPropertiesWindow(_windowList, *object, _parentWindow);
       });
   _list.SetDisplayType(ObjectListType::AllExceptFixtures);
   _list.SetShowTypeColumn(true);
@@ -44,7 +46,8 @@ ObjectListFrame::ObjectListFrame(MainWindow &parentWindow)
 
 void ObjectListFrame::onSelectedObjectChanged() {
   if (_delayUpdates.IsFirst()) {
-    theatre::FolderObject *selectedObj = _list.SelectedObject();
+    const system::ObservingPtr<theatre::FolderObject> selectedObj =
+        _list.SelectedObject();
     if (selectedObj) {
       _nameFrame.SetNamedObject(*selectedObj);
       _parentWindow.Menu().SetIsObjectSelected(true);

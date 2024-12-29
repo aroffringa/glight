@@ -31,4 +31,10 @@ class ValueSnapshot;
 enum class EffectType;
 }  // namespace glight::theatre
 
+namespace glight::system {
+template <typename T>
+class TrackablePtr;
+template <typename T>
+class ObservingPtr;
+}  // namespace glight::system
 #endif

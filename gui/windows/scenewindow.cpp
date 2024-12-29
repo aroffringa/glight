@@ -22,14 +22,15 @@
 #include "gui/dialogs/stringinputdialog.h"
 #include "gui/dialogs/sceneselect.h"
 
+using glight::system::TrackablePtr;
 using glight::theatre::Controllable;
 using glight::theatre::Scene;
 
 namespace {
 Scene *FirstScene(glight::theatre::Management &management) {
-  for (const std::unique_ptr<Controllable> &controllable :
+  for (const TrackablePtr<Controllable> &controllable :
        management.Controllables()) {
-    if (Scene *scene = dynamic_cast<Scene *>(controllable.get()); scene) {
+    if (Scene *scene = dynamic_cast<Scene *>(controllable.Get()); scene) {
       return scene;
     }
   }
@@ -744,7 +745,8 @@ bool SceneWindow::NewScene() {
   dialog.set_secondary_text("Name of new scene:");
   int result = dialog.run();
   if (result == Gtk::RESPONSE_OK) {
-    glight::theatre::Scene &scene = _management.AddScene(true);
+    theatre::Scene &scene =
+        static_cast<theatre::Scene &>(*_management.AddScene(true));
     if (!scene.Parent().GetChildIfExists(entry.get_text())) {
       scene.SetName(entry.get_text());
     }

@@ -76,49 +76,50 @@ void NewEmptyPreset(ObjectBrowser &browser,
   Folder &parent_folder = browser.SelectedFolder();
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
-  theatre::PresetCollection &preset_collection =
-      management.AddPresetCollection();
-  preset_collection.SetName(parent_folder.GetAvailableName("Preset"));
+  ObservingPtr<theatre::PresetCollection> preset_collection =
+      management.AddPresetCollection().GetObserver<theatre::PresetCollection>();
+  preset_collection->SetName(parent_folder.GetAvailableName("Preset"));
   parent_folder.Add(preset_collection);
-  management.AddSourceValue(preset_collection, 0);
+  management.AddSourceValue(*preset_collection, 0);
   lock.unlock();
 
   Instance::Events().EmitUpdate();
-  browser.SelectObject(preset_collection);
-  AssignFader(preset_collection);
-  OpenPropertiesWindow(property_windows, preset_collection, parent);
+  browser.SelectObject(*preset_collection);
+  AssignFader(*preset_collection);
+  OpenPropertiesWindow(property_windows, *preset_collection, parent);
 }
 
 void NewPresetFromCurrent(ObjectBrowser &browser) {
   Folder &parent = browser.SelectedFolder();
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
-  theatre::PresetCollection &preset_collection =
-      management.AddPresetCollection();
-  preset_collection.SetName(parent.GetAvailableName("Preset"));
+  ObservingPtr<theatre::PresetCollection> preset_collection =
+      management.AddPresetCollection().GetObserver<theatre::PresetCollection>();
+  preset_collection->SetName(parent.GetAvailableName("Preset"));
   parent.Add(preset_collection);
-  preset_collection.SetFromCurrentSituation(management);
-  management.AddSourceValue(preset_collection, 0);
+  preset_collection->SetFromCurrentSituation(management);
+  management.AddSourceValue(*preset_collection, 0);
   lock.unlock();
 
   Instance::Events().EmitUpdate();
-  browser.SelectObject(preset_collection);
-  AssignFader(preset_collection);
+  browser.SelectObject(*preset_collection);
+  AssignFader(*preset_collection);
 }
 
-void NewPresetFromFixtures(theatre::Folder &parent_folder,
-                           const std::set<theatre::Fixture *> &fixtures) {
+void NewPresetFromFixtures(
+    theatre::Folder &parent_folder,
+    const std::set<ObservingPtr<theatre::Fixture>, std::less<>> &fixtures) {
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
-  theatre::PresetCollection &preset_collection =
-      management.AddPresetCollection();
-  preset_collection.SetName(parent_folder.GetAvailableName("Preset"));
+  ObservingPtr<theatre::PresetCollection> preset_collection =
+      management.AddPresetCollection().GetObserver<theatre::PresetCollection>();
+  preset_collection->SetName(parent_folder.GetAvailableName("Preset"));
   parent_folder.Add(preset_collection);
-  preset_collection.SetFromCurrentFixtures(management, fixtures);
-  management.AddSourceValue(preset_collection, 0);
+  preset_collection->SetFromCurrentFixtures(management, fixtures);
+  management.AddSourceValue(*preset_collection, 0);
   lock.unlock();
 
-  AssignFader(preset_collection);
+  AssignFader(*preset_collection);
   Instance::Events().EmitUpdate();
 }
 
@@ -140,16 +141,17 @@ void NewTimeSequence(ObjectBrowser &browser,
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
   Folder &parent_folder = browser.SelectedFolder();
-  theatre::TimeSequence &time_sequence = management.AddTimeSequence();
-  time_sequence.SetName(parent_folder.GetAvailableName("Seq"));
+  ObservingPtr<theatre::TimeSequence> time_sequence =
+      management.AddTimeSequence().GetObserver<theatre::TimeSequence>();
+  time_sequence->SetName(parent_folder.GetAvailableName("Seq"));
   parent_folder.Add(time_sequence);
-  management.AddSourceValue(time_sequence, 0);
+  management.AddSourceValue(*time_sequence, 0);
   lock.unlock();
 
   Instance::Events().EmitUpdate();
-  browser.SelectObject(time_sequence);
-  AssignFader(time_sequence);
-  OpenPropertiesWindow(property_windows, time_sequence, parent);
+  browser.SelectObject(*time_sequence);
+  AssignFader(*time_sequence);
+  OpenPropertiesWindow(property_windows, *time_sequence, parent);
 }
 
 void NewEffect(theatre::EffectType effect_type, ObjectBrowser &browser,
@@ -161,7 +163,9 @@ void NewEffect(theatre::EffectType effect_type, ObjectBrowser &browser,
   Folder &parent_folder = browser.SelectedFolder();
   effect->SetName(
       parent_folder.GetAvailableName(EffectTypeToName(effect_type)));
-  Effect *added = &management.AddEffect(std::move(effect), parent_folder);
+  ObservingPtr<Effect> added =
+      management.AddEffect(std::move(effect), parent_folder)
+          .GetObserver<Effect>();
   for (size_t i = 0; i != added->NInputs(); ++i)
     management.AddSourceValue(*added, i);
   lock.unlock();
@@ -184,7 +188,7 @@ void NewFolder(ObjectBrowser &browser) {
 }
 
 void DeleteObject(ObjectBrowser &browser) {
-  FolderObject *object = browser.SelectedObject();
+  ObservingPtr<FolderObject> object = browser.SelectedObject();
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
   if (object && object != &management.RootFolder()) {

@@ -107,7 +107,7 @@ void FixtureListWindow::fillFixturesList() {
     row[_fixturesListColumns._universe] = fixture->GetUniverse();
     row[_fixturesListColumns._channels] = getChannelString(*fixture);
     row[_fixturesListColumns._symbol] = fixture->Symbol().Name();
-    row[_fixturesListColumns._fixture] = fixture.Get();
+    row[_fixturesListColumns._fixture] = fixture.GetObserver();
   }
 }
 
@@ -134,15 +134,17 @@ void FixtureListWindow::onNewButtonClicked() {
   add_fixture_window_->show();
 }
 
-std::vector<theatre::Fixture *> FixtureListWindow::GetSelection() const {
+std::vector<system::ObservingPtr<theatre::Fixture>>
+FixtureListWindow::GetSelection() const {
   Glib::RefPtr<const Gtk::TreeSelection> selection =
       _fixturesListView.get_selection();
   std::vector<Gtk::TreeModel::Path> rows = selection->get_selected_rows();
-  std::vector<theatre::Fixture *> fixtures;
+  std::vector<system::ObservingPtr<theatre::Fixture>> fixtures;
   for (const Gtk::TreeModel::Path &path : rows) {
     const Gtk::TreeModel::iterator iter = _fixturesListModel->get_iter(path);
     if (iter) {
-      theatre::Fixture *fixture = (*iter)[_fixturesListColumns._fixture];
+      const system::ObservingPtr<theatre::Fixture> &fixture =
+          (*iter)[_fixturesListColumns._fixture];
       fixtures.emplace_back(fixture);
     }
   }
@@ -151,8 +153,9 @@ std::vector<theatre::Fixture *> FixtureListWindow::GetSelection() const {
 
 void FixtureListWindow::onRemoveButtonClicked() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<theatre::Fixture *> selection = GetSelection();
-  for (theatre::Fixture *fixture : selection) {
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
+      GetSelection();
+  for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
     Instance::Management().RemoveFixture(*fixture);
   }
   lock.unlock();
@@ -161,30 +164,33 @@ void FixtureListWindow::onRemoveButtonClicked() {
 
 void FixtureListWindow::onIncChannelButtonClicked() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<theatre::Fixture *> selection = GetSelection();
-  for (theatre::Fixture *fixture : selection) {
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
+      GetSelection();
+  for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
     fixture->IncChannel();
     if (!fixture->IsVisible())
       fixture->SetSymbol(theatre::FixtureSymbol::Normal);
-    updateFixture(fixture);
+    updateFixture(fixture.Get());
   }
 }
 
 void FixtureListWindow::onDecChannelButtonClicked() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<theatre::Fixture *> selection = GetSelection();
-  for (theatre::Fixture *fixture : selection) {
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
+      GetSelection();
+  for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
     fixture->DecChannel();
     if (!fixture->IsVisible())
       fixture->SetSymbol(theatre::FixtureSymbol::Normal);
-    updateFixture(fixture);
+    updateFixture(fixture.Get());
   }
 }
 
 void FixtureListWindow::onSetChannelButtonClicked() {
-  const std::vector<theatre::Fixture *> selection = GetSelection();
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
+      GetSelection();
   if (selection.size() == 1) {
-    theatre::Fixture *fixture = selection[0];
+    const system::ObservingPtr<theatre::Fixture> &fixture = selection[0];
     Gtk::MessageDialog dialog(*this, "Set DMX channel", false,
                               Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
     Gtk::Entry entry;
@@ -204,7 +210,7 @@ void FixtureListWindow::onSetChannelButtonClicked() {
           fixture->SetSymbol(theatre::FixtureSymbol::Normal);
         const unsigned universe = 0;  // TODO
         fixture->SetChannel(theatre::DmxChannel(value - 1, universe));
-        updateFixture(fixture);
+        updateFixture(fixture.Get());
       }
     }
   }
@@ -238,10 +244,11 @@ void FixtureListWindow::onGlobalSelectionChange() {
   if (_recursionLock.IsFirst()) {
     RecursionLock::Token token(_recursionLock);
     _fixturesListView.get_selection()->unselect_all();
-    const std::vector<theatre::Fixture *> &new_selection =
+    const std::vector<system::ObservingPtr<theatre::Fixture>> &new_selection =
         Instance::Selection().Selection();
     for (const auto &child : _fixturesListModel->children()) {
-      theatre::Fixture *fixture = child[_fixturesListColumns._fixture];
+      const system::ObservingPtr<theatre::Fixture> &fixture =
+          child[_fixturesListColumns._fixture];
       auto iter =
           std::find(new_selection.begin(), new_selection.end(), fixture);
       if (iter != new_selection.end()) {
@@ -253,8 +260,9 @@ void FixtureListWindow::onGlobalSelectionChange() {
 
 void FixtureListWindow::onUpClicked() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<theatre::Fixture *> selection = GetSelection();
-  for (theatre::Fixture *fixture : selection) {
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
+      GetSelection();
+  for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
     theatre::Fixture *previous_fixture = nullptr;
     for (const system::TrackablePtr<theatre::Fixture> &f :
          Instance::Management().GetTheatre().Fixtures()) {
@@ -275,8 +283,9 @@ void FixtureListWindow::onUpClicked() {
 
 void FixtureListWindow::onDownClicked() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<theatre::Fixture *> selection = GetSelection();
-  for (theatre::Fixture *fixture : selection) {
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
+      GetSelection();
+  for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
     for (auto iterator = Instance::Management().GetTheatre().Fixtures().begin();
          iterator != Instance::Management().GetTheatre().Fixtures().end();
          ++iterator) {

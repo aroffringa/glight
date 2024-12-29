@@ -61,8 +61,8 @@ BOOST_AUTO_TEST_CASE(ShapeCount) {
 
 Color testColor(StockFixture cl, const std::vector<unsigned char> &values) {
   Management management;
-  const FixtureType &fixtureType = management.GetTheatre().AddFixtureType(cl);
-  Fixture &rgbFixture = management.GetTheatre().AddFixture(fixtureType);
+  const FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(cl);
+  Fixture &rgbFixture = *management.GetTheatre().AddFixture(fixtureType);
   const ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   uni.SetValues(values.data(), values.size());
@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE(GetColor_RGBAWUV) {
 BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
   Management management;
   const FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise);
-  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
+      *management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
   const ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   // Master, R, G, B, Strobe, Rotation, Macro
@@ -132,11 +132,11 @@ BOOST_AUTO_TEST_CASE(function_summary) {
   Management management;
 
   const FixtureType &rgb_type =
-      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
+      *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
   BOOST_CHECK_EQUAL(FunctionSummary(rgb_type), "R-G-B");
 
   const FixtureType &btv_type =
-      management.GetTheatre().AddFixtureType(StockFixture::BT_VINTAGE_7CH);
+      *management.GetTheatre().AddFixtureType(StockFixture::BT_VINTAGE_7CH);
   BOOST_CHECK_EQUAL(FunctionSummary(btv_type), "W-M-S-R-G-B-C");
 }
 
