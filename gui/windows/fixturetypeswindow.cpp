@@ -19,6 +19,10 @@
 
 namespace glight::gui::windows {
 
+using system::ObservingPtr;
+using system::TrackablePtr;
+using theatre::FixtureType;
+
 FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   set_title("Glight - fixture types");
   set_size_request(200, 400);
@@ -57,9 +61,9 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
 
   right_grid_.attach(class_label_, 0, 2);
   const std::vector<theatre::FixtureClass> classes =
-      theatre::FixtureType::GetClassList();
+      FixtureType::GetClassList();
   for (theatre::FixtureClass c : classes)
-    class_combo_.append(theatre::FixtureType::ClassName(c));
+    class_combo_.append(FixtureType::ClassName(c));
   right_grid_.attach(class_combo_, 1, 2, 2, 1);
   class_combo_.set_hexpand(true);
 
@@ -125,21 +129,21 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
 
 void FixtureTypesWindow::fillList() {
   RecursionLock::Token token(recursion_lock_);
-  const theatre::FixtureType *selected_type = getSelected();
+  const FixtureType *selected_type = getSelected();
   list_model_->clear();
 
   theatre::Management &management = Instance::Management();
   std::lock_guard<std::mutex> lock(management.Mutex());
-  const std::vector<std::unique_ptr<theatre::FixtureType>> &types =
+  const std::vector<TrackablePtr<FixtureType>> &types =
       management.GetTheatre().FixtureTypes();
-  for (const std::unique_ptr<theatre::FixtureType> &type : types) {
+  for (const TrackablePtr<FixtureType> &type : types) {
     Gtk::TreeModel::iterator iter = list_model_->append();
     const Gtk::TreeModel::Row &row = *iter;
-    row[list_columns_.fixture_type_] = type.get();
+    row[list_columns_.fixture_type_] = type.Get();
     row[list_columns_.name_] = type->Name();
     row[list_columns_.functions_] = FunctionSummary(*type);
     row[list_columns_.in_use_] = management.GetTheatre().IsUsed(*type);
-    if (selected_type && selected_type == type.get()) {
+    if (selected_type && selected_type == type.Get()) {
       list_view_.get_selection()->select(row);
     }
   }
@@ -162,9 +166,14 @@ void FixtureTypesWindow::onNewButtonClicked() {
 }
 
 void FixtureTypesWindow::onRemoveClicked() {
-  theatre::FixtureType *type = getSelected();
+  FixtureType *type = getSelected();
   if (type) {
-    Instance::Management().RemoveFixtureType(*type);
+    {
+      theatre::Management &management = Instance::Management();
+      std::lock_guard<std::mutex> lock(management.Mutex());
+      management.RemoveFixtureType(*type);
+      Instance::Selection().UpdateAfterDelete();
+    }
     Instance::Events().EmitUpdate();
   } else {
     const Gtk::TreeModel::const_iterator selected =
@@ -174,14 +183,18 @@ void FixtureTypesWindow::onRemoveClicked() {
 }
 
 void FixtureTypesWindow::onSaveClicked() {
-  theatre::FixtureType *type = getSelected();
+  FixtureType *type = getSelected();
   bool is_used = false;
   if (type) {
     is_used = Instance::Management().GetTheatre().IsUsed(*type);
   } else {
-    theatre::FixtureType ft;
-    type = &Instance::Management().GetTheatre().AddFixtureType(ft);
-    Instance::Management().RootFolder().Add(*type);
+    FixtureType ft;
+    ObservingPtr<FixtureType> new_type = Instance::Management()
+                                             .GetTheatre()
+                                             .AddFixtureType(ft)
+                                             .GetObserver<FixtureType>();
+    type = new_type.Get();
+    Instance::Management().RootFolder().Add(std::move(new_type));
   }
   type->SetName(name_entry_.get_text());
   type->SetShortName(short_name_entry_.get_text());
@@ -214,13 +227,13 @@ void FixtureTypesWindow::onSaveClicked() {
   if (!is_used) {
     type->SetFunctions(functions_frame_.GetFunctions());
     type->SetFixtureClass(
-        theatre::FixtureType::NameToClass(class_combo_.get_active_text()));
+        FixtureType::NameToClass(class_combo_.get_active_text()));
   }
   Instance::Events().EmitUpdate();
   Select(*type);
 }
 
-void FixtureTypesWindow::Select(const theatre::FixtureType &selection) {
+void FixtureTypesWindow::Select(const FixtureType &selection) {
   Gtk::TreeModel::Children children = list_model_->children();
   for (Gtk::TreeIter iter = children.begin(), end = children.end(); iter != end;
        ++iter) {
@@ -232,7 +245,7 @@ void FixtureTypesWindow::Select(const theatre::FixtureType &selection) {
   }
 }
 
-theatre::FixtureType *FixtureTypesWindow::getSelected() {
+FixtureType *FixtureTypesWindow::getSelected() {
   Glib::RefPtr<Gtk::TreeSelection> selection = list_view_.get_selection();
   const Gtk::TreeModel::const_iterator selected = selection->get_selected();
   if (selected)
@@ -241,13 +254,13 @@ theatre::FixtureType *FixtureTypesWindow::getSelected() {
     return nullptr;
 }
 
-void FixtureTypesWindow::SelectFixtures(const theatre::FixtureType &type) {
+void FixtureTypesWindow::SelectFixtures(const FixtureType &type) {
   const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       Instance::Management().GetTheatre().Fixtures();
-  std::vector<theatre::Fixture *> selected_fixtures;
+  std::vector<system::ObservingPtr<theatre::Fixture>> selected_fixtures;
   for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
     if (&fixture->Type() == &type)
-      selected_fixtures.emplace_back(fixture.Get());
+      selected_fixtures.emplace_back(fixture.GetObserver());
   }
   Instance::Selection().SetSelection(std::move(selected_fixtures));
 }
@@ -258,8 +271,8 @@ void FixtureTypesWindow::onSelectionChanged() {
     Glib::RefPtr<Gtk::TreeSelection> selection = list_view_.get_selection();
     const Gtk::TreeModel::const_iterator selected = selection->get_selected();
     const bool has_selection = static_cast<bool>(selected);
-    const theatre::FixtureType *type =
-        has_selection ? static_cast<theatre::FixtureType *>(
+    const FixtureType *type =
+        has_selection ? static_cast<FixtureType *>(
                             (*selected)[list_columns_.fixture_type_])
                       : nullptr;
     remove_button_.set_sensitive(has_selection && !layout_locked_);
@@ -283,7 +296,7 @@ void FixtureTypesWindow::onSelectionChanged() {
       brightness_entry_.set_text(std::to_string(type->Brightness()));
       class_combo_.set_sensitive(!is_used && !layout_locked_);
       class_combo_.set_active_text(
-          theatre::FixtureType::ClassName(type->GetFixtureClass()));
+          FixtureType::ClassName(type->GetFixtureClass()));
 
       max_power_entry_.set_text(std::to_string(type->MaxPower()));
       idle_power_entry_.set_text(std::to_string(type->IdlePower()));
@@ -302,7 +315,7 @@ void FixtureTypesWindow::onSelectionChanged() {
       brightness_entry_.set_text("10");
       class_combo_.set_sensitive(!layout_locked_);
       class_combo_.set_active_text(
-          theatre::FixtureType::ClassName(theatre::FixtureClass::Par));
+          FixtureType::ClassName(theatre::FixtureClass::Par));
       max_power_entry_.set_text("0");
       idle_power_entry_.set_text("0");
       functions_frame_.set_sensitive(!layout_locked_);

@@ -48,12 +48,12 @@ void SceneSelect::FillScenesList() {
   model_->clear();
 
   std::lock_guard<std::mutex> lock(management_.Mutex());
-  const std::vector<std::unique_ptr<theatre::Controllable>> &controllables =
-      management_.Controllables();
-  for (const std::unique_ptr<theatre::Controllable> &controllable :
+  const std::vector<system::TrackablePtr<theatre::Controllable>>
+      &controllables = management_.Controllables();
+  for (const system::TrackablePtr<theatre::Controllable> &controllable :
        controllables) {
     if (theatre::Scene *scene =
-            dynamic_cast<theatre::Scene *>(controllable.get());
+            dynamic_cast<theatre::Scene *>(controllable.Get());
         scene) {
       Gtk::TreeModel::iterator iter = model_->append();
       const Gtk::TreeModel::Row &row = *iter;

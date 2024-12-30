@@ -16,8 +16,8 @@ class FixtureGroup : public FolderObject {
   FixtureGroup(const std::string& name) : FolderObject(name) {}
   ~FixtureGroup() { Clear(); }
 
-  std::vector<Fixture*> Fixtures() const {
-    std::vector<Fixture*> list;
+  std::vector<system::ObservingPtr<theatre::Fixture>> Fixtures() const {
+    std::vector<system::ObservingPtr<theatre::Fixture>> list;
     list.reserve(fixtures_.size());
     for (const Item& item : fixtures_) {
       list.emplace_back(item.first);
@@ -32,19 +32,20 @@ class FixtureGroup : public FolderObject {
     fixtures_.clear();
   }
 
-  bool Insert(Fixture& fixture) {
+  bool Insert(const system::ObservingPtr<theatre::Fixture>& fixture) {
     const auto [new_item, is_added] = fixtures_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(&fixture),
+        std::piecewise_construct, std::forward_as_tuple(fixture),
         std::forward_as_tuple());
     if (is_added) {
       new_item->second =
-          fixture.SignalDelete().connect([&]() { Remove(fixture); });
+          fixture->SignalDelete().connect([&, fixture]() { Remove(fixture); });
     }
     return is_added;
   }
 
-  bool Remove(const Fixture& fixture) {
-    const iterator item = fixtures_.find(const_cast<Fixture*>(&fixture));
+  bool Remove(const system::ObservingPtr<theatre::Fixture>& fixture) {
+    const iterator item = fixtures_.find(
+        const_cast<system::ObservingPtr<theatre::Fixture>&>(fixture));
     if (item != fixtures_.end()) {
       item->second.disconnect();
       fixtures_.erase(item);
@@ -54,8 +55,9 @@ class FixtureGroup : public FolderObject {
     }
   }
 
-  bool Contains(const Fixture& fixture) {
-    return fixtures_.count(const_cast<Fixture*>(&fixture)) != 0;
+  bool Contains(const system::ObservingPtr<theatre::Fixture>& fixture) {
+    return fixtures_.count(const_cast<system::ObservingPtr<theatre::Fixture>&>(
+               fixture)) != 0;
   }
 
   size_t Size() const { return fixtures_.size(); }
@@ -63,10 +65,12 @@ class FixtureGroup : public FolderObject {
   bool Empty() const { return fixtures_.empty(); }
 
  private:
-  using iterator = std::map<Fixture*, sigc::connection>::iterator;
-  using Item = std::pair<Fixture* const, sigc::connection>;
+  using iterator = std::map<system::ObservingPtr<theatre::Fixture>,
+                            sigc::connection>::iterator;
+  using Item =
+      std::pair<system::ObservingPtr<theatre::Fixture> const, sigc::connection>;
 
-  std::map<Fixture*, sigc::connection> fixtures_;
+  std::map<system::ObservingPtr<theatre::Fixture>, sigc::connection> fixtures_;
 };
 
 }  // namespace glight::theatre

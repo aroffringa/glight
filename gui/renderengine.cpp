@@ -3,9 +3,15 @@
 #include "../theatre/fixture.h"
 #include "../theatre/theatre.h"
 
+#include "system/math.h"
+
 namespace glight::gui {
 
 namespace {
+
+constexpr double kRotationHandleEnd = 2.0;
+constexpr double kRotationHandleStart = 0.5;
+
 constexpr double GetRadiusFactor(theatre::FixtureSymbol::Symbol symbol) {
   switch (symbol) {
     case theatre::FixtureSymbol::Hidden:
@@ -162,7 +168,8 @@ RenderEngine::RenderEngine(const theatre::Management &management)
 void RenderEngine::DrawSnapshot(
     const Cairo::RefPtr<Cairo::Context> &cairo,
     const theatre::ValueSnapshot &snapshot, const DrawStyle &style,
-    const std::vector<theatre::Fixture *> &selected_fixtures) {
+    const std::vector<system::ObservingPtr<theatre::Fixture>>
+        &selected_fixtures) {
   const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       management_.GetTheatre().Fixtures();
   cairo->save();
@@ -208,21 +215,35 @@ void RenderEngine::DrawSnapshot(
   }
   is_moving_ = draw_data.is_moving;
 
+  DrawSelectedFixtures(cairo, selected_fixtures);
+  cairo->restore();
+}
+
+void RenderEngine::DrawSelectedFixtures(
+    const Cairo::RefPtr<Cairo::Context> &cairo,
+    const std::vector<system::ObservingPtr<theatre::Fixture>>
+        &selected_fixtures) const {
   cairo->set_source_rgb(0.2, 0.2, 1.0);
   cairo->set_line_width(4.0 / scale_);
-  for (const theatre::Fixture *f : selected_fixtures) {
+  for (const system::ObservingPtr<theatre::Fixture> &fixture_ptr :
+       selected_fixtures) {
+    const theatre::Fixture *f = fixture_ptr.Get();
     if (f->IsVisible()) {
-      const double rad = GetRadiusFactor(f->Symbol().Value()) *
-                         management_.GetTheatre().FixtureSymbolSize();
-      ;
+      const double direction = f->Direction();
+      const double radius = GetRadiusFactor(f->Symbol().Value()) *
+                            management_.GetTheatre().FixtureSymbolSize();
       const double x = f->GetPosition().X() + 0.5;
       const double y = f->GetPosition().Y() + 0.5;
-      cairo->arc(x, y, rad, 0.0, 2.0 * M_PI);
+      cairo->arc(x, y, radius, 0.0, 2.0 * M_PI);
+      const double cos_dir = std::cos(direction);
+      const double sin_dir = std::sin(direction);
+      cairo->move_to(x + radius * kRotationHandleEnd * cos_dir,
+                     y + radius * kRotationHandleEnd * sin_dir);
+      cairo->line_to(x + radius * kRotationHandleStart * cos_dir,
+                     y + radius * kRotationHandleStart * sin_dir);
       cairo->stroke();
     }
   }
-
-  cairo->restore();
 }
 
 void RenderEngine::DrawSelectionRectangle(
@@ -241,12 +262,12 @@ void RenderEngine::DrawSelectionRectangle(
   cairo->restore();
 }
 
-theatre::Fixture *RenderEngine::FixtureAt(
+system::ObservingPtr<theatre::Fixture> RenderEngine::FixtureAt(
     const theatre::Position &position) const {
   const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       management_.GetTheatre().Fixtures();
 
-  theatre::Fixture *fixture = nullptr;
+  const system::TrackablePtr<theatre::Fixture> *fixture = nullptr;
   double closest = std::numeric_limits<double>::max();
   for (const system::TrackablePtr<theatre::Fixture> &f : fixtures) {
     if (f->IsVisible() &&
@@ -258,12 +279,43 @@ theatre::Fixture *RenderEngine::FixtureAt(
                             management_.GetTheatre().FixtureSymbolSize();
       const double radius_squared = radius * radius;
       if (distanceSq <= radius_squared && distanceSq < closest) {
-        fixture = f.Get();
+        fixture = &f;
         closest = distanceSq;
       }
     }
   }
-  return fixture;
+  return fixture ? fixture->GetObserver() : nullptr;
+}
+
+const system::ObservingPtr<theatre::Fixture> RenderEngine::GetDirectionHandleAt(
+    const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures,
+    const theatre::Position &position) const {
+  for (const system::ObservingPtr<theatre::Fixture> &f : fixtures) {
+    if (f->IsVisible() &&
+        position.InsideRectangle(
+            f->GetPosition(),
+            f->GetPosition().Add(kRotationHandleEnd, kRotationHandleEnd))) {
+      const theatre::Position centre = f->GetPosition().Add(0.5, 0.5);
+      const double distanceSq = position.SquaredDistance(centre);
+      const double radius = GetRadiusFactor(f->Symbol().Value()) *
+                            management_.GetTheatre().FixtureSymbolSize();
+      const double kStartSquared =
+          kRotationHandleStart * kRotationHandleStart * radius * radius;
+      const double kEndSquared =
+          kRotationHandleEnd * kRotationHandleEnd * radius * radius;
+      if (distanceSq >= kStartSquared && distanceSq < kEndSquared) {
+        const double direction = f->Direction();
+        const double cos_dir = std::cos(direction);
+        const double sin_dir = std::sin(direction);
+        if (std::abs(system::DistanceToLine(
+                position.X(), position.Y(), centre.X(), centre.Y(),
+                centre.X() + cos_dir, centre.Y() + sin_dir)) < 3.0) {
+          return f;
+        }
+      }
+    }
+  }
+  return nullptr;
 }
 
 theatre::Position RenderEngine::MouseToPosition(double mouse_x, double mouse_y,

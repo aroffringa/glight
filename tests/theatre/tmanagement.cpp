@@ -14,6 +14,7 @@
 #include <memory>
 
 using namespace glight::theatre;
+using glight::system::ObservingPtr;
 
 BOOST_AUTO_TEST_SUITE(management)
 
@@ -30,12 +31,12 @@ BOOST_AUTO_TEST_CASE(RemoveObject) {
   effectPtr->SetName("effect");
   BOOST_CHECK(management.RootFolder().Children().empty());
   Folder &folder = management.AddFolder(management.RootFolder(), "folder");
-  Effect &effect = management.AddEffect(std::move(effectPtr), folder);
+  Effect &effect = *management.AddEffectPtr(std::move(effectPtr), folder);
   management.AddSourceValue(effect, 0);
-  Chase &chase = management.AddChase();
-  chase.SetName("chase");
+  ObservingPtr<Chase> chase = management.AddChasePtr();
+  chase->SetName("chase");
   folder.Add(chase);
-  management.AddSourceValue(chase, 0);
+  management.AddSourceValue(*chase, 0);
   BOOST_CHECK_EQUAL(management.RootFolder().Children().size(), 1);
   BOOST_CHECK_EQUAL(folder.Children().size(), 2);
   BOOST_CHECK(!management.SourceValues().empty());
@@ -68,34 +69,42 @@ BOOST_AUTO_TEST_CASE(GetSpecificControllables) {
 
 BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
   Management management;
-  FixtureType &typeA =
-      management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
+
+  ObservingPtr<FixtureType> typeA =
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
   management.RootFolder().Add(typeA);
-  FixtureType &typeB =
-      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
+  BOOST_CHECK(typeA);
+
+  ObservingPtr<FixtureType> typeB =
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb3Ch);
   management.RootFolder().Add(typeB);
-  FixtureType &typeC =
-      management.GetTheatre().AddFixtureType(StockFixture::Rgba4Ch);
+  BOOST_CHECK(typeB);
+
+  ObservingPtr<FixtureType> typeC =
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba4Ch);
   management.RootFolder().Add(typeC);
-  management.RemoveFixtureType(typeB);
-  management.RemoveFixtureType(typeC);
-  management.RemoveFixtureType(typeA);
+  BOOST_CHECK(typeC);
+
+  management.RemoveFixtureType(*typeB);
+  BOOST_CHECK(typeC);
+  management.RemoveFixtureType(*typeC);
+  management.RemoveFixtureType(*typeA);
   BOOST_CHECK(management.GetTheatre().FixtureTypes().empty());
 }
 
 BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
   Management management;
-  FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
+  ObservingPtr<FixtureType> fixtureType =
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
   management.RootFolder().Add(fixtureType);
-  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
+  Fixture &fixture = *management.GetTheatre().AddFixture(*fixtureType);
   FixtureControl &control =
-      management.AddFixtureControl(fixture, management.RootFolder());
+      *management.AddFixtureControlPtr(fixture, management.RootFolder());
   SourceValue &value = management.AddSourceValue(control, 0);
   value.A().SetValue(ControlValue::Max());
 
-  management.RemoveFixtureType(fixtureType);
-  BOOST_CHECK(!management.GetTheatre().FixtureTypes().empty());
+  management.RemoveFixtureType(*fixtureType);
+  BOOST_CHECK(management.GetTheatre().FixtureTypes().empty());
   BOOST_CHECK(management.GetTheatre().Fixtures().empty());
   BOOST_CHECK(management.Controllables().empty());
 }
@@ -105,14 +114,14 @@ BOOST_AUTO_TEST_CASE(HasCycles) {
   BOOST_CHECK_EQUAL(management.HasCycle(), false);
 
   std::unique_ptr<FadeEffect> effectPtr(new FadeEffect());
-  Effect &effect = management.AddEffect(std::move(effectPtr));
+  Effect &effect = *management.AddEffectPtr(std::move(effectPtr));
   BOOST_CHECK_EQUAL(management.HasCycle(), false);
   effect.AddConnection(effect, 0);
   BOOST_CHECK_EQUAL(management.HasCycle(), true);
   effect.RemoveConnection(0);
   BOOST_CHECK_EQUAL(management.HasCycle(), false);
 
-  TimeSequence &timeSeq = management.AddTimeSequence();
+  TimeSequence &timeSeq = *management.AddTimeSequencePtr();
   BOOST_CHECK_EQUAL(management.HasCycle(), false);
   timeSeq.AddStep(timeSeq, 0);
   BOOST_CHECK_EQUAL(management.HasCycle(), true);
@@ -128,7 +137,7 @@ BOOST_AUTO_TEST_CASE(HasCycles) {
   effect.RemoveConnection(0);
   BOOST_CHECK_EQUAL(management.HasCycle(), false);
 
-  PresetCollection &collection = management.AddPresetCollection();
+  PresetCollection &collection = *management.AddPresetCollectionPtr();
   BOOST_CHECK_EQUAL(management.HasCycle(), false);
   collection.AddPresetValue(collection, 0);
   BOOST_CHECK_EQUAL(management.HasCycle(), true);

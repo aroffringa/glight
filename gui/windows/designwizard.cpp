@@ -27,6 +27,7 @@
 
 namespace glight::gui {
 
+using system::ObservingPtr;
 using theatre::AutoDesign;
 
 DesignWizard::DesignWizard()
@@ -112,7 +113,9 @@ void DesignWizard::initPage1() {
   _objectBrowser.SignalSelectionChange().connect(
       [&]() { onControllableSelected(); });
   _objectBrowser.SignalObjectActivated().connect(
-      [&](theatre::FolderObject &object) { addControllable(object); });
+      [&](const ObservingPtr<theatre::FolderObject> &object) {
+        addControllable(object);
+      });
   _vBoxPage1b.pack_start(_objectBrowser);
 
   _addControllableButton.set_image_from_icon_name("go-down");
@@ -298,11 +301,11 @@ void DesignWizard::onNextClicked() {
     case Page1_SelFixtures: {
       _selectedControllables.clear();
       if (_notebook.get_current_page() == 0) {
-        for (std::vector<theatre::Fixture *> fixtures =
+        for (std::vector<system::ObservingPtr<theatre::Fixture>> fixtures =
                  _fixtureList.Selection();
-             theatre::Fixture * fixture : fixtures) {
+             const system::ObservingPtr<theatre::Fixture> &fixture : fixtures) {
           _selectedControllables.emplace_back(
-              &management.GetFixtureControl(*fixture));
+              management.GetFixtureControl(*fixture));
         }
       } else {
         for (const auto &iter : _controllablesListModel->children()) {
@@ -312,19 +315,21 @@ void DesignWizard::onNextClicked() {
       }
       _mainBox.remove(_vBoxPage1);
 
-      _reorderWidget.SetList(std::vector<theatre::NamedObject *>(
-          _selectedControllables.begin(), _selectedControllables.end()));
+      _reorderWidget.SetList(
+          std::vector<system::ObservingPtr<theatre::NamedObject>>(
+              _selectedControllables.begin(), _selectedControllables.end()));
       _mainBox.pack_start(_reorderWidget);
       _reorderWidget.show();
       _currentPage = Page2_Order;
     } break;
 
     case Page2_Order: {
-      std::vector<theatre::NamedObject *> list = _reorderWidget.GetList();
+      std::vector<ObservingPtr<theatre::NamedObject>> list =
+          _reorderWidget.GetList();
       _selectedControllables.clear();
-      for (theatre::NamedObject *object : list)
+      for (const ObservingPtr<theatre::NamedObject> &object : list)
         _selectedControllables.emplace_back(
-            static_cast<theatre::Controllable *>(object));
+            static_cast<ObservingPtr<theatre::Controllable>>(object));
       _mainBox.remove(_reorderWidget);
       _mainBox.pack_start(_vBoxPage3, true, true);
       _vBoxPage3.show_all();
@@ -547,14 +552,16 @@ void DesignWizard::onNextClicked() {
   }
 }
 
-void DesignWizard::addControllable(theatre::FolderObject &object) {
+void DesignWizard::addControllable(
+    const system::ObservingPtr<theatre::FolderObject> &object) {
   theatre::Controllable *controllable =
-      dynamic_cast<theatre::Controllable *>(&object);
+      dynamic_cast<theatre::Controllable *>(object.Get());
   if (controllable) {
     Gtk::TreeModel::iterator iter = _controllablesListModel->append();
     const Gtk::TreeModel::Row &row = *iter;
     if (iter) {
-      row[_controllablesListColumns._controllable] = controllable;
+      row[_controllablesListColumns._controllable] =
+          static_cast<ObservingPtr<theatre::Controllable>>(object);
       row[_controllablesListColumns._title] = controllable->Name();
       row[_controllablesListColumns._path] = controllable->Parent().FullPath();
     }
@@ -562,8 +569,8 @@ void DesignWizard::addControllable(theatre::FolderObject &object) {
 }
 
 void DesignWizard::onAddControllable() {
-  theatre::FolderObject *object = _objectBrowser.SelectedObject();
-  if (object) addControllable(*object);
+  ObservingPtr<theatre::FolderObject> object = _objectBrowser.SelectedObject();
+  if (object) addControllable(std::move(object));
 }
 
 void DesignWizard::onRemoveControllable() {
@@ -576,8 +583,8 @@ void DesignWizard::onRemoveControllable() {
 }
 
 void DesignWizard::onControllableSelected() {
-  theatre::Controllable *object =
-      dynamic_cast<theatre::Controllable *>(_objectBrowser.SelectedObject());
+  theatre::Controllable *object = dynamic_cast<theatre::Controllable *>(
+      _objectBrowser.SelectedObject().Get());
   _addControllableButton.set_sensitive(object != nullptr);
 }
 

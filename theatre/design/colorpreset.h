@@ -5,6 +5,8 @@
 
 #include "theatre/color.h"
 
+#include "system/trackableptr.h"
+
 namespace glight::theatre {
 
 class Controllable;
@@ -51,7 +53,7 @@ inline void AddPresetValue(Management &management, Controllable &control,
  */
 PresetCollection &MakeColorPreset(
     Management &management, Folder &destination,
-    const std::vector<Controllable *> &controllables,
+    const std::vector<system::ObservingPtr<Controllable>> &controllables,
     const std::vector<ColorOrVariable> &colors,
     const ColorDeduction &deduction);
 
@@ -61,10 +63,11 @@ PresetCollection &MakeColorPreset(
  * with the same index from the list of colors, and a
  * separate PresetCollection is made for each.
  */
-void MakeColorPresetPerFixture(Management &management, Folder &destination,
-                               const std::vector<Controllable *> &controllables,
-                               const std::vector<ColorOrVariable> &colors,
-                               const ColorDeduction &deduction);
+void MakeColorPresetPerFixture(
+    Management &management, Folder &destination,
+    const std::vector<system::ObservingPtr<Controllable>> &controllables,
+    const std::vector<ColorOrVariable> &colors,
+    const ColorDeduction &deduction);
 
 }  // namespace glight::theatre
 

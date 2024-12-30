@@ -144,12 +144,12 @@ void AddFixtureWindow::fillStock() {
 
 void AddFixtureWindow::fillFromProject() {
   type_model_->clear();
-  const std::vector<std::unique_ptr<FixtureType>> &types =
+  const std::vector<system::TrackablePtr<FixtureType>> &types =
       _management->GetTheatre().FixtureTypes();
-  for (const std::unique_ptr<FixtureType> &type : types) {
+  for (const system::TrackablePtr<FixtureType> &type : types) {
     Gtk::TreeModel::iterator iter = type_model_->append();
     (*iter)[type_columns_.type_str_] = type->Name();
-    (*iter)[type_columns_.type_] = type.get();
+    (*iter)[type_columns_.type_] = type.Get();
   }
   if (types.empty())
     _addButton.set_sensitive(false);
@@ -167,23 +167,26 @@ void AddFixtureWindow::onAdd() {
     FixtureType *project_type = dynamic_cast<FixtureType *>(
         _management->RootFolder().GetChildIfExists(type->Name()));
     if (!project_type) {
-      project_type = &_management->GetTheatre().AddFixtureType(*type);
-      _management->RootFolder().Add(*project_type);
+      const system::TrackablePtr<FixtureType> &added_type =
+          _management->GetTheatre().AddFixtureType(*type);
+      project_type = added_type.Get();
+      _management->RootFolder().Add(added_type.GetObserver());
     }
 
     for (size_t fixIter = 0; fixIter != static_cast<size_t>(count); ++fixIter) {
       const theatre::Position position =
           _management->GetTheatre().GetFreePosition();
       theatre::Fixture &fixture =
-          _management->GetTheatre().AddFixture(*project_type);
+          *_management->GetTheatre().AddFixture(*project_type);
       theatre::DmxChannel channel(
           fixture.GetFirstChannel().Channel(),
           _management->GetUniverses().FirstOutputUniverse());
       fixture.SetChannel(channel);
       fixture.GetPosition() = position;
 
-      theatre::FixtureControl &control = _management->AddFixtureControl(
-          fixture, _management->RootFolder() /* TODO */);
+      theatre::FixtureControl &control = static_cast<theatre::FixtureControl &>(
+          *_management->AddFixtureControl(
+              fixture, _management->RootFolder() /* TODO */));
       if (temperature_cb_.get_active()) {
         control.AddFilter(std::make_unique<theatre::ColorTemperatureFilter>());
       } else {

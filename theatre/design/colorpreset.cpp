@@ -11,6 +11,8 @@
 
 namespace glight::theatre {
 
+using system::ObservingPtr;
+
 void AddPresetValue(Management &management, Controllable &control,
                     PresetCollection &pc, const Color &color,
                     const ColorDeduction &deduction) {
@@ -109,7 +111,8 @@ void AddPresetValue(Management &management, Controllable &control,
                     const ColorDeduction &deduction) {
   std::unique_ptr<RgbMasterEffect> effect = std::make_unique<RgbMasterEffect>();
   effect->SetName(pc.Parent().GetAvailableName(pc.Name() + "_var"));
-  Effect &added_effect = management.AddEffect(std::move(effect), pc.Parent());
+  Effect &added_effect = static_cast<Effect &>(
+      *management.AddEffect(std::move(effect), pc.Parent()));
   for (size_t inp = 0; inp != added_effect.NInputs(); ++inp)
     management.AddSourceValue(added_effect, inp);
 
@@ -132,29 +135,33 @@ void AddPresetValue(Management &management, Controllable &control,
 
 PresetCollection &MakeColorPreset(
     Management &management, Folder &destination,
-    const std::vector<Controllable *> &controllables,
+    const std::vector<ObservingPtr<Controllable>> &controllables,
     const std::vector<ColorOrVariable> &colors,
     const ColorDeduction &deduction) {
-  PresetCollection &pc = management.AddPresetCollection();
-  pc.SetName(destination.GetAvailableName("Colourpreset"));
+  ObservingPtr<PresetCollection> pc =
+      management.AddPresetCollection().GetObserver<PresetCollection>();
+  pc->SetName(destination.GetAvailableName("Colourpreset"));
   destination.Add(pc);
   for (size_t cIndex = 0; cIndex != controllables.size(); ++cIndex) {
     size_t colorIndex = cIndex % colors.size();
-    AddPresetValue(management, *controllables[cIndex], pc, colors[colorIndex],
+    AddPresetValue(management, *controllables[cIndex], *pc, colors[colorIndex],
                    deduction);
   }
-  management.AddSourceValue(pc, 0);
-  return pc;
+  management.AddSourceValue(*pc, 0);
+  return *pc;
 }
 
-void MakeColorPresetPerFixture(Management &management, Folder &destination,
-                               const std::vector<Controllable *> &controllables,
-                               const std::vector<ColorOrVariable> &colors,
-                               const ColorDeduction &deduction) {
+void MakeColorPresetPerFixture(
+    Management &management, Folder &destination,
+    const std::vector<ObservingPtr<Controllable>> &controllables,
+    const std::vector<ColorOrVariable> &colors,
+    const ColorDeduction &deduction) {
   for (size_t cIndex = 0; cIndex != controllables.size(); ++cIndex) {
-    PresetCollection &pc = management.AddPresetCollection();
+    ObservingPtr<PresetCollection> pc_ptr =
+        management.AddPresetCollection().GetObserver<PresetCollection>();
+    PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName("Colourpreset"));
-    destination.Add(pc);
+    destination.Add(std::move(pc_ptr));
     size_t colorIndex = cIndex % colors.size();
     AddPresetValue(management, *controllables[cIndex], pc, colors[colorIndex],
                    deduction);

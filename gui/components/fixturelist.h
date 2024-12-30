@@ -19,8 +19,9 @@ class FixtureList : public Gtk::ScrolledWindow {
  public:
   FixtureList();
 
-  std::vector<theatre::Fixture *> Selection() const;
-  void Select(const std::vector<theatre::Fixture *> &fixtures);
+  std::vector<system::ObservingPtr<theatre::Fixture>> Selection() const;
+  void Select(
+      const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures);
 
  private:
   void Fill();
@@ -37,7 +38,7 @@ class FixtureList : public Gtk::ScrolledWindow {
 
     Gtk::TreeModelColumn<Glib::ustring> title_;
     Gtk::TreeModelColumn<Glib::ustring> type_;
-    Gtk::TreeModelColumn<theatre::Fixture *> fixture_;
+    Gtk::TreeModelColumn<system::ObservingPtr<theatre::Fixture>> fixture_;
     Gtk::TreeModelColumn<theatre::FixtureGroup *> group_;
   } columns_;
 };

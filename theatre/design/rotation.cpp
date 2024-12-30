@@ -10,17 +10,22 @@
 
 namespace glight::theatre {
 
-TimeSequence &MakeRotation(Management &management, Folder &destination,
-                           const std::vector<Controllable *> &controllables,
-                           const std::vector<ColorOrVariable> &colors,
-                           const ColorDeduction &deduction, RotationType type) {
+using system::ObservingPtr;
+
+TimeSequence &MakeRotation(
+    Management &management, Folder &destination,
+    const std::vector<system::ObservingPtr<Controllable>> &controllables,
+    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
+    RotationType type) {
   assert(!controllables.empty());
   assert(!colors.empty());
 
-  TimeSequence &result = management.AddTimeSequence();
+  const ObservingPtr<TimeSequence> result_ptr =
+      management.AddTimeSequence().GetObserver<TimeSequence>();
+  TimeSequence &result = *result_ptr;
   result.SetName(destination.GetAvailableName("Rotation"));
   result.SetRepeatCount(0);
-  destination.Add(result);
+  destination.Add(result_ptr);
   management.AddSourceValue(result, 0);
 
   std::vector<ColorOrVariable> modified_colors = colors;

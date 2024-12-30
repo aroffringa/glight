@@ -11,6 +11,7 @@
 
 namespace glight::gui {
 
+using system::ObservingPtr;
 using theatre::Management;
 
 ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase)
@@ -196,7 +197,11 @@ void ChasePropertiesWindow::onUpdateControllables() {
 }
 
 void ChasePropertiesWindow::onToTimeSequenceClicked() {
-  theatre::TimeSequence &tSequence = Instance::Management().AddTimeSequence();
+  const ObservingPtr<theatre::TimeSequence> time_sequence_ptr =
+      Instance::Management()
+          .AddTimeSequence()
+          .GetObserver<theatre::TimeSequence>();
+  theatre::TimeSequence &tSequence = *time_sequence_ptr;
   tSequence.SetRepeatCount(0);
   size_t index = 0;
   for (theatre::Input &input : _chase->GetSequence().List()) {
@@ -216,7 +221,7 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   source->Reconnect(tSequence, 0);
   Instance::Management().RemoveControllable(*_chase);
   tSequence.SetName(name);
-  folder.Add(tSequence);
+  folder.Add(time_sequence_ptr);
   Instance::Events().EmitUpdate();
 }
 

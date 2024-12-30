@@ -91,7 +91,7 @@ class InputSelectWidget : public Gtk::VBox {
 
   void onBrowserSelectionChange() {
     theatre::Controllable *controllable =
-        dynamic_cast<theatre::Controllable *>(_browser.SelectedObject());
+        dynamic_cast<theatre::Controllable *>(_browser.SelectedObject().Get());
     if (controllable != _selectedObject) {
       bool selectionChanged = (_selectedInput != NO_INPUT_SELECTED);
       _selectedObject = controllable;

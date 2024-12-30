@@ -9,31 +9,20 @@
 
 namespace glight::theatre {
 
-/*
-Theatre::Theatre(const Theatre &source)
-  : _highestChannel(source._highestChannel) {
-_fixtureTypes.reserve(source._fixtureTypes.size());
-for (const std::unique_ptr<FixtureType> &fixtureType : source._fixtureTypes)
-  _fixtureTypes.emplace_back(std::make_unique<FixtureType>(*fixtureType));
-
-_fixtures.reserve(source._fixtures.size());
-for (const std::unique_ptr<Fixture> &fixture : source._fixtures)
-  _fixtures.emplace_back(std::make_unique<Fixture>(*fixture));
-}
-*/
+using system::TrackablePtr;
 
 void Theatre::Clear() {
   _fixtures.clear();
   _fixtureTypes.clear();
 }
 
-Fixture &Theatre::AddFixture(const FixtureType &type) {
+const TrackablePtr<Fixture> &Theatre::AddFixture(const FixtureType &type) {
   // Find free name
   std::string ext = "A";
   std::string prefix = type.ShortName();
   if (!prefix.empty()) prefix = prefix + " ";
   while (true) {
-    if (!FolderObject::Contains(_fixtures, prefix + ext)) {
+    if (!NamedObject::Contains(_fixtures, prefix + ext)) {
       break;
     }
     bool ready = false;
@@ -55,20 +44,22 @@ Fixture &Theatre::AddFixture(const FixtureType &type) {
       }
     } while (!ready);
   }
-  _fixtures.emplace_back(std::make_unique<Fixture>(*this, type, prefix + ext));
-  Fixture &f = *_fixtures.back();
+  TrackablePtr<Fixture> &f = _fixtures.emplace_back(
+      system::MakeTrackable<Fixture>(*this, type, prefix + ext));
   NotifyDmxChange();
   return f;
 }
 
-FixtureType &Theatre::AddFixtureType(StockFixture fixtureClass) {
-  _fixtureTypes.emplace_back(std::make_unique<FixtureType>(fixtureClass));
-  return *_fixtureTypes.back();
+const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
+    StockFixture fixtureClass) {
+  return _fixtureTypes.emplace_back(
+      system::MakeTrackable<FixtureType>(fixtureClass));
 }
 
-FixtureType &Theatre::AddFixtureType(const FixtureType &fixture_type) {
-  _fixtureTypes.emplace_back(std::make_unique<FixtureType>(fixture_type));
-  return *_fixtureTypes.back();
+const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
+    const FixtureType &fixture_type) {
+  return _fixtureTypes.emplace_back(
+      system::MakeTrackable<FixtureType>(fixture_type));
 }
 
 bool Theatre::Contains(Fixture &fixture) const {
@@ -79,11 +70,17 @@ bool Theatre::Contains(Fixture &fixture) const {
 }
 
 Fixture &Theatre::GetFixture(const std::string &name) const {
-  return FolderObject::FindNamedObject(_fixtures, name);
+  return *NamedObject::FindNamedObject(_fixtures, name);
 }
 
-FixtureType &Theatre::GetFixtureType(const std::string &name) const {
-  return FolderObject::FindNamedObject(_fixtureTypes, name);
+system::ObservingPtr<Fixture> Theatre::GetFixturePtr(
+    const std::string &name) const {
+  return NamedObject::FindNamedObject(_fixtures, name).GetObserver();
+}
+
+const system::TrackablePtr<FixtureType> &Theatre::GetFixtureType(
+    const std::string &name) const {
+  return NamedObject::FindNamedObject(_fixtureTypes, name);
 }
 
 FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
@@ -99,7 +96,7 @@ FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
 }
 
 void Theatre::RemoveFixture(const Fixture &fixture) {
-  const size_t fIndex = FolderObject::FindIndex(_fixtures, &fixture);
+  const size_t fIndex = NamedObject::FindIndex(_fixtures, &fixture);
   _fixtures.erase(_fixtures.begin() + fIndex);
 }
 
@@ -115,7 +112,7 @@ void Theatre::RemoveFixtureType(const FixtureType &fixtureType) {
       ++i;
     }
   }
-  const size_t ftIndex = FolderObject::FindIndex(_fixtureTypes, &fixtureType);
+  const size_t ftIndex = NamedObject::FindIndex(_fixtureTypes, &fixtureType);
   _fixtureTypes[ftIndex]->Parent().Remove(*_fixtureTypes[ftIndex]);
   _fixtureTypes.erase(_fixtureTypes.begin() + ftIndex);
 }
@@ -130,7 +127,7 @@ void Theatre::SwapFixturePositions(const Fixture &fixture_a,
   }
   assert(a);
   assert(b);
-  std::swap(*a, *b);
+  swap(*a, *b);
 }
 
 bool Theatre::IsUsed(const FixtureType &fixtureType) const {

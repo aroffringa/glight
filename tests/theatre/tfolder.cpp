@@ -11,112 +11,114 @@
 #include <memory>
 
 using namespace glight::theatre;
+using glight::system::ObservingPtr;
+using glight::system::TrackablePtr;
 
 BOOST_AUTO_TEST_SUITE(folder)
 
 BOOST_AUTO_TEST_CASE(AddItem) {
-  std::unique_ptr<Folder> a(new Folder("a"));
+  TrackablePtr<Folder> a(new Folder("a"));
   BOOST_CHECK_EQUAL(a->Children().size(), 0);
-  std::unique_ptr<Folder> b(new Folder("b"));
+  TrackablePtr<Folder> b(new Folder("b"));
   BOOST_CHECK_EQUAL(b->Children().size(), 0);
-  a->Add(*b);
+  a->Add(b.GetObserver());
   BOOST_CHECK_EQUAL(a->Children().size(), 1);
   BOOST_CHECK_EQUAL(b->Children().size(), 0);
   BOOST_CHECK_EQUAL(b->Parent().Name(), a->Name());
 
   // Check if duplicate names in one folder generate an exception
-  std::unique_ptr<Folder> b2(new Folder("b"));
-  BOOST_CHECK_THROW(a->Add(*b2), std::exception);
+  TrackablePtr<Folder> b2(new Folder("b"));
+  BOOST_CHECK_THROW(a->Add(b2.GetObserver()), std::exception);
 }
 
 BOOST_AUTO_TEST_CASE(Move) {
-  std::unique_ptr<Folder> a(new Folder("a"));
-  std::unique_ptr<Folder> b(new Folder("b"));
-  std::unique_ptr<Folder> c(new Folder("c"));
-  a->Add(*b);
-  Folder::Move(*b, *c);
+  TrackablePtr<Folder> a(new Folder("a"));
+  TrackablePtr<Folder> b(new Folder("b"));
+  TrackablePtr<Folder> c(new Folder("c"));
+  a->Add(b.GetObserver());
+  Folder::Move(b.GetObserver(), *c);
   BOOST_CHECK_EQUAL(a->Children().size(), 0);
   BOOST_CHECK_EQUAL(b->Children().size(), 0);
   BOOST_CHECK_EQUAL(c->Children().size(), 1);
   BOOST_CHECK_EQUAL(c->GetChild("b").Name(), "b");
-  Folder::Move(*b, *a);
+  Folder::Move(b.GetObserver(), *a);
   BOOST_CHECK_EQUAL(a->Children().size(), 1);
   BOOST_CHECK_EQUAL(a->GetChild("b").Name(), "b");
-  Folder::Move(*b, *a);
+  Folder::Move(b.GetObserver(), *a);
 }
 
 BOOST_AUTO_TEST_CASE(FullPath) {
-  std::unique_ptr<Folder> a(new Folder("a"));
+  TrackablePtr<Folder> a(new Folder("a"));
   BOOST_CHECK_EQUAL(a->FullPath(), "a");
-  std::unique_ptr<Folder> b(new Folder("b"));
+  TrackablePtr<Folder> b(new Folder("b"));
   BOOST_CHECK_EQUAL(b->FullPath(), "b");
-  a->Add(*b);
+  a->Add(b.GetObserver());
   BOOST_CHECK_EQUAL(b->FullPath(), "a/b");
-  std::unique_ptr<Folder> c(new Folder("c"));
-  b->Add(*c);
+  TrackablePtr<Folder> c(new Folder("c"));
+  b->Add(c.GetObserver());
   BOOST_CHECK_EQUAL(a->FullPath(), "a");
   BOOST_CHECK_EQUAL(b->FullPath(), "a/b");
   BOOST_CHECK_EQUAL(c->FullPath(), "a/b/c");
 }
 
 BOOST_AUTO_TEST_CASE(FollowDown) {
-  std::unique_ptr<Folder> a(new Folder("a"));
-  std::unique_ptr<Folder> b(new Folder("b"));
-  std::unique_ptr<Folder> c(new Folder("c"));
-  b->Add(*c);
-  a->Add(*b);
+  TrackablePtr<Folder> a(new Folder("a"));
+  TrackablePtr<Folder> b(new Folder("b"));
+  TrackablePtr<Folder> c(new Folder("c"));
+  b->Add(c.GetObserver());
+  a->Add(b.GetObserver());
 
-  BOOST_CHECK_EQUAL(a->FollowDown("b"), b.get());
+  BOOST_CHECK_EQUAL(a->FollowDown("b"), b.Get());
 
-  BOOST_CHECK_EQUAL(a->FollowDown("b/c"), c.get());
+  BOOST_CHECK_EQUAL(a->FollowDown("b/c"), c.Get());
 
-  BOOST_CHECK_EQUAL(b->FollowDown("c"), c.get());
+  BOOST_CHECK_EQUAL(b->FollowDown("c"), c.Get());
 
-  std::unique_ptr<Folder> root(new Folder("root"));
-  std::unique_ptr<Folder> f1(new Folder("bert"));
-  std::unique_ptr<Folder> f2(new Folder("carole"));
-  std::unique_ptr<Folder> f3(new Folder("daniel"));
-  f2->Add(*f3);
-  f1->Add(*f2);
-  root->Add(*f1);
+  TrackablePtr<Folder> root(new Folder("root"));
+  TrackablePtr<Folder> f1(new Folder("bert"));
+  TrackablePtr<Folder> f2(new Folder("carole"));
+  TrackablePtr<Folder> f3(new Folder("daniel"));
+  f2->Add(f3.GetObserver());
+  f1->Add(f2.GetObserver());
+  root->Add(f1.GetObserver());
   BOOST_CHECK_EQUAL(
       root->FollowDown(folders::RemoveRoot("root/bert/carole/daniel")),
-      f3.get());
+      f3.Get());
   std::string notMoved = folders::RemoveRoot("root/bert/carole/daniel");
-  BOOST_CHECK_EQUAL(root->FollowDown(notMoved), f3.get());
+  BOOST_CHECK_EQUAL(root->FollowDown(notMoved), f3.Get());
 }
 
 BOOST_AUTO_TEST_CASE(FollowRelPath) {
-  std::unique_ptr<Folder> a(new Folder("a"));
-  std::unique_ptr<Folder> b(new Folder("b"));
-  std::unique_ptr<FolderObject> c(new FolderObject("c"));
+  TrackablePtr<Folder> a(new Folder("a"));
+  TrackablePtr<Folder> b(new Folder("b"));
+  TrackablePtr<FolderObject> c(new FolderObject("c"));
 
-  b->Add(*c);
-  a->Add(*b);
+  b->Add(c.GetObserver());
+  a->Add(b.GetObserver());
 
-  BOOST_CHECK_EQUAL(a->FollowRelPath("b"), b.get());
+  BOOST_CHECK_EQUAL(a->FollowRelPath("b"), b.Get());
 
-  BOOST_CHECK_EQUAL(a->FollowRelPath("b/c"), c.get());
+  BOOST_CHECK_EQUAL(a->FollowRelPath("b/c"), c.Get());
 
-  BOOST_CHECK_EQUAL(b->FollowRelPath("c"), c.get());
+  BOOST_CHECK_EQUAL(b->FollowRelPath("c"), c.Get());
 }
 
 BOOST_AUTO_TEST_CASE(GetAvailableName) {
-  std::unique_ptr<Folder> a(new Folder("a"));
+  TrackablePtr<Folder> a(new Folder("a"));
   BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj1");
   BOOST_CHECK_EQUAL(a->GetAvailableName(""), "1");
 
-  std::unique_ptr<Folder> b(new Folder("obj1"));
-  a->Add(*b);
+  TrackablePtr<Folder> b(new Folder("obj1"));
+  a->Add(b.GetObserver());
   BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj2");
   BOOST_CHECK_EQUAL(a->GetAvailableName(""), "1");
 
-  std::unique_ptr<Folder> c(new Folder("obj3"));
-  a->Add(*c);
+  TrackablePtr<Folder> c(new Folder("obj3"));
+  a->Add(c.GetObserver());
   BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj2");
 
-  std::unique_ptr<Folder> d(new Folder("obj2"));
-  a->Add(*d);
+  TrackablePtr<Folder> d(new Folder("obj2"));
+  a->Add(d.GetObserver());
   BOOST_CHECK_EQUAL(a->GetAvailableName("obj"), "obj4");
 }
 
@@ -137,26 +139,27 @@ BOOST_AUTO_TEST_CASE(RemoveFolder) {
   Management management;
   Folder &root = management.RootFolder();
   FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
-  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
-  FixtureControl &control = management.AddFixtureControl(fixture, root);
+      *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
+  ObservingPtr<FixtureControl> control =
+      management.AddFixtureControlPtr(fixture, root);
 
   Folder &folder = management.AddFolder(root, "Folder");
-  TimeSequence &ts1 = management.AddTimeSequence();
-  ts1.SetName("ts1");
+  ObservingPtr<TimeSequence> ts1 = management.AddTimeSequencePtr();
+  ts1->SetName("ts1");
   folder.Add(ts1);
 
-  Chase &c = management.AddChase();
-  c.SetName("c");
+  ObservingPtr<Chase> c = management.AddChasePtr();
+  c->SetName("c");
   folder.Add(c);
-  c.GetSequence().Add(control, 0);
+  c->GetSequence().Add(*control, 0);
 
-  ts1.AddStep(c, 0);
+  ts1->AddStep(*c, 0);
 
-  TimeSequence &ts2 = management.AddTimeSequence();
-  ts2.SetName("ts2");
+  ObservingPtr<TimeSequence> ts2 = management.AddTimeSequencePtr();
+  ts2->SetName("ts2");
   folder.Add(ts2);
-  ts2.AddStep(c, 0);
+  ts2->AddStep(*c, 0);
 
   management.RemoveFolder(folder);
   BOOST_CHECK_EQUAL(management.Folders().size(), 1);

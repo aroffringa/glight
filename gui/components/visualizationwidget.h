@@ -33,7 +33,8 @@ enum class MouseState {
   DragFixture,
   DragRectangle,
   DragAddRectangle,
-  TrackPan
+  TrackPan,
+  RotateFixture
 };
 
 enum class DryModeStyle { Primary, Secondary, Vertical, Horizontal, Shadow };
@@ -55,9 +56,10 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void inializeContextMenu();
   void initialize();
   void drawAll(const Cairo::RefPtr<Cairo::Context> &cairo);
-  void DrawFixtures(const Cairo::RefPtr<Cairo::Context> &cairo,
-                    const std::vector<theatre::Fixture *> &selection,
-                    size_t width, size_t height);
+  void DrawFixtures(
+      const Cairo::RefPtr<Cairo::Context> &cairo,
+      const std::vector<system::ObservingPtr<theatre::Fixture>> &selection,
+      size_t width, size_t height);
   void updateMidiColors();
   void onTheatreChanged();
   bool onButtonPress(GdkEventButton *event);
@@ -97,7 +99,8 @@ class VisualizationWidget : public Gtk::DrawingArea {
   ScopedConnection _timeoutConnection;
   ScopedConnection update_connection_;
   MouseState _dragType;
-  std::vector<theatre::Fixture *> _selectedFixtures,
+  std::vector<system::ObservingPtr<theatre::Fixture>> _selectedFixtures;
+  std::vector<system::ObservingPtr<theatre::Fixture>>
       _selectedFixturesBeforeDrag;
   theatre::Position _draggingStart, _draggingTo;
   RenderEngine render_engine_;

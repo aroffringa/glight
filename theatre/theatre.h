@@ -22,21 +22,37 @@ class Theatre {
 
   void Clear();
 
-  Fixture &AddFixture(const FixtureType &type);
-  FixtureType &AddFixtureType(StockFixture fixtureClass);
-  FixtureType &AddFixtureType(const FixtureType &type);
+  const system::TrackablePtr<Fixture> &AddFixture(const FixtureType &type);
+  system::ObservingPtr<Fixture> AddFixturePtr(const FixtureType &type) {
+    return AddFixture(type).GetObserver();
+  }
+
+  const system::TrackablePtr<FixtureType> &AddFixtureType(
+      StockFixture fixture_class);
+  system::ObservingPtr<FixtureType> AddFixtureTypePtr(
+      StockFixture fixture_class) {
+    return AddFixtureType(fixture_class).GetObserver();
+  }
+
+  const system::TrackablePtr<FixtureType> &AddFixtureType(
+      const FixtureType &type);
+  system::ObservingPtr<FixtureType> AddFixtureTypePtr(const FixtureType &type) {
+    return AddFixtureType(type).GetObserver();
+  }
 
   bool Contains(Fixture &fixture) const;
 
   const std::vector<system::TrackablePtr<Fixture>> &Fixtures() const {
     return _fixtures;
   }
-  const std::vector<std::unique_ptr<FixtureType>> &FixtureTypes() const {
+  const std::vector<system::TrackablePtr<FixtureType>> &FixtureTypes() const {
     return _fixtureTypes;
   }
 
   Fixture &GetFixture(const std::string &name) const;
-  FixtureType &GetFixtureType(const std::string &name) const;
+  system::ObservingPtr<Fixture> GetFixturePtr(const std::string &name) const;
+  const system::TrackablePtr<FixtureType> &GetFixtureType(
+      const std::string &name) const;
   FixtureFunction &GetFixtureFunction(const std::string &name) const;
 
   void RemoveFixture(const Fixture &fixture);
@@ -75,7 +91,7 @@ class Theatre {
   double height_ = 10.0;
   double fixture_symbol_size_ = 0.5;
   std::vector<system::TrackablePtr<Fixture>> _fixtures;
-  std::vector<std::unique_ptr<FixtureType>> _fixtureTypes;
+  std::vector<system::TrackablePtr<FixtureType>> _fixtureTypes;
   unsigned _highestChannel = 0;
 };
 

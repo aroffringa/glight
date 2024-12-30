@@ -21,8 +21,10 @@ void NewEmptyPreset(ObjectBrowser& browser,
                     ObjectWindowList<PropertiesWindow>& property_windows,
                     Gtk::Window& parent);
 void NewPresetFromCurrent(ObjectBrowser& browser);
-void NewPresetFromFixtures(theatre::Folder& parent_folder,
-                           const std::set<theatre::Fixture*>& fixtures);
+void NewPresetFromFixtures(
+    theatre::Folder& parent_folder,
+    const std::set<system::ObservingPtr<theatre::Fixture>, std::less<>>&
+        fixtures);
 void NewChase(ObjectBrowser& browser,
               ObjectWindowList<PropertiesWindow>& property_windows,
               Gtk::Window& parent);

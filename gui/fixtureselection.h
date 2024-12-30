@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../theatre/forwards.h"
+#include "system/trackableptr.h"
 
 namespace glight::gui {
 
@@ -13,22 +14,34 @@ class FixtureSelection {
  public:
   sigc::signal<void> &SignalChange() { return _signalChange; }
 
-  const std::vector<theatre::Fixture *> &Selection() const {
+  const std::vector<system::ObservingPtr<theatre::Fixture>> &Selection() const {
     return _selection;
   }
 
-  void SetSelection(const std::vector<theatre::Fixture *> &selection) {
+  void SetSelection(
+      const std::vector<system::ObservingPtr<theatre::Fixture>> &selection) {
     _selection = selection;
     _signalChange.emit();
   }
-  void SetSelection(std::vector<theatre::Fixture *> &&selection) {
+  void SetSelection(
+      std::vector<system::ObservingPtr<theatre::Fixture>> &&selection) {
     _selection = std::move(selection);
     _signalChange.emit();
+  }
+  /**
+   * If any fixtures are in the selection that no longer exist, remove them.
+   */
+  void UpdateAfterDelete() {
+    auto iter = std::remove(_selection.begin(), _selection.end(), nullptr);
+    if (iter != _selection.end()) {
+      _selection.erase(iter, _selection.end());
+      _signalChange.emit();
+    }
   }
 
  private:
   sigc::signal<void> _signalChange;
-  std::vector<theatre::Fixture *> _selection;
+  std::vector<system::ObservingPtr<theatre::Fixture>> _selection;
 };
 
 }  // namespace glight::gui

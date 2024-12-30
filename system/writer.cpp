@@ -26,6 +26,9 @@
 #include "gui/state/guistate.h"
 
 namespace glight::system {
+
+using system::TrackablePtr;
+
 namespace {
 
 using namespace glight::theatre;
@@ -44,8 +47,8 @@ void writeControllable(WriteState &state, const Controllable &controllable);
 void writeFolders(WriteState &state) {
   state.writer.StartArray("folders");
   std::queue<const Folder *> folders;
-  for (const std::unique_ptr<Folder> &folder : state.management.Folders())
-    folders.emplace(folder.get());
+  for (const TrackablePtr<Folder> &folder : state.management.Folders())
+    folders.emplace(folder.Get());
   size_t next_folder_id = 0;
   while (!folders.empty()) {
     const Folder &folder = *folders.front();
@@ -129,9 +132,10 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
 void writeFixtureGroup(WriteState &state, const FixtureGroup &group) {
   state.writer.StartObject();
   writeFolderAttributes(state, group);
-  const std::vector<Fixture *> fixtures = group.Fixtures();
+  const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures =
+      group.Fixtures();
   state.writer.StartArray("fixtures");
-  for (const Fixture *fixture : fixtures) {
+  for (const system::ObservingPtr<theatre::Fixture> &fixture : fixtures) {
     // TODO fixture should become a FolderObject and this should be the full
     // path
     state.writer.String(fixture->Name());
@@ -591,11 +595,11 @@ void writeGlightShow(WriteState &state) {
   state.writer.Number("height", theatre.Height());
   state.writer.Number("fixture-symbol-size", theatre.FixtureSymbolSize());
 
-  const std::vector<std::unique_ptr<FixtureType>> &fixtureTypes =
+  const std::vector<TrackablePtr<FixtureType>> &fixtureTypes =
       theatre.FixtureTypes();
 
   state.writer.StartArray("fixture-types");
-  for (const std::unique_ptr<FixtureType> &ft : fixtureTypes)
+  for (const TrackablePtr<FixtureType> &ft : fixtureTypes)
     writeFixtureType(state, *ft);
   state.writer.EndArray();  // fixture-types
 
@@ -609,17 +613,17 @@ void writeGlightShow(WriteState &state) {
   state.writer.EndObject();  // theatre
 
   state.writer.StartArray("fixture-groups");
-  const std::vector<std::unique_ptr<FixtureGroup>> &groups =
+  const std::vector<TrackablePtr<FixtureGroup>> &groups =
       state.management.FixtureGroups();
-  for (const std::unique_ptr<FixtureGroup> &f : groups)
+  for (const TrackablePtr<FixtureGroup> &f : groups)
     writeFixtureGroup(state, *f);
   state.writer.EndArray();  // fixture-groups
 
   state.writer.StartArray("controls");
 
-  const std::vector<std::unique_ptr<Controllable>> &controllables =
+  const std::vector<TrackablePtr<Controllable>> &controllables =
       state.management.Controllables();
-  for (const std::unique_ptr<Controllable> &c : controllables)
+  for (const TrackablePtr<Controllable> &c : controllables)
     writeControllable(state, *c);
   state.writer.EndArray();  // controls
 

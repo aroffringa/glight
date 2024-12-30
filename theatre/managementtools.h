@@ -7,8 +7,10 @@
 
 namespace glight::theatre {
 
-void SetAllFixtures(Management& management,
-                    const std::vector<Fixture*> fixtures, const Color& color);
+void SetAllFixtures(
+    Management& management,
+    const std::vector<system::ObservingPtr<theatre::Fixture>>& fixtures,
+    const Color& color);
 
 }
 

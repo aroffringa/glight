@@ -10,6 +10,8 @@
 #include "../../theatre/forwards.h"
 #include "../../theatre/namedobject.h"
 
+#include "system/trackableptr.h"
+
 namespace glight::gui {
 class EventTransmitter;
 }
@@ -21,11 +23,11 @@ class ReorderWidget : public Gtk::HBox {
   ReorderWidget();
 
   template <typename NObject>
-  void SetList(const std::vector<NObject *> &objects);
+  void SetList(const std::vector<system::ObservingPtr<NObject>> &objects);
 
-  void Append(theatre::NamedObject &object);
+  void Append(system::ObservingPtr<theatre::NamedObject> object);
 
-  std::vector<theatre::NamedObject *> GetList() const;
+  std::vector<system::ObservingPtr<theatre::NamedObject>> GetList() const;
 
   sigc::signal<void()> &SignalChanged() { return signal_changed_; }
 
@@ -51,7 +53,7 @@ class ReorderWidget : public Gtk::HBox {
 
     Gtk::TreeModelColumn<Glib::ustring> title_;
     Gtk::TreeModelColumn<Glib::ustring> type_;
-    Gtk::TreeModelColumn<theatre::NamedObject *> object_;
+    Gtk::TreeModelColumn<system::ObservingPtr<theatre::NamedObject>> object_;
   } columns_;
   Gtk::ScrolledWindow scrolled_window_;
 
@@ -64,11 +66,12 @@ class ReorderWidget : public Gtk::HBox {
 };
 
 template <typename NObject>
-void ReorderWidget::SetList(const std::vector<NObject *> &objects) {
+void ReorderWidget::SetList(
+    const std::vector<system::ObservingPtr<NObject>> &objects) {
   model_->clear();
 
-  for (theatre::NamedObject *object : objects) {
-    Append(*object);
+  for (system::ObservingPtr<theatre::NamedObject> object : objects) {
+    Append(object);
   }
   signal_changed_();
 }

@@ -14,6 +14,8 @@ namespace glight::gui {
 using theatre::Folder;
 using theatre::FolderObject;
 
+using system::ObservingPtr;
+
 FolderCombo::FolderCombo() : Gtk::ComboBox(false) {
   Instance::Events().SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &FolderCombo::fillList));
@@ -56,8 +58,8 @@ void FolderCombo::fillList() {
 
 void FolderCombo::fillListFolder(const Folder &folder, size_t depth,
                                  const Folder *selectedObj) {
-  for (FolderObject *obj : folder.Children()) {
-    Folder *childFolder = dynamic_cast<Folder *>(obj);
+  for (const ObservingPtr<FolderObject> &obj : folder.Children()) {
+    Folder *childFolder = dynamic_cast<Folder *>(obj.Get());
     if (childFolder) {
       Gtk::TreeModel::iterator iter = _listModel->append();
       const Gtk::TreeModel::Row &childRow = *iter;

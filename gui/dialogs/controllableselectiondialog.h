@@ -37,7 +37,7 @@ class ControllableSelectionDialog : public Gtk::Dialog {
     object_browser_.SelectObject(object);
   }
 
-  theatre::FolderObject* SelectedObject() {
+  system::ObservingPtr<theatre::FolderObject> SelectedObject() {
     return object_browser_.SelectedObject();
   }
   theatre::Folder& SelectedFolder() { return object_browser_.SelectedFolder(); }

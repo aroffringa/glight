@@ -46,7 +46,7 @@ class FixtureListWindow : public ChildWindow {
   }
 
  private:
-  std::vector<theatre::Fixture *> GetSelection() const;
+  std::vector<system::ObservingPtr<theatre::Fixture>> GetSelection() const;
   void update() { fillFixturesList(); }
   void fillFixturesList();
   void onNewButtonClicked();
@@ -83,7 +83,7 @@ class FixtureListWindow : public ChildWindow {
     Gtk::TreeModelColumn<Glib::ustring> _title, _type;
     Gtk::TreeModelColumn<unsigned> _universe;
     Gtk::TreeModelColumn<Glib::ustring> _channels, _symbol;
-    Gtk::TreeModelColumn<theatre::Fixture *> _fixture;
+    Gtk::TreeModelColumn<system::ObservingPtr<theatre::Fixture>> _fixture;
   } _fixturesListColumns;
   Gtk::ScrolledWindow _fixturesScrolledWindow;
 

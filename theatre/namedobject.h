@@ -52,13 +52,23 @@ class NamedObject {
   }
 
   template <typename NamedObjectType>
-  static NamedObjectType *FindNamedObjectIfExists(
+  static const system::TrackablePtr<NamedObjectType> *FindNamedObjectIfExists(
       const std::vector<system::TrackablePtr<NamedObjectType>> &container,
       const std::string &name) {
     for (const system::TrackablePtr<NamedObjectType> &obj : container) {
-      if (obj->_name == name) return obj.Get();
+      if (obj->_name == name) return &obj;
     }
     return nullptr;
+  }
+
+  template <typename NamedObjectType>
+  static system::ObservingPtr<NamedObjectType> FindNamedObjectIfExists(
+      const std::vector<system::ObservingPtr<NamedObjectType>> &container,
+      const std::string &name) {
+    for (const system::ObservingPtr<NamedObjectType> &obj : container) {
+      if (obj->_name == name) return obj;
+    }
+    return {};
   }
 
   template <typename NamedObjectType>
@@ -84,12 +94,26 @@ class NamedObject {
   }
 
   template <typename NamedObjectType>
-  static NamedObjectType &FindNamedObject(
+  static const system::TrackablePtr<NamedObjectType> &FindNamedObject(
       const std::vector<system::TrackablePtr<NamedObjectType>> &container,
       const std::string &name) {
-    NamedObjectType *obj = FindNamedObjectIfExists(container, name);
+    const system::TrackablePtr<NamedObjectType> *obj =
+        FindNamedObjectIfExists(container, name);
     if (obj)
       return *obj;
+    else
+      throw std::runtime_error("Could not find named object " + name +
+                               " in container.");
+  }
+
+  template <typename NamedObjectType>
+  static const system::ObservingPtr<NamedObjectType> FindNamedObject(
+      const std::vector<system::ObservingPtr<NamedObjectType>> &container,
+      const std::string &name) {
+    system::ObservingPtr<NamedObjectType> obj =
+        FindNamedObjectIfExists(container, name);
+    if (obj)
+      return obj;
     else
       throw std::runtime_error("Could not find named object " + name +
                                " in container.");

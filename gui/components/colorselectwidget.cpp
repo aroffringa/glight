@@ -81,16 +81,18 @@ void ColorSelectWidget::OpenVariableSelection() {
       theatre::Folder &parent = dialog.SelectedFolder();
       effect->SetName(string_dialog.Value());
       theatre::Management &management = Instance::Management();
-      theatre::Effect &added = management.AddEffect(std::move(effect), parent);
-      for (size_t i = 0; i != added.NInputs(); ++i)
-        management.AddSourceValue(added, i);
+      system::ObservingPtr<theatre::Effect> added =
+          management.AddEffect(std::move(effect), parent)
+              .GetObserver<theatre::Effect>();
+      for (size_t i = 0; i != added->NInputs(); ++i)
+        management.AddSourceValue(*added, i);
       Instance::Events().EmitUpdate();
-      dialog.SelectObject(added);
+      dialog.SelectObject(*added);
     }
   });
   if (dialog.run() == Gtk::RESPONSE_OK) {
     theatre::VariableEffect *v =
-        dynamic_cast<theatre::VariableEffect *>(dialog.SelectedObject());
+        dynamic_cast<theatre::VariableEffect *>(dialog.SelectedObject().Get());
     if (v && v != variable_) {
       variable_ = v;
       SetVariableLabel();

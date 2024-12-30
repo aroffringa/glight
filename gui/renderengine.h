@@ -5,6 +5,8 @@
 #include "../theatre/position.h"
 #include "../theatre/valuesnapshot.h"
 
+#include "system/trackableptr.h"
+
 #include <cairomm/context.h>
 
 #include <vector>
@@ -34,17 +36,26 @@ class RenderEngine {
   void DrawSnapshot(const Cairo::RefPtr<Cairo::Context> &cairo,
                     const theatre::ValueSnapshot &snapshot,
                     const DrawStyle &style,
-                    const std::vector<theatre::Fixture *> &selected_fixtures);
-
+                    const std::vector<system::ObservingPtr<theatre::Fixture>>
+                        &selected_fixtures);
+  void DrawSelectedFixtures(
+      const Cairo::RefPtr<Cairo::Context> &cairo,
+      const std::vector<system::ObservingPtr<theatre::Fixture>>
+          &selected_fixtures) const;
   void DrawSelectionRectangle(const Cairo::RefPtr<Cairo::Context> &cairo,
                               const theatre::Position &from,
                               const theatre::Position &to) const;
 
-  theatre::Fixture *FixtureAt(const theatre::Position &position) const;
-  theatre::Fixture *FixtureAt(double mouse_x, double mouse_y, double width,
-                              double height) const {
+  system::ObservingPtr<theatre::Fixture> FixtureAt(
+      const theatre::Position &position) const;
+  system::ObservingPtr<theatre::Fixture> FixtureAt(double mouse_x,
+                                                   double mouse_y, double width,
+                                                   double height) const {
     return FixtureAt(MouseToPosition(mouse_x, mouse_y, width, height));
   }
+  const system::ObservingPtr<theatre::Fixture> GetDirectionHandleAt(
+      const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures,
+      const theatre::Position &position) const;
   theatre::Position MouseToPosition(double mouse_x, double mouse_y,
                                     double width, double height) const;
   bool IsMoving() const { return is_moving_; }

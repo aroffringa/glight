@@ -8,15 +8,18 @@
 
 namespace glight {
 
+using system::ObservingPtr;
+
 BOOST_AUTO_TEST_SUITE(theatre)
 
 BOOST_AUTO_TEST_CASE(add_fixture) {
   Management management;
   FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
-  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
-  FixtureControl &control = management.AddFixtureControl(fixture);
-  BOOST_CHECK_EQUAL(&management.GetFixtureControl(fixture), &control);
+      *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
+  FixtureControl &control =
+      static_cast<FixtureControl &>(*management.AddFixtureControl(fixture));
+  BOOST_CHECK_EQUAL(management.GetFixtureControl(fixture).Get(), &control);
   BOOST_CHECK_EQUAL(&control.GetFixture(), &fixture);
   BOOST_CHECK_EQUAL(control.NInputs(), 3);
   BOOST_CHECK(control.InputColor(0) == Color(255, 0, 0));
@@ -30,23 +33,23 @@ BOOST_AUTO_TEST_CASE(add_fixture) {
 BOOST_AUTO_TEST_CASE(AddMany) {
   Management management;
   FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
-  Fixture *fixture = &management.GetTheatre().AddFixture(fixtureType);
+      *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
+  Fixture *fixture = management.GetTheatre().AddFixture(fixtureType).Get();
   BOOST_CHECK_EQUAL(fixture->Name(), "RGB A");
   for (size_t i = 0; i != 30; ++i) {
-    fixture = &management.GetTheatre().AddFixture(fixtureType);
+    fixture = management.GetTheatre().AddFixture(fixtureType).Get();
     management.AddFixtureControl(*fixture);
   }
-  fixture = &management.GetTheatre().AddFixture(fixtureType);
+  fixture = management.GetTheatre().AddFixture(fixtureType).Get();
   BOOST_CHECK_EQUAL(fixture->Name(), "RGB AF");
   BOOST_CHECK_EQUAL(management.GetTheatre().Fixtures().size(), 32);
   for (size_t i = 0; i != 26 * (26 + 1) - 32; ++i) {
-    fixture = &management.GetTheatre().AddFixture(fixtureType);
+    fixture = management.GetTheatre().AddFixture(fixtureType).Get();
     management.AddFixtureControl(*fixture);
   }
   BOOST_CHECK_EQUAL(fixture->Name(), "RGB ZZ");
   BOOST_CHECK_EQUAL(management.GetTheatre().Fixtures().size(), 26 * (26 + 1));
-  fixture = &management.GetTheatre().AddFixture(fixtureType);
+  fixture = management.GetTheatre().AddFixture(fixtureType).Get();
   management.AddFixtureControl(*fixture);
   BOOST_CHECK_EQUAL(fixture->Name(), "RGB AAA");
   BOOST_CHECK_EQUAL(management.GetTheatre().Fixtures().size(), 26 * 27 + 1);
@@ -54,12 +57,12 @@ BOOST_AUTO_TEST_CASE(AddMany) {
 
 BOOST_AUTO_TEST_CASE(remove_fixture) {
   Management management;
-  FixtureType &fixtureType =
-      management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
+  ObservingPtr<FixtureType> fixtureType =
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb3Ch);
   management.RootFolder().Add(fixtureType);
-  Fixture &fixture = management.GetTheatre().AddFixture(fixtureType);
+  Fixture &fixture = *management.GetTheatre().AddFixture(*fixtureType);
   FixtureControl &control =
-      management.AddFixtureControl(fixture, management.RootFolder());
+      *management.AddFixtureControlPtr(fixture, management.RootFolder());
   const std::vector<std::unique_ptr<FixtureFunction>> &functions =
       fixture.Functions();
   BOOST_CHECK_EQUAL(functions.size(), 3);

@@ -10,6 +10,7 @@
 
 namespace glight::gui::windows {
 
+using system::ObservingPtr;
 using theatre::Fixture;
 using theatre::NamedObject;
 
@@ -31,12 +32,13 @@ GroupWindow::GroupWindow(theatre::FixtureGroup& group)
 theatre::FolderObject& GroupWindow::GetObject() { return group_; }
 
 void GroupWindow::Append() {
-  std::vector<Fixture*> fixtures = fixture_list_.Selection();
-  std::vector<NamedObject*> objects = reorder_widget_.GetList();
+  std::vector<ObservingPtr<theatre::Fixture>> fixtures =
+      fixture_list_.Selection();
+  std::vector<ObservingPtr<NamedObject>> objects = reorder_widget_.GetList();
   std::sort(objects.begin(), objects.end());
-  for (Fixture* fixture : fixtures) {
-    if (!std::binary_search(objects.begin(), objects.end(), fixture)) {
-      reorder_widget_.Append(*fixture);
+  for (const ObservingPtr<theatre::Fixture>& fixture : fixtures) {
+    if (!std::binary_search(objects.begin(), objects.end(), fixture.Get())) {
+      reorder_widget_.Append(fixture);
     }
   }
 }
@@ -44,9 +46,9 @@ void GroupWindow::Append() {
 void GroupWindow::StoreGroup() {
   std::unique_lock lock(Instance::Management().Mutex());
   group_.Clear();
-  std::vector<NamedObject*> objects = reorder_widget_.GetList();
-  for (NamedObject* object : objects) {
-    group_.Insert(static_cast<Fixture&>(*object));
+  std::vector<ObservingPtr<NamedObject>> objects = reorder_widget_.GetList();
+  for (ObservingPtr<NamedObject> object : objects) {
+    group_.Insert(static_cast<ObservingPtr<Fixture>>(object));
   }
 }
 
