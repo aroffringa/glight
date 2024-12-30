@@ -159,6 +159,7 @@ void FixtureListWindow::onRemoveButtonClicked() {
     Instance::Management().RemoveFixture(*fixture);
   }
   lock.unlock();
+  Instance::Selection().UpdateAfterDelete();
   Instance::Events().EmitUpdate();
 }
 

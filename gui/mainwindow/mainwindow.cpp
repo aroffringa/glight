@@ -265,6 +265,7 @@ void MainWindow::onMINewClicked() {
   }
 
   if (confirmed) {
+    Instance::Selection().SetSelection({});
     std::unique_lock<std::mutex> lock(_management->Mutex());
     _management->Clear();
     _faderWindows.clear();
@@ -283,6 +284,7 @@ void MainWindow::onMINewClicked() {
 }
 
 void MainWindow::OpenFile(const std::string &filename) {
+  Instance::Selection().SetSelection({});
   std::unique_lock<std::mutex> lock(_management->Mutex());
   _management->Clear();
   _faderWindows.clear();

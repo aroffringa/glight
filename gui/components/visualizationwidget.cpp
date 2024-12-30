@@ -635,6 +635,7 @@ void VisualizationWidget::onRemoveFixtures() {
     _management->RemoveFixture(*fixture);
   }
   _selectedFixtures.clear();
+  Instance::Selection().UpdateAfterDelete();
   _eventTransmitter->EmitUpdate();
 }
 
