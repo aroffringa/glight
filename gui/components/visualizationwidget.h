@@ -87,6 +87,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void selectFixtures(const theatre::Position &a, const theatre::Position &b);
   void addFixtures(const theatre::Position &a, const theatre::Position &b);
   void SetPan(const theatre::Position &position);
+  void SetCursor(Gdk::CursorType cursor_type);
 
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;
@@ -100,12 +101,13 @@ class VisualizationWidget : public Gtk::DrawingArea {
   ScopedConnection update_connection_;
   MouseState _dragType;
   std::vector<system::ObservingPtr<theatre::Fixture>> _selectedFixtures;
-  std::vector<system::ObservingPtr<theatre::Fixture>>
-      _selectedFixturesBeforeDrag;
-  theatre::Position _draggingStart, _draggingTo;
+  std::vector<system::ObservingPtr<theatre::Fixture>> _dragInvolvedFixtures;
+  theatre::Position _draggingStart;
+  theatre::Position _draggingTo;
   RenderEngine render_engine_;
   theatre::ValueSnapshot primary_snapshot_;
   theatre::ValueSnapshot secondary_snapshot_;
+  Gdk::CursorType cursor_type_;
   std::unique_ptr<Gtk::Window> sub_window_;
 
   Gtk::Menu _popupMenu;

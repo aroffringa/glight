@@ -1,6 +1,7 @@
 #ifndef THEATRE_POSITION_H_
 #define THEATRE_POSITION_H_
 
+#include <cmath>
 #include <utility>
 
 namespace glight::theatre {
@@ -73,6 +74,8 @@ class Position {
     const double dx = x_ - other.x_, dy = y_ - other.y_;
     return dx * dx + dy * dy;
   }
+
+  double Angle() const { return std::atan2(y_, x_); }
 
  private:
   constexpr std::pair<double, double> p() const {

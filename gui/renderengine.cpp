@@ -287,14 +287,15 @@ system::ObservingPtr<theatre::Fixture> RenderEngine::FixtureAt(
   return fixture ? fixture->GetObserver() : nullptr;
 }
 
-const system::ObservingPtr<theatre::Fixture> RenderEngine::GetDirectionHandleAt(
+system::ObservingPtr<theatre::Fixture> RenderEngine::GetDirectionHandleAt(
     const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures,
     const theatre::Position &position) const {
   for (const system::ObservingPtr<theatre::Fixture> &f : fixtures) {
+    const double start = 0.5 - kRotationHandleEnd;
+    const double end = 0.5 + kRotationHandleEnd;
     if (f->IsVisible() &&
-        position.InsideRectangle(
-            f->GetPosition(),
-            f->GetPosition().Add(kRotationHandleEnd, kRotationHandleEnd))) {
+        position.InsideRectangle(f->GetPosition().Add(start, start),
+                                 f->GetPosition().Add(end, end))) {
       const theatre::Position centre = f->GetPosition().Add(0.5, 0.5);
       const double distanceSq = position.SquaredDistance(centre);
       const double radius = GetRadiusFactor(f->Symbol().Value()) *
@@ -307,9 +308,18 @@ const system::ObservingPtr<theatre::Fixture> RenderEngine::GetDirectionHandleAt(
         const double direction = f->Direction();
         const double cos_dir = std::cos(direction);
         const double sin_dir = std::sin(direction);
-        if (std::abs(system::DistanceToLine(
+        double mouse_direction_diff =
+            std::fmod((position - centre).Angle() - direction, 2.0 * M_PI);
+        if (mouse_direction_diff < -M_PI)
+          mouse_direction_diff += 2.0 * M_PI;
+        else if (mouse_direction_diff > M_PI)
+          mouse_direction_diff -= 2.0 * M_PI;
+        const bool same_side = mouse_direction_diff < 0.5 * M_PI &&
+                               mouse_direction_diff > -0.5 * M_PI;
+        if (same_side &&
+            std::abs(system::DistanceToLine(
                 position.X(), position.Y(), centre.X(), centre.Y(),
-                centre.X() + cos_dir, centre.Y() + sin_dir)) < 3.0) {
+                centre.X() + cos_dir, centre.Y() + sin_dir)) < 0.15) {
           return f;
         }
       }

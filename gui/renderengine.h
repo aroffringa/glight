@@ -53,7 +53,7 @@ class RenderEngine {
                                                    double height) const {
     return FixtureAt(MouseToPosition(mouse_x, mouse_y, width, height));
   }
-  const system::ObservingPtr<theatre::Fixture> GetDirectionHandleAt(
+  system::ObservingPtr<theatre::Fixture> GetDirectionHandleAt(
       const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures,
       const theatre::Position &position) const;
   theatre::Position MouseToPosition(double mouse_x, double mouse_y,
