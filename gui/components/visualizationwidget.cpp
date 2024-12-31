@@ -12,6 +12,7 @@
 #include "gui/mainwindow/mainwindow.h"
 
 #include "system/math.h"
+#include "system/trackableptr.h"
 #include "system/midi/manager.h"
 
 #include "theatre/fixture.h"
@@ -34,6 +35,33 @@
 #include <optional>
 
 namespace glight::gui {
+
+using system::ObservingPtr;
+
+namespace {
+theatre::Position RotateFixtures(
+    std::vector<ObservingPtr<theatre::Fixture>> &fixture_list,
+    ObservingPtr<theatre::Fixture> &centre_of_rotation, theatre::Position from,
+    theatre::Position to) {
+  const theatre::Position centre =
+      centre_of_rotation->GetPosition() + theatre::Position(0.5, 0.5);
+  const double from_angle = (from - centre).Angle();
+  double rotation = (to - centre).Angle() - from_angle;
+  rotation = std::round(rotation / (M_PI * 0.125)) * M_PI * 0.125;
+  if (rotation == 0.0) {
+    return from;
+  } else {
+    for (const ObservingPtr<theatre::Fixture> &fixture : fixture_list) {
+      const double new_direction =
+          std::fmod(fixture->Direction() + rotation, 2.0 * M_PI);
+      fixture->SetDirection(new_direction < 0.0 ? new_direction + 2.0 * M_PI
+                                                : new_direction);
+    }
+    return centre + theatre::Position(std::cos(from_angle + rotation),
+                                      std::sin(from_angle + rotation));
+  }
+}
+}  // namespace
 
 VisualizationWidget::VisualizationWidget(theatre::Management *management,
                                          EventTransmitter *eventTransmitter,
@@ -397,8 +425,15 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
             _globalSelection->SetSelection(_selectedFixtures);
           }
         } else {
-          _selectedFixtures.clear();
-          _globalSelection->SetSelection(_selectedFixtures);
+          system::ObservingPtr<theatre::Fixture> clicked_handle =
+              render_engine_.GetDirectionHandleAt(_selectedFixtures, pos);
+          if (clicked_handle) {
+            _dragType = MouseState::RotateFixture;
+            _dragInvolvedFixtures = {clicked_handle};
+          } else {
+            _selectedFixtures.clear();
+            _globalSelection->SetSelection(_selectedFixtures);
+          }
         }
       }
 
@@ -406,12 +441,14 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
       if (shift) {
         _dragType = MouseState::DragAddRectangle;
         _draggingTo = pos;
-        _selectedFixturesBeforeDrag = _selectedFixtures;
-      } else if (!_selectedFixtures.empty()) {
-        _dragType = MouseState::DragFixture;
-      } else {
-        _dragType = MouseState::DragRectangle;
-        _draggingTo = pos;
+        _dragInvolvedFixtures = _selectedFixtures;
+      } else if (_dragType != MouseState::RotateFixture) {
+        if (!_selectedFixtures.empty()) {
+          _dragType = MouseState::DragFixture;
+        } else {
+          _dragType = MouseState::DragRectangle;
+          _draggingTo = pos;
+        }
       }
       queue_draw();
     }
@@ -446,50 +483,72 @@ bool VisualizationWidget::onButtonRelease(GdkEventButton *event) {
             event->x, event->y, info->width, info->height);
       }
     }
-    if (_dragType == MouseState::TrackPan) {
+    if (_dragType == MouseState::TrackPan ||
+        _dragType == MouseState::RotateFixture) {
       _dragType = MouseState::Normal;
     } else {
       _globalSelection->SetSelection(_selectedFixtures);
       _dragType = MouseState::Normal;
-      _selectedFixturesBeforeDrag.clear();
+      _dragInvolvedFixtures.clear();
       queue_draw();
     }
   }
   return true;
 }
 
+void VisualizationWidget::SetCursor(Gdk::CursorType cursor_type) {
+  if (cursor_type_ != cursor_type) {
+    cursor_type_ = cursor_type;
+    get_window()->set_cursor(Gdk::Cursor::create(get_display(), cursor_type));
+  }
+}
+
 bool VisualizationWidget::onMotion(GdkEventMotion *event) {
-  if (_dragType != MouseState::Normal) {
-    const std::optional<DrawInfo> info =
-        GetPrimaryStyleDimensions(GetDryModeStyle(), get_width(), get_height());
-    if (info) {
-      const theatre::Position pos = render_engine_.MouseToPosition(
-          event->x, event->y, info->width, info->height);
-      switch (_dragType) {
-        case MouseState::Normal:
-          break;
-        case MouseState::DragFixture:
-          if (!Instance::State().LayoutLocked()) {
-            for (const system::ObservingPtr<theatre::Fixture> &fixture :
-                 _selectedFixtures)
-              fixture->GetPosition() += pos - _draggingStart;
-            _draggingStart = pos;
+  const std::optional<DrawInfo> info =
+      GetPrimaryStyleDimensions(GetDryModeStyle(), get_width(), get_height());
+  if (info) {
+    const theatre::Position pos = render_engine_.MouseToPosition(
+        event->x, event->y, info->width, info->height);
+    switch (_dragType) {
+      case MouseState::Normal: {
+        Gdk::CursorType cursor = Gdk::CursorType::ARROW;
+        system::ObservingPtr<theatre::Fixture> hover_fixture =
+            render_engine_.FixtureAt(pos);
+        if (!hover_fixture) {
+          system::ObservingPtr<theatre::Fixture> hover_handle =
+              render_engine_.GetDirectionHandleAt(_selectedFixtures, pos);
+          if (hover_handle) {
+            cursor = Gdk::CursorType::CROSS;
           }
-          break;
-        case MouseState::DragRectangle:
-          _draggingTo = pos;
-          selectFixtures(_draggingStart, _draggingTo);
-          break;
-        case MouseState::DragAddRectangle:
-          _draggingTo = pos;
-          addFixtures(_draggingStart, _draggingTo);
-          break;
-        case MouseState::TrackPan:
-          SetPan(pos);
-          break;
-      }
-      queue_draw();
+        }
+        SetCursor(cursor);
+      } break;
+      case MouseState::DragFixture:
+        if (!Instance::State().LayoutLocked()) {
+          for (const system::ObservingPtr<theatre::Fixture> &fixture :
+               _selectedFixtures)
+            fixture->GetPosition() += pos - _draggingStart;
+          _draggingStart = pos;
+        }
+        break;
+      case MouseState::DragRectangle:
+        _draggingTo = pos;
+        selectFixtures(_draggingStart, _draggingTo);
+        break;
+      case MouseState::DragAddRectangle:
+        _draggingTo = pos;
+        addFixtures(_draggingStart, _draggingTo);
+        break;
+      case MouseState::TrackPan:
+        SetPan(pos);
+        break;
+      case MouseState::RotateFixture:
+        _draggingStart =
+            RotateFixtures(_selectedFixtures, _dragInvolvedFixtures.front(),
+                           _draggingStart, pos);
+        break;
     }
+    queue_draw();
   }
   return true;
 }
@@ -520,7 +579,7 @@ void VisualizationWidget::addFixtures(const theatre::Position &a,
                                       const theatre::Position &b) {
   selectFixtures(a, b);
   for (const system::ObservingPtr<theatre::Fixture> &fixture :
-       _selectedFixturesBeforeDrag) {
+       _dragInvolvedFixtures) {
     auto iter =
         std::find(_selectedFixtures.begin(), _selectedFixtures.end(), fixture);
     if (iter == _selectedFixtures.end())
