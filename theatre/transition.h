@@ -5,6 +5,7 @@
 #include "timing.h"
 
 #include <cassert>
+#include <vector>
 
 namespace glight::theatre {
 
@@ -14,19 +15,38 @@ enum class TransitionType {
   FadeThroughBlack,
   FadeThroughFull,
   GlowFade,
-  Random,
   Stepped,
-  Erratic,
-  Black,
-  Full,
   FadeFromBlack,
   FadeToBlack,
   FadeFromFull,
-  FadeToFull
+  FadeToFull,
+  ConstantAcceleration,
+  Random,
+  Erratic,
+  Black,
+  Full
 };
 
-inline std::string ToString(TransitionType mix_style) {
-  switch (mix_style) {
+inline std::vector<TransitionType> GetTransitionTypes() {
+  return std::vector<TransitionType>{TransitionType::None,
+                                     TransitionType::Fade,
+                                     TransitionType::FadeThroughBlack,
+                                     TransitionType::FadeThroughFull,
+                                     TransitionType::GlowFade,
+                                     TransitionType::Stepped,
+                                     TransitionType::FadeFromBlack,
+                                     TransitionType::FadeToBlack,
+                                     TransitionType::FadeFromFull,
+                                     TransitionType::FadeToFull,
+                                     TransitionType::ConstantAcceleration,
+                                     TransitionType::Random,
+                                     TransitionType::Erratic,
+                                     TransitionType::Black,
+                                     TransitionType::Full};
+}
+
+inline std::string ToString(TransitionType type) {
+  switch (type) {
     default:
     case TransitionType::None:
       return "none";
@@ -38,16 +58,8 @@ inline std::string ToString(TransitionType mix_style) {
       return "fade_through_full";
     case TransitionType::GlowFade:
       return "glow_fade";
-    case TransitionType::Random:
-      return "random";
     case TransitionType::Stepped:
       return "stepped";
-    case TransitionType::Erratic:
-      return "erratic";
-    case TransitionType::Black:
-      return "black";
-    case TransitionType::Full:
-      return "full";
     case TransitionType::FadeFromBlack:
       return "fade_from_black";
     case TransitionType::FadeToBlack:
@@ -56,6 +68,52 @@ inline std::string ToString(TransitionType mix_style) {
       return "fade_from_full";
     case TransitionType::FadeToFull:
       return "fade_to_full";
+    case TransitionType::ConstantAcceleration:
+      return "constant_acceleration";
+    case TransitionType::Random:
+      return "random";
+    case TransitionType::Erratic:
+      return "erratic";
+    case TransitionType::Black:
+      return "black";
+    case TransitionType::Full:
+      return "full";
+  }
+}
+
+inline std::string GetDescription(TransitionType type) {
+  switch (type) {
+    default:
+    case TransitionType::None:
+      return "None";
+    case TransitionType::Fade:
+      return "Fade";
+    case TransitionType::FadeThroughBlack:
+      return "Fade through black";
+    case TransitionType::FadeThroughFull:
+      return "Fade through full";
+    case TransitionType::GlowFade:
+      return "Fade with afterglow";
+    case TransitionType::Stepped:
+      return "Stepped";
+    case TransitionType::FadeFromBlack:
+      return "Fade from black";
+    case TransitionType::FadeToBlack:
+      return "Fade towards black";
+    case TransitionType::FadeFromFull:
+      return "Fade from full";
+    case TransitionType::FadeToFull:
+      return "Fade towards full";
+    case TransitionType::ConstantAcceleration:
+      return "Constant acceleration";
+    case TransitionType::Random:
+      return "Random jumps";
+    case TransitionType::Erratic:
+      return "Erratic (strobe-like effect)";
+    case TransitionType::Black:
+      return "Off during transition";
+    case TransitionType::Full:
+      return "Full during transition";
   }
 }
 
@@ -68,16 +126,8 @@ inline TransitionType GetTransitionType(const std::string &str) {
     return TransitionType::FadeThroughFull;
   else if (str == "glow_fade")
     return TransitionType::GlowFade;
-  else if (str == "random")
-    return TransitionType::Random;
   else if (str == "stepped")
     return TransitionType::Stepped;
-  else if (str == "erratic")
-    return TransitionType::Erratic;
-  else if (str == "black")
-    return TransitionType::Black;
-  else if (str == "full")
-    return TransitionType::Full;
   else if (str == "fade_from_black")
     return TransitionType::FadeFromBlack;
   else if (str == "fade_to_black")
@@ -86,6 +136,16 @@ inline TransitionType GetTransitionType(const std::string &str) {
     return TransitionType::FadeFromFull;
   else if (str == "fade_to_full")
     return TransitionType::FadeToFull;
+  else if (str == "Constant acceleration")
+    return TransitionType::ConstantAcceleration;
+  else if (str == "random")
+    return TransitionType::Random;
+  else if (str == "erratic")
+    return TransitionType::Erratic;
+  else if (str == "black")
+    return TransitionType::Black;
+  else if (str == "full")
+    return TransitionType::Full;
   else  // "none"
     return TransitionType::None;
 }
