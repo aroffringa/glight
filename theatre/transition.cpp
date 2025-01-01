@@ -193,33 +193,36 @@ void Transition::Mix(Controllable &first, size_t first_input,
       break;
     case TransitionType::Fade: {
       const unsigned secondRatioValue =
-          (unsigned)((transition_time / length_in_ms_) * 256.0);
-      const unsigned firstRatioValue = 255 - secondRatioValue;
-      first.MixInput(first_input,
-                     ControlValue((value.UInt() * firstRatioValue) >> 8));
-      second.MixInput(second_input,
-                      ControlValue((value.UInt() * secondRatioValue) >> 8));
+          (unsigned)((transition_time / length_in_ms_) * 65536.0);
+      const unsigned firstRatioValue = 65535 - secondRatioValue;
+      first.MixInput(
+          first_input,
+          ControlValue(((value.UInt() >> 8) * firstRatioValue) >> 8));
+      second.MixInput(
+          second_input,
+          ControlValue(((value.UInt() >> 8) * secondRatioValue) >> 8));
     } break;
     case TransitionType::FadeThroughBlack: {
       const unsigned ratio =
-          (unsigned)((transition_time / length_in_ms_) * 512.0);
-      if (ratio < 256) {
-        ControlValue firstValue((value.UInt() * (255 - ratio)) >> 8);
+          (unsigned)((transition_time / length_in_ms_) * (65536 * 2.0));
+      if (ratio < 65536) {
+        ControlValue firstValue(((value.UInt() >> 8) * (65535 - ratio)) >> 8);
         first.MixInput(first_input, firstValue);
       } else {
-        ControlValue secondValue((value.UInt() * (ratio - 256)) >> 8);
+        ControlValue secondValue(((value.UInt() >> 8) * (ratio - 65536)) >> 8);
         second.MixInput(second_input, secondValue);
       }
     } break;
     case TransitionType::FadeThroughFull: {
       const unsigned ratio =
-          (unsigned)((transition_time / length_in_ms_) * 512.0);
-      if (ratio < 256) {
+          (unsigned)((transition_time / length_in_ms_) * (65536 * 2.0));
+      if (ratio < 65536) {
         first.MixInput(first_input, value);
-        const ControlValue secondValue((value.UInt() * ratio) >> 8);
+        const ControlValue secondValue(((value.UInt() >> 8) * ratio) >> 8);
         second.MixInput(second_input, secondValue);
       } else {
-        const ControlValue firstValue((value.UInt() * (512 - ratio)) >> 8);
+        const ControlValue firstValue(((value.UInt() >> 8) * (512 - ratio)) >>
+                                      8);
         first.MixInput(first_input, firstValue);
         second.MixInput(second_input, value);
       }
@@ -299,29 +302,29 @@ void Transition::Mix(Controllable &first, size_t first_input,
       break;
     case TransitionType::FadeFromBlack: {
       unsigned ratioValue =
-          (unsigned)((transition_time / length_in_ms_) * 256.0);
+          (unsigned)((transition_time / length_in_ms_) * 65536.0);
       second.MixInput(second_input,
-                      ControlValue((value.UInt() * ratioValue) >> 8));
+                      ControlValue(((value.UInt() >> 8) * ratioValue) >> 8));
     } break;
     case TransitionType::FadeToBlack: {
       unsigned ratioValue =
-          255 - (unsigned)((transition_time / length_in_ms_) * 256.0);
+          65535 - (unsigned)((transition_time / length_in_ms_) * 65536.0);
       first.MixInput(second_input,
-                     ControlValue((value.UInt() * ratioValue) >> 8));
+                     ControlValue(((value.UInt() >> 8) * ratioValue) >> 8));
     } break;
     case TransitionType::FadeFromFull: {
       const unsigned ratio_value =
-          255 - (unsigned)((transition_time / length_in_ms_) * 256.0);
+          65535 - (unsigned)((transition_time / length_in_ms_) * 65536.0);
       first.MixInput(first_input,
-                     ControlValue((value.UInt() * ratio_value) >> 8));
+                     ControlValue(((value.UInt() >> 8) * ratio_value) >> 8));
       second.MixInput(second_input, value);
     } break;
     case TransitionType::FadeToFull: {
       unsigned ratio_value =
-          (unsigned)((transition_time / length_in_ms_) * 256.0);
+          (unsigned)((transition_time / length_in_ms_) * 65536.0);
       first.MixInput(first_input, value);
       second.MixInput(second_input,
-                      ControlValue((value.UInt() * ratio_value) >> 8));
+                      ControlValue(((value.UInt() >> 8) * ratio_value) >> 8));
     } break;
   }
 }
