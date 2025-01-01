@@ -47,6 +47,14 @@ ControlValue Transition::InValue(double transition_time,
           static_cast<unsigned>((transition_time / length_in_ms_) * 5.0);
       return ControlValue(value * ControlValue::MaxUInt() / 5);
     }
+    case TransitionType::ConstantAcceleration: {
+      const double ratio = transition_time / length_in_ms_;
+      if (ratio <= 0.5)
+        return ControlValue::FromRatio(ratio * ratio * 2.0);
+      else
+        return ControlValue::FromRatio(1.0 -
+                                       (ratio - 1.0) * (ratio - 1.0) * 2.0);
+    }
     case TransitionType::Random: {
       const unsigned ratio =
           (unsigned)((transition_time / length_in_ms_) * 256);
@@ -127,6 +135,13 @@ ControlValue Transition::OutValue(double transition_time,
       double ratio =
           1.0 - std::floor(4.999 * transition_time / length_in_ms_) / 5.0;
       return ControlValue::FromRatio(ratio);
+    }
+    case TransitionType::ConstantAcceleration: {
+      const double ratio = transition_time / length_in_ms_;
+      if (ratio <= 0.5)
+        return ControlValue::FromRatio(1.0 - ratio * ratio * 2.0);
+      else
+        return ControlValue::FromRatio((ratio - 1.0) * (ratio - 1.0) * 2.0);
     }
     case TransitionType::Random: {
       const unsigned ratio =
@@ -240,6 +255,20 @@ void Transition::Mix(Controllable &first, size_t first_input,
                      ControlValue((value.UInt() * firstRatioValue) >> 8));
       second.MixInput(second_input,
                       ControlValue((value.UInt() * secondRatioValue) >> 8));
+    } break;
+    case TransitionType::ConstantAcceleration: {
+      const double ratio = transition_time / length_in_ms_;
+      const double fade_value = (ratio <= 0.5)
+                                    ? ratio * ratio * 2.0
+                                    : 1.0 - (ratio - 1.0) * (ratio - 1.0) * 2.0;
+      unsigned secondRatioValue = (unsigned)(fade_value * 65536.0);
+      const unsigned firstRatioValue = 65535 - secondRatioValue;
+      first.MixInput(
+          first_input,
+          ControlValue(((value.UInt() >> 8) * firstRatioValue) >> 8));
+      second.MixInput(
+          second_input,
+          ControlValue(((value.UInt() >> 8) * secondRatioValue) >> 8));
     } break;
     case TransitionType::Random: {
       const unsigned ratio =

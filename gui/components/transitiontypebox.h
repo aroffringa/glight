@@ -4,173 +4,77 @@
 #include "../../theatre/transition.h"
 
 #include <gtkmm/box.h>
+#include <gtkmm/combobox.h>
 #include <gtkmm/label.h>
-#include <gtkmm/radiobutton.h>
+#include <gtkmm/liststore.h>
 
 namespace glight::gui {
 
-class TransitionTypeBox : public Gtk::VBox {
+class TransitionTypeBox : public Gtk::HBox {
  public:
   TransitionTypeBox(
       theatre::TransitionType value = theatre::TransitionType::Fade) {
-    _topBox.pack_start(_label);
+    pack_start(label_);
+    label_.show();
 
-    Gtk::RadioButtonGroup transTypeGroup;
-    _noneRB.set_group(transTypeGroup);
-    _noneRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::None); });
-    _topBox.pack_start(_noneRB);
+    model_ = Gtk::ListStore::create(columns_);
+    const std::vector<theatre::TransitionType> types =
+        theatre::GetTransitionTypes();
+    for (theatre::TransitionType type : types) {
+      Gtk::TreeModel::iterator iter = model_->append();
+      const Gtk::TreeModel::Row& row = *iter;
+      row[columns_.description_] = GetDescription(type);
+      row[columns_.value_] = type;
+    }
 
-    _fadeRB.set_group(transTypeGroup);
-    _fadeRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::Fade); });
-    _topBox.pack_start(_fadeRB);
+    combo_.set_model(model_);
+    combo_.pack_start(columns_.description_);
 
-    _fadeThroughBlackRB.set_group(transTypeGroup);
-    _fadeThroughBlackRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::FadeThroughBlack); });
-    _topBox.pack_start(_fadeThroughBlackRB);
-
-    _fadeThroughFullRB.set_group(transTypeGroup);
-    _fadeThroughFullRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::FadeThroughFull); });
-    _topBox.pack_start(_fadeThroughFullRB);
-
-    _glowFadeRB.set_group(transTypeGroup);
-    _glowFadeRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::GlowFade); });
-    _centreBox.pack_start(_glowFadeRB);
-
-    _steppedRB.set_group(transTypeGroup);
-    _steppedRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::Stepped); });
-    _centreBox.pack_start(_steppedRB);
-
-    _randomRB.set_group(transTypeGroup);
-    _randomRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::Random); });
-    _centreBox.pack_start(_randomRB);
-
-    _erraticRB.set_group(transTypeGroup);
-    _erraticRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::Erratic); });
-    _centreBox.pack_start(_erraticRB);
-
-    _blackRB.set_group(transTypeGroup);
-    _blackRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::Black); });
-    _centreBox.pack_start(_blackRB);
-
-    _fullRB.set_group(transTypeGroup);
-    _fullRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::Full); });
-    _centreBox.pack_start(_fullRB);
-
-    _fadeFromBlackRB.set_group(transTypeGroup);
-    _fadeFromBlackRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::FadeFromBlack); });
-    _bottomBox.pack_start(_fadeFromBlackRB);
-
-    _fadeToBlackRB.set_group(transTypeGroup);
-    _fadeToBlackRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::FadeToBlack); });
-    _bottomBox.pack_start(_fadeToBlackRB);
-
-    _fadeFromFullRB.set_group(transTypeGroup);
-    _fadeFromFullRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::FadeFromFull); });
-    _bottomBox.pack_start(_fadeFromFullRB);
-
-    _fadeToFullRB.set_group(transTypeGroup);
-    _fadeToFullRB.signal_clicked().connect(
-        [&]() { Change(theatre::TransitionType::FadeToFull); });
-    _bottomBox.pack_start(_fadeToFullRB);
-
-    pack_start(_topBox);
-    pack_start(_centreBox);
-    pack_end(_bottomBox);
+    pack_end(combo_);
+    combo_.signal_changed().connect([&]() {
+      const int index = combo_.get_active_row_number();
+      if (index >= 0) {
+        const theatre::TransitionType type =
+            theatre::GetTransitionTypes()[index];
+        value_ = type;
+        signal_changed_(type);
+      }
+    });
+    combo_.show();
 
     Set(value);
   }
 
-  sigc::signal<void(theatre::TransitionType)> &SignalChanged() {
-    return _signalChanged;
+  sigc::signal<void(theatre::TransitionType)>& SignalChanged() {
+    return signal_changed_;
   }
 
   void Set(theatre::TransitionType type) {
-    using theatre::TransitionType;
-    switch (type) {
-      case TransitionType::None:
-        _noneRB.set_active();
-        break;
-      case TransitionType::Fade:
-        _fadeRB.set_active();
-        break;
-      case TransitionType::FadeThroughBlack:
-        _fadeThroughBlackRB.set_active();
-        break;
-      case TransitionType::FadeThroughFull:
-        _fadeThroughFullRB.set_active();
-        break;
-      case TransitionType::GlowFade:
-        _glowFadeRB.set_active();
-        break;
-      case TransitionType::Stepped:
-        _steppedRB.set_active();
-        break;
-      case TransitionType::Random:
-        _randomRB.set_active();
-        break;
-      case TransitionType::Erratic:
-        _erraticRB.set_active();
-        break;
-      case TransitionType::Black:
-        _blackRB.set_active();
-        break;
-      case TransitionType::Full:
-        _fullRB.set_active();
-        break;
-      case TransitionType::FadeFromBlack:
-        _fadeFromBlackRB.set_active();
-        break;
-      case TransitionType::FadeToBlack:
-        _fadeToBlackRB.set_active();
-        break;
-      case TransitionType::FadeFromFull:
-        _fadeFromFullRB.set_active();
-        break;
-      case TransitionType::FadeToFull:
-        _fadeToFullRB.set_active();
-        break;
-    }
+    const std::vector<theatre::TransitionType> types =
+        theatre::GetTransitionTypes();
+    const size_t index =
+        std::find(types.begin(), types.end(), type) - types.begin();
+    combo_.set_active(index);
+    value_ = type;
   }
 
-  theatre::TransitionType Get() const { return _value; }
+  theatre::TransitionType Get() const { return value_; }
 
  private:
-  void Change(theatre::TransitionType type) {
-    _value = type;
-    _signalChanged(type);
-  }
+  Gtk::Label label_{"Type:"};
+  Gtk::ComboBox combo_;
+  struct Columns : public Gtk::TreeModelColumnRecord {
+    Columns() {
+      add(description_);
+      add(value_);
+    }
 
-  Gtk::Label _label{"Type:"};
-  Gtk::HBox _topBox, _centreBox, _bottomBox;
-  Gtk::RadioButton _noneRB{"None"};
-  Gtk::RadioButton _fadeRB{"Fade"};
-  Gtk::RadioButton _fadeThroughBlackRB{"Through black"};
-  Gtk::RadioButton _fadeThroughFullRB{"Through full"};
-  Gtk::RadioButton _glowFadeRB{"Glow fade"};
-  Gtk::RadioButton _steppedRB{"Stepped"};
-  Gtk::RadioButton _randomRB{"Random"};
-  Gtk::RadioButton _erraticRB{"Erratic"};
-  Gtk::RadioButton _blackRB{"Black out"};
-  Gtk::RadioButton _fullRB{"Full on"};
-  Gtk::RadioButton _fadeFromBlackRB{"From black"};
-  Gtk::RadioButton _fadeToBlackRB{"To black"};
-  Gtk::RadioButton _fadeFromFullRB{"From full"};
-  Gtk::RadioButton _fadeToFullRB{"To full"};
-  sigc::signal<void(theatre::TransitionType)> _signalChanged;
-  theatre::TransitionType _value;
+    Gtk::TreeModelColumn<Glib::ustring> description_;
+    Gtk::TreeModelColumn<theatre::TransitionType> value_;
+  } columns_;
+  Glib::RefPtr<Gtk::ListStore> model_;
+  sigc::signal<void(theatre::TransitionType)> signal_changed_;
+  theatre::TransitionType value_;
 };
 
 }  // namespace glight::gui
