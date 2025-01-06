@@ -72,6 +72,17 @@ ControlValue Transition::InValue(double transition_time,
       else
         return ControlValue::Zero();
     }
+    case TransitionType::SlowStrobe:
+      return timing.TimestepNumber() % 8 == 0 ? ControlValue::Max()
+                                              : ControlValue::Zero();
+    case TransitionType::FastStrobe:
+      return timing.TimestepNumber() % 2 == 0 ? ControlValue::Max()
+                                              : ControlValue::Zero();
+    case TransitionType::StrobeAB:
+      return transition_time * 2.0 < length_in_ms_ &&
+                     timing.TimestepNumber() % 2 == 0
+                 ? ControlValue::Max()
+                 : ControlValue::Zero();
     case TransitionType::Black:
       return ControlValue::Zero();
     case TransitionType::Full:
@@ -161,6 +172,17 @@ ControlValue Transition::OutValue(double transition_time,
       else
         return ControlValue::Zero();
     }
+    case TransitionType::SlowStrobe:
+      return timing.TimestepNumber() % 8 + 4 == 0 ? ControlValue::Max()
+                                                  : ControlValue::Zero();
+    case TransitionType::FastStrobe:
+      return timing.TimestepNumber() % 2 == 1 ? ControlValue::Max()
+                                              : ControlValue::Zero();
+    case TransitionType::StrobeAB:
+      return transition_time * 2.0 >= length_in_ms_ &&
+                     timing.TimestepNumber() % 2 == 0
+                 ? ControlValue::Max()
+                 : ControlValue::Zero();
     case TransitionType::Black:
     case TransitionType::FadeFromBlack: {
       return ControlValue::Zero();
@@ -293,6 +315,26 @@ void Transition::Mix(Controllable &first, size_t first_input,
         first.MixInput(first_input, value);
       else
         second.MixInput(second_input, value);
+    } break;
+    case TransitionType::SlowStrobe:
+      if (timing.TimestepNumber() % 8 == 0)
+        first.MixInput(first_input, value);
+      else if (timing.TimestepNumber() % 8 == 4)
+        second.MixInput(second_input, value);
+      break;
+    case TransitionType::FastStrobe:
+      if (timing.TimestepNumber() % 2 == 0)
+        first.MixInput(first_input, value);
+      else
+        second.MixInput(second_input, value);
+      break;
+    case TransitionType::StrobeAB: {
+      if (timing.TimestepNumber() % 2 == 0) {
+        if (transition_time * 2.0 < length_in_ms_)
+          first.MixInput(first_input, value);
+        else
+          second.MixInput(second_input, value);
+      }
     } break;
     case TransitionType::Black:
       break;

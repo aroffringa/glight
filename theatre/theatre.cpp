@@ -150,7 +150,7 @@ void Theatre::NotifyDmxChange() {
   _highestChannel = highest;
 }
 
-Position Theatre::GetFreePosition() const {
+Coordinate3D Theatre::GetFreePosition() const {
   const size_t rowLength = 10.0;
   size_t n = _fixtures.size() * 2;
   std::unique_ptr<bool[]> available(new bool[n]);
@@ -172,13 +172,15 @@ Position Theatre::GetFreePosition() const {
     }
   }
   for (size_t i = 0; i != n; ++i) {
-    if (available[i]) return Position(i % rowLength, i / rowLength);
+    if (available[i])
+      return Coordinate3D(i % rowLength, i / rowLength,
+                          Fixture::kDefaultHeight);
   }
-  return Position(n % rowLength, n / rowLength);
+  return Coordinate3D(n % rowLength, n / rowLength, Fixture::kDefaultHeight);
 }
 
-Position Theatre::Extend() const {
-  Position extend;
+Coordinate2D Theatre::Extend() const {
+  Coordinate2D extend;
   for (const system::TrackablePtr<Fixture> &fixture : _fixtures) {
     const double right = fixture->GetPosition().X() + 1.0;
     const double bottom = fixture->GetPosition().Y() + 1.0;

@@ -51,4 +51,30 @@ void Fixture::SetChannel(DmxChannel dmx_channel) {
   theatre_.NotifyDmxChange();
 }
 
+double Fixture::GetBeamDirection(const ValueSnapshot &snapshot,
+                                 size_t shape_index) const {
+  double direction = direction_;
+  if (type_.CanBeamRotate()) {
+    const double pan = type_.GetPan(*this, snapshot, shape_index);
+    if (is_upside_down_)
+      direction -= pan;
+    else
+      direction += pan;
+  }
+  return direction;
+}
+
+double Fixture::GetBeamTilt(const ValueSnapshot &snapshot,
+                            size_t shape_index) const {
+  double beam_tilt = static_tilt_;
+  if (type_.CanBeamRotate()) {
+    const double tilt = type_.GetTilt(*this, snapshot, shape_index);
+    if (is_upside_down_)
+      beam_tilt -= tilt;
+    else
+      beam_tilt += tilt;
+  }
+  return beam_tilt;
+}
+
 }  // namespace glight::theatre

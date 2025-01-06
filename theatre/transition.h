@@ -23,6 +23,9 @@ enum class TransitionType {
   ConstantAcceleration,
   Random,
   Erratic,
+  SlowStrobe,
+  FastStrobe,
+  StrobeAB,
   Black,
   Full
 };
@@ -41,6 +44,9 @@ inline std::vector<TransitionType> GetTransitionTypes() {
                                      TransitionType::ConstantAcceleration,
                                      TransitionType::Random,
                                      TransitionType::Erratic,
+                                     TransitionType::SlowStrobe,
+                                     TransitionType::FastStrobe,
+                                     TransitionType::StrobeAB,
                                      TransitionType::Black,
                                      TransitionType::Full};
 }
@@ -74,6 +80,12 @@ inline std::string ToString(TransitionType type) {
       return "random";
     case TransitionType::Erratic:
       return "erratic";
+    case TransitionType::SlowStrobe:
+      return "slow_strobe";
+    case TransitionType::FastStrobe:
+      return "fast_strobe";
+    case TransitionType::StrobeAB:
+      return "strobe_a_b";
     case TransitionType::Black:
       return "black";
     case TransitionType::Full:
@@ -110,6 +122,12 @@ inline std::string GetDescription(TransitionType type) {
       return "Random jumps";
     case TransitionType::Erratic:
       return "Erratic (strobe-like effect)";
+    case TransitionType::SlowStrobe:
+      return "Slow strobe";
+    case TransitionType::FastStrobe:
+      return "Fast strobe";
+    case TransitionType::StrobeAB:
+      return "Strobe A, then B";
     case TransitionType::Black:
       return "Off during transition";
     case TransitionType::Full:
@@ -142,6 +160,12 @@ inline TransitionType GetTransitionType(const std::string &str) {
     return TransitionType::Random;
   else if (str == "erratic")
     return TransitionType::Erratic;
+  else if (str == "slow_strobe")
+    return TransitionType::SlowStrobe;
+  else if (str == "fast_strobe")
+    return TransitionType::FastStrobe;
+  else if (str == "strobe_a_b")
+    return TransitionType::StrobeAB;
   else if (str == "black")
     return TransitionType::Black;
   else if (str == "full")

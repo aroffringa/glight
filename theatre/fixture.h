@@ -4,15 +4,15 @@
 #include <set>
 
 #include "color.h"
+#include "coordinate3d.h"
 #include "fixturefunction.h"
 #include "fixturesymbol.h"
 #include "namedobject.h"
-#include "position.h"
 
 namespace glight::theatre {
 
 class FixtureType;
-class Position;
+class Coordinate2D;
 class Theatre;
 class ValueSnapshot;
 
@@ -23,6 +23,9 @@ class Fixture : public NamedObject {
  public:
   Fixture(Theatre &theatre, const FixtureType &type, const std::string &name);
   // Fixture(const Fixture &source, Theatre &theatre);
+
+  static inline constexpr double kDefaultHeight = 5.0;
+  static inline constexpr double kDefaultTilt = 0.25 * M_PI;
 
   const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const {
     return functions_;
@@ -68,8 +71,17 @@ class Fixture : public NamedObject {
 
   inline int GetTilt(const ValueSnapshot &snapshot, size_t shape_index) const;
 
-  Position &GetPosition() { return position_; }
-  const Position &GetPosition() const { return position_; }
+  double GetBeamDirection(const ValueSnapshot &snapshot,
+                          size_t shape_index) const;
+  double GetBeamTilt(const ValueSnapshot &snapshot, size_t shape_index) const;
+
+  Coordinate3D &GetPosition() { return position_; }
+  const Coordinate3D &GetPosition() const { return position_; }
+  Coordinate2D GetXY() const { return position_.XY(); }
+  void SetXY(const Coordinate2D &xy) {
+    position_.X() = xy.X();
+    position_.Y() = xy.Y();
+  }
 
   FixtureSymbol Symbol() const { return symbol_; }
   void SetSymbol(FixtureSymbol symbol) { symbol_ = symbol; }
@@ -78,8 +90,8 @@ class Fixture : public NamedObject {
   double Direction() const { return direction_; }
   void SetDirection(double direction) { direction_ = direction; }
 
-  double Tilt() const { return tilt_; }
-  void SetTilt(double tilt) { tilt_ = tilt; }
+  double StaticTilt() const { return static_tilt_; }
+  void SetStaticTilt(double static_tilt) { static_tilt_ = static_tilt; }
 
   bool IsUpsideDown() const { return is_upside_down_; }
   void SetUpsideDown(bool is_upside_down) { is_upside_down_ = is_upside_down; }
@@ -90,9 +102,9 @@ class Fixture : public NamedObject {
  private:
   Theatre &theatre_;
   const FixtureType &type_;
-  Position position_;
+  Coordinate3D position_;
   double direction_ = 0.5 * M_PI;
-  double tilt_ = 0.0;
+  double static_tilt_ = kDefaultTilt;
   bool is_upside_down_ = false;
   FixtureSymbol symbol_;
   size_t electric_phase_ = 0;

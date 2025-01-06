@@ -113,8 +113,11 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   state.writer.String("type", fixture.Type().Name());
   state.writer.Number("position-x", fixture.GetPosition().X());
   state.writer.Number("position-y", fixture.GetPosition().Y());
+  if (fixture.GetPosition().Z() != Fixture::kDefaultHeight)
+    state.writer.Number("position-z", fixture.GetPosition().Z());
   state.writer.Number("direction", fixture.Direction());
-  if (fixture.Tilt() != 0.0) state.writer.Number("tilt", fixture.Tilt());
+  if (fixture.StaticTilt() != Fixture::kDefaultTilt)
+    state.writer.Number("tilt", fixture.StaticTilt());
   if (fixture.IsUpsideDown())
     state.writer.Boolean("upside-down", fixture.IsUpsideDown());
   if (fixture.ElectricPhase() != 0)

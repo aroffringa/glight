@@ -206,8 +206,11 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     ParseNameAttr(f_node, fixture);
     fixture.GetPosition().X() = ToNum(f_node["position-x"]).AsDouble();
     fixture.GetPosition().Y() = ToNum(f_node["position-y"]).AsDouble();
+    fixture.GetPosition().Z() =
+        OptionalDouble(f_node, "position-z", Fixture::kDefaultHeight);
     fixture.SetDirection(ToNum(f_node["direction"]).AsDouble());
-    fixture.SetTilt(OptionalDouble(f_node, "tilt", 0.0));
+    fixture.SetStaticTilt(
+        OptionalDouble(f_node, "tilt", Fixture::kDefaultTilt));
     fixture.SetUpsideDown(OptionalBool(f_node, "upside-down", false));
     fixture.SetElectricPhase(OptionalSize(f_node, "electric-phase", 0));
     fixture.SetSymbol(FixtureSymbol(ToStr(f_node["symbol"])));

@@ -248,6 +248,21 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       max_tilt_ = 0.5 * M_PI;
       short_name_ = "Move";
       break;
+    case StockFixture::ZoomingMovingHead:
+      functions_.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Pan, 3, empty_channel, 0);
+      functions_.emplace_back(FunctionType::Tilt, 4, empty_channel, 0);
+      min_pan_ = 0.0;
+      max_pan_ = 2.0 * M_PI;
+      min_tilt_ = -0.25 * M_PI;
+      max_tilt_ = 0.5 * M_PI;
+      functions_.emplace_back(FunctionType::Zoom, 5, empty_channel, 0);
+      min_beam_angle_ = 10.0 * M_PI / 180.0;
+      max_beam_angle_ = 50.0 * M_PI / 180.0;
+      short_name_ = "Move+Zoom";
+      break;
   }
   max_power_ = 0;
   for (FixtureTypeFunction &function : functions_) {

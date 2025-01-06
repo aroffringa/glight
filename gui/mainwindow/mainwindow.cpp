@@ -123,6 +123,24 @@ void MainWindow::InitializeMenu() {
   main_menu_.TheatreDimensions.connect(
       [&]() { onMITheatreDimensionsClicked(); });
 
+  main_menu_.ShowFixtures.connect([&]() {
+    _visualizationWidget->SetDrawFixtures(main_menu_.ShowFixturesActive());
+    _visualizationWidget->Update();
+  });
+  main_menu_.ShowBeams.connect([&]() {
+    _visualizationWidget->SetDrawBeams(main_menu_.ShowBeamsActive());
+    _visualizationWidget->Update();
+  });
+  main_menu_.ShowProjections.connect([&]() {
+    _visualizationWidget->SetDrawProjections(
+        main_menu_.ShowProjectionsActive());
+    _visualizationWidget->Update();
+  });
+  main_menu_.ShowTheatreWalls.connect([&]() {
+    _visualizationWidget->SetDrawWalls(main_menu_.ShowTheatreWallsActive());
+    _visualizationWidget->Update();
+  });
+
   main_menu_.SideBar.connect([&]() { onSideBarButtonClicked(); });
   main_menu_.PowerMonitor.connect([&]() { onPowerMonitorButtonClicked(); });
   main_menu_.FullScreen.connect([&]() { onFullscreen(); });

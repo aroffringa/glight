@@ -174,7 +174,7 @@ void AddFixtureWindow::onAdd() {
     }
 
     for (size_t fixIter = 0; fixIter != static_cast<size_t>(count); ++fixIter) {
-      const theatre::Position position =
+      const theatre::Coordinate3D position =
           _management->GetTheatre().GetFreePosition();
       theatre::Fixture &fixture =
           *_management->GetTheatre().AddFixture(*project_type);

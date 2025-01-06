@@ -1,9 +1,9 @@
 #ifndef GLIGHT_GUI_VISUALIZATION_WIDGET_H_
 #define GLIGHT_GUI_VISUALIZATION_WIDGET_H_
 
+#include "theatre/coordinate2d.h"
 #include "theatre/fixturesymbol.h"
 #include "theatre/forwards.h"
-#include "theatre/position.h"
 #include "theatre/valuesnapshot.h"
 
 #include "gui/renderengine.h"
@@ -48,6 +48,13 @@ class VisualizationWidget : public Gtk::DrawingArea {
 
   void Update() { queue_draw(); }
 
+  void SetDrawFixtures(bool draw_fixtures) { draw_fixtures_ = draw_fixtures; }
+  void SetDrawBeams(bool draw_beams) { draw_beams_ = draw_beams; }
+  void SetDrawProjections(bool draw_projections) {
+    draw_projections_ = draw_projections;
+  }
+  void SetDrawWalls(bool draw_walls) { draw_walls_ = draw_walls; }
+
  private:
   VisualizationWidget(const VisualizationWidget &) = delete;
   VisualizationWidget &operator=(const VisualizationWidget &) = delete;
@@ -56,7 +63,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void inializeContextMenu();
   void initialize();
   void drawAll(const Cairo::RefPtr<Cairo::Context> &cairo);
-  void DrawFixtures(
+  void DrawShapshot(
       const Cairo::RefPtr<Cairo::Context> &cairo,
       const std::vector<system::ObservingPtr<theatre::Fixture>> &selection,
       size_t width, size_t height);
@@ -84,10 +91,17 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void OnSetColor();
   void OnTrackWithPan();
 
-  void selectFixtures(const theatre::Position &a, const theatre::Position &b);
-  void addFixtures(const theatre::Position &a, const theatre::Position &b);
-  void SetPan(const theatre::Position &position);
+  void selectFixtures(const theatre::Coordinate2D &a,
+                      const theatre::Coordinate2D &b);
+  void addFixtures(const theatre::Coordinate2D &a,
+                   const theatre::Coordinate2D &b);
+  void SetPan(const theatre::Coordinate2D &position);
   void SetCursor(Gdk::CursorType cursor_type);
+
+  bool draw_fixtures_ = true;
+  bool draw_beams_ = true;
+  bool draw_projections_ = true;
+  bool draw_walls_ = true;
 
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;
@@ -102,8 +116,8 @@ class VisualizationWidget : public Gtk::DrawingArea {
   MouseState _dragType;
   std::vector<system::ObservingPtr<theatre::Fixture>> _selectedFixtures;
   std::vector<system::ObservingPtr<theatre::Fixture>> _dragInvolvedFixtures;
-  theatre::Position _draggingStart;
-  theatre::Position _draggingTo;
+  theatre::Coordinate2D _draggingStart;
+  theatre::Coordinate2D _draggingTo;
   RenderEngine render_engine_;
   theatre::ValueSnapshot primary_snapshot_;
   theatre::ValueSnapshot secondary_snapshot_;
