@@ -72,25 +72,33 @@ void DrawFixtureProjection(const DrawData &data,
         const double tan_beam_angle = std::tan(beam_angle);
         const double cos_tilt = std::cos(tilt);
         const double sin_tilt = std::sin(tilt);
+
+        const double forward_x = cos_tilt * cos_direction;
+        const double forward_y = cos_tilt * sin_direction;
+        const double forward_z = sin_tilt;
+
         for (size_t i = 0; i != 80; ++i) {
-          // Steps:
-          // Perform rotation around x-axis
-          // Unrotate y-axis with tilt degrees
-          // Unrotate z-axis with direction degrees
-          const double circle = static_cast<double>(i) * (M_PI * 2.0 / 80.0);
+          // Calculate intersection with floor. Steps:
+          // - Start from "top" of the beam, a vector in direction of the x-axis
+          // but rotated upward (in y-direction) by the beam angle.
+          // - Perform rotation around x-axis by iterator
+          // - Unrotate y-axis with tilt degrees
+          // - Unrotate z-axis with direction degrees
+          const double iterator = static_cast<double>(i) * (M_PI * 2.0 / 80.0);
           // x1 = 1.0;
-          // y1 = std::tan(beam_angle) * std::cos(circle);
-          // z1 = std::tan(beam_angle) * std::sin(circle);
-          // x2 = x1 * std::cos(tilt) + z1 * std::sin(tilt);
+          // y1 = tan(beam_angle) * cos(iterator);
+          // z1 = tan(beam_angle) * sin(iterator);
+          // x2 = x1 * cos(tilt) + z1 * sin(tilt);
           // y2 = y1;
-          // z2 = z1 * std::cos(tilt) - x1 * std::sin(tilt);
-          // x3 = y2 * std::sin(direction) - x2 * std::cos(direction);
-          // y3 = -y2 * std::cos(direction) - x2 * std::sin(direction);
+          // z2 = z1 * cos(tilt) - x1 * sin(tilt);
+          // x3 = y2 * sin(direction) - x2 * cos(direction);
+          // y3 = -y2 * cos(direction) - x2 * sin(direction);
           // z3 = z2;
-          const double sin_circle = std::sin(circle);
-          const double cos_circle = std::cos(circle);
-          const double y1 = tan_beam_angle * cos_circle;
-          const double z1 = tan_beam_angle * sin_circle;
+          // Simplified:
+          const double sin_iterator = std::sin(iterator);
+          const double cos_iterator = std::cos(iterator);
+          const double y1 = tan_beam_angle * cos_iterator;
+          const double z1 = tan_beam_angle * sin_iterator;
           const double x2 = cos_tilt + z1 * sin_tilt;
           const double x3 = y1 * sin_direction - x2 * cos_direction;
           const double y3 = -y1 * cos_direction - x2 * sin_direction;
@@ -99,11 +107,16 @@ void DrawFixtureProjection(const DrawData &data,
             const double scaling = z / z3;
             const double proj_x = x + x3 * scaling;
             const double proj_y = y + y3 * scaling;
-            if (first) {
-              data.cairo->move_to(proj_x, proj_y);
-              first = false;
-            } else {
-              data.cairo->line_to(proj_x, proj_y);
+            // Make sure the intersection is in the forward direction
+            const double inproduct = x3 * scaling * forward_x +
+                                     y3 * scaling * forward_y + z * forward_z;
+            if (inproduct > 0.0) {
+              if (first) {
+                data.cairo->move_to(proj_x, proj_y);
+                first = false;
+              } else {
+                data.cairo->line_to(proj_x, proj_y);
+              }
             }
           }
         }
