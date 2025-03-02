@@ -40,7 +40,8 @@ enum class StockFixture {
   CWWWA3Ch,
   RGBLight6Ch_16bit,
   ZoomLight,
-  MovingHead
+  MovingHead,
+  ZoomingMovingHead
 };
 
 enum class FixtureClass {
@@ -118,6 +119,8 @@ class FixtureType : public FolderObject {
         return "Zoom light (RGB)";
       case StockFixture::MovingHead:
         return "Moving head (RGB)";
+      case StockFixture::ZoomingMovingHead:
+        return "Zooming moving head (RGB)";
     }
     return "Unknown fixture class";
   }
@@ -158,7 +161,8 @@ class FixtureType : public FolderObject {
                            SF::BT_VINTAGE_7CH,
                            SF::RGBLight6Ch_16bit,
                            SF::ZoomLight,
-                           SF::MovingHead};
+                           SF::MovingHead,
+                           SF::ZoomingMovingHead};
   }
 
   static std::vector<FixtureClass> GetClassList() {

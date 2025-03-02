@@ -83,6 +83,31 @@ MainMenu::MainMenu() {
   _miDesign.set_submenu(_menuDesign);
   append(_miDesign);
 
+  // View menu
+  _miShowFixtures.set_active(true);
+  _miShowFixtures.signal_activate().connect(ShowFixtures);
+  _menuView.append(_miShowFixtures);
+
+  _miShowBeams.set_active(true);
+  _miShowBeams.signal_activate().connect(ShowBeams);
+  _menuView.append(_miShowBeams);
+
+  _miShowProjections.set_active(true);
+  _miShowProjections.signal_activate().connect(ShowProjections);
+  _menuView.append(_miShowProjections);
+
+  _miShowStageBorders.set_active(true);
+  _miShowStageBorders.signal_activate().connect(ShowStageBorders);
+  _menuView.append(_miShowStageBorders);
+
+  _menuView.append(_miViewSeperator);
+
+  _miFullScreen.signal_activate().connect(FullScreen);
+  _menuView.append(_miFullScreen);
+
+  _miView.set_submenu(_menuView);
+  append(_miView);
+
   // Window menu
   _miSideBar.set_active(true);
   _miSideBar.signal_activate().connect(SideBar);
@@ -90,9 +115,6 @@ MainMenu::MainMenu() {
 
   _miPowerMonitor.signal_activate().connect(PowerMonitor);
   _menuWindow.append(_miPowerMonitor);
-
-  _miFullScreen.signal_activate().connect(FullScreen);
-  _menuWindow.append(_miFullScreen);
 
   _miNewFaderWindow.signal_activate().connect([&]() { NewFaderWindow(); });
   _menuFaderWindows.append(_miNewFaderWindow);

@@ -123,6 +123,28 @@ void MainWindow::InitializeMenu() {
   main_menu_.TheatreDimensions.connect(
       [&]() { onMITheatreDimensionsClicked(); });
 
+  main_menu_.ShowFixtures.connect([&]() {
+    _visualizationWidget->SetDrawFixtures(main_menu_.ShowFixturesActive());
+    _state.SetShowFixtures(main_menu_.ShowFixturesActive());
+    _visualizationWidget->Update();
+  });
+  main_menu_.ShowBeams.connect([&]() {
+    _visualizationWidget->SetDrawBeams(main_menu_.ShowBeamsActive());
+    _state.SetShowBeams(main_menu_.ShowBeamsActive());
+    _visualizationWidget->Update();
+  });
+  main_menu_.ShowProjections.connect([&]() {
+    _visualizationWidget->SetDrawProjections(
+        main_menu_.ShowProjectionsActive());
+    _state.SetShowProjections(main_menu_.ShowProjectionsActive());
+    _visualizationWidget->Update();
+  });
+  main_menu_.ShowStageBorders.connect([&]() {
+    _visualizationWidget->SetDrawBorders(main_menu_.ShowStageBordersActive());
+    _state.SetShowStageBorders(main_menu_.ShowStageBordersActive());
+    _visualizationWidget->Update();
+  });
+
   main_menu_.SideBar.connect([&]() { onSideBarButtonClicked(); });
   main_menu_.PowerMonitor.connect([&]() { onPowerMonitorButtonClicked(); });
   main_menu_.FullScreen.connect([&]() { onFullscreen(); });
@@ -251,6 +273,14 @@ bool MainWindow::onDelete(GdkEventAny * /*unused*/) {
   }
 }
 
+void MainWindow::LoadMenuOptionsFromState() {
+  main_menu_.SetLayoutLocked(_state.LayoutLocked());
+  main_menu_.SetShowFixtures(_state.ShowFixtures());
+  main_menu_.SetShowBeams(_state.ShowBeams());
+  main_menu_.SetShowProjections(_state.ShowProjections());
+  main_menu_.SetShowStageBorders(_state.ShowStageBorders());
+}
+
 void MainWindow::onMINewClicked() {
   bool confirmed = false;
   if (_management->IsEmpty())
@@ -276,8 +306,7 @@ void MainWindow::onMINewClicked() {
     // It's important to sent an update now, because windows might have
     // references to removed fixtures.
     EmitUpdate();
-
-    UpdateLayoutLock();
+    LoadMenuOptionsFromState();
 
     addFaderWindow();
   }
@@ -298,7 +327,7 @@ void MainWindow::OpenFile(const std::string &filename) {
   EmitUpdate();
   resize(_state.WindowWidth(), _state.WindowHeight());
   move(_state.WindowPositionX(), _state.WindowPositionY());
-  UpdateLayoutLock();
+  LoadMenuOptionsFromState();
   if (_state.Empty()) {
     std::cout << "File did not contain GUI state info: will start with default "
                  "faders.\n";
@@ -314,6 +343,7 @@ void MainWindow::OpenFile(const std::string &filename) {
       }
     }
   }
+
   _state.EmitFaderSetChangeSignal();
 }
 

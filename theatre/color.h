@@ -1,6 +1,8 @@
 #ifndef THEATRE_COLOR_H_
 #define THEATRE_COLOR_H_
 
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <string>
 #include <variant>
@@ -50,6 +52,24 @@ class Color {
 
   constexpr Color operator/(unsigned int divisor) const {
     return Color(red_ / divisor, green_ / divisor, blue_ / divisor);
+  }
+
+  /**
+   * Calculates the maximum intensity color r, g, b values, as well
+   * as the normalization factor to maximize the color. For example,
+   * given the color {85, 0, 0} (dark red), the return color is
+   * full red, as ratio, so {1, 0, 0}, and the normalization factor
+   * is 1/3 (because 255 * 1 / 3 = 85).
+   */
+  constexpr std::array<double, 4> GetNormalizedRatios() const {
+    double r = RedRatio();
+    double g = GreenRatio();
+    double b = BlueRatio();
+    const double max_rgb = std::max({r, g, b});
+    r /= max_rgb;
+    g /= max_rgb;
+    b /= max_rgb;
+    return {r, g, b, max_rgb};
   }
 
   constexpr static Color Gray(unsigned char intensity) {

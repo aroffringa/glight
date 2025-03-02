@@ -1,8 +1,8 @@
 #ifndef GLIGHT_RENDERING_H_
 #define GLIGHT_RENDERING_H_
 
+#include "../theatre/coordinate2d.h"
 #include "../theatre/management.h"
-#include "../theatre/position.h"
 #include "../theatre/valuesnapshot.h"
 
 #include "system/trackableptr.h"
@@ -22,6 +22,10 @@ struct DrawStyle {
   size_t width = 0;
   size_t height = 0;
   double time_since_previous = 0.0;
+  bool draw_fixtures = true;
+  bool draw_beams = true;
+  bool draw_projections = true;
+  bool draw_borders = true;
   bool draw_background = false;
 };
 
@@ -43,11 +47,11 @@ class RenderEngine {
       const std::vector<system::ObservingPtr<theatre::Fixture>>
           &selected_fixtures) const;
   void DrawSelectionRectangle(const Cairo::RefPtr<Cairo::Context> &cairo,
-                              const theatre::Position &from,
-                              const theatre::Position &to) const;
+                              const theatre::Coordinate2D &from,
+                              const theatre::Coordinate2D &to) const;
 
   system::ObservingPtr<theatre::Fixture> FixtureAt(
-      const theatre::Position &position) const;
+      const theatre::Coordinate2D &position) const;
   system::ObservingPtr<theatre::Fixture> FixtureAt(double mouse_x,
                                                    double mouse_y, double width,
                                                    double height) const {
@@ -55,9 +59,9 @@ class RenderEngine {
   }
   system::ObservingPtr<theatre::Fixture> GetDirectionHandleAt(
       const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures,
-      const theatre::Position &position) const;
-  theatre::Position MouseToPosition(double mouse_x, double mouse_y,
-                                    double width, double height) const;
+      const theatre::Coordinate2D &position) const;
+  theatre::Coordinate2D MouseToPosition(double mouse_x, double mouse_y,
+                                        double width, double height) const;
   bool IsMoving() const { return is_moving_; }
 
  private:

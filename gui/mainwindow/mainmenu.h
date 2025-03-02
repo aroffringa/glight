@@ -43,8 +43,14 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> DesignWizard;
   sigc::signal<void()> TheatreDimensions;
 
-  // Window menu
+  // View menu
+  sigc::signal<void()> ShowFixtures;
+  sigc::signal<void()> ShowBeams;
+  sigc::signal<void()> ShowProjections;
+  sigc::signal<void()> ShowStageBorders;
   sigc::signal<void()> FullScreen;
+
+  // Window menu
   sigc::signal<void()> NewFaderWindow;
   sigc::signal<void()> FixtureList;
   sigc::signal<void()> FixtureTypes;
@@ -52,6 +58,28 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> PowerMonitor;
   sigc::signal<void(bool active)> SceneWindow;
   sigc::signal<void(FaderSetState& fader_set)> FaderWindow;
+
+  bool ShowFixturesActive() const { return _miShowFixtures.get_active(); }
+  void SetShowFixtures(bool show_fixtures) {
+    _miShowFixtures.set_active(show_fixtures);
+  }
+
+  bool ShowBeamsActive() const { return _miShowBeams.get_active(); }
+  void SetShowBeams(bool show_beams) { _miShowBeams.set_active(show_beams); }
+
+  bool ShowProjectionsActive() const { return _miShowProjections.get_active(); }
+  void SetShowProjections(bool show_projections) {
+    _miShowProjections.set_active(show_projections);
+  }
+
+  bool ShowStageBordersActive() const {
+    return _miShowStageBorders.get_active();
+  }
+  void SetShowStageBorders(bool show_stage_borders) {
+    _miShowStageBorders.set_active(show_stage_borders);
+  }
+
+  bool FullScreenActive() const { return _miFullScreen.get_active(); }
 
   bool FixtureListActive() const { return _miFixtureListWindow.get_active(); }
   void SetFixtureListActive(bool active) {
@@ -74,8 +102,6 @@ class MainMenu : public Gtk::MenuBar {
   void SetSceneWindowActive(bool active) { _miSceneWindow.set_active(active); }
 
   void SetFaderList(const std::vector<std::unique_ptr<FaderSetState>>& faders);
-
-  bool FullScreenActive() const { return _miFullScreen.get_active(); }
 
   bool IsLayoutLocked() const { return _miLockLayout.get_active(); }
   void SetLayoutLocked(bool lock) { _miLockLayout.set_active(lock); }
@@ -117,11 +143,19 @@ class MainMenu : public Gtk::MenuBar {
   Gtk::SeparatorMenuItem _miDesignSep2;
   Gtk::MenuItem _miTheatreDimensions{"Theatre dimensions..."};
 
+  Gtk::Menu _menuView;
+  Gtk::MenuItem _miView{"_View", true};
+  Gtk::CheckMenuItem _miShowFixtures{"Show fixtures"};
+  Gtk::CheckMenuItem _miShowBeams{"Show beams"};
+  Gtk::CheckMenuItem _miShowProjections{"Show projections"};
+  Gtk::CheckMenuItem _miShowStageBorders{"Show theatre walls"};
+  Gtk::SeparatorMenuItem _miViewSeperator;
+  Gtk::CheckMenuItem _miFullScreen{"Full screen"};
+
   Gtk::Menu _menuWindow;
   Gtk::MenuItem _miWindow{"_Window", true};
   Gtk::CheckMenuItem _miSideBar{"Side bar"};
   Gtk::CheckMenuItem _miPowerMonitor{"Power monitor"};
-  Gtk::CheckMenuItem _miFullScreen{"Full screen"};
   Gtk::CheckMenuItem _miFixtureListWindow{"Fixtures"};
   Gtk::CheckMenuItem _miFixtureTypesWindow{"Fixture types"};
   Gtk::Menu _menuFaderWindows;

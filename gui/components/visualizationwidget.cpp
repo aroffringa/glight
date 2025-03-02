@@ -39,12 +39,12 @@ namespace glight::gui {
 using system::ObservingPtr;
 
 namespace {
-theatre::Position RotateFixtures(
+theatre::Coordinate2D RotateFixtures(
     std::vector<ObservingPtr<theatre::Fixture>> &fixture_list,
-    ObservingPtr<theatre::Fixture> &centre_of_rotation, theatre::Position from,
-    theatre::Position to) {
-  const theatre::Position centre =
-      centre_of_rotation->GetPosition() + theatre::Position(0.5, 0.5);
+    ObservingPtr<theatre::Fixture> &centre_of_rotation,
+    theatre::Coordinate2D from, theatre::Coordinate2D to) {
+  const theatre::Coordinate2D centre =
+      centre_of_rotation->GetXY() + theatre::Coordinate2D(0.5, 0.5);
   const double from_angle = (from - centre).Angle();
   double rotation = (to - centre).Angle() - from_angle;
   rotation = std::round(rotation / (M_PI * 0.125)) * M_PI * 0.125;
@@ -57,8 +57,8 @@ theatre::Position RotateFixtures(
       fixture->SetDirection(new_direction < 0.0 ? new_direction + 2.0 * M_PI
                                                 : new_direction);
     }
-    return centre + theatre::Position(std::cos(from_angle + rotation),
-                                      std::sin(from_angle + rotation));
+    return centre + theatre::Coordinate2D(std::cos(from_angle + rotation),
+                                          std::sin(from_angle + rotation));
   }
 }
 }  // namespace
@@ -345,7 +345,7 @@ std::optional<DrawInfo> GetSecondaryStyleDimensions(DryModeStyle style,
   return draw_info;
 }
 
-void VisualizationWidget::DrawFixtures(
+void VisualizationWidget::DrawShapshot(
     const Cairo::RefPtr<Cairo::Context> &cairo,
     const std::vector<system::ObservingPtr<theatre::Fixture>> &selection,
     size_t width, size_t height) {
@@ -361,6 +361,10 @@ void VisualizationWidget::DrawFixtures(
   DrawStyle style;
   style.time_since_previous = time - previous_time;
   style.draw_background = true;
+  style.draw_fixtures = draw_fixtures_;
+  style.draw_beams = draw_beams_;
+  style.draw_projections = draw_projections_;
+  style.draw_borders = draw_borders_;
   previous_time = time;
   const DryModeStyle dry_mode = GetDryModeStyle();
   if (const std::optional<DrawInfo> draw_info =
@@ -381,7 +385,7 @@ void VisualizationWidget::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
   const size_t width = get_width();
   const size_t height = get_height();
 
-  DrawFixtures(cairo, _selectedFixtures, width, height);
+  DrawShapshot(cairo, _selectedFixtures, width, height);
 
   if (_dragType == MouseState::DragRectangle ||
       _dragType == MouseState::DragAddRectangle) {
@@ -397,7 +401,7 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
     const std::optional<DrawInfo> info =
         GetPrimaryStyleDimensions(GetDryModeStyle(), get_width(), get_height());
     if (info) {
-      const theatre::Position pos = render_engine_.MouseToPosition(
+      const theatre::Coordinate2D pos = render_engine_.MouseToPosition(
           event->x, event->y, info->width, info->height);
       system::ObservingPtr<theatre::Fixture> clicked_fixture =
           render_engine_.FixtureAt(pos);
@@ -507,7 +511,7 @@ bool VisualizationWidget::onMotion(GdkEventMotion *event) {
   const std::optional<DrawInfo> info =
       GetPrimaryStyleDimensions(GetDryModeStyle(), get_width(), get_height());
   if (info) {
-    const theatre::Position pos = render_engine_.MouseToPosition(
+    const theatre::Coordinate2D pos = render_engine_.MouseToPosition(
         event->x, event->y, info->width, info->height);
     switch (_dragType) {
       case MouseState::Normal: {
@@ -527,7 +531,7 @@ bool VisualizationWidget::onMotion(GdkEventMotion *event) {
         if (!Instance::State().LayoutLocked()) {
           for (const system::ObservingPtr<theatre::Fixture> &fixture :
                _selectedFixtures)
-            fixture->GetPosition() += pos - _draggingStart;
+            fixture->SetXY(fixture->GetXY() + pos - _draggingStart);
           _draggingStart = pos;
         }
         break;
@@ -553,8 +557,8 @@ bool VisualizationWidget::onMotion(GdkEventMotion *event) {
   return true;
 }
 
-void VisualizationWidget::selectFixtures(const theatre::Position &a,
-                                         const theatre::Position &b) {
+void VisualizationWidget::selectFixtures(const theatre::Coordinate2D &a,
+                                         const theatre::Coordinate2D &b) {
   _selectedFixtures.clear();
   double x1 = a.X();
   double y1 = a.Y();
@@ -562,21 +566,21 @@ void VisualizationWidget::selectFixtures(const theatre::Position &a,
   double y2 = b.Y();
   if (x1 > x2) std::swap(x1, x2);
   if (y1 > y2) std::swap(y1, y2);
-  theatre::Position first(x1 - 0.1, y1 - 0.1);
-  theatre::Position second(x2 - 0.9, y2 - 0.9);
+  theatre::Coordinate2D first(x1 - 0.1, y1 - 0.1);
+  theatre::Coordinate2D second(x2 - 0.9, y2 - 0.9);
   if (second.X() - first.X() > 0.0 && second.Y() - first.Y() > 0.0) {
     const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
         _management->GetTheatre().Fixtures();
     for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
       if (fixture->IsVisible() &&
-          fixture->GetPosition().InsideRectangle(first, second))
+          fixture->GetXY().InsideRectangle(first, second))
         _selectedFixtures.emplace_back(fixture.GetObserver());
     }
   }
 }
 
-void VisualizationWidget::addFixtures(const theatre::Position &a,
-                                      const theatre::Position &b) {
+void VisualizationWidget::addFixtures(const theatre::Coordinate2D &a,
+                                      const theatre::Coordinate2D &b) {
   selectFixtures(a, b);
   for (const system::ObservingPtr<theatre::Fixture> &fixture :
        _dragInvolvedFixtures) {
@@ -627,6 +631,8 @@ void VisualizationWidget::onDistributeEvenly() {
     double right = _selectedFixtures[0]->GetPosition().X();
     double top = _selectedFixtures[0]->GetPosition().Y();
     double bottom = _selectedFixtures[0]->GetPosition().Y();
+    double highest = _selectedFixtures[0]->GetPosition().Z();
+    double lowest = _selectedFixtures[0]->GetPosition().Z();
 
     for (size_t i = 1; i != _selectedFixtures.size(); ++i) {
       const theatre::Fixture *fixture = _selectedFixtures[i].Get();
@@ -634,6 +640,8 @@ void VisualizationWidget::onDistributeEvenly() {
       right = std::max(fixture->GetPosition().X(), right);
       top = std::min(fixture->GetPosition().Y(), top);
       bottom = std::max(fixture->GetPosition().Y(), bottom);
+      highest = std::min(fixture->GetPosition().Z(), highest);
+      lowest = std::max(fixture->GetPosition().Z(), lowest);
     }
 
     std::vector<theatre::Fixture *> list;
@@ -642,15 +650,34 @@ void VisualizationWidget::onDistributeEvenly() {
          _selectedFixtures)
       list.emplace_back(fixture.Get());
     if (left == right) {
-      std::sort(list.begin(), list.end(),
-                [](const theatre::Fixture *a, const theatre::Fixture *b) {
-                  return a->GetPosition().Y() < b->GetPosition().Y();
-                });
-      for (size_t i = 0; i != list.size(); ++i) {
-        double y = static_cast<double>(i) /
-                       static_cast<double>(list.size() - 1) * (bottom - top) +
-                   top;
-        list[i]->GetPosition().Y() = y;
+      if (top == bottom) {
+        std::sort(list.begin(), list.end(),
+                  [](const theatre::Fixture *a, const theatre::Fixture *b) {
+                    return a->GetPosition().Z() < b->GetPosition().Z();
+                  });
+        for (size_t i = 0; i != list.size(); ++i) {
+          const double z = static_cast<double>(i) /
+                               static_cast<double>(list.size() - 1) *
+                               (bottom - top) +
+                           top;
+          list[i]->GetPosition().Z() = z;
+        }
+      } else {
+        std::sort(list.begin(), list.end(),
+                  [](const theatre::Fixture *a, const theatre::Fixture *b) {
+                    return a->GetPosition().Y() < b->GetPosition().Y();
+                  });
+        for (size_t i = 0; i != list.size(); ++i) {
+          const double y = static_cast<double>(i) /
+                               static_cast<double>(list.size() - 1) *
+                               (bottom - top) +
+                           top;
+          const double z = static_cast<double>(i) /
+                               static_cast<double>(list.size() - 1) *
+                               (highest - lowest) +
+                           highest;
+          list[i]->GetPosition() = {left, y, z};
+        }
       }
     } else {
       std::sort(list.begin(), list.end(),
@@ -664,9 +691,10 @@ void VisualizationWidget::onDistributeEvenly() {
       for (size_t i = 0; i != list.size(); ++i) {
         double r =
             static_cast<double>(i) / static_cast<double>(list.size() - 1);
-        double x = r * (right - left) + left;
-        double y = r * (bottom - top) + top;
-        list[i]->GetPosition() = theatre::Position(x, y);
+        const double x = r * (right - left) + left;
+        const double y = r * (bottom - top) + top;
+        const double z = r * (highest - lowest) + highest;
+        list[i]->GetPosition() = {x, y, z};
       }
     }
   }
@@ -748,7 +776,7 @@ void VisualizationWidget::onSaveImage() {
     const Cairo::RefPtr<Cairo::SvgSurface> surface =
         Cairo::SvgSurface::create(filename, width, height);
     const Cairo::RefPtr<Cairo::Context> cairo = Cairo::Context::create(surface);
-    DrawFixtures(cairo, {}, width, height);
+    DrawShapshot(cairo, {}, width, height);
     cairo->show_page();
     surface->finish();
   }
@@ -792,15 +820,15 @@ bool VisualizationWidget::onTimeout() {
 
 void VisualizationWidget::OnTrackWithPan() { _dragType = MouseState::TrackPan; }
 
-void VisualizationWidget::SetPan(const theatre::Position &position) {
+void VisualizationWidget::SetPan(const theatre::Coordinate2D &position) {
   theatre::Management &management = Instance::Management();
   bool is_changed = false;
   for (const system::ObservingPtr<theatre::Fixture> &fixture :
        _selectedFixtures) {
     if (fixture->Type().CanBeamRotate()) {
-      constexpr theatre::Position offset(0.5, 0.5);
-      const theatre::Position direction =
-          position - fixture->GetPosition() - offset;
+      constexpr theatre::Coordinate2D offset(0.5, 0.5);
+      const theatre::Coordinate2D direction =
+          position - fixture->GetXY() - offset;
       const bool is_zero = direction.Y() == 0.0 && direction.X() == 0.0;
       const double angle =
           is_zero ? 0.0 : std::atan2(direction.Y(), direction.X());

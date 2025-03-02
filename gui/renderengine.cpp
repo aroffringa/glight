@@ -29,7 +29,7 @@ constexpr double GetRadiusFactor(theatre::FixtureSymbol::Symbol symbol) {
 double GetScale(const theatre::Management &management, double width,
                 double height) {
   const theatre::Theatre &theatre = management.GetTheatre();
-  theatre::Position extend(theatre.Width(), theatre.Depth());
+  theatre::Coordinate2D extend(theatre.Width(), theatre.Depth());
   constexpr double margin = 16.0;
   if (extend.X() == 0.0 || extend.Y() == 0.0)
     return 1.0;
@@ -47,44 +47,146 @@ struct DrawData {
   bool is_moving = false;
 };
 
+void DrawFixtureProjection(const DrawData &data,
+                           const theatre::Fixture &fixture) {
+  const theatre::FixtureType &type = fixture.Type();
+  const size_t shape_count = type.ShapeCount();
+  for (size_t shape_index = 0; shape_index != shape_count; ++shape_index) {
+    const double tilt = fixture.GetBeamTilt(data.snapshot, shape_index);
+    const double direction =
+        fixture.GetBeamDirection(data.snapshot, shape_index);
+    const double beam_angle =
+        type.CanZoom() ? type.GetZoom(fixture, data.snapshot, shape_index) * 0.5
+                       : type.MinBeamAngle() * 0.5;
+    const double x = fixture.GetPosition().X() + 0.5;
+    const double y = fixture.GetPosition().Y() + 0.5;
+    const double z = fixture.GetPosition().Z();
+    const double sin_direction = std::sin(direction);
+    const double cos_direction = std::cos(direction);
+    if (beam_angle > 0.0 && beam_angle < M_PI) {
+      const theatre::Color c = fixture.GetColor(data.snapshot, shape_index);
+      if (c != theatre::Color::Black()) {
+        const auto [r, g, b, max_rgb] = c.GetNormalizedRatios();
+        data.cairo->set_source_rgba(r, g, b, 0.5 * max_rgb);
+        bool first = true;
+        const double tan_beam_angle = std::tan(beam_angle);
+        const double cos_tilt = std::cos(tilt);
+        const double sin_tilt = std::sin(tilt);
+
+        const double forward_x = cos_tilt * cos_direction;
+        const double forward_y = cos_tilt * sin_direction;
+        const double forward_z = sin_tilt;
+
+        for (size_t i = 0; i != 80; ++i) {
+          // Calculate intersection with floor. Steps:
+          // - Start from "top" of the beam, a vector in direction of the x-axis
+          // but rotated upward (in y-direction) by the beam angle.
+          // - Perform rotation around x-axis by iterator
+          // - Unrotate y-axis with tilt degrees
+          // - Unrotate z-axis with direction degrees
+          // x1 = 1.0;
+          // y1 = tan(beam_angle) * cos(iterator);
+          // z1 = tan(beam_angle) * sin(iterator);
+          // x2 = x1 * cos(tilt) + z1 * sin(tilt);
+          // y2 = y1;
+          // z2 = z1 * cos(tilt) - x1 * sin(tilt);
+          // x3 = y2 * sin(direction) - x2 * cos(direction);
+          // y3 = -y2 * cos(direction) - x2 * sin(direction);
+          // z3 = z2;
+          // Simplified:
+          const double iterator = static_cast<double>(i) * (M_PI * 2.0 / 80.0);
+          const double sin_iterator = std::sin(iterator);
+          const double cos_iterator = std::cos(iterator);
+          const double y1 = tan_beam_angle * cos_iterator;
+          const double z1 = tan_beam_angle * sin_iterator;
+          const double x2 = cos_tilt + z1 * sin_tilt;
+          const double x3 = y1 * sin_direction - x2 * cos_direction;
+          const double y3 = -y1 * cos_direction - x2 * sin_direction;
+          const double z3 = z1 * cos_tilt - sin_tilt;
+          if (std::abs(z3) > 1e-3) {
+            const double scaling = z / z3;
+            const double proj_x = x + x3 * scaling;
+            const double proj_y = y + y3 * scaling;
+            // Make sure the intersection is in the forward direction
+            const double inproduct = x3 * scaling * forward_x +
+                                     y3 * scaling * forward_y + z * forward_z;
+            if (inproduct > 0.0) {
+              if (first) {
+                data.cairo->move_to(proj_x, proj_y);
+                first = false;
+              } else {
+                data.cairo->line_to(proj_x, proj_y);
+              }
+            }
+          }
+        }
+        data.cairo->close_path();
+        data.cairo->fill();
+      }
+      /*
+      const double throw_distance =
+          std::tan(0.5 * M_PI - tilt) * fixture.GetPosition().Z();
+      const double throw_x = x + cos_direction * throw_distance;
+      const double throw_y = y + sin_direction * throw_distance;
+      data.cairo->set_source_rgb(0.7, 0.2, 0.2);
+      data.cairo->move_to(throw_x - 0.5, throw_y - 0.5);
+      data.cairo->line_to(throw_x + 0.5, throw_y + 0.5);
+      data.cairo->move_to(throw_x - 0.5, throw_y + 0.5);
+      data.cairo->line_to(throw_x + 0.5, throw_y - 0.5);
+      data.cairo->stroke();
+      */
+    }
+  }
+}
+
 void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
-  const glight::theatre::FixtureType &type = fixture.Type();
+  const theatre::FixtureType &type = fixture.Type();
   const size_t shape_count = type.ShapeCount();
   for (size_t shape_index = 0; shape_index != shape_count; ++shape_index) {
     const theatre::Color c = fixture.GetColor(data.snapshot, shape_index);
     if (c != theatre::Color::Black() && type.MinBeamAngle() > 0.0) {
-      double direction = fixture.Direction();
-      if (type.CanBeamRotate()) {
-        const double pan = type.GetPan(fixture, data.snapshot, shape_index);
-        if (fixture.IsUpsideDown())
-          direction -= pan;
-        else
-          direction += pan;
-      }
-
+      const double direction =
+          fixture.GetBeamDirection(data.snapshot, shape_index);
+      const double x = fixture.GetPosition().X() + 0.5;
+      const double y = fixture.GetPosition().Y() + 0.5;
+      const double z = fixture.GetPosition().Z();
       const double beam_angle =
-          type.CanZoom() ? type.GetZoom(fixture, data.snapshot, shape_index)
-                         : type.MinBeamAngle();
-      const double direction_1 = direction - beam_angle * 0.5;
-      const double direction_2 = direction + beam_angle * 0.5;
+          type.CanZoom()
+              ? type.GetZoom(fixture, data.snapshot, shape_index) * 0.5
+              : type.MinBeamAngle() * 0.5;
+      const double tilt = fixture.GetBeamTilt(data.snapshot, shape_index);
+      const double cos_tilt = std::cos(tilt);
+      const double sin_tilt = std::sin(tilt);
+      const double sin_direction = std::sin(direction);
+      const double cos_direction = std::cos(direction);
+      const double tan_beam_angle = std::tan(beam_angle);
+      // Calculate intersection with floor
+      const double scaling = sin_tilt < 1e-3 ? 1e3 : z / sin_tilt;
+      const double term_1 = tan_beam_angle * sin_direction;
+      const double term_2 = cos_tilt * cos_direction;
+      const double term_3 = tan_beam_angle * cos_direction;
+      const double term_4 = cos_tilt * sin_direction;
+      const double direction_1_x = (-term_1 + term_2) * scaling;
+      const double direction_1_y = (term_3 + term_4) * scaling;
+      const double radius_1 = std::sqrt(direction_1_x * direction_1_x +
+                                        direction_1_y * direction_1_y);
+      // We only care about the ratio so the scaling is not necessary here
+      const double direction_2_x = term_1 + term_2;
+      const double direction_2_y = -term_3 + term_4;
+      const double direction_1 = std::atan2(direction_1_y, direction_1_x);
+      const double direction_2 = std::atan2(direction_2_y, direction_2_x);
+
       const double radius = GetRadiusFactor(fixture.Symbol().Value()) *
                             data.management.GetTheatre().FixtureSymbolSize();
       const double beam_start_radius = radius * 1.2;
       const double beam_factor = type.MinBeamAngle() / beam_angle;
-      const double beam_end_radius =
+      const double power_radius =
           radius * (1.2 + type.Brightness() * beam_factor);
-      const double x = fixture.GetPosition().X() + 0.5;
-      const double y = fixture.GetPosition().Y() + 0.5;
+      const double beam_end_radius = std::min(power_radius, radius_1);
       Cairo::RefPtr<Cairo::RadialGradient> gradient =
           Cairo::RadialGradient::create(x, y, beam_start_radius, x, y,
                                         beam_end_radius);
-      double r = static_cast<double>(c.Red()) / 255.0;
-      double g = static_cast<double>(c.Green()) / 255.0;
-      double b = static_cast<double>(c.Blue()) / 255.0;
-      const double max_rgb = std::max({r, g, b});
-      r /= max_rgb;
-      g /= max_rgb;
-      b /= max_rgb;
+      const auto [r, g, b, max_rgb] = c.GetNormalizedRatios();
       gradient->add_color_stop_rgba(0.0, r, g, b, 0.5 * max_rgb);
       gradient->add_color_stop_rgba(1.0, r, g, b, 0.0);
       data.cairo->set_source(gradient);
@@ -186,7 +288,7 @@ void RenderEngine::DrawSnapshot(
   cairo->translate(x_padding_ * 0.5 + style.x_offset / scale_,
                    y_padding_ * 0.5 + style.y_offset / scale_);
 
-  if (style.draw_background) {
+  if (style.draw_borders) {
     cairo->set_source_rgba(0, 0, 0, 1);
     cairo->rectangle(0, 0, management_.GetTheatre().Width(),
                      management_.GetTheatre().Depth());
@@ -198,19 +300,28 @@ void RenderEngine::DrawSnapshot(
 
   DrawData draw_data{cairo, management_, snapshot, style, scale_, false};
 
-  for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
-    if (fixture->IsVisible()) {
-      DrawFixtureBeam(draw_data, *fixture);
+  if (style.draw_projections) {
+    for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
+      DrawFixtureProjection(draw_data, *fixture);
+    }
+  }
+  if (style.draw_beams) {
+    for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
+      if (fixture->IsVisible()) {
+        DrawFixtureBeam(draw_data, *fixture);
+      }
     }
   }
 
-  state_.resize(fixtures.size());
-  for (size_t fixtureIndex = 0; fixtureIndex != fixtures.size();
-       ++fixtureIndex) {
-    const theatre::Fixture &fixture = *fixtures[fixtureIndex];
-    if (fixture.IsVisible()) {
-      FixtureState &fixture_state = state_[fixtureIndex];
-      DrawFixture(draw_data, fixture, fixture_state);
+  if (style.draw_fixtures) {
+    state_.resize(fixtures.size());
+    for (size_t fixtureIndex = 0; fixtureIndex != fixtures.size();
+         ++fixtureIndex) {
+      const theatre::Fixture &fixture = *fixtures[fixtureIndex];
+      if (fixture.IsVisible()) {
+        FixtureState &fixture_state = state_[fixtureIndex];
+        DrawFixture(draw_data, fixture, fixture_state);
+      }
     }
   }
   is_moving_ = draw_data.is_moving;
@@ -247,9 +358,9 @@ void RenderEngine::DrawSelectedFixtures(
 }
 
 void RenderEngine::DrawSelectionRectangle(
-    const Cairo::RefPtr<Cairo::Context> &cairo, const theatre::Position &from,
-    const theatre::Position &to) const {
-  const theatre::Position size = to - from;
+    const Cairo::RefPtr<Cairo::Context> &cairo,
+    const theatre::Coordinate2D &from, const theatre::Coordinate2D &to) const {
+  const theatre::Coordinate2D size = to - from;
   cairo->save();
   cairo->scale(scale_, scale_);
   cairo->translate(x_padding_ * 0.5, y_padding_ * 0.5);
@@ -263,7 +374,7 @@ void RenderEngine::DrawSelectionRectangle(
 }
 
 system::ObservingPtr<theatre::Fixture> RenderEngine::FixtureAt(
-    const theatre::Position &position) const {
+    const theatre::Coordinate2D &position) const {
   const std::vector<system::TrackablePtr<theatre::Fixture>> &fixtures =
       management_.GetTheatre().Fixtures();
 
@@ -271,10 +382,9 @@ system::ObservingPtr<theatre::Fixture> RenderEngine::FixtureAt(
   double closest = std::numeric_limits<double>::max();
   for (const system::TrackablePtr<theatre::Fixture> &f : fixtures) {
     if (f->IsVisible() &&
-        position.InsideRectangle(f->GetPosition(),
-                                 f->GetPosition().Add(1.0, 1.0))) {
+        position.InsideRectangle(f->GetXY(), f->GetXY().Add(1.0, 1.0))) {
       const double distanceSq =
-          position.SquaredDistance(f->GetPosition().Add(0.5, 0.5));
+          position.SquaredDistance(f->GetXY().Add(0.5, 0.5));
       const double radius = GetRadiusFactor(f->Symbol().Value()) *
                             management_.GetTheatre().FixtureSymbolSize();
       const double radius_squared = radius * radius;
@@ -289,14 +399,13 @@ system::ObservingPtr<theatre::Fixture> RenderEngine::FixtureAt(
 
 system::ObservingPtr<theatre::Fixture> RenderEngine::GetDirectionHandleAt(
     const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures,
-    const theatre::Position &position) const {
+    const theatre::Coordinate2D &position) const {
   for (const system::ObservingPtr<theatre::Fixture> &f : fixtures) {
     const double start = 0.5 - kRotationHandleEnd;
     const double end = 0.5 + kRotationHandleEnd;
-    if (f->IsVisible() &&
-        position.InsideRectangle(f->GetPosition().Add(start, start),
-                                 f->GetPosition().Add(end, end))) {
-      const theatre::Position centre = f->GetPosition().Add(0.5, 0.5);
+    if (f->IsVisible() && position.InsideRectangle(f->GetXY().Add(start, start),
+                                                   f->GetXY().Add(end, end))) {
+      const theatre::Coordinate2D centre = f->GetXY().Add(0.5, 0.5);
       const double distanceSq = position.SquaredDistance(centre);
       const double radius = GetRadiusFactor(f->Symbol().Value()) *
                             management_.GetTheatre().FixtureSymbolSize();
@@ -328,15 +437,16 @@ system::ObservingPtr<theatre::Fixture> RenderEngine::GetDirectionHandleAt(
   return nullptr;
 }
 
-theatre::Position RenderEngine::MouseToPosition(double mouse_x, double mouse_y,
-                                                double width,
-                                                double height) const {
+theatre::Coordinate2D RenderEngine::MouseToPosition(double mouse_x,
+                                                    double mouse_y,
+                                                    double width,
+                                                    double height) const {
   const double scale = GetScale(management_, width, height);
-  if (scale == 0.0) return theatre::Position(0.0, 0.0);
-  const theatre::Position padding(
+  if (scale == 0.0) return theatre::Coordinate2D(0.0, 0.0);
+  const theatre::Coordinate2D padding(
       std::max(0.0 / scale, width / scale - management_.GetTheatre().Width()),
       std::max(0.0 / scale, height / scale - management_.GetTheatre().Depth()));
-  return theatre::Position(mouse_x, mouse_y) / scale - padding * 0.5;
+  return theatre::Coordinate2D(mouse_x, mouse_y) / scale - padding * 0.5;
 }
 
 }  // namespace glight::gui

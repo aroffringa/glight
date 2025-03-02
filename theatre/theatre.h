@@ -6,7 +6,7 @@
 
 #include "fixture.h"
 #include "fixturetype.h"
-#include "position.h"
+#include "coordinate3d.h"
 
 #include "system/trackableptr.h"
 
@@ -71,8 +71,8 @@ class Theatre {
   }
   void NotifyDmxChange();
 
-  Position GetFreePosition() const;
-  Position Extend() const;
+  Coordinate3D GetFreePosition() const;
+  Coordinate2D Extend() const;
 
   double Width() const { return width_; }
   void SetWidth(double width) { width_ = width; }

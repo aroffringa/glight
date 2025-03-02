@@ -34,6 +34,11 @@ class GUIState {
   void Clear() {
     fader_sets_.clear();
     layout_locked_ = false;
+    show_fixtures = true;
+    show_beams = true;
+    show_projections = true;
+    show_crosshairs = true;
+    show_stage_borders = true;
   }
 
   bool Empty() const { return fader_sets_.empty(); }
@@ -86,6 +91,23 @@ class GUIState {
    */
   double FixtureSize() const { return fixture_size; }
 
+  bool ShowFixtures() const { return show_fixtures; }
+  void SetShowFixtures(bool _show_fixtures) { show_fixtures = _show_fixtures; }
+  bool ShowBeams() const { return show_beams; }
+  void SetShowBeams(bool _show_beams) { show_beams = _show_beams; }
+  bool ShowProjections() const { return show_projections; }
+  void SetShowProjections(bool _show_projections) {
+    show_projections = _show_projections;
+  }
+  bool ShowCrosshairs() const { return show_crosshairs; }
+  void SetShowCrosshairs(bool _show_crosshairs) {
+    show_crosshairs = _show_crosshairs;
+  }
+  bool ShowStageBorders() const { return show_stage_borders; }
+  void SetShowStageBorders(bool show_borders) {
+    show_stage_borders = show_borders;
+  }
+
  private:
   bool layout_locked_ = false;
   int window_position_x = 0;
@@ -96,6 +118,11 @@ class GUIState {
   double theatre_depth = 0;
   double theatre_height = 0;
   double fixture_size = 0;
+  bool show_fixtures = true;
+  bool show_beams = true;
+  bool show_projections = true;
+  bool show_crosshairs = true;
+  bool show_stage_borders = true;
   sigc::signal<void()> fader_set_signal_change_;
   std::vector<std::unique_ptr<FaderSetState>> fader_sets_;
 };

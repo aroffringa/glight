@@ -113,8 +113,11 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   state.writer.String("type", fixture.Type().Name());
   state.writer.Number("position-x", fixture.GetPosition().X());
   state.writer.Number("position-y", fixture.GetPosition().Y());
+  if (fixture.GetPosition().Z() != Fixture::kDefaultHeight)
+    state.writer.Number("position-z", fixture.GetPosition().Z());
   state.writer.Number("direction", fixture.Direction());
-  if (fixture.Tilt() != 0.0) state.writer.Number("tilt", fixture.Tilt());
+  if (fixture.StaticTilt() != Fixture::kDefaultTilt)
+    state.writer.Number("tilt", fixture.StaticTilt());
   if (fixture.IsUpsideDown())
     state.writer.Boolean("upside-down", fixture.IsUpsideDown());
   if (fixture.ElectricPhase() != 0)
@@ -566,9 +569,17 @@ void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
 }
 
 void writeGUIState(WriteState &state) {
-  if (state.guiState->LayoutLocked()) {
+  if (state.guiState->LayoutLocked())
     state.writer.Boolean("layout-locked", true);
-  }
+  if (!state.guiState->ShowFixtures())
+    state.writer.Boolean("show-fixtures", false);
+  if (!state.guiState->ShowBeams()) state.writer.Boolean("show-beams", false);
+  if (!state.guiState->ShowProjections())
+    state.writer.Boolean("show-projections", false);
+  if (!state.guiState->ShowCrosshairs())
+    state.writer.Boolean("show-crosshairs", false);
+  if (!state.guiState->ShowStageBorders())
+    state.writer.Boolean("show-stage-borders", false);
   state.writer.Number("window-position-x", state.guiState->WindowPositionX());
   state.writer.Number("window-position-y", state.guiState->WindowPositionY());
   state.writer.Number("window-width", state.guiState->WindowWidth());

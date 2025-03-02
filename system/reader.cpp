@@ -206,8 +206,11 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     ParseNameAttr(f_node, fixture);
     fixture.GetPosition().X() = ToNum(f_node["position-x"]).AsDouble();
     fixture.GetPosition().Y() = ToNum(f_node["position-y"]).AsDouble();
+    fixture.GetPosition().Z() =
+        OptionalDouble(f_node, "position-z", Fixture::kDefaultHeight);
     fixture.SetDirection(ToNum(f_node["direction"]).AsDouble());
-    fixture.SetTilt(OptionalDouble(f_node, "tilt", 0.0));
+    fixture.SetStaticTilt(
+        OptionalDouble(f_node, "tilt", Fixture::kDefaultTilt));
     fixture.SetUpsideDown(OptionalBool(f_node, "upside-down", false));
     fixture.SetElectricPhase(OptionalSize(f_node, "electric-phase", 0));
     fixture.SetSymbol(FixtureSymbol(ToStr(f_node["symbol"])));
@@ -577,8 +580,13 @@ void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,
 
 void ParseGui(const Object &node, gui::GUIState &guiState,
               Management &management) {
-  const bool locked =
-      node.contains("layout-locked") && ToBool(node["layout-locked"]);
+  guiState.SetLayoutLocked(OptionalBool(node, "layout-locked", false));
+  guiState.SetShowFixtures(OptionalBool(node, "show-fixtures", true));
+  guiState.SetShowBeams(OptionalBool(node, "show-beams", true));
+  guiState.SetShowProjections(OptionalBool(node, "show-projections", true));
+  guiState.SetShowCrosshairs(OptionalBool(node, "show-crosshairs", true));
+  guiState.SetShowStageBorders(OptionalBool(node, "show-stage-borders", true));
+
   if (node.contains("window-position-x")) {
     const int x = ToNum(node["window-position-x"]).AsInt();
     const int y = ToNum(node["window-position-y"]).AsInt();
@@ -586,7 +594,6 @@ void ParseGui(const Object &node, gui::GUIState &guiState,
     const size_t height = ToNum(node["window-height"]).AsSize();
     guiState.SetWindowPosition(x, y, width, height);
   }
-  guiState.SetLayoutLocked(locked);
   const Array &states = ToArr(node["states"]);
   for (const Node &item : states) {
     const Object &state_node = ToObj(item);
