@@ -47,7 +47,7 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> ShowFixtures;
   sigc::signal<void()> ShowBeams;
   sigc::signal<void()> ShowProjections;
-  sigc::signal<void()> ShowTheatreWalls;
+  sigc::signal<void()> ShowStageBorders;
   sigc::signal<void()> FullScreen;
 
   // Window menu
@@ -60,11 +60,25 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void(FaderSetState& fader_set)> FaderWindow;
 
   bool ShowFixturesActive() const { return _miShowFixtures.get_active(); }
-  bool ShowBeamsActive() const { return _miShowBeams.get_active(); }
-  bool ShowProjectionsActive() const { return _miShowProjections.get_active(); }
-  bool ShowTheatreWallsActive() const {
-    return _miShowTheatreWalls.get_active();
+  void SetShowFixtures(bool show_fixtures) {
+    _miShowFixtures.set_active(show_fixtures);
   }
+
+  bool ShowBeamsActive() const { return _miShowBeams.get_active(); }
+  void SetShowBeams(bool show_beams) { _miShowBeams.set_active(show_beams); }
+
+  bool ShowProjectionsActive() const { return _miShowProjections.get_active(); }
+  void SetShowProjections(bool show_projections) {
+    _miShowProjections.set_active(show_projections);
+  }
+
+  bool ShowStageBordersActive() const {
+    return _miShowStageBorders.get_active();
+  }
+  void SetShowStageBorders(bool show_stage_borders) {
+    _miShowStageBorders.set_active(show_stage_borders);
+  }
+
   bool FullScreenActive() const { return _miFullScreen.get_active(); }
 
   bool FixtureListActive() const { return _miFixtureListWindow.get_active(); }
@@ -134,7 +148,7 @@ class MainMenu : public Gtk::MenuBar {
   Gtk::CheckMenuItem _miShowFixtures{"Show fixtures"};
   Gtk::CheckMenuItem _miShowBeams{"Show beams"};
   Gtk::CheckMenuItem _miShowProjections{"Show projections"};
-  Gtk::CheckMenuItem _miShowTheatreWalls{"Show theatre walls"};
+  Gtk::CheckMenuItem _miShowStageBorders{"Show theatre walls"};
   Gtk::SeparatorMenuItem _miViewSeperator;
   Gtk::CheckMenuItem _miFullScreen{"Full screen"};
 

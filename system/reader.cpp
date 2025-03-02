@@ -580,8 +580,13 @@ void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,
 
 void ParseGui(const Object &node, gui::GUIState &guiState,
               Management &management) {
-  const bool locked =
-      node.contains("layout-locked") && ToBool(node["layout-locked"]);
+  guiState.SetLayoutLocked(OptionalBool(node, "layout-locked", false));
+  guiState.SetShowFixtures(OptionalBool(node, "show-fixtures", true));
+  guiState.SetShowBeams(OptionalBool(node, "show-beams", true));
+  guiState.SetShowProjections(OptionalBool(node, "show-projections", true));
+  guiState.SetShowCrosshairs(OptionalBool(node, "show-crosshairs", true));
+  guiState.SetShowStageBorders(OptionalBool(node, "show-stage-borders", true));
+
   if (node.contains("window-position-x")) {
     const int x = ToNum(node["window-position-x"]).AsInt();
     const int y = ToNum(node["window-position-y"]).AsInt();
@@ -589,7 +594,6 @@ void ParseGui(const Object &node, gui::GUIState &guiState,
     const size_t height = ToNum(node["window-height"]).AsSize();
     guiState.SetWindowPosition(x, y, width, height);
   }
-  guiState.SetLayoutLocked(locked);
   const Array &states = ToArr(node["states"]);
   for (const Node &item : states) {
     const Object &state_node = ToObj(item);

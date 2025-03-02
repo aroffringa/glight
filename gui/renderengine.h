@@ -25,7 +25,7 @@ struct DrawStyle {
   bool draw_fixtures = true;
   bool draw_beams = true;
   bool draw_projections = true;
-  bool draw_walls = true;
+  bool draw_borders = true;
   bool draw_background = false;
 };
 

@@ -84,7 +84,6 @@ void DrawFixtureProjection(const DrawData &data,
           // - Perform rotation around x-axis by iterator
           // - Unrotate y-axis with tilt degrees
           // - Unrotate z-axis with direction degrees
-          const double iterator = static_cast<double>(i) * (M_PI * 2.0 / 80.0);
           // x1 = 1.0;
           // y1 = tan(beam_angle) * cos(iterator);
           // z1 = tan(beam_angle) * sin(iterator);
@@ -95,6 +94,7 @@ void DrawFixtureProjection(const DrawData &data,
           // y3 = -y2 * cos(direction) - x2 * sin(direction);
           // z3 = z2;
           // Simplified:
+          const double iterator = static_cast<double>(i) * (M_PI * 2.0 / 80.0);
           const double sin_iterator = std::sin(iterator);
           const double cos_iterator = std::cos(iterator);
           const double y1 = tan_beam_angle * cos_iterator;
@@ -123,6 +123,7 @@ void DrawFixtureProjection(const DrawData &data,
         data.cairo->close_path();
         data.cairo->fill();
       }
+      /*
       const double throw_distance =
           std::tan(0.5 * M_PI - tilt) * fixture.GetPosition().Z();
       const double throw_x = x + cos_direction * throw_distance;
@@ -133,6 +134,7 @@ void DrawFixtureProjection(const DrawData &data,
       data.cairo->move_to(throw_x - 0.5, throw_y + 0.5);
       data.cairo->line_to(throw_x + 0.5, throw_y - 0.5);
       data.cairo->stroke();
+      */
     }
   }
 }
@@ -147,17 +149,40 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
           fixture.GetBeamDirection(data.snapshot, shape_index);
       const double x = fixture.GetPosition().X() + 0.5;
       const double y = fixture.GetPosition().Y() + 0.5;
+      const double z = fixture.GetPosition().Z();
       const double beam_angle =
-          type.CanZoom() ? type.GetZoom(fixture, data.snapshot, shape_index)
-                         : type.MinBeamAngle();
-      const double direction_1 = direction - beam_angle * 0.5;
-      const double direction_2 = direction + beam_angle * 0.5;
+          type.CanZoom()
+              ? type.GetZoom(fixture, data.snapshot, shape_index) * 0.5
+              : type.MinBeamAngle() * 0.5;
+      const double tilt = fixture.GetBeamTilt(data.snapshot, shape_index);
+      const double cos_tilt = std::cos(tilt);
+      const double sin_tilt = std::sin(tilt);
+      const double sin_direction = std::sin(direction);
+      const double cos_direction = std::cos(direction);
+      const double tan_beam_angle = std::tan(beam_angle);
+      // Calculate intersection with floor
+      const double scaling = sin_tilt < 1e-3 ? 1e3 : z / sin_tilt;
+      const double term_1 = tan_beam_angle * sin_direction;
+      const double term_2 = cos_tilt * cos_direction;
+      const double term_3 = tan_beam_angle * cos_direction;
+      const double term_4 = cos_tilt * sin_direction;
+      const double direction_1_x = (-term_1 + term_2) * scaling;
+      const double direction_1_y = (term_3 + term_4) * scaling;
+      const double radius_1 = std::sqrt(direction_1_x * direction_1_x +
+                                        direction_1_y * direction_1_y);
+      // We only care about the ratio so the scaling is not necessary here
+      const double direction_2_x = term_1 + term_2;
+      const double direction_2_y = -term_3 + term_4;
+      const double direction_1 = std::atan2(direction_1_y, direction_1_x);
+      const double direction_2 = std::atan2(direction_2_y, direction_2_x);
+
       const double radius = GetRadiusFactor(fixture.Symbol().Value()) *
                             data.management.GetTheatre().FixtureSymbolSize();
       const double beam_start_radius = radius * 1.2;
       const double beam_factor = type.MinBeamAngle() / beam_angle;
-      const double beam_end_radius =
+      const double power_radius =
           radius * (1.2 + type.Brightness() * beam_factor);
+      const double beam_end_radius = std::min(power_radius, radius_1);
       Cairo::RefPtr<Cairo::RadialGradient> gradient =
           Cairo::RadialGradient::create(x, y, beam_start_radius, x, y,
                                         beam_end_radius);
@@ -263,7 +288,7 @@ void RenderEngine::DrawSnapshot(
   cairo->translate(x_padding_ * 0.5 + style.x_offset / scale_,
                    y_padding_ * 0.5 + style.y_offset / scale_);
 
-  if (style.draw_walls) {
+  if (style.draw_borders) {
     cairo->set_source_rgba(0, 0, 0, 1);
     cairo->rectangle(0, 0, management_.GetTheatre().Width(),
                      management_.GetTheatre().Depth());

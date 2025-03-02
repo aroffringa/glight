@@ -569,9 +569,17 @@ void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
 }
 
 void writeGUIState(WriteState &state) {
-  if (state.guiState->LayoutLocked()) {
+  if (state.guiState->LayoutLocked())
     state.writer.Boolean("layout-locked", true);
-  }
+  if (!state.guiState->ShowFixtures())
+    state.writer.Boolean("show-fixtures", false);
+  if (!state.guiState->ShowBeams()) state.writer.Boolean("show-beams", false);
+  if (!state.guiState->ShowProjections())
+    state.writer.Boolean("show-projections", false);
+  if (!state.guiState->ShowCrosshairs())
+    state.writer.Boolean("show-crosshairs", false);
+  if (!state.guiState->ShowStageBorders())
+    state.writer.Boolean("show-stage-borders", false);
   state.writer.Number("window-position-x", state.guiState->WindowPositionX());
   state.writer.Number("window-position-y", state.guiState->WindowPositionY());
   state.writer.Number("window-width", state.guiState->WindowWidth());

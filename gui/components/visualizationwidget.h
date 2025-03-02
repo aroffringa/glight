@@ -53,7 +53,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void SetDrawProjections(bool draw_projections) {
     draw_projections_ = draw_projections;
   }
-  void SetDrawWalls(bool draw_walls) { draw_walls_ = draw_walls; }
+  void SetDrawBorders(bool draw_borders) { draw_borders_ = draw_borders; }
 
  private:
   VisualizationWidget(const VisualizationWidget &) = delete;
@@ -101,7 +101,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   bool draw_fixtures_ = true;
   bool draw_beams_ = true;
   bool draw_projections_ = true;
-  bool draw_walls_ = true;
+  bool draw_borders_ = true;
 
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;

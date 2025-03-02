@@ -96,9 +96,9 @@ MainMenu::MainMenu() {
   _miShowProjections.signal_activate().connect(ShowProjections);
   _menuView.append(_miShowProjections);
 
-  _miShowTheatreWalls.set_active(true);
-  _miShowTheatreWalls.signal_activate().connect(ShowTheatreWalls);
-  _menuView.append(_miShowTheatreWalls);
+  _miShowStageBorders.set_active(true);
+  _miShowStageBorders.signal_activate().connect(ShowStageBorders);
+  _menuView.append(_miShowStageBorders);
 
   _menuView.append(_miViewSeperator);
 

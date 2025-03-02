@@ -364,7 +364,7 @@ void VisualizationWidget::DrawShapshot(
   style.draw_fixtures = draw_fixtures_;
   style.draw_beams = draw_beams_;
   style.draw_projections = draw_projections_;
-  style.draw_walls = draw_walls_;
+  style.draw_borders = draw_borders_;
   previous_time = time;
   const DryModeStyle dry_mode = GetDryModeStyle();
   if (const std::optional<DrawInfo> draw_info =
