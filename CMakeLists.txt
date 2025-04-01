@@ -237,7 +237,7 @@ if(Boost_FOUND)
   add_test(runtests runtests)
   add_custom_target(check COMMAND runtests -l unit_scope DEPENDS runtests)
 else()
-  message("Boost testing framework not found.")
+  message(STATUS "Boost testing framework not found.")
 endif()
 
 add_custom_target(
@@ -246,14 +246,25 @@ add_custom_target(
   DEPENDS check
 )
 
+set(CPACK_PACKAGE_NAME "glight")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "André Offringa")
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 9)
 set(CPACK_PACKAGE_VERSION_PATCH 0)
-set(CPACK_PACKAGE_DESCRIPTION "Glight is an application for making DMX light shows and live control")
+set(CPACK_PACKAGE_DESCRIPTION "Glight is an application for live control of DMX lighting")
 set(CPACK_DEBIAN_PACKAGE_SECTION misc)
+
+find_program(LSB_RELEASE_EXEC lsb_release)
+execute_process(COMMAND ${LSB_RELEASE_EXEC} -rs
+    OUTPUT_VARIABLE LSB_RELEASE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(LSB_RELEASE STREQUAL "24.04")
+  message(STATUS "Setting package dependencies for Ubuntu 24.04")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libasound2,libaubio5,libflac++10,libgtkmm-3.0-1t64,libola1,libxml2")
+endif()
 include(CPack)
 
 install(TARGETS glight RUNTIME DESTINATION bin)
