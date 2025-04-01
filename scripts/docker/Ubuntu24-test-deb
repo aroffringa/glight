@@ -1,0 +1,11 @@
+FROM ubuntu:24.04
+
+ADD . /src
+WORKDIR /src
+
+RUN \
+  apt-get -y update && \
+  apt-get -y dist-upgrade && \
+  ls -alh ./build/package/glight-0.9.0-Ubuntu24.deb && \
+  apt-get -y install ./build/package/glight-0.9.0-Ubuntu24.deb
+

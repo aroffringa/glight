@@ -237,7 +237,7 @@ if(Boost_FOUND)
   add_test(runtests runtests)
   add_custom_target(check COMMAND runtests -l unit_scope DEPENDS runtests)
 else()
-  message("Boost testing framework not found.")
+  message(STATUS "Boost testing framework not found.")
 endif()
 
 add_custom_target(
@@ -246,14 +246,16 @@ add_custom_target(
   DEPENDS check
 )
 
+set(CPACK_PACKAGE_NAME "glight")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "André Offringa")
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 9)
 set(CPACK_PACKAGE_VERSION_PATCH 0)
-set(CPACK_PACKAGE_DESCRIPTION "Glight is an application for making DMX light shows and live control")
+set(CPACK_PACKAGE_DESCRIPTION "Glight is an application for live control of DMX lighting")
 set(CPACK_DEBIAN_PACKAGE_SECTION misc)
+
 include(CPack)
 
 install(TARGETS glight RUNTIME DESTINATION bin)
