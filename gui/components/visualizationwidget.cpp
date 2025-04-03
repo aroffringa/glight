@@ -98,94 +98,29 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
 }
 
 void VisualizationWidget::inializeContextMenu() {
-  std::vector<theatre::FixtureSymbol::Symbol> symbols(
-      theatre::FixtureSymbol::List());
-
-  mi_set_full_on_.signal_activate().connect([&]() {
+  context_menu_.SignalSetFullOn.connect([&]() {
     theatre::SetAllFixtures(*_management, _selectedFixtures, Color::White());
   });
-  set_menu_.add(mi_set_full_on_);
-  mi_set_off_.signal_activate().connect([&]() {
+  context_menu_.SignalSetOff.connect([&]() {
     theatre::SetAllFixtures(*_management, _selectedFixtures, Color::Black());
   });
-  set_menu_.add(mi_set_off_);
-  mi_set_color_.signal_activate().connect([&]() { OnSetColor(); });
-  set_menu_.add(mi_set_color_);
-
-  mi_track_pan_.signal_activate().connect([&]() { OnTrackWithPan(); });
-  set_menu_.add(mi_track_pan_);
-
-  mi_set_menu_.set_submenu(set_menu_);
-  _popupMenu.add(mi_set_menu_);
-
-  _miSymbols.reserve(symbols.size());
-  for (theatre::FixtureSymbol::Symbol symbol : symbols) {
-    _miSymbols.emplace_back(theatre::FixtureSymbol(symbol).Name());
-    _miSymbols.back().signal_activate().connect(
-        [this, symbol]() { onSetSymbol(symbol); });
-    _symbolMenu.add(_miSymbols.back());
-  }
-
-  _miSymbolMenu.set_submenu(_symbolMenu);
-  _popupMenu.add(_miSymbolMenu);
-
-  Gtk::RadioMenuItem::Group dryModeStyleGroup;
-  _miDMSPrimary.set_group(dryModeStyleGroup);
-  _miDMSPrimary.set_active(true);
-  _miDMSPrimary.signal_activate().connect([&]() { Update(); });
-  _dryModeStyleMenu.add(_miDMSPrimary);
-  _miDMSSecondary.set_group(dryModeStyleGroup);
-  _miDMSSecondary.signal_activate().connect([&]() { Update(); });
-  _dryModeStyleMenu.add(_miDMSSecondary);
-  _miDMSHorizontal.set_group(dryModeStyleGroup);
-  _miDMSHorizontal.signal_activate().connect([&]() { Update(); });
-  _dryModeStyleMenu.add(_miDMSHorizontal);
-  _miDMSVertical.set_group(dryModeStyleGroup);
-  _miDMSVertical.signal_activate().connect([&]() { Update(); });
-  _dryModeStyleMenu.add(_miDMSVertical);
-  _miDMSShadow.set_group(dryModeStyleGroup);
-  _miDMSShadow.signal_activate().connect([&]() { Update(); });
-  _dryModeStyleMenu.add(_miDMSShadow);
-
-  _miDryModeStyle.set_submenu(_dryModeStyleMenu);
-  _popupMenu.add(_miDryModeStyle);
-
-  _miAlignHorizontally.signal_activate().connect(
-      [&] { onAlignHorizontally(); });
-  _popupMenu.add(_miAlignHorizontally);
-
-  _miAlignVertically.signal_activate().connect([&] { onAlignVertically(); });
-  _popupMenu.add(_miAlignVertically);
-
-  _miDistributeEvenly.signal_activate().connect([&] { onDistributeEvenly(); });
-  _popupMenu.add(_miDistributeEvenly);
-
-  _popupMenu.add(_miSeparator1);
-
-  _miAdd.signal_activate().connect([&] { onAddFixtures(); });
-  _popupMenu.add(_miAdd);
-
-  _miAddPreset.signal_activate().connect([&] { onAddPreset(); });
-  _popupMenu.add(_miAddPreset);
-
-  _miRemove.signal_activate().connect([&] { onRemoveFixtures(); });
-  _popupMenu.add(_miRemove);
-
-  _miGroup.signal_activate().connect([&] { onGroupFixtures(); });
-  _popupMenu.add(_miGroup);
-
-  _miDesign.signal_activate().connect([&] { onDesignFixtures(); });
-  _popupMenu.add(_miDesign);
-
-  _popupMenu.add(_miSeparator2);
-
-  _miProperties.signal_activate().connect([&] { onFixtureProperties(); });
-  _popupMenu.add(_miProperties);
-
-  _miSaveImage.signal_activate().connect([&] { onSaveImage(); });
-  _popupMenu.add(_miSaveImage);
-
-  _popupMenu.show_all_children();
+  context_menu_.SignalSetColor.connect([&]() { OnSetColor(); });
+  context_menu_.SignalTrackPan.connect([&]() { OnTrackWithPan(); });
+  context_menu_.SignalSelectSymbol.connect(
+      [&](theatre::FixtureSymbol::Symbol symbol) { onSetSymbol(symbol); });
+  context_menu_.SignalDryStyleChange.connect([&]() { Update(); });
+  context_menu_.SignalAlignHorizontally.connect(
+      [&]() { onAlignHorizontally(); });
+  context_menu_.SignalAlignVertically.connect([&]() { onAlignVertically(); });
+  context_menu_.SignalDistributeEvenly.connect([&]() { onDistributeEvenly(); });
+  context_menu_.SignalAddFixtures.connect([&]() { onAddFixtures(); });
+  context_menu_.SignalAddPreset.connect([&]() { onAddPreset(); });
+  context_menu_.SignalRemoveFixtures.connect([&]() { onRemoveFixtures(); });
+  context_menu_.SignalGroupFixtures.connect([&]() { onGroupFixtures(); });
+  context_menu_.SignalDesignFixtures.connect([&]() { onDesignFixtures(); });
+  context_menu_.SignalFixtureProperties.connect(
+      [&]() { onFixtureProperties(); });
+  context_menu_.SignalSaveImage.connect([&]() { onSaveImage(); });
 }
 
 void VisualizationWidget::initialize() {
@@ -245,19 +180,6 @@ void VisualizationWidget::updateMidiColors() {
     else
       midi_manager.SetBeat(system::OptionalNumber<double>());
   }
-}
-
-DryModeStyle VisualizationWidget::GetDryModeStyle() const {
-  if (_miDMSSecondary.get_active())
-    return DryModeStyle::Secondary;
-  else if (_miDMSHorizontal.get_active())
-    return DryModeStyle::Horizontal;
-  else if (_miDMSVertical.get_active())
-    return DryModeStyle::Vertical;
-  else if (_miDMSShadow.get_active())
-    return DryModeStyle::Shadow;
-  else
-    return DryModeStyle::Primary;
 }
 
 struct DrawInfo {
@@ -366,7 +288,7 @@ void VisualizationWidget::DrawShapshot(
   style.draw_projections = draw_projections_;
   style.draw_borders = draw_borders_;
   previous_time = time;
-  const DryModeStyle dry_mode = GetDryModeStyle();
+  const DryModeStyle dry_mode = context_menu_.GetDryModeStyle();
   if (const std::optional<DrawInfo> draw_info =
           GetPrimaryStyleDimensions(dry_mode, width, height);
       draw_info) {
@@ -398,8 +320,8 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
     const bool shift =
         (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK)) ==
         GDK_SHIFT_MASK;
-    const std::optional<DrawInfo> info =
-        GetPrimaryStyleDimensions(GetDryModeStyle(), get_width(), get_height());
+    const std::optional<DrawInfo> info = GetPrimaryStyleDimensions(
+        context_menu_.GetDryModeStyle(), get_width(), get_height());
     if (info) {
       const theatre::Coordinate2D pos = render_engine_.MouseToPosition(
           event->x, event->y, info->width, info->height);
@@ -459,20 +381,9 @@ bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
   }
   if (event->button == 3) {
     queue_draw();
-    const bool enable = !Instance::State().LayoutLocked();
-    const bool has_selection = !_selectedFixtures.empty();
-    const bool selection_enabled = enable && has_selection;
-    const bool dual_enabled = enable && _selectedFixtures.size() >= 2;
-    mi_set_menu_.set_sensitive(has_selection);
-    _miAlignHorizontally.set_sensitive(dual_enabled);
-    _miAlignVertically.set_sensitive(dual_enabled);
-    _miDistributeEvenly.set_sensitive(dual_enabled);
-    _miAdd.set_sensitive(enable);
-    _miAddPreset.set_sensitive(enable);
-    _miRemove.set_sensitive(selection_enabled);
-    _miSymbolMenu.set_sensitive(selection_enabled);
-    _miProperties.set_sensitive(selection_enabled);
-    _popupMenu.popup_at_pointer(reinterpret_cast<GdkEvent *>(event));
+    context_menu_.SetSensitivity(Instance::State().LayoutLocked(),
+                                 _selectedFixtures.size());
+    context_menu_.popup_at_pointer(reinterpret_cast<GdkEvent *>(event));
   }
   return true;
 }
@@ -481,7 +392,7 @@ bool VisualizationWidget::onButtonRelease(GdkEventButton *event) {
   if (event->button == 1) {
     if (_dragType == MouseState::DragFixture) {
       const std::optional<DrawInfo> info = GetPrimaryStyleDimensions(
-          GetDryModeStyle(), get_width(), get_height());
+          context_menu_.GetDryModeStyle(), get_width(), get_height());
       if (info) {
         _draggingStart = render_engine_.MouseToPosition(
             event->x, event->y, info->width, info->height);
@@ -508,8 +419,8 @@ void VisualizationWidget::SetCursor(Gdk::CursorType cursor_type) {
 }
 
 bool VisualizationWidget::onMotion(GdkEventMotion *event) {
-  const std::optional<DrawInfo> info =
-      GetPrimaryStyleDimensions(GetDryModeStyle(), get_width(), get_height());
+  const std::optional<DrawInfo> info = GetPrimaryStyleDimensions(
+      context_menu_.GetDryModeStyle(), get_width(), get_height());
   if (info) {
     const theatre::Coordinate2D pos = render_engine_.MouseToPosition(
         event->x, event->y, info->width, info->height);

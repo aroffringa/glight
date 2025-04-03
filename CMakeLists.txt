@@ -88,6 +88,7 @@ set(GUIFILES
   gui/components/powermonitor.cpp
   gui/components/propertiesbox.cpp
   gui/components/reorderwidget.cpp
+  gui/components/visualizationmenu.cpp
   gui/components/visualizationwidget.cpp
   gui/dialogs/createchasedialog.cpp
   gui/dialogs/inputselectdialog.cpp
