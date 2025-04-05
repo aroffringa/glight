@@ -105,6 +105,7 @@ void VisualizationWidget::inializeContextMenu() {
     theatre::SetAllFixtures(*_management, _selectedFixtures, Color::Black());
   });
   context_menu_.SignalSetColor.connect([&]() { OnSetColor(); });
+  context_menu_.SignalTrack.connect([&]() { OnTrack(); });
   context_menu_.SignalTrackPan.connect([&]() { OnTrackWithPan(); });
   context_menu_.SignalSelectSymbol.connect(
       [&](theatre::FixtureSymbol::Symbol symbol) { onSetSymbol(symbol); });
@@ -398,7 +399,7 @@ bool VisualizationWidget::onButtonRelease(GdkEventButton *event) {
             event->x, event->y, info->width, info->height);
       }
     }
-    if (_dragType == MouseState::TrackPan ||
+    if (_dragType == MouseState::Track || _dragType == MouseState::TrackPan ||
         _dragType == MouseState::RotateFixture) {
       _dragType = MouseState::Normal;
     } else {
@@ -453,6 +454,10 @@ bool VisualizationWidget::onMotion(GdkEventMotion *event) {
       case MouseState::DragAddRectangle:
         _draggingTo = pos;
         addFixtures(_draggingStart, _draggingTo);
+        break;
+      case MouseState::Track:
+        SetPan(pos);
+        SetTilt(pos);
         break;
       case MouseState::TrackPan:
         SetPan(pos);
@@ -729,7 +734,44 @@ bool VisualizationWidget::onTimeout() {
   return true;
 }
 
+void VisualizationWidget::OnTrack() { _dragType = MouseState::Track; }
+
 void VisualizationWidget::OnTrackWithPan() { _dragType = MouseState::TrackPan; }
+
+void VisualizationWidget::SetTilt(const theatre::Coordinate2D &position) {
+  theatre::Management &management = Instance::Management();
+  bool is_changed = false;
+  for (const system::ObservingPtr<theatre::Fixture> &fixture :
+       _selectedFixtures) {
+    if (fixture->Type().CanBeamTilt()) {
+      constexpr theatre::Coordinate2D offset(0.5, 0.5);
+      const theatre::Coordinate2D direction =
+          position - fixture->GetXY() - offset;
+      const double z = fixture->GetPosition().Z();
+      const double dist = std::sqrt(direction.X() * direction.X() +
+                                    direction.Y() * direction.Y());
+      double tilt = std::atan(z / dist) - fixture->StaticTilt();
+      if (fixture->IsUpsideDown()) tilt = -tilt;
+      const double begin_tilt = fixture->Type().MinTilt();
+      const double end_tilt = fixture->Type().MaxTilt();
+      const double min_value = std::min(begin_tilt, end_tilt);
+      const double max_value = std::max(begin_tilt, end_tilt);
+      tilt = system::RadialClamp(tilt, min_value, max_value);
+      const double tilt_scaling = (tilt - begin_tilt) / (end_tilt - begin_tilt);
+      theatre::FixtureControl &control =
+          *management.GetFixtureControl(*fixture);
+      for (size_t i = 0; i != control.NInputs(); ++i) {
+        if (control.InputType(i) == theatre::FunctionType::Tilt) {
+          theatre::SourceValue *source = management.GetSourceValue(control, i);
+          source->A().Set(
+              theatre::ControlValue::FromRatio(tilt_scaling).UInt());
+          is_changed = true;
+        }
+      }
+    }
+  }
+  if (is_changed) Update();
+}
 
 void VisualizationWidget::SetPan(const theatre::Coordinate2D &position) {
   theatre::Management &management = Instance::Management();

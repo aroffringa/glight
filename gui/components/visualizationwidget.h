@@ -31,6 +31,7 @@ enum class MouseState {
   DragFixture,
   DragRectangle,
   DragAddRectangle,
+  Track,
   TrackPan,
   RotateFixture
 };
@@ -84,12 +85,14 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void onGlobalSelectionChanged();
 
   void OnSetColor();
+  void OnTrack();
   void OnTrackWithPan();
 
   void selectFixtures(const theatre::Coordinate2D &a,
                       const theatre::Coordinate2D &b);
   void addFixtures(const theatre::Coordinate2D &a,
                    const theatre::Coordinate2D &b);
+  void SetTilt(const theatre::Coordinate2D &position);
   void SetPan(const theatre::Coordinate2D &position);
   void SetCursor(Gdk::CursorType cursor_type);
 

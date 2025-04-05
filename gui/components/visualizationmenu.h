@@ -23,6 +23,7 @@ class VisualizationMenu : public Gtk::Menu {
   sigc::signal<void()> SignalSetFullOn;
   sigc::signal<void()> SignalSetOff;
   sigc::signal<void()> SignalSetColor;
+  sigc::signal<void()> SignalTrack;
   sigc::signal<void()> SignalTrackPan;
 
   sigc::signal<void(theatre::FixtureSymbol::Symbol)> SignalSelectSymbol;
@@ -51,6 +52,7 @@ class VisualizationMenu : public Gtk::Menu {
   Gtk::MenuItem mi_set_full_on_{"Full on"};
   Gtk::MenuItem mi_set_off_{"Off"};
   Gtk::MenuItem mi_set_color_{"Set color..."};
+  Gtk::MenuItem mi_track_{"Track"};
   Gtk::MenuItem mi_track_pan_{"Track with pan"};
 
   Gtk::MenuItem _miSymbolMenu{"Symbol"};

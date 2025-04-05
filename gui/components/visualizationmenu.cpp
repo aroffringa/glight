@@ -20,6 +20,9 @@ VisualizationMenu::VisualizationMenu() {
   set_menu_.add(mi_set_color_);
   mi_set_color_.signal_activate().connect(SignalSetColor);
 
+  set_menu_.add(mi_track_);
+  mi_track_.signal_activate().connect(SignalTrack);
+
   set_menu_.add(mi_track_pan_);
   mi_track_pan_.signal_activate().connect(SignalTrackPan);
 
