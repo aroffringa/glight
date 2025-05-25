@@ -23,7 +23,7 @@ struct TrackablePtrData {
 
   template <typename ObserverType>
   ObservingPtr<ObserverType> GetObserver() const noexcept;
-  friend class ObservingPtrData;
+  friend struct ObservingPtrData;
   void SetParent(ObservingPtrData* observer) const;
 };
 
@@ -475,7 +475,7 @@ class ObservingPtr : private internal::ObservingPtrData {
   }
 
  private:
-  friend class internal::TrackablePtrData;
+  friend struct internal::TrackablePtrData;
   constexpr ObservingPtr(const internal::TrackablePtrData* parent,
                          internal::ObservingPtrData* previous,
                          internal::ObservingPtrData* next) noexcept

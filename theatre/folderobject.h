@@ -16,7 +16,7 @@ class FolderObject : public NamedObject {
 
   FolderObject() : _parent(nullptr) {}
   FolderObject(const std::string &name) : NamedObject(name), _parent(nullptr) {}
-  virtual ~FolderObject() {}
+  virtual ~FolderObject() = default;
 
   FolderObject(const FolderObject &) = default;
   FolderObject(FolderObject &&) = default;

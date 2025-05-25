@@ -16,7 +16,7 @@ class ControlSceneItem final : public SceneItem {
         _input(input),
         _startValue(ControlValue::Max()),
         _endValue(ControlValue::Max()) {}
-  ~ControlSceneItem() {}
+  ~ControlSceneItem() = default;
 
   ControlValue &StartValue() { return _startValue; }
   const ControlValue &StartValue() const { return _startValue; }

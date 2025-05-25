@@ -43,8 +43,8 @@ inline KeySceneLevel GetKeySceneLevel(const std::string &str) {
  */
 class KeySceneItem final : public SceneItem {
  public:
-  KeySceneItem() : _level(KeySceneLevel::Key) {}
-  ~KeySceneItem() {}
+  KeySceneItem() = default;
+  ~KeySceneItem() = default;
 
   KeySceneLevel Level() const { return _level; }
   void SetLevel(KeySceneLevel level) { _level = level; }
@@ -66,7 +66,7 @@ class KeySceneItem final : public SceneItem {
   }
 
  private:
-  KeySceneLevel _level;
+  KeySceneLevel _level = KeySceneLevel::Key;
 };
 
 }  // namespace glight::theatre

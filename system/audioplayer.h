@@ -13,7 +13,8 @@ namespace glight::system {
 
 class SyncListener {
  public:
-  virtual ~SyncListener(){};
+  virtual ~SyncListener() = default;
+
   /**
    * This call may not lock the mutex, as this can lead to
    * a deadlock when the audioplayer is closing with

@@ -38,7 +38,7 @@ class ValueSnapshot {
 
   ValueSnapshot &operator=(ValueSnapshot &&rhs) = default;
 
-  ~ValueSnapshot() {}
+  ~ValueSnapshot() = default;
 
   void Clear() { _universeValues.clear(); }
 

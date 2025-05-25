@@ -33,8 +33,8 @@ inline BlackoutOperation GetBlackoutOperation(const std::string& str) {
  */
 class BlackoutSceneItem final : public SceneItem {
  public:
-  BlackoutSceneItem() : operation_(BlackoutOperation::Blackout) {}
-  ~BlackoutSceneItem() {}
+  BlackoutSceneItem() = default;
+  ~BlackoutSceneItem() = default;
 
   BlackoutOperation Operation() const { return operation_; }
   void SetOperation(BlackoutOperation operation) { operation_ = operation; }
@@ -55,7 +55,7 @@ class BlackoutSceneItem final : public SceneItem {
   void Start(Scene& scene) override;
 
  private:
-  BlackoutOperation operation_;
+  BlackoutOperation operation_ = BlackoutOperation::Blackout;
   double fade_speed_ = 0;
 };
 
