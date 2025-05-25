@@ -1,7 +1,7 @@
 # Glight
 Glight allows a computer with DMX interface to act as a DMX controller for live control of stage lighting. It basically turns your computer into a traditional lighting console, but also adds several enhanced features. It makes use of the [Open Light Architecture](https://www.openlighting.org/ola/) (OLA) for connecting to the DMX interface, and can therefore make use of a wide variety of DMX interfaces and other connections that OLA offers.
 
-Glight's website with documentation can be found here: https://glight.readthedocs.io/
+Glight's website with documentation can be found here: https://glight.readthedocs.io/ . Glight is is released under the GNU General Public License version 3.0 or later.
 
 <img src="https://raw.githubusercontent.com/aroffringa/glight/master/doc/NTDS-2023.jpg" alt="NTDS-2023" title="Photo of Glight in action" />
 
@@ -38,6 +38,24 @@ For compilation, gcc version 11 or newer (or a similar version of clang) is requ
 To also install glight in the system path, `sudo make install` can be run afterwards.
 
 [Boost](https://www.boost.org/) is required to also compile the tests. (`libboost-test-dev` on Debian and Ubuntu).
+
+## License
+
+This file is part of the Glight software package.
+
+The Glight package is free software: you can redistribute it
+and/or modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.
+
+Glight is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with the Glight package.  If not, see
+<http://www.gnu.org/licenses/>.
 
 ## Contact
 Glight is written by André Offringa. Feedback and bugreports are welcome; please use Github for this, or mail me at offringa@gmail.com.
