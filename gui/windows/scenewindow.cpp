@@ -88,7 +88,7 @@ SceneWindow::SceneWindow(theatre::Management &management,
 
   Gtk::RadioToolButton::Group group;
   addTool(move_cursor_tb_, "Move cursor",
-          "Clicking the audio will move the cursor", "start-here", [&]() {});
+          "Clicking the audio will move the cursor", "go-jump", [&]() {});
   move_cursor_tb_.set_group(group);
   addTool(set_start_tb_, "Set start time",
           "Clicking the audio will change the start time of the selection",
