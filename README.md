@@ -1,7 +1,7 @@
 # Glight
 Glight allows a computer with DMX interface to act as a DMX controller for live control of stage lighting. It basically turns your computer into a traditional lighting console, but also adds several enhanced features. It makes use of the [Open Light Architecture](https://www.openlighting.org/ola/) (OLA) for connecting to the DMX interface, and can therefore make use of a wide variety of DMX interfaces and other connections that OLA offers.
 
-Glight's website with documentation can be found here: https://glight.readthedocs.io/ . Glight is is released under the GNU General Public License version 3.0 or later.
+Glight's website with documentation can be found here: https://glight.readthedocs.io/ . Glight is released under the GNU General Public License version 3.0 or later.
 
 <img src="https://raw.githubusercontent.com/aroffringa/glight/master/doc/NTDS-2023.jpg" alt="NTDS-2023" title="Photo of Glight in action" />
 
