@@ -13,7 +13,7 @@
 namespace glight::json {
 
 struct Node {
-  virtual ~Node() {}
+  virtual ~Node() = default;
 };
 
 struct Object : public Node {

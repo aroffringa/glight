@@ -10,9 +10,9 @@ namespace glight::system {
 
 /**
  * This class behaves like std::optional<T>, with T an integer or floating point
- * type, but implements it using a 'magical number' to represent unset. It does
- * not require therefore more storage to store the state, and because the type
- * is known to be a fundamental type, no (placement) new is required, which
+ * type, but implements it using a 'magical number' to represent unset. It
+ * therefore does not require more storage to store the state, and because the
+ * type is known to be a fundamental type, no (placement) new is required, which
  * allows all methods to be @c noexcept. Because unset is represented by a
  * magical number, comparisons are also faster, as the single value is already
  * strictly ordered.
@@ -76,7 +76,7 @@ class OptionalNumber {
   template <class T = NumberType>
   constexpr OptionalNumber<NumberType>& operator=(
       const std::optional<T>& rhs) noexcept {
-    number_ = rhs.number_;
+    number_ = rhs ? *rhs : UnsetValue;
     return *this;
   }
 

@@ -13,7 +13,7 @@ class DmxChannel {
   constexpr DmxChannel() : universe_(0), channel_(0) {}
   constexpr DmxChannel(unsigned channel, unsigned universe)
       : universe_(universe), channel_(channel) {}
-  ~DmxChannel() {}
+  ~DmxChannel() = default;
 
   constexpr unsigned Universe() const { return universe_; }
   constexpr unsigned Channel() const { return channel_; }
