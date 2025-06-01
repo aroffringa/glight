@@ -37,6 +37,7 @@ BOOST_AUTO_TEST_CASE(empty_construct) {
   ResetTracker();
   TrackablePtr<Tracker> a;
   BOOST_CHECK(!a);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 0);
   BOOST_CHECK(!a.GetObserver());
   BOOST_CHECK_EQUAL(a.ShareCount(), 0);
   BOOST_CHECK_EQUAL(n_constructions, 0);
@@ -216,6 +217,12 @@ BOOST_AUTO_TEST_CASE(move_assignment) {
   BOOST_CHECK(!b);
   BOOST_CHECK_EQUAL(n_constructions, 1);
   BOOST_CHECK_EQUAL(n_deletes, 1);
+
+  a = TrackablePtr(new Tracker());
+  b = TrackablePtr(new Tracker());
+  b = std::move(a);
+  BOOST_CHECK(b);
+  BOOST_CHECK(!a);
 }
 
 BOOST_AUTO_TEST_CASE(self_assignment_trackable_ptr) {
@@ -493,6 +500,29 @@ BOOST_AUTO_TEST_CASE(swap_different_ptr_observers) {
   b.Reset();
 }
 
+BOOST_AUTO_TEST_CASE(copy_assign_observer) {
+  ResetTracker();
+  Tracker* tracker_a = new Tracker();
+  Tracker* tracker_b = new Tracker();
+  {
+    TrackablePtr<Tracker> a(tracker_a);
+    TrackablePtr<Tracker> b(tracker_b);
+    ObservingPtr w = a.GetObserver();
+    ObservingPtr z = b.GetObserver();
+    w = z;
+    BOOST_CHECK(w);
+    BOOST_CHECK_EQUAL(w.Get(), tracker_b);
+    BOOST_CHECK_EQUAL(n_deletes, 0);
+    b.Reset();
+    BOOST_CHECK(!w);
+    z = a.GetObserver();
+    w = z;
+    BOOST_CHECK(w);
+    BOOST_CHECK_EQUAL(w.Get(), tracker_a);
+  }
+  BOOST_CHECK_EQUAL(n_deletes, 2);
+}
+
 BOOST_AUTO_TEST_CASE(move_observer) {
   ResetTracker();
   Tracker* tracker = new Tracker();
@@ -613,6 +643,74 @@ BOOST_AUTO_TEST_CASE(make_trackable_ptr) {
   b.Reset();
   BOOST_CHECK_EQUAL(n_constructions, 2);
   BOOST_CHECK_EQUAL(n_deletes, 2);
+}
+
+struct ChildTracker : public Tracker {};
+
+BOOST_AUTO_TEST_CASE(cast_observable_ptr) {
+  ResetTracker();
+  ChildTracker* tracker = new ChildTracker();
+  const TrackablePtr<ChildTracker> a(tracker);
+  {
+    const ObservingPtr<Tracker> x = a.GetObserver<Tracker>();
+    BOOST_CHECK(x);
+    BOOST_CHECK_EQUAL(x.Get(), tracker);
+    const ObservingPtr<ChildTracker> y =
+        static_cast<ObservingPtr<ChildTracker>>(x);
+    BOOST_CHECK(y);
+    BOOST_CHECK_EQUAL(y.Get(), tracker);
+  }
+  BOOST_CHECK(a);
+  BOOST_CHECK(a.GetObserver());
+  BOOST_CHECK_EQUAL(a.GetObserver().Get(), tracker);
+}
+
+BOOST_AUTO_TEST_CASE(performance_create_trackable,
+                     *boost::unit_test::disabled()) {
+  constexpr size_t n = 10000000;
+  std::vector<TrackablePtr<int>> v;
+  v.reserve(n);
+  for (size_t i = 0; i != n; ++i) {
+    v.emplace_back(new int());
+  }
+  BOOST_CHECK_EQUAL(v.size(), n);
+}
+
+BOOST_AUTO_TEST_CASE(performance_create_shared, *boost::unit_test::disabled()) {
+  constexpr size_t n = 10000000;
+  std::vector<std::shared_ptr<int>> v;
+  v.reserve(n);
+  for (size_t i = 0; i != n; ++i) {
+    v.emplace_back(new int());
+  }
+  BOOST_CHECK_EQUAL(v.size(), n);
+}
+
+BOOST_AUTO_TEST_CASE(performance_track_trackable,
+                     *boost::unit_test::disabled()) {
+  constexpr size_t n = 1000000;
+  constexpr size_t n_observers = 100;
+  std::vector<TrackablePtr<int>> v;
+  std::vector<ObservingPtr<int>> o;
+  v.reserve(n);
+  for (size_t i = 0; i != n; ++i) {
+    TrackablePtr<int>& p = v.emplace_back(new int());
+    for (size_t j = 0; j != n_observers; ++j) o.emplace_back(p.GetObserver());
+  }
+  BOOST_CHECK_EQUAL(v.size(), n);
+}
+
+BOOST_AUTO_TEST_CASE(performance_track_shared, *boost::unit_test::disabled()) {
+  constexpr size_t n = 1000000;
+  constexpr size_t n_observers = 100;
+  std::vector<std::shared_ptr<int>> v;
+  std::vector<std::weak_ptr<int>> o;
+  v.reserve(n);
+  for (size_t i = 0; i != n; ++i) {
+    std::shared_ptr<int>& p = v.emplace_back(new int());
+    for (size_t j = 0; j != n_observers; ++j) o.emplace_back(p);
+  }
+  BOOST_CHECK_EQUAL(v.size(), n);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
