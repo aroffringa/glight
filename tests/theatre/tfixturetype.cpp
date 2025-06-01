@@ -63,7 +63,7 @@ Color testColor(StockFixture cl, const std::vector<unsigned char> &values) {
   Management management;
   const FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(cl);
   Fixture &rgbFixture = *management.GetTheatre().AddFixture(fixtureType);
-  const ValueSnapshot snapShot(true, 1);
+  ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   uni.SetValues(values.data(), values.size());
   return rgbFixture.Type().GetColor(rgbFixture, snapShot, 0);
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
   const FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise);
   Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
-  const ValueSnapshot snapShot(true, 1);
+  ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   // Master, R, G, B, Strobe, Rotation, Macro
   const std::vector<unsigned char> values{255, 255, 0, 0, 0, 128, 0};

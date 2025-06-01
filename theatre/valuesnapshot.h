@@ -13,26 +13,25 @@ class ValueSnapshot {
  public:
   ValueSnapshot() = default;
 
-  ValueSnapshot(bool primary, size_t universeCount) : primary_(primary) {
+  ValueSnapshot(bool primary, size_t universeCount) : is_primary_(primary) {
     SetUniverseCount(universeCount);
   }
 
   ValueSnapshot(const ValueSnapshot &source)
-      : _universeValues(copy(source._universeValues)),
-        primary_(source.primary_) {}
+      : universes_(Copy(source.universes_)), is_primary_(source.is_primary_) {}
 
   ValueSnapshot(ValueSnapshot &&source) = default;
 
   ValueSnapshot &operator=(const ValueSnapshot &rhs) {
-    if (_universeValues.size() == rhs._universeValues.size()) {
+    if (universes_.size() == rhs.universes_.size()) {
       // This is an optimization to avoid allocations
-      for (size_t i = 0; i != _universeValues.size(); ++i) {
-        *_universeValues[i] = *rhs._universeValues[i];
+      for (size_t i = 0; i != universes_.size(); ++i) {
+        universes_[i] = rhs.universes_[i];
       }
     } else {
-      _universeValues = copy(rhs._universeValues);
+      universes_ = Copy(rhs.universes_);
     }
-    primary_ = rhs.primary_;
+    is_primary_ = rhs.is_primary_;
     return *this;
   }
 
@@ -40,31 +39,35 @@ class ValueSnapshot {
 
   ~ValueSnapshot() = default;
 
-  void Clear() { _universeValues.clear(); }
+  void Clear() { universes_.clear(); }
 
-  size_t UniverseCount() const { return _universeValues.size(); }
-  void SetUniverseCount(size_t count) { resize(_universeValues, count); }
+  size_t UniverseCount() const { return universes_.size(); }
+  void SetUniverseCount(size_t count) { Resize(universes_, count); }
 
   unsigned char GetValue(const DmxChannel &channel) const {
-    return GetUniverseSnapshot(channel.Universe())[channel.Channel()];
+    return channel.Universe() < universes_.size()
+               ? universes_[channel.Universe()][channel.Channel()]
+               : 0;
   }
 
-  ValueUniverseSnapshot &GetUniverseSnapshot(size_t index) const {
-    return *_universeValues[index];
+  ValueUniverseSnapshot &GetUniverseSnapshot(size_t index) {
+    return universes_[index];
+  }
+  const ValueUniverseSnapshot &GetUniverseSnapshot(size_t index) const {
+    return universes_[index];
   }
 
   friend void swap(ValueSnapshot &left, ValueSnapshot &right) {
-    std::swap(left._universeValues, right._universeValues);
-    std::swap(left.primary_, right.primary_);
+    std::swap(left.universes_, right.universes_);
+    std::swap(left.is_primary_, right.is_primary_);
   }
 
   friend bool operator==(const ValueSnapshot &left,
                          const ValueSnapshot &right) {
-    if (left.primary_ != right.primary_) return false;
-    if (left._universeValues.size() != right._universeValues.size())
-      return false;
-    for (size_t i = 0; i != left._universeValues.size(); ++i) {
-      if (*left._universeValues[i] != *right._universeValues[i]) return false;
+    if (left.is_primary_ != right.is_primary_) return false;
+    if (left.universes_.size() != right.universes_.size()) return false;
+    for (size_t i = 0; i != left.universes_.size(); ++i) {
+      if (left.universes_[i] != right.universes_[i]) return false;
     }
     return true;
   }
@@ -75,29 +78,28 @@ class ValueSnapshot {
   }
 
  private:
-  static std::vector<std::unique_ptr<ValueUniverseSnapshot>> copy(
-      const std::vector<std::unique_ptr<ValueUniverseSnapshot>> &source) {
-    std::vector<std::unique_ptr<ValueUniverseSnapshot>> result;
+  static std::vector<ValueUniverseSnapshot> Copy(
+      const std::vector<ValueUniverseSnapshot> &source) {
+    std::vector<ValueUniverseSnapshot> result;
     result.reserve(source.size());
-    for (const std::unique_ptr<ValueUniverseSnapshot> &snapshot : source) {
-      result.emplace_back(std::make_unique<ValueUniverseSnapshot>(*snapshot));
+    for (const ValueUniverseSnapshot &snapshot : source) {
+      result.emplace_back(snapshot);
     }
     return result;
   }
 
-  static void resize(std::vector<std::unique_ptr<ValueUniverseSnapshot>> &vec,
-                     size_t count) {
+  static void Resize(std::vector<ValueUniverseSnapshot> &vec, size_t count) {
     if (count < vec.size()) {
       vec.resize(count);
     } else {
       do {
-        vec.emplace_back(std::make_unique<ValueUniverseSnapshot>());
+        vec.emplace_back();
       } while (count > vec.size());
     }
   }
 
-  std::vector<std::unique_ptr<ValueUniverseSnapshot>> _universeValues;
-  bool primary_ = true;
+  std::vector<ValueUniverseSnapshot> universes_;
+  bool is_primary_ = true;
 };
 
 }  // namespace glight::theatre
