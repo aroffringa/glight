@@ -1,7 +1,7 @@
 #ifndef GUI_FIXTURE_LIST_WINDOW_H_
 #define GUI_FIXTURE_LIST_WINDOW_H_
 
-#include <gtkmm/box.h>
+#include <gtkmm/grid.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
@@ -88,15 +88,14 @@ class FixtureListWindow : public ChildWindow {
   } fixtures_list_columns_;
   Gtk::ScrolledWindow fixtures_scrolled_window_;
 
-  Gtk::HBox main_box_;
-  Gtk::VBox button_box_;
+  Gtk::Grid grid_;
 
   Gtk::Button new_button_{"New"};
   Gtk::Button remove_button_{"Remove"};
-  Gtk::Button inc_channel_button_{"+channel"};
-  Gtk::Button dec_channel_button_{"-channel"};
-  Gtk::Button inc_universe_button_{"+uni"};
-  Gtk::Button dec_universe_button_{"-uni"};
+  Gtk::Button inc_channel_button_{"+ C"};
+  Gtk::Button dec_channel_button_{"- C"};
+  Gtk::Button inc_universe_button_{"+ U"};
+  Gtk::Button dec_universe_button_{"- U"};
   Gtk::Button set_channel_button_{"Set..."};
   Gtk::Button up_button_;
   Gtk::Button down_button_;

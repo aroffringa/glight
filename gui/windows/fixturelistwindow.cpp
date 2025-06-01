@@ -48,58 +48,59 @@ FixtureListWindow::FixtureListWindow() {
 
   fixtures_scrolled_window_.set_policy(Gtk::POLICY_NEVER,
                                        Gtk::POLICY_AUTOMATIC);
-  main_box_.pack_start(fixtures_scrolled_window_);
+  fixtures_scrolled_window_.set_hexpand(true);
+  fixtures_scrolled_window_.set_vexpand(true);
 
-  button_box_.set_homogeneous(true);
+  grid_.attach(fixtures_scrolled_window_, 0, 0, 1, 8);
+  grid_.set_hexpand(true);
+  grid_.set_vexpand(true);
 
   new_button_.set_image_from_icon_name("document-new");
   new_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureListWindow::onNewButtonClicked), false);
-  button_box_.pack_start(new_button_);
+  grid_.attach(new_button_, 1, 0, 2, 1);
 
   remove_button_.set_image_from_icon_name("edit-delete");
   remove_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureListWindow::onRemoveButtonClicked));
-  button_box_.pack_start(remove_button_);
+  grid_.attach(remove_button_, 1, 1, 2, 1);
 
   dec_channel_button_.signal_clicked().connect(
       [&]() { IncreaseChannelOrUniverse<-1, 0>(); });
-  button_box_.pack_start(dec_channel_button_);
+  grid_.attach(dec_channel_button_, 1, 2, 1, 1);
 
   inc_channel_button_.signal_clicked().connect(
       [&]() { IncreaseChannelOrUniverse<1, 0>(); });
-  button_box_.pack_start(inc_channel_button_);
+  grid_.attach(inc_channel_button_, 1, 3, 1, 1);
 
   dec_universe_button_.signal_clicked().connect(
       [&]() { IncreaseChannelOrUniverse<0, -1>(); });
-  button_box_.pack_start(dec_universe_button_);
+  grid_.attach(dec_universe_button_, 2, 2, 1, 1);
 
   inc_universe_button_.signal_clicked().connect(
       [&]() { IncreaseChannelOrUniverse<0, 1>(); });
-  button_box_.pack_start(inc_universe_button_);
+  grid_.attach(inc_universe_button_, 2, 3, 1, 1);
 
   set_channel_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureListWindow::onSetChannelButtonClicked));
-  button_box_.pack_start(set_channel_button_);
+  grid_.attach(set_channel_button_, 1, 4, 2, 1);
 
   up_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureListWindow::onUpClicked));
   up_button_.set_image_from_icon_name("go-up");
-  button_box_.pack_start(up_button_);
+  grid_.attach(up_button_, 1, 5, 2, 1);
 
   down_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureListWindow::onDownClicked));
   down_button_.set_image_from_icon_name("go-down");
-  button_box_.pack_start(down_button_);
+  grid_.attach(down_button_, 1, 6, 2, 1);
 
   reassign_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureListWindow::onReassignClicked));
-  button_box_.pack_start(reassign_button_);
+  grid_.attach(reassign_button_, 1, 7, 2, 1);
 
-  main_box_.pack_start(button_box_, false, false, 0);
-
-  add(main_box_);
-  main_box_.show_all();
+  add(grid_);
+  grid_.show_all();
 }
 
 FixtureListWindow::~FixtureListWindow() = default;
