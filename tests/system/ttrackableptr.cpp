@@ -655,7 +655,8 @@ BOOST_AUTO_TEST_CASE(cast_observable_ptr) {
     const ObservingPtr<Tracker> x = a.GetObserver<Tracker>();
     BOOST_CHECK(x);
     BOOST_CHECK_EQUAL(x.Get(), tracker);
-    const ObservingPtr<ChildTracker> y = static_cast<ObservingPtr<ChildTracker>>(x);
+    const ObservingPtr<ChildTracker> y =
+        static_cast<ObservingPtr<ChildTracker>>(x);
     BOOST_CHECK(y);
     BOOST_CHECK_EQUAL(y.Get(), tracker);
   }
@@ -664,54 +665,52 @@ BOOST_AUTO_TEST_CASE(cast_observable_ptr) {
   BOOST_CHECK_EQUAL(a.GetObserver().Get(), tracker);
 }
 
-BOOST_AUTO_TEST_CASE(performance_create_trackable, * boost::unit_test::disabled()) {
+BOOST_AUTO_TEST_CASE(performance_create_trackable,
+                     *boost::unit_test::disabled()) {
   constexpr size_t n = 10000000;
   std::vector<TrackablePtr<int>> v;
   v.reserve(n);
-  for(size_t i=0; i!=n; ++i) {
+  for (size_t i = 0; i != n; ++i) {
     v.emplace_back(new int());
   }
   BOOST_CHECK_EQUAL(v.size(), n);
 }
 
-BOOST_AUTO_TEST_CASE(performance_create_shared, * boost::unit_test::disabled()) {
+BOOST_AUTO_TEST_CASE(performance_create_shared, *boost::unit_test::disabled()) {
   constexpr size_t n = 10000000;
   std::vector<std::shared_ptr<int>> v;
   v.reserve(n);
-  for(size_t i=0; i!=n; ++i) {
+  for (size_t i = 0; i != n; ++i) {
     v.emplace_back(new int());
   }
   BOOST_CHECK_EQUAL(v.size(), n);
 }
 
-BOOST_AUTO_TEST_CASE(performance_track_trackable, * boost::unit_test::disabled()) {
+BOOST_AUTO_TEST_CASE(performance_track_trackable,
+                     *boost::unit_test::disabled()) {
   constexpr size_t n = 1000000;
   constexpr size_t n_observers = 100;
   std::vector<TrackablePtr<int>> v;
   std::vector<ObservingPtr<int>> o;
   v.reserve(n);
-  for(size_t i=0; i!=n; ++i) {
+  for (size_t i = 0; i != n; ++i) {
     TrackablePtr<int>& p = v.emplace_back(new int());
-    for(size_t j=0; j!=n_observers; ++j)
-      o.emplace_back(p.GetObserver());
+    for (size_t j = 0; j != n_observers; ++j) o.emplace_back(p.GetObserver());
   }
   BOOST_CHECK_EQUAL(v.size(), n);
 }
 
-BOOST_AUTO_TEST_CASE(performance_track_shared, * boost::unit_test::disabled()) {
+BOOST_AUTO_TEST_CASE(performance_track_shared, *boost::unit_test::disabled()) {
   constexpr size_t n = 1000000;
   constexpr size_t n_observers = 100;
   std::vector<std::shared_ptr<int>> v;
   std::vector<std::weak_ptr<int>> o;
   v.reserve(n);
-  for(size_t i=0; i!=n; ++i) {
+  for (size_t i = 0; i != n; ++i) {
     std::shared_ptr<int>& p = v.emplace_back(new int());
-    for(size_t j=0; j!=n_observers; ++j)
-      o.emplace_back(p);
+    for (size_t j = 0; j != n_observers; ++j) o.emplace_back(p);
   }
   BOOST_CHECK_EQUAL(v.size(), n);
 }
-
-
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -49,8 +49,7 @@ class TrackablePtr {
    * The new TrackablePtr will become the owner of the pointer and
    * make sure it is destructed.
    */
-  constexpr explicit TrackablePtr(T* object) noexcept
-      : object_(object) {}
+  constexpr explicit TrackablePtr(T* object) noexcept : object_(object) {}
   constexpr explicit TrackablePtr(std::unique_ptr<T> object) noexcept
       : object_(object.release()) {}
   /**
@@ -58,16 +57,15 @@ class TrackablePtr {
    * observers that track the source beforehand, will track the newly
    * constructed object afterwards.
    */
-  constexpr TrackablePtr(TrackablePtr<T>&& source) noexcept :
-    object_(source.object_), data_(source.data_)
-  {
+  constexpr TrackablePtr(TrackablePtr<T>&& source) noexcept
+      : object_(source.object_), data_(source.data_) {
     source.object_ = nullptr;
     source.data_ = nullptr;
   }
   constexpr ~TrackablePtr() noexcept {
-    if(data_) {
+    if (data_) {
       --data_->reference_count;
-      if(data_->reference_count == 0) {
+      if (data_->reference_count == 0) {
         delete data_;
       } else {
         data_->object = nullptr;
@@ -82,11 +80,11 @@ class TrackablePtr {
    * afterwards.
    */
   TrackablePtr<T>& operator=(TrackablePtr<T>&& rhs) noexcept {
-    if(&rhs != this) {
+    if (&rhs != this) {
       delete object_;
-      if(data_) {
+      if (data_) {
         --data_->reference_count;
-        if(data_->reference_count == 0) {
+        if (data_->reference_count == 0) {
           delete data_;
         } else {
           data_->object = nullptr;
@@ -113,9 +111,9 @@ class TrackablePtr {
   void Reset() noexcept {
     delete object_;
     object_ = nullptr;
-    if(data_) {
+    if (data_) {
       --data_->reference_count;
-      if(data_->reference_count == 0) {
+      if (data_->reference_count == 0) {
         delete data_;
       } else {
         data_->object = nullptr;
@@ -236,8 +234,8 @@ class TrackablePtr {
    * Number of observers that track this pointer.
    */
   size_t ShareCount() const noexcept {
-    if(data_) {
-      return data_->reference_count-1;
+    if (data_) {
+      return data_->reference_count - 1;
     } else {
       return 0;
     }
@@ -250,9 +248,9 @@ class TrackablePtr {
   std::unique_ptr<T> Release() noexcept {
     T* object = object_;
     object_ = nullptr;
-    if(data_) {
+    if (data_) {
       --data_->reference_count;
-      if(data_->reference_count == 0) {
+      if (data_->reference_count == 0) {
         delete data_;
       } else {
         data_->object = nullptr;
@@ -268,8 +266,8 @@ class TrackablePtr {
   }
 
  private:
-   T* object_ = nullptr;
-   mutable internal::TrackablePtrData* data_ = nullptr;
+  T* object_ = nullptr;
+  mutable internal::TrackablePtrData* data_ = nullptr;
 };
 
 /**
@@ -288,8 +286,9 @@ class ObservingPtr {
    * Copy construct an ObservingPtr. The new ObservingPtr will track
    * the same pointer as the @p source.
    */
-  constexpr ObservingPtr(const ObservingPtr& source) noexcept : data_(source.data_) {
-    if(data_) {
+  constexpr ObservingPtr(const ObservingPtr& source) noexcept
+      : data_(source.data_) {
+    if (data_) {
       ++data_->reference_count;
     }
   }
@@ -301,31 +300,28 @@ class ObservingPtr {
     source.data_ = nullptr;
   }
   constexpr ~ObservingPtr() noexcept {
-    if(data_) {
+    if (data_) {
       --data_->reference_count;
-      if(data_->reference_count == 0)
-        delete data_;
+      if (data_->reference_count == 0) delete data_;
     }
   }
   ObservingPtr<T>& operator=(const ObservingPtr<T>& rhs) noexcept {
     // For the case of self-assignment, the counter needs to be increased first
-    if(rhs.data_) {
+    if (rhs.data_) {
       ++rhs.data_->reference_count;
     }
-    if(data_) {
+    if (data_) {
       --data_->reference_count;
-      if(data_->reference_count == 0)
-        delete data_;
+      if (data_->reference_count == 0) delete data_;
     }
     data_ = rhs.data_;
     return *this;
   }
   ObservingPtr<T>& operator=(ObservingPtr<T>&& rhs) noexcept {
-    if(&rhs != this) {
-      if(data_) {
+    if (&rhs != this) {
+      if (data_) {
         --data_->reference_count;
-        if(data_->reference_count == 0)
-          delete data_;
+        if (data_->reference_count == 0) delete data_;
       }
       data_ = rhs.data_;
       rhs.data_ = nullptr;
@@ -335,8 +331,7 @@ class ObservingPtr {
   constexpr operator bool() const { return Get() != nullptr; }
   template <typename ImplicitCastableType>
   constexpr operator ObservingPtr<ImplicitCastableType>() const {
-    if(data_)
-      data_->reference_count++;
+    if (data_) data_->reference_count++;
     return ObservingPtr<ImplicitCastableType>(data_);
   }
   constexpr bool operator==(const ObservingPtr& rhs) const {
@@ -412,19 +407,20 @@ class ObservingPtr {
   }
 
  private:
-   constexpr ObservingPtr(internal::TrackablePtrData* data) : data_(data) {}
-   template<typename S>
-   friend class TrackablePtr;
-   template<typename S>
-   friend class ObservingPtr;
-   internal::TrackablePtrData* data_ = nullptr;
+  constexpr ObservingPtr(internal::TrackablePtrData* data) : data_(data) {}
+  template <typename S>
+  friend class TrackablePtr;
+  template <typename S>
+  friend class ObservingPtr;
+  internal::TrackablePtrData* data_ = nullptr;
 };
 
-template<typename T>
-template<typename ObservingType>
+template <typename T>
+template <typename ObservingType>
 ObservingPtr<ObservingType> TrackablePtr<T>::GetObserver() const {
-  if(data_ == nullptr) {
-    data_ = new internal::TrackablePtrData{.object=object_, .reference_count=2};
+  if (data_ == nullptr) {
+    data_ =
+        new internal::TrackablePtrData{.object = object_, .reference_count = 2};
   } else {
     data_->reference_count++;
   }
