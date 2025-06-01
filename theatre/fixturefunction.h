@@ -59,6 +59,11 @@ class FixtureFunction final : public NamedObject {
   void IncChannel();
   /** The caller must call theatre.NotifyDmxChange(); afterward. */
   void DecChannel();
+  /** The caller must call theatre.NotifyDmxChange(); afterward. */
+  void SetUniverse(unsigned universe) {
+    main_channel_.SetUniverse(universe);
+    if (fine_channel_) fine_channel_->SetUniverse(universe);
+  }
 
   unsigned char GetCharValue(const ValueSnapshot &snapshot) const {
     return snapshot.GetValue(main_channel_);

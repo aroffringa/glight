@@ -53,6 +53,8 @@ class Fixture : public NamedObject {
 
   void SetChannel(DmxChannel dmx_channel);
 
+  void SetUniverse(unsigned universe);
+
   DmxChannel GetFirstChannel() const;
 
   void ClearFunctions() { functions_.clear(); }

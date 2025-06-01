@@ -1,7 +1,7 @@
 #ifndef GUI_FIXTURE_LIST_WINDOW_H_
 #define GUI_FIXTURE_LIST_WINDOW_H_
 
-#include <gtkmm/box.h>
+#include <gtkmm/grid.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
@@ -35,14 +35,14 @@ class FixtureListWindow : public ChildWindow {
   ~FixtureListWindow();
 
   void SetLayoutLocked(bool locked) {
-    _newButton.set_sensitive(!locked);
-    _removeButton.set_sensitive(!locked);
-    _incChannelButton.set_sensitive(!locked);
-    _decChannelButton.set_sensitive(!locked);
-    _setChannelButton.set_sensitive(!locked);
-    _upButton.set_sensitive(!locked);
-    _downButton.set_sensitive(!locked);
-    _reassignButton.set_sensitive(!locked);
+    new_button_.set_sensitive(!locked);
+    remove_button_.set_sensitive(!locked);
+    inc_channel_button_.set_sensitive(!locked);
+    dec_channel_button_.set_sensitive(!locked);
+    set_channel_button_.set_sensitive(!locked);
+    up_button_.set_sensitive(!locked);
+    down_button_.set_sensitive(!locked);
+    reassign_button_.set_sensitive(!locked);
   }
 
  private:
@@ -51,8 +51,8 @@ class FixtureListWindow : public ChildWindow {
   void fillFixturesList();
   void onNewButtonClicked();
   void onRemoveButtonClicked();
-  void onIncChannelButtonClicked();
-  void onDecChannelButtonClicked();
+  template <int ChannelIncrease, int UniverseIncrease>
+  void IncreaseChannelOrUniverse();
   void onSetChannelButtonClicked();
   void updateFixture(const theatre::Fixture *fixture);
   static std::string getChannelString(const theatre::Fixture &fixture);
@@ -64,40 +64,42 @@ class FixtureListWindow : public ChildWindow {
 
   std::unique_ptr<AddFixtureWindow> add_fixture_window_;
 
-  ScopedConnection _updateControllablesConnection;
-  ScopedConnection _globalSelectionConnection;
-  RecursionLock _recursionLock;
+  ScopedConnection update_controllables_connection_;
+  ScopedConnection global_selection_connection_;
+  RecursionLock recursion_lock_;
 
-  Gtk::TreeView _fixturesListView;
-  Glib::RefPtr<Gtk::ListStore> _fixturesListModel;
+  Gtk::TreeView fixtures_list_view_;
+  Glib::RefPtr<Gtk::ListStore> fixtures_list_model_;
   struct FixturesListColumns : public Gtk::TreeModelColumnRecord {
     FixturesListColumns() {
-      add(_title);
-      add(_type);
-      add(_universe);
-      add(_channels);
-      add(_symbol);
-      add(_fixture);
+      add(title_);
+      add(type_);
+      add(channels_);
+      add(universe_);
+      add(symbol_);
+      add(fixture_);
     }
 
-    Gtk::TreeModelColumn<Glib::ustring> _title, _type;
-    Gtk::TreeModelColumn<unsigned> _universe;
-    Gtk::TreeModelColumn<Glib::ustring> _channels, _symbol;
-    Gtk::TreeModelColumn<system::ObservingPtr<theatre::Fixture>> _fixture;
-  } _fixturesListColumns;
-  Gtk::ScrolledWindow _fixturesScrolledWindow;
+    Gtk::TreeModelColumn<Glib::ustring> title_, type_;
+    Gtk::TreeModelColumn<Glib::ustring> channels_;
+    Gtk::TreeModelColumn<unsigned> universe_;
+    Gtk::TreeModelColumn<Glib::ustring> symbol_;
+    Gtk::TreeModelColumn<system::ObservingPtr<theatre::Fixture>> fixture_;
+  } fixtures_list_columns_;
+  Gtk::ScrolledWindow fixtures_scrolled_window_;
 
-  Gtk::VBox _mainBox;
-  Gtk::Box _buttonBox;
+  Gtk::Grid grid_;
 
-  Gtk::Button _newButton{"New"};
-  Gtk::Button _removeButton{"Remove"};
-  Gtk::Button _incChannelButton{"+channel"};
-  Gtk::Button _decChannelButton{"-channel"};
-  Gtk::Button _setChannelButton{"Set..."};
-  Gtk::Button _upButton;
-  Gtk::Button _downButton;
-  Gtk::Button _reassignButton{"Reassign"};
+  Gtk::Button new_button_{"New"};
+  Gtk::Button remove_button_{"Remove"};
+  Gtk::Button inc_channel_button_{"+ C"};
+  Gtk::Button dec_channel_button_{"- C"};
+  Gtk::Button inc_universe_button_{"+ U"};
+  Gtk::Button dec_universe_button_{"- U"};
+  Gtk::Button set_channel_button_{"Set..."};
+  Gtk::Button up_button_;
+  Gtk::Button down_button_;
+  Gtk::Button reassign_button_{"Reassign"};
 };
 
 }  // namespace glight::gui::windows

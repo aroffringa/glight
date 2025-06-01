@@ -51,6 +51,14 @@ void Fixture::SetChannel(DmxChannel dmx_channel) {
   theatre_.NotifyDmxChange();
 }
 
+void Fixture::SetUniverse(unsigned universe) {
+  for (std::unique_ptr<FixtureFunction> &ff : functions_) {
+    ff->SetUniverse(universe);
+  }
+
+  theatre_.NotifyDmxChange();
+}
+
 double Fixture::GetBeamDirection(const ValueSnapshot &snapshot,
                                  size_t shape_index) const {
   double direction = direction_;
