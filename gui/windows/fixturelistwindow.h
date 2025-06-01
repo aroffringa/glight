@@ -51,10 +51,8 @@ class FixtureListWindow : public ChildWindow {
   void fillFixturesList();
   void onNewButtonClicked();
   void onRemoveButtonClicked();
-  void onIncChannelButtonClicked();
-  void onDecChannelButtonClicked();
-  void OnDecUniverseButtonClicked();
-  void OnIncUniverseButtonClicked();
+  template <int ChannelIncrease, int UniverseIncrease>
+  void IncreaseChannelOrUniverse();
   void onSetChannelButtonClicked();
   void updateFixture(const theatre::Fixture *fixture);
   static std::string getChannelString(const theatre::Fixture &fixture);

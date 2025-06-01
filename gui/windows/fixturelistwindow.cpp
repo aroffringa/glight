@@ -63,19 +63,19 @@ FixtureListWindow::FixtureListWindow() {
   button_box_.pack_start(remove_button_);
 
   dec_channel_button_.signal_clicked().connect(
-      sigc::mem_fun(*this, &FixtureListWindow::onDecChannelButtonClicked));
+      [&]() { IncreaseChannelOrUniverse<-1, 0>(); });
   button_box_.pack_start(dec_channel_button_);
 
   inc_channel_button_.signal_clicked().connect(
-      sigc::mem_fun(*this, &FixtureListWindow::onIncChannelButtonClicked));
+      [&]() { IncreaseChannelOrUniverse<1, 0>(); });
   button_box_.pack_start(inc_channel_button_);
 
   dec_universe_button_.signal_clicked().connect(
-      [&]() { OnDecUniverseButtonClicked(); });
+      [&]() { IncreaseChannelOrUniverse<0, -1>(); });
   button_box_.pack_start(dec_universe_button_);
 
   inc_universe_button_.signal_clicked().connect(
-      [&]() { OnIncUniverseButtonClicked(); });
+      [&]() { IncreaseChannelOrUniverse<0, 1>(); });
   button_box_.pack_start(inc_universe_button_);
 
   set_channel_button_.signal_clicked().connect(
@@ -172,30 +172,6 @@ void FixtureListWindow::onRemoveButtonClicked() {
   lock.unlock();
   Instance::Selection().UpdateAfterDelete();
   Instance::Events().EmitUpdate();
-}
-
-void FixtureListWindow::onIncChannelButtonClicked() {
-  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
-      GetSelection();
-  for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
-    fixture->IncChannel();
-    if (!fixture->IsVisible())
-      fixture->SetSymbol(theatre::FixtureSymbol::Normal);
-    updateFixture(fixture.Get());
-  }
-}
-
-void FixtureListWindow::onDecChannelButtonClicked() {
-  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
-      GetSelection();
-  for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
-    fixture->DecChannel();
-    if (!fixture->IsVisible())
-      fixture->SetSymbol(theatre::FixtureSymbol::Normal);
-    updateFixture(fixture.Get());
-  }
 }
 
 void FixtureListWindow::onSetChannelButtonClicked() {
@@ -330,26 +306,27 @@ void FixtureListWindow::onReassignClicked() {
   Instance::Events().EmitUpdate();
 }
 
-void FixtureListWindow::OnDecUniverseButtonClicked() {
+template <int ChannelIncrease, int UniverseIncrease>
+void FixtureListWindow::IncreaseChannelOrUniverse() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
   const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
       GetSelection();
   for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
-    const unsigned universe = fixture->GetUniverse();
-    if (universe > 0) {
-      fixture->SetUniverse(universe - 1);
-      updateFixture(fixture.Get());
+    if constexpr (ChannelIncrease > 0) {
+      for (int i = 0; i != ChannelIncrease; ++i) fixture->IncChannel();
+    } else if constexpr (ChannelIncrease < 0) {
+      for (int i = 0; i != -ChannelIncrease; ++i) fixture->DecChannel();
     }
-  }
-}
-
-void FixtureListWindow::OnIncUniverseButtonClicked() {
-  std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
-      GetSelection();
-  for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
-    const unsigned universe = fixture->GetUniverse();
-    fixture->SetUniverse(universe + 1);
+    if constexpr (ChannelIncrease != 0) {
+      if (!fixture->IsVisible())
+        fixture->SetSymbol(theatre::FixtureSymbol::Normal);
+    }
+    const int universe = fixture->GetUniverse();
+    if constexpr (UniverseIncrease != 0) {
+      if (universe + UniverseIncrease >= 0) {
+        fixture->SetUniverse(universe + UniverseIncrease);
+      }
+    }
     updateFixture(fixture.Get());
   }
 }
