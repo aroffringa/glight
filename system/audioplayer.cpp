@@ -12,20 +12,9 @@ void AudioPlayer::open() {
   snd_pcm_uframes_t buffer_size = _alsaBufferSize;
   snd_pcm_uframes_t period_size = _alsaPeriodSize;
 
-  /*void **hints = nullptr;
-  if (snd_device_name_hint(-1, "pcm", &hints) < 0)
-    throw AlsaError("snd_device_name_hint() returned error");
-  size_t hi = 0;
-  while (hints[hi] != nullptr) {
-    char *deviceName = snd_device_name_get_hint(hints[hi], "NAME");
-    std::cout << " - " << deviceName << '\n';
-    free(deviceName);
-    ++hi;
-  }
-  snd_device_name_free_hint(hints);*/
-
   // Open PCM device for playback.
-  int rc = snd_pcm_open(&_handle, "pulse", SND_PCM_STREAM_PLAYBACK, 0);
+  int rc =
+      snd_pcm_open(&_handle, device_name_.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
   if (rc < 0)
     throw AlsaError(std::string("snd_pcm_open() returned: ") +
                     snd_strerror(rc));

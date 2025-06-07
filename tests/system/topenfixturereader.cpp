@@ -1,4 +1,5 @@
 #include "system/openfixturereader.h"
+#include "system/settings.h"
 
 #include "theatre/fixturetypefunction.h"
 #include "theatre/management.h"
@@ -660,7 +661,8 @@ const char* kFlatParQA12 = R"(
 BOOST_AUTO_TEST_SUITE(open_fixture_reader)
 
 BOOST_AUTO_TEST_CASE(read) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   std::istringstream data_stream(kFlatParQA12);
   std::unique_ptr<json::Node> root = json::Parse(data_stream);
   theatre::Theatre& theatre = management.GetTheatre();

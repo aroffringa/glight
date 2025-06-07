@@ -1,3 +1,5 @@
+#include "system/settings.h"
+
 #include "theatre/fixturecontrol.h"
 #include "theatre/management.h"
 #include "theatre/presetcollection.h"
@@ -14,7 +16,8 @@ using glight::system::TrackablePtr;
 BOOST_AUTO_TEST_SUITE(preset_collection)
 
 BOOST_AUTO_TEST_CASE(Add) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
   Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
@@ -32,7 +35,8 @@ BOOST_AUTO_TEST_CASE(Add) {
 }
 
 BOOST_AUTO_TEST_CASE(SetValue) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
   Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);

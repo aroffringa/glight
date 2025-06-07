@@ -15,6 +15,8 @@
 #include "theatre/filters/automasterfilter.h"
 #include "theatre/filters/rgbfilter.h"
 
+#include "system/settings.h"
+
 #include "gui/state/guistate.h"
 
 #include "system/reader.h"
@@ -286,7 +288,8 @@ void CheckEqual(const Management &a, const Management &b) {
 BOOST_AUTO_TEST_SUITE(file_format)
 
 BOOST_AUTO_TEST_CASE(ReadAndWrite) {
-  Management write_management;
+  glight::system::Settings settings;
+  Management write_management(settings);
   FillManagement(write_management);
 
   glight::gui::GUIState guiState;
@@ -305,7 +308,7 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   std::ostringstream stream;
   glight::system::Write(stream, write_management, &guiState);
 
-  Management read_management;
+  Management read_management(settings);
   //
   // Read and check if the result is correct
   //

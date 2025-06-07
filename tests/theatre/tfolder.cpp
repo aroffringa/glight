@@ -1,3 +1,5 @@
+#include "system/settings.h"
+
 #include "theatre/chase.h"
 #include "theatre/fixturecontrol.h"
 #include "theatre/folder.h"
@@ -123,7 +125,8 @@ BOOST_AUTO_TEST_CASE(GetAvailableName) {
 }
 
 BOOST_AUTO_TEST_CASE(FolderManagement) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   Folder &root = management.RootFolder();
   BOOST_CHECK(root.Children().empty());
   root.SetName("a");
@@ -136,7 +139,8 @@ BOOST_AUTO_TEST_CASE(RemoveFolder) {
   // Test removal of a folder that contains dependencies to
   // other dependent items
 
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   Folder &root = management.RootFolder();
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);

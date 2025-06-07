@@ -63,13 +63,13 @@ class JsonWriter {
   void Number(unsigned number) { IntegerNumber(number); }
   void Number(size_t number) { IntegerNumber(number); }
 
-  void String(const std::string& str) {
+  void String(std::string_view str) {
     Next();
-    Out() << Encode(std::string_view(str));
+    Out() << Encode(str);
     state_ = State::AfterItem;
   }
 
-  void String(const char* name, const std::string& str) {
+  void String(const char* name, std::string_view str) {
     Name(name);
     String(str);
   }

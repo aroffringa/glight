@@ -1,3 +1,5 @@
+#include "system/settings.h"
+
 #include "theatre/management.h"
 
 #include "theatre/scenes/scene.h"
@@ -12,7 +14,8 @@ using system::TrackablePtr;
 BOOST_AUTO_TEST_SUITE(scene)
 
 BOOST_AUTO_TEST_CASE(make) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   const TrackablePtr<Controllable>& scene_ptr = management.AddScene(true);
   BOOST_CHECK(scene_ptr);
   Scene& scene = static_cast<Scene&>(*scene_ptr);

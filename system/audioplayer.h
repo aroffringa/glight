@@ -31,8 +31,9 @@ class AudioPlayer : private SyncListener {
         : runtime_error(std::string("Alsa error: ") + message) {}
   };
 
-  AudioPlayer(FlacDecoder &decoder)
-      : _alsaPeriodSize(256),
+  AudioPlayer(FlacDecoder &decoder, const std::string &device_name)
+      : device_name_(device_name),
+        _alsaPeriodSize(256),
         _alsaBufferSize(2048),
         _alsaThread(),
         _isStopping(false),
@@ -62,6 +63,7 @@ class AudioPlayer : private SyncListener {
   void SetSyncListener(SyncListener &listener) { _syncListener = &listener; }
 
  private:
+  std::string device_name_;
   unsigned char _alsaBuffer[1024 * 64 * 4];
   snd_pcm_t *_handle;
   unsigned _alsaPeriodSize;

@@ -9,6 +9,8 @@
 
 #include "theatre/effects/fadeeffect.h"
 
+#include "system/settings.h"
+
 #include <boost/test/unit_test.hpp>
 
 #include <memory>
@@ -19,14 +21,16 @@ using glight::system::ObservingPtr;
 BOOST_AUTO_TEST_SUITE(management)
 
 BOOST_AUTO_TEST_CASE(Destruct) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   management.Run();
   BOOST_CHECK_THROW(management.Run(), std::exception);
   management.StartBeatFinder();
 }
 
 BOOST_AUTO_TEST_CASE(RemoveObject) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   std::unique_ptr<FadeEffect> effectPtr(new FadeEffect());
   effectPtr->SetName("effect");
   BOOST_CHECK(management.RootFolder().Children().empty());
@@ -48,7 +52,8 @@ BOOST_AUTO_TEST_CASE(RemoveObject) {
 }
 
 BOOST_AUTO_TEST_CASE(GetSpecificControllables) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(),
                     0);
   management.AddEffect(Effect::Make(EffectType::Fade));
@@ -68,7 +73,8 @@ BOOST_AUTO_TEST_CASE(GetSpecificControllables) {
 }
 
 BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
 
   ObservingPtr<FixtureType> typeA =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
@@ -93,7 +99,8 @@ BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
 }
 
 BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   ObservingPtr<FixtureType> fixtureType =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
   management.RootFolder().Add(fixtureType);
@@ -110,7 +117,8 @@ BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
 }
 
 BOOST_AUTO_TEST_CASE(HasCycles) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   BOOST_CHECK_EQUAL(management.HasCycle(), false);
 
   std::unique_ptr<FadeEffect> effectPtr(new FadeEffect());

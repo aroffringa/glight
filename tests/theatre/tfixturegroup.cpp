@@ -1,3 +1,5 @@
+#include "system/settings.h"
+
 #include "theatre/fixturegroup.h"
 #include "theatre/management.h"
 #include "theatre/theatre.h"
@@ -88,7 +90,8 @@ BOOST_AUTO_TEST_CASE(contains) {
 }
 
 BOOST_AUTO_TEST_CASE(add_to_management) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   Theatre& theatre = management.GetTheatre();
   const theatre::FixtureType& type =
       *theatre.AddFixtureType(StockFixture::Rgb3Ch);

@@ -2,6 +2,8 @@
 
 #include "../management.h"
 
+#include "system/settings.h"
+
 #include <iostream>
 
 namespace glight::theatre {
@@ -37,7 +39,8 @@ void Scene::initPlayer() {
       _audioPlayer.reset();
       _decoder.reset();
       _decoder = std::make_unique<system::FlacDecoder>(_audioFilename);
-      _audioPlayer = std::make_unique<system::AudioPlayer>(*_decoder);
+      _audioPlayer = std::make_unique<system::AudioPlayer>(
+          *_decoder, _management.Settings().audio_output);
       _audioPlayer->SetSyncListener(*this);
       try {  // Don't report an error when seeking fails
         _audioPlayer->Seek(_startOffset);

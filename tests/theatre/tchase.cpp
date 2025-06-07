@@ -7,6 +7,8 @@
 #include "theatre/sequence.h"
 #include "theatre/theatre.h"
 
+#include "system/settings.h"
+
 #include <boost/test/unit_test.hpp>
 
 #include <memory>
@@ -17,7 +19,8 @@ using glight::system::ObservingPtr;
 BOOST_AUTO_TEST_SUITE(chase)
 
 BOOST_AUTO_TEST_CASE(remove_indirect) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   Folder &root = management.RootFolder();
   ObservingPtr<FixtureType> ft =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);

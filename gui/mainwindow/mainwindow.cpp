@@ -31,6 +31,7 @@
 
 #include "system/openfixturereader.h"
 #include "system/reader.h"
+#include "system/settings.h"
 #include "system/writer.h"
 
 #include "system/midi/manager.h"
@@ -50,7 +51,8 @@ MainWindow::MainWindow() {
   Instance::Get().SetState(_state);
   Instance::Get().SetSelection(_fixtureSelection);
   Instance::Get().SetEvents(*this);
-  _management = std::make_unique<theatre::Management>();
+  Instance::Settings() = system::LoadSettings();
+  _management = std::make_unique<theatre::Management>(Instance::Settings());
   Instance::Get().SetManagement(*_management);
   _management->StartBeatFinder();
   _management->GetUniverses().Open();
@@ -104,6 +106,8 @@ MainWindow::~MainWindow() {
   _faderWindows.clear();
 
   _management.reset();
+
+  system::Save(Instance::Settings());
 }
 
 void MainWindow::InitializeMenu() {
