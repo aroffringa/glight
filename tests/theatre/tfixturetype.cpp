@@ -1,3 +1,5 @@
+#include "system/settings.h"
+
 #include "theatre/fixture.h"
 #include "theatre/fixturetype.h"
 #include "theatre/management.h"
@@ -60,7 +62,8 @@ BOOST_AUTO_TEST_CASE(ShapeCount) {
 }
 
 Color testColor(StockFixture cl, const std::vector<unsigned char> &values) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   const FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(cl);
   Fixture &rgbFixture = *management.GetTheatre().AddFixture(fixtureType);
   ValueSnapshot snapShot(true, 1);
@@ -115,7 +118,8 @@ BOOST_AUTO_TEST_CASE(GetColor_RGBAWUV) {
 }
 
 BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   const FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise);
   Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
@@ -129,7 +133,8 @@ BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
 }
 
 BOOST_AUTO_TEST_CASE(function_summary) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
 
   const FixtureType &rgb_type =
       *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);

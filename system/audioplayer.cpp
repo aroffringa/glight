@@ -13,7 +13,8 @@ void AudioPlayer::open() {
   snd_pcm_uframes_t period_size = _alsaPeriodSize;
 
   // Open PCM device for playback.
-  int rc = snd_pcm_open(&_handle, "default", SND_PCM_STREAM_PLAYBACK, 0);
+  int rc =
+      snd_pcm_open(&_handle, device_name_.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
   if (rc < 0)
     throw AlsaError(std::string("snd_pcm_open() returned: ") +
                     snd_strerror(rc));

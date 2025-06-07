@@ -75,6 +75,7 @@ set(GUIFILES
   gui/application.cpp
   gui/components/nameframe.cpp
   gui/functions.cpp
+  gui/instance.cpp
   gui/renderengine.cpp
   gui/components/audiowidget.cpp
   gui/components/beatinput.cpp
@@ -130,6 +131,7 @@ set(SYSTEMFILES
   system/jsonwriter.cpp
   system/openfixturereader.cpp
   system/reader.cpp
+  system/settings.cpp
   system/writer.cpp
   system/midi/controller.cpp
   system/midi/manager.cpp

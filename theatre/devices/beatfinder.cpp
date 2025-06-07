@@ -14,7 +14,8 @@ void BeatFinder::open() {
   if (_isOpen) throw AlsaError("Alsa was opened twice");
 
   // Open PCM device for capture.
-  int rc = snd_pcm_open(&_handle, "default", SND_PCM_STREAM_CAPTURE, 0);
+  int rc =
+      snd_pcm_open(&_handle, device_name_.c_str(), SND_PCM_STREAM_CAPTURE, 0);
   if (rc < 0) throw AlsaError(snd_strerror(rc));
   _isOpen = true;
 

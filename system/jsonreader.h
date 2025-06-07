@@ -144,6 +144,12 @@ inline std::string OptionalString(const Object &parent, const char *name,
   return iter == parent.end() ? default_value : ToStr(*iter);
 }
 
+inline void AssignOptionalString(std::string &value, const Object &parent,
+                                 const char *name) {
+  const Object::const_iterator iter = parent.find(name);
+  if (iter != parent.end()) value = ToStr(*iter);
+}
+
 namespace details {
 bool ReadNumber(char first, std::istream &stream, std::string &data);
 bool ReadString(std::istream &stream, std::string &data);

@@ -20,17 +20,9 @@ class BeatFinder {
         : runtime_error(std::string("Alsa error: ") + message) {}
   };
 
-  BeatFinder()
-      : _alsaPeriodSize(256),
-        _alsaBufferSize(2048),
-        _alsaThread(),
-        _isStopping(false),
-        _isOpen(false),
-        _beat(Beat()),
-        _audioLevel(0),
-        _minimumConfidence(0.05) {}
+  BeatFinder(const std::string &device_name) : device_name_(device_name) {}
 
-  virtual ~BeatFinder() { close(); }
+  ~BeatFinder() { close(); }
 
   void Start() {
     _alsaThread = std::make_unique<std::thread>([&]() { TryOpen(); });
@@ -54,10 +46,12 @@ class BeatFinder {
   }
 
   snd_pcm_t *_handle;
-  unsigned _alsaPeriodSize, _alsaBufferSize;
+  unsigned _alsaPeriodSize = 256;
+  unsigned _alsaBufferSize = 2048;
   std::unique_ptr<std::thread> _alsaThread;
-  std::atomic<bool> _isStopping;
-  bool _isOpen;
+  std::atomic<bool> _isStopping = false;
+  bool _isOpen = false;
+  std::string device_name_;
   std::mutex _mutex;
   struct Beat {
     Beat() = default;
@@ -65,9 +59,9 @@ class BeatFinder {
     float value = 0.0;
     float confidence = 0.0;
   };
-  std::atomic<Beat> _beat;
-  std::atomic<uint16_t> _audioLevel;
-  float _minimumConfidence;
+  std::atomic<Beat> _beat = Beat();
+  std::atomic<uint16_t> _audioLevel = 0;
+  float _minimumConfidence = 0.05;
 
   void open();
   void close();

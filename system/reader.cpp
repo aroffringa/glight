@@ -632,7 +632,7 @@ void Read(const std::string &filename, Management &management,
 
 void ImportFixtureTypes(const std::string &filename,
                         theatre::Management &management) {
-  theatre::Management file_management;
+  theatre::Management file_management(management.Settings());
   system::Read(filename, file_management);
   const std::vector<TrackablePtr<theatre::FixtureType>> &new_types =
       file_management.GetTheatre().FixtureTypes();

@@ -15,6 +15,10 @@
 
 #include "devices/universemap.h"
 
+namespace glight::system {
+struct Settings;
+}
+
 namespace glight::theatre {
 
 /**
@@ -22,7 +26,7 @@ namespace glight::theatre {
  */
 class Management {
  public:
-  Management();
+  Management(const system::Settings &settings);
   ~Management();
 
   void Clear();
@@ -150,6 +154,8 @@ class Management {
 
   std::mutex &Mutex() { return _mutex; }
 
+  const system::Settings &Settings() const { return settings_; }
+
   FolderObject &GetObjectFromPath(const std::string &path) const;
 
   FolderObject *GetObjectFromPathIfExists(const std::string &path) const;
@@ -238,6 +244,7 @@ class Management {
   std::unique_ptr<std::thread> _thread;
   std::atomic<bool> _isQuitting = false;
   mutable std::mutex _mutex;
+  const system::Settings &settings_;
   std::chrono::time_point<std::chrono::steady_clock> _createTime =
       std::chrono::steady_clock::now();
   std::mt19937 _randomGenerator;

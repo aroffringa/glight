@@ -1,9 +1,15 @@
 #ifndef GLIGHT_GUI_INSTANCE_H_
 #define GLIGHT_GUI_INSTANCE_H_
 
+#include <memory>
+
 namespace glight {
 namespace theatre {
 class Management;
+}
+
+namespace system {
+struct Settings;
 }
 
 namespace gui {
@@ -18,6 +24,12 @@ class GUIState;
  */
 class Instance {
  public:
+  Instance();
+  ~Instance();
+
+  Instance(const Instance&) = delete;
+  Instance& operator=(const Instance&) = delete;
+
   static Instance& Get() {
     static Instance instance;
     return instance;
@@ -37,11 +49,16 @@ class Instance {
   static GUIState& State() { return *Get().state_; }
   void SetState(GUIState& state) { state_ = &state; }
 
+  static system::Settings& Settings() { return *Get().settings_; }
+
  private:
+  // Because this class is used in many places, all members are pointers
+  // so that extra includes can be avoided.
   theatre::Management* management_;
   EventTransmitter* events_;
   FixtureSelection* selection_;
   GUIState* state_;
+  std::unique_ptr<system::Settings> settings_;
 };
 
 }  // namespace gui

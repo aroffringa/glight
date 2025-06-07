@@ -1,3 +1,5 @@
+#include "system/settings.h"
+
 #include "theatre/fixturecontrol.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
@@ -13,7 +15,8 @@ using system::ObservingPtr;
 BOOST_AUTO_TEST_SUITE(theatre)
 
 BOOST_AUTO_TEST_CASE(add_fixture) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
   Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
@@ -31,7 +34,8 @@ BOOST_AUTO_TEST_CASE(add_fixture) {
 }
 
 BOOST_AUTO_TEST_CASE(AddMany) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
   Fixture *fixture = management.GetTheatre().AddFixture(fixtureType).Get();
@@ -56,7 +60,8 @@ BOOST_AUTO_TEST_CASE(AddMany) {
 }
 
 BOOST_AUTO_TEST_CASE(remove_fixture) {
-  Management management;
+  const glight::system::Settings settings;
+  Management management(settings);
   ObservingPtr<FixtureType> fixtureType =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb3Ch);
   management.RootFolder().Add(fixtureType);

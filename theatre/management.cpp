@@ -21,6 +21,8 @@
 
 #include "devices/beatfinder.h"
 
+#include "system/settings.h"
+
 #include "scenes/scene.h"
 
 namespace glight::theatre {
@@ -29,7 +31,8 @@ using system::MakeTrackable;
 using system::ObservingPtr;
 using system::TrackablePtr;
 
-Management::Management() : _theatre(std::make_unique<Theatre>()) {
+Management::Management(const system::Settings &settings)
+    : settings_(settings), _theatre(std::make_unique<Theatre>()) {
   _rootFolder = _folders.emplace_back(MakeTrackable<Folder>()).Get();
   _rootFolder->SetName("Root");
 }
@@ -44,7 +47,7 @@ Management::~Management() {
 }
 
 void Management::StartBeatFinder() {
-  _beatFinder = std::make_unique<BeatFinder>();
+  _beatFinder = std::make_unique<BeatFinder>(settings_.audio_input);
   _beatFinder->Start();
 }
 
