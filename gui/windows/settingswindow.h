@@ -30,6 +30,12 @@ class SettingsWindow : public ChildWindow {
   void SaveSelectedOlaUniverse();
   void ReloadOla();
 
+  void SetInputAudio();
+  void SetOutputAudio();
+
+  void MakeDmxPage();
+  void MakeAudioPage();
+
   Gtk::Notebook notebook_;
   Gtk::Grid dmx_page_;
   struct UniverseListColumns : public Gtk::TreeModelColumnRecord {
@@ -61,6 +67,18 @@ class SettingsWindow : public ChildWindow {
   Gtk::RadioButton dmx_output_rb_{"Output"};
 
   Gtk::VBox midi_page_;
+
+  std::vector<std::string> input_devices_;
+  std::vector<std::string> output_devices_;
+  Gtk::Grid audio_page_;
+  Gtk::Label audio_page_label_{
+      "Select the Alsa device names to be used. The input device is used for "
+      "beat detection and volume effects. The output device is used for "
+      "playing the audio of scenes."};
+  Gtk::Label input_devices_label_{"Input device: "};
+  Gtk::ComboBoxText input_devices_combo_;
+  Gtk::Label output_devices_label_{"Output device: "};
+  Gtk::ComboBoxText output_devices_combo_;
 
   RecursionLock recursion_lock_;
 };

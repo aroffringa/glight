@@ -194,8 +194,7 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
       const double sin_1 = std::sin(direction_1);
       const double cos_2 = std::cos(direction_2);
       const double sin_2 = std::sin(direction_2);
-      data.cairo->arc_negative(x, y, beam_start_radius, direction_2,
-                               direction_1);
+      data.cairo->arc(x, y, beam_start_radius, direction_2, direction_1);
       data.cairo->line_to(x + cos_1 * beam_end_radius,
                           y + sin_1 * beam_end_radius);
       // small optimization: don't draw an extra arc when the
@@ -334,8 +333,8 @@ void RenderEngine::DrawSelectedFixtures(
     const Cairo::RefPtr<Cairo::Context> &cairo,
     const std::vector<system::ObservingPtr<theatre::Fixture>>
         &selected_fixtures) const {
-  cairo->set_source_rgb(0.2, 0.2, 1.0);
   cairo->set_line_width(4.0 / scale_);
+  cairo->set_source_rgb(0.2, 0.2, 1.0);
   for (const system::ObservingPtr<theatre::Fixture> &fixture_ptr :
        selected_fixtures) {
     const theatre::Fixture *f = fixture_ptr.Get();
@@ -348,10 +347,16 @@ void RenderEngine::DrawSelectedFixtures(
       cairo->arc(x, y, radius, 0.0, 2.0 * M_PI);
       const double cos_dir = std::cos(direction);
       const double sin_dir = std::sin(direction);
-      cairo->move_to(x + radius * kRotationHandleEnd * cos_dir,
-                     y + radius * kRotationHandleEnd * sin_dir);
+      const double end_x = x + radius * kRotationHandleEnd * cos_dir;
+      const double end_y = y + radius * kRotationHandleEnd * sin_dir;
+      cairo->move_to(end_x, end_y);
       cairo->line_to(x + radius * kRotationHandleStart * cos_dir,
                      y + radius * kRotationHandleStart * sin_dir);
+      cairo->stroke();
+      cairo->arc(end_x, end_y, 5.0 / scale_, 0.0, 2.0 * M_PI);
+      cairo->set_source_rgb(0.2, 0.5, 1.0);
+      cairo->fill_preserve();
+      cairo->set_source_rgb(0.2, 0.2, 1.0);
       cairo->stroke();
     }
   }
