@@ -12,7 +12,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     libflac++-dev \
     libgtkmm-3.0-dev \
     libola-dev \
-    libxml2-dev \
     lsb-release
 
 ADD . /src
