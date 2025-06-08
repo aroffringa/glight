@@ -1,8 +1,13 @@
 #include "settingswindow.h"
 
+#include <cassert>
 #include <variant>
 
+#include <alsa/asoundlib.h>
+
 #include "gui/instance.h"
+
+#include "system/settings.h"
 
 #include "theatre/management.h"
 
@@ -15,6 +20,20 @@ using theatre::devices::OutputMapping;
 using theatre::devices::UniverseMap;
 
 SettingsWindow::SettingsWindow() {
+  MakeDmxPage();
+
+  // notebook_.append_page(midi_page_, "MIDI");
+
+  MakeAudioPage();
+
+  add(notebook_);
+  notebook_.show_all();
+
+  FillUniverses();
+  UpdateAfterSelection();
+}
+
+void SettingsWindow::MakeDmxPage() {
   universe_list_store_ = Gtk::ListStore::create(universe_columns_);
   universe_list_view_.set_model(universe_list_store_);
   universe_list_view_.append_column("Universe", universe_columns_.universe_);
@@ -66,14 +85,62 @@ SettingsWindow::SettingsWindow() {
   dmx_output_rb_.signal_clicked().connect(save_universe);
   dmx_page_.attach(dmx_output_rb_, 0, 6, 2, 1);
   notebook_.append_page(dmx_page_, "DMX");
+}
 
-  notebook_.append_page(midi_page_, "MIDI");
-
-  add(notebook_);
-  notebook_.show_all();
-
-  FillUniverses();
-  UpdateAfterSelection();
+void SettingsWindow::MakeAudioPage() {
+  void** hints = nullptr;
+  if (snd_device_name_hint(-1, "pcm", &hints) >= 0) {
+    size_t hi = 0;
+    output_devices_combo_.remove_all();
+    const std::string selected_input = Instance::Settings().audio_input;
+    const std::string selected_output = Instance::Settings().audio_output;
+    while (hints[hi] != nullptr) {
+      char* device_name = snd_device_name_get_hint(hints[hi], "NAME");
+      char* device_desc = snd_device_name_get_hint(hints[hi], "DESC");
+      char* input_or_output = snd_device_name_get_hint(hints[hi], "IOID");
+      const bool is_input = input_or_output == nullptr ||
+                            std::strcmp(input_or_output, "Input") == 0;
+      const bool is_output = input_or_output == nullptr ||
+                             std::strcmp(input_or_output, "Output") == 0;
+      assert(is_input || is_output);
+      std::string device_desc_str(device_desc);
+      const std::size_t new_line = device_desc_str.find('\n');
+      if (new_line != std::string::npos) {
+        device_desc_str.resize(new_line);
+      }
+      const std::string description_with_name =
+          device_desc_str + " (" + device_name + ")";
+      if (is_input) {
+        input_devices_combo_.append(description_with_name);
+        input_devices_.emplace_back(device_name);
+      }
+      if (is_output) {
+        output_devices_combo_.append(description_with_name);
+        output_devices_.emplace_back(device_name);
+      }
+      if (selected_input == device_name) input_devices_combo_.set_active(hi);
+      if (selected_output == device_name) output_devices_combo_.set_active(hi);
+      free(input_or_output);
+      free(device_desc);
+      free(device_name);
+      ++hi;
+    }
+    snd_device_name_free_hint(hints);
+  }
+  input_devices_combo_.signal_changed().connect([&]() { SetInputAudio(); });
+  output_devices_combo_.signal_changed().connect([&]() { SetOutputAudio(); });
+  audio_page_label_.set_line_wrap(true);
+  audio_page_label_.set_max_width_chars(40);
+  audio_page_label_.set_margin_start(8);
+  audio_page_label_.set_margin_end(8);
+  audio_page_label_.set_margin_top(8);
+  audio_page_label_.set_margin_bottom(8);
+  audio_page_.attach(audio_page_label_, 0, 0, 2, 1);
+  audio_page_.attach(input_devices_label_, 0, 1);
+  audio_page_.attach(input_devices_combo_, 1, 1);
+  audio_page_.attach(output_devices_label_, 0, 2);
+  audio_page_.attach(output_devices_combo_, 1, 2);
+  notebook_.append_page(audio_page_, "Audio");
 }
 
 void SettingsWindow::FillUniverses() {
@@ -261,6 +328,19 @@ void SettingsWindow::ReloadOla() {
   lock.unlock();
   FillUniverses();
   UpdateAfterSelection();
+}
+
+void SettingsWindow::SetInputAudio() {
+  const std::string& selected_device =
+      input_devices_[input_devices_combo_.get_active_row_number()];
+  Instance::Settings().audio_input = selected_device;
+  Instance::Management().StartBeatFinder();
+}
+
+void SettingsWindow::SetOutputAudio() {
+  const std::string& selected_device =
+      output_devices_[output_devices_combo_.get_active_row_number()];
+  Instance::Settings().audio_output = selected_device;
 }
 
 }  // namespace glight::gui::windows

@@ -47,6 +47,10 @@ Management::~Management() {
 }
 
 void Management::StartBeatFinder() {
+  std::lock_guard<std::mutex> lock(_mutex);
+  // In case the beat finder is already running, it is better to stop it first
+  // so the audio device is not used twice.
+  _beatFinder.reset();
   _beatFinder = std::make_unique<BeatFinder>(settings_.audio_input);
   _beatFinder->Start();
 }

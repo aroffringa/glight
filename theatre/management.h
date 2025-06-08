@@ -40,6 +40,14 @@ class Management {
 
   void Run();
 
+  /**
+   * Start or restart the beat finder. This is not done automatically because
+   * for testing and certain other scenarios it might not be desirable to access
+   * the audio device.
+   *
+   * If the beat finder is running, calling this function again can be used to
+   * use a new device after the device has been changed in the settings.
+   */
   void StartBeatFinder();
   BeatFinder &GetBeatFinder() { return *_beatFinder; }
 
