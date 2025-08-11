@@ -6,6 +6,6 @@ WORKDIR /src
 RUN \
   apt-get -y update && \
   apt-get -y dist-upgrade && \
-  ls -alh ./build/package/glight-0.9.2-Ubuntu22.deb && \
-  apt-get -y install ./build/package/glight-0.9.2-Ubuntu22.deb
+  ls -alh ./build/package/glight-0.9.3-Ubuntu22.deb && \
+  apt-get -y install ./build/package/glight-0.9.3-Ubuntu22.deb
 

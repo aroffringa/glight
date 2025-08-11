@@ -20,7 +20,7 @@
 namespace glight::gui::windows {
 
 FixtureProperties::FixtureProperties() {
-  set_title("Glight - fixture types");
+  set_title("Glight - fixture properties");
   set_size_request(200, 400);
 
   auto update_lambda = [&]() { FixtureProperties::update(); };
