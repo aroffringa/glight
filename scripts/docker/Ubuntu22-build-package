@@ -24,4 +24,4 @@ RUN \
   cd /build && \
   cmake ../src && \
   make package -j`nproc` && \
-  apt-get install ./glight-0.9.2-Linux.deb
+  apt-get install ./glight-0.9.3-Linux.deb

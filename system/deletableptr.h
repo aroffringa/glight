@@ -40,7 +40,7 @@ class DeletablePtr {
   }
 
   DeletablePtr& operator=(const DeletablePtr& source) = default;
-  DeletablePtr& operator=(nullptr_t) { Reset(); }
+  DeletablePtr& operator=(std::nullptr_t) { Reset(); }
   DeletablePtr& operator=(DeletablePtr&& source) {
     Reset();
     std::swap(source.pointer_, pointer_);

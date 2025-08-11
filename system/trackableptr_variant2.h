@@ -75,7 +75,7 @@ class TrackablePtr {
   }
 
   /**
-   * Move assign an TrackablePtr. The @p rhs will be reset, and all observers
+   * Move assign a TrackablePtr. The @p rhs will be reset, and all observers
    * that track the rhs beforehand, will track the destination object
    * afterwards.
    */
