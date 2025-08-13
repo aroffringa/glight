@@ -74,9 +74,7 @@ class Management {
   void RemoveObject(FolderObject &object);
 
   const system::TrackablePtr<Controllable> &AddPresetCollection();
-  system::ObservingPtr<PresetCollection> AddPresetCollectionPtr() {
-    return AddPresetCollection().GetObserver<PresetCollection>();
-  }
+  system::ObservingPtr<PresetCollection> AddPresetCollectionPtr();
 
   void RemoveControllable(Controllable &controllable);
   bool Contains(const Controllable &controllable) const;
@@ -102,16 +100,12 @@ class Management {
   const system::TrackablePtr<Controllable> &AddFixtureControl(
       const Fixture &fixture);
   system::ObservingPtr<FixtureControl> AddFixtureControlPtr(
-      const Fixture &fixture) {
-    return AddFixtureControl(fixture).GetObserver<FixtureControl>();
-  }
+      const Fixture &fixture);
 
   const system::TrackablePtr<Controllable> &AddFixtureControl(
       const Fixture &fixture, const Folder &parent);
   system::ObservingPtr<FixtureControl> AddFixtureControlPtr(
-      const Fixture &fixture, const Folder &parent) {
-    return AddFixtureControl(fixture, parent).GetObserver<FixtureControl>();
-  };
+      const Fixture &fixture, const Folder &parent);
 
   system::ObservingPtr<FixtureControl> GetFixtureControl(
       const Fixture &fixture) const;
@@ -130,14 +124,10 @@ class Management {
   bool Contains(const SourceValue &sourceValue) const;
 
   const system::TrackablePtr<Controllable> &AddChase();
-  system::ObservingPtr<Chase> AddChasePtr() {
-    return AddChase().GetObserver<Chase>();
-  }
+  system::ObservingPtr<Chase> AddChasePtr();
 
   const system::TrackablePtr<Controllable> &AddTimeSequence();
-  system::ObservingPtr<TimeSequence> AddTimeSequencePtr() {
-    return AddTimeSequence().GetObserver<TimeSequence>();
-  }
+  system::ObservingPtr<TimeSequence> AddTimeSequencePtr();
 
   /**
    * Add an effect and do not place it in a folder. The caller needs to
@@ -156,9 +146,7 @@ class Management {
                                             Folder &folder);
 
   const system::TrackablePtr<Controllable> &AddScene(bool in_folder);
-  system::ObservingPtr<Scene> AddScenePtr(bool in_folder) {
-    return AddScene(in_folder).GetObserver<Scene>();
-  }
+  system::ObservingPtr<Scene> AddScenePtr(bool in_folder);
 
   std::mutex &Mutex() { return _mutex; }
 

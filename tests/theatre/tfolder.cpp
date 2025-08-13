@@ -2,6 +2,7 @@
 
 #include "theatre/chase.h"
 #include "theatre/fixturecontrol.h"
+#include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/folderoperations.h"
 #include "theatre/management.h"
@@ -144,7 +145,7 @@ BOOST_AUTO_TEST_CASE(RemoveFolder) {
   Folder &root = management.RootFolder();
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
-  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   ObservingPtr<FixtureControl> control =
       management.AddFixtureControlPtr(fixture, root);
 

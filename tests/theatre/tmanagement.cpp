@@ -1,5 +1,6 @@
 #include "theatre/chase.h"
 #include "theatre/fixturecontrol.h"
+#include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
 #include "theatre/presetcollection.h"
@@ -104,7 +105,7 @@ BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
   ObservingPtr<FixtureType> fixtureType =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
   management.RootFolder().Add(fixtureType);
-  Fixture &fixture = *management.GetTheatre().AddFixture(*fixtureType);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType->Modes().front());
   FixtureControl &control =
       *management.AddFixtureControlPtr(fixture, management.RootFolder());
   SourceValue &value = management.AddSourceValue(control, 0);

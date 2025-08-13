@@ -21,7 +21,7 @@ TimeSequence &MakeRotation(
   assert(!colors.empty());
 
   const ObservingPtr<TimeSequence> result_ptr =
-      management.AddTimeSequence().GetObserver<TimeSequence>();
+      management.AddTimeSequencePtr();
   TimeSequence &result = *result_ptr;
   result.SetName(destination.GetAvailableName("Rotation"));
   result.SetRepeatCount(0);

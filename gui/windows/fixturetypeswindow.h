@@ -49,6 +49,7 @@ class FixtureTypesWindow : public ChildWindow {
   void onSelectionChanged();
   std::pair<theatre::FixtureType*, theatre::FixtureMode*> GetSelected();
   void Select(const theatre::FixtureMode &selection);
+  void Select(const theatre::FixtureType &selection);
   void SelectFixtures(const theatre::FixtureMode &mode);
   void SelectFixtures(const theatre::FixtureType &type);
 

@@ -82,8 +82,7 @@ void ColorSelectWidget::OpenVariableSelection() {
       effect->SetName(string_dialog.Value());
       theatre::Management &management = Instance::Management();
       system::ObservingPtr<theatre::Effect> added =
-          management.AddEffect(std::move(effect), parent)
-              .GetObserver<theatre::Effect>();
+          management.AddEffectPtr(std::move(effect), parent);
       for (size_t i = 0; i != added->NInputs(); ++i)
         management.AddSourceValue(*added, i);
       Instance::Events().EmitUpdate();

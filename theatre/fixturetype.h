@@ -50,12 +50,22 @@ public:
 
   FixtureType(const std::string& name);
 
-  FixtureClass GetFixtureClass() const { return class_; }
+  FixtureType(const FixtureType& source) : FolderObject(source), data_(source.data_) {
+    // The modes have a pointer to the fixture type, so need to
+    // be explicitly copied.
+    for(const FixtureMode& source_mode : source.Modes()) {
+      FixtureMode& new_mode = AddMode();
+      new_mode.SetName(source_mode.Name());
+      new_mode.SetFunctions(source_mode.Functions());
+    }
+  }
 
-  void SetFixtureClass(FixtureClass new_class) { class_ = new_class; }
+  FixtureClass GetFixtureClass() const { return data_.class_; }
+
+  void SetFixtureClass(FixtureClass new_class) { data_.class_ = new_class; }
 
   size_t ShapeCount() const {
-    switch (class_) {
+    switch (data_.class_) {
       case FixtureClass::Par:
         return 1;
       case FixtureClass::RingedPar:
@@ -80,8 +90,8 @@ public:
     throw std::runtime_error("ModeIndex(): can't find specified mode");
   }
 
-  const std::string &ShortName() const { return short_name_; }
-  void SetShortName(const std::string &short_name) { short_name_ = short_name; }
+  const std::string &ShortName() const { return data_.short_name_; }
+  void SetShortName(const std::string &short_name) { data_.short_name_ = short_name; }
 
   /**
    * For a non-zoomable fixture, the static full-width half-maximum angle
@@ -89,74 +99,76 @@ public:
    * smallest angle that the beam can make. If the fixture has no beam, it will
    * be zero.
    */
-  double MinBeamAngle() const { return min_beam_angle_; }
+  double MinBeamAngle() const { return data_.min_beam_angle_; }
   void SetMinBeamAngle(double min_beam_angle) {
-    min_beam_angle_ = min_beam_angle;
+    data_.min_beam_angle_ = min_beam_angle;
   }
 
-  double MaxBeamAngle() const { return max_beam_angle_; }
+  double MaxBeamAngle() const { return data_.max_beam_angle_; }
   void SetMaxBeamAngle(double max_beam_angle) {
-    max_beam_angle_ = max_beam_angle;
+    data_.max_beam_angle_ = max_beam_angle;
   }
 
   /**
    * Pan is the horizonal / primary axis rotation of a beamed device (e.g.
    * moving head), in radians.
    */
-  double MinPan() const { return min_pan_; }
-  void SetMinPan(double min_pan) { min_pan_ = min_pan; }
+  double MinPan() const { return data_.min_pan_; }
+  void SetMinPan(double min_pan) { data_.min_pan_ = min_pan; }
 
-  double MaxPan() const { return max_pan_; }
-  void SetMaxPan(double max_pan) { max_pan_ = max_pan; }
+  double MaxPan() const { return data_.max_pan_; }
+  void SetMaxPan(double max_pan) { data_.max_pan_ = max_pan; }
 
   /**
    * Tilt is the vertical / 2nd axis rotation of a beamed device (e.g. moving
    * head), in radians.
    */
-  double MinTilt() const { return min_tilt_; }
-  void SetMinTilt(double min_tilt) { min_tilt_ = min_tilt; }
+  double MinTilt() const { return data_.min_tilt_; }
+  void SetMinTilt(double min_tilt) { data_.min_tilt_ = min_tilt; }
 
-  double MaxTilt() const { return max_tilt_; }
-  void SetMaxTilt(double max_tilt) { max_tilt_ = max_tilt; }
+  double MaxTilt() const { return data_.max_tilt_; }
+  void SetMaxTilt(double max_tilt) { data_.max_tilt_ = max_tilt; }
 
-  bool CanZoom() const { return min_beam_angle_ != max_beam_angle_; }
-  bool CanBeamRotate() const { return min_pan_ != max_pan_; }
-  bool CanBeamTilt() const { return min_tilt_ != max_tilt_; }
+  bool CanZoom() const { return data_.min_beam_angle_ != data_.max_beam_angle_; }
+  bool CanBeamRotate() const { return data_.min_pan_ != data_.max_pan_; }
+  bool CanBeamTilt() const { return data_.min_tilt_ != data_.max_tilt_; }
 
   /**
    * Distance in meters that the beam can reach at the static beam angle.
    * For a zoomable fixture, it is the reached distance when using the smallest
    * angle.
    */
-  double Brightness() const { return brightness_; }
-  void SetBrightness(double brightness) { brightness_ = brightness; }
+  double Brightness() const { return data_.brightness_; }
+  void SetBrightness(double brightness) { data_.brightness_ = brightness; }
 
   /// Maximum power drawn by this fixture, in watts.
-  unsigned MaxPower() const { return max_power_; }
-  void SetMaxPower(unsigned max_power) { max_power_ = max_power; }
+  unsigned MaxPower() const { return data_.max_power_; }
+  void SetMaxPower(unsigned max_power) { data_.max_power_ = max_power; }
 
-  unsigned IdlePower() const { return idle_power_; }
-  void SetIdlePower(unsigned idle_power) { idle_power_ = idle_power; }
+  unsigned IdlePower() const { return data_.idle_power_; }
+  void SetIdlePower(unsigned idle_power) { data_.idle_power_ = idle_power; }
 
 private:
   static void SetRgbAdj6chMacroParameters(ColorRangeParameters &macro);
   static void SetH2OMacroParameters(ColorRangeParameters &macro);
   static void SetBTMacroParameters(ColorRangeParameters &macro);
 
-  FixtureClass class_ = FixtureClass::Par;
-
   std::vector<FixtureMode> modes_;
-  std::string short_name_;
 
-  double min_beam_angle_ = 30.0 * M_PI / 180.0;
-  double max_beam_angle_ = 30.0 * M_PI / 180.0;
-  double min_pan_ = 0.0;
-  double max_pan_ = 0.0;
-  double min_tilt_ = 0.0;
-  double max_tilt_ = 0.0;
-  double brightness_ = 10.0;
-  unsigned max_power_ = 0;
-  unsigned idle_power_ = 0;
+  struct Data {
+    FixtureClass class_ = FixtureClass::Par;
+    std::string short_name_;
+
+    double min_beam_angle_ = 30.0 * M_PI / 180.0;
+    double max_beam_angle_ = 30.0 * M_PI / 180.0;
+    double min_pan_ = 0.0;
+    double max_pan_ = 0.0;
+    double min_tilt_ = 0.0;
+    double max_tilt_ = 0.0;
+    double brightness_ = 10.0;
+    unsigned max_power_ = 0;
+    unsigned idle_power_ = 0;
+  } data_;
 };
 
 inline std::map<std::string, FixtureType> GetStockTypes() {

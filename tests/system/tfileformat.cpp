@@ -48,10 +48,10 @@ void FillManagement(Management &management) {
   // Make a group with the two fixtures
   management.AddFixtureGroup(root, "Ayra and ADJ");
 
-  ObservingPtr<FixtureMode> ft =
+  ObservingPtr<FixtureType> ft =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgbw4Ch);
   root.Add(ft);
-  Fixture &f = *management.GetTheatre().AddFixture(*ft);
+  Fixture &f = *management.GetTheatre().AddFixture(ft->Modes().front());
   FixtureControl &fc = *management.AddFixtureControlPtr(f, subFolder);
   fc.SetName("Control for RGBW fixture");
   fc.AddFilter(std::make_unique<RgbFilter>());

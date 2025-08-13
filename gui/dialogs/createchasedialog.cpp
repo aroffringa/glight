@@ -107,7 +107,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
     theatre::Management &management = Instance::Management();
     std::unique_lock<std::mutex> lock(management.Mutex());
 
-    _newChase = management.AddChase().GetObserver<theatre::Chase>();
+    _newChase = management.AddChasePtr();
     management.AddSourceValue(*_newChase, 0);
     _newChase->SetName(folder.GetAvailableName("Chase"));
     folder.Add(_newChase);

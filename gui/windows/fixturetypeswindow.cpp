@@ -143,10 +143,15 @@ void FixtureTypesWindow::fillList() {
     const Gtk::TreeModel::Row &row = *iter;
     row[list_columns_.fixture_type_] = project_type.Get();
     row[list_columns_.name_] = project_type->Name();
-    row[list_columns_.functions_] = FunctionSummary(*project_type);
     row[list_columns_.in_use_] = management.GetTheatre().IsUsed(*project_type);
     if (selected_type && selected_type == project_type.Get()) {
       tree_view_.get_selection()->select(row);
+    }
+    for(const FixtureMode& mode : project_type->Modes()) {
+      Gtk::TreeModel::iterator child_iter = tree_model_->append(row.children());
+    const Gtk::TreeModel::Row &child_row = *child_iter;
+      child_row[list_columns_.functions_] = FunctionSummary(mode);
+      child_row[list_columns_.in_use_] = management.GetTheatre().IsUsed(mode);
     }
   }
 }
@@ -193,10 +198,9 @@ void FixtureTypesWindow::onSaveClicked() {
     }
   } else {
     if (!type) {
-      FixtureType ft;
       ObservingPtr<FixtureType> new_type = Instance::Management()
                                               .GetTheatre()
-                                              .AddFixtureType(ft)
+                                              .AddFixtureType(system::MakeTrackable<FixtureType>())
                                               .GetObserver<FixtureType>();
       type = new_type.Get();
       Instance::Management().RootFolder().Add(std::move(new_type));
@@ -238,10 +242,18 @@ void FixtureTypesWindow::onSaveClicked() {
 
 void FixtureTypesWindow::Select(const FixtureMode &selection) {
   Gtk::TreeModel::Children children = tree_model_->children();
-  for (Gtk::TreeIter iter = children.begin(), end = children.end(); iter != end;
-       ++iter) {
-    Gtk::TreeRow row = *iter;
+  for (Gtk::TreeRow row : children) {
     if (row[list_columns_.fixture_mode_] == &selection) {
+      tree_view_.get_selection()->select(row);
+      break;
+    }
+  }
+}
+
+void FixtureTypesWindow::Select(const FixtureType &selection) {
+  Gtk::TreeModel::Children children = tree_model_->children();
+  for (Gtk::TreeRow row : children) {
+    if (row[list_columns_.fixture_type_] == &selection) {
       tree_view_.get_selection()->select(row);
       break;
     }

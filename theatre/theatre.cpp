@@ -12,6 +12,9 @@ namespace glight::theatre {
 
 using system::TrackablePtr;
 
+Theatre::Theatre() = default;
+Theatre::~Theatre() = default;
+
 void Theatre::Clear() {
   _fixtures.clear();
   _fixtureTypes.clear();
@@ -52,15 +55,14 @@ const TrackablePtr<Fixture> &Theatre::AddFixture(const FixtureMode &mode) {
 }
 
 const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
-    StockFixture fixtureClass) {
+    StockFixture stock_fixture) {
   return _fixtureTypes.emplace_back(
-      system::MakeTrackable<FixtureType>(fixtureClass));
+      system::MakeTrackable<FixtureType>(stock_fixture));
 }
 
 const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
-    const FixtureType &fixture_type) {
-  return _fixtureTypes.emplace_back(
-      system::MakeTrackable<FixtureType>(fixture_type));
+    TrackablePtr<FixtureType>&& fixture_type) {
+  return _fixtureTypes.emplace_back(std::move(fixture_type));
 }
 
 bool Theatre::Contains(Fixture &fixture) const {

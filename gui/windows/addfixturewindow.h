@@ -37,9 +37,11 @@ class AddFixtureWindow : public Gtk::Window {
     TypeColumns() {
       add(type_);
       add(type_str_);
+      add(stock_fixture_);
     }
     Gtk::TreeModelColumn<const theatre::FixtureType *> type_;
     Gtk::TreeModelColumn<Glib::ustring> type_str_;
+    Gtk::TreeModelColumn<theatre::StockFixture> stock_fixture_;
   } type_columns_;
 
   Gtk::Grid _grid;

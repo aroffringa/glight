@@ -198,9 +198,7 @@ void ChasePropertiesWindow::onUpdateControllables() {
 
 void ChasePropertiesWindow::onToTimeSequenceClicked() {
   const ObservingPtr<theatre::TimeSequence> time_sequence_ptr =
-      Instance::Management()
-          .AddTimeSequence()
-          .GetObserver<theatre::TimeSequence>();
+      Instance::Management().AddTimeSequencePtr();
   theatre::TimeSequence &tSequence = *time_sequence_ptr;
   tSequence.SetRepeatCount(0);
   size_t index = 0;

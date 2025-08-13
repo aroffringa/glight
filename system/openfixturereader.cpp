@@ -122,12 +122,12 @@ void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
       ParseFunctions(fixture_object);
   const std::string fixture_name = ToStr(fixture_object["name"]);
   const json::Array& modes = ToArr(fixture_object["modes"]);
-  FixtureType fixture_type(fixture_name);
+  TrackablePtr<FixtureType> fixture_type = MakeTrackable<FixtureType>(fixture_name);
   for (const json::Node& mode_node : modes) {
     const json::Object& mode = ToObj(mode_node);
     const std::string mode_name = ToStr(mode["name"]);
     const json::Array& mode_channels = ToArr(mode["channels"]);
-    FixtureMode fixture_mode(fixture_type);
+    FixtureMode& fixture_mode = fixture_type->AddMode();
     fixture_mode.SetName(mode_name);
     std::vector<FixtureModeFunction> mode_functions;
     size_t dmx_channel = 0;
@@ -144,10 +144,10 @@ void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
         ++dmx_channel;
     }
     fixture_mode.SetFunctions(mode_functions);
-    system::ObservingPtr<FixtureMode> added_type =
-        management.GetTheatre().AddFixtureType(fixture_type).GetObserver();
-    management.RootFolder().Add(std::move(added_type));
   }
+  system::ObservingPtr<FixtureType> added_type =
+      management.GetTheatre().AddFixtureTypePtr(std::move(fixture_type));
+  management.RootFolder().Add(std::move(added_type));
 }
 
 }  // namespace glight::system

@@ -139,7 +139,7 @@ PresetCollection &MakeColorPreset(
     const std::vector<ColorOrVariable> &colors,
     const ColorDeduction &deduction) {
   ObservingPtr<PresetCollection> pc =
-      management.AddPresetCollection().GetObserver<PresetCollection>();
+      management.AddPresetCollectionPtr();
   pc->SetName(destination.GetAvailableName("Colourpreset"));
   destination.Add(pc);
   for (size_t cIndex = 0; cIndex != controllables.size(); ++cIndex) {
@@ -158,7 +158,7 @@ void MakeColorPresetPerFixture(
     const ColorDeduction &deduction) {
   for (size_t cIndex = 0; cIndex != controllables.size(); ++cIndex) {
     ObservingPtr<PresetCollection> pc_ptr =
-        management.AddPresetCollection().GetObserver<PresetCollection>();
+        management.AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName("Colourpreset"));
     destination.Add(std::move(pc_ptr));

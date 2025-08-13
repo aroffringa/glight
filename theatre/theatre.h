@@ -4,9 +4,10 @@
 #include <memory>
 #include <vector>
 
-#include "fixture.h"
-#include "fixturemode.h"
 #include "coordinate3d.h"
+#include "dmxchannel.h"
+#include "forwards.h"
+#include "stockfixture.h"
 
 #include "system/trackableptr.h"
 
@@ -17,8 +18,8 @@ namespace glight::theatre {
  */
 class Theatre {
  public:
-  Theatre() = default;
-  // Theatre(const Theatre &source);
+  Theatre();
+  ~Theatre();
 
   void Clear();
 
@@ -27,17 +28,15 @@ class Theatre {
     return AddFixture(mode).GetObserver();
   }
 
-  const system::TrackablePtr<FixtureType> &AddFixtureType(
-      StockFixture fixture_class);
-  system::ObservingPtr<FixtureType> AddFixtureTypePtr(
-      StockFixture fixture_class) {
-    return AddFixtureType(fixture_class).GetObserver();
+  const system::TrackablePtr<FixtureType> &AddFixtureType(StockFixture stock_fixture);
+  system::ObservingPtr<FixtureType> AddFixtureTypePtr(StockFixture stock_fixture) {
+    return AddFixtureType(stock_fixture).GetObserver();
   }
 
   const system::TrackablePtr<FixtureType> &AddFixtureType(
-      const FixtureType &type);
-  system::ObservingPtr<FixtureType> AddFixtureTypePtr(const FixtureType &type) {
-    return AddFixtureType(type).GetObserver();
+      system::TrackablePtr<FixtureType>&& type);
+  system::ObservingPtr<FixtureType> AddFixtureTypePtr(system::TrackablePtr<FixtureType>&& type) {
+    return AddFixtureType(std::move(type)).GetObserver();
   }
 
   bool Contains(Fixture &fixture) const;
@@ -53,6 +52,10 @@ class Theatre {
   system::ObservingPtr<Fixture> GetFixturePtr(const std::string &name) const;
   const system::TrackablePtr<FixtureType> &GetFixtureType(
       const std::string &name) const;
+  system::ObservingPtr<FixtureType> GetFixtureTypePtr(
+      const std::string &name) const {
+    return GetFixtureType(name).GetObserver();
+  }
   FixtureFunction &GetFixtureFunction(const std::string &name) const;
 
   void RemoveFixture(const Fixture &fixture);

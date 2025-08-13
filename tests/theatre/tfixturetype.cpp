@@ -67,8 +67,8 @@ BOOST_AUTO_TEST_CASE(ShapeCount) {
 Color testColor(StockFixture cl, const std::vector<unsigned char> &values) {
   const glight::system::Settings settings;
   Management management(settings);
-  const FixtureMode &fixtureType = *management.GetTheatre().AddFixtureType(cl);
-  Fixture &rgbFixture = *management.GetTheatre().AddFixture(fixtureType);
+  const FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(cl);
+  Fixture &rgbFixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   uni.SetValues(values.data(), values.size());
@@ -123,9 +123,9 @@ BOOST_AUTO_TEST_CASE(GetColor_RGBAWUV) {
 BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
   const glight::system::Settings settings;
   Management management(settings);
-  const FixtureMode &fixtureType =
+  const FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise);
-  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   // Master, R, G, B, Strobe, Rotation, Macro
@@ -139,13 +139,13 @@ BOOST_AUTO_TEST_CASE(function_summary) {
   const glight::system::Settings settings;
   Management management(settings);
 
-  const FixtureMode &rgb_type =
+  const FixtureType &rgb_type =
       *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
-  BOOST_CHECK_EQUAL(FunctionSummary(rgb_type), "R-G-B");
+  BOOST_CHECK_EQUAL(FunctionSummary(rgb_type.Modes().front()), "R-G-B");
 
-  const FixtureMode &btv_type =
+  const FixtureType &btv_type =
       *management.GetTheatre().AddFixtureType(StockFixture::BT_VINTAGE_7CH);
-  BOOST_CHECK_EQUAL(FunctionSummary(btv_type), "W-M-S-R-G-B-C");
+  BOOST_CHECK_EQUAL(FunctionSummary(btv_type.Modes().front()), "W-M-S-R-G-B-C");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

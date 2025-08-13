@@ -652,7 +652,7 @@ BOOST_AUTO_TEST_CASE(cast_observable_ptr) {
   ChildTracker* tracker = new ChildTracker();
   const TrackablePtr<ChildTracker> a(tracker);
   {
-    const ObservingPtr<Tracker> x = a.GetObserver<Tracker>();
+    const ObservingPtr<Tracker> x = StaticObserverCast<Tracker>(a.GetObserver());
     BOOST_CHECK(x);
     BOOST_CHECK_EQUAL(x.Get(), tracker);
     const ObservingPtr<ChildTracker> y =
