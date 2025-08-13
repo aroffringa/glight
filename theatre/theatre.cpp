@@ -61,7 +61,7 @@ const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
 }
 
 const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
-    TrackablePtr<FixtureType>&& fixture_type) {
+    TrackablePtr<FixtureType> &&fixture_type) {
   return _fixtureTypes.emplace_back(std::move(fixture_type));
 }
 

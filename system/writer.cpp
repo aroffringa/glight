@@ -113,7 +113,8 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   state.writer.StartObject();
   writeNameAttributes(state, fixture);
   state.writer.String("type", fixture.Mode().Type().Name());
-  state.writer.Number("mode-index", fixture.Mode().Type().ModeIndex(fixture.Mode()));
+  state.writer.Number("mode-index",
+                      fixture.Mode().Type().ModeIndex(fixture.Mode()));
   state.writer.Number("position-x", fixture.GetPosition().X());
   state.writer.Number("position-y", fixture.GetPosition().Y());
   if (fixture.GetPosition().Z() != Fixture::kDefaultHeight)

@@ -20,7 +20,8 @@ BOOST_AUTO_TEST_CASE(add_fixture) {
   Management management(settings);
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
-  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  Fixture &fixture =
+      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   FixtureControl &control =
       static_cast<FixtureControl &>(*management.AddFixtureControl(fixture));
   BOOST_CHECK_EQUAL(management.GetFixtureControl(fixture).Get(), &control);
@@ -39,7 +40,7 @@ BOOST_AUTO_TEST_CASE(AddMany) {
   Management management(settings);
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
-  const FixtureMode& mode = fixtureType.Modes().front();
+  const FixtureMode &mode = fixtureType.Modes().front();
   Fixture *fixture = management.GetTheatre().AddFixture(mode).Get();
   BOOST_CHECK_EQUAL(fixture->Name(), "RGB A");
   for (size_t i = 0; i != 30; ++i) {
@@ -66,7 +67,7 @@ BOOST_AUTO_TEST_CASE(remove_fixture) {
   Management management(settings);
   ObservingPtr<FixtureType> fixtureType =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb3Ch);
-  const FixtureMode& mode = fixtureType->Modes().front();
+  const FixtureMode &mode = fixtureType->Modes().front();
   management.RootFolder().Add(fixtureType);
   Fixture &fixture = *management.GetTheatre().AddFixture(mode);
   FixtureControl &control =

@@ -47,11 +47,12 @@ class FixtureTypesWindow : public ChildWindow {
   void onRemoveClicked();
   void onSaveClicked();
   void onSelectionChanged();
-  std::pair<theatre::FixtureType*, theatre::FixtureMode*> GetSelected();
+  std::pair<theatre::FixtureType *, theatre::FixtureMode *> GetSelected();
   void Select(const theatre::FixtureMode &selection);
   void Select(const theatre::FixtureType &selection);
   void SelectFixtures(const theatre::FixtureMode &mode);
   void SelectFixtures(const theatre::FixtureType &type);
+  void ShowTypeWidgets(bool visible);
 
   ScopedConnection update_controllables_connection_;
   RecursionLock recursion_lock_;
@@ -111,6 +112,7 @@ class FixtureTypesWindow : public ChildWindow {
 
   FixtureTypeFunctionsFrame functions_frame_;
 
+  // Bottom
   Gtk::Box button_box_;
   Gtk::Button new_button_{"New"};
   Gtk::Button remove_button_{"Remove"};

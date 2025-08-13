@@ -253,7 +253,8 @@ const TrackablePtr<Controllable> &Management::AddPresetCollection() {
 }
 
 system::ObservingPtr<PresetCollection> Management::AddPresetCollectionPtr() {
-  return static_cast<system::ObservingPtr<PresetCollection>>(AddPresetCollection().GetObserver());
+  return static_cast<system::ObservingPtr<PresetCollection>>(
+      AddPresetCollection().GetObserver());
 }
 
 Folder &Management::AddFolder(Folder &parent, const std::string &name) {
@@ -352,12 +353,14 @@ const TrackablePtr<Controllable> &Management::AddFixtureControl(
 
 system::ObservingPtr<FixtureControl> Management::AddFixtureControlPtr(
     const Fixture &fixture) {
-  return static_cast<system::ObservingPtr<FixtureControl>>(AddFixtureControl(fixture).GetObserver());
+  return static_cast<system::ObservingPtr<FixtureControl>>(
+      AddFixtureControl(fixture).GetObserver());
 }
 
 system::ObservingPtr<FixtureControl> Management::AddFixtureControlPtr(
     const Fixture &fixture, const Folder &parent) {
-  return static_cast<system::ObservingPtr<FixtureControl>>(AddFixtureControl(fixture, parent).GetObserver());
+  return static_cast<system::ObservingPtr<FixtureControl>>(
+      AddFixtureControl(fixture, parent).GetObserver());
 };
 
 ObservingPtr<FixtureControl> Management::GetFixtureControl(
@@ -365,7 +368,8 @@ ObservingPtr<FixtureControl> Management::GetFixtureControl(
   for (const TrackablePtr<Controllable> &contr : _controllables) {
     FixtureControl *fc = dynamic_cast<FixtureControl *>(contr.Get());
     if (fc) {
-      if (&fc->GetFixture() == &fixture) return StaticObserverCast<FixtureControl>(contr.GetObserver());
+      if (&fc->GetFixture() == &fixture)
+        return StaticObserverCast<FixtureControl>(contr.GetObserver());
     }
   }
   throw std::runtime_error("GetFixtureControl() : Fixture control not found");
@@ -458,7 +462,8 @@ const TrackablePtr<Controllable> &Management::AddTimeSequence() {
 }
 
 system::ObservingPtr<TimeSequence> Management::AddTimeSequencePtr() {
-  return static_cast<system::ObservingPtr<TimeSequence>>(AddTimeSequence().GetObserver());
+  return static_cast<system::ObservingPtr<TimeSequence>>(
+      AddTimeSequence().GetObserver());
 }
 
 const TrackablePtr<Controllable> &Management::AddEffect(
@@ -481,7 +486,8 @@ const TrackablePtr<Controllable> &Management::AddEffect(
 
 system::ObservingPtr<Effect> Management::AddEffectPtr(
     std::unique_ptr<Effect> effect, Folder &folder) {
-  return static_cast<system::ObservingPtr<Effect>>(AddEffect(std::move(effect), folder).GetObserver());
+  return static_cast<system::ObservingPtr<Effect>>(
+      AddEffect(std::move(effect), folder).GetObserver());
 }
 
 const TrackablePtr<Controllable> &Management::AddScene(bool in_folder) {

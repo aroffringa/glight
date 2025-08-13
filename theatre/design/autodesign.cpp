@@ -52,8 +52,7 @@ Chase &AutoDesign::MakeRunningLight(
          (frameIndex != 0 || colors.size() % 2 == 0)))
       nFixInPattern = 2;
 
-    ObservingPtr<PresetCollection> pc =
-        management.AddPresetCollectionPtr();
+    ObservingPtr<PresetCollection> pc = management.AddPresetCollectionPtr();
     pc->SetName(destination.GetAvailableName(chase->Name() + "_"));
     destination.Add(pc);
     // If there are less colours given than fixtures, the sequence is repeated
@@ -122,8 +121,7 @@ Chase &AutoDesign::MakeColorVariation(
   std::mt19937 rnd(rd());
   std::normal_distribution<double> distribution(0.0, variation);
   for (const ColorOrVariable &color_or_var : colors) {
-    ObservingPtr<PresetCollection> pc_ptr =
-        management.AddPresetCollectionPtr();
+    ObservingPtr<PresetCollection> pc_ptr = management.AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc_ptr);
@@ -199,8 +197,7 @@ Chase &AutoDesign::MakeColorShift(
       } while (duplicate);
     }
 
-    ObservingPtr<PresetCollection> pc_ptr =
-        management.AddPresetCollectionPtr();
+    ObservingPtr<PresetCollection> pc_ptr = management.AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc_ptr);
@@ -270,8 +267,7 @@ Controllable &AutoDesign::MakeVUMeter(
          (level != 0 || controllables.size() % 2 == 0)))
       nFixInLevel = 2;
 
-    ObservingPtr<PresetCollection> pc_ptr =
-        management.AddPresetCollectionPtr();
+    ObservingPtr<PresetCollection> pc_ptr = management.AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName(newAudioLevel.Name() + "_Set"));
     destination.Add(std::move(pc_ptr));
@@ -352,8 +348,7 @@ Chase &AutoDesign::MakeIncreasingChase(
       }
     }
 
-    ObservingPtr<PresetCollection> pc_ptr =
-        management.AddPresetCollectionPtr();
+    ObservingPtr<PresetCollection> pc_ptr = management.AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc_ptr);

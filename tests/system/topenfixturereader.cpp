@@ -673,7 +673,8 @@ BOOST_AUTO_TEST_CASE(read) {
   BOOST_REQUIRE_EQUAL(fixture_type->Modes().size(), 8);
   const theatre::FixtureMode& mode1 = fixture_type->Modes().front();
   BOOST_REQUIRE_EQUAL(mode1.Functions().size(), 1);
-  BOOST_REQUIRE(mode1.Functions()[0].Type() == theatre::FunctionType::ColorMacro);
+  BOOST_REQUIRE(mode1.Functions()[0].Type() ==
+                theatre::FunctionType::ColorMacro);
   const theatre::ColorRangeParameters& parameters =
       mode1.Functions()[0].GetColorRangeParameters();
   BOOST_CHECK_EQUAL(parameters.GetRanges().size(), 16);

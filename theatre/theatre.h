@@ -28,14 +28,17 @@ class Theatre {
     return AddFixture(mode).GetObserver();
   }
 
-  const system::TrackablePtr<FixtureType> &AddFixtureType(StockFixture stock_fixture);
-  system::ObservingPtr<FixtureType> AddFixtureTypePtr(StockFixture stock_fixture) {
+  const system::TrackablePtr<FixtureType> &AddFixtureType(
+      StockFixture stock_fixture);
+  system::ObservingPtr<FixtureType> AddFixtureTypePtr(
+      StockFixture stock_fixture) {
     return AddFixtureType(stock_fixture).GetObserver();
   }
 
   const system::TrackablePtr<FixtureType> &AddFixtureType(
-      system::TrackablePtr<FixtureType>&& type);
-  system::ObservingPtr<FixtureType> AddFixtureTypePtr(system::TrackablePtr<FixtureType>&& type) {
+      system::TrackablePtr<FixtureType> &&type);
+  system::ObservingPtr<FixtureType> AddFixtureTypePtr(
+      system::TrackablePtr<FixtureType> &&type) {
     return AddFixtureType(std::move(type)).GetObserver();
   }
 

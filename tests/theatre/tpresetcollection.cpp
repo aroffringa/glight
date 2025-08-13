@@ -21,7 +21,8 @@ BOOST_AUTO_TEST_CASE(Add) {
   Management management(settings);
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
-  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  Fixture &fixture =
+      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   Controllable *control = management.AddFixtureControl(fixture).Get();
   SourceValue &value = management.AddSourceValue(*control, 0);
   value.A().SetValue(ControlValue::Max());
@@ -40,7 +41,8 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   Management management(settings);
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
-  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  Fixture &fixture =
+      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   fixture.SetChannel(DmxChannel(100, 0));
   FixtureControl &fixtureControl = *management.AddFixtureControlPtr(fixture);
   BOOST_REQUIRE_EQUAL(fixtureControl.NInputs(), 1);

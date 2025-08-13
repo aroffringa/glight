@@ -147,9 +147,11 @@ void FixtureTypesWindow::fillList() {
     if (selected_type && selected_type == project_type.Get()) {
       tree_view_.get_selection()->select(row);
     }
-    for(const FixtureMode& mode : project_type->Modes()) {
+    for (FixtureMode &mode : project_type->Modes()) {
       Gtk::TreeModel::iterator child_iter = tree_model_->append(row.children());
-    const Gtk::TreeModel::Row &child_row = *child_iter;
+      const Gtk::TreeModel::Row &child_row = *child_iter;
+      child_row[list_columns_.fixture_mode_] = &mode;
+      child_row[list_columns_.name_] = mode.Name();
       child_row[list_columns_.functions_] = FunctionSummary(mode);
       child_row[list_columns_.in_use_] = management.GetTheatre().IsUsed(mode);
     }
@@ -191,17 +193,18 @@ void FixtureTypesWindow::onRemoveClicked() {
 
 void FixtureTypesWindow::onSaveClicked() {
   auto [type, mode] = GetSelected();
-  if(mode) {
+  if (mode) {
     const bool is_used = Instance::Management().GetTheatre().IsUsed(*type);
     if (!is_used) {
       mode->SetFunctions(functions_frame_.GetFunctions());
     }
   } else {
     if (!type) {
-      ObservingPtr<FixtureType> new_type = Instance::Management()
-                                              .GetTheatre()
-                                              .AddFixtureType(system::MakeTrackable<FixtureType>())
-                                              .GetObserver<FixtureType>();
+      ObservingPtr<FixtureType> new_type =
+          Instance::Management()
+              .GetTheatre()
+              .AddFixtureType(system::MakeTrackable<FixtureType>())
+              .GetObserver<FixtureType>();
       type = new_type.Get();
       Instance::Management().RootFolder().Add(std::move(new_type));
     }
@@ -210,10 +213,12 @@ void FixtureTypesWindow::onSaveClicked() {
 
     const double min_beam_angle =
         std::atof(min_beam_angle_entry_.get_text().c_str());
-    type->SetMinBeamAngle(std::clamp(min_beam_angle, 0.0, 360.0) * M_PI / 180.0);
+    type->SetMinBeamAngle(std::clamp(min_beam_angle, 0.0, 360.0) * M_PI /
+                          180.0);
     const double max_beam_angle =
         std::atof(max_beam_angle_entry_.get_text().c_str());
-    type->SetMaxBeamAngle(std::clamp(max_beam_angle, 0.0, 360.0) * M_PI / 180.0);
+    type->SetMaxBeamAngle(std::clamp(max_beam_angle, 0.0, 360.0) * M_PI /
+                          180.0);
 
     const double min_pan = std::atof(min_pan_entry_.get_text().c_str());
     type->SetMinPan(std::clamp(min_pan, -3600.0, 3600.0) * M_PI / 180.0);
@@ -260,13 +265,13 @@ void FixtureTypesWindow::Select(const FixtureType &selection) {
   }
 }
 
-std::pair<FixtureType*, FixtureMode*> FixtureTypesWindow::GetSelected() {
+std::pair<FixtureType *, FixtureMode *> FixtureTypesWindow::GetSelected() {
   Glib::RefPtr<Gtk::TreeSelection> selection = tree_view_.get_selection();
   const Gtk::TreeModel::const_iterator selected = selection->get_selected();
   if (selected) {
-    FixtureMode* mode = (*selected)[list_columns_.fixture_mode_];
-    FixtureType* type = (*selected)[list_columns_.fixture_type_];
-    if(mode)
+    FixtureMode *mode = (*selected)[list_columns_.fixture_mode_];
+    FixtureType *type = (*selected)[list_columns_.fixture_type_];
+    if (mode)
       return {nullptr, mode};
     else
       return {type, nullptr};
@@ -307,10 +312,12 @@ void FixtureTypesWindow::onSelectionChanged() {
     save_button_.set_sensitive(has_selection && !layout_locked_);
     right_grid_.set_sensitive(has_selection && !layout_locked_);
     if (mode) {
+      ShowTypeWidgets(false);
       const bool is_used = Instance::Management().GetTheatre().IsUsed(*mode);
       functions_frame_.set_sensitive(!is_used && !layout_locked_);
       functions_frame_.SetFunctions(mode->Functions());
     } else if (type) {
+      ShowTypeWidgets(true);
       SelectFixtures(*type);
       const bool is_used = Instance::Management().GetTheatre().IsUsed(*type);
       name_entry_.set_text(type->Name());
@@ -333,6 +340,7 @@ void FixtureTypesWindow::onSelectionChanged() {
       max_power_entry_.set_text(std::to_string(type->MaxPower()));
       idle_power_entry_.set_text(std::to_string(type->IdlePower()));
     } else {
+      ShowTypeWidgets(true);
       name_entry_.set_text("");
       short_name_entry_.set_text("");
       min_beam_angle_entry_.set_text("30");
@@ -343,14 +351,47 @@ void FixtureTypesWindow::onSelectionChanged() {
       max_beam_tilt_entry_.set_text("0");
       brightness_entry_.set_text("10");
       class_combo_.set_sensitive(!layout_locked_);
-      class_combo_.set_active_text(std::string(
-          ToString(theatre::FixtureClass::Par)));
+      class_combo_.set_active_text(
+          std::string(ToString(theatre::FixtureClass::Par)));
       max_power_entry_.set_text("0");
       idle_power_entry_.set_text("0");
-      functions_frame_.set_sensitive(!layout_locked_);
       functions_frame_.SetFunctions({});
     }
   }
+}
+
+void FixtureTypesWindow::ShowTypeWidgets(bool visible) {
+  const bool not_visible = !visible;
+
+  name_label_.set_visible(visible);
+  name_entry_.set_visible(visible);
+  short_name_label_.set_visible(visible);
+  short_name_entry_.set_visible(visible);
+  class_label_.set_visible(visible);
+  class_combo_.set_visible(visible);
+
+  beam_angle_label_.set_visible(visible);
+  min_beam_angle_entry_.set_visible(visible);
+  max_beam_angle_entry_.set_visible(visible);
+
+  pan_label_.set_visible(visible);
+  min_pan_entry_.set_visible(visible);
+  max_pan_entry_.set_visible(visible);
+
+  tilt_label_.set_visible(visible);
+  min_beam_tilt_entry_.set_visible(visible);
+  max_beam_tilt_entry_.set_visible(visible);
+
+  brightness_label_.set_visible(visible);
+  brightness_entry_.set_visible(visible);
+
+  max_power_label_.set_visible(visible);
+  max_power_entry_.set_visible(visible);
+
+  idle_power_label_.set_visible(visible);
+  idle_power_entry_.set_visible(visible);
+
+  functions_frame_.set_visible(not_visible);
 }
 
 }  // namespace glight::gui::windows

@@ -20,8 +20,7 @@ BOOST_AUTO_TEST_CASE(ClassList) {
   for (FixtureClass cl : list) {
     BOOST_CHECK(GetFixtureClass(ToString(cl)) == cl);
   }
-  BOOST_CHECK_NO_THROW(
-      ToString((FixtureClass)std::numeric_limits<int>::max()));
+  BOOST_CHECK_NO_THROW(ToString((FixtureClass)std::numeric_limits<int>::max()));
   BOOST_CHECK_THROW(GetFixtureClass("This is not a class! ~!@"),
                     std::runtime_error);
 }
@@ -33,8 +32,7 @@ BOOST_AUTO_TEST_CASE(StockList) {
   for (StockFixture stock_fixture : list) {
     BOOST_CHECK(!ToString(stock_fixture).empty());
   }
-  BOOST_CHECK_NO_THROW(
-      ToString((StockFixture)std::numeric_limits<int>::max()));
+  BOOST_CHECK_NO_THROW(ToString((StockFixture)std::numeric_limits<int>::max()));
 }
 
 BOOST_AUTO_TEST_CASE(Construct) {
@@ -50,7 +48,7 @@ BOOST_AUTO_TEST_CASE(Copy) {
   FixtureType typeA(StockFixture::Rgb3Ch);
   FixtureType typeB(typeA);
   BOOST_REQUIRE(!typeB.Modes().empty());
-  const FixtureMode& mode = typeB.Modes().front();
+  const FixtureMode &mode = typeB.Modes().front();
   BOOST_REQUIRE_EQUAL(mode.Functions().size(), 3);
   BOOST_CHECK(mode.Functions()[0].Type() == FunctionType::Red);
   BOOST_CHECK(mode.Functions()[1].Type() == FunctionType::Green);
@@ -68,7 +66,8 @@ Color testColor(StockFixture cl, const std::vector<unsigned char> &values) {
   const glight::system::Settings settings;
   Management management(settings);
   const FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(cl);
-  Fixture &rgbFixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  Fixture &rgbFixture =
+      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   uni.SetValues(values.data(), values.size());
@@ -125,7 +124,8 @@ BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
   Management management(settings);
   const FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise);
-  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  Fixture &fixture =
+      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   // Master, R, G, B, Strobe, Rotation, Macro

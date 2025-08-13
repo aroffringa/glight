@@ -168,9 +168,9 @@ void CheckEqual(const Management &a, const Management &b) {
     const FixtureType &b_t = *b.GetTheatre().FixtureTypes()[i];
     BOOST_CHECK(a_t.GetFixtureClass() == b_t.GetFixtureClass());
     BOOST_REQUIRE_EQUAL(a_t.Modes().size(), b_t.Modes().size());
-    for(size_t m=0; m!=a_t.Modes().size(); ++m) {
-      const FixtureMode& mode_a = a_t.Modes()[m];
-      const FixtureMode& mode_b = b_t.Modes()[m];
+    for (size_t m = 0; m != a_t.Modes().size(); ++m) {
+      const FixtureMode &mode_a = a_t.Modes()[m];
+      const FixtureMode &mode_b = b_t.Modes()[m];
       BOOST_REQUIRE_EQUAL(mode_a.Functions().size(), mode_b.Functions().size());
       for (size_t j = 0; j != mode_a.Functions().size(); ++j) {
         CheckEqual(mode_a.Functions()[j], mode_b.Functions()[j]);

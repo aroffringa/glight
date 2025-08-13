@@ -122,7 +122,8 @@ void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
       ParseFunctions(fixture_object);
   const std::string fixture_name = ToStr(fixture_object["name"]);
   const json::Array& modes = ToArr(fixture_object["modes"]);
-  TrackablePtr<FixtureType> fixture_type = MakeTrackable<FixtureType>(fixture_name);
+  TrackablePtr<FixtureType> fixture_type =
+      MakeTrackable<FixtureType>(fixture_name);
   for (const json::Node& mode_node : modes) {
     const json::Object& mode = ToObj(mode_node);
     const std::string mode_name = ToStr(mode["name"]);

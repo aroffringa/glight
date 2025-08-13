@@ -27,7 +27,8 @@ BOOST_AUTO_TEST_CASE(SetValue) {
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
   BOOST_REQUIRE_EQUAL(fixture_type->Modes().size(), 1);
   BOOST_REQUIRE_EQUAL(fixture_type->Modes().front().Functions().size(), 1);
-  Fixture &fixture = *management.GetTheatre().AddFixture(fixture_type->Modes().front());
+  Fixture &fixture =
+      *management.GetTheatre().AddFixture(fixture_type->Modes().front());
   BOOST_REQUIRE_EQUAL(fixture.Functions().size(), 1);
   fixture.SetChannel(DmxChannel(100, 0));
   ObservingPtr<FixtureControl> control =
@@ -57,7 +58,7 @@ BOOST_AUTO_TEST_CASE(Filters) {
   {
     ObservingPtr<FixtureType> fixtureType =
         management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba4Ch);
-    const FixtureMode& mode = fixtureType->Modes().front();
+    const FixtureMode &mode = fixtureType->Modes().front();
     Fixture &fixture = *management.GetTheatre().AddFixture(mode);
     ObservingPtr<FixtureControl> control =
         management.AddFixtureControlPtr(fixture);
@@ -69,7 +70,7 @@ BOOST_AUTO_TEST_CASE(Filters) {
   {
     ObservingPtr<FixtureType> fixtureType =
         management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba5Ch);
-    const FixtureMode& mode = fixtureType->Modes().front();
+    const FixtureMode &mode = fixtureType->Modes().front();
     Fixture &fixture = *management.GetTheatre().AddFixture(mode);
     ObservingPtr<FixtureControl> control =
         management.AddFixtureControlPtr(fixture);

@@ -145,7 +145,8 @@ BOOST_AUTO_TEST_CASE(RemoveFolder) {
   Folder &root = management.RootFolder();
   FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
-  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  Fixture &fixture =
+      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   ObservingPtr<FixtureControl> control =
       management.AddFixtureControlPtr(fixture, root);
 

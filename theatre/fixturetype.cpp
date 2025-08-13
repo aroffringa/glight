@@ -6,7 +6,7 @@ using glight::system::OptionalNumber;
 
 namespace glight::theatre {
 
-FixtureType::FixtureType(const std::string& name) : FolderObject(name) {}
+FixtureType::FixtureType(const std::string &name) : FolderObject(name) {}
 
 FixtureType::FixtureType(StockFixture stock_fixture)
     : FolderObject(ToString(stock_fixture)) {
@@ -116,8 +116,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
       ranges.emplace_back(9, 121, 0, max_speed);
       ranges.emplace_back(134, 256, 0, -max_speed);
-      FixtureModeFunction &macro = functions.emplace_back(
-          FunctionType::ColorMacro, 2, empty_channel, 0);
+      FixtureModeFunction &macro =
+          functions.emplace_back(FunctionType::ColorMacro, 2, empty_channel, 0);
       SetH2OMacroParameters(macro.GetColorRangeParameters());
       data_.short_name_ = "H2O";
     } break;
@@ -166,8 +166,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
-      FixtureModeFunction &macro = functions.emplace_back(
-          FunctionType::ColorMacro, 3, empty_channel, 0);
+      FixtureModeFunction &macro =
+          functions.emplace_back(FunctionType::ColorMacro, 3, empty_channel, 0);
       SetRgbAdj6chMacroParameters(macro.GetColorRangeParameters());
       functions.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
       functions.emplace_back(FunctionType::Pulse, 5, empty_channel, 0);
@@ -177,8 +177,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
-      FixtureModeFunction &macro = functions.emplace_back(
-          FunctionType::ColorMacro, 3, empty_channel, 0);
+      FixtureModeFunction &macro =
+          functions.emplace_back(FunctionType::ColorMacro, 3, empty_channel, 0);
       SetRgbAdj6chMacroParameters(macro.GetColorRangeParameters());
       functions.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
       functions.emplace_back(FunctionType::Pulse, 5, empty_channel, 0);
@@ -211,19 +211,19 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions.emplace_back(FunctionType::Red, 3, empty_channel, 1);
       functions.emplace_back(FunctionType::Green, 4, empty_channel, 1);
       functions.emplace_back(FunctionType::Blue, 5, empty_channel, 1);
-      FixtureModeFunction &macro = functions.emplace_back(
-          FunctionType::ColorMacro, 6, empty_channel, 1);
+      FixtureModeFunction &macro =
+          functions.emplace_back(FunctionType::ColorMacro, 6, empty_channel, 1);
       SetBTMacroParameters(macro.GetColorRangeParameters());
       data_.class_ = FixtureClass::RingedPar;
       data_.short_name_ = "BTVint";
     } break;
     case StockFixture::RGBLight6Ch_16bit:
       functions.emplace_back(FunctionType::Red, 0, OptionalNumber<size_t>(1),
-                              0);
+                             0);
       functions.emplace_back(FunctionType::Green, 2, OptionalNumber<size_t>(3),
-                              0);
+                             0);
       functions.emplace_back(FunctionType::Blue, 4, OptionalNumber<size_t>(5),
-                              0);
+                             0);
       data_.short_name_ = "RGB";
       break;
     case StockFixture::ZoomLight:
@@ -272,7 +272,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
   }
   data_.idle_power_ = 3;
 
-  FixtureMode& mode = modes_.emplace_back(*this);
+  FixtureMode &mode = modes_.emplace_back(*this);
   mode.SetName("Default");
   mode.SetFunctions(functions);
 }
@@ -354,4 +354,4 @@ void FixtureType::SetBTMacroParameters(ColorRangeParameters &macro) {
   ranges.emplace_back(0, 256, Color::White());
 }
 
-} // namespace glight::theatre
+}  // namespace glight::theatre

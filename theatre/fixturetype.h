@@ -37,23 +37,24 @@ inline constexpr std::string_view ToString(FixtureClass fixtureClass) {
 
 inline FixtureClass GetFixtureClass(std::string_view name) {
   const std::vector<FixtureClass> list = GetFixtureClassList();
-  for (const FixtureClass &cl : list)
+  for (const FixtureClass& cl : list)
     if (ToString(cl) == name) return cl;
   throw std::runtime_error("Fixture class not found: " + std::string(name));
 }
 
 class FixtureType : public FolderObject {
-public:
+ public:
   FixtureType() = default;
 
   FixtureType(StockFixture stock_fixture);
 
   FixtureType(const std::string& name);
 
-  FixtureType(const FixtureType& source) : FolderObject(source), data_(source.data_) {
+  FixtureType(const FixtureType& source)
+      : FolderObject(source), data_(source.data_) {
     // The modes have a pointer to the fixture type, so need to
     // be explicitly copied.
-    for(const FixtureMode& source_mode : source.Modes()) {
+    for (const FixtureMode& source_mode : source.Modes()) {
       FixtureMode& new_mode = AddMode();
       new_mode.SetName(source_mode.Name());
       new_mode.SetFunctions(source_mode.Functions());
@@ -74,24 +75,23 @@ public:
     return 0;
   }
 
-  FixtureMode& AddMode() {
-    return modes_.emplace_back(*this);
-  }
+  FixtureMode& AddMode() { return modes_.emplace_back(*this); }
 
-  const std::vector<FixtureMode>& Modes() const {
-    return modes_;
-  }
+  std::vector<FixtureMode>& Modes() { return modes_; }
+
+  const std::vector<FixtureMode>& Modes() const { return modes_; }
 
   size_t ModeIndex(const FixtureMode& mode) const {
-    for(size_t index = 0; index != modes_.size(); ++index) {
-      if(&mode == &modes_[index])
-        return index;
+    for (size_t index = 0; index != modes_.size(); ++index) {
+      if (&mode == &modes_[index]) return index;
     }
     throw std::runtime_error("ModeIndex(): can't find specified mode");
   }
 
-  const std::string &ShortName() const { return data_.short_name_; }
-  void SetShortName(const std::string &short_name) { data_.short_name_ = short_name; }
+  const std::string& ShortName() const { return data_.short_name_; }
+  void SetShortName(const std::string& short_name) {
+    data_.short_name_ = short_name;
+  }
 
   /**
    * For a non-zoomable fixture, the static full-width half-maximum angle
@@ -129,7 +129,9 @@ public:
   double MaxTilt() const { return data_.max_tilt_; }
   void SetMaxTilt(double max_tilt) { data_.max_tilt_ = max_tilt; }
 
-  bool CanZoom() const { return data_.min_beam_angle_ != data_.max_beam_angle_; }
+  bool CanZoom() const {
+    return data_.min_beam_angle_ != data_.max_beam_angle_;
+  }
   bool CanBeamRotate() const { return data_.min_pan_ != data_.max_pan_; }
   bool CanBeamTilt() const { return data_.min_tilt_ != data_.max_tilt_; }
 
@@ -148,10 +150,10 @@ public:
   unsigned IdlePower() const { return data_.idle_power_; }
   void SetIdlePower(unsigned idle_power) { data_.idle_power_ = idle_power; }
 
-private:
-  static void SetRgbAdj6chMacroParameters(ColorRangeParameters &macro);
-  static void SetH2OMacroParameters(ColorRangeParameters &macro);
-  static void SetBTMacroParameters(ColorRangeParameters &macro);
+ private:
+  static void SetRgbAdj6chMacroParameters(ColorRangeParameters& macro);
+  static void SetH2OMacroParameters(ColorRangeParameters& macro);
+  static void SetBTMacroParameters(ColorRangeParameters& macro);
 
   std::vector<FixtureMode> modes_;
 

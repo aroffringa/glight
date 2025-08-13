@@ -99,7 +99,7 @@ void AddFixtureWindow::updateFilters() {
   if (selected) {
     const FixtureType &type = *(*selected)[type_columns_.type_];
     // TODO mode should be selectable
-    const FixtureMode& mode = *type.Modes().begin();
+    const FixtureMode &mode = *type.Modes().begin();
     for (const FixtureModeFunction &function : mode.Functions()) {
       if (function.Type() == theatre::FunctionType::Master)
         enable_master = true;
@@ -167,24 +167,24 @@ void AddFixtureWindow::onAdd() {
   if (iter && count > 0) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
 
-    const FixtureType& type = *(*iter)[type_columns_.type_];
-    FixtureType* project_type = dynamic_cast<FixtureType *>(
+    const FixtureType &type = *(*iter)[type_columns_.type_];
+    FixtureType *project_type = dynamic_cast<FixtureType *>(
         _management->RootFolder().GetChildIfExists(type.Name()));
     if (!project_type) {
-      theatre::StockFixture stock_fixture = (*iter)[type_columns_.stock_fixture_];
+      theatre::StockFixture stock_fixture =
+          (*iter)[type_columns_.stock_fixture_];
       const system::TrackablePtr<FixtureType> &added_type =
           _management->GetTheatre().AddFixtureType(stock_fixture);
       project_type = added_type.Get();
       _management->RootFolder().Add(added_type.GetObserver());
     }
     // TODO make mode selectable
-    const FixtureMode& mode = project_type->Modes().front();
+    const FixtureMode &mode = project_type->Modes().front();
 
     for (size_t fixIter = 0; fixIter != static_cast<size_t>(count); ++fixIter) {
       const theatre::Coordinate3D position =
           _management->GetTheatre().GetFreePosition();
-      theatre::Fixture &fixture =
-          *_management->GetTheatre().AddFixture(mode);
+      theatre::Fixture &fixture = *_management->GetTheatre().AddFixture(mode);
       theatre::DmxChannel channel(
           fixture.GetFirstChannel().Channel(),
           _management->GetUniverses().FirstOutputUniverse());

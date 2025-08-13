@@ -22,13 +22,13 @@ class FixtureType;
  */
 class FixtureMode : public NamedObject {
  public:
-  explicit FixtureMode(FixtureType& parent_type) : type_(&parent_type) {}
+  explicit FixtureMode(FixtureType &parent_type) : type_(&parent_type) {}
 
   FixtureMode(const FixtureMode &fixture_mode) = delete;
   FixtureMode(FixtureMode &&) = default;
 
-  FixtureType& Type() { return *type_; }
-  const FixtureType& Type() const { return *type_; }
+  FixtureType &Type() { return *type_; }
+  const FixtureType &Type() const { return *type_; }
 
   Color GetColor(const Fixture &fixture, const ValueSnapshot &snapshot,
                  size_t shape_index) const;
@@ -70,7 +70,7 @@ class FixtureMode : public NamedObject {
   void UpdateFunctions();
 
   std::vector<FixtureModeFunction> functions_;
-  FixtureType* type_;
+  FixtureType *type_;
   unsigned scaling_value_ = 0;
 };
 

@@ -20,8 +20,7 @@ TimeSequence &MakeRotation(
   assert(!controllables.empty());
   assert(!colors.empty());
 
-  const ObservingPtr<TimeSequence> result_ptr =
-      management.AddTimeSequencePtr();
+  const ObservingPtr<TimeSequence> result_ptr = management.AddTimeSequencePtr();
   TimeSequence &result = *result_ptr;
   result.SetName(destination.GetAvailableName("Rotation"));
   result.SetRepeatCount(0);
