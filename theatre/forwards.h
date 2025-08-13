@@ -13,6 +13,7 @@ class Effect;
 class Fixture;
 class FixtureControl;
 class FixtureGroup;
+class FixtureMode;
 class FixtureType;
 class Folder;
 class FolderObject;

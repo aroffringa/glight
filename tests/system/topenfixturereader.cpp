@@ -1,7 +1,7 @@
 #include "system/openfixturereader.h"
 #include "system/settings.h"
 
-#include "theatre/fixturetypefunction.h"
+#include "theatre/fixturemodefunction.h"
 #include "theatre/management.h"
 #include "theatre/theatre.h"
 
@@ -667,9 +667,9 @@ BOOST_AUTO_TEST_CASE(read) {
   std::unique_ptr<json::Node> root = json::Parse(data_stream);
   theatre::Theatre& theatre = management.GetTheatre();
   ReadOpenFixture(management, *root);
-  system::ObservingPtr<theatre::FixtureType> f1 =
+  system::ObservingPtr<theatre::FixtureMode> f1 =
       theatre.GetFixtureType("Flat Par QA12 (1-channel)")
-          .GetObserver<theatre::FixtureType>();
+          .GetObserver<theatre::FixtureMode>();
   BOOST_REQUIRE_EQUAL(f1->Functions().size(), 1);
   BOOST_REQUIRE(f1->Functions()[0].Type() == theatre::FunctionType::ColorMacro);
   const theatre::ColorRangeParameters& parameters =

@@ -2,6 +2,7 @@
 #include "theatre/fixture.h"
 #include "theatre/fixturecontrol.h"
 #include "theatre/fixturegroup.h"
+#include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
 #include "theatre/presetcollection.h"
@@ -47,7 +48,7 @@ void FillManagement(Management &management) {
   // Make a group with the two fixtures
   management.AddFixtureGroup(root, "Ayra and ADJ");
 
-  ObservingPtr<FixtureType> ft =
+  ObservingPtr<FixtureMode> ft =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgbw4Ch);
   root.Add(ft);
   Fixture &f = *management.GetTheatre().AddFixture(*ft);
@@ -117,7 +118,7 @@ void FillManagement(Management &management) {
   BOOST_CHECK(!management.HasCycle());
 }
 
-void CheckEqual(const FixtureTypeFunction &a, const FixtureTypeFunction &b) {
+void CheckEqual(const FixtureModeFunction &a, const FixtureModeFunction &b) {
   BOOST_REQUIRE(a.Type() == b.Type());
   BOOST_CHECK_EQUAL(a.DmxOffset(), b.DmxOffset());
   BOOST_CHECK(a.FineChannelOffset() == b.FineChannelOffset());
@@ -166,9 +167,14 @@ void CheckEqual(const Management &a, const Management &b) {
     const FixtureType &a_t = *a.GetTheatre().FixtureTypes()[i];
     const FixtureType &b_t = *b.GetTheatre().FixtureTypes()[i];
     BOOST_CHECK(a_t.GetFixtureClass() == b_t.GetFixtureClass());
-    BOOST_REQUIRE_EQUAL(a_t.Functions().size(), b_t.Functions().size());
-    for (size_t j = 0; j != a_t.Functions().size(); ++j) {
-      CheckEqual(a_t.Functions()[j], b_t.Functions()[j]);
+    BOOST_REQUIRE_EQUAL(a_t.Modes().size(), b_t.Modes().size());
+    for(size_t m=0; m!=a_t.Modes().size(); ++m) {
+      const FixtureMode& mode_a = a_t.Modes()[m];
+      const FixtureMode& mode_b = b_t.Modes()[m];
+      BOOST_REQUIRE_EQUAL(mode_a.Functions().size(), mode_b.Functions().size());
+      for (size_t j = 0; j != mode_a.Functions().size(); ++j) {
+        CheckEqual(mode_a.Functions()[j], mode_b.Functions()[j]);
+      }
     }
   }
 

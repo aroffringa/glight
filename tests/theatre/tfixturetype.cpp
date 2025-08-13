@@ -14,44 +14,47 @@ using namespace glight::theatre;
 BOOST_AUTO_TEST_SUITE(fixture_type)
 
 BOOST_AUTO_TEST_CASE(ClassList) {
-  const std::vector<FixtureClass> list = FixtureType::GetClassList();
+  const std::vector<FixtureClass> list = GetFixtureClassList();
   BOOST_REQUIRE(!list.empty());
 
   for (FixtureClass cl : list) {
-    BOOST_CHECK(FixtureType::NameToClass(FixtureType::ClassName(cl)) == cl);
+    BOOST_CHECK(GetFixtureClass(ToString(cl)) == cl);
   }
   BOOST_CHECK_NO_THROW(
-      FixtureType::ClassName((FixtureClass)std::numeric_limits<int>::max()));
-  BOOST_CHECK_THROW(FixtureType::NameToClass("This is not a class! ~!@"),
+      ToString((FixtureClass)std::numeric_limits<int>::max()));
+  BOOST_CHECK_THROW(GetFixtureClass("This is not a class! ~!@"),
                     std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(StockList) {
-  const std::vector<StockFixture> list = FixtureType::GetStockList();
+  const std::vector<StockFixture> list = GetStockFixtureList();
   BOOST_REQUIRE(!list.empty());
 
   for (StockFixture stock_fixture : list) {
-    BOOST_CHECK(!FixtureType::StockName(stock_fixture).empty());
+    BOOST_CHECK(!ToString(stock_fixture).empty());
   }
   BOOST_CHECK_NO_THROW(
-      FixtureType::StockName((StockFixture)std::numeric_limits<int>::max()));
+      ToString((StockFixture)std::numeric_limits<int>::max()));
 }
 
 BOOST_AUTO_TEST_CASE(Construct) {
-  const std::vector<StockFixture> list = FixtureType::GetStockList();
+  const std::vector<StockFixture> list = GetStockFixtureList();
   for (StockFixture cl : list) {
     FixtureType type(cl);
-    BOOST_CHECK(!type.Functions().empty());
+    BOOST_CHECK(!type.Modes().empty());
+    BOOST_CHECK(!type.Modes().front().Functions().empty());
   }
 }
 
 BOOST_AUTO_TEST_CASE(Copy) {
   FixtureType typeA(StockFixture::Rgb3Ch);
   FixtureType typeB(typeA);
-  BOOST_REQUIRE_EQUAL(typeB.Functions().size(), 3);
-  BOOST_CHECK(typeB.Functions()[0].Type() == FunctionType::Red);
-  BOOST_CHECK(typeB.Functions()[1].Type() == FunctionType::Green);
-  BOOST_CHECK(typeB.Functions()[2].Type() == FunctionType::Blue);
+  BOOST_REQUIRE(!typeB.Modes().empty());
+  const FixtureMode& mode = typeB.Modes().front();
+  BOOST_REQUIRE_EQUAL(mode.Functions().size(), 3);
+  BOOST_CHECK(mode.Functions()[0].Type() == FunctionType::Red);
+  BOOST_CHECK(mode.Functions()[1].Type() == FunctionType::Green);
+  BOOST_CHECK(mode.Functions()[2].Type() == FunctionType::Blue);
 }
 
 BOOST_AUTO_TEST_CASE(ShapeCount) {
@@ -64,12 +67,12 @@ BOOST_AUTO_TEST_CASE(ShapeCount) {
 Color testColor(StockFixture cl, const std::vector<unsigned char> &values) {
   const glight::system::Settings settings;
   Management management(settings);
-  const FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(cl);
+  const FixtureMode &fixtureType = *management.GetTheatre().AddFixtureType(cl);
   Fixture &rgbFixture = *management.GetTheatre().AddFixture(fixtureType);
   ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   uni.SetValues(values.data(), values.size());
-  return rgbFixture.Type().GetColor(rgbFixture, snapShot, 0);
+  return rgbFixture.Mode().GetColor(rgbFixture, snapShot, 0);
 }
 
 BOOST_AUTO_TEST_CASE(GetColor_RGB) {
@@ -120,7 +123,7 @@ BOOST_AUTO_TEST_CASE(GetColor_RGBAWUV) {
 BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
   const glight::system::Settings settings;
   Management management(settings);
-  const FixtureType &fixtureType =
+  const FixtureMode &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise);
   Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType);
   ValueSnapshot snapShot(true, 1);
@@ -128,7 +131,7 @@ BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
   // Master, R, G, B, Strobe, Rotation, Macro
   const std::vector<unsigned char> values{255, 255, 0, 0, 0, 128, 0};
   uni.SetValues(values.data(), values.size());
-  const int speed = fixture.Type().GetRotationSpeed(fixture, snapShot, 0);
+  const int speed = fixture.Mode().GetRotationSpeed(fixture, snapShot, 0);
   BOOST_CHECK_EQUAL(speed, -((1 << 24) / 100));
 }
 
@@ -136,11 +139,11 @@ BOOST_AUTO_TEST_CASE(function_summary) {
   const glight::system::Settings settings;
   Management management(settings);
 
-  const FixtureType &rgb_type =
+  const FixtureMode &rgb_type =
       *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
   BOOST_CHECK_EQUAL(FunctionSummary(rgb_type), "R-G-B");
 
-  const FixtureType &btv_type =
+  const FixtureMode &btv_type =
       *management.GetTheatre().AddFixtureType(StockFixture::BT_VINTAGE_7CH);
   BOOST_CHECK_EQUAL(FunctionSummary(btv_type), "W-M-S-R-G-B-C");
 }

@@ -362,7 +362,7 @@ void Management::RemoveFixture(const Fixture &fixture) {
   RemoveControllable(control);
 }
 
-void Management::RemoveFixtureType(const FixtureType &fixtureType) {
+void Management::RemoveFixtureType(const FixtureType &fixture_type) {
   const std::vector<system::TrackablePtr<Fixture>> &fixtures =
       _theatre->Fixtures();
   size_t i = 0;
@@ -370,13 +370,13 @@ void Management::RemoveFixtureType(const FixtureType &fixtureType) {
     // Go backward through the list, as fixtures might be removed
     const size_t fIndex = fixtures.size() - 1 - i;
     Fixture &f = *fixtures[fIndex];
-    if (&f.Type() == &fixtureType) {
+    if (&f.Mode().Type() == &fixture_type) {
       RemoveFixture(*fixtures[fIndex]);
     } else {
       ++i;
     }
   }
-  _theatre->RemoveFixtureType(fixtureType);
+  _theatre->RemoveFixtureType(fixture_type);
 }
 
 const TrackablePtr<FixtureGroup> &Management::AddFixtureGroup() {

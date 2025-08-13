@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <stdexcept>
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include <sigc++/signal.h>
@@ -20,6 +22,8 @@ class NamedObject {
 
   NamedObject() : _name() {}
   NamedObject(const std::string &name) : _name(name) {}
+  NamedObject(std::string_view name) : _name(name) {}
+  NamedObject(const char name[]) : _name(name) {}
   virtual ~NamedObject() { _signalDelete(); }
 
   NamedObject(const NamedObject &source)

@@ -1,4 +1,4 @@
-#include "theatre/fixturetypefunction.h"
+#include "theatre/fixturemodefunction.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -9,12 +9,12 @@ namespace glight::theatre {
 BOOST_AUTO_TEST_SUITE(fixture_type_function)
 
 BOOST_AUTO_TEST_CASE(copy) {
-  FixtureTypeFunction a(FunctionType::ColorMacro, 12,
+  FixtureModeFunction a(FunctionType::ColorMacro, 12,
                         system::OptionalNumber<size_t>(), 0);
   a.GetColorRangeParameters().GetRanges().emplace_back(100, 200, Color::Lime());
   a.GetColorRangeParameters().GetRanges().emplace_back(300, 500,
                                                        std::optional<Color>());
-  FixtureTypeFunction b(FunctionType::White, 11,
+  FixtureModeFunction b(FunctionType::White, 11,
                         system::OptionalNumber<size_t>(), 0);
   b = std::move(a);
   BOOST_CHECK(b.Type() == FunctionType::ColorMacro);
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(copy) {
 }
 
 BOOST_AUTO_TEST_CASE(range_function) {
-  FixtureTypeFunction f(FunctionType::RotationSpeed, 37, {}, 2);
+  FixtureModeFunction f(FunctionType::RotationSpeed, 37, {}, 2);
   BOOST_CHECK_EQUAL(f.DmxOffset(), 37);
   BOOST_CHECK(f.Type() == FunctionType::RotationSpeed);
   BOOST_CHECK(!f.FineChannelOffset());

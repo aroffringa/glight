@@ -143,6 +143,7 @@ set(THEATREFILES
   theatre/effect.cpp
   theatre/fixture.cpp
   theatre/fixturefunction.cpp
+  theatre/fixturemode.cpp
   theatre/fixturetype.cpp
   theatre/folder.cpp
   theatre/folderobject.cpp
@@ -173,7 +174,7 @@ include_directories(external/hsluv)
 include_directories($<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 add_library(glight-object OBJECT
-  ${GUIFILES} ${SYSTEMFILES} ${THEATREFILES} ${EXTERNALFILES})
+  ${THEATREFILES} ${SYSTEMFILES} ${GUIFILES} ${EXTERNALFILES})
 
 add_executable(glight $<TARGET_OBJECTS:glight-object> glight.cpp)
 

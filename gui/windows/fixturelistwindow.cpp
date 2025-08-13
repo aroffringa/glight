@@ -12,6 +12,7 @@
 
 #include "theatre/fixture.h"
 #include "theatre/fixturecontrol.h"
+#include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
 #include "theatre/theatre.h"
@@ -115,7 +116,7 @@ void FixtureListWindow::fillFixturesList() {
     Gtk::TreeModel::iterator iter = fixtures_list_model_->append();
     const Gtk::TreeModel::Row &row = *iter;
     row[fixtures_list_columns_.title_] = fixture->Name();
-    row[fixtures_list_columns_.type_] = fixture->Type().Name();
+    row[fixtures_list_columns_.type_] = fixture->Mode().Name();
     row[fixtures_list_columns_.universe_] = fixture->GetUniverse();
     row[fixtures_list_columns_.channels_] = getChannelString(*fixture);
     row[fixtures_list_columns_.symbol_] = fixture->Symbol().Name();
@@ -211,7 +212,7 @@ void FixtureListWindow::updateFixture(const theatre::Fixture *fixture) {
     Gtk::TreeModel::Row row = *iter;
     if (fixture == (*iter)[fixtures_list_columns_.fixture_]) {
       row[fixtures_list_columns_.title_] = fixture->Name();
-      row[fixtures_list_columns_.type_] = fixture->Type().Name();
+      row[fixtures_list_columns_.type_] = fixture->Mode().Name();
       row[fixtures_list_columns_.channels_] = getChannelString(*fixture);
       row[fixtures_list_columns_.universe_] = fixture->GetUniverse();
       row[fixtures_list_columns_.symbol_] = fixture->Symbol().Name();

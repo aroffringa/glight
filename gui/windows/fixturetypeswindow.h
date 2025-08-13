@@ -13,11 +13,11 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
-#include <gtkmm/liststore.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
+#include <gtkmm/treestore.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
@@ -47,27 +47,30 @@ class FixtureTypesWindow : public ChildWindow {
   void onRemoveClicked();
   void onSaveClicked();
   void onSelectionChanged();
-  theatre::FixtureType *getSelected();
-  void Select(const theatre::FixtureType &selection);
+  std::pair<theatre::FixtureType*, theatre::FixtureMode*> GetSelected();
+  void Select(const theatre::FixtureMode &selection);
+  void SelectFixtures(const theatre::FixtureMode &mode);
   void SelectFixtures(const theatre::FixtureType &type);
 
   ScopedConnection update_controllables_connection_;
   RecursionLock recursion_lock_;
 
-  Gtk::TreeView list_view_;
-  Glib::RefPtr<Gtk::ListStore> list_model_;
+  Gtk::TreeView tree_view_;
+  Glib::RefPtr<Gtk::TreeStore> tree_model_;
   struct TypesListColumns : public Gtk::TreeModelColumnRecord {
     TypesListColumns() {
       add(name_);
       add(functions_);
       add(in_use_);
       add(fixture_type_);
+      add(fixture_mode_);
     }
 
     Gtk::TreeModelColumn<Glib::ustring> name_;
     Gtk::TreeModelColumn<Glib::ustring> functions_;
     Gtk::TreeModelColumn<bool> in_use_;
     Gtk::TreeModelColumn<theatre::FixtureType *> fixture_type_;
+    Gtk::TreeModelColumn<theatre::FixtureMode *> fixture_mode_;
   } list_columns_;
   Gtk::ScrolledWindow type_scrollbars_;
 

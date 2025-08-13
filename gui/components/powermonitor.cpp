@@ -6,6 +6,7 @@
 
 #include <glibmm/main.h>
 
+#include "theatre/fixturetype.h"
 #include "theatre/management.h"
 #include "theatre/theatre.h"
 
@@ -67,10 +68,10 @@ std::map<size_t, std::pair<double, double>> GetPowerPerPhase(
   std::map<size_t, std::pair<double, double>> phases;
   for (const system::TrackablePtr<theatre::Fixture>& fixture :
        theatre.Fixtures()) {
-    const double fixture_power = fixture->Type().GetPower(*fixture, snapshot);
+    const double fixture_power = fixture->Mode().GetPower(*fixture, snapshot);
     std::pair<double, double>& phase_power = phases[fixture->ElectricPhase()];
     phase_power.first += fixture_power;
-    phase_power.second += fixture->Type().MaxPower();
+    phase_power.second += fixture->Mode().Type().MaxPower();
   }
   if (phases.empty()) phases.emplace(0, std::make_pair(0.0, 0.0));
   return phases;

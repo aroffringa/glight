@@ -43,10 +43,10 @@ class ColorTemperatureFilter final : public Filter {
   void DetermineInputTypes() override {
     system::OptionalNumber<size_t> master;
     system::OptionalNumber<size_t> temperature;
-    std::vector<FixtureTypeFunction> input_types{
-        FixtureTypeFunction(FunctionType::Red, 0, {}, 0),
-        FixtureTypeFunction(FunctionType::Green, 0, {}, 0),
-        FixtureTypeFunction(FunctionType::Blue, 0, {}, 0)};
+    std::vector<FixtureModeFunction> input_types{
+        FixtureModeFunction(FunctionType::Red, 0, {}, 0),
+        FixtureModeFunction(FunctionType::Green, 0, {}, 0),
+        FixtureModeFunction(FunctionType::Blue, 0, {}, 0)};
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
       const FunctionType type = OutputTypes()[i].Type();
       if (type == FunctionType::Master)

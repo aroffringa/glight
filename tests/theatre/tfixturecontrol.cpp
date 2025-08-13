@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_SUITE(fixture_control)
 BOOST_AUTO_TEST_CASE(SetValue) {
   const glight::system::Settings settings;
   Management management(settings);
-  ObservingPtr<FixtureType> fixtureType =
+  ObservingPtr<FixtureMode> fixtureType =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
   Fixture &fixture = *management.GetTheatre().AddFixture(*fixtureType);
   fixture.SetChannel(DmxChannel(100, 0));
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(Filters) {
   Management management(settings);
 
   {
-    ObservingPtr<FixtureType> fixtureType =
+    ObservingPtr<FixtureMode> fixtureType =
         management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba4Ch);
     Fixture &fixture = *management.GetTheatre().AddFixture(*fixtureType);
     ObservingPtr<FixtureControl> control =
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(Filters) {
     BOOST_CHECK(control->InputType(0) == FunctionType::White);
   }
   {
-    ObservingPtr<FixtureType> fixtureType =
+    ObservingPtr<FixtureMode> fixtureType =
         management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba5Ch);
     Fixture &fixture = *management.GetTheatre().AddFixture(*fixtureType);
     ObservingPtr<FixtureControl> control =

@@ -9,6 +9,8 @@
 #include "theatre/fixturecontrol.h"
 #include "theatre/fixturefunction.h"
 #include "theatre/fixturegroup.h"
+#include "theatre/fixturemode.h"
+#include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
 #include "theatre/presetvalue.h"
@@ -114,9 +116,9 @@ void ParseRotationParameters(const json::Object &node,
   }
 }
 
-void ParseFixtureTypeFunctions(const json::Array &node,
-                               FixtureType &fixture_type) {
-  std::vector<FixtureTypeFunction> functions;
+void ParseFixtureModeFunctions(const json::Array &node,
+                               FixtureMode &fixture_mode) {
+  std::vector<FixtureModeFunction> functions;
   for (const json::Node &child : node) {
     const json::Object &obj = ToObj(child);
     const FunctionType ft = GetFunctionType(ToStr(obj["type"]));
@@ -126,7 +128,7 @@ void ParseFixtureTypeFunctions(const json::Array &node,
       fine_channel = ToNum(obj["fine-channel-offset"]).AsSize();
     }
     const unsigned shape = ToNum(obj["shape"]).AsUInt();
-    FixtureTypeFunction &new_function =
+    FixtureModeFunction &new_function =
         functions.emplace_back(ft, dmx_offset, fine_channel, shape);
     new_function.SetPower(OptionalUInt(obj, "power", 0));
     switch (ft) {
@@ -143,7 +145,7 @@ void ParseFixtureTypeFunctions(const json::Array &node,
         break;
     }
   }
-  fixture_type.SetFunctions(std::move(functions));
+  fixture_mode.SetFunctions(std::move(functions));
 }
 
 void ParseFixtureTypes(const json::Array &node, Management &management) {
@@ -152,7 +154,7 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
     FixtureType ft;
     ft.SetShortName(ToStr(ft_node["short-name"]));
     const std::string &class_name = ToStr(ft_node["fixture-class"]);
-    ft.SetFixtureClass(FixtureType::NameToClass(class_name));
+    ft.SetFixtureClass(GetFixtureClass(class_name));
     if (ft_node.contains("beam-angle")) {
       const double angle = ToNum(ft_node["beam-angle"]).AsDouble();
       ft.SetMinBeamAngle(angle);
@@ -176,7 +178,21 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
       throw std::runtime_error("Error in file: fixture type listed twice");
     }
     ParseFolderAttr(ft_node, new_type.GetObserver(), management);
-    ParseFixtureTypeFunctions(ToArr(ft_node["functions"]), *new_type);
+    if(ft_node.contains("functions")) {
+      // Old format: no modes
+      FixtureMode& new_mode = ft.AddMode();
+      new_mode.SetName("Default");
+      ParseFixtureModeFunctions(ToArr(ft_node["functions"]), new_mode);
+    } else {
+      const Array& modes_array = ToArr(ft_node["modes"]);
+      for(const Node& mode_node : modes_array)
+      {
+        const Object& mode_object = ToObj(mode_node);
+        FixtureMode& new_mode = ft.AddMode();
+        new_mode.SetName(ToStr(mode_object["name"]));
+        ParseFixtureModeFunctions(ToArr(mode_object["functions"]), new_mode);
+       }
+    }
   }
 }
 
@@ -202,7 +218,10 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
   for (const Node &child : node) {
     const Object &f_node = ToObj(child);
     FixtureType &type = *theatre.GetFixtureType(ToStr(f_node["type"]));
-    Fixture &fixture = *theatre.AddFixture(type);
+    size_t mode_index = OptionalUInt(f_node, "mode-index", 0);
+    if(mode_index >= type.Modes().size())
+      throw std::runtime_error("Invalid mode index in fixture of type " + type.Name());
+    Fixture &fixture = *theatre.AddFixture(type.Modes()[mode_index]);
     ParseNameAttr(f_node, fixture);
     fixture.GetPosition().X() = ToNum(f_node["position-x"]).AsDouble();
     fixture.GetPosition().Y() = ToNum(f_node["position-y"]).AsDouble();
@@ -220,12 +239,12 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     for (const Node &f : functions) {
       ParseFixtureFunction(ToObj(f), fixture);
     }
-    if (fixture.Functions().size() != type.Functions().size()) {
+    if (fixture.Functions().size() != fixture.Mode().Functions().size()) {
       throw std::runtime_error("Corrupted fixture found: " + fixture.Name() +
                                " of type " + type.Name() + " has " +
                                std::to_string(fixture.Functions().size()) +
                                " functions, but should have " +
-                               std::to_string(type.Functions().size()) +
+                               std::to_string(fixture.Mode().Functions().size()) +
                                " functions according to its type");
     }
   }

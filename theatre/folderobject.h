@@ -1,6 +1,9 @@
 #ifndef THEATRE_FOLDEROBJECT_H_
 #define THEATRE_FOLDEROBJECT_H_
 
+#include <string>
+#include <string_view>
+
 #include "namedobject.h"
 
 namespace glight::theatre {
@@ -16,6 +19,8 @@ class FolderObject : public NamedObject {
 
   FolderObject() : _parent(nullptr) {}
   FolderObject(const std::string &name) : NamedObject(name), _parent(nullptr) {}
+  FolderObject(std::string_view name) : NamedObject(name), _parent(nullptr) {}
+  FolderObject(const char name[]) : NamedObject(name), _parent(nullptr) {}
   virtual ~FolderObject() = default;
 
   FolderObject(const FolderObject &) = default;

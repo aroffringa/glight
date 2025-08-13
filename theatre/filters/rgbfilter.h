@@ -192,10 +192,10 @@ class RgbFilter : public Filter {
     macro_index_.Reset();
     master_index_.Reset();
 
-    std::vector<FixtureTypeFunction> input_types{
-        FixtureTypeFunction(FunctionType::Red, 0, {}, 0),
-        FixtureTypeFunction(FunctionType::Green, 0, {}, 0),
-        FixtureTypeFunction(FunctionType::Blue, 0, {}, 0)};
+    std::vector<FixtureModeFunction> input_types{
+        FixtureModeFunction(FunctionType::Red, 0, {}, 0),
+        FixtureModeFunction(FunctionType::Green, 0, {}, 0),
+        FixtureModeFunction(FunctionType::Blue, 0, {}, 0)};
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
       const FunctionType type = OutputTypes()[i].Type();
       switch (type) {

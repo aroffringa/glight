@@ -3,8 +3,9 @@
 #include "gui/eventtransmitter.h"
 
 #include "theatre/fixturecontrol.h"
+#include "theatre/fixturemode.h"
+#include "theatre/fixturemodefunction.h"
 #include "theatre/fixturetype.h"
-#include "theatre/fixturetypefunction.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
 #include "theatre/theatre.h"
@@ -16,14 +17,15 @@
 
 namespace glight::gui::windows {
 
+using theatre::FixtureMode;
+using theatre::FixtureModeFunction;
 using theatre::FixtureType;
-using theatre::FixtureTypeFunction;
 
 AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
                                    theatre::Management &management)
     : _eventHub(*eventHub),
       _management(&management),
-      stock_list_(theatre::FixtureType::GetStockTypes()) {
+      stock_list_(theatre::GetStockTypes()) {
   _grid.set_row_spacing(5);
   _grid.set_column_spacing(2);
 
@@ -95,8 +97,10 @@ void AddFixtureWindow::updateFilters() {
   bool has_color = false;
   bool has_temperature = false;
   if (selected) {
-    const FixtureType *type = (*selected)[type_columns_.type_];
-    for (const FixtureTypeFunction &function : type->Functions()) {
+    const FixtureType &type = *(*selected)[type_columns_.type_];
+    // TODO mode should be selectable
+    const FixtureMode& mode = *type.Modes().begin();
+    for (const FixtureModeFunction &function : mode.Functions()) {
       if (function.Type() == theatre::FunctionType::Master)
         enable_master = true;
       else if (IsColor(function.Type())) {
@@ -134,7 +138,7 @@ void AddFixtureWindow::fillStock() {
     Gtk::TreeModel::iterator iter = type_model_->append();
     (*iter)[type_columns_.type_str_] = item.first;
     (*iter)[type_columns_.type_] = &item.second;
-    if (item.first == FixtureType::StockName(theatre::StockFixture::Rgb3Ch)) {
+    if (item.first == ToString(theatre::StockFixture::Rgb3Ch)) {
       _typeCombo.set_active(iter);
     }
   }
@@ -163,12 +167,12 @@ void AddFixtureWindow::onAdd() {
   if (iter && count > 0) {
     std::unique_lock<std::mutex> lock(_management->Mutex());
 
-    const FixtureType *type = (*iter)[type_columns_.type_];
-    FixtureType *project_type = dynamic_cast<FixtureType *>(
-        _management->RootFolder().GetChildIfExists(type->Name()));
+    const FixtureType& type = *(*iter)[type_columns_.type_];
+    FixtureType* project_type = dynamic_cast<FixtureType *>(
+        _management->RootFolder().GetChildIfExists(type.Name()));
     if (!project_type) {
       const system::TrackablePtr<FixtureType> &added_type =
-          _management->GetTheatre().AddFixtureType(*type);
+          _management->GetTheatre().AddFixtureType(type);
       project_type = added_type.Get();
       _management->RootFolder().Add(added_type.GetObserver());
     }

@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "fixture.h"
-#include "fixturetype.h"
+#include "fixturemode.h"
 #include "coordinate3d.h"
 
 #include "system/trackableptr.h"
@@ -22,9 +22,9 @@ class Theatre {
 
   void Clear();
 
-  const system::TrackablePtr<Fixture> &AddFixture(const FixtureType &type);
-  system::ObservingPtr<Fixture> AddFixturePtr(const FixtureType &type) {
-    return AddFixture(type).GetObserver();
+  const system::TrackablePtr<Fixture> &AddFixture(const FixtureMode &mode);
+  system::ObservingPtr<Fixture> AddFixturePtr(const FixtureMode &mode) {
+    return AddFixture(mode).GetObserver();
   }
 
   const system::TrackablePtr<FixtureType> &AddFixtureType(
@@ -59,7 +59,8 @@ class Theatre {
   void RemoveFixtureType(const FixtureType &fixtureType);
 
   void SwapFixturePositions(const Fixture &fixture_a, const Fixture &fixture_b);
-  bool IsUsed(const FixtureType &fixtureType) const;
+  bool IsUsed(const FixtureType &fixture_type) const;
+  bool IsUsed(const FixtureMode &fixture_mode) const;
 
   /**
    * Highest channel used (over all universes).

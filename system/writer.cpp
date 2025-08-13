@@ -10,6 +10,8 @@
 #include "theatre/fixturecontrol.h"
 #include "theatre/fixturefunction.h"
 #include "theatre/fixturegroup.h"
+#include "theatre/fixturemode.h"
+#include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
 #include "theatre/presetvalue.h"
@@ -110,7 +112,8 @@ void writeFixtureFunction(WriteState &state,
 void writeFixture(WriteState &state, const Fixture &fixture) {
   state.writer.StartObject();
   writeNameAttributes(state, fixture);
-  state.writer.String("type", fixture.Type().Name());
+  state.writer.String("type", fixture.Mode().Type().Name());
+  state.writer.Number("mode-index", fixture.Mode().Type().ModeIndex(fixture.Mode()));
   state.writer.Number("position-x", fixture.GetPosition().X());
   state.writer.Number("position-y", fixture.GetPosition().Y());
   if (fixture.GetPosition().Z() != Fixture::kDefaultHeight)
@@ -186,7 +189,7 @@ void writeRotationParameters(WriteState &state,
 }
 
 void writeFixtureTypeFunction(WriteState &state,
-                              const FixtureTypeFunction &function) {
+                              const FixtureModeFunction &function) {
   state.writer.StartObject();
   state.writer.String("type", ToString(function.Type()));
   state.writer.Number("dmx-offset", function.DmxOffset());
@@ -208,29 +211,36 @@ void writeFixtureTypeFunction(WriteState &state,
   state.writer.EndObject();
 }
 
-void writeFixtureType(WriteState &state, const FixtureType &fixtureType) {
+void writeFixtureType(WriteState &state, const FixtureType &fixture_type) {
   state.writer.StartObject();
-  writeFolderAttributes(state, fixtureType);
-  state.writer.String("short-name", fixtureType.ShortName());
+  writeFolderAttributes(state, fixture_type);
+  state.writer.String("short-name", fixture_type.ShortName());
   state.writer.String("fixture-class",
-                      FixtureType::ClassName(fixtureType.GetFixtureClass()));
-  state.writer.Number("shape-count", fixtureType.ShapeCount());
-  state.writer.Number("min-beam-angle", fixtureType.MinBeamAngle());
-  state.writer.Number("max-beam-angle", fixtureType.MaxBeamAngle());
-  state.writer.Number("min-pan", fixtureType.MinPan());
-  state.writer.Number("max-pan", fixtureType.MaxPan());
-  state.writer.Number("min-tilt", fixtureType.MinTilt());
-  state.writer.Number("max-tilt", fixtureType.MaxTilt());
-  state.writer.Number("brightness", fixtureType.Brightness());
-  if (fixtureType.MaxPower() != 0.0)
-    state.writer.Number("max-power", fixtureType.MaxPower());
-  if (fixtureType.IdlePower() != 0.0)
-    state.writer.Number("idle-power", fixtureType.IdlePower());
-  state.writer.StartArray("functions");
-  for (const FixtureTypeFunction &f : fixtureType.Functions()) {
-    writeFixtureTypeFunction(state, f);
+                      ToString(fixture_type.GetFixtureClass()));
+  state.writer.Number("shape-count", fixture_type.ShapeCount());
+  state.writer.Number("min-beam-angle", fixture_type.MinBeamAngle());
+  state.writer.Number("max-beam-angle", fixture_type.MaxBeamAngle());
+  state.writer.Number("min-pan", fixture_type.MinPan());
+  state.writer.Number("max-pan", fixture_type.MaxPan());
+  state.writer.Number("min-tilt", fixture_type.MinTilt());
+  state.writer.Number("max-tilt", fixture_type.MaxTilt());
+  state.writer.Number("brightness", fixture_type.Brightness());
+  if (fixture_type.MaxPower() != 0.0)
+    state.writer.Number("max-power", fixture_type.MaxPower());
+  if (fixture_type.IdlePower() != 0.0)
+    state.writer.Number("idle-power", fixture_type.IdlePower());
+  state.writer.StartArray("modes");
+  for (const FixtureMode &mode : fixture_type.Modes()) {
+    state.writer.StartObject();
+    state.writer.String("name", mode.Name());
+    state.writer.StartArray("functions");
+    for (const FixtureModeFunction &f : mode.Functions()) {
+      writeFixtureTypeFunction(state, f);
+    }
+    state.writer.EndArray();  // functions
+    state.writer.EndObject();
   }
-  state.writer.EndArray();  // functions
+  state.writer.EndArray();  // modes
   state.writer.EndObject();
 }
 
@@ -606,11 +616,11 @@ void writeGlightShow(WriteState &state) {
   state.writer.Number("height", theatre.Height());
   state.writer.Number("fixture-symbol-size", theatre.FixtureSymbolSize());
 
-  const std::vector<TrackablePtr<FixtureType>> &fixtureTypes =
+  const std::vector<TrackablePtr<FixtureType>> &fixture_types =
       theatre.FixtureTypes();
 
   state.writer.StartArray("fixture-types");
-  for (const TrackablePtr<FixtureType> &ft : fixtureTypes)
+  for (const TrackablePtr<FixtureType> &ft : fixture_types)
     writeFixtureType(state, *ft);
   state.writer.EndArray();  // fixture-types
 

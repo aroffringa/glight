@@ -5,7 +5,7 @@
 
 #include "../controlvalue.h"
 #include "../folderobject.h"
-#include "../fixturetypefunction.h"
+#include "../fixturemodefunction.h"
 
 namespace glight::theatre {
 
@@ -27,10 +27,10 @@ class Filter {
 
   static std::unique_ptr<Filter> Make(FilterType type);
 
-  const std::vector<FixtureTypeFunction>& InputTypes() const {
+  const std::vector<FixtureModeFunction>& InputTypes() const {
     return input_types_;
   }
-  const std::vector<FixtureTypeFunction>& OutputTypes() const {
+  const std::vector<FixtureModeFunction>& OutputTypes() const {
     return output_types_;
   }
 
@@ -52,7 +52,7 @@ class Filter {
    * Set the output types, which connects this filter to another filter or
    * fixture and adapts the input types accordingly.
    */
-  void SetOutputTypes(std::vector<FixtureTypeFunction> output_functions) {
+  void SetOutputTypes(std::vector<FixtureModeFunction> output_functions) {
     output_types_ = std::move(output_functions);
     DetermineInputTypes();
   }
@@ -67,13 +67,13 @@ class Filter {
                      std::vector<ControlValue>& output) = 0;
 
  protected:
-  void SetInputTypes(std::vector<FixtureTypeFunction> input_types) {
+  void SetInputTypes(std::vector<FixtureModeFunction> input_types) {
     input_types_ = std::move(input_types);
   }
 
  private:
-  std::vector<FixtureTypeFunction> input_types_;
-  std::vector<FixtureTypeFunction> output_types_;
+  std::vector<FixtureModeFunction> input_types_;
+  std::vector<FixtureModeFunction> output_types_;
 };
 
 }  // namespace glight::theatre

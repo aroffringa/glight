@@ -11,7 +11,7 @@
 
 namespace glight::theatre {
 
-class FixtureType;
+class FixtureMode;
 class Coordinate2D;
 class Theatre;
 class ValueSnapshot;
@@ -21,7 +21,7 @@ class ValueSnapshot;
  */
 class Fixture : public NamedObject {
  public:
-  Fixture(Theatre &theatre, const FixtureType &type, const std::string &name);
+  Fixture(Theatre &theatre, const FixtureMode &type, const std::string &name);
   // Fixture(const Fixture &source, Theatre &theatre);
 
   static inline constexpr double kDefaultHeight = 5.0;
@@ -31,7 +31,7 @@ class Fixture : public NamedObject {
     return functions_;
   }
 
-  const FixtureType &Type() const { return type_; }
+  const FixtureMode &Mode() const { return mode_; }
 
   std::vector<unsigned> GetChannels() const {
     std::vector<unsigned> channels;
@@ -103,7 +103,7 @@ class Fixture : public NamedObject {
 
  private:
   Theatre &theatre_;
-  const FixtureType &type_;
+  const FixtureMode &mode_;
   Coordinate3D position_;
   double direction_ = 0.5 * M_PI;
   double static_tilt_ = kDefaultTilt;
@@ -115,27 +115,27 @@ class Fixture : public NamedObject {
 
 }  // namespace glight::theatre
 
-#include "fixturetype.h"
+#include "fixturemode.h"
 
 namespace glight::theatre {
 
 Color Fixture::GetColor(const ValueSnapshot &snapshot,
                         size_t shape_index) const {
-  return type_.GetColor(*this, snapshot, shape_index);
+  return mode_.GetColor(*this, snapshot, shape_index);
 }
 
 int Fixture::GetRotationSpeed(const ValueSnapshot &snapshot,
                               size_t shape_index) const {
-  return type_.GetRotationSpeed(*this, snapshot, shape_index);
+  return mode_.GetRotationSpeed(*this, snapshot, shape_index);
 }
 
 int Fixture::GetRotation(const ValueSnapshot &snapshot,
                          size_t shape_index) const {
-  return type_.GetPan(*this, snapshot, shape_index);
+  return mode_.GetPan(*this, snapshot, shape_index);
 }
 
 int Fixture::GetTilt(const ValueSnapshot &snapshot, size_t shape_index) const {
-  return type_.GetTilt(*this, snapshot, shape_index);
+  return mode_.GetTilt(*this, snapshot, shape_index);
 }
 
 }  // namespace glight::theatre

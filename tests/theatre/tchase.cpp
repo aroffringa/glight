@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(remove_indirect) {
   const glight::system::Settings settings;
   Management management(settings);
   Folder &root = management.RootFolder();
-  ObservingPtr<FixtureType> ft =
+  ObservingPtr<FixtureMode> ft =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
   Fixture &f = *management.GetTheatre().AddFixture(*ft);
   ObservingPtr<FixtureControl> fc = management.AddFixtureControlPtr(f);

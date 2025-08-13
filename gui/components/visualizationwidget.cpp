@@ -18,6 +18,7 @@
 #include "theatre/fixture.h"
 #include "theatre/fixturecontrol.h"
 #include "theatre/fixturegroup.h"
+#include "theatre/fixturetype.h"
 #include "theatre/management.h"
 #include "theatre/managementtools.h"
 #include "theatre/theatre.h"
@@ -160,8 +161,8 @@ void VisualizationWidget::updateMidiColors() {
     size_t pad = 0;
     for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
       if (fixture->IsVisible()) {
-        const glight::theatre::FixtureType &type = fixture->Type();
-        const size_t shape_count = type.ShapeCount();
+        const glight::theatre::FixtureMode &mode = fixture->Mode();
+        const size_t shape_count = mode.Type().ShapeCount();
         for (size_t shape_index = 0; shape_index != shape_count;
              ++shape_index) {
           const theatre::Color color =
@@ -743,7 +744,7 @@ void VisualizationWidget::SetTilt(const theatre::Coordinate2D &position) {
   bool is_changed = false;
   for (const system::ObservingPtr<theatre::Fixture> &fixture :
        _selectedFixtures) {
-    if (fixture->Type().CanBeamTilt()) {
+    if (fixture->Mode().Type().CanBeamTilt()) {
       constexpr theatre::Coordinate2D offset(0.5, 0.5);
       const theatre::Coordinate2D direction =
           position - fixture->GetXY() - offset;
@@ -752,8 +753,8 @@ void VisualizationWidget::SetTilt(const theatre::Coordinate2D &position) {
                                     direction.Y() * direction.Y());
       double tilt = std::atan(z / dist) - fixture->StaticTilt();
       if (fixture->IsUpsideDown()) tilt = -tilt;
-      const double begin_tilt = fixture->Type().MinTilt();
-      const double end_tilt = fixture->Type().MaxTilt();
+      const double begin_tilt = fixture->Mode().Type().MinTilt();
+      const double end_tilt = fixture->Mode().Type().MaxTilt();
       const double min_value = std::min(begin_tilt, end_tilt);
       const double max_value = std::max(begin_tilt, end_tilt);
       tilt = system::RadialClamp(tilt, min_value, max_value);
@@ -778,15 +779,15 @@ void VisualizationWidget::SetPan(const theatre::Coordinate2D &position) {
   bool is_changed = false;
   for (const system::ObservingPtr<theatre::Fixture> &fixture :
        _selectedFixtures) {
-    if (fixture->Type().CanBeamRotate()) {
+    if (fixture->Mode().Type().CanBeamRotate()) {
       constexpr theatre::Coordinate2D offset(0.5, 0.5);
       const theatre::Coordinate2D direction =
           position - fixture->GetXY() - offset;
       const bool is_zero = direction.Y() == 0.0 && direction.X() == 0.0;
       const double angle =
           is_zero ? 0.0 : std::atan2(direction.Y(), direction.X());
-      double begin_pan = fixture->Type().MinPan();
-      double end_pan = fixture->Type().MaxPan();
+      double begin_pan = fixture->Mode().Type().MinPan();
+      double end_pan = fixture->Mode().Type().MaxPan();
       if (fixture->IsUpsideDown()) {
         std::swap(begin_pan, end_pan);
       }

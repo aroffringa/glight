@@ -1,7 +1,7 @@
 #ifndef GUI_WINDOWS_FIXTURE_TYPE_FUNCTIONS_FRAME_H_
 #define GUI_WINDOWS_FIXTURE_TYPE_FUNCTIONS_FRAME_H_
 
-#include "../../theatre/fixturetype.h"
+#include "../../theatre/fixturemode.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/checkbutton.h>
@@ -17,11 +17,11 @@ namespace glight::gui {
 class FixtureTypeFunctionsFrame : public Gtk::Frame {
  public:
   FixtureTypeFunctionsFrame(Gtk::Window& parent_window);
-  const std::vector<theatre::FixtureTypeFunction>& GetFunctions() const {
+  const std::vector<theatre::FixtureModeFunction>& GetFunctions() const {
     return functions_;
   }
   void SetFunctions(
-      const std::vector<theatre::FixtureTypeFunction>& functions) {
+      const std::vector<theatre::FixtureModeFunction>& functions) {
     functions_ = functions;
     FillModel();
   }
@@ -47,7 +47,7 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
 
     Gtk::TreeModelColumn<size_t> dmx_offset_;
     Gtk::TreeModelColumn<Glib::ustring> fine_channel_;
-    Gtk::TreeModelColumn<theatre::FixtureTypeFunction*> function_;
+    Gtk::TreeModelColumn<theatre::FixtureModeFunction*> function_;
     Gtk::TreeModelColumn<Glib::ustring> function_type_str_;
   } functions_columns_;
 
@@ -79,7 +79,7 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
 
   Gtk::Window& parent_window_;
   std::unique_ptr<Gtk::Window> sub_window_;
-  std::vector<theatre::FixtureTypeFunction> functions_;
+  std::vector<theatre::FixtureModeFunction> functions_;
 };
 
 }  // namespace glight::gui

@@ -9,7 +9,7 @@
 #include <gtkmm/treeview.h>
 
 #include "theatre/forwards.h"
-#include "theatre/fixturetype.h"
+#include "theatre/fixturemode.h"
 
 #include "gui/scopedconnection.h"
 #include "gui/recursionlock.h"
