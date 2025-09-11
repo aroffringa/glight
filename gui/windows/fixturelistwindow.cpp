@@ -140,8 +140,7 @@ std::string FixtureListWindow::getChannelString(
 }
 
 void FixtureListWindow::onNewButtonClicked() {
-  add_fixture_window_ = std::make_unique<AddFixtureWindow>(
-      &Instance::Events(), Instance::Management());
+  add_fixture_window_ = std::make_unique<AddFixtureWindow>();
   add_fixture_window_->set_modal(true);
   add_fixture_window_->set_transient_for(*this);
   add_fixture_window_->show();

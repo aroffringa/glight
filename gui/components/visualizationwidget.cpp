@@ -618,8 +618,7 @@ void VisualizationWidget::onDistributeEvenly() {
 }
 
 void VisualizationWidget::onAddFixtures() {
-  sub_window_ = std::make_unique<windows::AddFixtureWindow>(_eventTransmitter,
-                                                            *_management);
+  sub_window_ = std::make_unique<windows::AddFixtureWindow>();
   sub_window_->set_transient_for(*main_window_);
   sub_window_->set_modal(true);
   sub_window_->show();

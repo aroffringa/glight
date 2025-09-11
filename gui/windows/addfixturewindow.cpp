@@ -1,6 +1,7 @@
 #include "addfixturewindow.h"
 
 #include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
 #include "theatre/fixturecontrol.h"
 #include "theatre/fixturemode.h"
@@ -21,13 +22,15 @@ using theatre::FixtureMode;
 using theatre::FixtureModeFunction;
 using theatre::FixtureType;
 
-AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
-                                   theatre::Management &management)
-    : _eventHub(*eventHub),
-      _management(&management),
-      stock_list_(theatre::GetStockTypes()) {
-  _grid.set_row_spacing(5);
-  _grid.set_column_spacing(2);
+AddFixtureWindow::AddFixtureWindow() {
+  const std::vector<theatre::StockFixture> stock_fixtures =
+      theatre::GetStockFixtureList();
+  for (theatre::StockFixture stock_fixture : stock_fixtures) {
+    stock_list_.emplace(ToString(stock_fixture), stock_fixture);
+  }
+
+  grid_.set_row_spacing(5);
+  grid_.set_column_spacing(2);
 
   Gtk::RadioButton::Group group;
   stock_or_project_box_.pack_start(stock_button_);
@@ -40,25 +43,25 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
   project_button_.set_hexpand(true);
   project_button_.signal_toggled().connect([&]() { onStockProjectToggled(); });
 
-  _grid.attach(stock_or_project_box_, 0, 0, 2, 1);
+  grid_.attach(stock_or_project_box_, 0, 0, 2, 1);
   stock_or_project_box_.set_halign(Gtk::ALIGN_CENTER);
   stock_or_project_box_.set_hexpand(true);
 
-  _grid.attach(_typeLabel, 0, 1, 1, 1);
+  grid_.attach(type_label_, 0, 1, 1, 1);
 
   type_model_ = Gtk::ListStore::create(type_columns_);
-  _typeCombo.set_model(type_model_);
-  _typeCombo.pack_start(type_columns_.type_str_);
-  _typeCombo.signal_changed().connect([&]() { updateFilters(); });
+  type_combo_.set_model(type_model_);
+  type_combo_.pack_start(type_columns_.type_str_);
+  type_combo_.signal_changed().connect([&]() { updateFilters(); });
   fillStock();
-  _grid.attach(_typeCombo, 1, 1, 3, 1);
+  grid_.attach(type_combo_, 1, 1, 3, 1);
 
-  _grid.attach(_countLabel, 0, 2, 1, 1);
-  _countEntry.set_text("1"), _grid.attach(_countEntry, 1, 2, 1, 1);
-  _decCountButton.signal_clicked().connect([&]() { onDecCount(); });
-  _grid.attach(_decCountButton, 2, 2, 1, 1);
-  _incCountButton.signal_clicked().connect([&]() { onIncCount(); });
-  _grid.attach(_incCountButton, 3, 2, 1, 1);
+  grid_.attach(count_label_, 0, 2, 1, 1);
+  count_entry_.set_text("1"), grid_.attach(count_entry_, 1, 2, 1, 1);
+  decrease_count_button_.signal_clicked().connect([&]() { onDecCount(); });
+  grid_.attach(decrease_count_button_, 2, 2, 1, 1);
+  increase_count_button_.signal_clicked().connect([&]() { onIncCount(); });
+  grid_.attach(increase_count_button_, 3, 2, 1, 1);
 
   filters_box_.pack_start(auto_master_cb_);
   filters_box_.pack_start(rgb_cb_);
@@ -67,18 +70,18 @@ AddFixtureWindow::AddFixtureWindow(EventTransmitter *eventHub,
   updateFilters();
 
   filters_frame_.add(filters_box_);
-  _grid.attach(filters_frame_, 0, 3, 4, 1);
+  grid_.attach(filters_frame_, 0, 3, 4, 1);
 
-  _buttonBox.set_homogeneous(true);
+  button_box_.set_homogeneous(true);
 
-  _cancelButton.signal_clicked().connect([&]() { onCancel(); });
-  _buttonBox.pack_start(_cancelButton);
-  _addButton.signal_clicked().connect([&]() { onAdd(); });
-  _buttonBox.pack_end(_addButton);
-  _grid.attach(_buttonBox, 0, 4, 4, 1);
+  cancel_button_.signal_clicked().connect([&]() { onCancel(); });
+  button_box_.pack_start(cancel_button_);
+  add_button_.signal_clicked().connect([&]() { onAdd(); });
+  button_box_.pack_end(add_button_);
+  grid_.attach(button_box_, 0, 4, 4, 1);
 
-  add(_grid);
-  _grid.set_hexpand(true);
+  add(grid_);
+  grid_.set_hexpand(true);
   show_all_children();
 }
 
@@ -90,16 +93,23 @@ void AddFixtureWindow::onStockProjectToggled() {
 }
 
 void AddFixtureWindow::updateFilters() {
-  Gtk::TreeModel::const_iterator selected = _typeCombo.get_active();
+  Gtk::TreeModel::const_iterator selected = type_combo_.get_active();
   bool enable_master = false;
   bool enable_color = false;
   bool enable_monochrome = false;
   bool has_color = false;
   bool has_temperature = false;
   if (selected) {
-    const FixtureType &type = *(*selected)[type_columns_.type_];
+    system::ObservingPtr<theatre::FixtureType> type =
+        (*selected)[type_columns_.type_];
+    system::TrackablePtr<theatre::FixtureType> stock_type;
+    if (!type) {
+      stock_type = system::MakeTrackable<theatre::FixtureType>(
+          (*selected)[type_columns_.stock_fixture_]);
+      type = stock_type.GetObserver();
+    }
     // TODO mode should be selectable
-    const FixtureMode &mode = *type.Modes().begin();
+    const FixtureMode &mode = *type->Modes().begin();
     for (const FixtureModeFunction &function : mode.Functions()) {
       if (function.Type() == theatre::FunctionType::Master)
         enable_master = true;
@@ -134,66 +144,65 @@ void AddFixtureWindow::updateFilters() {
 
 void AddFixtureWindow::fillStock() {
   type_model_->clear();
-  for (const std::pair<const std::string, FixtureType> &item : stock_list_) {
+  for (const std::pair<const std::string, theatre::StockFixture> &item :
+       stock_list_) {
     Gtk::TreeModel::iterator iter = type_model_->append();
     (*iter)[type_columns_.type_str_] = item.first;
-    (*iter)[type_columns_.type_] = &item.second;
+    (*iter)[type_columns_.stock_fixture_] = item.second;
     if (item.first == ToString(theatre::StockFixture::Rgb3Ch)) {
-      _typeCombo.set_active(iter);
+      type_combo_.set_active(iter);
     }
   }
-  if (!_typeCombo.get_active()) _typeCombo.set_active(0);
-  _addButton.set_sensitive(true);
+  if (!type_combo_.get_active()) type_combo_.set_active(0);
+  add_button_.set_sensitive(true);
 }
 
 void AddFixtureWindow::fillFromProject() {
   type_model_->clear();
+  theatre::Management &management = Instance::Management();
   const std::vector<system::TrackablePtr<FixtureType>> &types =
-      _management->GetTheatre().FixtureTypes();
+      management.GetTheatre().FixtureTypes();
   for (const system::TrackablePtr<FixtureType> &type : types) {
     Gtk::TreeModel::iterator iter = type_model_->append();
     (*iter)[type_columns_.type_str_] = type->Name();
-    (*iter)[type_columns_.type_] = type.Get();
+    (*iter)[type_columns_.type_] = type.GetObserver();
   }
   if (types.empty())
-    _addButton.set_sensitive(false);
+    add_button_.set_sensitive(false);
   else
-    _typeCombo.set_active(0);
+    type_combo_.set_active(0);
 }
 
 void AddFixtureWindow::onAdd() {
-  Gtk::TreeModel::const_iterator iter = _typeCombo.get_active();
-  const int count = std::atoi(_countEntry.get_text().c_str());
+  Gtk::TreeModel::const_iterator iter = type_combo_.get_active();
+  const int count = std::atoi(count_entry_.get_text().c_str());
   if (iter && count > 0) {
-    std::unique_lock<std::mutex> lock(_management->Mutex());
+    theatre::Management &management = Instance::Management();
+    std::unique_lock<std::mutex> lock(management.Mutex());
 
-    const FixtureType &type = *(*iter)[type_columns_.type_];
-    FixtureType *project_type = dynamic_cast<FixtureType *>(
-        _management->RootFolder().GetChildIfExists(type.Name()));
-    if (!project_type) {
+    system::ObservingPtr<FixtureType> type = (*iter)[type_columns_.type_];
+    if (!type) {
       theatre::StockFixture stock_fixture =
           (*iter)[type_columns_.stock_fixture_];
-      const system::TrackablePtr<FixtureType> &added_type =
-          _management->GetTheatre().AddFixtureType(stock_fixture);
-      project_type = added_type.Get();
-      _management->RootFolder().Add(added_type.GetObserver());
+      type = management.GetTheatre().AddFixtureTypePtr(stock_fixture);
+      management.RootFolder().Add(type);
     }
     // TODO make mode selectable
-    const FixtureMode &mode = project_type->Modes().front();
+    const FixtureMode &mode = type->Modes().front();
 
     for (size_t fixIter = 0; fixIter != static_cast<size_t>(count); ++fixIter) {
       const theatre::Coordinate3D position =
-          _management->GetTheatre().GetFreePosition();
-      theatre::Fixture &fixture = *_management->GetTheatre().AddFixture(mode);
+          management.GetTheatre().GetFreePosition();
+      theatre::Fixture &fixture = *management.GetTheatre().AddFixture(mode);
       theatre::DmxChannel channel(
           fixture.GetFirstChannel().Channel(),
-          _management->GetUniverses().FirstOutputUniverse());
+          management.GetUniverses().FirstOutputUniverse());
       fixture.SetChannel(channel);
       fixture.GetPosition() = position;
 
-      theatre::FixtureControl &control = static_cast<theatre::FixtureControl &>(
-          *_management->AddFixtureControl(
-              fixture, _management->RootFolder() /* TODO */));
+      theatre::FixtureControl &control =
+          static_cast<theatre::FixtureControl &>(*management.AddFixtureControl(
+              fixture, management.RootFolder() /* TODO */));
       if (temperature_cb_.get_active()) {
         control.AddFilter(std::make_unique<theatre::ColorTemperatureFilter>());
       } else {
@@ -208,29 +217,29 @@ void AddFixtureWindow::onAdd() {
         control.AddFilter(std::make_unique<theatre::MonochromeFilter>());
       }
       for (size_t i = 0; i != control.NInputs(); ++i) {
-        _management->AddSourceValue(control, i);
+        management.AddSourceValue(control, i);
       }
     }
 
     lock.unlock();
-    _eventHub.EmitUpdate();
+    Instance::Events().EmitUpdate();
     hide();
   }
 }
 
 void AddFixtureWindow::onDecCount() {
-  int count = std::atoi(_countEntry.get_text().c_str());
+  int count = std::atoi(count_entry_.get_text().c_str());
   if (count > 1)
     count--;
   else
     count = 1;
-  _countEntry.set_text(std::to_string(count));
+  count_entry_.set_text(std::to_string(count));
 }
 
 void AddFixtureWindow::onIncCount() {
-  int count = std::atoi(_countEntry.get_text().c_str());
+  int count = std::atoi(count_entry_.get_text().c_str());
   count++;
-  _countEntry.set_text(std::to_string(count));
+  count_entry_.set_text(std::to_string(count));
 }
 
 }  // namespace glight::gui::windows
