@@ -59,6 +59,8 @@ class Theatre {
       const std::string &name) const {
     return GetFixtureType(name).GetObserver();
   }
+  system::ObservingPtr<FixtureType> GetFixtureTypePtr(
+      const FixtureType &type) const;
   FixtureFunction &GetFixtureFunction(const std::string &name) const;
 
   void RemoveFixture(const Fixture &fixture);

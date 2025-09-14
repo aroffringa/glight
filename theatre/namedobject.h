@@ -22,6 +22,7 @@ class NamedObject {
 
   NamedObject() : _name() {}
   NamedObject(const std::string &name) : _name(name) {}
+  NamedObject(std::string &&name) : _name(std::move(name)) {}
   NamedObject(std::string_view name) : _name(name) {}
   NamedObject(const char name[]) : _name(name) {}
   virtual ~NamedObject() { _signalDelete(); }
@@ -48,7 +49,7 @@ class NamedObject {
   template <typename NamedObjectType>
   static NamedObjectType *FindNamedObjectIfExists(
       const std::vector<std::unique_ptr<NamedObjectType>> &container,
-      const std::string &name) {
+      std::string_view name) {
     for (const std::unique_ptr<NamedObjectType> &obj : container) {
       if (obj->_name == name) return obj.get();
     }
@@ -58,7 +59,7 @@ class NamedObject {
   template <typename NamedObjectType>
   static const system::TrackablePtr<NamedObjectType> *FindNamedObjectIfExists(
       const std::vector<system::TrackablePtr<NamedObjectType>> &container,
-      const std::string &name) {
+      std::string_view name) {
     for (const system::TrackablePtr<NamedObjectType> &obj : container) {
       if (obj->_name == name) return &obj;
     }
@@ -68,7 +69,7 @@ class NamedObject {
   template <typename NamedObjectType>
   static system::ObservingPtr<NamedObjectType> FindNamedObjectIfExists(
       const std::vector<system::ObservingPtr<NamedObjectType>> &container,
-      const std::string &name) {
+      std::string_view name) {
     for (const system::ObservingPtr<NamedObjectType> &obj : container) {
       if (obj->_name == name) return obj;
     }
@@ -77,8 +78,7 @@ class NamedObject {
 
   template <typename NamedObjectType>
   static NamedObjectType *FindNamedObjectIfExists(
-      const std::vector<NamedObjectType *> &container,
-      const std::string &name) {
+      const std::vector<NamedObjectType *> &container, std::string_view name) {
     for (NamedObjectType *obj : container) {
       if (obj->_name == name) return obj;
     }
@@ -88,51 +88,50 @@ class NamedObject {
   template <typename NamedObjectType>
   static NamedObjectType &FindNamedObject(
       const std::vector<std::unique_ptr<NamedObjectType>> &container,
-      const std::string &name) {
+      std::string_view name) {
     NamedObjectType *obj = FindNamedObjectIfExists(container, name);
     if (obj)
       return *obj;
     else
-      throw std::runtime_error("Could not find named object " + name +
-                               " in container.");
+      throw std::runtime_error("Could not find named object " +
+                               std::string(name) + " in container.");
   }
 
   template <typename NamedObjectType>
   static const system::TrackablePtr<NamedObjectType> &FindNamedObject(
       const std::vector<system::TrackablePtr<NamedObjectType>> &container,
-      const std::string &name) {
+      std::string_view name) {
     const system::TrackablePtr<NamedObjectType> *obj =
         FindNamedObjectIfExists(container, name);
     if (obj)
       return *obj;
     else
-      throw std::runtime_error("Could not find named object " + name +
-                               " in container.");
+      throw std::runtime_error("Could not find named object " +
+                               std::string(name) + " in container.");
   }
 
   template <typename NamedObjectType>
   static const system::ObservingPtr<NamedObjectType> FindNamedObject(
       const std::vector<system::ObservingPtr<NamedObjectType>> &container,
-      const std::string &name) {
+      std::string_view name) {
     system::ObservingPtr<NamedObjectType> obj =
         FindNamedObjectIfExists(container, name);
     if (obj)
       return obj;
     else
-      throw std::runtime_error("Could not find named object " + name +
-                               " in container.");
+      throw std::runtime_error("Could not find named object " +
+                               std::string(name) + " in container.");
   }
 
   template <typename NamedObjectType>
   static NamedObjectType &FindNamedObject(
-      const std::vector<NamedObjectType *> &container,
-      const std::string &name) {
+      const std::vector<NamedObjectType *> &container, std::string_view name) {
     NamedObjectType *obj = FindNamedObjectIfExists(container, name);
     if (obj)
       return *obj;
     else
-      throw std::runtime_error("Could not find named object " + name +
-                               " in container.");
+      throw std::runtime_error("Could not find named object " +
+                               std::string(name) + " in container.");
   }
 
   template <typename ObjectType>
@@ -182,7 +181,7 @@ class NamedObject {
   template <typename ObjectType>
   static bool Contains(
       const std::vector<std::unique_ptr<ObjectType>> &container,
-      const std::string &name) {
+      std::string_view name) {
     for (const std::unique_ptr<ObjectType> &obj : container) {
       if (obj->_name == name) return true;
     }
@@ -192,7 +191,7 @@ class NamedObject {
   template <typename ObjectType>
   static bool Contains(
       const std::vector<system::TrackablePtr<ObjectType>> &container,
-      const std::string &name) {
+      std::string_view name) {
     for (const system::TrackablePtr<ObjectType> &obj : container) {
       if (obj->_name == name) return true;
     }

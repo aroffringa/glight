@@ -4,6 +4,7 @@
 #include "fixturetype.h"
 #include "folder.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <sstream>
@@ -84,6 +85,18 @@ system::ObservingPtr<Fixture> Theatre::GetFixturePtr(
 const system::TrackablePtr<FixtureType> &Theatre::GetFixtureType(
     const std::string &name) const {
   return NamedObject::FindNamedObject(_fixtureTypes, name);
+}
+
+system::ObservingPtr<FixtureType> Theatre::GetFixtureTypePtr(
+    const FixtureType &type) const {
+  std::vector<system::TrackablePtr<FixtureType>>::const_iterator result =
+      std::find_if(
+          _fixtureTypes.begin(), _fixtureTypes.end(),
+          [&type](const system::TrackablePtr<FixtureType> &element) -> bool {
+            return element.Get() == &type;
+          });
+  assert(result != _fixtureTypes.end());
+  return result->GetObserver();
 }
 
 FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {

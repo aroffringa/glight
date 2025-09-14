@@ -182,10 +182,16 @@ void AddFixtureWindow::onAdd() {
 
     system::ObservingPtr<FixtureType> type = (*iter)[type_columns_.type_];
     if (!type) {
-      theatre::StockFixture stock_fixture =
+      const theatre::StockFixture stock_fixture =
           (*iter)[type_columns_.stock_fixture_];
-      type = management.GetTheatre().AddFixtureTypePtr(stock_fixture);
-      management.RootFolder().Add(type);
+      FixtureType *project_type = dynamic_cast<FixtureType *>(
+          management.RootFolder().GetChildIfExists(ToString(stock_fixture)));
+      if (project_type) {
+        type = management.GetTheatre().GetFixtureTypePtr(*project_type);
+      } else {
+        type = management.GetTheatre().AddFixtureTypePtr(stock_fixture);
+        management.RootFolder().Add(type);
+      }
     }
     // TODO make mode selectable
     const FixtureMode &mode = type->Modes().front();

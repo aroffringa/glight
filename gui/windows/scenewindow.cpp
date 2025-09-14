@@ -747,7 +747,7 @@ bool SceneWindow::NewScene() {
   if (result == Gtk::RESPONSE_OK) {
     theatre::Scene &scene =
         static_cast<theatre::Scene &>(*_management.AddScene(true));
-    if (!scene.Parent().GetChildIfExists(entry.get_text())) {
+    if (!scene.Parent().GetChildIfExists(std::string(entry.get_text()))) {
       scene.SetName(entry.get_text());
     }
     _sourceValue = &_management.AddSourceValue(scene, 0);
