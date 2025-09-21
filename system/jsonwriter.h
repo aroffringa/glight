@@ -14,7 +14,7 @@ class JsonWriter {
  public:
   JsonWriter() = default;
 
-  JsonWriter(std::ostream& stream) : stream_(&stream) {}
+  JsonWriter(std::ostream& stream);
 
   void Name(const char* name) {
     Next();

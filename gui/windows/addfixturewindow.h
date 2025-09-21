@@ -30,9 +30,12 @@ class AddFixtureWindow : public Gtk::Window {
   AddFixtureWindow();
 
  private:
+  void updateModes();
   void updateFilters();
   void fillStock();
   void fillFromProject();
+  system::ObservingPtr<theatre::FixtureType> GetSelectedType(
+      system::TrackablePtr<theatre::FixtureType>& stock_type);
 
   struct TypeColumns : public Gtk::TreeModelColumnRecord {
     TypeColumns() {
@@ -45,16 +48,28 @@ class AddFixtureWindow : public Gtk::Window {
     Gtk::TreeModelColumn<theatre::StockFixture> stock_fixture_;
   } type_columns_;
 
+  struct ModeColumns : public Gtk::TreeModelColumnRecord {
+    ModeColumns() {
+      add(mode_str_);
+      add(mode_index_);
+    }
+    Gtk::TreeModelColumn<Glib::ustring> mode_str_;
+    Gtk::TreeModelColumn<size_t> mode_index_;
+  } mode_columns_;
+
   Gtk::Grid grid_;
   Gtk::HBox stock_or_project_box_;
   Gtk::RadioButton stock_button_{"Stock"};
   Gtk::RadioButton project_button_{"Project"};
+
   Gtk::Label type_label_{"Type:"};
   Glib::RefPtr<Gtk::ListStore> type_model_;
   Gtk::ComboBox type_combo_;
+
   Gtk::Label channel_mode_label_{"Channel mode:"};
   Glib::RefPtr<Gtk::ListStore> channel_mode_model_;
   Gtk::ComboBox channel_mode_combo_;
+
   Gtk::Label count_label_{"Count:"};
   Gtk::Entry count_entry_;
   Gtk::Button decrease_count_button_{"-"};

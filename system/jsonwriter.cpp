@@ -1,18 +1,17 @@
 #include "jsonwriter.h"
 
-#include <codecvt>
 #include <cuchar>
-#include <locale>
 #include <vector>
 
 namespace glight::json {
 
+JsonWriter::JsonWriter(std::ostream& stream) : stream_(&stream) {}
+
 std::string JsonWriter::Encode(const std::string_view& str) {
-  std::vector<char32_t> result{U'\"'};
-  std::u32string utf32 =
-      std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>{}.from_bytes(
-          str.begin(), str.end());
-  for (char32_t c : utf32) {
+  std::u32string u32str(str.begin(), str.end());
+  std::vector<char32_t> result;
+  result.emplace_back('\"');
+  for (char32_t c : u32str) {
     switch (c) {
       case U'\\':
       case U'\"':
@@ -45,9 +44,8 @@ std::string JsonWriter::Encode(const std::string_view& str) {
         break;
     }
   }
-  return std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>{}.to_bytes(
-             result.data(), result.data() + result.size()) +
-         '\"';
+  result.emplace_back(U'\"');
+  return std::string(result.begin(), result.end());
 }
 
 }  // namespace glight::json

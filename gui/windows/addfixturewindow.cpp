@@ -50,18 +50,27 @@ AddFixtureWindow::AddFixtureWindow() {
   grid_.attach(type_label_, 0, 1, 1, 1);
 
   type_model_ = Gtk::ListStore::create(type_columns_);
+  channel_mode_model_ = Gtk::ListStore::create(mode_columns_);
+
   type_combo_.set_model(type_model_);
   type_combo_.pack_start(type_columns_.type_str_);
-  type_combo_.signal_changed().connect([&]() { updateFilters(); });
-  fillStock();
+  type_combo_.signal_changed().connect([&]() { updateModes(); });
   grid_.attach(type_combo_, 1, 1, 3, 1);
 
-  grid_.attach(count_label_, 0, 2, 1, 1);
-  count_entry_.set_text("1"), grid_.attach(count_entry_, 1, 2, 1, 1);
+  grid_.attach(channel_mode_label_, 0, 2, 1, 1);
+  channel_mode_combo_.set_model(channel_mode_model_);
+  channel_mode_combo_.pack_start(mode_columns_.mode_str_);
+  channel_mode_combo_.signal_changed().connect([&]() { updateFilters(); });
+  grid_.attach(channel_mode_combo_, 1, 2, 3, 1);
+
+  fillStock();
+
+  grid_.attach(count_label_, 0, 3, 1, 1);
+  count_entry_.set_text("1"), grid_.attach(count_entry_, 1, 3, 1, 1);
   decrease_count_button_.signal_clicked().connect([&]() { onDecCount(); });
-  grid_.attach(decrease_count_button_, 2, 2, 1, 1);
+  grid_.attach(decrease_count_button_, 2, 3, 1, 1);
   increase_count_button_.signal_clicked().connect([&]() { onIncCount(); });
-  grid_.attach(increase_count_button_, 3, 2, 1, 1);
+  grid_.attach(increase_count_button_, 3, 3, 1, 1);
 
   filters_box_.pack_start(auto_master_cb_);
   filters_box_.pack_start(rgb_cb_);
@@ -70,7 +79,7 @@ AddFixtureWindow::AddFixtureWindow() {
   updateFilters();
 
   filters_frame_.add(filters_box_);
-  grid_.attach(filters_frame_, 0, 3, 4, 1);
+  grid_.attach(filters_frame_, 0, 4, 4, 1);
 
   button_box_.set_homogeneous(true);
 
@@ -78,7 +87,7 @@ AddFixtureWindow::AddFixtureWindow() {
   button_box_.pack_start(cancel_button_);
   add_button_.signal_clicked().connect([&]() { onAdd(); });
   button_box_.pack_end(add_button_);
-  grid_.attach(button_box_, 0, 4, 4, 1);
+  grid_.attach(button_box_, 0, 5, 4, 1);
 
   add(grid_);
   grid_.set_hexpand(true);
@@ -92,24 +101,53 @@ void AddFixtureWindow::onStockProjectToggled() {
     fillFromProject();
 }
 
+system::ObservingPtr<theatre::FixtureType> AddFixtureWindow::GetSelectedType(
+    system::TrackablePtr<theatre::FixtureType> &stock_type) {
+  Gtk::TreeModel::const_iterator selected_type = type_combo_.get_active();
+  system::ObservingPtr<theatre::FixtureType> type =
+      (*selected_type)[type_columns_.type_];
+  if (!type) {
+    stock_type = system::MakeTrackable<theatre::FixtureType>(
+        (*selected_type)[type_columns_.stock_fixture_]);
+    type = stock_type.GetObserver();
+  }
+  return type;
+}
+
+void AddFixtureWindow::updateModes() {
+  Gtk::TreeModel::const_iterator selected_type = type_combo_.get_active();
+  if (selected_type) {
+    channel_mode_model_->clear();
+    system::TrackablePtr<theatre::FixtureType> stock_type;
+    system::ObservingPtr<theatre::FixtureType> type =
+        GetSelectedType(stock_type);
+    const std::vector<FixtureMode> &modes = type->Modes();
+    for (size_t index = 0; index != modes.size(); ++index) {
+      Gtk::TreeModel::iterator iter = channel_mode_model_->append();
+      (*iter)[mode_columns_.mode_str_] = modes[index].Name();
+      (*iter)[mode_columns_.mode_index_] = index;
+      if (index == 0) {
+        channel_mode_combo_.set_active(iter);
+      }
+    }
+  }
+}
+
 void AddFixtureWindow::updateFilters() {
-  Gtk::TreeModel::const_iterator selected = type_combo_.get_active();
+  Gtk::TreeModel::const_iterator selected_type = type_combo_.get_active();
+  Gtk::TreeModel::const_iterator selected_mode =
+      channel_mode_combo_.get_active();
   bool enable_master = false;
   bool enable_color = false;
   bool enable_monochrome = false;
   bool has_color = false;
   bool has_temperature = false;
-  if (selected) {
-    system::ObservingPtr<theatre::FixtureType> type =
-        (*selected)[type_columns_.type_];
+  if (selected_type && selected_mode) {
     system::TrackablePtr<theatre::FixtureType> stock_type;
-    if (!type) {
-      stock_type = system::MakeTrackable<theatre::FixtureType>(
-          (*selected)[type_columns_.stock_fixture_]);
-      type = stock_type.GetObserver();
-    }
-    // TODO mode should be selectable
-    const FixtureMode &mode = *type->Modes().begin();
+    system::ObservingPtr<theatre::FixtureType> type =
+        GetSelectedType(stock_type);
+    const size_t mode_index = (*selected_mode)[mode_columns_.mode_index_];
+    const FixtureMode &mode = type->Modes()[mode_index];
     for (const FixtureModeFunction &function : mode.Functions()) {
       if (function.Type() == theatre::FunctionType::Master)
         enable_master = true;
