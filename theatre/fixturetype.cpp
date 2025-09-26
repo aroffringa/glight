@@ -11,55 +11,77 @@ FixtureType::FixtureType(const std::string &name) : FolderObject(name) {}
 FixtureType::FixtureType(StockFixture stock_fixture)
     : FolderObject(ToString(stock_fixture)) {
   constexpr OptionalNumber<size_t> empty_channel;
+  FixtureMode *mode = &modes_.emplace_back(*this);
   std::vector<FixtureModeFunction> functions;
   switch (stock_fixture) {
-    case StockFixture::Light1Ch:
+    case StockFixture::Light:
       functions.emplace_back(FunctionType::White, 0, empty_channel, 0);
       data_.short_name_ = "Light";
       break;
-    case StockFixture::Rgb3Ch:
+    case StockFixture::Rgb: {
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
       data_.short_name_ = "RGB";
-      break;
-    case StockFixture::Rgb4Ch:
-      functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
-      functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
-      functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      mode->SetFunctions(functions);
+      mode->SetName("3 ch (RGB)");
+      mode = &modes_.emplace_back(*this);
       functions.emplace_back(FunctionType::Master, 3, empty_channel, 0);
-      data_.short_name_ = "RGB";
-      break;
-    case StockFixture::Rgba4Ch:
+      mode->SetFunctions(functions);
+      mode->SetName("4 ch (RGBM)");
+      mode = &modes_.emplace_back(*this);
+      functions.clear();
+      functions.emplace_back(FunctionType::Red, 0, OptionalNumber<size_t>(1),
+                             0);
+      functions.emplace_back(FunctionType::Green, 2, OptionalNumber<size_t>(3),
+                             0);
+      functions.emplace_back(FunctionType::Blue, 4, OptionalNumber<size_t>(5),
+                             0);
+      mode->SetFunctions(functions);
+      mode->SetName("6 ch (RGB 16-bit)");
+      mode = &modes_.emplace_back(*this);
+      functions.clear();
+      functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      FixtureModeFunction &macro =
+          functions.emplace_back(FunctionType::ColorMacro, 3, empty_channel, 0);
+      SetRgbAdj6chMacroParameters(macro.GetColorRangeParameters());
+      functions.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
+      functions.emplace_back(FunctionType::Pulse, 5, empty_channel, 0);
+      mode->SetFunctions(functions);
+      mode->SetName("6 ch (ADJ)");
+      mode = &modes_.emplace_back(*this);
+      functions.emplace_back(FunctionType::Master, 6, empty_channel, 0);
+      mode->SetName("7 ch (ADJ)");
+    } break;
+    case StockFixture::Rgba:
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
       functions.emplace_back(FunctionType::Amber, 3, empty_channel, 0);
       data_.short_name_ = "RGBA";
-      break;
-    case StockFixture::Rgba5Ch:
-      functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
-      functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
-      functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
-      functions.emplace_back(FunctionType::Amber, 3, empty_channel, 0);
+      mode->SetFunctions(functions);
+      mode->SetName("4 ch (RGBA)");
+      mode = &modes_.emplace_back(*this);
       functions.emplace_back(FunctionType::Master, 4, empty_channel, 0);
-      data_.short_name_ = "RGBA";
+      mode->SetName("5 ch (RGBA M)");
       break;
-    case StockFixture::Rgbw4Ch:
+    case StockFixture::Rgbw:
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
       functions.emplace_back(FunctionType::White, 3, empty_channel, 0);
       data_.short_name_ = "RGBW";
       break;
-    case StockFixture::RgbUv4Ch:
+    case StockFixture::RgbUv:
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
       functions.emplace_back(FunctionType::UV, 3, empty_channel, 0);
       data_.short_name_ = "RGBUV";
       break;
-    case StockFixture::Rgbaw5Ch:
+    case StockFixture::Rgbaw:
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
@@ -67,7 +89,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions.emplace_back(FunctionType::White, 4, empty_channel, 0);
       data_.short_name_ = "RGBAW";
       break;
-    case StockFixture::RgbawUv6Ch:
+    case StockFixture::RgbawUv:
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
@@ -76,26 +98,28 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions.emplace_back(FunctionType::UV, 5, empty_channel, 0);
       data_.short_name_ = "RGBAWUV";
       break;
-    case StockFixture::Rgbl4Ch:
+    case StockFixture::Rgbl:
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
       functions.emplace_back(FunctionType::Lime, 3, empty_channel, 0);
       data_.short_name_ = "RGBL";
       break;
-    case StockFixture::CWWW2Ch:
+    case StockFixture::CwWw:
       functions.emplace_back(FunctionType::ColdWhite, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::WarmWhite, 1, empty_channel, 0);
       data_.short_name_ = "CW/WW";
-      break;
-    case StockFixture::CWWW4Ch:
+      mode->SetFunctions(functions);
+      mode->SetName("2 ch (CW/WW)");
+      mode = &modes_.emplace_back(*this);
+      functions.clear();
       functions.emplace_back(FunctionType::Master, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::ColdWhite, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::WarmWhite, 2, empty_channel, 0);
       functions.emplace_back(FunctionType::Strobe, 3, empty_channel, 0);
-      data_.short_name_ = "CW/WW";
+      mode->SetName("4 ch (M CW/WW Strobe)");
       break;
-    case StockFixture::CWWWA3Ch:
+    case StockFixture::CwWwA:
       functions.emplace_back(FunctionType::ColdWhite, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::WarmWhite, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Amber, 2, empty_channel, 0);
@@ -162,30 +186,7 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       data_.min_beam_angle_ = 2.0 * M_PI;
       data_.brightness_ = 1.0;
     } break;
-    case StockFixture::RGB_ADJ_6CH: {
-      functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
-      functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
-      functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
-      FixtureModeFunction &macro =
-          functions.emplace_back(FunctionType::ColorMacro, 3, empty_channel, 0);
-      SetRgbAdj6chMacroParameters(macro.GetColorRangeParameters());
-      functions.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
-      functions.emplace_back(FunctionType::Pulse, 5, empty_channel, 0);
-      data_.short_name_ = "ADJ RGB";
-    } break;
-    case StockFixture::RGB_ADJ_7CH: {
-      functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
-      functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
-      functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
-      FixtureModeFunction &macro =
-          functions.emplace_back(FunctionType::ColorMacro, 3, empty_channel, 0);
-      SetRgbAdj6chMacroParameters(macro.GetColorRangeParameters());
-      functions.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
-      functions.emplace_back(FunctionType::Pulse, 5, empty_channel, 0);
-      functions.emplace_back(FunctionType::Master, 6, empty_channel, 0);
-      data_.short_name_ = "ADJ RGB";
-    } break;
-    case StockFixture::BT_VINTAGE_5CH:
+    case StockFixture::BtVintage: {
       functions.emplace_back(FunctionType::White, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Master, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Red, 2, empty_channel, 1);
@@ -193,39 +194,24 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions.emplace_back(FunctionType::Blue, 4, empty_channel, 1);
       data_.class_ = FixtureClass::RingedPar;
       data_.short_name_ = "BTVint";
-      break;
-    case StockFixture::BT_VINTAGE_6CH:
+      mode->SetFunctions(functions);
+      mode->SetName("5 ch");
+      mode = &modes_.emplace_back(*this);
+      functions.clear();
       functions.emplace_back(FunctionType::White, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Master, 1, empty_channel, 0);
       functions.emplace_back(FunctionType::Strobe, 2, empty_channel, 0);
       functions.emplace_back(FunctionType::Red, 3, empty_channel, 1);
       functions.emplace_back(FunctionType::Green, 4, empty_channel, 1);
       functions.emplace_back(FunctionType::Blue, 5, empty_channel, 1);
-      data_.class_ = FixtureClass::RingedPar;
-      data_.short_name_ = "BTVint";
-      break;
-    case StockFixture::BT_VINTAGE_7CH: {
-      functions.emplace_back(FunctionType::White, 0, empty_channel, 0);
-      functions.emplace_back(FunctionType::Master, 1, empty_channel, 0);
-      functions.emplace_back(FunctionType::Strobe, 2, empty_channel, 0);
-      functions.emplace_back(FunctionType::Red, 3, empty_channel, 1);
-      functions.emplace_back(FunctionType::Green, 4, empty_channel, 1);
-      functions.emplace_back(FunctionType::Blue, 5, empty_channel, 1);
+      mode->SetFunctions(functions);
+      mode->SetName("6 ch");
+      mode = &modes_.emplace_back(*this);
       FixtureModeFunction &macro =
           functions.emplace_back(FunctionType::ColorMacro, 6, empty_channel, 1);
       SetBTMacroParameters(macro.GetColorRangeParameters());
-      data_.class_ = FixtureClass::RingedPar;
-      data_.short_name_ = "BTVint";
+      mode->SetName("7 ch");
     } break;
-    case StockFixture::RGBLight6Ch_16bit:
-      functions.emplace_back(FunctionType::Red, 0, OptionalNumber<size_t>(1),
-                             0);
-      functions.emplace_back(FunctionType::Green, 2, OptionalNumber<size_t>(3),
-                             0);
-      functions.emplace_back(FunctionType::Blue, 4, OptionalNumber<size_t>(5),
-                             0);
-      data_.short_name_ = "RGB";
-      break;
     case StockFixture::ZoomLight:
       functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
@@ -272,9 +258,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
   }
   data_.idle_power_ = 3;
 
-  FixtureMode &mode = modes_.emplace_back(*this);
-  mode.SetName("Default");
-  mode.SetFunctions(functions);
+  mode->SetFunctions(functions);
+  if (Modes().size() == 1) mode->SetName("Default");
 }
 
 void FixtureType::SetRgbAdj6chMacroParameters(ColorRangeParameters &macro) {

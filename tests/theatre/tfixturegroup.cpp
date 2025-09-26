@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(construct) {
 BOOST_AUTO_TEST_CASE(insert) {
   theatre::Theatre theatre;
   const theatre::FixtureType& type =
-      *theatre.AddFixtureTypePtr(StockFixture::Rgb3Ch);
+      *theatre.AddFixtureTypePtr(StockFixture::Rgb);
   ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
   ObservingPtr<Fixture> b = theatre.AddFixturePtr(type.Modes().front());
   FixtureGroup group("g1");
@@ -45,8 +45,7 @@ BOOST_AUTO_TEST_CASE(insert) {
 
 BOOST_AUTO_TEST_CASE(remove) {
   theatre::Theatre theatre;
-  const theatre::FixtureType& type =
-      *theatre.AddFixtureType(StockFixture::Rgb3Ch);
+  const theatre::FixtureType& type = *theatre.AddFixtureType(StockFixture::Rgb);
   ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
   ObservingPtr<Fixture> b = theatre.AddFixturePtr(type.Modes().front());
   ObservingPtr<Fixture> c = theatre.AddFixturePtr(type.Modes().front());
@@ -75,8 +74,7 @@ BOOST_AUTO_TEST_CASE(remove) {
 
 BOOST_AUTO_TEST_CASE(contains) {
   Theatre theatre;
-  const theatre::FixtureType& type =
-      *theatre.AddFixtureType(StockFixture::Rgb3Ch);
+  const theatre::FixtureType& type = *theatre.AddFixtureType(StockFixture::Rgb);
   ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
   ObservingPtr<Fixture> b = theatre.AddFixturePtr(type.Modes().front());
   ObservingPtr<Fixture> c = theatre.AddFixturePtr(type.Modes().front());
@@ -94,8 +92,7 @@ BOOST_AUTO_TEST_CASE(add_to_management) {
   const glight::system::Settings settings;
   Management management(settings);
   Theatre& theatre = management.GetTheatre();
-  const theatre::FixtureType& type =
-      *theatre.AddFixtureType(StockFixture::Rgb3Ch);
+  const theatre::FixtureType& type = *theatre.AddFixtureType(StockFixture::Rgb);
   ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
   theatre.AddFixture(type.Modes().front());
   ObservingPtr<Fixture> c = theatre.AddFixturePtr(type.Modes().front());

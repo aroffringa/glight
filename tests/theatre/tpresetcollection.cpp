@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(Add) {
   const glight::system::Settings settings;
   Management management(settings);
   FixtureType &fixtureType =
-      *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
+      *management.GetTheatre().AddFixtureType(StockFixture::Light);
   Fixture &fixture =
       *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   Controllable *control = management.AddFixtureControl(fixture).Get();
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   const glight::system::Settings settings;
   Management management(settings);
   FixtureType &fixtureType =
-      *management.GetTheatre().AddFixtureType(StockFixture::Light1Ch);
+      *management.GetTheatre().AddFixtureType(StockFixture::Light);
   Fixture &fixture =
       *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   fixture.SetChannel(DmxChannel(100, 0));

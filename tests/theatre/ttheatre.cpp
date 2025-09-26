@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(add_fixture) {
   const glight::system::Settings settings;
   Management management(settings);
   FixtureType &fixtureType =
-      *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
+      *management.GetTheatre().AddFixtureType(StockFixture::Rgb);
   Fixture &fixture =
       *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   FixtureControl &control =
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(AddMany) {
   const glight::system::Settings settings;
   Management management(settings);
   FixtureType &fixtureType =
-      *management.GetTheatre().AddFixtureType(StockFixture::Rgb3Ch);
+      *management.GetTheatre().AddFixtureType(StockFixture::Rgb);
   const FixtureMode &mode = fixtureType.Modes().front();
   Fixture *fixture = management.GetTheatre().AddFixture(mode).Get();
   BOOST_CHECK_EQUAL(fixture->Name(), "RGB A");
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(remove_fixture) {
   const glight::system::Settings settings;
   Management management(settings);
   ObservingPtr<FixtureType> fixtureType =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb3Ch);
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb);
   const FixtureMode &mode = fixtureType->Modes().front();
   management.RootFolder().Add(fixtureType);
   Fixture &fixture = *management.GetTheatre().AddFixture(mode);

@@ -187,7 +187,7 @@ void AddFixtureWindow::fillStock() {
     Gtk::TreeModel::iterator iter = type_model_->append();
     (*iter)[type_columns_.type_str_] = item.first;
     (*iter)[type_columns_.stock_fixture_] = item.second;
-    if (item.first == ToString(theatre::StockFixture::Rgb3Ch)) {
+    if (item.first == ToString(theatre::StockFixture::Rgb)) {
       type_combo_.set_active(iter);
     }
   }
@@ -214,7 +214,9 @@ void AddFixtureWindow::fillFromProject() {
 void AddFixtureWindow::onAdd() {
   Gtk::TreeModel::const_iterator iter = type_combo_.get_active();
   const int count = std::atoi(count_entry_.get_text().c_str());
-  if (iter && count > 0) {
+  Gtk::TreeModel::const_iterator selected_mode =
+      channel_mode_combo_.get_active();
+  if (iter && selected_mode && count > 0) {
     theatre::Management &management = Instance::Management();
     std::unique_lock<std::mutex> lock(management.Mutex());
 
@@ -231,8 +233,8 @@ void AddFixtureWindow::onAdd() {
         management.RootFolder().Add(type);
       }
     }
-    // TODO make mode selectable
-    const FixtureMode &mode = type->Modes().front();
+    const size_t mode_index = (*selected_mode)[mode_columns_.mode_index_];
+    const FixtureMode &mode = type->Modes()[mode_index];
 
     for (size_t fixIter = 0; fixIter != static_cast<size_t>(count); ++fixIter) {
       const theatre::Coordinate3D position =

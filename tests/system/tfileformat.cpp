@@ -39,8 +39,7 @@ void FillManagement(Management &management) {
   Folder &subFolder = management.AddFolder(root, "A subfolder");
 
   // Use the RGB_ADJ_6CH fixture to test storing macro parameters
-  root.Add(
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::RGB_ADJ_6CH));
+  root.Add(management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb));
   // Use the AyraTDCSunrise fixture to test rotation parameters:
   root.Add(
       management.GetTheatre().AddFixtureTypePtr(StockFixture::AyraTDCSunrise));
@@ -49,7 +48,7 @@ void FillManagement(Management &management) {
   management.AddFixtureGroup(root, "Ayra and ADJ");
 
   ObservingPtr<FixtureType> ft =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgbw4Ch);
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgbw);
   root.Add(ft);
   Fixture &f = *management.GetTheatre().AddFixture(ft->Modes().front());
   FixtureControl &fc = *management.AddFixtureControlPtr(f, subFolder);

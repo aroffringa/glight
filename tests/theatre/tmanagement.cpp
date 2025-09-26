@@ -78,17 +78,17 @@ BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
   Management management(settings);
 
   ObservingPtr<FixtureType> typeA =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light);
   management.RootFolder().Add(typeA);
   BOOST_CHECK(typeA);
 
   ObservingPtr<FixtureType> typeB =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb3Ch);
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb);
   management.RootFolder().Add(typeB);
   BOOST_CHECK(typeB);
 
   ObservingPtr<FixtureType> typeC =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba4Ch);
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba);
   management.RootFolder().Add(typeC);
   BOOST_CHECK(typeC);
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
   const glight::system::Settings settings;
   Management management(settings);
   ObservingPtr<FixtureType> fixtureType =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light);
   management.RootFolder().Add(fixtureType);
   Fixture &fixture =
       *management.GetTheatre().AddFixture(fixtureType->Modes().front());
