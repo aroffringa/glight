@@ -12,7 +12,9 @@ class DmxDevice;
 class Effect;
 class Fixture;
 class FixtureControl;
+class FixtureFunction;
 class FixtureGroup;
+class FixtureMode;
 class FixtureType;
 class Folder;
 class FolderObject;
@@ -29,6 +31,7 @@ class Theatre;
 class TimeSequence;
 class ValueSnapshot;
 enum class EffectType;
+enum class StockFixture;
 }  // namespace glight::theatre
 
 namespace glight::system {

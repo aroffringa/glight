@@ -96,15 +96,15 @@ class Folder : public FolderObject {
     return *FindNamedObject(_objects, name);
   }
 
-  FolderObject *GetChildIfExists(const std::string &name) {
+  FolderObject *GetChildIfExists(std::string_view name) {
     return FindNamedObjectIfExists(_objects, name).Get();
   }
 
-  const FolderObject &GetChild(const std::string &name) const {
+  const FolderObject &GetChild(std::string_view name) const {
     return *FindNamedObject(_objects, name);
   }
 
-  const FolderObject *GetChildIfExists(const std::string &name) const {
+  const FolderObject *GetChildIfExists(std::string_view name) const {
     return FindNamedObjectIfExists(_objects, name).Get();
   }
 

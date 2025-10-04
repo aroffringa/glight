@@ -1,14 +1,16 @@
 #include "fixture.h"
+
+#include "fixturetype.h"
 #include "theatre.h"
 
 namespace glight::theatre {
 
-Fixture::Fixture(Theatre &theatre, const FixtureType &type,
+Fixture::Fixture(Theatre &theatre, const FixtureMode &type,
                  const std::string &name)
-    : NamedObject(name), theatre_(theatre), type_(type) {
+    : NamedObject(name), theatre_(theatre), mode_(type) {
   DmxChannel base_channel = theatre.FirstFreeChannel();
   for (size_t ci = 0; ci != type.Functions().size(); ++ci) {
-    const FixtureTypeFunction function = type.Functions()[ci];
+    const FixtureModeFunction function = type.Functions()[ci];
     const std::string name(AbbreviatedFunctionType(function.Type()));
     functions_.emplace_back(std::make_unique<FixtureFunction>(name));
     const DmxChannel main_channel(base_channel + function.DmxOffset());
@@ -39,7 +41,7 @@ DmxChannel Fixture::GetFirstChannel() const {
 void Fixture::SetChannel(DmxChannel dmx_channel) {
   for (size_t i = 0; i != functions_.size(); ++i) {
     std::unique_ptr<FixtureFunction> &ff = functions_[i];
-    const glight::theatre::FixtureTypeFunction &tf = Type().Functions()[i];
+    const glight::theatre::FixtureModeFunction &tf = Mode().Functions()[i];
     if (tf.FineChannelOffset()) {
       ff->SetChannel(dmx_channel + tf.DmxOffset(),
                      dmx_channel + *tf.FineChannelOffset());
@@ -62,8 +64,8 @@ void Fixture::SetUniverse(unsigned universe) {
 double Fixture::GetBeamDirection(const ValueSnapshot &snapshot,
                                  size_t shape_index) const {
   double direction = direction_;
-  if (type_.CanBeamRotate()) {
-    const double pan = type_.GetPan(*this, snapshot, shape_index);
+  if (mode_.Type().CanBeamRotate()) {
+    const double pan = mode_.GetPan(*this, snapshot, shape_index);
     if (is_upside_down_)
       direction -= pan;
     else
@@ -75,8 +77,8 @@ double Fixture::GetBeamDirection(const ValueSnapshot &snapshot,
 double Fixture::GetBeamTilt(const ValueSnapshot &snapshot,
                             size_t shape_index) const {
   double beam_tilt = static_tilt_;
-  if (type_.CanBeamRotate()) {
-    const double tilt = type_.GetTilt(*this, snapshot, shape_index);
+  if (mode_.Type().CanBeamRotate()) {
+    const double tilt = mode_.GetTilt(*this, snapshot, shape_index);
     if (is_upside_down_)
       beam_tilt -= tilt;
     else

@@ -1,18 +1,21 @@
 #include "openfixturereader.h"
 
-#include "../theatre/fixturetypefunction.h"
+#include "../theatre/fixturemode.h"
+#include "../theatre/fixturemodefunction.h"
+#include "../theatre/fixturetype.h"
 #include "../theatre/folder.h"
 #include "../theatre/theatre.h"
 
 namespace glight::system {
 
+using theatre::FixtureMode;
+using theatre::FixtureModeFunction;
 using theatre::FixtureType;
-using theatre::FixtureTypeFunction;
 
 namespace {
 void ParseCapabilities(const json::Array& capabilities,
                        const std::string& channel_name,
-                       std::map<std::string, FixtureTypeFunction>& functions) {
+                       std::map<std::string, FixtureModeFunction>& functions) {
   std::vector<std::pair<unsigned, unsigned>> empty_ranges;
 
   for (const json::Node& capability_child : capabilities) {
@@ -21,7 +24,7 @@ void ParseCapabilities(const json::Array& capabilities,
     const unsigned start = ToNum(*dmxRange.items[0]).AsUInt();
     const unsigned end = ToNum(*dmxRange.items[1]).AsUInt() + 1;
     const std::string& type = ToStr(capability["type"]);
-    FixtureTypeFunction* function = nullptr;
+    FixtureModeFunction* function = nullptr;
 
     if (type == "NoFunction") {
       empty_ranges.emplace_back(start, end);
@@ -55,9 +58,9 @@ void ParseCapabilities(const json::Array& capabilities,
   }
 }
 
-std::map<std::string, FixtureTypeFunction> ParseFunctions(
+std::map<std::string, FixtureModeFunction> ParseFunctions(
     const json::Object& fixture_object) {
-  std::map<std::string, FixtureTypeFunction> functions;
+  std::map<std::string, FixtureModeFunction> functions;
   const json::Object& channels = ToObj(fixture_object["availableChannels"]);
   for (const std::pair<const std::string, std::unique_ptr<json::Node>>& child :
        channels.children) {
@@ -115,17 +118,19 @@ std::map<std::string, FixtureTypeFunction> ParseFunctions(
 void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
   const json::Object& fixture_object = ToObj(node);
 
-  std::map<std::string, FixtureTypeFunction> functions =
+  std::map<std::string, FixtureModeFunction> functions =
       ParseFunctions(fixture_object);
   const std::string fixture_name = ToStr(fixture_object["name"]);
   const json::Array& modes = ToArr(fixture_object["modes"]);
+  TrackablePtr<FixtureType> fixture_type =
+      MakeTrackable<FixtureType>(fixture_name);
   for (const json::Node& mode_node : modes) {
     const json::Object& mode = ToObj(mode_node);
     const std::string mode_name = ToStr(mode["name"]);
     const json::Array& mode_channels = ToArr(mode["channels"]);
-    FixtureType fixture_type;
-    fixture_type.SetName(fixture_name + " (" + mode_name + ")");
-    std::vector<FixtureTypeFunction> mode_functions;
+    FixtureMode& fixture_mode = fixture_type->AddMode();
+    fixture_mode.SetName(mode_name);
+    std::vector<FixtureModeFunction> mode_functions;
     size_t dmx_channel = 0;
     for (const json::Node& channel : mode_channels) {
       const auto iter = functions.find(ToStr(channel));
@@ -139,11 +144,11 @@ void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
       else
         ++dmx_channel;
     }
-    fixture_type.SetFunctions(mode_functions);
-    system::ObservingPtr<FixtureType> added_type =
-        management.GetTheatre().AddFixtureType(fixture_type).GetObserver();
-    management.RootFolder().Add(std::move(added_type));
+    fixture_mode.SetFunctions(mode_functions);
   }
+  system::ObservingPtr<FixtureType> added_type =
+      management.GetTheatre().AddFixtureTypePtr(std::move(fixture_type));
+  management.RootFolder().Add(std::move(added_type));
 }
 
 }  // namespace glight::system

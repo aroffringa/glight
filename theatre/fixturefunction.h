@@ -17,9 +17,9 @@ class Theatre;
 
 /**
  * This class holds the dmx information and name of a fixture's function.
- * Objects of this class are matched with a FixtureTypeFunction, which can
+ * Objects of this class are matched with a FixtureModeFunction, which can
  * be found through the Fixture class: function index i of a Fixture matches
- * with FixtureTypeFunction i of the corresponding FixtureType.
+ * with FixtureModeFunction i of the corresponding FixtureMode.
  */
 class FixtureFunction final : public NamedObject {
  public:

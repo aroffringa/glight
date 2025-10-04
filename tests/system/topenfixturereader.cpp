@@ -1,7 +1,8 @@
 #include "system/openfixturereader.h"
 #include "system/settings.h"
 
-#include "theatre/fixturetypefunction.h"
+#include "theatre/fixturemodefunction.h"
+#include "theatre/fixturetype.h"
 #include "theatre/management.h"
 #include "theatre/theatre.h"
 
@@ -667,13 +668,15 @@ BOOST_AUTO_TEST_CASE(read) {
   std::unique_ptr<json::Node> root = json::Parse(data_stream);
   theatre::Theatre& theatre = management.GetTheatre();
   ReadOpenFixture(management, *root);
-  system::ObservingPtr<theatre::FixtureType> f1 =
-      theatre.GetFixtureType("Flat Par QA12 (1-channel)")
-          .GetObserver<theatre::FixtureType>();
-  BOOST_REQUIRE_EQUAL(f1->Functions().size(), 1);
-  BOOST_REQUIRE(f1->Functions()[0].Type() == theatre::FunctionType::ColorMacro);
+  system::ObservingPtr<theatre::FixtureType> fixture_type =
+      theatre.GetFixtureTypePtr("Flat Par QA12");
+  BOOST_REQUIRE_EQUAL(fixture_type->Modes().size(), 8);
+  const theatre::FixtureMode& mode1 = fixture_type->Modes().front();
+  BOOST_REQUIRE_EQUAL(mode1.Functions().size(), 1);
+  BOOST_REQUIRE(mode1.Functions()[0].Type() ==
+                theatre::FunctionType::ColorMacro);
   const theatre::ColorRangeParameters& parameters =
-      f1->Functions()[0].GetColorRangeParameters();
+      mode1.Functions()[0].GetColorRangeParameters();
   BOOST_CHECK_EQUAL(parameters.GetRanges().size(), 16);
   BOOST_CHECK(!parameters.GetRanges()[0].color);
   BOOST_CHECK_EQUAL(parameters.GetRanges()[0].input_min, 0);

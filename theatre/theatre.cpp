@@ -1,8 +1,10 @@
 #include "theatre.h"
 
 #include "fixture.h"
+#include "fixturetype.h"
 #include "folder.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <sstream>
@@ -11,15 +13,18 @@ namespace glight::theatre {
 
 using system::TrackablePtr;
 
+Theatre::Theatre() = default;
+Theatre::~Theatre() = default;
+
 void Theatre::Clear() {
   _fixtures.clear();
   _fixtureTypes.clear();
 }
 
-const TrackablePtr<Fixture> &Theatre::AddFixture(const FixtureType &type) {
+const TrackablePtr<Fixture> &Theatre::AddFixture(const FixtureMode &mode) {
   // Find free name
   std::string ext = "A";
-  std::string prefix = type.ShortName();
+  std::string prefix = mode.Type().ShortName();
   if (!prefix.empty()) prefix = prefix + " ";
   while (true) {
     if (!NamedObject::Contains(_fixtures, prefix + ext)) {
@@ -45,21 +50,20 @@ const TrackablePtr<Fixture> &Theatre::AddFixture(const FixtureType &type) {
     } while (!ready);
   }
   TrackablePtr<Fixture> &f = _fixtures.emplace_back(
-      system::MakeTrackable<Fixture>(*this, type, prefix + ext));
+      system::MakeTrackable<Fixture>(*this, mode, prefix + ext));
   NotifyDmxChange();
   return f;
 }
 
 const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
-    StockFixture fixtureClass) {
+    StockFixture stock_fixture) {
   return _fixtureTypes.emplace_back(
-      system::MakeTrackable<FixtureType>(fixtureClass));
+      system::MakeTrackable<FixtureType>(stock_fixture));
 }
 
 const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
-    const FixtureType &fixture_type) {
-  return _fixtureTypes.emplace_back(
-      system::MakeTrackable<FixtureType>(fixture_type));
+    TrackablePtr<FixtureType> &&fixture_type) {
+  return _fixtureTypes.emplace_back(std::move(fixture_type));
 }
 
 bool Theatre::Contains(Fixture &fixture) const {
@@ -81,6 +85,18 @@ system::ObservingPtr<Fixture> Theatre::GetFixturePtr(
 const system::TrackablePtr<FixtureType> &Theatre::GetFixtureType(
     const std::string &name) const {
   return NamedObject::FindNamedObject(_fixtureTypes, name);
+}
+
+system::ObservingPtr<FixtureType> Theatre::GetFixtureTypePtr(
+    const FixtureType &type) const {
+  std::vector<system::TrackablePtr<FixtureType>>::const_iterator result =
+      std::find_if(
+          _fixtureTypes.begin(), _fixtureTypes.end(),
+          [&type](const system::TrackablePtr<FixtureType> &element) -> bool {
+            return element.Get() == &type;
+          });
+  assert(result != _fixtureTypes.end());
+  return result->GetObserver();
 }
 
 FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
@@ -106,7 +122,7 @@ void Theatre::RemoveFixtureType(const FixtureType &fixtureType) {
     // Go backward through the list, as they might be removed
     const size_t fIndex = _fixtures.size() - 1 - i;
     Fixture &f = *_fixtures[fIndex];
-    if (&f.Type() == &fixtureType) {
+    if (&f.Mode().Type() == &fixtureType) {
       _fixtures.erase(_fixtures.begin() + fIndex);
     } else {
       ++i;
@@ -130,9 +146,18 @@ void Theatre::SwapFixturePositions(const Fixture &fixture_a,
   swap(*a, *b);
 }
 
-bool Theatre::IsUsed(const FixtureType &fixtureType) const {
+bool Theatre::IsUsed(const FixtureType &fixture_type) const {
   for (const system::TrackablePtr<Fixture> &f : _fixtures) {
-    if (&f->Type() == &fixtureType) {
+    if (&f->Mode().Type() == &fixture_type) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Theatre::IsUsed(const FixtureMode &fixture_mode) const {
+  for (const system::TrackablePtr<Fixture> &f : _fixtures) {
+    if (&f->Mode() == &fixture_mode) {
       return true;
     }
   }

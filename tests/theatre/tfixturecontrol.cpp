@@ -1,6 +1,7 @@
 #include "system/settings.h"
 
 #include "theatre/fixturecontrol.h"
+#include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
 #include "theatre/theatre.h"
@@ -22,9 +23,13 @@ BOOST_AUTO_TEST_SUITE(fixture_control)
 BOOST_AUTO_TEST_CASE(SetValue) {
   const glight::system::Settings settings;
   Management management(settings);
-  ObservingPtr<FixtureType> fixtureType =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
-  Fixture &fixture = *management.GetTheatre().AddFixture(*fixtureType);
+  ObservingPtr<FixtureType> fixture_type =
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light);
+  BOOST_REQUIRE_EQUAL(fixture_type->Modes().size(), 1);
+  BOOST_REQUIRE_EQUAL(fixture_type->Modes().front().Functions().size(), 1);
+  Fixture &fixture =
+      *management.GetTheatre().AddFixture(fixture_type->Modes().front());
+  BOOST_REQUIRE_EQUAL(fixture.Functions().size(), 1);
   fixture.SetChannel(DmxChannel(100, 0));
   ObservingPtr<FixtureControl> control =
       management.AddFixtureControlPtr(fixture);
@@ -52,8 +57,9 @@ BOOST_AUTO_TEST_CASE(Filters) {
 
   {
     ObservingPtr<FixtureType> fixtureType =
-        management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba4Ch);
-    Fixture &fixture = *management.GetTheatre().AddFixture(*fixtureType);
+        management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba);
+    const FixtureMode &mode = fixtureType->Modes().front();
+    Fixture &fixture = *management.GetTheatre().AddFixture(mode);
     ObservingPtr<FixtureControl> control =
         management.AddFixtureControlPtr(fixture);
     control->AddFilter(std::make_unique<RgbFilter>());
@@ -63,8 +69,9 @@ BOOST_AUTO_TEST_CASE(Filters) {
   }
   {
     ObservingPtr<FixtureType> fixtureType =
-        management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba5Ch);
-    Fixture &fixture = *management.GetTheatre().AddFixture(*fixtureType);
+        management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba);
+    const FixtureMode &mode = fixtureType->Modes().front();
+    Fixture &fixture = *management.GetTheatre().AddFixture(mode);
     ObservingPtr<FixtureControl> control =
         management.AddFixtureControlPtr(fixture);
     control->AddFilter(std::make_unique<AutoMasterFilter>());

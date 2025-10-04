@@ -4,9 +4,10 @@
 #include <memory>
 #include <vector>
 
-#include "fixture.h"
-#include "fixturetype.h"
 #include "coordinate3d.h"
+#include "dmxchannel.h"
+#include "forwards.h"
+#include "stockfixture.h"
 
 #include "system/trackableptr.h"
 
@@ -17,27 +18,28 @@ namespace glight::theatre {
  */
 class Theatre {
  public:
-  Theatre() = default;
-  // Theatre(const Theatre &source);
+  Theatre();
+  ~Theatre();
 
   void Clear();
 
-  const system::TrackablePtr<Fixture> &AddFixture(const FixtureType &type);
-  system::ObservingPtr<Fixture> AddFixturePtr(const FixtureType &type) {
-    return AddFixture(type).GetObserver();
+  const system::TrackablePtr<Fixture> &AddFixture(const FixtureMode &mode);
+  system::ObservingPtr<Fixture> AddFixturePtr(const FixtureMode &mode) {
+    return AddFixture(mode).GetObserver();
   }
 
   const system::TrackablePtr<FixtureType> &AddFixtureType(
-      StockFixture fixture_class);
+      StockFixture stock_fixture);
   system::ObservingPtr<FixtureType> AddFixtureTypePtr(
-      StockFixture fixture_class) {
-    return AddFixtureType(fixture_class).GetObserver();
+      StockFixture stock_fixture) {
+    return AddFixtureType(stock_fixture).GetObserver();
   }
 
   const system::TrackablePtr<FixtureType> &AddFixtureType(
-      const FixtureType &type);
-  system::ObservingPtr<FixtureType> AddFixtureTypePtr(const FixtureType &type) {
-    return AddFixtureType(type).GetObserver();
+      system::TrackablePtr<FixtureType> &&type);
+  system::ObservingPtr<FixtureType> AddFixtureTypePtr(
+      system::TrackablePtr<FixtureType> &&type) {
+    return AddFixtureType(std::move(type)).GetObserver();
   }
 
   bool Contains(Fixture &fixture) const;
@@ -53,13 +55,20 @@ class Theatre {
   system::ObservingPtr<Fixture> GetFixturePtr(const std::string &name) const;
   const system::TrackablePtr<FixtureType> &GetFixtureType(
       const std::string &name) const;
+  system::ObservingPtr<FixtureType> GetFixtureTypePtr(
+      const std::string &name) const {
+    return GetFixtureType(name).GetObserver();
+  }
+  system::ObservingPtr<FixtureType> GetFixtureTypePtr(
+      const FixtureType &type) const;
   FixtureFunction &GetFixtureFunction(const std::string &name) const;
 
   void RemoveFixture(const Fixture &fixture);
   void RemoveFixtureType(const FixtureType &fixtureType);
 
   void SwapFixturePositions(const Fixture &fixture_a, const Fixture &fixture_b);
-  bool IsUsed(const FixtureType &fixtureType) const;
+  bool IsUsed(const FixtureType &fixture_type) const;
+  bool IsUsed(const FixtureMode &fixture_mode) const;
 
   /**
    * Highest channel used (over all universes).

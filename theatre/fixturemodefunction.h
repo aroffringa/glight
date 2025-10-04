@@ -10,7 +10,7 @@
 
 namespace glight::theatre {
 
-class FixtureTypeFunction {
+class FixtureModeFunction {
  public:
   /**
    * @param dmx_offset Dmx channel offset of this function from fixture starting
@@ -19,7 +19,7 @@ class FixtureTypeFunction {
    * channel, of the fine channel that corresponds to this function. If set, it
    * implies 16 bits are used for this function.
    */
-  FixtureTypeFunction(FunctionType type, size_t dmx_offset,
+  FixtureModeFunction(FunctionType type, size_t dmx_offset,
                       system::OptionalNumber<size_t> fine_channel,
                       unsigned shape)
       : type_(type),
@@ -29,9 +29,9 @@ class FixtureTypeFunction {
     ConstructParameters();
   }
 
-  ~FixtureTypeFunction() { DestructParameters(); }
+  ~FixtureModeFunction() { DestructParameters(); }
 
-  FixtureTypeFunction(const FixtureTypeFunction& source)
+  FixtureModeFunction(const FixtureModeFunction& source)
       : type_(source.type_),
         dmx_offset_(source.dmx_offset_),
         fine_channel_(source.fine_channel_),
@@ -40,7 +40,7 @@ class FixtureTypeFunction {
     CopyParameters(source);
   }
 
-  FixtureTypeFunction& operator=(const FixtureTypeFunction& source) {
+  FixtureModeFunction& operator=(const FixtureModeFunction& source) {
     DestructParameters();
     type_ = source.type_;
     dmx_offset_ = source.dmx_offset_;
@@ -120,7 +120,7 @@ class FixtureTypeFunction {
     }
   }
 
-  void CopyParameters(const FixtureTypeFunction& source) {
+  void CopyParameters(const FixtureModeFunction& source) {
     switch (type_) {
       case FunctionType::ColorMacro:
       case FunctionType::ColorWheel:

@@ -1,7 +1,7 @@
 #ifndef THEATRE_DMXCHANNEL_H_
 #define THEATRE_DMXCHANNEL_H_
 
-#include "controlvalue.h"
+#include <cstring>
 
 namespace glight::theatre {
 

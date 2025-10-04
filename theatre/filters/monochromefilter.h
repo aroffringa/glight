@@ -31,9 +31,9 @@ class MonochromeFilter final : public Filter {
 
  protected:
   void DetermineInputTypes() override {
-    std::vector<FixtureTypeFunction> input_types{
-        FixtureTypeFunction(FunctionType::White, 0, {}, 0)};
-    for (const FixtureTypeFunction& function : OutputTypes()) {
+    std::vector<FixtureModeFunction> input_types{
+        FixtureModeFunction(FunctionType::White, 0, {}, 0)};
+    for (const FixtureModeFunction& function : OutputTypes()) {
       if (!IsColor(function.Type())) input_types.emplace_back(function);
     }
     SetInputTypes(std::move(input_types));

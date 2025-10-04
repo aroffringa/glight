@@ -1,5 +1,6 @@
 #include "theatre/chase.h"
 #include "theatre/fixturecontrol.h"
+#include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
 #include "theatre/presetcollection.h"
@@ -23,8 +24,8 @@ BOOST_AUTO_TEST_CASE(remove_indirect) {
   Management management(settings);
   Folder &root = management.RootFolder();
   ObservingPtr<FixtureType> ft =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light1Ch);
-  Fixture &f = *management.GetTheatre().AddFixture(*ft);
+      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light);
+  Fixture &f = *management.GetTheatre().AddFixture(ft->Modes().front());
   ObservingPtr<FixtureControl> fc = management.AddFixtureControlPtr(f);
   SourceValue &sv = management.AddSourceValue(*fc, 0);
   sv.A().SetValue(ControlValue::Max());

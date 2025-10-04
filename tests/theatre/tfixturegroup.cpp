@@ -1,6 +1,7 @@
 #include "system/settings.h"
 
 #include "theatre/fixturegroup.h"
+#include "theatre/fixturetype.h"
 #include "theatre/management.h"
 #include "theatre/theatre.h"
 
@@ -31,9 +32,9 @@ BOOST_AUTO_TEST_CASE(construct) {
 BOOST_AUTO_TEST_CASE(insert) {
   theatre::Theatre theatre;
   const theatre::FixtureType& type =
-      *theatre.AddFixtureTypePtr(StockFixture::Rgb3Ch);
-  ObservingPtr<Fixture> a = theatre.AddFixturePtr(type);
-  ObservingPtr<Fixture> b = theatre.AddFixturePtr(type);
+      *theatre.AddFixtureTypePtr(StockFixture::Rgb);
+  ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
+  ObservingPtr<Fixture> b = theatre.AddFixturePtr(type.Modes().front());
   FixtureGroup group("g1");
   group.Insert(a);
   group.Insert(b);
@@ -44,11 +45,10 @@ BOOST_AUTO_TEST_CASE(insert) {
 
 BOOST_AUTO_TEST_CASE(remove) {
   theatre::Theatre theatre;
-  const theatre::FixtureType& type =
-      *theatre.AddFixtureType(StockFixture::Rgb3Ch);
-  ObservingPtr<Fixture> a = theatre.AddFixturePtr(type);
-  ObservingPtr<Fixture> b = theatre.AddFixturePtr(type);
-  ObservingPtr<Fixture> c = theatre.AddFixturePtr(type);
+  const theatre::FixtureType& type = *theatre.AddFixtureType(StockFixture::Rgb);
+  ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
+  ObservingPtr<Fixture> b = theatre.AddFixturePtr(type.Modes().front());
+  ObservingPtr<Fixture> c = theatre.AddFixturePtr(type.Modes().front());
   FixtureGroup group("g1");
   BOOST_CHECK(!group.Remove(a));
   group.Insert(a);
@@ -74,11 +74,10 @@ BOOST_AUTO_TEST_CASE(remove) {
 
 BOOST_AUTO_TEST_CASE(contains) {
   Theatre theatre;
-  const theatre::FixtureType& type =
-      *theatre.AddFixtureType(StockFixture::Rgb3Ch);
-  ObservingPtr<Fixture> a = theatre.AddFixturePtr(type);
-  ObservingPtr<Fixture> b = theatre.AddFixturePtr(type);
-  ObservingPtr<Fixture> c = theatre.AddFixturePtr(type);
+  const theatre::FixtureType& type = *theatre.AddFixtureType(StockFixture::Rgb);
+  ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
+  ObservingPtr<Fixture> b = theatre.AddFixturePtr(type.Modes().front());
+  ObservingPtr<Fixture> c = theatre.AddFixturePtr(type.Modes().front());
   FixtureGroup group("g1");
   BOOST_CHECK(!group.Contains(a));
   group.Insert(a);
@@ -93,11 +92,10 @@ BOOST_AUTO_TEST_CASE(add_to_management) {
   const glight::system::Settings settings;
   Management management(settings);
   Theatre& theatre = management.GetTheatre();
-  const theatre::FixtureType& type =
-      *theatre.AddFixtureType(StockFixture::Rgb3Ch);
-  ObservingPtr<Fixture> a = theatre.AddFixturePtr(type);
-  theatre.AddFixture(type);
-  ObservingPtr<Fixture> c = theatre.AddFixturePtr(type);
+  const theatre::FixtureType& type = *theatre.AddFixtureType(StockFixture::Rgb);
+  ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
+  theatre.AddFixture(type.Modes().front());
+  ObservingPtr<Fixture> c = theatre.AddFixturePtr(type.Modes().front());
   FixtureGroup& group =
       *management.AddFixtureGroup(management.RootFolder(), "newgroup");
   BOOST_CHECK_EQUAL(group.Name(), "newgroup");

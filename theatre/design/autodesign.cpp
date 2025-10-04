@@ -26,7 +26,7 @@ Chase &AutoDesign::MakeRunningLight(
     const std::vector<ObservingPtr<Controllable>> &controllables,
     const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
     RunType runType) {
-  ObservingPtr<Chase> chase = management.AddChase().GetObserver<Chase>();
+  ObservingPtr<Chase> chase = management.AddChasePtr();
   chase->SetName(destination.GetAvailableName("Runchase"));
   destination.Add(chase);
   management.AddSourceValue(*chase, 0);
@@ -52,8 +52,7 @@ Chase &AutoDesign::MakeRunningLight(
          (frameIndex != 0 || colors.size() % 2 == 0)))
       nFixInPattern = 2;
 
-    ObservingPtr<PresetCollection> pc =
-        management.AddPresetCollection().GetObserver<PresetCollection>();
+    ObservingPtr<PresetCollection> pc = management.AddPresetCollectionPtr();
     pc->SetName(destination.GetAvailableName(chase->Name() + "_"));
     destination.Add(pc);
     // If there are less colours given than fixtures, the sequence is repeated
@@ -112,7 +111,7 @@ Chase &AutoDesign::MakeColorVariation(
     const std::vector<ObservingPtr<Controllable>> &controllables,
     const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
     double variation) {
-  ObservingPtr<Chase> chase_ptr = management.AddChase().GetObserver<Chase>();
+  ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
   destination.Add(chase_ptr);
   Chase &chase = *chase_ptr;
   chase.SetName(destination.GetAvailableName("Colorvar"));
@@ -122,8 +121,7 @@ Chase &AutoDesign::MakeColorVariation(
   std::mt19937 rnd(rd());
   std::normal_distribution<double> distribution(0.0, variation);
   for (const ColorOrVariable &color_or_var : colors) {
-    ObservingPtr<PresetCollection> pc_ptr =
-        management.AddPresetCollection().GetObserver<PresetCollection>();
+    ObservingPtr<PresetCollection> pc_ptr = management.AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc_ptr);
@@ -160,7 +158,7 @@ Chase &AutoDesign::MakeColorShift(
     const std::vector<ObservingPtr<Controllable>> &controllables,
     const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
     ShiftType shiftType) {
-  ObservingPtr<Chase> chase_ptr = management.AddChase().GetObserver<Chase>();
+  ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
   Chase &chase = *chase_ptr;
   chase.SetName(destination.GetAvailableName("Colourshift"));
   destination.Add(chase_ptr);
@@ -199,8 +197,7 @@ Chase &AutoDesign::MakeColorShift(
       } while (duplicate);
     }
 
-    ObservingPtr<PresetCollection> pc_ptr =
-        management.AddPresetCollection().GetObserver<PresetCollection>();
+    ObservingPtr<PresetCollection> pc_ptr = management.AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc_ptr);
@@ -270,8 +267,7 @@ Controllable &AutoDesign::MakeVUMeter(
          (level != 0 || controllables.size() % 2 == 0)))
       nFixInLevel = 2;
 
-    ObservingPtr<PresetCollection> pc_ptr =
-        management.AddPresetCollection().GetObserver<PresetCollection>();
+    ObservingPtr<PresetCollection> pc_ptr = management.AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName(newAudioLevel.Name() + "_Set"));
     destination.Add(std::move(pc_ptr));
@@ -312,7 +308,7 @@ Chase &AutoDesign::MakeIncreasingChase(
   if (colors.size() != controllables.size())
     throw std::runtime_error(
         "Number of controllables does not match number of provided colours");
-  ObservingPtr<Chase> chase_ptr = management.AddChase().GetObserver<Chase>();
+  ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
   Chase &chase = *chase_ptr;
   chase.SetName(destination.GetAvailableName("Increasing chase"));
   destination.Add(std::move(chase_ptr));
@@ -352,8 +348,7 @@ Chase &AutoDesign::MakeIncreasingChase(
       }
     }
 
-    ObservingPtr<PresetCollection> pc_ptr =
-        management.AddPresetCollection().GetObserver<PresetCollection>();
+    ObservingPtr<PresetCollection> pc_ptr = management.AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc_ptr);

@@ -50,7 +50,7 @@ class AutoMasterFilter final : public Filter {
  protected:
   void DetermineInputTypes() override {
     master_channel_index_.Reset();
-    std::vector<FixtureTypeFunction> input_functions;
+    std::vector<FixtureModeFunction> input_functions;
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
       const FunctionType type = OutputTypes()[i].Type();
       if (type == FunctionType::Master) {

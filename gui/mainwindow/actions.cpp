@@ -77,7 +77,7 @@ void NewEmptyPreset(ObjectBrowser &browser,
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
   ObservingPtr<theatre::PresetCollection> preset_collection =
-      management.AddPresetCollection().GetObserver<theatre::PresetCollection>();
+      management.AddPresetCollectionPtr();
   preset_collection->SetName(parent_folder.GetAvailableName("Preset"));
   parent_folder.Add(preset_collection);
   management.AddSourceValue(*preset_collection, 0);
@@ -94,7 +94,7 @@ void NewPresetFromCurrent(ObjectBrowser &browser) {
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
   ObservingPtr<theatre::PresetCollection> preset_collection =
-      management.AddPresetCollection().GetObserver<theatre::PresetCollection>();
+      management.AddPresetCollectionPtr();
   preset_collection->SetName(parent.GetAvailableName("Preset"));
   parent.Add(preset_collection);
   preset_collection->SetFromCurrentSituation(management);
@@ -112,7 +112,7 @@ void NewPresetFromFixtures(
   Management &management = Instance::Management();
   std::unique_lock<std::mutex> lock(management.Mutex());
   ObservingPtr<theatre::PresetCollection> preset_collection =
-      management.AddPresetCollection().GetObserver<theatre::PresetCollection>();
+      management.AddPresetCollectionPtr();
   preset_collection->SetName(parent_folder.GetAvailableName("Preset"));
   parent_folder.Add(preset_collection);
   preset_collection->SetFromCurrentFixtures(management, fixtures);
@@ -142,7 +142,7 @@ void NewTimeSequence(ObjectBrowser &browser,
   std::unique_lock<std::mutex> lock(management.Mutex());
   Folder &parent_folder = browser.SelectedFolder();
   ObservingPtr<theatre::TimeSequence> time_sequence =
-      management.AddTimeSequence().GetObserver<theatre::TimeSequence>();
+      management.AddTimeSequencePtr();
   time_sequence->SetName(parent_folder.GetAvailableName("Seq"));
   parent_folder.Add(time_sequence);
   management.AddSourceValue(*time_sequence, 0);
@@ -164,8 +164,7 @@ void NewEffect(theatre::EffectType effect_type, ObjectBrowser &browser,
   effect->SetName(
       parent_folder.GetAvailableName(EffectTypeToName(effect_type)));
   ObservingPtr<Effect> added =
-      management.AddEffect(std::move(effect), parent_folder)
-          .GetObserver<Effect>();
+      management.AddEffectPtr(std::move(effect), parent_folder);
   for (size_t i = 0; i != added->NInputs(); ++i)
     management.AddSourceValue(*added, i);
   lock.unlock();

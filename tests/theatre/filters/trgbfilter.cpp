@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(cold_and_warm_white) {
 
 BOOST_AUTO_TEST_CASE(macro) {
   RgbFilter filter;
-  std::vector<FixtureTypeFunction> functions =
+  std::vector<FixtureModeFunction> functions =
       MakeFunctionList({FunctionType::ColorMacro});
   std::vector<ColorRangeParameters::Range>& ranges =
       functions.back().GetColorRangeParameters().GetRanges();
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(macro) {
 
 BOOST_AUTO_TEST_CASE(macro_with_master) {
   RgbFilter filter;
-  std::vector<FixtureTypeFunction> functions =
+  std::vector<FixtureModeFunction> functions =
       MakeFunctionList({FunctionType::ColorMacro, FunctionType::Master});
   std::vector<ColorRangeParameters::Range>& ranges =
       functions.front().GetColorRangeParameters().GetRanges();

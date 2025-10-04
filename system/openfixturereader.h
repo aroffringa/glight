@@ -3,7 +3,7 @@
 
 #include "jsonreader.h"
 
-#include "../theatre/fixturetype.h"
+#include "../theatre/fixturemode.h"
 #include "../theatre/management.h"
 
 namespace glight::system {

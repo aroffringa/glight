@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <memory>
+#include <type_traits>
 
 namespace glight::system {
 
@@ -15,6 +16,11 @@ namespace internal {
 struct TrackablePtrData {
   void* object = nullptr;
   size_t reference_count = 0;
+};
+
+template <typename From, typename To>
+concept StaticConversion = requires(From f) {
+  static_cast<To>(f);
 };
 
 }  // namespace internal
@@ -228,7 +234,9 @@ class TrackablePtr {
   }
 
   template <typename ObserverType = T>
-  ObservingPtr<ObserverType> GetObserver() const;
+  requires(std::is_same_v<ObserverType, T> ||
+           std::is_convertible_v<ObserverType, T>)
+      ObservingPtr<ObserverType> GetObserver() const;
 
   /**
    * Number of observers that track this pointer.
@@ -329,11 +337,41 @@ class ObservingPtr {
     return *this;
   }
   constexpr operator bool() const { return Get() != nullptr; }
+
   template <typename ImplicitCastableType>
-  constexpr operator ObservingPtr<ImplicitCastableType>() const {
+  requires(std::is_convertible_v<T*, ImplicitCastableType*>) constexpr
+  operator ObservingPtr<ImplicitCastableType>() const& {
     if (data_) data_->reference_count++;
     return ObservingPtr<ImplicitCastableType>(data_);
   }
+
+  template <typename ImplicitCastableType>
+  requires(std::is_convertible_v<T*, ImplicitCastableType*>) constexpr
+  operator ObservingPtr<ImplicitCastableType>() && {
+    ObservingPtr<ImplicitCastableType> result(data_);
+    data_ = nullptr;
+    return result;
+  }
+
+  template <typename ExplicitCastableType>
+  requires(
+      !std::is_convertible_v<T*, ExplicitCastableType*> &&
+      internal::StaticConversion<T*, ExplicitCastableType*>) constexpr explicit
+  operator ObservingPtr<ExplicitCastableType>() const& {
+    if (data_) data_->reference_count++;
+    return ObservingPtr<ExplicitCastableType>(data_);
+  }
+
+  template <typename ExplicitCastableType>
+  requires(
+      !std::is_convertible_v<T*, ExplicitCastableType*> &&
+      internal::StaticConversion<T*, ExplicitCastableType*>) constexpr explicit
+  operator ObservingPtr<ExplicitCastableType>() && {
+    ObservingPtr<ExplicitCastableType> result(data_);
+    data_ = nullptr;
+    return result;
+  }
+
   constexpr bool operator==(const ObservingPtr& rhs) const {
     return Get() == rhs.Get();
   }
@@ -417,7 +455,9 @@ class ObservingPtr {
 
 template <typename T>
 template <typename ObservingType>
-ObservingPtr<ObservingType> TrackablePtr<T>::GetObserver() const {
+requires(std::is_same_v<ObservingType, T> ||
+         std::is_convertible_v<ObservingType, T>)
+    ObservingPtr<ObservingType> TrackablePtr<T>::GetObserver() const {
   if (data_ == nullptr) {
     data_ =
         new internal::TrackablePtrData{.object = object_, .reference_count = 2};
@@ -430,6 +470,16 @@ ObservingPtr<ObservingType> TrackablePtr<T>::GetObserver() const {
 template <typename T, typename... Args>
 TrackablePtr<T> MakeTrackable(Args&&... args) {
   return TrackablePtr<T>(new T(std::forward<Args>(args)...));
+}
+
+template <typename To, typename From>
+ObservingPtr<To> StaticObserverCast(const ObservingPtr<From>& from) {
+  return static_cast<ObservingPtr<To>>(from);
+}
+
+template <typename To, typename From>
+ObservingPtr<To> StaticObserverCast(ObservingPtr<From>&& from) {
+  return static_cast<ObservingPtr<To>>(std::move(from));
 }
 
 }  // namespace glight::system

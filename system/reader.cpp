@@ -9,6 +9,8 @@
 #include "theatre/fixturecontrol.h"
 #include "theatre/fixturefunction.h"
 #include "theatre/fixturegroup.h"
+#include "theatre/fixturemode.h"
+#include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
 #include "theatre/presetvalue.h"
@@ -114,9 +116,9 @@ void ParseRotationParameters(const json::Object &node,
   }
 }
 
-void ParseFixtureTypeFunctions(const json::Array &node,
-                               FixtureType &fixture_type) {
-  std::vector<FixtureTypeFunction> functions;
+void ParseFixtureModeFunctions(const json::Array &node,
+                               FixtureMode &fixture_mode) {
+  std::vector<FixtureModeFunction> functions;
   for (const json::Node &child : node) {
     const json::Object &obj = ToObj(child);
     const FunctionType ft = GetFunctionType(ToStr(obj["type"]));
@@ -126,7 +128,7 @@ void ParseFixtureTypeFunctions(const json::Array &node,
       fine_channel = ToNum(obj["fine-channel-offset"]).AsSize();
     }
     const unsigned shape = ToNum(obj["shape"]).AsUInt();
-    FixtureTypeFunction &new_function =
+    FixtureModeFunction &new_function =
         functions.emplace_back(ft, dmx_offset, fine_channel, shape);
     new_function.SetPower(OptionalUInt(obj, "power", 0));
     switch (ft) {
@@ -143,40 +145,53 @@ void ParseFixtureTypeFunctions(const json::Array &node,
         break;
     }
   }
-  fixture_type.SetFunctions(std::move(functions));
+  fixture_mode.SetFunctions(std::move(functions));
 }
 
 void ParseFixtureTypes(const json::Array &node, Management &management) {
   for (const Node &child : node) {
     const Object &ft_node = ToObj(child);
-    FixtureType ft;
-    ft.SetShortName(ToStr(ft_node["short-name"]));
+    TrackablePtr<FixtureType> ft = MakeTrackable<FixtureType>();
+    ft->SetShortName(ToStr(ft_node["short-name"]));
     const std::string &class_name = ToStr(ft_node["fixture-class"]);
-    ft.SetFixtureClass(FixtureType::NameToClass(class_name));
+    ft->SetFixtureClass(GetFixtureClass(class_name));
     if (ft_node.contains("beam-angle")) {
       const double angle = ToNum(ft_node["beam-angle"]).AsDouble();
-      ft.SetMinBeamAngle(angle);
-      ft.SetMaxBeamAngle(angle);
+      ft->SetMinBeamAngle(angle);
+      ft->SetMaxBeamAngle(angle);
     } else {
-      ft.SetMinBeamAngle(ToNum(ft_node["min-beam-angle"]).AsDouble());
-      ft.SetMaxBeamAngle(ToNum(ft_node["max-beam-angle"]).AsDouble());
+      ft->SetMinBeamAngle(ToNum(ft_node["min-beam-angle"]).AsDouble());
+      ft->SetMaxBeamAngle(ToNum(ft_node["max-beam-angle"]).AsDouble());
     }
     if (ft_node.contains("min-pan")) {
-      ft.SetMinPan(ToNum(ft_node["min-pan"]).AsDouble());
-      ft.SetMaxPan(ToNum(ft_node["max-pan"]).AsDouble());
-      ft.SetMinTilt(ToNum(ft_node["min-tilt"]).AsDouble());
-      ft.SetMaxTilt(ToNum(ft_node["max-tilt"]).AsDouble());
+      ft->SetMinPan(ToNum(ft_node["min-pan"]).AsDouble());
+      ft->SetMaxPan(ToNum(ft_node["max-pan"]).AsDouble());
+      ft->SetMinTilt(ToNum(ft_node["min-tilt"]).AsDouble());
+      ft->SetMaxTilt(ToNum(ft_node["max-tilt"]).AsDouble());
     }
-    ft.SetBrightness(ToNum(ft_node["brightness"]).AsDouble());
-    ft.SetMaxPower(OptionalUInt(ft_node, "max-power", 0));
-    ft.SetIdlePower(OptionalUInt(ft_node, "idle-power", 0));
-    const TrackablePtr<FixtureType> &new_type =
-        management.GetTheatre().AddFixtureType(ft);
-    if (management.RootFolder().GetChildIfExists(new_type->Name())) {
+    ft->SetBrightness(ToNum(ft_node["brightness"]).AsDouble());
+    ft->SetMaxPower(OptionalUInt(ft_node, "max-power", 0));
+    ft->SetIdlePower(OptionalUInt(ft_node, "idle-power", 0));
+    if (management.RootFolder().GetChildIfExists(ft->Name())) {
       throw std::runtime_error("Error in file: fixture type listed twice");
     }
-    ParseFolderAttr(ft_node, new_type.GetObserver(), management);
-    ParseFixtureTypeFunctions(ToArr(ft_node["functions"]), *new_type);
+    if (ft_node.contains("functions")) {
+      // Old format: no modes
+      FixtureMode &new_mode = ft->AddMode();
+      new_mode.SetName("Default");
+      ParseFixtureModeFunctions(ToArr(ft_node["functions"]), new_mode);
+    } else {
+      const Array &modes_array = ToArr(ft_node["modes"]);
+      for (const Node &mode_node : modes_array) {
+        const Object &mode_object = ToObj(mode_node);
+        FixtureMode &new_mode = ft->AddMode();
+        new_mode.SetName(ToStr(mode_object["name"]));
+        ParseFixtureModeFunctions(ToArr(mode_object["functions"]), new_mode);
+      }
+    }
+    ObservingPtr<FixtureType> observer =
+        management.GetTheatre().AddFixtureTypePtr(std::move(ft));
+    ParseFolderAttr(ft_node, observer, management);
   }
 }
 
@@ -202,7 +217,12 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
   for (const Node &child : node) {
     const Object &f_node = ToObj(child);
     FixtureType &type = *theatre.GetFixtureType(ToStr(f_node["type"]));
-    Fixture &fixture = *theatre.AddFixture(type);
+    const size_t mode_index = OptionalUInt(f_node, "mode-index", 0);
+    if (mode_index >= type.Modes().size())
+      throw std::runtime_error("Invalid mode index (" +
+                               std::to_string(mode_index) +
+                               ") in fixture of type " + type.Name());
+    Fixture &fixture = *theatre.AddFixture(type.Modes()[mode_index]);
     ParseNameAttr(f_node, fixture);
     fixture.GetPosition().X() = ToNum(f_node["position-x"]).AsDouble();
     fixture.GetPosition().Y() = ToNum(f_node["position-y"]).AsDouble();
@@ -220,13 +240,13 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     for (const Node &f : functions) {
       ParseFixtureFunction(ToObj(f), fixture);
     }
-    if (fixture.Functions().size() != type.Functions().size()) {
-      throw std::runtime_error("Corrupted fixture found: " + fixture.Name() +
-                               " of type " + type.Name() + " has " +
-                               std::to_string(fixture.Functions().size()) +
-                               " functions, but should have " +
-                               std::to_string(type.Functions().size()) +
-                               " functions according to its type");
+    if (fixture.Functions().size() != fixture.Mode().Functions().size()) {
+      throw std::runtime_error(
+          "Corrupted fixture found: " + fixture.Name() + " of type " +
+          type.Name() + " has " + std::to_string(fixture.Functions().size()) +
+          " functions, but should have " +
+          std::to_string(fixture.Mode().Functions().size()) +
+          " functions according to its type");
     }
   }
 }
@@ -263,7 +283,7 @@ void ParseFixtureControl(const Object &node, Management &management) {
   Fixture &fixture =
       management.GetTheatre().GetFixture(ToStr(node["fixture-ref"]));
   ObservingPtr<FixtureControl> control_ptr =
-      management.AddFixtureControl(fixture).GetObserver<FixtureControl>();
+      management.AddFixtureControlPtr(fixture);
   ParseFolderAttr(node, control_ptr, management);
   FixtureControl &control = *control_ptr;
   if (node.contains("filters")) {
@@ -278,7 +298,7 @@ void ParseFixtureControl(const Object &node, Management &management) {
 
 void ParsePresetCollection(const Object &node, Management &management) {
   ObservingPtr<PresetCollection> collection_ptr =
-      management.AddPresetCollection().GetObserver<PresetCollection>();
+      management.AddPresetCollectionPtr();
   ParseFolderAttr(node, collection_ptr, management);
   PresetCollection &collection = *collection_ptr;
   const Array &values = ToArr(node["values"]);
@@ -327,7 +347,7 @@ Transition ParseTransition(const Object &node) {
 }
 
 void ParseChase(const Object &node, Management &management) {
-  ObservingPtr<Chase> chase_ptr = management.AddChase().GetObserver<Chase>();
+  ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
   ParseFolderAttr(node, chase_ptr, management);
   Chase &chase = *chase_ptr;
   ParseTrigger(ToObj(node["trigger"]), chase.GetTrigger());
@@ -337,7 +357,7 @@ void ParseChase(const Object &node, Management &management) {
 
 void ParseTimeSequence(const Object &node, Management &management) {
   ObservingPtr<TimeSequence> time_sequence_ptr =
-      management.AddTimeSequence().GetObserver<TimeSequence>();
+      management.AddTimeSequencePtr();
   ParseFolderAttr(node, time_sequence_ptr, management);
   TimeSequence &time_sequence = *time_sequence_ptr;
   time_sequence.SetSustain(ToBool(node["sustain"]));
@@ -361,7 +381,8 @@ void ParseEffect(const Object &node, Management &management) {
   EffectType type = NameToEffectType(ToStr(node["effect_type"]));
   const TrackablePtr<Controllable> &effect_ptr =
       management.AddEffect(Effect::Make(type));
-  ParseFolderAttr(node, effect_ptr.GetObserver<Effect>(), management);
+  ParseFolderAttr(node, StaticObserverCast<Effect>(effect_ptr.GetObserver()),
+                  management);
   std::unique_ptr<PropertySet> ps = PropertySet::Make(*effect_ptr);
   const Array &properties = ToArr(node["properties"]);
   for (const Node &item : properties) {
@@ -445,8 +466,7 @@ void ParseSceneItem(const Object &node, Scene &scene, Management &management) {
 }
 
 void ParseScene(const Object &scene_node, Management &management) {
-  const ObservingPtr<Scene> &scene_ptr =
-      management.AddScene(false).GetObserver<Scene>();
+  const ObservingPtr<Scene> &scene_ptr = management.AddScenePtr(false);
   ParseFolderAttr(scene_node, scene_ptr, management);
   Scene &scene = *scene_ptr;
   scene.SetAudioFile(ToStr(scene_node["audio-file"]));
@@ -634,12 +654,13 @@ void ImportFixtureTypes(const std::string &filename,
                         theatre::Management &management) {
   theatre::Management file_management(management.Settings());
   system::Read(filename, file_management);
-  const std::vector<TrackablePtr<theatre::FixtureType>> &new_types =
+  const std::vector<TrackablePtr<FixtureType>> &new_types =
       file_management.GetTheatre().FixtureTypes();
-  for (const TrackablePtr<theatre::FixtureType> &type : new_types) {
+  for (const TrackablePtr<FixtureType> &type : new_types) {
     if (!management.RootFolder().GetChildIfExists(type->Name())) {
-      const TrackablePtr<theatre::FixtureType> &added_type =
-          management.GetTheatre().AddFixtureType(*type);
+      const TrackablePtr<FixtureType> &added_type =
+          management.GetTheatre().AddFixtureType(
+              MakeTrackable<FixtureType>(*type));
       management.RootFolder().Add(added_type.GetObserver());
     }
   }

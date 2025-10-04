@@ -43,7 +43,7 @@ void FixtureList::Fill() {
     Gtk::TreeModel::iterator iter = model_->append();
     const Gtk::TreeModel::Row &row = *iter;
     row[columns_.title_] = fixture->Name();
-    row[columns_.type_] = fixture->Type().Name();
+    row[columns_.type_] = fixture->Mode().Name();
     row[columns_.fixture_] = fixture.GetObserver();
     row[columns_.group_] = nullptr;
   }

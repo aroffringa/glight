@@ -32,7 +32,7 @@ class FixtureControl final : public Controllable {
 
   virtual FunctionType InputType(size_t index) const override {
     if (filters_.empty())
-      return fixture_->Type().Functions()[index].Type();
+      return fixture_->Mode().Functions()[index].Type();
     else
       return filters_.back()->InputTypes()[index].Type();
   }
@@ -80,7 +80,7 @@ class FixtureControl final : public Controllable {
     assert(filter);
     if (filters_.empty()) {
       filters_.emplace_back(std::move(filter));
-      filters_.back()->SetOutputTypes(fixture_->Type().Functions());
+      filters_.back()->SetOutputTypes(fixture_->Mode().Functions());
     } else {
       Filter *previous_last = filters_.back().get();
       filters_.emplace_back(std::move(filter));

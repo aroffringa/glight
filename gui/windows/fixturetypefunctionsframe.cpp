@@ -7,7 +7,7 @@
 namespace glight::gui {
 
 using system::OptionalNumber;
-using theatre::FixtureTypeFunction;
+using theatre::FixtureModeFunction;
 using theatre::FunctionType;
 
 namespace {
@@ -92,7 +92,7 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
     if (selected) {
       Gtk::TreeModel::const_iterator iter = function_type_combo_.get_active();
       if (iter) {
-        FixtureTypeFunction* function =
+        FixtureModeFunction* function =
             (*selected)[functions_columns_.function_];
         FunctionType type = (*iter)[function_type_columns_.function_type_];
         // We should not update the type if no change is made, as it would
@@ -131,7 +131,7 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
 
 void FixtureTypeFunctionsFrame::FillModel() {
   functions_model_->clear();
-  for (FixtureTypeFunction& f : functions_) {
+  for (FixtureModeFunction& f : functions_) {
     Gtk::TreeModel::iterator iter = functions_model_->append();
     const Gtk::TreeModel::Row& row = *iter;
     row[functions_columns_.dmx_offset_] = f.DmxOffset();
@@ -143,7 +143,7 @@ void FixtureTypeFunctionsFrame::FillModel() {
 
 void FixtureTypeFunctionsFrame::UpdateModel() {
   auto row_iter = functions_model_->children().begin();
-  for (FixtureTypeFunction& f : functions_) {
+  for (FixtureModeFunction& f : functions_) {
     const Gtk::TreeModel::Row& row = *row_iter;
     row[functions_columns_.dmx_offset_] = f.DmxOffset();
     row[functions_columns_.fine_channel_] = FineToString(f.FineChannelOffset());
@@ -180,10 +180,10 @@ void FixtureTypeFunctionsFrame::onRemove() {
   Glib::RefPtr<Gtk::TreeSelection> selection = functions_view_.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
   if (selected) {
-    FixtureTypeFunction* function = (*selected)[functions_columns_.function_];
+    FixtureModeFunction* function = (*selected)[functions_columns_.function_];
     auto iter =
         std::find_if(functions_.begin(), functions_.end(),
-                     [function](const FixtureTypeFunction& ftf) -> bool {
+                     [function](const FixtureModeFunction& ftf) -> bool {
                        return &ftf == function;
                      });
     assert(iter != functions_.end());
@@ -207,7 +207,7 @@ void FixtureTypeFunctionsFrame::onSelectionChanged() {
   function_type_combo_.set_sensitive(is_selected);
   function_parameters_button_.set_sensitive(is_selected);
   if (is_selected) {
-    const FixtureTypeFunction& function =
+    const FixtureModeFunction& function =
         *(*selected)[functions_columns_.function_];
     dmx_offset_entry_.set_text(std::to_string(function.DmxOffset()));
     fine_channel_entry_.set_text((*selected)[functions_columns_.fine_channel_]);
@@ -227,7 +227,7 @@ void FixtureTypeFunctionsFrame::OpenFunctionParametersEditWindow() {
       functions_view_.get_selection()->get_selected();
   const bool is_selected = static_cast<bool>(selected);
   if (is_selected) {
-    FixtureTypeFunction& function = *(*selected)[functions_columns_.function_];
+    FixtureModeFunction& function = *(*selected)[functions_columns_.function_];
     if (function.Type() == FunctionType::ColorMacro ||
         function.Type() == FunctionType::ColorWheel) {
       sub_window_ = std::make_unique<windows::EditColorRange>(

@@ -1,6 +1,8 @@
 #include "renderengine.h"
 
 #include "../theatre/fixture.h"
+#include "../theatre/fixturemode.h"
+#include "../theatre/fixturetype.h"
 #include "../theatre/theatre.h"
 
 #include "system/math.h"
@@ -49,14 +51,15 @@ struct DrawData {
 
 void DrawFixtureProjection(const DrawData &data,
                            const theatre::Fixture &fixture) {
-  const theatre::FixtureType &type = fixture.Type();
+  const theatre::FixtureMode &mode = fixture.Mode();
+  const theatre::FixtureType &type = mode.Type();
   const size_t shape_count = type.ShapeCount();
   for (size_t shape_index = 0; shape_index != shape_count; ++shape_index) {
     const double tilt = fixture.GetBeamTilt(data.snapshot, shape_index);
     const double direction =
         fixture.GetBeamDirection(data.snapshot, shape_index);
     const double beam_angle =
-        type.CanZoom() ? type.GetZoom(fixture, data.snapshot, shape_index) * 0.5
+        type.CanZoom() ? mode.GetZoom(fixture, data.snapshot, shape_index) * 0.5
                        : type.MinBeamAngle() * 0.5;
     const double x = fixture.GetPosition().X() + 0.5;
     const double y = fixture.GetPosition().Y() + 0.5;
@@ -140,7 +143,8 @@ void DrawFixtureProjection(const DrawData &data,
 }
 
 void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
-  const theatre::FixtureType &type = fixture.Type();
+  const theatre::FixtureMode &mode = fixture.Mode();
+  const theatre::FixtureType &type = mode.Type();
   const size_t shape_count = type.ShapeCount();
   for (size_t shape_index = 0; shape_index != shape_count; ++shape_index) {
     const theatre::Color c = fixture.GetColor(data.snapshot, shape_index);
@@ -152,7 +156,7 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
       const double z = fixture.GetPosition().Z();
       const double beam_angle =
           type.CanZoom()
-              ? type.GetZoom(fixture, data.snapshot, shape_index) * 0.5
+              ? mode.GetZoom(fixture, data.snapshot, shape_index) * 0.5
               : type.MinBeamAngle() * 0.5;
       const double tilt = fixture.GetBeamTilt(data.snapshot, shape_index);
       const double cos_tilt = std::cos(tilt);
@@ -214,7 +218,7 @@ void DrawFixtureBeam(const DrawData &data, const theatre::Fixture &fixture) {
 
 void DrawFixture(DrawData &data, const theatre::Fixture &fixture,
                  FixtureState &fixture_state) {
-  size_t shapeCount = fixture.Type().ShapeCount();
+  size_t shapeCount = fixture.Mode().Type().ShapeCount();
   for (size_t i = 0; i != shapeCount; ++i) {
     const size_t shapeIndex = shapeCount - i - 1;
     const theatre::Color c = fixture.GetColor(data.snapshot, shapeIndex);
