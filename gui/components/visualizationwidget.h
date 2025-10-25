@@ -56,7 +56,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   VisualizationWidget(const VisualizationWidget &) = delete;
   VisualizationWidget &operator=(const VisualizationWidget &) = delete;
 
-  void inializeContextMenu();
+  void initializeContextMenu();
   void initialize();
   void drawAll(const Cairo::RefPtr<Cairo::Context> &cairo);
   void DrawShapshot(

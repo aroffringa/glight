@@ -91,14 +91,14 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
       sigc::mem_fun(*this, &VisualizationWidget::onButtonRelease));
   signal_motion_notify_event().connect(
       sigc::mem_fun(*this, &VisualizationWidget::onMotion));
-  inializeContextMenu();
+  initializeContextMenu();
   primary_snapshot_ = _management->PrimarySnapshot();
   secondary_snapshot_ = _management->SecondarySnapshot();
   update_connection_ = _eventTransmitter->SignalUpdateControllables().connect(
       [&]() { Update(); });
 }
 
-void VisualizationWidget::inializeContextMenu() {
+void VisualizationWidget::initializeContextMenu() {
   context_menu_.SignalSetFullOn.connect([&]() {
     theatre::SetAllFixtures(*_management, _selectedFixtures, Color::White());
   });
@@ -137,9 +137,10 @@ void VisualizationWidget::initialize() {
 }
 
 void VisualizationWidget::onTheatreChanged() {
-  for (size_t i = _selectedFixtures.size(); i != 0; --i) {
-    if (!_management->GetTheatre().Contains(*_selectedFixtures[i - 1]))
-      _selectedFixtures.erase(_selectedFixtures.begin() + i - 1);
+  const auto iter =
+      std::remove(_selectedFixtures.begin(), _selectedFixtures.end(), nullptr);
+  if (iter != _selectedFixtures.end()) {
+    _selectedFixtures.erase(iter, _selectedFixtures.end());
   }
   Update();
 }
@@ -660,7 +661,6 @@ void VisualizationWidget::onDesignFixtures() {
   std::unique_ptr<DesignWizard> &designWizard = main_window_->GetDesignWizard();
   designWizard = std::make_unique<DesignWizard>();
   designWizard->SetCurrentPath(main_window_->SelectedFolder().FullPath());
-  designWizard->Select(_selectedFixtures);
   designWizard->present();
 }
 

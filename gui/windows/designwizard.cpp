@@ -4,6 +4,7 @@
 #include <ranges>
 
 #include "gui/eventtransmitter.h"
+#include "gui/fixtureselection.h"
 #include "gui/functions.h"
 #include "gui/instance.h"
 
@@ -96,6 +97,8 @@ DesignWizard::DesignWizard()
 
   add(_mainBox);
   _mainBox.show();
+
+  _fixtureList.Select(Instance::Selection().Selection());
 }
 
 DesignWizard::~DesignWizard() = default;

@@ -32,7 +32,8 @@ class FixtureSelection {
    * If any fixtures are in the selection that no longer exist, remove them.
    */
   void UpdateAfterDelete() {
-    auto iter = std::remove(_selection.begin(), _selection.end(), nullptr);
+    const auto iter =
+        std::remove(_selection.begin(), _selection.end(), nullptr);
     if (iter != _selection.end()) {
       _selection.erase(iter, _selection.end());
       _signalChange.emit();

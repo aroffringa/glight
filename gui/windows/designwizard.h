@@ -37,11 +37,6 @@ class DesignWizard : public Gtk::Window {
     _currentPath = currentPath;
   }
 
-  void Select(
-      const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures) {
-    _fixtureList.Select(fixtures);
-  }
-
  private:
   enum Page {
     Page1_SelFixtures,

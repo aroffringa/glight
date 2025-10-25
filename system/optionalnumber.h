@@ -44,7 +44,10 @@ class OptionalNumber {
   constexpr explicit OptionalNumber(std::nullopt_t) noexcept {}
 
   template <class T = NumberType>
-  constexpr explicit OptionalNumber(T number) noexcept : number_(number) {}
+  requires(!std::is_same_v<
+           T, OptionalNumber<
+                  T>>) constexpr explicit OptionalNumber(T number) noexcept
+      : number_(number) {}
 
   constexpr OptionalNumber(const OptionalNumber<NumberType>& source) noexcept =
       default;
@@ -177,18 +180,22 @@ class OptionalNumber {
 
   constexpr void Reset() noexcept { number_ = UnsetValue; }
 
+  constexpr void Swap(OptionalNumber<NumberType>& other) {
+    // To let OptionalNumber also work with types that may implement their own
+    // swap function, we bring std::swap in but don't call swap explicitly from
+    // the std namespace.
+    using std::swap;
+    swap(other.number_, number_);
+  }
+
  private:
   NumberType number_ = UnsetValue;
 };
 
 template <typename NumberType>
-void swap(OptionalNumber<NumberType>& first,
-          OptionalNumber<NumberType>& second) noexcept {
-  // To let OptionalNumber also work with types that may implement their own
-  // swap function, we bring std::swap in but don't call swap explicitly from
-  // the std namespace.
-  using std::swap;
-  swap(first.number_, second.number_);
+constexpr void swap(OptionalNumber<NumberType>& first,
+                    OptionalNumber<NumberType>& second) noexcept {
+  first.Swap(second);
 }
 
 }  // namespace glight::system
