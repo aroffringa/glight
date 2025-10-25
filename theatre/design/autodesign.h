@@ -1,6 +1,7 @@
 #ifndef THEATRE_AUTO_DESIGN_H_
 #define THEATRE_AUTO_DESIGN_H_
 
+#include <string>
 #include <vector>
 
 #include "theatre/color.h"
@@ -12,8 +13,8 @@ namespace glight::theatre {
 
 class Chase;
 class Color;
-struct ColorDeduction;
 class Controllable;
+struct DesignInfo;
 class Folder;
 class Management;
 
@@ -44,41 +45,28 @@ enum class IncreasingType {
 
 class AutoDesign {
  public:
-  static Chase &MakeRunningLight(
-      Management &management, Folder &destination,
-      const std::vector<system::ObservingPtr<Controllable>> &controllables,
-      const std::vector<ColorOrVariable> &colors,
-      const ColorDeduction &deduction, RunType runType);
+  static Chase &MakeRunningLight(const DesignInfo &design,
+                                 const std::vector<ColorOrVariable> &colors,
+                                 RunType runType);
 
-  static Chase &MakeColorVariation(
-      Management &management, Folder &destination,
-      const std::vector<system::ObservingPtr<Controllable>> &controllables,
-      const std::vector<ColorOrVariable> &colors,
-      const ColorDeduction &deduction, double variation);
+  static Chase &MakeColorVariation(const DesignInfo &design,
+                                   const std::vector<ColorOrVariable> &colors,
+                                   double variation);
 
-  static Chase &MakeColorShift(
-      Management &management, Folder &destination,
-      const std::vector<system::ObservingPtr<Controllable>> &controllables,
-      const std::vector<ColorOrVariable> &colors,
-      const ColorDeduction &deduction, ShiftType shiftType);
+  static Chase &MakeColorShift(const DesignInfo &design,
+                               const std::vector<ColorOrVariable> &colors,
+                               ShiftType shiftType);
 
-  static Controllable &MakeVUMeter(
-      Management &management, Folder &destination,
-      const std::vector<system::ObservingPtr<Controllable>> &controllables,
-      const std::vector<ColorOrVariable> &colors,
-      const ColorDeduction &deduction, VUMeterDirection direction);
+  static Controllable &MakeVUMeter(const DesignInfo &design,
+                                   const std::vector<ColorOrVariable> &colors,
+                                   VUMeterDirection direction);
 
-  static Chase &MakeIncreasingChase(
-      Management &management, Folder &destination,
-      const std::vector<system::ObservingPtr<Controllable>> &controllables,
-      const std::vector<ColorOrVariable> &colors,
-      const ColorDeduction &deduction, IncreasingType incType);
+  static Chase &MakeIncreasingChase(const DesignInfo &design,
+                                    const std::vector<ColorOrVariable> &colors,
+                                    IncreasingType incType);
 
-  static Effect &MakeFire(
-      Management &management, Folder &destination,
-      const std::vector<system::ObservingPtr<Controllable>> &controllables,
-      const std::vector<ColorOrVariable> &colors,
-      const ColorDeduction &deduction);
+  static Effect &MakeFire(const DesignInfo &design,
+                          const std::vector<ColorOrVariable> &colors);
 };
 
 }  // namespace glight::theatre

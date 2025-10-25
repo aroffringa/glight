@@ -9,19 +9,14 @@
 
 namespace glight::theatre {
 
-class Controllable;
-struct ColorDeduction;
-class Folder;
-class Management;
+struct DesignInfo;
 class TimeSequence;
 
 enum class RotationType { Forward, Backward, ForwardBackward };
 
-TimeSequence &MakeRotation(
-    Management &management, Folder &destination,
-    const std::vector<system::ObservingPtr<Controllable>> &controllables,
-    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
-    RotationType type);
+TimeSequence &MakeRotation(const DesignInfo &design,
+                           const std::vector<ColorOrVariable> &colors,
+                           RotationType type);
 }  // namespace glight::theatre
 
 #endif

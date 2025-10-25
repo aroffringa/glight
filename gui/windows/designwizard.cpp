@@ -24,6 +24,7 @@
 #include "theatre/timesequence.h"
 
 #include "theatre/design/colorpreset.h"
+#include "theatre/design/designinfo.h"
 #include "theatre/design/rotation.h"
 
 namespace glight::gui {
@@ -55,7 +56,7 @@ DesignWizard::DesignWizard()
 
       _colorsWidgetP4(this),
       _parentFolderCombo(),
-      _newFolderCB("New folder: "),
+      _newFolderCB("New folder"),
       _increasingRunRB("Increasing order"),
       _decreasingRunRB("Decreasing order"),
       _backAndForthRunRB("Back and forth"),
@@ -281,10 +282,10 @@ void DesignWizard::initPage4Destination(const std::string &name) {
   _parentFolderCombo.Select(folder);
   _vBoxPage4.pack_start(_parentFolderCombo, false, false);
   _newFolderCB.set_active(true);
-  _folderNameBox.pack_start(_newFolderCB, false, false);
   const std::string new_name = folder.GetAvailableName(name);
-  _newFolderNameEntry.set_text(new_name);
-  _folderNameBox.pack_start(_newFolderNameEntry, false, false);
+  _nameEntry.set_text(new_name);
+  _folderNameBox.pack_start(_nameEntry, true, true);
+  _folderNameBox.pack_start(_newFolderCB, false, false);
   _vBoxPage4.pack_start(_folderNameBox, false, false);
 }
 
@@ -295,6 +296,12 @@ theatre::Folder &DesignWizard::getCurrentFolder() const {
     return *folder;
   else
     return Instance::Management().RootFolder();
+}
+
+theatre::DesignInfo DesignWizard::GetDesign() const {
+  return theatre::DesignInfo{&Instance::Management(), &makeDestinationFolder(),
+                             _nameEntry.get_text(), &_selectedControllables,
+                             colorDeduction()};
 }
 
 void DesignWizard::onNextClicked() {
@@ -420,8 +427,7 @@ void DesignWizard::onNextClicked() {
         runType = RunType::RandomRun;
       std::unique_lock lock(management.Mutex());
       theatre::Chase &chase = AutoDesign::MakeRunningLight(
-          management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetSelection(), colorDeduction(), runType);
+          GetDesign(), _colorsWidgetP4.GetSelection(), runType);
       lock.unlock();
       events.EmitUpdate();
       AssignFader(chase);
@@ -431,9 +437,7 @@ void DesignWizard::onNextClicked() {
     case Page4_2_SingleColor: {
       std::unique_lock lock(management.Mutex());
       theatre::Chase &chase = AutoDesign::MakeColorVariation(
-          management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetSelection(), colorDeduction(),
-          _variation.get_value());
+          GetDesign(), _colorsWidgetP4.GetSelection(), _variation.get_value());
       lock.unlock();
       events.EmitUpdate();
       AssignFader(chase);
@@ -453,8 +457,7 @@ void DesignWizard::onNextClicked() {
         shiftType = ShiftType::RandomShift;
       std::unique_lock lock(management.Mutex());
       theatre::Chase &chase = AutoDesign::MakeColorShift(
-          management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetSelection(), colorDeduction(), shiftType);
+          GetDesign(), _colorsWidgetP4.GetSelection(), shiftType);
       lock.unlock();
       events.EmitUpdate();
       AssignFader(chase);
@@ -474,8 +477,7 @@ void DesignWizard::onNextClicked() {
         direction = VUMeterDirection::VUOutward;
       std::unique_lock lock(management.Mutex());
       glight::theatre::Controllable &vu_meter = AutoDesign::MakeVUMeter(
-          management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetSelection(), colorDeduction(), direction);
+          GetDesign(), _colorsWidgetP4.GetSelection(), direction);
       lock.unlock();
       events.EmitUpdate();
       AssignFader(vu_meter);
@@ -485,15 +487,12 @@ void DesignWizard::onNextClicked() {
     case Page4_5_ColorPreset: {
       std::unique_lock lock(management.Mutex());
       if (_eachFixtureSeparatelyCB.get_active()) {
-        MakeColorPresetPerFixture(
-            management, makeDestinationFolder(), _selectedControllables,
-            _colorsWidgetP4.GetSelection(), colorDeduction());
+        MakeColorPresetPerFixture(GetDesign(), _colorsWidgetP4.GetSelection());
         lock.unlock();
         events.EmitUpdate();
       } else {
-        glight::theatre::PresetCollection &preset = MakeColorPreset(
-            management, makeDestinationFolder(), _selectedControllables,
-            _colorsWidgetP4.GetSelection(), colorDeduction());
+        glight::theatre::PresetCollection &preset =
+            MakeColorPreset(GetDesign(), _colorsWidgetP4.GetSelection());
         lock.unlock();
         events.EmitUpdate();
         AssignFader(preset);
@@ -514,8 +513,7 @@ void DesignWizard::onNextClicked() {
         incType = IncreasingType::IncBackwardReturn;
       std::unique_lock lock(management.Mutex());
       glight::theatre::Chase &chase = AutoDesign::MakeIncreasingChase(
-          management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetSelection(), colorDeduction(), incType);
+          GetDesign(), _colorsWidgetP4.GetSelection(), incType);
       lock.unlock();
       events.EmitUpdate();
       AssignFader(chase);
@@ -532,9 +530,8 @@ void DesignWizard::onNextClicked() {
       else  // if (_rotForwardReturnRB.get_active())
         type = RotationType::ForwardBackward;
       std::unique_lock lock(management.Mutex());
-      glight::theatre::TimeSequence &rotation = MakeRotation(
-          management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetSelection(), colorDeduction(), type);
+      glight::theatre::TimeSequence &rotation =
+          MakeRotation(GetDesign(), _colorsWidgetP4.GetSelection(), type);
       lock.unlock();
       events.EmitUpdate();
       AssignFader(rotation);
@@ -544,9 +541,8 @@ void DesignWizard::onNextClicked() {
     case Page4_8_Fire: {
       using theatre::RotationType;
       std::unique_lock lock(management.Mutex());
-      theatre::Effect &fire = AutoDesign::MakeFire(
-          management, makeDestinationFolder(), _selectedControllables,
-          _colorsWidgetP4.GetSelection(), colorDeduction());
+      theatre::Effect &fire =
+          AutoDesign::MakeFire(GetDesign(), _colorsWidgetP4.GetSelection());
       lock.unlock();
       events.EmitUpdate();
       AssignFader(fire);
@@ -603,7 +599,7 @@ theatre::ColorDeduction DesignWizard::colorDeduction() const {
 theatre::Folder &DesignWizard::makeDestinationFolder() const {
   theatre::Folder *folder = &_parentFolderCombo.Selection();
   if (_newFolderCB.get_active()) {
-    const std::string new_name = _newFolderNameEntry.get_text();
+    const std::string new_name = _nameEntry.get_text();
     theatre::Management &management = Instance::Management();
     folder = &management.AddFolder(*folder, new_name);
   }
