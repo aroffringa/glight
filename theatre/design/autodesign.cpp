@@ -1,6 +1,7 @@
 #include "autodesign.h"
 
 #include "colorpreset.h"
+#include "designinfo.h"
 
 #include "theatre/chase.h"
 #include "theatre/color.h"
@@ -21,15 +22,13 @@ namespace glight::theatre {
 
 using system::ObservingPtr;
 
-Chase &AutoDesign::MakeRunningLight(
-    Management &management, Folder &destination,
-    const std::vector<ObservingPtr<Controllable>> &controllables,
-    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
-    RunType runType) {
-  ObservingPtr<Chase> chase = management.AddChasePtr();
-  chase->SetName(destination.GetAvailableName("Runchase"));
-  destination.Add(chase);
-  management.AddSourceValue(*chase, 0);
+Chase &AutoDesign::MakeRunningLight(const DesignInfo &design,
+                                    const std::vector<ColorOrVariable> &colors,
+                                    RunType runType) {
+  ObservingPtr<Chase> chase = design.management->AddChasePtr();
+  chase->SetName(GetValidName(design, "Runchase"));
+  design.destination->Add(chase);
+  design.management->AddSourceValue(*chase, 0);
   Sequence &seq = chase->GetSequence();
   size_t frames;
   if (runType == RunType::InwardRun || runType == RunType::OutwardRun)
@@ -52,14 +51,15 @@ Chase &AutoDesign::MakeRunningLight(
          (frameIndex != 0 || colors.size() % 2 == 0)))
       nFixInPattern = 2;
 
-    ObservingPtr<PresetCollection> pc = management.AddPresetCollectionPtr();
-    pc->SetName(destination.GetAvailableName(chase->Name() + "_"));
-    destination.Add(pc);
+    ObservingPtr<PresetCollection> pc =
+        design.management->AddPresetCollectionPtr();
+    pc->SetName(design.destination->GetAvailableName(chase->Name() + "_"));
+    design.destination->Add(pc);
     // If there are less colours given than fixtures, the sequence is repeated
     // several times. This loop is for that purpose.
     for (size_t patternIndex = 0;
          patternIndex <
-         (controllables.size() + colors.size() - 1) / colors.size();
+         (design.controllables->size() + colors.size() - 1) / colors.size();
          ++patternIndex) {
       for (size_t fixInPatIndex = 0; fixInPatIndex != nFixInPattern;
            ++fixInPatIndex) {
@@ -89,15 +89,15 @@ Chase &AutoDesign::MakeRunningLight(
               cIndex = frames + frameIndex + patternIndex * colors.size();
             break;
         }
-        if (cIndex < controllables.size()) {
+        if (cIndex < design.controllables->size()) {
           size_t colourIndex = cIndex % colors.size();
-          AddPresetValue(management, *controllables[cIndex], *pc,
-                         colors[colourIndex], deduction);
+          AddPresetValue(*design.management, *(*design.controllables)[cIndex],
+                         *pc, colors[colourIndex], design.deduction);
         }
       }
     }
     seq.Add(*pc, 0);
-    management.AddSourceValue(*pc, 0);
+    design.management->AddSourceValue(*pc, 0);
   }
   if (runType == RunType::BackAndForthRun) {
     for (size_t i = 2; i < colors.size(); ++i)
@@ -107,14 +107,14 @@ Chase &AutoDesign::MakeRunningLight(
 }
 
 Chase &AutoDesign::MakeColorVariation(
-    Management &management, Folder &destination,
-    const std::vector<ObservingPtr<Controllable>> &controllables,
-    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
+    const DesignInfo &design, const std::vector<ColorOrVariable> &colors,
     double variation) {
+  Management &management = *design.management;
+  Folder &destination = *design.destination;
   ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
   destination.Add(chase_ptr);
   Chase &chase = *chase_ptr;
-  chase.SetName(destination.GetAvailableName("Colorvar"));
+  chase.SetName(GetValidName(design, "Colorvar"));
   management.AddSourceValue(chase, 0);
   Sequence &seq = chase.GetSequence();
   std::random_device rd;
@@ -125,7 +125,7 @@ Chase &AutoDesign::MakeColorVariation(
     PresetCollection &pc = *pc_ptr;
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc_ptr);
-    for (const ObservingPtr<Controllable> &c : controllables) {
+    for (const ObservingPtr<Controllable> &c : *design.controllables) {
       const double redVar = std::round(distribution(rnd));
       const double greenVar = std::round(distribution(rnd));
       const double blueVar = std::round(distribution(rnd));
@@ -141,10 +141,11 @@ Chase &AutoDesign::MakeColorVariation(
             std::max<double>(
                 0.0, std::min<double>(
                          static_cast<double>(color.Blue()) + blueVar, 255)));
-        AddPresetValue(management, *c, pc, randomizedColor, deduction);
+        AddPresetValue(management, *c, pc, randomizedColor, design.deduction);
       } else {
         AddPresetValue(management, *c, pc,
-                       std::get<VariableEffect *>(color_or_var), deduction);
+                       std::get<VariableEffect *>(color_or_var),
+                       design.deduction);
       }
     }
     seq.Add(pc, 0);
@@ -153,14 +154,14 @@ Chase &AutoDesign::MakeColorVariation(
   return chase;
 }
 
-Chase &AutoDesign::MakeColorShift(
-    Management &management, Folder &destination,
-    const std::vector<ObservingPtr<Controllable>> &controllables,
-    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
-    ShiftType shiftType) {
+Chase &AutoDesign::MakeColorShift(const DesignInfo &design,
+                                  const std::vector<ColorOrVariable> &colors,
+                                  ShiftType shiftType) {
+  Management &management = *design.management;
+  Folder &destination = *design.destination;
   ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
   Chase &chase = *chase_ptr;
-  chase.SetName(destination.GetAvailableName("Colourshift"));
+  chase.SetName(GetValidName(design, "Colourshift"));
   destination.Add(chase_ptr);
   management.AddSourceValue(chase, 0);
   Sequence &seq = chase.GetSequence();
@@ -202,7 +203,7 @@ Chase &AutoDesign::MakeColorShift(
     pc.SetName(destination.GetAvailableName(chase.Name() + "_"));
     destination.Add(pc_ptr);
 
-    for (size_t cIndex = 0; cIndex != controllables.size(); ++cIndex) {
+    for (size_t cIndex = 0; cIndex != design.controllables->size(); ++cIndex) {
       size_t colourIndex = 0;
       switch (shiftType) {
         case ShiftType::IncreasingShift:
@@ -216,8 +217,8 @@ Chase &AutoDesign::MakeColorShift(
           colourIndex = pos[frameIndex][cIndex % frames];
           break;
       }
-      AddPresetValue(management, *controllables[cIndex], pc,
-                     colors[colourIndex], deduction);
+      AddPresetValue(management, *(*design.controllables)[cIndex], pc,
+                     colors[colourIndex], design.deduction);
     }
     seq.Add(pc, 0);
     management.AddSourceValue(pc, 0);
@@ -230,15 +231,15 @@ Chase &AutoDesign::MakeColorShift(
 }
 
 Controllable &AutoDesign::MakeVUMeter(
-    Management &management, Folder &destination,
-    const std::vector<ObservingPtr<Controllable>> &controllables,
-    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
+    const DesignInfo &design, const std::vector<ColorOrVariable> &colors,
     VUMeterDirection direction) {
-  if (colors.size() != controllables.size())
+  Management &management = *design.management;
+  Folder &destination = *design.destination;
+  if (colors.size() != design.controllables->size())
     throw std::runtime_error(
         "Number of colours did not match number of fixtures");
   std::unique_ptr<AudioLevelEffect> audioLevel(new AudioLevelEffect());
-  audioLevel->SetName(destination.GetAvailableName("VUMeter"));
+  audioLevel->SetName(GetValidName(design, "VUMeter"));
   Effect &newAudioLevel = static_cast<Effect &>(
       *management.AddEffect(std::move(audioLevel), destination));
   for (size_t inp = 0; inp != newAudioLevel.NInputs(); ++inp)
@@ -246,9 +247,9 @@ Controllable &AutoDesign::MakeVUMeter(
   size_t nLevels = 0;
   if (direction == VUMeterDirection::VUInward ||
       direction == VUMeterDirection::VUOutward)
-    nLevels = (controllables.size() + 1) / 2;
+    nLevels = (design.controllables->size() + 1) / 2;
   else
-    nLevels = controllables.size();
+    nLevels = design.controllables->size();
   for (size_t level = 0; level != nLevels; ++level) {
     std::unique_ptr<ThresholdEffect> threshold(new ThresholdEffect());
     threshold->SetLowerStartLimit(((1 << 24) - 1) * level / nLevels);
@@ -262,9 +263,9 @@ Controllable &AutoDesign::MakeVUMeter(
 
     size_t nFixInLevel = 1;
     if ((direction == VUMeterDirection::VUInward &&
-         (level != nLevels - 1 || controllables.size() % 2 == 0)) ||
+         (level != nLevels - 1 || design.controllables->size() % 2 == 0)) ||
         (direction == VUMeterDirection::VUOutward &&
-         (level != 0 || controllables.size() % 2 == 0)))
+         (level != 0 || design.controllables->size() % 2 == 0)))
       nFixInLevel = 2;
 
     ObservingPtr<PresetCollection> pc_ptr = management.AddPresetCollectionPtr();
@@ -286,12 +287,12 @@ Controllable &AutoDesign::MakeVUMeter(
         }
       } else {
         if (direction == VUMeterDirection::VUInward)
-          fixIndex = controllables.size() - level - 1;
+          fixIndex = design.controllables->size() - level - 1;
         else  // VUOutward
           fixIndex = nLevels + level;
       }
-      AddPresetValue(management, *controllables[fixIndex], pc, colors[fixIndex],
-                     deduction);
+      AddPresetValue(management, *(*design.controllables)[fixIndex], pc,
+                     colors[fixIndex], design.deduction);
     }
     management.AddSourceValue(pc, 0);
     newEffect.AddConnection(pc, 0);
@@ -301,25 +302,25 @@ Controllable &AutoDesign::MakeVUMeter(
 }
 
 Chase &AutoDesign::MakeIncreasingChase(
-    Management &management, Folder &destination,
-    const std::vector<ObservingPtr<Controllable>> &controllables,
-    const std::vector<ColorOrVariable> &colors, const ColorDeduction &deduction,
+    const DesignInfo &design, const std::vector<ColorOrVariable> &colors,
     IncreasingType incType) {
-  if (colors.size() != controllables.size())
+  Management &management = *design.management;
+  Folder &destination = *design.destination;
+  if (colors.size() != design.controllables->size())
     throw std::runtime_error(
         "Number of controllables does not match number of provided colours");
   ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
   Chase &chase = *chase_ptr;
-  chase.SetName(destination.GetAvailableName("Increasing chase"));
+  chase.SetName(GetValidName(design, "Increasing chase"));
   destination.Add(std::move(chase_ptr));
   management.AddSourceValue(chase, 0);
   Sequence &seq = chase.GetSequence();
 
-  size_t nFix = controllables.size();
+  size_t nFix = design.controllables->size();
   for (size_t frameIndex = 0; frameIndex != nFix * 2; ++frameIndex) {
     size_t startFixture = 0;
     size_t endFixture = 0;
-    if (frameIndex < controllables.size())  // building up
+    if (frameIndex < design.controllables->size())  // building up
     {
       switch (incType) {
         case IncreasingType::IncForward:
@@ -354,7 +355,8 @@ Chase &AutoDesign::MakeIncreasingChase(
     destination.Add(pc_ptr);
 
     for (size_t i = startFixture; i != endFixture; ++i) {
-      AddPresetValue(management, *controllables[i], pc, colors[i], deduction);
+      AddPresetValue(management, *(*design.controllables)[i], pc, colors[i],
+                     design.deduction);
     }
     seq.Add(pc, 0);
     management.AddSourceValue(pc, 0);
@@ -362,30 +364,33 @@ Chase &AutoDesign::MakeIncreasingChase(
   return chase;
 }
 
-Effect &AutoDesign::MakeFire(
-    Management &management, Folder &destination,
-    const std::vector<ObservingPtr<Controllable>> &controllables,
-    const std::vector<ColorOrVariable> &colors,
-    const ColorDeduction &deduction) {
+Effect &AutoDesign::MakeFire(const DesignInfo &design,
+                             const std::vector<ColorOrVariable> &colors) {
+  Management &management = *design.management;
+  Folder &destination = *design.destination;
   std::unique_ptr<FlickerEffect> flicker = std::make_unique<FlickerEffect>();
   flicker->SetSpeed(ControlValue::MaxUInt() / 333);
-  flicker->SetName(destination.GetAvailableName("Fire"));
+  flicker->SetName(GetValidName(design, "Fire"));
   Effect &parent = static_cast<Effect &>(
       *management.AddEffect(std::move(flicker), destination));
   for (size_t inp = 0; inp != parent.NInputs(); ++inp)
     management.AddSourceValue(parent, inp);
   std::mt19937 mt;
   std::uniform_int_distribution uniform(0, 10);
-  for (size_t i = 0; i != controllables.size(); ++i) {
-    const ObservingPtr<Controllable> &controllable = controllables[i];
+  for (size_t i = 0; i != design.controllables->size(); ++i) {
+    const ObservingPtr<Controllable> &controllable = (*design.controllables)[i];
     if (colors.size() == 1) {
-      PresetCollection &preset = MakeColorPreset(
-          management, destination, {controllable}, colors, deduction);
+      std::vector preset_controllable{controllable};
+      DesignInfo preset_design{&management, &destination, "",
+                               &preset_controllable, design.deduction};
+      PresetCollection &preset = MakeColorPreset(preset_design, colors);
       parent.AddConnection(preset, 0);
     } else {
+      std::vector chase_controllable{controllable};
+      DesignInfo chase_design{&management, &destination, "",
+                              &chase_controllable, design.deduction};
       Chase &chase =
-          MakeColorShift(management, destination, {controllable}, colors,
-                         deduction, ShiftType::IncreasingShift);
+          MakeColorShift(chase_design, colors, ShiftType::IncreasingShift);
       parent.AddConnection(chase, 0);
       chase.GetTransition().SetType(TransitionType::Fade);
       chase.GetTransition().SetLengthInMs(1000 + i + uniform(mt) * 10);

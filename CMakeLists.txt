@@ -156,6 +156,7 @@ set(THEATREFILES
   theatre/transition.cpp
   theatre/design/autodesign.cpp
   theatre/design/colorpreset.cpp
+  theatre/design/designinfo.cpp
   theatre/design/rotation.cpp
   theatre/devices/beatfinder.cpp
   theatre/devices/olaconnection.cpp

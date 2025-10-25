@@ -12,6 +12,7 @@ namespace glight::theatre {
 class Controllable;
 class Color;
 struct ColorDeduction;
+struct DesignInfo;
 class Folder;
 class Management;
 class PresetCollection;
@@ -51,11 +52,8 @@ inline void AddPresetValue(Management &management, Controllable &control,
  * Each controllable in the list is assigned the color
  * with the same index from the list of colors.
  */
-PresetCollection &MakeColorPreset(
-    Management &management, Folder &destination,
-    const std::vector<system::ObservingPtr<Controllable>> &controllables,
-    const std::vector<ColorOrVariable> &colors,
-    const ColorDeduction &deduction);
+PresetCollection &MakeColorPreset(const DesignInfo &design,
+                                  const std::vector<ColorOrVariable> &colors);
 
 /**
  * Construct PresetCollections from a list of colors.
@@ -63,11 +61,8 @@ PresetCollection &MakeColorPreset(
  * with the same index from the list of colors, and a
  * separate PresetCollection is made for each.
  */
-void MakeColorPresetPerFixture(
-    Management &management, Folder &destination,
-    const std::vector<system::ObservingPtr<Controllable>> &controllables,
-    const std::vector<ColorOrVariable> &colors,
-    const ColorDeduction &deduction);
+void MakeColorPresetPerFixture(const DesignInfo &design,
+                               const std::vector<ColorOrVariable> &colors);
 
 }  // namespace glight::theatre
 

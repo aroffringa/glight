@@ -111,17 +111,27 @@ class Folder : public FolderObject {
   std::string GetAvailableName(const std::string &prefix) const {
     bool nameAvailable;
     size_t nameNumber = 0;
+    std::string proposed_name;
     do {
       nameAvailable = true;
       ++nameNumber;
+      proposed_name = prefix + std::to_string(nameNumber);
       for (const system::ObservingPtr<FolderObject> &object : _objects) {
-        if (object->Name() == prefix + std::to_string(nameNumber)) {
+        if (object->Name() == proposed_name) {
           nameAvailable = false;
           break;
         }
       }
     } while (!nameAvailable);
     return prefix + std::to_string(nameNumber);
+  }
+
+  std::string GetAvailableName(std::string_view prefix) const {
+    return GetAvailableName(std::string(prefix));
+  }
+
+  std::string GetAvailableName(const char *prefix) const {
+    return GetAvailableName(std::string(prefix));
   }
 
   static void Move(system::ObservingPtr<FolderObject> object,

@@ -7,6 +7,7 @@
 #include "gui/components/objectbrowser.h"
 #include "gui/components/reorderwidget.h"
 
+#include "theatre/colordeduction.h"
 #include "theatre/forwards.h"
 #include "theatre/design/autodesign.h"
 
@@ -75,6 +76,7 @@ class DesignWizard : public Gtk::Window {
   void onControllableSelected();
 
   theatre::ColorDeduction colorDeduction() const;
+  theatre::DesignInfo GetDesign() const;
 
   std::string _currentPath;
 
@@ -108,8 +110,8 @@ class DesignWizard : public Gtk::Window {
   Gtk::Label _parentLabel;
   FolderCombo _parentFolderCombo;
   Gtk::HBox _folderNameBox;
+  Gtk::Entry _nameEntry;
   Gtk::CheckButton _newFolderCB;
-  Gtk::Entry _newFolderNameEntry;
 
   // 4_1
   Gtk::RadioButton _increasingRunRB, _decreasingRunRB, _backAndForthRunRB,
