@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include <gtkmm/adjustment.h>
+
 namespace glight::gui {
 namespace {
 inline constexpr size_t kNValues = 21;
@@ -13,16 +15,16 @@ inline const double values[kNValues] = {
 
 DurationInput::DurationInput(double value)
     : scale_(Gtk::Adjustment::create(0, 0, kNValues, 1),
-             Gtk::ORIENTATION_HORIZONTAL) {
+             Gtk::Orientation::HORIZONTAL) {
   Initialize(value);
 }
 
 DurationInput::DurationInput(const std::string &label, double value)
     : label_(label),
       scale_(Gtk::Adjustment::create(0, 0, kNValues, 1),
-             Gtk::ORIENTATION_HORIZONTAL) {
-  label_.set_halign(Gtk::ALIGN_END);
-  pack_start(label_, false, false);
+             Gtk::Orientation::HORIZONTAL) {
+  label_.set_halign(Gtk::Align::END);
+  append(label_);
 
   Initialize(value);
 }
@@ -33,15 +35,13 @@ void DurationInput::Initialize(double value) {
   scale_.set_round_digits(0);
   scale_.set_draw_value(false);
   scale_.signal_value_changed().connect([&]() { onScaleChanged(); });
-  pack_start(scale_, true, true);
+  append(scale_);
 
   SetEntry(value);
   entry_.set_max_length(6);
   entry_.set_width_chars(6);
   entry_.signal_changed().connect([&]() { OnEntryChanged(); });
-  pack_end(entry_, false, false);
-
-  show_all_children();
+  append(entry_);
 }
 
 double DurationInput::ValueToScale(double value) {

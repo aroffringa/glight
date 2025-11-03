@@ -18,7 +18,7 @@ class EventTransmitter;
 
 namespace glight::gui::components {
 
-class ReorderWidget : public Gtk::HBox {
+class ReorderWidget : public Gtk::Box {
  public:
   ReorderWidget();
 
@@ -57,7 +57,7 @@ class ReorderWidget : public Gtk::HBox {
   } columns_;
   Gtk::ScrolledWindow scrolled_window_;
 
-  Gtk::VBox button_box_;
+  Gtk::Box button_box_{Gtk::Orientation::VERTICAL};
   Gtk::Button up_button_;
   Gtk::Button down_button_;
   Gtk::Button remove_button_;

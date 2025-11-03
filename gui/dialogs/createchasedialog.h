@@ -52,8 +52,8 @@ class CreateChaseDialog : public Gtk::Dialog {
     Gtk::TreeModelColumn<theatre::Controllable *> _controllable;
   } _newChaseListColumns;
 
-  Gtk::VBox _listVBox;
-  Gtk::HBox _newChaseBox;
+  Gtk::Box _listVBox{Gtk::Orientation::VERTICAL};
+  Gtk::Box _newChaseBox;
 
   Gtk::Frame _newChaseFrame;
 

@@ -13,7 +13,6 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
-#include <gtkmm/menu.h>
 #include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
@@ -79,7 +78,7 @@ class FixtureTypesWindow : public ChildWindow {
   Gtk::Grid main_grid_;
   Gtk::Paned paned_;
 
-  Gtk::VBox left_box_;
+  Gtk::Box left_box_{Gtk::Orientation::VERTICAL};
 
   Gtk::Grid right_grid_;
   Gtk::Label name_label_{"Name:"};

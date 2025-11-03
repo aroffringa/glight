@@ -8,6 +8,7 @@
 #include "gui/scopedconnection.h"
 #include "gui/components/propertiesbox.h"
 
+#include <gtkmm/dialog.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
@@ -48,8 +49,8 @@ class EffectPropertiesWindow : public PropertiesWindow {
     Gtk::TreeModelColumn<size_t> _inputIndex;
   } _connectionsListColumns;
 
-  Gtk::VBox _topBox;
-  Gtk::HBox _mainHBox, _connectionsBox;
+  Gtk::Box _topBox{Gtk::Orientation::VERTICAL};
+  Gtk::Box _mainHBox, _connectionsBox;
   Gtk::Frame _connectionsFrame{"Connections"};
   Gtk::Frame _propertiesFrame{"Properties"};
   std::unique_ptr<theatre::PropertySet> _propertySet;
@@ -61,6 +62,8 @@ class EffectPropertiesWindow : public PropertiesWindow {
   Gtk::Button _addConnectionButton{"Add"};
   Gtk::Button _connectControllablesButton{};
   Gtk::Button _removeConnectionButton{"Remove"};
+
+  std::unique_ptr<Gtk::Dialog> dialog_;
 
   theatre::Effect *_effect;
 };

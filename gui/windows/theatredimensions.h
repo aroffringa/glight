@@ -1,10 +1,11 @@
 #ifndef GLIGHT_GUI_WINDOWS_THEATRE_DIMENSIONS_H_
 #define GLIGHT_GUI_WINDOWS_THEATRE_DIMENSIONS_H_
 
+#include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
+#include <gtkmm/label.h>
 
 #include "gui/recursionlock.h"
 #include "gui/windows/childwindow.h"
@@ -28,7 +29,7 @@ class TheatreDimensions : public ChildWindow {
   Gtk::Entry height_entry_;
   Gtk::Label fixture_size_label_{"Fixture symbol size:"};
   Gtk::Entry fixture_size_entry_;
-  Gtk::ButtonBox button_box_;
+  Gtk::Box button_box_;
   Gtk::Button set_button_{"Set"};
 };
 

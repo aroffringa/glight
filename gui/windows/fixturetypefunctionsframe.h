@@ -8,6 +8,7 @@
 #include <gtkmm/combobox.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
@@ -52,7 +53,7 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
   } functions_columns_;
 
   Gtk::Grid grid_;
-  Gtk::HBox functions_button_box_;
+  Gtk::Box functions_button_box_;
   Gtk::Button add_function_button_{"+"};
   Gtk::Button remove_function_button_{"-"};
 

@@ -23,22 +23,22 @@ PresetCollectionWindow::PresetCollectionWindow(
 
   _inputSelector.SignalSelectionChange().connect(
       sigc::mem_fun(*this, &PresetCollectionWindow::onInputSelectionChanged));
-  _topBox.pack_start(_inputSelector);
+  _topBox.append(_inputSelector);
   _inputSelector.set_size_request(200, 200);
 
   _addPresetButton.set_image_from_icon_name("go-next");
   _addPresetButton.set_sensitive(false);
   _addPresetButton.signal_clicked().connect(
       sigc::mem_fun(*this, &PresetCollectionWindow::onAddPreset));
-  _buttonBox.pack_start(_addPresetButton, false, false, 4);
+  _buttonBox.append(_addPresetButton);
 
   _removePresetButton.set_image_from_icon_name("go-previous");
   _removePresetButton.signal_clicked().connect(
       sigc::mem_fun(*this, &PresetCollectionWindow::onRemovePreset));
-  _buttonBox.pack_start(_removePresetButton, false, false, 4);
+  _buttonBox.append(_removePresetButton);
 
-  _buttonBox.set_valign(Gtk::ALIGN_CENTER);
-  _topBox.pack_start(_buttonBox, false, false, 4);
+  _buttonBox.set_valign(Gtk::Align::CENTER);
+  _topBox.append(_buttonBox);
 
   _presetsStore = Gtk::ListStore::create(_presetListColumns);
 
@@ -48,10 +48,11 @@ PresetCollectionWindow::PresetCollectionWindow(
   fillPresetsList();
   _presetsView.get_selection()->signal_changed().connect(
       sigc::mem_fun(*this, &PresetCollectionWindow::onSelectedPresetChanged));
-  _presetsScrolledWindow.add(_presetsView);
+  _presetsScrolledWindow.set_child(_presetsView);
 
   _presetsScrolledWindow.set_size_request(200, 200);
-  _presetsScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+  _presetsScrolledWindow.set_policy(Gtk::PolicyType::NEVER,
+                                    Gtk::PolicyType::AUTOMATIC);
   _grid.attach(_presetsScrolledWindow, 0, 0, 2, 1);
   _presetsScrolledWindow.set_hexpand(true);
   _presetsScrolledWindow.set_vexpand(true);
@@ -66,10 +67,9 @@ PresetCollectionWindow::PresetCollectionWindow(
   _controlValueEntry.set_hexpand(false);
   _controlValueEntry.set_vexpand(false);
 
-  _topBox.pack_end(_grid, true, true, 4);
+  _topBox.append(_grid);
 
-  add(_topBox);
-  show_all_children();
+  set_child(_topBox);
 
   load();
   onSelectedPresetChanged();
@@ -93,7 +93,8 @@ bool PresetCollectionWindow::selectedPresetIndex(size_t &index) {
 }
 
 void PresetCollectionWindow::selectPreset(size_t index) {
-  _presetsView.get_selection()->select(_presetsStore->children()[index]);
+  _presetsView.get_selection()->select(
+      _presetsStore->children()[index].get_iter());
 }
 
 void PresetCollectionWindow::fillPresetsList() {
@@ -110,7 +111,7 @@ void PresetCollectionWindow::fillPresetsList() {
     const std::unique_ptr<theatre::PresetValue> &pValue =
         _presetCollection->PresetValues()[i];
     Gtk::TreeModel::iterator iter = _presetsStore->append();
-    const Gtk::TreeModel::Row &row = *iter;
+    Gtk::TreeModel::Row &row = *iter;
     row[_presetListColumns._control] =
         pValue->GetControllable().InputName(pValue->InputIndex());
     std::ostringstream str;
@@ -118,7 +119,7 @@ void PresetCollectionWindow::fillPresetsList() {
     row[_presetListColumns._value] = str.str();
     row[_presetListColumns._presetIndex] = i;
     if (hasSelection && i == index) {
-      _presetsView.get_selection()->select(row);
+      _presetsView.get_selection()->select(row.get_iter());
     }
   }
   token.Release();
@@ -144,8 +145,8 @@ void PresetCollectionWindow::onAddPreset() {
       Gtk::MessageDialog dialog(
           "Can not add this object to the time sequence: "
           "this would create a cycle in the connections.",
-          false, Gtk::MESSAGE_ERROR);
-      dialog.run();
+          false, Gtk::MessageType::ERROR);
+      dialog.show();
     } else {
       preset.SetValue(theatre::ControlValue::Max());
       lock.unlock();

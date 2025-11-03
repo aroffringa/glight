@@ -2,9 +2,7 @@
 
 #include <algorithm>
 
-#include <gtkmm/main.h>
 #include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
 
 #include "gui/eventtransmitter.h"
 #include "gui/fixtureselection.h"
@@ -43,12 +41,13 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   tree_view_.get_selection()->signal_changed().connect(
       [&]() { onSelectionChanged(); });
   fillList();
-  type_scrollbars_.add(tree_view_);
+  type_scrollbars_.set_child(tree_view_);
 
-  type_scrollbars_.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-  left_box_.pack_start(type_scrollbars_);
+  type_scrollbars_.set_policy(Gtk::PolicyType::NEVER,
+                              Gtk::PolicyType::AUTOMATIC);
+  left_box_.append(type_scrollbars_);
 
-  paned_.add1(left_box_);
+  paned_.set_start_child(left_box_);
   left_box_.set_hexpand(true);
   left_box_.set_vexpand(true);
 
@@ -94,7 +93,7 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   functions_frame_.set_vexpand(true);
   functions_frame_.set_hexpand(true);
 
-  paned_.add(right_grid_);
+  paned_.set_end_child(right_grid_);
   right_grid_.set_hexpand(true);
   right_grid_.set_vexpand(true);
   right_grid_.set_row_spacing(5);
@@ -108,23 +107,22 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   new_button_.set_image_from_icon_name("document-new");
   new_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureTypesWindow::onNewButtonClicked), false);
-  button_box_.pack_start(new_button_);
+  button_box_.append(new_button_);
 
   remove_button_.set_image_from_icon_name("edit-delete");
   remove_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureTypesWindow::onRemoveClicked));
-  button_box_.pack_start(remove_button_);
+  button_box_.append(remove_button_);
 
   save_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureTypesWindow::onSaveClicked));
-  button_box_.pack_start(save_button_);
+  button_box_.append(save_button_);
 
   main_grid_.attach(button_box_, 0, 1, 1, 1);
   button_box_.set_hexpand(true);
   button_box_.set_vexpand(false);
 
-  add(main_grid_);
-  main_grid_.show_all();
+  set_child(main_grid_);
 
   onSelectionChanged();
 }
@@ -140,16 +138,16 @@ void FixtureTypesWindow::fillList() {
       management.GetTheatre().FixtureTypes();
   for (const TrackablePtr<FixtureType> &project_type : project_types) {
     Gtk::TreeModel::iterator iter = tree_model_->append();
-    const Gtk::TreeModel::Row &row = *iter;
+    Gtk::TreeModel::Row &row = *iter;
     row[list_columns_.fixture_type_] = project_type.Get();
     row[list_columns_.name_] = project_type->Name();
     row[list_columns_.in_use_] = management.GetTheatre().IsUsed(*project_type);
     if (selected_type && selected_type == project_type.Get()) {
-      tree_view_.get_selection()->select(row);
+      tree_view_.get_selection()->select(row.get_iter());
     }
     for (FixtureMode &mode : project_type->Modes()) {
       Gtk::TreeModel::iterator child_iter = tree_model_->append(row.children());
-      const Gtk::TreeModel::Row &child_row = *child_iter;
+      Gtk::TreeModel::Row &child_row = *child_iter;
       child_row[list_columns_.fixture_mode_] = &mode;
       child_row[list_columns_.name_] = mode.Name();
       child_row[list_columns_.functions_] = FunctionSummary(mode);
@@ -166,7 +164,7 @@ void FixtureTypesWindow::onNewButtonClicked() {
     if ((*last)[list_columns_.fixture_type_] == nullptr) return;
   }
   Gtk::TreeModel::iterator iter = tree_model_->append();
-  const Gtk::TreeModel::Row &row = *iter;
+  Gtk::TreeModel::Row &row = *iter;
   row[list_columns_.fixture_type_] = nullptr;
   row[list_columns_.name_] = {};
   row[list_columns_.functions_] = {};
@@ -185,7 +183,7 @@ void FixtureTypesWindow::onRemoveClicked() {
     }
     Instance::Events().EmitUpdate();
   } else {
-    const Gtk::TreeModel::const_iterator selected =
+    const Gtk::TreeModel::iterator selected =
         tree_view_.get_selection()->get_selected();
     if (selected) tree_model_->erase(selected);
   }
@@ -249,7 +247,7 @@ void FixtureTypesWindow::Select(const FixtureMode &selection) {
   Gtk::TreeModel::Children children = tree_model_->children();
   for (Gtk::TreeRow row : children) {
     if (row[list_columns_.fixture_mode_] == &selection) {
-      tree_view_.get_selection()->select(row);
+      tree_view_.get_selection()->select(row.get_iter());
       break;
     }
   }
@@ -259,7 +257,7 @@ void FixtureTypesWindow::Select(const FixtureType &selection) {
   Gtk::TreeModel::Children children = tree_model_->children();
   for (Gtk::TreeRow row : children) {
     if (row[list_columns_.fixture_type_] == &selection) {
-      tree_view_.get_selection()->select(row);
+      tree_view_.get_selection()->select(row.get_iter());
       break;
     }
   }

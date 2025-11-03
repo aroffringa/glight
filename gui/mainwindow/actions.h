@@ -11,6 +11,10 @@
 #include "gui/mainwindow/objectwindowlist.h"
 #include "gui/windows/propertieswindow.h"
 
+namespace Gtk {
+class Dialog;
+}
+
 namespace glight::gui::mainwindow {
 
 PropertiesWindow& OpenPropertiesWindow(
@@ -25,7 +29,7 @@ void NewPresetFromFixtures(
     theatre::Folder& parent_folder,
     const std::set<system::ObservingPtr<theatre::Fixture>, std::less<>>&
         fixtures);
-void NewChase(ObjectBrowser& browser,
+void NewChase(std::unique_ptr<Gtk::Dialog>& dialog, ObjectBrowser& browser,
               ObjectWindowList<PropertiesWindow>& property_windows,
               Gtk::Window& parent);
 void NewTimeSequence(ObjectBrowser& browser,

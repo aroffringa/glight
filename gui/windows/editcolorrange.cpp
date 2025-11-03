@@ -19,7 +19,7 @@ EditColorRange::EditColorRange(std::vector<ColorRangeParameters::Range> ranges)
 
   list_model_ = Gtk::ListStore::create(list_columns_);
 
-  list_view_.get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
+  list_view_.get_selection()->set_mode(Gtk::SelectionMode::MULTIPLE);
   list_view_.get_selection()->signal_changed().connect(
       [&]() { OnSelectionChanged(); });
   list_view_.set_model(list_model_);
@@ -28,27 +28,28 @@ EditColorRange::EditColorRange(std::vector<ColorRangeParameters::Range> ranges)
   list_view_.append_column("Color", list_columns_.color_);
   list_view_.set_rubber_banding(true);
   FillList();
-  scrolled_window_.add(list_view_);
+  scrolled_window_.set_child(list_view_);
 
-  scrolled_window_.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+  scrolled_window_.set_policy(Gtk::PolicyType::NEVER,
+                              Gtk::PolicyType::AUTOMATIC);
   scrolled_window_.set_hexpand(true);
   scrolled_window_.set_vexpand(true);
   grid_.attach(scrolled_window_, 0, 1, 2, 1);
 
   start_label_.set_margin_end(5);
-  start_label_.set_halign(Gtk::ALIGN_END);
+  start_label_.set_halign(Gtk::Align::END);
   grid_.attach(start_label_, 0, 2);
   const auto save_change = [&]() { SaveChange(); };
   start_entry_.signal_changed().connect(save_change);
   grid_.attach(start_entry_, 1, 2);
   end_label_.set_margin_end(5);
-  end_label_.set_halign(Gtk::ALIGN_END);
+  end_label_.set_halign(Gtk::Align::END);
   grid_.attach(end_label_, 0, 3);
   end_entry_.signal_changed().connect(save_change);
   grid_.attach(end_entry_, 1, 3);
-  color_check_button_.signal_clicked().connect(save_change);
+  color_check_button_.signal_toggled().connect(save_change);
   color_check_button_.set_margin_end(5);
-  color_check_button_.set_halign(Gtk::ALIGN_END);
+  color_check_button_.set_halign(Gtk::Align::END);
   grid_.attach(color_check_button_, 0, 4);
   color_selection_.SignalColorChanged().connect(save_change);
   grid_.attach(color_selection_, 1, 4);
@@ -57,8 +58,7 @@ EditColorRange::EditColorRange(std::vector<ColorRangeParameters::Range> ranges)
 
   grid_.set_hexpand(true);
   grid_.set_vexpand(true);
-  add(grid_);
-  show_all();
+  set_child(grid_);
 }
 
 void EditColorRange::FillList() {

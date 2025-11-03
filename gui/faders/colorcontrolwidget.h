@@ -6,7 +6,7 @@
 #include "gui/components/colorselectwidget.h"
 
 #include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/label.h>
 
 namespace glight::gui {
@@ -34,11 +34,9 @@ class ColorControlWidget final : public ControlWidget {
   void UpdateDisplaySettings();
   void OnColorChanged();
   theatre::Color ColorFromSourceValues() const;
-  bool HandleRightRelease(GdkEventButton *event);
+  bool HandleRightRelease();
   void ShowAssignControllableDialog();
 
-  Gtk::HBox box_;
-  Gtk::EventBox event_box_;
   Gtk::Label name_label_{"<..>"};
   ColorSelectWidget color_selector_;
 
@@ -46,6 +44,7 @@ class ColorControlWidget final : public ControlWidget {
 
   sigc::connection update_display_settings_connection_;
   theatre::Color previous_color_ = theatre::Color::Black();
+  std::unique_ptr<Gtk::Dialog> dialog_;
 };
 
 }  // namespace glight::gui

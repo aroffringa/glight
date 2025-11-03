@@ -5,10 +5,10 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
-#include <gtkmm/radiobutton.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/window.h>
@@ -42,21 +42,21 @@ class ChasePropertiesWindow : public PropertiesWindow {
   void onUpdateControllables();
   void onToTimeSequenceClicked();
 
-  Gtk::VBox _box;
+  Gtk::Box _box{Gtk::Orientation::VERTICAL};
   Gtk::Grid _grid;
 
-  Gtk::RadioButton _delayTriggerCheckButton;
+  Gtk::CheckButton _delayTriggerCheckButton;
   DurationInput _triggerDuration;
   DurationInput _transitionDuration;
   TransitionTypeBox _transitionTypeBox;
   Gtk::Separator _transitionSep;
 
-  Gtk::RadioButton _synchronizedTriggerCheckButton;
+  Gtk::CheckButton _synchronizedTriggerCheckButton;
   Gtk::Label _synchronizationsLabel;
   Gtk::Scale _synchronizationsCount;
   Gtk::Separator _synchronizedSep;
 
-  Gtk::RadioButton _beatTriggerCheckButton;
+  Gtk::CheckButton _beatTriggerCheckButton;
   Gtk::Label _beatSpeedLabel;
   BeatInput _beatSpeed;
 

@@ -12,7 +12,7 @@ namespace glight::gui {
 
 class FixtureSelection {
  public:
-  sigc::signal<void> &SignalChange() { return _signalChange; }
+  sigc::signal<void()> &SignalChange() { return _signalChange; }
 
   const std::vector<system::ObservingPtr<theatre::Fixture>> &Selection() const {
     return _selection;
@@ -41,7 +41,7 @@ class FixtureSelection {
   }
 
  private:
-  sigc::signal<void> _signalChange;
+  sigc::signal<void()> _signalChange;
   std::vector<system::ObservingPtr<theatre::Fixture>> _selection;
 };
 

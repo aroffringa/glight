@@ -10,7 +10,6 @@
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
-#include <gtkmm/radiobutton.h>
 #include <gtkmm/window.h>
 
 #include "theatre/forwards.h"
@@ -58,9 +57,9 @@ class AddFixtureWindow : public Gtk::Window {
   } mode_columns_;
 
   Gtk::Grid grid_;
-  Gtk::HBox stock_or_project_box_;
-  Gtk::RadioButton stock_button_{"Stock"};
-  Gtk::RadioButton project_button_{"Project"};
+  Gtk::Box stock_or_project_box_;
+  Gtk::CheckButton stock_button_{"Stock"};
+  Gtk::CheckButton project_button_{"Project"};
 
   Gtk::Label type_label_{"Type:"};
   Glib::RefPtr<Gtk::ListStore> type_model_;
@@ -75,7 +74,7 @@ class AddFixtureWindow : public Gtk::Window {
   Gtk::Button decrease_count_button_{"-"};
   Gtk::Button increase_count_button_{"+"};
   Gtk::Frame filters_frame_{"Filters"};
-  Gtk::VBox filters_box_;
+  Gtk::Box filters_box_{Gtk::Orientation::VERTICAL};
   Gtk::CheckButton auto_master_cb_{"Auto master channel"};
   Gtk::CheckButton rgb_cb_{"RGB colorspace"};
   Gtk::CheckButton monochrome_cb_{"Monochrome"};

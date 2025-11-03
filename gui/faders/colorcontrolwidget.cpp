@@ -24,24 +24,16 @@ ColorControlWidget::ColorControlWidget(FaderWindow &fader_window,
     : ControlWidget(fader_window, state, mode),
       color_selector_(&fader_window, false) {
   color_selector_.SignalColorChanged().connect([&]() { OnColorChanged(); });
-  box_.pack_start(color_selector_);
+  append(color_selector_);
   color_selector_.show();
 
-  name_label_.set_halign(Gtk::ALIGN_START);
-  name_label_.set_justify(Gtk::JUSTIFY_LEFT);
-  event_box_.add(name_label_);
-  name_label_.show();
-
-  event_box_.set_events(Gdk::BUTTON_PRESS_MASK);
-  event_box_.signal_button_press_event().connect([&](GdkEventButton *) {
-    ShowAssignControllableDialog();
-    return true;
-  });
-  event_box_.show();
-  box_.pack_start(event_box_, true, true, 0);
-
-  add(box_);
-  box_.show();
+  name_label_.set_halign(Gtk::Align::START);
+  name_label_.set_justify(Gtk::Justification::LEFT);
+  auto gesture = Gtk::GestureClick::create();
+  gesture->signal_pressed().connect(
+      [&](int, double, double) { ShowAssignControllableDialog(); });
+  name_label_.add_controller(gesture);
+  append(name_label_);
 
   SetDefaultSourceCount(3);
 
@@ -128,13 +120,13 @@ void ColorControlWidget::FlashOff() { Toggle(); }
 
 void ColorControlWidget::Limit(double value) {}
 
-bool ColorControlWidget::HandleRightRelease(GdkEventButton *event) {
+bool ColorControlWidget::HandleRightRelease() {
   std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
   menu = std::make_unique<ControlMenu>(State());
   menu->SignalAssign().connect([&]() { ShowAssignControllableDialog(); });
   menu->SignalToggleName().connect(
       [&]() { State().SetDisplayName(menu->DisplayName()); });
-  menu->popup_at_pointer(reinterpret_cast<const GdkEvent *>(event));
+  menu->popup();
   return true;
 }
 
@@ -143,25 +135,33 @@ void ColorControlWidget::UpdateDisplaySettings() {
 }
 
 void ColorControlWidget::ShowAssignControllableDialog() {
-  ControllableSelectionDialog dialog("Select item for color control", false);
+  dialog_ = std::make_unique<ControllableSelectionDialog>(
+      "Select item for color control", false);
+  ControllableSelectionDialog &dialog =
+      static_cast<ControllableSelectionDialog &>(*dialog_);
   dialog.SetFilter(ObjectListType::All);
-  if (dialog.run() == Gtk::RESPONSE_OK) {
-    theatre::Controllable *controllable =
-        dynamic_cast<theatre::Controllable *>(dialog.SelectedObject().Get());
-    if (controllable) {
-      std::vector<theatre::SourceValue *> sources(3);
-      for (size_t i = 0; i != controllable->NInputs(); ++i) {
-        theatre::Management &management = Instance::Management();
-        if (controllable->InputType(i) == theatre::FunctionType::Red)
-          sources[0] = management.GetSourceValue(*controllable, i);
-        else if (controllable->InputType(i) == theatre::FunctionType::Green)
-          sources[1] = management.GetSourceValue(*controllable, i);
-        else if (controllable->InputType(i) == theatre::FunctionType::Blue)
-          sources[2] = management.GetSourceValue(*controllable, i);
+  dialog.signal_response().connect([this](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      const ControllableSelectionDialog &csd =
+          static_cast<ControllableSelectionDialog &>(*dialog_);
+      theatre::Controllable *controllable =
+          dynamic_cast<theatre::Controllable *>(csd.SelectedObject().Get());
+      if (controllable) {
+        std::vector<theatre::SourceValue *> sources(3);
+        for (size_t i = 0; i != controllable->NInputs(); ++i) {
+          theatre::Management &management = Instance::Management();
+          if (controllable->InputType(i) == theatre::FunctionType::Red)
+            sources[0] = management.GetSourceValue(*controllable, i);
+          else if (controllable->InputType(i) == theatre::FunctionType::Green)
+            sources[1] = management.GetSourceValue(*controllable, i);
+          else if (controllable->InputType(i) == theatre::FunctionType::Blue)
+            sources[2] = management.GetSourceValue(*controllable, i);
+        }
+        Assign(sources, true);
       }
-      Assign(sources, true);
     }
-  }
+  });
+  dialog.show();
 }
 
 }  // namespace glight::gui

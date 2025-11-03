@@ -4,8 +4,8 @@
 #include "controlwidget.h"
 
 #include <gtkmm/box.h>
+#include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
 #include <gtkmm/overlay.h>
 #include <gtkmm/scale.h>
@@ -37,31 +37,28 @@ class FaderWidget final : public ControlWidget {
     if (_scale.get_value() > value) _scale.set_value(value);
   }
 
-  Gtk::Widget &NameLabel() { return _labelEventBox; }
+  Gtk::Widget &NameLabel() { return _nameLabel; }
 
  private:
   void ShowFadeButtons(bool mouse_in);
   void onScaleChange();
   void onOnButtonClicked();
-  bool onFlashButtonPressed(GdkEventButton *event);
-  bool onFlashButtonReleased(GdkEventButton *event);
+  void onFlashButtonPressed(int, double, double);
+  void onFlashButtonReleased(int, double, double);
   void onFadeUp();
   void onFadeDown();
-  bool HandleRightPress(GdkEventButton *event);
-  bool HandleRightRelease(GdkEventButton *event);
+  void HandleRightPress(int, double, double);
+  void HandleRightRelease(int, double, double);
   void MakeMenu();
   void UpdateDisplaySettings();
 
-  Gtk::EventBox _mouseInBox;
   Gtk::Overlay _overlay;
-  Gtk::VBox _box;
   Gtk::Button _fadeUpButton;
   Gtk::Scale _scale;
   Gtk::Button _fadeDownButton;
   Gtk::Button _flashButton;
   Gtk::Label flash_button_label_;
   IconButton _checkButton;
-  Gtk::EventBox _labelEventBox;
   Gtk::Label _nameLabel{"<..>"};
   bool _mouseIn = false;
   bool _holdUpdates = false;

@@ -35,10 +35,10 @@ class MultiControllableSelectionDialog : public Gtk::Dialog {
   void OnRemove();
   void OnUpdateControllables();
 
-  Gtk::HBox box_;
+  Gtk::Box box_;
   ObjectBrowser object_browser_;
 
-  Gtk::VBox button_box_;
+  Gtk::Box button_box_{Gtk::Orientation::VERTICAL};
   Gtk::Button add_button_;
   Gtk::Button remove_button_;
 

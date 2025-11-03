@@ -6,9 +6,7 @@
 #include "gui/fixtureselection.h"
 #include "gui/instance.h"
 
-#include <gtkmm/main.h>
 #include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
 
 #include "theatre/fixture.h"
 #include "theatre/fixturecontrol.h"
@@ -32,7 +30,7 @@ FixtureListWindow::FixtureListWindow() {
 
   fixtures_list_model_ = Gtk::ListStore::create(fixtures_list_columns_);
 
-  fixtures_list_view_.get_selection()->set_mode(Gtk::SELECTION_MULTIPLE);
+  fixtures_list_view_.get_selection()->set_mode(Gtk::SelectionMode::MULTIPLE);
   fixtures_list_view_.get_selection()->signal_changed().connect(
       [&]() { onSelectionChanged(); });
   fixtures_list_view_.set_model(fixtures_list_model_);
@@ -45,10 +43,10 @@ FixtureListWindow::FixtureListWindow() {
   fixtures_list_view_.append_column("Symbol", fixtures_list_columns_.symbol_);
   fixtures_list_view_.set_rubber_banding(true);
   fillFixturesList();
-  fixtures_scrolled_window_.add(fixtures_list_view_);
+  fixtures_scrolled_window_.set_child(fixtures_list_view_);
 
-  fixtures_scrolled_window_.set_policy(Gtk::POLICY_NEVER,
-                                       Gtk::POLICY_AUTOMATIC);
+  fixtures_scrolled_window_.set_policy(Gtk::PolicyType::NEVER,
+                                       Gtk::PolicyType::AUTOMATIC);
   fixtures_scrolled_window_.set_hexpand(true);
   fixtures_scrolled_window_.set_vexpand(true);
 
@@ -100,8 +98,7 @@ FixtureListWindow::FixtureListWindow() {
       sigc::mem_fun(*this, &FixtureListWindow::onReassignClicked));
   grid_.attach(reassign_button_, 1, 7, 2, 1);
 
-  add(grid_);
-  grid_.show_all();
+  set_child(grid_);
 }
 
 FixtureListWindow::~FixtureListWindow() = default;
@@ -114,7 +111,7 @@ void FixtureListWindow::fillFixturesList() {
       Instance::Management().GetTheatre().Fixtures();
   for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = fixtures_list_model_->append();
-    const Gtk::TreeModel::Row &row = *iter;
+    Gtk::TreeModel::Row &row = *iter;
     row[fixtures_list_columns_.title_] = fixture->Name();
     row[fixtures_list_columns_.type_] = fixture->Mode().Name();
     row[fixtures_list_columns_.universe_] = fixture->GetUniverse();
@@ -180,28 +177,37 @@ void FixtureListWindow::onSetChannelButtonClicked() {
       GetSelection();
   if (selection.size() == 1) {
     const system::ObservingPtr<theatre::Fixture> &fixture = selection[0];
-    Gtk::MessageDialog dialog(*this, "Set DMX channel", false,
-                              Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
-    Gtk::Entry entry;
-    entry.set_text(std::to_string(
+    dialog_ = Gtk::MessageDialog(*this, "Set DMX channel", false,
+                                 Gtk::MessageType::QUESTION,
+                                 Gtk::ButtonsType::OK_CANCEL);
+    Gtk::MessageDialog &dialog = static_cast<Gtk::MessageDialog &>(dialog_);
+    dialog_entry_ = Gtk::Entry();
+    dialog_entry_.set_text(std::to_string(
         fixture->Functions().front()->MainChannel().Channel() + 1));
-    dialog.get_message_area()->pack_start(entry, Gtk::PACK_SHRINK);
-    dialog.get_message_area()->show_all_children();
+    dialog.get_message_area()->append(dialog_entry_);
     dialog.set_secondary_text(
         "Please enter the new DMX channel for this fixture");
-    int result = dialog.run();
-    if (result == Gtk::RESPONSE_OK) {
-      std::string dmxChannel = entry.get_text();
-      unsigned value = std::atoi(dmxChannel.c_str());
-      if (value > 0 && value <= 512) {
-        std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-        if (!fixture->IsVisible())
-          fixture->SetSymbol(theatre::FixtureSymbol::Normal);
-        const unsigned universe = 0;  // TODO
-        fixture->SetChannel(theatre::DmxChannel(value - 1, universe));
-        updateFixture(fixture.Get());
+    dialog.signal_response().connect([this](int response) {
+      if (response == Gtk::ResponseType::OK) {
+        std::string dmxChannel = dialog_entry_.get_text();
+        unsigned value = std::atoi(dmxChannel.c_str());
+        if (value > 0 && value <= 512) {
+          const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
+              GetSelection();
+          if (selection.size() == 1) {
+            const system::ObservingPtr<theatre::Fixture> &fixture =
+                selection[0];
+            std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
+            if (!fixture->IsVisible())
+              fixture->SetSymbol(theatre::FixtureSymbol::Normal);
+            const unsigned universe = 0;  // TODO
+            fixture->SetChannel(theatre::DmxChannel(value - 1, universe));
+            updateFixture(fixture.Get());
+          }
+        }
       }
-    }
+    });
+    dialog.show();
   }
 }
 
@@ -241,7 +247,7 @@ void FixtureListWindow::onGlobalSelectionChange() {
       auto iter =
           std::find(new_selection.begin(), new_selection.end(), fixture);
       if (iter != new_selection.end()) {
-        fixtures_list_view_.get_selection()->select(child);
+        fixtures_list_view_.get_selection()->select(child.get_iter());
       }
     }
   }

@@ -2,12 +2,12 @@
 #define GUI_SETTINGS_WINDOW_H_
 
 #include <gtkmm/box.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
-#include <gtkmm/radiobutton.h>
 #include <gtkmm/treeview.h>
 
 #include "gui/recursionlock.h"
@@ -56,17 +56,17 @@ class SettingsWindow : public ChildWindow {
   Gtk::Button reload_ola_button_{"Reload ola"};
   Gtk::Label ola_universe_label_{"Ola universe:"};
   Gtk::ComboBoxText ola_universe_combo_;
-  Gtk::RadioButton dmx_none_rb_{"None"};
-  Gtk::RadioButton dmx_input_rb_{"Input"};
-  Gtk::RadioButton dmx_disconnected_input_rb_{"Disconnected"};
-  Gtk::RadioButton dmx_fader_control_rb_{"Fader control"};
-  Gtk::RadioButton dmx_merge_rb_{"Merge into output"};
+  Gtk::CheckButton dmx_none_rb_{"None"};
+  Gtk::CheckButton dmx_input_rb_{"Input"};
+  Gtk::CheckButton dmx_disconnected_input_rb_{"Disconnected"};
+  Gtk::CheckButton dmx_fader_control_rb_{"Fader control"};
+  Gtk::CheckButton dmx_merge_rb_{"Merge into output"};
   Gtk::Frame dmx_input_function_frame_{"Function"};
-  Gtk::VBox dmx_input_function_box_;
+  Gtk::Box dmx_input_function_box_{Gtk::Orientation::VERTICAL};
 
-  Gtk::RadioButton dmx_output_rb_{"Output"};
+  Gtk::CheckButton dmx_output_rb_{"Output"};
 
-  Gtk::VBox midi_page_;
+  Gtk::Box midi_page_{Gtk::Orientation::VERTICAL};
 
   std::vector<std::string> input_devices_;
   std::vector<std::string> output_devices_;

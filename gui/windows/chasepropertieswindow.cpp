@@ -23,7 +23,7 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase)
       _synchronizedTriggerCheckButton("Synchronized"),
       _synchronizationsLabel("Nr. of synchronizations:"),
       _synchronizationsCount(Gtk::Adjustment::create(1.0, 1.0, 100.0, 1.0),
-                             Gtk::ORIENTATION_HORIZONTAL),
+                             Gtk::Orientation::HORIZONTAL),
 
       _beatTriggerCheckButton("Trigger by beat"),
       _beatSpeedLabel("Beats per trigger :"),
@@ -38,10 +38,8 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase)
 
   set_title(chase.Name() + " — glight");
 
-  Gtk::RadioButtonGroup group;
   _grid.attach(_delayTriggerCheckButton, 0, 0, 1, 3);
-  _delayTriggerCheckButton.set_group(group);
-  _delayTriggerCheckButton.signal_clicked().connect(
+  _delayTriggerCheckButton.signal_toggled().connect(
       sigc::mem_fun(*this, &ChasePropertiesWindow::onTriggerTypeChanged));
   _grid.attach(_triggerDuration, 1, 0, 2, 1);
   _triggerDuration.SignalValueChanged().connect(
@@ -54,27 +52,27 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase)
   _transitionTypeBox.SignalChanged().connect(
       sigc::mem_fun(*this, &ChasePropertiesWindow::onTransitionTypeChanged));
   _grid.attach(_transitionTypeBox, 1, 2, 2, 1);
-  _transitionSep.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+  _transitionSep.set_orientation(Gtk::Orientation::HORIZONTAL);
   _grid.attach(_transitionSep, 0, 3, 3, 1);
 
   _grid.attach(_synchronizedTriggerCheckButton, 0, 4, 1, 1);
-  _synchronizedTriggerCheckButton.set_group(group);
-  _synchronizedTriggerCheckButton.signal_clicked().connect(
+  _synchronizedTriggerCheckButton.set_group(_delayTriggerCheckButton);
+  _synchronizedTriggerCheckButton.signal_toggled().connect(
       sigc::mem_fun(*this, &ChasePropertiesWindow::onTriggerTypeChanged));
-  _synchronizationsLabel.set_halign(Gtk::ALIGN_END);
+  _synchronizationsLabel.set_halign(Gtk::Align::END);
   _grid.attach(_synchronizationsLabel, 1, 4, 1, 1);
   _grid.attach(_synchronizationsCount, 2, 4, 1, 1);
   _synchronizationsCount.set_value(1.0);
   _synchronizationsCount.signal_value_changed().connect(
       sigc::mem_fun(*this, &ChasePropertiesWindow::onSyncCountChanged));
-  _synchronizedSep.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+  _synchronizedSep.set_orientation(Gtk::Orientation::HORIZONTAL);
   _grid.attach(_synchronizedSep, 0, 5, 3, 1);
 
   _grid.attach(_beatTriggerCheckButton, 0, 6, 1, 1);
-  _beatTriggerCheckButton.set_group(group);
-  _beatTriggerCheckButton.signal_clicked().connect(
+  _beatTriggerCheckButton.set_group(_delayTriggerCheckButton);
+  _beatTriggerCheckButton.signal_toggled().connect(
       sigc::mem_fun(*this, &ChasePropertiesWindow::onTriggerTypeChanged));
-  _beatSpeedLabel.set_halign(Gtk::ALIGN_END);
+  _beatSpeedLabel.set_halign(Gtk::Align::END);
   _grid.attach(_beatSpeedLabel, 1, 6, 1, 1);
   _grid.attach(_beatSpeed, 2, 6, 1, 1);
   _beatSpeed.set_hexpand(true);
@@ -83,22 +81,21 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase)
       sigc::mem_fun(*this, &ChasePropertiesWindow::onBeatSpeedChanged));
 
   _grid.set_hexpand(true);
-  _box.pack_start(_grid);
+  _box.append(_grid);
 
   _toTimeSequenceButton.signal_clicked().connect(
       [&]() { onToTimeSequenceClicked(); });
   _buttonBox.set_homogeneous(true);
-  _buttonBox.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
-  _buttonBox.pack_start(_toTimeSequenceButton, true, false, 5);
+  _buttonBox.set_orientation(Gtk::Orientation::HORIZONTAL);
+  _buttonBox.append(_toTimeSequenceButton);
 
   _closeButton.set_image_from_icon_name("window-close");
   _closeButton.signal_clicked().connect([&]() { hide(); });
-  _buttonBox.pack_end(_closeButton, true, false, 5);
+  _buttonBox.append(_closeButton);
 
-  _box.pack_end(_buttonBox, true, true, 2);
+  _box.append(_buttonBox);
 
-  add(_box);
-  show_all_children();
+  set_child(_box);
 
   loadChaseInfo(chase);
 }

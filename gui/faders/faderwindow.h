@@ -1,17 +1,17 @@
 #ifndef GUI_FADER_WINDOW_H_
 #define GUI_FADER_WINDOW_H_
 
+#include <giomm/simpleaction.h>
+
 #include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/menubutton.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/image.h>
-#include <gtkmm/imagemenuitem.h>
 #include <gtkmm/liststore.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/radiomenuitem.h>
 #include <gtkmm/scale.h>
-#include <gtkmm/separatormenuitem.h>
 #include <gtkmm/window.h>
 
 #include <chrono>
@@ -65,6 +65,27 @@ class FaderWindow : public Gtk::Window {
   }
 
  private:
+  std::string GetLayout() const {
+    std::string state;
+    layout_action_->get_state(state);
+    return state;
+  }
+  bool GetSolo() const {
+    bool state;
+    solo_action_->get_state(state);
+    return state;
+  }
+  int GetFadeInValue() const {
+    int state;
+    fade_in_action_->get_state(state);
+    return state;
+  }
+  int GetFadeOutValue() const {
+    int state;
+    fade_out_action_->get_state(state);
+    return state;
+  }
+
   void initializeWidgets();
   void initializeMenu();
 
@@ -91,7 +112,7 @@ class FaderWindow : public Gtk::Window {
   void onSetNameClicked();
   void onControlValueChanged(ControlWidget *widget);
   void onControlAssigned(size_t widgetIndex);
-  bool onResize(GdkEventConfigure *event);
+  void onResize(int width, int height);
   void onChangeUpSpeed();
   void onChangeDownSpeed();
   bool onTimeout() {
@@ -108,11 +129,9 @@ class FaderWindow : public Gtk::Window {
   void addControl(FaderState &state, bool isUpper);
   void addControlInLayout(FaderState &state) {
     addControl(state, true);
-    if (_miDualLayout.get_active()) addControl(state, false);
+    if (GetLayout() == "dual") addControl(state, false);
   }
   void loadState();
-  size_t getFadeInSpeed() const;
-  size_t getFadeOutSpeed() const;
   /**
    * Returns a list with indices to controls that have a
    * default source count of 1.
@@ -122,46 +141,21 @@ class FaderWindow : public Gtk::Window {
   /// The fader menu is stored here so that only one menu is allocated at one
   /// time (instead of each fader allocating its own menu)
   std::unique_ptr<ControlMenu> control_menu_;
+  std::shared_ptr<Gio::SimpleAction> layout_action_;
+  std::shared_ptr<Gio::SimpleAction> solo_action_;
+  std::shared_ptr<Gio::SimpleAction> fade_in_action_;
+  std::shared_ptr<Gio::SimpleAction> fade_out_action_;
   size_t _keyRowIndex;
 
-  Gtk::HBox _hBox;
-  Gtk::VBox _leftBox;
+  Gtk::Box _hBox;
+  Gtk::Box _leftBox{Gtk::Orientation::VERTICAL};
   Gtk::Grid _controlGrid;
   Gtk::MenuButton _menuButton;
 
-  Gtk::Menu _popupMenu, _layoutMenu, _fadeInMenu, _fadeOutMenu;
-  Gtk::MenuItem _miLayout{"Layout"};
-  Gtk::MenuItem _miFadeIn{"Fade in"};
-  Gtk::MenuItem _miFadeOut{"Fade out"};
-  Gtk::MenuItem _miName{"Set name..."};
-  Gtk::CheckMenuItem _miSolo{"Solo"};
-  Gtk::RadioMenuItem _miFadeInOption[11], _miFadeOutOption[11];
-  Gtk::SeparatorMenuItem _miSep1;
-  Gtk::MenuItem _miAssign{"Assign"};
-  Gtk::MenuItem _miAssignChases{"Assign to chases"};
-  Gtk::MenuItem _miClear{"Clear"};
-  Gtk::SeparatorMenuItem _miSep2;
-  Gtk::MenuItem _miAddFader{"Add fader"};
-  Gtk::MenuItem _miAdd5Faders{"Add 5 faders"};
-  Gtk::MenuItem _miAddToggleButton{"Add toggle control"};
-  Gtk::MenuItem _miAdd5ToggleButtons{"Add 5 toggle controls"};
-  Gtk::MenuItem _miAddColorButton{"Add color button"};
-  Gtk::MenuItem _miAddComboButton{"Add combo button"};
-  Gtk::MenuItem _miAddMoverControl{"Add mover control"};
-  Gtk::MenuItem _miAddToggleColumn{"Add toggle column"};
-  Gtk::MenuItem _miRemoveFader{"Remove 1"};
-  Gtk::MenuItem _miRemove5Faders{"Remove 5"};
-  Gtk::MenuItem _miInputDevice{"Input device..."};
-
-  // Layout menu
-  Gtk::RadioMenuItem _miPrimaryLayout{"Primary"};
-  Gtk::RadioMenuItem _miSecondaryLayout{"Secondary"};
-  Gtk::RadioMenuItem _miDualLayout{"Dual"};
-
   std::vector<std::unique_ptr<ControlWidget>> _upperControls;
   std::vector<std::unique_ptr<ControlWidget>> _lowerControls;
-  std::vector<Gtk::VBox> _upperColumns;
-  std::vector<Gtk::VBox> _lowerColumns;
+  std::vector<Gtk::Box> _upperColumns;
+  std::vector<Gtk::Box> _lowerColumns;
   FaderSetState *_state = nullptr;
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;
@@ -176,6 +170,7 @@ class FaderWindow : public Gtk::Window {
   std::optional<Gtk::Button> _immediateCrossFadeButton;
   std::optional<Gtk::Button> _activateCrossFaderButton;
   std::optional<Gtk::Scale> _crossFader;
+  std::unique_ptr<Gtk::Dialog> dialog_;
 };
 
 }  // namespace glight::gui

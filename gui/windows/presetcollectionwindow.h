@@ -45,10 +45,10 @@ class PresetCollectionWindow : public PropertiesWindow {
   bool selectedPresetIndex(size_t &index);
   void selectPreset(size_t index);
 
-  Gtk::HBox _topBox;
+  Gtk::Box _topBox;
   InputSelectWidget _inputSelector;
 
-  Gtk::VBox _buttonBox;
+  Gtk::Box _buttonBox{Gtk::Orientation::VERTICAL};
   Gtk::Button _addPresetButton;
   Gtk::Button _removePresetButton;
 

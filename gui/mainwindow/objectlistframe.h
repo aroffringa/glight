@@ -3,6 +3,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/paned.h>
@@ -21,7 +22,7 @@ namespace glight::gui {
 
 class MainWindow;
 
-class ObjectListFrame : public Gtk::VBox {
+class ObjectListFrame : public Gtk::Box {
  public:
   ObjectListFrame(MainWindow &parentWindow);
 
@@ -37,6 +38,7 @@ class ObjectListFrame : public Gtk::VBox {
   ObjectBrowser _list;
 
   ObjectWindowList<PropertiesWindow> _windowList;
+  std::unique_ptr<Gtk::Dialog> dialog_;
 
   MainWindow &_parentWindow;
   NameFrame _nameFrame;

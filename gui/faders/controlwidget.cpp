@@ -105,17 +105,21 @@ theatre::SingleSourceValue& ControlWidget::GetSingleSourceValue(
 }
 
 void ControlWidget::ShowAssignDialog() {
-  InputSelectDialog dialog(false);
-  if (dialog.run() == Gtk::RESPONSE_OK) {
-    const bool allow_multi = DefaultSourceCount() != 1;
-    if (allow_multi) {
-      std::vector<SourceValue*> sources = GetSourceValues();
-      sources.emplace_back(dialog.SelectedSourceValue());
-      Assign(sources, true);
-    } else {
-      Assign({dialog.SelectedSourceValue()}, true);
+  dialog_ = std::make_unique<InputSelectDialog>(false);
+  dialog_->signal_response().connect([this](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      InputSelectDialog& dialog = static_cast<InputSelectDialog&>(*dialog_);
+      const bool allow_multi = DefaultSourceCount() != 1;
+      if (allow_multi) {
+        std::vector<SourceValue*> sources = GetSourceValues();
+        sources.emplace_back(dialog.SelectedSourceValue());
+        Assign(sources, true);
+      } else {
+        Assign({dialog.SelectedSourceValue()}, true);
+      }
     }
-  }
+    dialog_.reset();
+  });
 }
 
 void ControlWidget::OnStateChange() {

@@ -7,7 +7,6 @@
 
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 
@@ -27,7 +26,7 @@ class MoverWidget final : public ControlWidget {
 
  private:
   virtual void OnAssigned(bool moveFader) override;
-  bool HandleRightRelease(GdkEventButton *event);
+  void HandleRightRelease();
   void UpdateDisplaySettings();
   void MoveLeft();
   void MoveRight();
@@ -41,7 +40,6 @@ class MoverWidget final : public ControlWidget {
   Gtk::Button right_button_;
   Gtk::Button up_button_;
   Gtk::Button down_button_;
-  Gtk::EventBox event_box_;
   Gtk::Label name_label_{"<..>\n<..>"};
 
   bool hold_updates_ = false;

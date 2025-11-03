@@ -10,7 +10,7 @@
 
 namespace glight::gui {
 
-class BeatInput : public Gtk::HBox {
+class BeatInput : public Gtk::Box {
  public:
   BeatInput(double value);
 

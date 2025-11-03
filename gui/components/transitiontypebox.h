@@ -10,11 +10,11 @@
 
 namespace glight::gui {
 
-class TransitionTypeBox : public Gtk::HBox {
+class TransitionTypeBox : public Gtk::Box {
  public:
   TransitionTypeBox(
       theatre::TransitionType value = theatre::TransitionType::Fade) {
-    pack_start(label_);
+    append(label_);
     label_.show();
 
     model_ = Gtk::ListStore::create(columns_);
@@ -22,7 +22,7 @@ class TransitionTypeBox : public Gtk::HBox {
         theatre::GetTransitionTypes();
     for (theatre::TransitionType type : types) {
       Gtk::TreeModel::iterator iter = model_->append();
-      const Gtk::TreeModel::Row& row = *iter;
+      Gtk::TreeModel::Row& row = *iter;
       row[columns_.description_] = GetDescription(type);
       row[columns_.value_] = type;
     }
@@ -30,7 +30,7 @@ class TransitionTypeBox : public Gtk::HBox {
     combo_.set_model(model_);
     combo_.pack_start(columns_.description_);
 
-    pack_end(combo_);
+    append(combo_);
     combo_.signal_changed().connect([&]() {
       const int index = combo_.get_active_row_number();
       if (index >= 0) {

@@ -7,109 +7,105 @@ namespace glight::gui {
 
 using theatre::Color;
 
-VisualizationMenu::VisualizationMenu() {
-  std::vector<theatre::FixtureSymbol::Symbol> symbols(
+VisualizationMenu::VisualizationMenu(Gio::ActionMap& map) {
+  auto menu = Gio::Menu::create();
+
+  auto set_menu = Gio::Menu::create();
+  set_menu->append("Full on", "set_full_on");
+  set_menu->append("Off", "set_off");
+  set_menu->append("Set color...", "set_color");
+  set_menu->append("Track", "track");
+  set_menu->append("Pan only", "pan_track");
+
+  set_full_on_ = map.add_action("set_full_on", SignalSetFullOn);
+  set_off_ = map.add_action("set_off", SignalSetOff);
+  set_color_ = map.add_action("set_color", SignalSetColor);
+  set_track_ = map.add_action("track", SignalTrack);
+  set_pan_track_ = map.add_action("pan_track", SignalTrackPan);
+
+  menu->append_submenu("Set", set_menu);
+
+  auto symbol_menu = Gio::Menu::create();
+  const std::vector<theatre::FixtureSymbol::Symbol> symbols(
       theatre::FixtureSymbol::List());
-
-  set_menu_.add(mi_set_full_on_);
-  mi_set_full_on_.signal_activate().connect(SignalSetFullOn);
-
-  set_menu_.add(mi_set_off_);
-  mi_set_off_.signal_activate().connect(SignalSetOff);
-
-  set_menu_.add(mi_set_color_);
-  mi_set_color_.signal_activate().connect(SignalSetColor);
-
-  set_menu_.add(mi_track_);
-  mi_track_.signal_activate().connect(SignalTrack);
-
-  set_menu_.add(mi_track_pan_);
-  mi_track_pan_.signal_activate().connect(SignalTrackPan);
-
-  mi_set_menu_.set_submenu(set_menu_);
-  add(mi_set_menu_);
-
-  _miSymbols.reserve(symbols.size());
   for (theatre::FixtureSymbol::Symbol symbol : symbols) {
-    _miSymbols.emplace_back(theatre::FixtureSymbol(symbol).Name());
-    _miSymbols.back().signal_activate().connect(
-        [&, symbol]() { SignalSelectSymbol(symbol); });
-    _symbolMenu.add(_miSymbols.back());
+    symbol_menu->append(theatre::FixtureSymbol(symbol).Name(),
+                        "symbol_" + theatre::FixtureSymbol(symbol).Name());
+    std::shared_ptr<Gio::SimpleAction> action =
+        map.add_action("symbol_" + theatre::FixtureSymbol(symbol).Name(),
+                       [&, symbol]() { SignalSelectSymbol(symbol); });
+    symbols_.emplace_back(std::move(action));
   }
+  menu->append_submenu("Symbol", symbol_menu);
 
-  _miSymbolMenu.set_submenu(_symbolMenu);
-  add(_miSymbolMenu);
+  // TODO move this to main menu instead of context menu
+  auto dry_mode_style_menu = Gio::Menu::create();
+  dry_mode_style_menu->append("Primary", "mode_primary");
+  dry_mode_style_menu->append("Secondary", "mode_secondary");
+  dry_mode_style_menu->append("Vertical", "mode_vertical");
+  dry_mode_style_menu->append("Horizontal", "mode_horizontal");
+  dry_mode_style_menu->append("Shadow", "mode_shadow");
 
-  Gtk::RadioMenuItem::Group dryModeStyleGroup;
-  _miDMSPrimary.set_group(dryModeStyleGroup);
-  _miDMSPrimary.set_active(true);
-  _miDMSPrimary.signal_activate().connect(SignalDryStyleChange);
-  _dryModeStyleMenu.add(_miDMSPrimary);
-  _miDMSSecondary.set_group(dryModeStyleGroup);
-  _miDMSSecondary.signal_activate().connect(SignalDryStyleChange);
-  _dryModeStyleMenu.add(_miDMSSecondary);
-  _miDMSHorizontal.set_group(dryModeStyleGroup);
-  _miDMSHorizontal.signal_activate().connect(SignalDryStyleChange);
-  _dryModeStyleMenu.add(_miDMSHorizontal);
-  _miDMSVertical.set_group(dryModeStyleGroup);
-  _miDMSVertical.signal_activate().connect(SignalDryStyleChange);
-  _dryModeStyleMenu.add(_miDMSVertical);
-  _miDMSShadow.set_group(dryModeStyleGroup);
-  _miDMSShadow.signal_activate().connect(SignalDryStyleChange);
-  _dryModeStyleMenu.add(_miDMSShadow);
+  map.add_action("mode_primary", [&]() {
+    dry_mode_style_ = DryModeStyle::Primary;
+    SignalDryStyleChange();
+  });
+  map.add_action("mode_secondary", [&]() {
+    dry_mode_style_ = DryModeStyle::Secondary;
+    SignalDryStyleChange();
+  });
+  map.add_action("mode_vertical", [&]() {
+    dry_mode_style_ = DryModeStyle::Vertical;
+    SignalDryStyleChange();
+  });
+  map.add_action("mode_horizontal", [&]() {
+    dry_mode_style_ = DryModeStyle::Horizontal;
+    SignalDryStyleChange();
+  });
+  map.add_action("mode_shadow", [&]() {
+    dry_mode_style_ = DryModeStyle::Shadow;
+    SignalDryStyleChange();
+  });
 
-  _miDryModeStyle.set_submenu(_dryModeStyleMenu);
-  add(_miDryModeStyle);
+  menu->append_submenu("Dry mode style", dry_mode_style_menu);
 
-  _miAlignHorizontally.signal_activate().connect(
-      [&] { SignalAlignHorizontally(); });
-  add(_miAlignHorizontally);
+  auto position_section = Gio::Menu::create();
+  position_section->append("Align horizontally", "align_horizontally");
+  position_section->append("Align vertically", "align_vertically");
+  position_section->append("Distribute evenly", "distribute_evenly");
+  menu->append_section(position_section);
 
-  _miAlignVertically.signal_activate().connect(SignalAlignVertically);
-  add(_miAlignVertically);
+  align_horizontally_ =
+      map.add_action("align_horizontally", SignalAlignHorizontally);
+  align_vertically_ = map.add_action("align_vertically", SignalAlignVertically);
+  distribute_evenly_ =
+      map.add_action("distribute_evenly", SignalDistributeEvenly);
 
-  _miDistributeEvenly.signal_activate().connect(SignalDistributeEvenly);
-  add(_miDistributeEvenly);
+  auto edit_section = Gio::Menu::create();
+  edit_section->append("Add fixture...", "add_fixture");
+  edit_section->append("Add preset", "add_preset");
+  edit_section->append("Remove", "remove_fixtures");
+  edit_section->append("Group...", "group_fixtures");
+  edit_section->append("Design...", "design");
+  menu->append_section(edit_section);
 
-  add(_miSeparator1);
+  add_fixture_ = map.add_action("add_fixture", SignalAddFixtures);
+  add_preset_ = map.add_action("add_preset", SignalAddPreset);
+  remove_fixtures_ = map.add_action("remove_fixtures", SignalRemoveFixtures);
+  group_fixtures_ = map.add_action("group_fixtures", SignalGroupFixtures);
+  design_ = map.add_action("design", SignalDesignFixtures);
 
-  _miAdd.signal_activate().connect(SignalAddFixtures);
-  add(_miAdd);
+  auto extra_section = Gio::Menu::create();
+  extra_section->append("Properties", "properties");
+  extra_section->append("Save image...", "save_image");
+  menu->append_section(extra_section);
 
-  _miAddPreset.signal_activate().connect(SignalAddPreset);
-  add(_miAddPreset);
-
-  _miRemove.signal_activate().connect(SignalRemoveFixtures);
-  add(_miRemove);
-
-  _miGroup.signal_activate().connect(SignalGroupFixtures);
-  add(_miGroup);
-
-  _miDesign.signal_activate().connect(SignalDesignFixtures);
-  add(_miDesign);
-
-  add(_miSeparator2);
-
-  _miProperties.signal_activate().connect(SignalFixtureProperties);
-  add(_miProperties);
-
-  _miSaveImage.signal_activate().connect(SignalSaveImage);
-  add(_miSaveImage);
-
-  show_all_children();
+  properties_ = map.add_action("properties", SignalAddFixtures);
+  save_image_ = map.add_action("save_image", SignalAddPreset);
 }
 
 DryModeStyle VisualizationMenu::GetDryModeStyle() const {
-  if (_miDMSSecondary.get_active())
-    return DryModeStyle::Secondary;
-  else if (_miDMSHorizontal.get_active())
-    return DryModeStyle::Horizontal;
-  else if (_miDMSVertical.get_active())
-    return DryModeStyle::Vertical;
-  else if (_miDMSShadow.get_active())
-    return DryModeStyle::Shadow;
-  else
-    return DryModeStyle::Primary;
+  return dry_mode_style_;
 }
 
 void VisualizationMenu::SetSensitivity(bool is_layout_locked,
@@ -117,15 +113,24 @@ void VisualizationMenu::SetSensitivity(bool is_layout_locked,
   const bool has_selection = n_selected != 0;
   const bool selection_enabled = !is_layout_locked && has_selection;
   const bool dual_enabled = !is_layout_locked && n_selected >= 2;
-  mi_set_menu_.set_sensitive(has_selection);
-  _miAlignHorizontally.set_sensitive(dual_enabled);
-  _miAlignVertically.set_sensitive(dual_enabled);
-  _miDistributeEvenly.set_sensitive(dual_enabled);
-  _miAdd.set_sensitive(!is_layout_locked);
-  _miAddPreset.set_sensitive(!is_layout_locked);
-  _miRemove.set_sensitive(selection_enabled);
-  _miSymbolMenu.set_sensitive(selection_enabled);
-  _miProperties.set_sensitive(selection_enabled);
+
+  set_full_on_->set_enabled(has_selection);
+  set_off_->set_enabled(has_selection);
+  set_color_->set_enabled(has_selection);
+  set_track_->set_enabled(has_selection);
+  set_pan_track_->set_enabled(has_selection);
+
+  align_horizontally_->set_enabled(dual_enabled);
+  align_vertically_->set_enabled(dual_enabled);
+  distribute_evenly_->set_enabled(dual_enabled);
+
+  add_fixture_->set_enabled(!is_layout_locked);
+  add_preset_->set_enabled(!is_layout_locked);
+
+  remove_fixtures_->set_enabled(selection_enabled);
+  properties_->set_enabled(selection_enabled);
+
+  for (auto item : symbols_) item->set_enabled(selection_enabled);
 }
 
 }  // namespace glight::gui

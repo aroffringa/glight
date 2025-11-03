@@ -123,16 +123,20 @@ void NewPresetFromFixtures(
   Instance::Events().EmitUpdate();
 }
 
-void NewChase(ObjectBrowser &browser,
+void NewChase(std::unique_ptr<Gtk::Dialog> &dialog, ObjectBrowser &browser,
               ObjectWindowList<PropertiesWindow> &property_windows,
               Gtk::Window &parent) {
-  CreateChaseDialog dialog;
-  if (dialog.run() == Gtk::RESPONSE_OK) {
-    theatre::Chase &new_chase = dialog.CreatedChase();
-    browser.SelectObject(new_chase);
-    AssignFader(new_chase);
-    OpenPropertiesWindow(property_windows, new_chase, parent);
-  }
+  dialog = std::make_unique<CreateChaseDialog>();
+  dialog->signal_response().connect(
+      [d = dialog.get(), &browser, &property_windows, &parent](int response) {
+        if (response == Gtk::ResponseType::OK) {
+          theatre::Chase &new_chase =
+              static_cast<CreateChaseDialog *>(d)->CreatedChase();
+          browser.SelectObject(new_chase);
+          AssignFader(new_chase);
+          OpenPropertiesWindow(property_windows, new_chase, parent);
+        }
+      });
 }
 
 void NewTimeSequence(ObjectBrowser &browser,

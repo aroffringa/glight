@@ -9,7 +9,6 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
 
 namespace glight::gui {
@@ -27,12 +26,10 @@ class ToggleWidget final : public ControlWidget {
   virtual void Limit(double value) override;
 
  private:
-  Gtk::HBox box_;
   Gtk::Label flash_button_label_;
   Gtk::Button flash_button_;
   Gtk::Button fade_button_;
   IconButton icon_button_;
-  Gtk::EventBox event_box_;
   Gtk::Label name_label_{"<..>"};
 
   bool hold_updates_ = false;
@@ -42,10 +39,10 @@ class ToggleWidget final : public ControlWidget {
 
   virtual void OnAssigned(bool moveFader) override;
   void OnIconClicked();
-  bool OnFlashButtonPressed(GdkEventButton *event);
-  bool OnFlashButtonReleased(GdkEventButton *event);
+  void OnFlashButtonPressed(int button);
+  void OnFlashButtonReleased(int button);
   void OnFade();
-  bool HandleRightRelease(GdkEventButton *event);
+  void HandleRightRelease();
   void UpdateDisplaySettings();
   void UpdateActivated(const theatre::SingleSourceValue &value);
 };

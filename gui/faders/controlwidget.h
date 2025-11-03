@@ -3,7 +3,8 @@
 
 #include <memory>
 
-#include <gtkmm/bin.h>
+#include <gtkmm/box.h>
+#include <gtkmm/dialog.h>
 
 #include "../../theatre/forwards.h"
 
@@ -21,10 +22,10 @@ enum class ControlMode { Primary, Secondary };
  * Base class for GUI controls that allow switching presets, and that
  * should obey fading or solo settings.
  */
-class ControlWidget : public Gtk::Bin {
+class ControlWidget : public Gtk::Box {
  public:
   ControlWidget(FaderWindow &fader_window, FaderState &state, ControlMode mode);
-  ~ControlWidget();
+  ~ControlWidget() override;
 
   /**
    * Toggle this fader. When the fader is off, it should
@@ -64,8 +65,8 @@ class ControlWidget : public Gtk::Bin {
   virtual void SyncFader() = 0;
   virtual void Limit(double value) = 0;
 
-  sigc::signal<void> &SignalValueChange() { return _signalValueChange; }
-  sigc::signal<void> &SignalAssigned() { return _signalAssigned; }
+  sigc::signal<void()> &SignalValueChange() { return _signalValueChange; }
+  sigc::signal<void()> &SignalAssigned() { return _signalAssigned; }
 
   const std::vector<theatre::SourceValue *> &GetSourceValues() const {
     return sources_;
@@ -147,9 +148,10 @@ class ControlWidget : public Gtk::Bin {
   FaderWindow &fader_window_;
   sigc::connection _updateConnection;
   sigc::connection state_change_connection_;
-  sigc::signal<void> _signalValueChange;
-  sigc::signal<void> _signalAssigned;
-  sigc::signal<void> _signalDisplayChanged;
+  sigc::signal<void()> _signalValueChange;
+  sigc::signal<void()> _signalAssigned;
+  sigc::signal<void()> _signalDisplayChanged;
+  std::unique_ptr<Gtk::Dialog> dialog_;
 };
 
 }  // namespace glight::gui

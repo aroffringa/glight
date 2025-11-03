@@ -5,11 +5,12 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
-#include <gtkmm/radiobutton.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/treeview.h>
@@ -62,10 +63,10 @@ class TimeSequencePropertiesWindow final : public PropertiesWindow {
   theatre::TimeSequence::Step *selectedStep();
   void selectStep(size_t index);
 
-  Gtk::HBox _topBox;
+  Gtk::Box _topBox;
   InputSelectWidget _inputSelector;
 
-  Gtk::VBox _buttonBox;
+  Gtk::Box _buttonBox{Gtk::Orientation::VERTICAL};
   Gtk::Button _addStepButton;
   Gtk::Button _removeStepButton;
 
@@ -89,18 +90,20 @@ class TimeSequencePropertiesWindow final : public PropertiesWindow {
   Gtk::CheckButton _maxRepeatCB;
   Gtk::Scale _maxRepeatCount;
 
-  Gtk::RadioButton _delayTriggerCheckButton;
+  Gtk::CheckButton _delayTriggerCheckButton;
   DurationInput _triggerDuration;
 
-  Gtk::RadioButton _synchronizedTriggerCheckButton;
+  Gtk::CheckButton _synchronizedTriggerCheckButton;
   Gtk::Scale _synchronizationsCount;
 
-  Gtk::RadioButton _beatTriggerCheckButton;
+  Gtk::CheckButton _beatTriggerCheckButton;
   Gtk::Scale _beatSpeed;
 
   Gtk::Label _transitionSpeedLabel;
   DurationInput _transitionDuration;
   TransitionTypeBox _transitionTypeBox;
+
+  std::unique_ptr<Gtk::Dialog> dialog_;
 
   RecursionLock _recursionLock;
 

@@ -27,8 +27,10 @@
 
 #include <glibmm/main.h>
 
+#include <gtkmm/eventcontrollermotion.h>
 #include <gtkmm/filechooserdialog.h>
-#include <gtkmm/main.h>
+
+#include <sigc++/signal.h>
 
 #include <cmath>
 #include <iostream>  //DEBUG
@@ -76,21 +78,36 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
       _isTimerRunning(false),
       _dragType(MouseState::Normal),
 
-      render_engine_(*management) {
+      render_engine_(*management),
+      context_menu_(*showWindow) {
   set_size_request(64, 64);
 
   _globalSelectionConnection = _globalSelection->SignalChange().connect(
       [&]() { onGlobalSelectionChanged(); });
 
-  set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK |
-             Gdk::POINTER_MOTION_MASK);
-  signal_draw().connect(sigc::mem_fun(*this, &VisualizationWidget::onExpose));
-  signal_button_press_event().connect(
-      sigc::mem_fun(*this, &VisualizationWidget::onButtonPress));
-  signal_button_release_event().connect(
-      sigc::mem_fun(*this, &VisualizationWidget::onButtonRelease));
-  signal_motion_notify_event().connect(
+  set_draw_func([&](const Cairo::RefPtr<Cairo::Context> &cairo, int, int) {
+    VisualizationWidget::onExpose(cairo);
+  });
+
+  left_gesture_ = Gtk::GestureClick::create();
+  left_gesture_->set_button(1);
+  left_gesture_->signal_pressed().connect(
+      sigc::mem_fun(*this, &VisualizationWidget::onLeftButtonPress));
+  left_gesture_->signal_released().connect(
+      sigc::mem_fun(*this, &VisualizationWidget::onLeftButtonRelease));
+  add_controller(left_gesture_);
+
+  auto right_gesture = Gtk::GestureClick::create();
+  right_gesture->set_button(3);
+  right_gesture->signal_pressed().connect(
+      sigc::mem_fun(*this, &VisualizationWidget::onRightButtonPress));
+  add_controller(right_gesture);
+
+  auto motion = Gtk::EventControllerMotion::create();
+  motion->signal_motion().connect(
       sigc::mem_fun(*this, &VisualizationWidget::onMotion));
+  add_controller(motion);
+
   initializeContextMenu();
   primary_snapshot_ = _management->PrimarySnapshot();
   secondary_snapshot_ = _management->SecondarySnapshot();
@@ -318,125 +335,120 @@ void VisualizationWidget::drawAll(const Cairo::RefPtr<Cairo::Context> &cairo) {
   }
 }
 
-bool VisualizationWidget::onButtonPress(GdkEventButton *event) {
-  if (event->button == 1) {
-    const bool shift =
-        (event->state & (GDK_SHIFT_MASK | GDK_CONTROL_MASK | GDK_MOD1_MASK)) ==
-        GDK_SHIFT_MASK;
-    const std::optional<DrawInfo> info = GetPrimaryStyleDimensions(
-        context_menu_.GetDryModeStyle(), get_width(), get_height());
-    if (info) {
-      const theatre::Coordinate2D pos = render_engine_.MouseToPosition(
-          event->x, event->y, info->width, info->height);
-      system::ObservingPtr<theatre::Fixture> clicked_fixture =
-          render_engine_.FixtureAt(pos);
-      if (shift) {
-        if (clicked_fixture) {
-          // Was a fixture clicked that was already selected? Then unselect.
-          // If not, add the clicked fixture to the selection
-          auto iterator = std::find(_selectedFixtures.begin(),
-                                    _selectedFixtures.end(), clicked_fixture);
-          if (iterator == _selectedFixtures.end()) {
-            _selectedFixtures.emplace_back(clicked_fixture);
-            _globalSelection->SetSelection(_selectedFixtures);
-          } else {
-            _selectedFixtures.erase(iterator);
-            _globalSelection->SetSelection(_selectedFixtures);
-          }
-        }
-      } else {
-        if (clicked_fixture) {
-          // Was a fixture clicked that was already selected? Then keep all
-          // selected. If not, select the clicked fixture
-          if (std::find(_selectedFixtures.begin(), _selectedFixtures.end(),
-                        clicked_fixture) == _selectedFixtures.end()) {
-            _selectedFixtures.assign(1, clicked_fixture);
-            _globalSelection->SetSelection(_selectedFixtures);
-          }
-        } else {
-          system::ObservingPtr<theatre::Fixture> clicked_handle =
-              render_engine_.GetDirectionHandleAt(_selectedFixtures, pos);
-          if (clicked_handle) {
-            _dragType = MouseState::RotateFixture;
-            _dragInvolvedFixtures = {clicked_handle};
-          } else {
-            _selectedFixtures.clear();
-            _globalSelection->SetSelection(_selectedFixtures);
-          }
-        }
-      }
-
-      _draggingStart = pos;
-      if (shift) {
-        _dragType = MouseState::DragAddRectangle;
-        _draggingTo = pos;
-        _dragInvolvedFixtures = _selectedFixtures;
-      } else if (_dragType != MouseState::RotateFixture) {
-        if (!_selectedFixtures.empty()) {
-          _dragType = MouseState::DragFixture;
-        } else {
-          _dragType = MouseState::DragRectangle;
-          _draggingTo = pos;
-        }
-      }
-      queue_draw();
-    }
-  }
-  if (event->button == 3) {
-    queue_draw();
-    context_menu_.SetSensitivity(Instance::State().LayoutLocked(),
-                                 _selectedFixtures.size());
-    context_menu_.popup_at_pointer(reinterpret_cast<GdkEvent *>(event));
-  }
-  return true;
-}
-
-bool VisualizationWidget::onButtonRelease(GdkEventButton *event) {
-  if (event->button == 1) {
-    if (_dragType == MouseState::DragFixture) {
-      const std::optional<DrawInfo> info = GetPrimaryStyleDimensions(
-          context_menu_.GetDryModeStyle(), get_width(), get_height());
-      if (info) {
-        _draggingStart = render_engine_.MouseToPosition(
-            event->x, event->y, info->width, info->height);
-      }
-    }
-    if (_dragType == MouseState::Track || _dragType == MouseState::TrackPan ||
-        _dragType == MouseState::RotateFixture) {
-      _dragType = MouseState::Normal;
-    } else {
-      _globalSelection->SetSelection(_selectedFixtures);
-      _dragType = MouseState::Normal;
-      _dragInvolvedFixtures.clear();
-      queue_draw();
-    }
-  }
-  return true;
-}
-
-void VisualizationWidget::SetCursor(Gdk::CursorType cursor_type) {
-  if (cursor_type_ != cursor_type) {
-    cursor_type_ = cursor_type;
-    get_window()->set_cursor(Gdk::Cursor::create(get_display(), cursor_type));
-  }
-}
-
-bool VisualizationWidget::onMotion(GdkEventMotion *event) {
+void VisualizationWidget::onLeftButtonPress(int, double x, double y) {
+  auto modifiers = left_gesture_->get_current_event_state();
+  const bool shift = (modifiers & Gdk::ModifierType::SHIFT_MASK) ==
+                     Gdk::ModifierType::SHIFT_MASK;
   const std::optional<DrawInfo> info = GetPrimaryStyleDimensions(
       context_menu_.GetDryModeStyle(), get_width(), get_height());
   if (info) {
-    const theatre::Coordinate2D pos = render_engine_.MouseToPosition(
-        event->x, event->y, info->width, info->height);
+    const theatre::Coordinate2D pos =
+        render_engine_.MouseToPosition(x, y, info->width, info->height);
+    system::ObservingPtr<theatre::Fixture> clicked_fixture =
+        render_engine_.FixtureAt(pos);
+    if (shift) {
+      if (clicked_fixture) {
+        // Was a fixture clicked that was already selected? Then unselect.
+        // If not, add the clicked fixture to the selection
+        auto iterator = std::find(_selectedFixtures.begin(),
+                                  _selectedFixtures.end(), clicked_fixture);
+        if (iterator == _selectedFixtures.end()) {
+          _selectedFixtures.emplace_back(clicked_fixture);
+          _globalSelection->SetSelection(_selectedFixtures);
+        } else {
+          _selectedFixtures.erase(iterator);
+          _globalSelection->SetSelection(_selectedFixtures);
+        }
+      }
+    } else {
+      if (clicked_fixture) {
+        // Was a fixture clicked that was already selected? Then keep all
+        // selected. If not, select the clicked fixture
+        if (std::find(_selectedFixtures.begin(), _selectedFixtures.end(),
+                      clicked_fixture) == _selectedFixtures.end()) {
+          _selectedFixtures.assign(1, clicked_fixture);
+          _globalSelection->SetSelection(_selectedFixtures);
+        }
+      } else {
+        system::ObservingPtr<theatre::Fixture> clicked_handle =
+            render_engine_.GetDirectionHandleAt(_selectedFixtures, pos);
+        if (clicked_handle) {
+          _dragType = MouseState::RotateFixture;
+          _dragInvolvedFixtures = {clicked_handle};
+        } else {
+          _selectedFixtures.clear();
+          _globalSelection->SetSelection(_selectedFixtures);
+        }
+      }
+    }
+
+    _draggingStart = pos;
+    if (shift) {
+      _dragType = MouseState::DragAddRectangle;
+      _draggingTo = pos;
+      _dragInvolvedFixtures = _selectedFixtures;
+    } else if (_dragType != MouseState::RotateFixture) {
+      if (!_selectedFixtures.empty()) {
+        _dragType = MouseState::DragFixture;
+      } else {
+        _dragType = MouseState::DragRectangle;
+        _draggingTo = pos;
+      }
+    }
+    queue_draw();
+  }
+}
+
+void VisualizationWidget::onRightButtonPress(int, double, double) {
+  queue_draw();
+  context_menu_.SetSensitivity(Instance::State().LayoutLocked(),
+                               _selectedFixtures.size());
+  context_menu_.popup();
+}
+
+void VisualizationWidget::onLeftButtonRelease(int, double x, double y) {
+  if (_dragType == MouseState::DragFixture) {
+    const std::optional<DrawInfo> info = GetPrimaryStyleDimensions(
+        context_menu_.GetDryModeStyle(), get_width(), get_height());
+    if (info) {
+      _draggingStart =
+          render_engine_.MouseToPosition(x, y, info->width, info->height);
+    }
+  }
+  if (_dragType == MouseState::Track || _dragType == MouseState::TrackPan ||
+      _dragType == MouseState::RotateFixture) {
+    _dragType = MouseState::Normal;
+  } else {
+    _globalSelection->SetSelection(_selectedFixtures);
+    _dragType = MouseState::Normal;
+    _dragInvolvedFixtures.clear();
+    queue_draw();
+  }
+}
+
+void VisualizationWidget::SetCursor(const std::string &cursor_name) {
+  if (cursor_name_ != cursor_name) {
+    cursor_name_ = cursor_name;
+    set_cursor(Gdk::Cursor::create(cursor_name));
+  }
+}
+
+void VisualizationWidget::onMotion(double x, double y) {
+  const std::optional<DrawInfo> info = GetPrimaryStyleDimensions(
+      context_menu_.GetDryModeStyle(), get_width(), get_height());
+  if (info) {
+    const theatre::Coordinate2D pos =
+        render_engine_.MouseToPosition(x, y, info->width, info->height);
     switch (_dragType) {
       case MouseState::Normal: {
-        Gdk::CursorType cursor = Gdk::CursorType::ARROW;
+        std::string cursor = "arrow";
         system::ObservingPtr<theatre::Fixture> hover_fixture =
             render_engine_.FixtureAt(pos);
         if (!hover_fixture) {
           system::ObservingPtr<theatre::Fixture> hover_handle =
               render_engine_.GetDirectionHandleAt(_selectedFixtures, pos);
           if (hover_handle) {
-            cursor = Gdk::CursorType::CROSS;
+            cursor = "cross";
           }
         }
         SetCursor(cursor);
@@ -472,7 +484,6 @@ bool VisualizationWidget::onMotion(GdkEventMotion *event) {
     }
     queue_draw();
   }
-  return true;
 }
 
 void VisualizationWidget::selectFixtures(const theatre::Coordinate2D &a,
@@ -672,9 +683,12 @@ void VisualizationWidget::onFixtureProperties() {
 }
 
 void VisualizationWidget::onSaveImage() {
-  Gtk::FileChooserDialog dialog("Save image", Gtk::FILE_CHOOSER_ACTION_SAVE);
-  dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
-  dialog.add_button("Save", Gtk::RESPONSE_OK);
+  dialog_ = std::make_unique<Gtk::FileChooserDialog>(
+      "Save image", Gtk::FileChooser::Action::SAVE);
+  Gtk::FileChooserDialog &dialog =
+      static_cast<Gtk::FileChooserDialog &>(*dialog_);
+  dialog.add_button("Cancel", Gtk::ResponseType::CANCEL);
+  dialog.add_button("Save", Gtk::ResponseType::OK);
 
   Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
   filter->set_name("Scalable Vector Graphics (*.svg)");
@@ -682,20 +696,26 @@ void VisualizationWidget::onSaveImage() {
   filter->add_mime_type("image/svg+xml");
   dialog.add_filter(filter);
 
-  const int result = dialog.run();
-  if (result == Gtk::RESPONSE_OK) {
-    Glib::ustring filename(dialog.get_filename());
-    if (filename.find('.') == Glib::ustring::npos) filename += ".svg";
+  dialog.signal_response().connect([this](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      Gtk::FileChooserDialog &dialog =
+          static_cast<Gtk::FileChooserDialog &>(*dialog_);
+      Glib::ustring filename(dialog.get_file()->get_path());
+      if (filename.find('.') == Glib::ustring::npos) filename += ".svg";
 
-    const size_t width = get_width();
-    const size_t height = get_height();
-    const Cairo::RefPtr<Cairo::SvgSurface> surface =
-        Cairo::SvgSurface::create(filename, width, height);
-    const Cairo::RefPtr<Cairo::Context> cairo = Cairo::Context::create(surface);
-    DrawShapshot(cairo, {}, width, height);
-    cairo->show_page();
-    surface->finish();
-  }
+      const size_t width = get_width();
+      const size_t height = get_height();
+      const Cairo::RefPtr<Cairo::SvgSurface> surface =
+          Cairo::SvgSurface::create(filename, width, height);
+      const Cairo::RefPtr<Cairo::Context> cairo =
+          Cairo::Context::create(surface);
+      DrawShapshot(cairo, {}, width, height);
+      cairo->show_page();
+      surface->finish();
+      dialog_.reset();
+    }
+  });
+  dialog.show();
 }
 
 void VisualizationWidget::onSetSymbol(theatre::FixtureSymbol::Symbol symbol) {
@@ -713,11 +733,11 @@ void VisualizationWidget::onGlobalSelectionChanged() {
 }
 
 void VisualizationWidget::OnSetColor() {
-  std::optional<theatre::Color> color =
-      OpenColorDialog(*main_window_, theatre::Color::RedC());
-  if (color) {
-    theatre::SetAllFixtures(*_management, _selectedFixtures, *color);
-  }
+  OpenColorDialog(dialog_, *main_window_, theatre::Color::RedC(),
+                  [this](theatre::Color color) {
+                    theatre::SetAllFixtures(*_management, _selectedFixtures,
+                                            color);
+                  });
 }
 
 bool VisualizationWidget::onTimeout() {

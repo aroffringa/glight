@@ -8,7 +8,7 @@ namespace glight::gui {
 class Application : public Gtk::Application {
  public:
   Application()
-      : Gtk::Application("org.glight", Gio::APPLICATION_HANDLES_OPEN) {}
+      : Gtk::Application("org.glight", Gio::Application::Flags::HANDLES_OPEN) {}
   void Run(int argc, char *argv[]);
 };
 

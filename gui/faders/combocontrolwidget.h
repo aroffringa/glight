@@ -5,7 +5,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/combobox.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 
@@ -31,11 +30,9 @@ class ComboControlWidget final : public ControlWidget {
   virtual void OnAssigned(bool moveFader) override;
   void OnChanged();
   void UpdateDisplaySettings();
-  bool HandleRightRelease(GdkEventButton *event);
+  void HandleRightRelease();
   void OpenDescriptionDialog();
 
-  Gtk::VBox box_;
-  Gtk::EventBox event_box_;
   Gtk::Label description_label_{"<No description>"};
   Glib::RefPtr<Gtk::ListStore> model_;
   struct ListColumns : public Gtk::TreeModelColumnRecord {
@@ -51,6 +48,7 @@ class ComboControlWidget final : public ControlWidget {
   bool hold_updates_ = false;
 
   sigc::connection update_display_settings_connection_;
+  std::unique_ptr<Gtk::Dialog> dialog_;
 };
 
 }  // namespace glight::gui

@@ -1,5 +1,7 @@
 #include "togglewidget.h"
 
+#include <gtkmm/gestureclick.h>
+
 #include "controlmenu.h"
 #include "faderwindow.h"
 
@@ -22,61 +24,65 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
                            ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode),
       flash_button_label_(std::string(1, key)) {
-  auto right_press = [&](GdkEventButton *event) { return event->button == 3; };
-  auto right_release = [&](GdkEventButton *event) {
-    if (event->button == 3)
-      return HandleRightRelease(event);
-    else
-      return false;
-  };
+  auto gesture = Gtk::GestureClick::create();
+  gesture->set_button(3);
+  auto right_press = [&](int, double, double) {};
+  auto right_release = [&](int, double, double) { HandleRightRelease(); };
 
   // The flash button label is added manually because it takes less space
   // like this.
-  flash_button_.add(flash_button_label_);
+  flash_button_.set_child(flash_button_label_);
   flash_button_label_.show();
-  flash_button_.set_events(Gdk::BUTTON_PRESS_MASK);
-  flash_button_.signal_button_press_event().connect(
-      sigc::mem_fun(*this, &ToggleWidget::OnFlashButtonPressed), false);
-  flash_button_.signal_button_release_event().connect(
-      sigc::mem_fun(*this, &ToggleWidget::OnFlashButtonReleased), false);
-  box_.pack_start(flash_button_, false, false, 0);
-  flash_button_.set_valign(Gtk::ALIGN_CENTER);
+  auto flash_gesture = Gtk::GestureClick::create();
+  flash_gesture->set_button(0);
+  flash_gesture->signal_pressed().connect(
+      [this, g = flash_gesture.get()](int, double, double) {
+        OnFlashButtonPressed(g->get_current_button());
+      });
+  flash_gesture->signal_released().connect(
+      [this, g = flash_gesture.get()](int, double, double) {
+        OnFlashButtonReleased(g->get_current_button());
+      });
+  flash_button_.add_controller(flash_gesture);
+  append(flash_button_);
+  flash_button_.set_valign(Gtk::Align::CENTER);
   flash_button_.set_vexpand(false);
   flash_button_.show();
 
-  fade_button_.set_events(Gdk::BUTTON_PRESS_MASK);
-  fade_button_.signal_button_release_event().connect(right_release, false);
-  fade_button_.signal_clicked().connect([&]() { OnFade(); });
   fade_button_.set_image_from_icon_name("go-up");
-  box_.pack_start(fade_button_, false, false, 0);
+  auto fade_gesture = Gtk::GestureClick::create();
+  fade_gesture->set_button(3);
+  fade_gesture->signal_released().connect(right_release);
+  fade_button_.add_controller(fade_gesture);
+  fade_button_.signal_clicked().connect([&]() { OnFade(); });
+  append(fade_button_);
   fade_button_.set_vexpand(false);
   fade_button_.show();
 
   icon_button_.SignalChanged().connect([&]() { OnIconClicked(); });
-  icon_button_.signal_button_press_event().connect(right_press, false);
-  icon_button_.signal_button_release_event().connect(right_release, false);
-  box_.pack_start(icon_button_, false, false, 3);
+  auto icon_gesture = Gtk::GestureClick::create();
+  icon_gesture->set_button(3);
+  icon_gesture->signal_pressed().connect(right_press);
+  icon_gesture->signal_released().connect(right_release);
+  icon_button_.add_controller(icon_gesture);
+  append(icon_button_);
   icon_button_.show();
 
-  name_label_.set_halign(Gtk::ALIGN_START);
-  name_label_.set_justify(Gtk::JUSTIFY_LEFT);
-  event_box_.add(name_label_);
-  name_label_.show();
+  auto label_gesture = Gtk::GestureClick::create();
+  name_label_.set_halign(Gtk::Align::START);
+  name_label_.set_justify(Gtk::Justification::LEFT);
   name_label_.set_hexpand(true);
+  label_gesture->set_button(0);
+  label_gesture->signal_pressed().connect(
+      [this, g = label_gesture.get()](int, double, double) {
+        if (g->get_current_button() == 3)
+          HandleRightRelease();
+        else
+          ShowAssignDialog();
+      });
+  name_label_.add_controller(label_gesture);
 
-  event_box_.set_events(Gdk::BUTTON_PRESS_MASK);
-  event_box_.signal_button_press_event().connect([&](GdkEventButton *event) {
-    if (event->button == 3)
-      HandleRightRelease(event);
-    else
-      ShowAssignDialog();
-    return true;
-  });
-  box_.pack_start(event_box_, true, true, 0);
-  event_box_.show();
-
-  add(box_);
-  box_.show();
+  append(name_label_);
 
   UpdateDisplaySettings();
   update_display_settings_connection_ =
@@ -96,21 +102,17 @@ void ToggleWidget::OnIconClicked() {
   }
 }
 
-bool ToggleWidget::OnFlashButtonPressed(GdkEventButton *event) {
-  if (event->button == 3) {
-    return true;
-  } else {
+void ToggleWidget::OnFlashButtonPressed(int button) {
+  if (button == 1) {
     icon_button_.SetActive(true);
-    return false;
   }
 }
 
-bool ToggleWidget::OnFlashButtonReleased(GdkEventButton *event) {
-  if (event->button == 3) {
-    return HandleRightRelease(event);
+void ToggleWidget::OnFlashButtonReleased(int button) {
+  if (button == 3) {
+    HandleRightRelease();
   } else {
     icon_button_.SetActive(false);
-    return false;
   }
 }
 
@@ -208,7 +210,7 @@ void ToggleWidget::Limit(double value) {
   if (value < theatre::ControlValue::MaxUInt()) icon_button_.SetActive(false);
 }
 
-bool ToggleWidget::HandleRightRelease(GdkEventButton *event) {
+void ToggleWidget::HandleRightRelease() {
   std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
   menu = std::make_unique<ControlMenu>(State());
   menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
@@ -220,8 +222,7 @@ bool ToggleWidget::HandleRightRelease(GdkEventButton *event) {
       [&]() { State().SetDisplayCheckButton(menu->DisplayCheckButton()); });
   menu->SignalToggleFadeButtons().connect(
       [&]() { State().SetOverlayFadeButtons(menu->OverlayFadeButtons()); });
-  menu->popup_at_pointer(reinterpret_cast<const GdkEvent *>(event));
-  return true;
+  menu->popup();
 }
 
 void ToggleWidget::UpdateDisplaySettings() {

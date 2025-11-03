@@ -1,9 +1,10 @@
 #ifndef GUI_FIXTURE_LIST_WINDOW_H_
 #define GUI_FIXTURE_LIST_WINDOW_H_
 
+#include <gtkmm/dialog.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/liststore.h>
-#include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/treeview.h>
@@ -100,6 +101,8 @@ class FixtureListWindow : public ChildWindow {
   Gtk::Button up_button_;
   Gtk::Button down_button_;
   Gtk::Button reassign_button_{"Reassign"};
+  Gtk::Dialog dialog_;
+  Gtk::Entry dialog_entry_;
 };
 
 }  // namespace glight::gui::windows

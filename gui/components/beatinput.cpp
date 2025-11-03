@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include <gtkmm/adjustment.h>
+
 namespace glight::gui {
 namespace {
 inline constexpr size_t kNValues = 10;
@@ -14,7 +16,7 @@ inline const std::string kStringValues[kNValues]{
 BeatInput::BeatInput(double value)
     : scale_(Gtk::Adjustment::create(
                  0, 0, static_cast<double>(kNValues - 1) + 0.1, 1),
-             Gtk::ORIENTATION_HORIZONTAL) {
+             Gtk::Orientation::HORIZONTAL) {
   Initialize(value);
 }
 
@@ -22,9 +24,9 @@ BeatInput::BeatInput(const std::string &label, double value)
     : caption_label_(label),
       scale_(Gtk::Adjustment::create(
                  0, 0, static_cast<double>(kNValues - 1) + 0.1, 1),
-             Gtk::ORIENTATION_HORIZONTAL) {
-  caption_label_.set_halign(Gtk::ALIGN_END);
-  pack_start(caption_label_, false, false);
+             Gtk::Orientation::HORIZONTAL) {
+  caption_label_.set_halign(Gtk::Align::END);
+  append(caption_label_);
 
   Initialize(value);
 }
@@ -36,13 +38,11 @@ void BeatInput::Initialize(double value) {
   scale_.set_round_digits(0);
   scale_.set_draw_value(false);
   scale_.signal_value_changed().connect([&]() { OnScaleChanged(); });
-  pack_start(scale_, true, true);
+  append(scale_);
 
   SetValueLabel(index);
   value_label_.set_width_chars(3);
-  pack_end(value_label_, false, false);
-
-  show_all_children();
+  append(value_label_);
 }
 
 double BeatInput::ValueToScale(double value) {

@@ -3,6 +3,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 
 #include "objectbrowser.h"
@@ -14,33 +15,32 @@ namespace glight::gui {
 
 class EventTransmitter;
 
-class InputSelectWidget : public Gtk::VBox {
+class InputSelectWidget : public Gtk::Box {
  public:
   static const size_t NO_INPUT_SELECTED = std::numeric_limits<size_t>::max();
 
   InputSelectWidget()
-      : _browser(),
+      : Gtk::Box(Gtk::Orientation::VERTICAL),
+        _browser(),
         _inputLabel("Input:"),
         _selectedObject(nullptr),
         _selectedInput(NO_INPUT_SELECTED) {
     _browser.SetDisplayType(ObjectListType::All);
     _browser.SignalSelectionChange().connect(
         [&]() { onBrowserSelectionChange(); });
-    pack_start(_browser, true, true);
+    append(_browser);
 
     _listModel = Gtk::ListStore::create(_listColumns);
 
-    _inputBox.pack_start(_inputLabel, false, false, 5);
+    _inputBox.append(_inputLabel);
 
     _inputCombo.set_size_request(200, 0);
     _inputCombo.set_model(_listModel);
     _inputCombo.pack_start(_listColumns._title);
     _inputCombo.signal_changed().connect([&]() { onComboSelectionChange(); });
-    _inputBox.pack_start(_inputCombo, false, false, 5);
+    _inputBox.append(_inputCombo);
 
-    pack_end(_inputBox, false, false);
-
-    show_all_children();
+    append(_inputBox);
   }
 
   sigc::signal<void()> &SignalSelectionChange() {
@@ -53,7 +53,7 @@ class InputSelectWidget : public Gtk::VBox {
 
  private:
   ObjectBrowser _browser;
-  Gtk::HBox _inputBox;
+  Gtk::Box _inputBox;
   Gtk::Label _inputLabel;
   Gtk::ComboBox _inputCombo;
 

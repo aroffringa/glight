@@ -4,6 +4,8 @@
 #include "faderwindow.h"
 
 #include <gtkmm/adjustment.h>
+#include <gtkmm/eventcontrollerfocus.h>
+#include <gtkmm/gestureclick.h>
 
 #include "../state/faderstate.h"
 
@@ -24,22 +26,23 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
       _scale(Gtk::Adjustment::create(
                  0, 0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
                  (ControlValue::MaxUInt() + 1) / 100),
-             Gtk::ORIENTATION_VERTICAL),
+             Gtk::Orientation::VERTICAL),
       flash_button_label_(std::string(1, key)) {
+  set_orientation(Gtk::Orientation::VERTICAL);
   if (GetMode() == ControlMode::Primary) {
     _fadeUpButton.set_image_from_icon_name("go-up");
     _fadeUpButton.signal_clicked().connect([&]() { onFadeUp(); });
-    _fadeUpButton.set_halign(Gtk::ALIGN_CENTER);
-    _fadeUpButton.set_valign(Gtk::ALIGN_START);
+    _fadeUpButton.set_halign(Gtk::Align::CENTER);
+    _fadeUpButton.set_valign(Gtk::Align::START);
     _fadeUpButton.set_margin_top(10);
     _overlay.add_overlay(_fadeUpButton);
   }
 
-  auto right_press = [&](GdkEventButton *event) {
-    return HandleRightPress(event);
+  auto right_press = [&](int buttons, double x, double y) {
+    return HandleRightPress(buttons, x, y);
   };
-  auto right_release = [&](GdkEventButton *event) {
-    return HandleRightRelease(event);
+  auto right_release = [&](int buttons, double x, double y) {
+    return HandleRightRelease(buttons, x, y);
   };
 
   _scale.set_inverted(true);
@@ -47,75 +50,62 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
   _scale.set_vexpand(true);
   _scale.signal_value_changed().connect(
       sigc::mem_fun(*this, &FaderWidget::onScaleChange));
-  _scale.signal_button_press_event().connect(right_press, false);
-  _overlay.add(_scale);
+  auto scale_gesture = Gtk::GestureClick::create();
+  scale_gesture->signal_pressed().connect(right_press, false);
+  _scale.add_controller(scale_gesture);
+  _overlay.set_child(_scale);
   _scale.show();
 
-  _mouseInBox.set_events(Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK |
-                         Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-  _mouseInBox.signal_enter_notify_event().connect(
-      [&](GdkEventCrossing *) {
-        ShowFadeButtons(true);
-        return false;
-      },
-      false);
-  _mouseInBox.signal_leave_notify_event().connect(
-      [&](GdkEventCrossing *) {
-        ShowFadeButtons(false);
-        return false;
-      },
-      false);
-  _mouseInBox.signal_button_press_event().connect(right_press, false);
-  _mouseInBox.signal_button_release_event().connect(right_release, false);
+  auto overlay_focus = Gtk::EventControllerFocus::create();
+  overlay_focus->signal_enter().connect([&]() { ShowFadeButtons(true); },
+                                        false);
+  overlay_focus->signal_leave().connect([&]() { ShowFadeButtons(false); },
+                                        false);
+  _overlay.add_controller(overlay_focus);
+  auto overlay_gesture = Gtk::GestureClick::create();
+  overlay_gesture->set_button(3);
+  overlay_gesture->signal_pressed().connect(right_press, false);
+  overlay_gesture->signal_released().connect(right_release, false);
+  _overlay.add_controller(overlay_gesture);
 
-  _box.pack_start(_mouseInBox, true, true, 0);
-  _mouseInBox.show();
-
-  _mouseInBox.add(_overlay);
+  append(_overlay);
   _overlay.show();
 
   if (GetMode() == ControlMode::Primary) {
     _fadeDownButton.set_image_from_icon_name("go-down");
     _fadeDownButton.signal_clicked().connect([&]() { onFadeDown(); });
-    _fadeDownButton.set_halign(Gtk::ALIGN_CENTER);
-    _fadeDownButton.set_valign(Gtk::ALIGN_END);
+    _fadeDownButton.set_halign(Gtk::Align::CENTER);
+    _fadeDownButton.set_valign(Gtk::Align::END);
     _fadeDownButton.set_margin_bottom(10);
     _overlay.add_overlay(_fadeDownButton);
 
     // The flash button label is added manually because it takes less space
     // like this.
-    _flashButton.add(flash_button_label_);
+    _flashButton.set_child(flash_button_label_);
     flash_button_label_.show();
     flash_button_label_.set_hexpand(false);
-    _flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
-    _flashButton.signal_button_press_event().connect(
+    auto flash_gesture = Gtk::GestureClick::create();
+    flash_gesture->signal_pressed().connect(
         sigc::mem_fun(*this, &FaderWidget::onFlashButtonPressed), false);
-    _flashButton.set_events(Gdk::BUTTON_PRESS_MASK);
-    _flashButton.signal_button_release_event().connect(
+    flash_gesture->signal_released().connect(
         sigc::mem_fun(*this, &FaderWidget::onFlashButtonReleased), false);
-    _box.pack_start(_flashButton, false, false, 0);
+    _flashButton.add_controller(flash_gesture);
+    append(_flashButton);
     _flashButton.set_visible(state.DisplayFlashButton());
     _flashButton.set_hexpand(false);
   }
 
-  _checkButton.set_halign(Gtk::ALIGN_CENTER);
+  _checkButton.set_halign(Gtk::Align::CENTER);
   _checkButton.SignalChanged().connect(
       sigc::mem_fun(*this, &FaderWidget::onOnButtonClicked));
-  _box.pack_start(_checkButton, false, false, 0);
+  append(_checkButton);
   _checkButton.set_visible(state.DisplayCheckButton());
 
-  _labelEventBox.set_events(Gdk::BUTTON_PRESS_MASK);
-  _labelEventBox.show();
-
-  _labelEventBox.signal_button_press_event().connect([&](GdkEventButton *) {
-    ShowAssignDialog();
-    return true;
-  });
-  _labelEventBox.add(_nameLabel);
+  auto label_gesture = Gtk::GestureClick::create();
+  label_gesture->signal_pressed().connect(
+      [&](int, double, double) { ShowAssignDialog(); });
+  _nameLabel.add_controller(label_gesture);
   _nameLabel.set_visible(state.DisplayName());
-
-  add(_box);
-  _box.show();
 
   update_display_settings_connection_ =
       State().SignalChange().connect([&]() { UpdateDisplaySettings(); });
@@ -139,14 +129,12 @@ void FaderWidget::onOnButtonClicked() {
   }
 }
 
-bool FaderWidget::onFlashButtonPressed(GdkEventButton * /*unused*/) {
+void FaderWidget::onFlashButtonPressed(int buttons, double x, double y) {
   _scale.set_value(ControlValue::MaxUInt());
-  return false;
 }
 
-bool FaderWidget::onFlashButtonReleased(GdkEventButton * /*unused*/) {
+void FaderWidget::onFlashButtonReleased(int buttons, double x, double y) {
   _scale.set_value(0);
-  return false;
 }
 
 void FaderWidget::onScaleChange() {
@@ -238,27 +226,21 @@ void FaderWidget::ShowFadeButtons(bool mouse_in) {
   }
 }
 
-bool FaderWidget::HandleRightPress(GdkEventButton *event) {
-  return event->button == 3;  // right button?
-}
+void FaderWidget::HandleRightPress(int, double, double) {}
 
-bool FaderWidget::HandleRightRelease(GdkEventButton *event) {
-  if (event->button == 3) {  // right button?
-    std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
-    menu = std::make_unique<ControlMenu>(State());
-    menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
-    menu->SignalToggleName().connect(
-        [&]() { State().SetDisplayName(menu->DisplayName()); });
-    menu->SignalToggleFlashButton().connect(
-        [&]() { State().SetDisplayFlashButton(menu->DisplayFlashButton()); });
-    menu->SignalToggleCheckButton().connect(
-        [&]() { State().SetDisplayCheckButton(menu->DisplayCheckButton()); });
-    menu->SignalToggleFadeButtons().connect(
-        [&]() { State().SetOverlayFadeButtons(menu->OverlayFadeButtons()); });
-    menu->popup_at_pointer(reinterpret_cast<const GdkEvent *>(event));
-    return true;
-  }
-  return false;
+void FaderWidget::HandleRightRelease(int, double, double) {
+  std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
+  menu = std::make_unique<ControlMenu>(State());
+  menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
+  menu->SignalToggleName().connect(
+      [&]() { State().SetDisplayName(menu->DisplayName()); });
+  menu->SignalToggleFlashButton().connect(
+      [&]() { State().SetDisplayFlashButton(menu->DisplayFlashButton()); });
+  menu->SignalToggleCheckButton().connect(
+      [&]() { State().SetDisplayCheckButton(menu->DisplayCheckButton()); });
+  menu->SignalToggleFadeButtons().connect(
+      [&]() { State().SetOverlayFadeButtons(menu->OverlayFadeButtons()); });
+  menu->popup();
 }
 
 void FaderWidget::UpdateDisplaySettings() {

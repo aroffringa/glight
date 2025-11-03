@@ -6,8 +6,9 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/label.h>
-#include <gtkmm/radiobutton.h>
 
 #include "theatre/color.h"
 #include "theatre/forwards.h"
@@ -21,7 +22,7 @@ class VariableEffect;
 
 namespace glight::gui {
 
-class ColorSelectWidget : public Gtk::HBox {
+class ColorSelectWidget : public Gtk::Box {
  public:
   ColorSelectWidget(Gtk::Window *parent, bool allow_variable);
   bool IsVariable() const { return variable_button_.get_active(); }
@@ -77,9 +78,9 @@ class ColorSelectWidget : public Gtk::HBox {
     if (allow_variables != allow_variables_) {
       allow_variables_ = allow_variables;
       if (allow_variables) {
-        pack_start(static_button_, false, false, 0);
+        append(static_button_);
         static_button_.show();
-        pack_start(variable_button_, true, true, 0);
+        append(variable_button_);
         variable_button_.show();
         static_button_.set_active(true);
         variable_label_.set_visible(false);
@@ -95,14 +96,15 @@ class ColorSelectWidget : public Gtk::HBox {
 
  private:
   Gtk::Window *parent_;
-  Gtk::RadioButton static_button_;
-  Gtk::RadioButton variable_button_;
+  Gtk::CheckButton static_button_;
+  Gtk::CheckButton variable_button_;
   components::ColorButton color_button_{theatre::Color::White()};
   Gtk::Label variable_label_;
   Gtk::Button set_button_;
   bool allow_variables_ = true;
   theatre::VariableEffect *variable_ = nullptr;
   sigc::signal<void()> signal_color_changed_;
+  std::unique_ptr<Gtk::Dialog> dialog_;
 
   void SetVariableLabel();
 

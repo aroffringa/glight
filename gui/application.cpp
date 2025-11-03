@@ -13,7 +13,7 @@ void Application::Run(int argc, char *argv[]) {
   if (argc > 1) {
     window.OpenFile(argv[1]);
   }
-  run(window, 1, argv);
+  run(argc, argv);
   snd_config_update_free_global();
 }
 

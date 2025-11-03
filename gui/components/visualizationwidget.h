@@ -1,8 +1,10 @@
 #ifndef GLIGHT_GUI_VISUALIZATION_WIDGET_H_
 #define GLIGHT_GUI_VISUALIZATION_WIDGET_H_
 
-#include <gdkmm/pixbuf.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/drawingarea.h>
+#include <gdkmm/pixbuf.h>
+#include <gtkmm/gestureclick.h>
 
 #include "theatre/coordinate2d.h"
 #include "theatre/fixturesymbol.h"
@@ -65,9 +67,10 @@ class VisualizationWidget : public Gtk::DrawingArea {
       size_t width, size_t height);
   void updateMidiColors();
   void onTheatreChanged();
-  bool onButtonPress(GdkEventButton *event);
-  bool onButtonRelease(GdkEventButton *event);
-  bool onMotion(GdkEventMotion *event);
+  void onLeftButtonPress(int, double, double);
+  void onLeftButtonRelease(int, double, double);
+  void onRightButtonPress(int, double, double);
+  void onMotion(double, double);
   bool onExpose(const Cairo::RefPtr<Cairo::Context> &context);
   bool onTimeout();
 
@@ -94,7 +97,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
                    const theatre::Coordinate2D &b);
   void SetTilt(const theatre::Coordinate2D &position);
   void SetPan(const theatre::Coordinate2D &position);
-  void SetCursor(Gdk::CursorType cursor_type);
+  void SetCursor(const std::string &cursor_name);
 
   bool draw_fixtures_ = true;
   bool draw_beams_ = true;
@@ -119,9 +122,11 @@ class VisualizationWidget : public Gtk::DrawingArea {
   RenderEngine render_engine_;
   theatre::ValueSnapshot primary_snapshot_;
   theatre::ValueSnapshot secondary_snapshot_;
-  Gdk::CursorType cursor_type_;
+  std::string cursor_name_;
   std::unique_ptr<Gtk::Window> sub_window_;
+  std::shared_ptr<Gtk::GestureClick> left_gesture_;
 
+  std::unique_ptr<Gtk::Dialog> dialog_;
   VisualizationMenu context_menu_;
 };
 

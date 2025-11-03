@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 project(glight)
 
 find_package(PkgConfig)
-pkg_check_modules(GTKMM gtkmm-3.0>=3.0.0 REQUIRED)
+pkg_check_modules(GTKMM gtkmm-4.0>=4.0.0 REQUIRED)
 pkg_check_modules(SIGCXX2 sigc++-2.0 REQUIRED)
 pkg_check_modules(FLACPP flac++ REQUIRED)
 pkg_check_modules(ALSA alsa REQUIRED)
@@ -33,10 +33,10 @@ set(CMAKE_CXX_CLANG_TIDY "clang-tidy;--fix-errors;-checks=*,-llvmlibc*,\
 endif()
   
 add_compile_options(
-  -DGTKMM_DISABLE_DEPRECATED
-  -DGDKMM_DISABLE_DEPRECATED
-  -DGLIBMM_DISABLE_DEPRECATED
-  -DGIOMM_DISABLE_DEPRECATED
+#  -DGTKMM_DISABLE_DEPRECATED
+#  -DGDKMM_DISABLE_DEPRECATED
+#  -DGLIBMM_DISABLE_DEPRECATED
+#  -DGIOMM_DISABLE_DEPRECATED
   -O3
   -Wall
   -Wvla
