@@ -66,7 +66,7 @@ class FaderWindow : public Gtk::Window {
 
  private:
   std::string GetLayout() const {
-    std::string state;
+    Glib::ustring state;
     layout_action_->get_state(state);
     return state;
   }
@@ -112,7 +112,7 @@ class FaderWindow : public Gtk::Window {
   void onSetNameClicked();
   void onControlValueChanged(ControlWidget *widget);
   void onControlAssigned(size_t widgetIndex);
-  void onResize(int width, int height);
+  void SaveSize();
   void onChangeUpSpeed();
   void onChangeDownSpeed();
   bool onTimeout() {

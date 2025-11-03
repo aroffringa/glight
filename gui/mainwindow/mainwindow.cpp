@@ -74,20 +74,9 @@ MainWindow::MainWindow() {
   right_box_.append(power_monitor_);
   power_monitor_.Start();
 
-  key_controller_ = Gtk::EventControllerKey::create();
-  key_controller_->signal_key_pressed().connect(
-      [&](guint keyval, guint keycode, Gdk::ModifierType state) {
-        return MainWindow::onKeyDown(keyval);
-      },
-      false);
-  key_controller_->signal_key_released().connect(
-      [&](guint keyval, guint keycode, Gdk::ModifierType state) {
-        MainWindow::onKeyUp(keyval);
-      });
-
   _visualizationWidget = std::make_unique<VisualizationWidget>(
       _management.get(), this, &_fixtureSelection, this);
-  _visualizationWidget->add_controller(key_controller_);
+  _visualizationWidget->add_controller(GetKeyController());
   right_box_.append(*_visualizationWidget);
   revealer_box_.append(right_box_);
 
@@ -96,7 +85,7 @@ MainWindow::MainWindow() {
   set_child(_box);
   power_monitor_.set_visible(false);
 
-  add_controller(key_controller_);
+  add_controller(GetKeyController());
   signal_close_request().connect(sigc::mem_fun(*this, &MainWindow::onDelete),
                                  false);
 }
@@ -168,6 +157,21 @@ void MainWindow::InitializeMenu() {
   _box.append(main_menu_);
 }
 
+std::shared_ptr<Gtk::EventController> MainWindow::GetKeyController() {
+  std::shared_ptr<Gtk::EventControllerKey> key_controller =
+      Gtk::EventControllerKey::create();
+  key_controller->signal_key_pressed().connect(
+      [&](guint keyval, guint keycode, Gdk::ModifierType state) {
+        return MainWindow::onKeyDown(keyval);
+      },
+      false);
+  key_controller->signal_key_released().connect(
+      [&](guint keyval, guint keycode, Gdk::ModifierType state) {
+        MainWindow::onKeyUp(keyval);
+      });
+  return key_controller;
+}
+
 void MainWindow::EmitUpdate() { _signalUpdateControllables(); }
 
 void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
@@ -181,7 +185,7 @@ void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
     newWindow->LoadNew();
   else
     newWindow->LoadState(stateOrNull);
-  newWindow->add_controller(key_controller_);
+  newWindow->add_controller(GetKeyController());
   newWindow->signal_hide().connect(sigc::bind(
       sigc::mem_fun(*this, &MainWindow::onFaderWindowHidden), newWindow));
   newWindow->show();
@@ -194,7 +198,7 @@ void MainWindow::onFixtureListButtonClicked() {
     windows::FixtureListWindow &window =
         child_windows_.Open<windows::FixtureListWindow>(
             [&]() { main_menu_.SetFixtureListActive(false); });
-    window.add_controller(key_controller_);
+    window.add_controller(GetKeyController());
   } else {
     child_windows_.Hide<windows::FixtureListWindow>();
   }
@@ -206,7 +210,7 @@ void MainWindow::onFixtureTypesButtonClicked() {
     windows::FixtureTypesWindow &window =
         child_windows_.Open<windows::FixtureTypesWindow>(
             [&]() { main_menu_.SetFixtureTypesActive(false); });
-    window.add_controller(key_controller_);
+    window.add_controller(GetKeyController());
   } else {
     child_windows_.Hide<windows::FixtureTypesWindow>();
   }

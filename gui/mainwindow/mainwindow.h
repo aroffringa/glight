@@ -68,6 +68,7 @@ class MainWindow : public Gtk::ApplicationWindow, public EventTransmitter {
 
  private:
   void InitializeMenu();
+  std::shared_ptr<Gtk::EventController> GetKeyController();
 
   void onFixtureListButtonClicked();
   void onFixtureTypesButtonClicked();
@@ -134,7 +135,6 @@ class MainWindow : public Gtk::ApplicationWindow, public EventTransmitter {
   sigc::signal<void()> _signalUpdateControllables;
   MainMenu main_menu_;
   std::unique_ptr<system::midi::Manager> midi_manager_;
-  std::shared_ptr<Gtk::EventControllerKey> key_controller_;
   std::unique_ptr<Gtk::Dialog> dialog_;
 };
 

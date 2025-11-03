@@ -13,7 +13,11 @@ void Application::Run(int argc, char *argv[]) {
   if (argc > 1) {
     window.OpenFile(argv[1]);
   }
-  run(argc, argv);
+  signal_activate().connect([&window, this]() {
+    add_window(window);
+    window.present();
+  });
+  run();
   snd_config_update_free_global();
 }
 

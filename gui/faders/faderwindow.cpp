@@ -100,6 +100,7 @@ FaderWindow::FaderWindow(size_t keyRowIndex) : _keyRowIndex(keyRowIndex) {
 }
 
 FaderWindow::~FaderWindow() {
+  SaveSize();
   _timeoutConnection.disconnect();
   if (_state) _state->isActive = false;
   Instance::State().EmitFaderSetChangeSignal();
@@ -205,10 +206,6 @@ void FaderWindow::loadState() {
 void FaderWindow::initializeWidgets() {
   set_title("Glight - faders");
 
-  Glib::RefPtr<Gdk::Surface> surface = get_surface();
-  surface->signal_layout().connect(
-      sigc::mem_fun(*this, &FaderWindow::onResize));
-
   _timeoutConnection = Glib::signal_timeout().connect(
       sigc::mem_fun(*this, &FaderWindow::onTimeout), 40);
 
@@ -267,15 +264,15 @@ void FaderWindow::initializeMenu() {
   auto fade_in = Gio::Menu::create();
   auto fade_out = Gio::Menu::create();
 
-  auto fade_in_action = Gio::SimpleAction::create_radio_integer("fade_in", 0);
-  fade_in_action->signal_change_state().connect(
+  fade_in_action_ = Gio::SimpleAction::create_radio_integer("fade_in", 0);
+  fade_in_action_->signal_change_state().connect(
       [&](const Glib::VariantBase &) { onChangeUpSpeed(); });
-  actions->add_action(fade_in_action);
+  actions->add_action(fade_in_action_);
 
-  auto fade_out_action = Gio::SimpleAction::create_radio_integer("fade_out", 0);
-  fade_out_action->signal_change_state().connect(
+  fade_out_action_ = Gio::SimpleAction::create_radio_integer("fade_out", 0);
+  fade_out_action_->signal_change_state().connect(
       [&](const Glib::VariantBase &) { onChangeDownSpeed(); });
-  actions->add_action(fade_out_action);
+  actions->add_action(fade_out_action_);
 
   for (size_t i = 0; i != 11; ++i) {
     fade_in->append(SpeedLabel(i), "fade_in(" + std::to_string(i) + ")");
@@ -326,7 +323,7 @@ void FaderWindow::initializeMenu() {
   _menuButton.set_menu_model(menu);
 }
 
-void FaderWindow::onResize(int width, int height) {
+void FaderWindow::SaveSize() {
   if (_recursionLock.IsFirst()) {
     _state->height = get_height();
     _state->width = get_width();

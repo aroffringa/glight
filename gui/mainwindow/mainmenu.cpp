@@ -82,7 +82,8 @@ MainMenu::MainMenu() {
   auto effect_menu = Gio::Menu::create();
   std::vector<theatre::EffectType> effect_types = theatre::GetEffectTypes();
   for (theatre::EffectType t : effect_types) {
-    Add(effect_menu, EffectTypeToName(t), "add_effect_" + EffectTypeToName(t),
+    Add(effect_menu, EffectTypeToName(t),
+        "add_effect_" + std::to_string(static_cast<int>(t)),
         [&, t]() { AddEffect(t); });
   }
   add_section->append_submenu("Add effect", effect_menu);
