@@ -37,7 +37,7 @@
 
 namespace glight::gui {
 
-MainWindow::MainWindow() {
+MainWindow::MainWindow() : main_menu_(*this) {
   set_title("Glight - show");
   set_default_icon_name("glight");
   set_default_size(800, 500);
@@ -66,16 +66,23 @@ MainWindow::MainWindow() {
   addFaderWindow();
 
   _objectListFrame = std::make_unique<ObjectListFrame>(*this);
+  _objectListFrame->set_vexpand(true);
+  _objectListFrame->set_hexpand(false);
   revealer_.set_child(*_objectListFrame);
   revealer_.set_reveal_child(true);
   revealer_.set_transition_type(Gtk::RevealerTransitionType::SLIDE_RIGHT);
+  revealer_.set_vexpand(true);
+  revealer_.set_hexpand(false);
   revealer_box_.append(revealer_);
+  revealer_box_.set_vexpand(true);
 
   right_box_.append(power_monitor_);
+  right_box_.set_expand(true);
   power_monitor_.Start();
 
   _visualizationWidget = std::make_unique<VisualizationWidget>(
       _management.get(), this, &_fixtureSelection, this);
+  _visualizationWidget->set_expand(true);
   _visualizationWidget->add_controller(GetKeyController());
   right_box_.append(*_visualizationWidget);
   revealer_box_.append(right_box_);
@@ -113,42 +120,39 @@ void MainWindow::InitializeMenu() {
       [&]() { child_windows_.Open<windows::SettingsWindow>(); });
   main_menu_.Quit.connect([&]() { hide(); });
 
-  main_menu_.LockLayout.connect([&]() { UpdateLayoutLock(); });
+  main_menu_.LockLayout.connect([&](bool) { UpdateLayoutLock(); });
   main_menu_.BlackOut.connect([&]() { onMIBlackOut(); });
   main_menu_.DesignWizard.connect([&]() { onMIDesignWizardClicked(); });
   main_menu_.TheatreDimensions.connect(
       [&]() { onMITheatreDimensionsClicked(); });
 
-  main_menu_.ShowFixtures.connect([&]() {
-    _visualizationWidget->SetDrawFixtures(main_menu_.ShowFixturesActive());
-    _state.SetShowFixtures(main_menu_.ShowFixturesActive());
+  main_menu_.ShowFixtures.connect([&](bool new_value) {
+    _visualizationWidget->SetDrawFixtures(new_value);
+    _state.SetShowFixtures(new_value);
     _visualizationWidget->Update();
   });
-  main_menu_.ShowBeams.connect([&]() {
-    _visualizationWidget->SetDrawBeams(main_menu_.ShowBeamsActive());
-    _state.SetShowBeams(main_menu_.ShowBeamsActive());
+  main_menu_.ShowBeams.connect([&](bool new_value) {
+    _visualizationWidget->SetDrawBeams(new_value);
+    _state.SetShowBeams(new_value);
     _visualizationWidget->Update();
   });
-  main_menu_.ShowProjections.connect([&]() {
-    _visualizationWidget->SetDrawProjections(
-        main_menu_.ShowProjectionsActive());
-    _state.SetShowProjections(main_menu_.ShowProjectionsActive());
+  main_menu_.ShowProjections.connect([&](bool new_value) {
+    _visualizationWidget->SetDrawProjections(new_value);
+    _state.SetShowProjections(new_value);
     _visualizationWidget->Update();
   });
-  main_menu_.ShowStageBorders.connect([&]() {
-    _visualizationWidget->SetDrawBorders(main_menu_.ShowStageBordersActive());
-    _state.SetShowStageBorders(main_menu_.ShowStageBordersActive());
+  main_menu_.ShowStageBorders.connect([&](bool new_value) {
+    _visualizationWidget->SetDrawBorders(new_value);
+    _state.SetShowStageBorders(new_value);
     _visualizationWidget->Update();
   });
 
-  main_menu_.SideBar.connect([&]() { onSideBarButtonClicked(); });
-  main_menu_.PowerMonitor.connect([&]() { onPowerMonitorButtonClicked(); });
-  main_menu_.FullScreen.connect([&]() { onFullscreen(); });
+  main_menu_.SideBar.connect([&](bool) { onSideBarButtonClicked(); });
+  main_menu_.PowerMonitor.connect([&](bool) { onPowerMonitorButtonClicked(); });
+  main_menu_.FullScreen.connect([&](bool) { onFullscreen(); });
   main_menu_.NewFaderWindow.connect([&]() { addFaderWindow(); });
-  main_menu_.FixtureList.connect(
-      sigc::mem_fun(*this, &MainWindow::onFixtureListButtonClicked));
-  main_menu_.FixtureTypes.connect(
-      sigc::mem_fun(*this, &MainWindow::onFixtureTypesButtonClicked));
+  main_menu_.FixtureList.connect([&](bool) { onFixtureListButtonClicked(); });
+  main_menu_.FixtureTypes.connect([&](bool) { onFixtureTypesButtonClicked(); });
   main_menu_.SceneWindow.connect(
       [&](bool active) { onSceneWindowClicked(active); });
   main_menu_.FaderWindow.connect(

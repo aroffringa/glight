@@ -4,7 +4,9 @@
 #include <memory>
 #include <vector>
 
+#include <giomm/actionmap.h>
 #include <giomm/simpleaction.h>
+
 #include <gtkmm/popovermenubar.h>
 
 #include "theatre/effecttype.h"
@@ -15,7 +17,7 @@ class FaderSetState;
 
 class MainMenu : public Gtk::PopoverMenuBar {
  public:
-  MainMenu();
+  MainMenu(Gio::ActionMap& actions);
 
   // File menu
   sigc::signal<void()> New;
@@ -26,7 +28,7 @@ class MainMenu : public Gtk::PopoverMenuBar {
   sigc::signal<void()> Quit;
 
   // Design menu
-  sigc::signal<void()> LockLayout;
+  sigc::signal<void(bool)> LockLayout;
   sigc::signal<void()> BlackOut;
 
   sigc::signal<void()> AddEmptyPreset;
@@ -41,18 +43,18 @@ class MainMenu : public Gtk::PopoverMenuBar {
   sigc::signal<void()> TheatreDimensions;
 
   // View menu
-  sigc::signal<void()> ShowFixtures;
-  sigc::signal<void()> ShowBeams;
-  sigc::signal<void()> ShowProjections;
-  sigc::signal<void()> ShowStageBorders;
-  sigc::signal<void()> FullScreen;
+  sigc::signal<void(bool)> ShowFixtures;
+  sigc::signal<void(bool)> ShowBeams;
+  sigc::signal<void(bool)> ShowProjections;
+  sigc::signal<void(bool)> ShowStageBorders;
+  sigc::signal<void(bool)> FullScreen;
 
   // Window menu
   sigc::signal<void()> NewFaderWindow;
-  sigc::signal<void()> FixtureList;
-  sigc::signal<void()> FixtureTypes;
-  sigc::signal<void()> SideBar;
-  sigc::signal<void()> PowerMonitor;
+  sigc::signal<void(bool)> FixtureList;
+  sigc::signal<void(bool)> FixtureTypes;
+  sigc::signal<void(bool)> SideBar;
+  sigc::signal<void(bool)> PowerMonitor;
   sigc::signal<void(bool active)> SceneWindow;
   sigc::signal<void(FaderSetState& fader_set)> FaderWindow;
 

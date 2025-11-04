@@ -26,6 +26,7 @@ class ObjectBrowser : public Gtk::Box {
     _parentFolderButton.show();
 
     _folderCombo.SignalSelectionChange().connect([&]() { onFolderChanged(); });
+    _folderCombo.set_hexpand(true);
     _hBox.append(_folderCombo);
     _folderCombo.show();
 

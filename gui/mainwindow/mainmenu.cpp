@@ -6,37 +6,37 @@
 
 #include "gui/state/fadersetstate.h"
 
+#include <iostream>  // DEBUG
+
 namespace glight::gui {
 
-MainMenu::MainMenu() {
-  std::shared_ptr<Gio::SimpleActionGroup> actions =
-      Gio::SimpleActionGroup::create();
-
+MainMenu::MainMenu(Gio::ActionMap& actions) {
   const auto Add = [&actions](std::shared_ptr<Gio::Menu>& menu,
                               const Glib::ustring& label,
                               const Glib::ustring& action_name,
                               const sigc::slot<void()>& slot) {
-    menu->append(label, action_name);
-    return actions->add_action(action_name, slot);
+    menu->append(label, "win." + action_name);
+    return actions.add_action(action_name, slot);
   };
 
-  const auto Toggle = [&actions](std::shared_ptr<Gio::Menu>& menu,
-                                 const Glib::ustring& label,
-                                 const Glib::ustring& action_name,
-                                 const sigc::slot<void()>& slot) {
-    auto action_toggle = Gio::SimpleAction::create_bool(action_name, false);
-    menu->append(label, action_name);
-    actions->add_action(action_toggle);
-    action_toggle->signal_activate().connect(
-        [slot, action_toggle](const Glib::VariantBase&) {
-          bool active = false;
-          action_toggle->get_state(active);
-          active = !active;
-          action_toggle->change_state(Glib::Variant<bool>::create(active));
-          slot();
-        });
-    return action_toggle;
-  };
+  const auto Toggle =
+      [&actions](std::shared_ptr<Gio::Menu>& menu, const Glib::ustring& label,
+                 const Glib::ustring& action_name, bool initial_value,
+                 const sigc::slot<void(bool)>& slot) {
+        auto action_toggle =
+            Gio::SimpleAction::create_bool(action_name, initial_value);
+        menu->append(label, "win." + action_name);
+        action_toggle->signal_activate().connect(
+            [slot, action_toggle](const Glib::VariantBase&) {
+              bool active = false;
+              action_toggle->get_state(active);
+              active = !active;
+              action_toggle->change_state(Glib::Variant<bool>::create(active));
+              slot(active);
+            });
+        actions.add_action(action_toggle);
+        return action_toggle;
+      };
 
   // File menu
   auto file_menu = Gio::Menu::create();
@@ -59,15 +59,15 @@ MainMenu::MainMenu() {
   auto design_menu = Gio::Menu::create();
   auto design_section = Gio::Menu::create();
   layout_locked_ =
-      Toggle(design_section, "Lock layout", "design_lock", LockLayout);
+      Toggle(design_section, "Lock layout", "design_lock", false, LockLayout);
   auto blackout_action =
       Add(design_section, "Black-out", "black_out", BlackOut);
-  Add(design_section, "Protect black-out", "protect_lock",
-      [this, blackout_action]() {
-        bool protect;
-        layout_locked_->get_state(protect);
-        blackout_action->set_enabled(!protect);
-      });
+  blackout_action->set_enabled(false);
+  Toggle(design_section, "Protect black-out", "protect_lock", true,
+         [blackout_action](bool new_value) {
+           blackout_action->set_enabled(!new_value);
+         });
+
   design_menu->append_section(design_section);
 
   auto add_section = Gio::Menu::create();
@@ -88,7 +88,7 @@ MainMenu::MainMenu() {
   }
   add_section->append_submenu("Add effect", effect_menu);
   Add(add_section, "Add folder", "add_folder", AddFolder);
-  Add(add_section, "Delete", "design_lock", DeleteObject);
+  delete_object_ = Add(add_section, "Delete", "design_lock", DeleteObject);
   Add(add_section, "Design wizard...", "", DesignWizard);
   design_menu->append_section(add_section);
 
@@ -98,21 +98,23 @@ MainMenu::MainMenu() {
 
   auto view_menu = Gio::Menu::create();
   show_fixtures_ =
-      Toggle(view_menu, "Show fixtures", "show_fixtures", ShowFixtures);
-  show_beams_ = Toggle(view_menu, "Show beams", "show_beams", ShowBeams);
+      Toggle(view_menu, "Show fixtures", "show_fixtures", true, ShowFixtures);
+  show_beams_ = Toggle(view_menu, "Show beams", "show_beams", true, ShowBeams);
   show_projections_ = Toggle(view_menu, "Show projections", "show_projections",
-                             ShowProjections);
+                             true, ShowProjections);
   show_stage_borders_ = Toggle(view_menu, "Show theatre walls",
-                               "show_stage_borders", ShowStageBorders);
-  full_screen_ = Toggle(view_menu, "Full screen", "full_screen", FullScreen);
+                               "show_stage_borders", true, ShowStageBorders);
+  full_screen_ =
+      Toggle(view_menu, "Full screen", "full_screen", false, FullScreen);
 
   auto window_menu = Gio::Menu::create();
-  side_bar_ = Toggle(window_menu, "Side bar", "side_bar", SideBar);
-  power_monitor_ =
-      Toggle(window_menu, "Power monitor", "power_monitor", PowerMonitor);
-  fixture_list_ = Toggle(window_menu, "Fixtures", "fixture_list", FixtureList);
-  fixture_types_ =
-      Toggle(window_menu, "Fixture types", "fixture_types", FixtureTypes);
+  side_bar_ = Toggle(window_menu, "Side bar", "side_bar", true, SideBar);
+  power_monitor_ = Toggle(window_menu, "Power monitor", "power_monitor", false,
+                          PowerMonitor);
+  fixture_list_ =
+      Toggle(window_menu, "Fixtures", "fixture_list", false, FixtureList);
+  fixture_types_ = Toggle(window_menu, "Fixture types", "fixture_types", false,
+                          FixtureTypes);
   scene_window_ = Add(window_menu, "Scene", "scene",
                       [&]() { SceneWindow(GetState(scene_window_)); });
 
@@ -128,6 +130,7 @@ MainMenu::MainMenu() {
   top_level_menu->append_submenu("_Design", design_menu);
   top_level_menu->append_submenu("_View", view_menu);
   top_level_menu->append_submenu("_Window", window_menu);
+  set_menu_model(top_level_menu);
 }
 
 void MainMenu::SetFaderList(
