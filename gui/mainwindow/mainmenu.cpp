@@ -89,11 +89,12 @@ MainMenu::MainMenu(Gio::ActionMap& actions) {
   add_section->append_submenu("Add effect", effect_menu);
   Add(add_section, "Add folder", "add_folder", AddFolder);
   delete_object_ = Add(add_section, "Delete", "design_lock", DeleteObject);
-  Add(add_section, "Design wizard...", "", DesignWizard);
+  Add(add_section, "Design wizard...", "design_wizard", DesignWizard);
   design_menu->append_section(add_section);
 
   auto dimensions_section = Gio::Menu::create();
-  Add(add_section, "Theatre dimensions...", "", TheatreDimensions);
+  Add(add_section, "Theatre dimensions...", "theatre_dimensions",
+      TheatreDimensions);
   design_menu->append_section(dimensions_section);
 
   auto view_menu = Gio::Menu::create();

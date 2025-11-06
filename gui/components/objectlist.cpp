@@ -116,7 +116,8 @@ void ObjectList::fillListFolder(const Folder &folder,
                      _displayType == ObjectListType::OnlyVariables || almostAll;
   bool showFixtures = _displayType == ObjectListType::All;
 
-  Glib::RefPtr<Gtk::IconTheme> theme = Gtk::IconTheme::create();
+  Glib::RefPtr<Gtk::IconTheme> theme =
+      Gtk::IconTheme::get_for_display(Gdk::Display::get_default());
   int icon_height = 16;
   for (ObservingPtr<FolderObject> child : folder.Children()) {
     FolderObject *obj = child.Get();
@@ -168,11 +169,15 @@ void ObjectList::fillListFolder(const Folder &folder,
       childRow[_listColumns._title] = obj->Name();
       childRow[_listColumns._object] = child;
       if (!icon_name.empty()) {
-        childRow[_listColumns._icon] =
-            theme->lookup_icon(icon_name, icon_height);
-      }
-      if (obj == selectedObj) {
-        _listView.get_selection()->select(iter);
+        const auto file =
+            theme->lookup_icon(icon_name, icon_height)->get_file();
+        if (file->query_exists()) {
+          childRow[_listColumns._icon] =
+              Gdk::Pixbuf::create_from_file(file->get_path());
+        }
+        if (obj == selectedObj) {
+          _listView.get_selection()->select(iter);
+        }
       }
     }
   }
@@ -249,6 +254,7 @@ void ObjectList::constructContextMenu() {
   }
 
   _contextMenu.set_menu_model(menu);
+  _contextMenu.set_parent(_listView);
 }
 
 void ObjectList::constructFolderMenu(Gio::Menu &menu,
@@ -286,13 +292,14 @@ ObjectList::TreeViewWithMenu::TreeViewWithMenu(ObjectList &parent)
   auto gesture = Gtk::GestureClick::create();
   gesture->set_button(3);
   gesture->signal_pressed().connect(
-      [&](int, double, double) { TreeViewWithMenu::OnButtonPress(); });
+      [&](int, double x, double y) { TreeViewWithMenu::OnButtonPress(x, y); });
   add_controller(gesture);
 }
 
-void ObjectList::TreeViewWithMenu::OnButtonPress() {
+void ObjectList::TreeViewWithMenu::OnButtonPress(double x, double y) {
   _parent.constructContextMenu();
-  _parent._contextMenu.set_position();
+  const Gdk::Rectangle rectangle(x, y, 1, 1);
+  _parent._contextMenu.set_pointing_to(rectangle);
   _parent._contextMenu.popup();
 }
 

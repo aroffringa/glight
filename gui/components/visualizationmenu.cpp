@@ -7,21 +7,23 @@ namespace glight::gui {
 
 using theatre::Color;
 
-VisualizationMenu::VisualizationMenu(Gio::ActionMap& map) {
+VisualizationMenu::VisualizationMenu(Gio::ActionMap& actions) {
+  const auto Add = [&actions](std::shared_ptr<Gio::Menu>& menu,
+                              const Glib::ustring& label,
+                              const Glib::ustring& action_name,
+                              const sigc::slot<void()>& slot) {
+    menu->append(label, "win." + action_name);
+    return actions.add_action(action_name, slot);
+  };
+
   auto menu = Gio::Menu::create();
 
   auto set_menu = Gio::Menu::create();
-  set_menu->append("Full on", "set_full_on");
-  set_menu->append("Off", "set_off");
-  set_menu->append("Set color...", "set_color");
-  set_menu->append("Track", "track");
-  set_menu->append("Pan only", "pan_track");
-
-  set_full_on_ = map.add_action("set_full_on", SignalSetFullOn);
-  set_off_ = map.add_action("set_off", SignalSetOff);
-  set_color_ = map.add_action("set_color", SignalSetColor);
-  set_track_ = map.add_action("track", SignalTrack);
-  set_pan_track_ = map.add_action("pan_track", SignalTrackPan);
+  set_full_on_ = Add(set_menu, "Full on", "set_full_on", SignalSetFullOn);
+  set_off_ = Add(set_menu, "Off", "set_off", SignalSetOff);
+  set_color_ = Add(set_menu, "Set color...", "set_color", SignalSetColor);
+  set_track_ = Add(set_menu, "Track", "track", SignalTrack);
+  set_pan_track_ = Add(set_menu, "Pan only", "pan_track", SignalTrackPan);
 
   menu->append_submenu("Set", set_menu);
 
@@ -29,40 +31,32 @@ VisualizationMenu::VisualizationMenu(Gio::ActionMap& map) {
   const std::vector<theatre::FixtureSymbol::Symbol> symbols(
       theatre::FixtureSymbol::List());
   for (theatre::FixtureSymbol::Symbol symbol : symbols) {
-    symbol_menu->append(theatre::FixtureSymbol(symbol).Name(),
-                        "symbol_" + theatre::FixtureSymbol(symbol).Name());
-    std::shared_ptr<Gio::SimpleAction> action =
-        map.add_action("symbol_" + theatre::FixtureSymbol(symbol).Name(),
-                       [&, symbol]() { SignalSelectSymbol(symbol); });
+    auto action = Add(symbol_menu, theatre::FixtureSymbol(symbol).Name(),
+                      "symbol_" + theatre::FixtureSymbol(symbol).Name(),
+                      [&, symbol]() { SignalSelectSymbol(symbol); });
     symbols_.emplace_back(std::move(action));
   }
   menu->append_submenu("Symbol", symbol_menu);
 
   // TODO move this to main menu instead of context menu
   auto dry_mode_style_menu = Gio::Menu::create();
-  dry_mode_style_menu->append("Primary", "mode_primary");
-  dry_mode_style_menu->append("Secondary", "mode_secondary");
-  dry_mode_style_menu->append("Vertical", "mode_vertical");
-  dry_mode_style_menu->append("Horizontal", "mode_horizontal");
-  dry_mode_style_menu->append("Shadow", "mode_shadow");
-
-  map.add_action("mode_primary", [&]() {
+  Add(dry_mode_style_menu, "Primary", "mode_primary", [&]() {
     dry_mode_style_ = DryModeStyle::Primary;
     SignalDryStyleChange();
   });
-  map.add_action("mode_secondary", [&]() {
+  Add(dry_mode_style_menu, "Secondary", "mode_secondary", [&]() {
     dry_mode_style_ = DryModeStyle::Secondary;
     SignalDryStyleChange();
   });
-  map.add_action("mode_vertical", [&]() {
+  Add(dry_mode_style_menu, "Vertical", "mode_vertical", [&]() {
     dry_mode_style_ = DryModeStyle::Vertical;
     SignalDryStyleChange();
   });
-  map.add_action("mode_horizontal", [&]() {
+  Add(dry_mode_style_menu, "Horizontal", "mode_horizontal", [&]() {
     dry_mode_style_ = DryModeStyle::Horizontal;
     SignalDryStyleChange();
   });
-  map.add_action("mode_shadow", [&]() {
+  Add(dry_mode_style_menu, "Shadow", "mode_shadow", [&]() {
     dry_mode_style_ = DryModeStyle::Shadow;
     SignalDryStyleChange();
   });
@@ -70,38 +64,32 @@ VisualizationMenu::VisualizationMenu(Gio::ActionMap& map) {
   menu->append_submenu("Dry mode style", dry_mode_style_menu);
 
   auto position_section = Gio::Menu::create();
-  position_section->append("Align horizontally", "align_horizontally");
-  position_section->append("Align vertically", "align_vertically");
-  position_section->append("Distribute evenly", "distribute_evenly");
+  align_horizontally_ = Add(position_section, "Align horizontally",
+                            "align_horizontally", SignalAlignHorizontally);
+  align_vertically_ = Add(position_section, "Align vertically",
+                          "align_vertically", SignalAlignVertically);
+  distribute_evenly_ = Add(position_section, "Distribute evenly",
+                           "distribute_evenly", SignalDistributeEvenly);
   menu->append_section(position_section);
 
-  align_horizontally_ =
-      map.add_action("align_horizontally", SignalAlignHorizontally);
-  align_vertically_ = map.add_action("align_vertically", SignalAlignVertically);
-  distribute_evenly_ =
-      map.add_action("distribute_evenly", SignalDistributeEvenly);
-
   auto edit_section = Gio::Menu::create();
-  edit_section->append("Add fixture...", "add_fixture");
-  edit_section->append("Add preset", "add_preset");
-  edit_section->append("Remove", "remove_fixtures");
-  edit_section->append("Group...", "group_fixtures");
-  edit_section->append("Design...", "design");
+  add_fixture_ =
+      Add(edit_section, "Add fixture...", "add_fixture", SignalAddFixtures);
+  add_preset_ = Add(edit_section, "Add preset", "add_preset", SignalAddPreset);
+  remove_fixtures_ =
+      Add(edit_section, "Remove", "remove_fixtures", SignalRemoveFixtures);
+  group_fixtures_ =
+      Add(edit_section, "Group...", "group_fixtures", SignalGroupFixtures);
+  design_ = Add(edit_section, "Design...", "design", SignalDesignFixtures);
   menu->append_section(edit_section);
 
-  add_fixture_ = map.add_action("add_fixture", SignalAddFixtures);
-  add_preset_ = map.add_action("add_preset", SignalAddPreset);
-  remove_fixtures_ = map.add_action("remove_fixtures", SignalRemoveFixtures);
-  group_fixtures_ = map.add_action("group_fixtures", SignalGroupFixtures);
-  design_ = map.add_action("design", SignalDesignFixtures);
-
   auto extra_section = Gio::Menu::create();
-  extra_section->append("Properties", "properties");
-  extra_section->append("Save image...", "save_image");
+  properties_ =
+      Add(extra_section, "Properties", "properties", SignalFixtureProperties);
+  Add(extra_section, "Save image...", "save_image", SignalSaveImage);
   menu->append_section(extra_section);
 
-  properties_ = map.add_action("properties", SignalAddFixtures);
-  save_image_ = map.add_action("save_image", SignalAddPreset);
+  set_menu_model(menu);
 }
 
 DryModeStyle VisualizationMenu::GetDryModeStyle() const {
@@ -126,8 +114,8 @@ void VisualizationMenu::SetSensitivity(bool is_layout_locked,
 
   add_fixture_->set_enabled(!is_layout_locked);
   add_preset_->set_enabled(!is_layout_locked);
-
   remove_fixtures_->set_enabled(selection_enabled);
+
   properties_->set_enabled(selection_enabled);
 
   for (auto item : symbols_) item->set_enabled(selection_enabled);

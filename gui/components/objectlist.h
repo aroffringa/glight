@@ -4,7 +4,10 @@
 #include <giomm/menu.h>
 #include <giomm/simpleactiongroup.h>
 
+#include <gdkmm/pixbuf.h>
+
 #include <gtkmm/iconpaintable.h>
+#include <gtkmm/image.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/popovermenu.h>
 #include <gtkmm/scrolledwindow.h>
@@ -87,7 +90,7 @@ class ObjectList : public Gtk::ScrolledWindow {
 
    private:
     ObjectList &_parent;
-    void OnButtonPress();
+    void OnButtonPress(double x, double y);
   } _listView;
 
   Glib::RefPtr<Gtk::ListStore> _listModel;
@@ -99,7 +102,7 @@ class ObjectList : public Gtk::ScrolledWindow {
       add(_object);
     }
 
-    Gtk::TreeModelColumn<Glib::RefPtr<Gtk::IconPaintable>> _icon;
+    Gtk::TreeModelColumn<Glib::RefPtr<Gdk::Pixbuf>> _icon;
     Gtk::TreeModelColumn<Glib::ustring> _type;
     Gtk::TreeModelColumn<Glib::ustring> _title;
     Gtk::TreeModelColumn<system::ObservingPtr<theatre::FolderObject>> _object;

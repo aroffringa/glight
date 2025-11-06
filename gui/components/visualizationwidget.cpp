@@ -140,6 +140,7 @@ void VisualizationWidget::initializeContextMenu() {
   context_menu_.SignalFixtureProperties.connect(
       [&]() { onFixtureProperties(); });
   context_menu_.SignalSaveImage.connect([&]() { onSaveImage(); });
+  context_menu_.set_parent(*this);
 }
 
 void VisualizationWidget::initialize() {
@@ -399,10 +400,11 @@ void VisualizationWidget::onLeftButtonPress(int, double x, double y) {
   }
 }
 
-void VisualizationWidget::onRightButtonPress(int, double, double) {
+void VisualizationWidget::onRightButtonPress(int, double x, double y) {
   queue_draw();
   context_menu_.SetSensitivity(Instance::State().LayoutLocked(),
                                _selectedFixtures.size());
+  context_menu_.set_pointing_to(Gdk::Rectangle(x, y, 1, 1));
   context_menu_.popup();
 }
 
