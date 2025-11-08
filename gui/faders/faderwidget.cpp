@@ -29,7 +29,7 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
                  0, 0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
                  (ControlValue::MaxUInt() + 1) / 100),
              Gtk::Orientation::VERTICAL),
-      flash_button_label_(std::string(1, key)) {
+      flash_button_(std::string(1, key)) {
   set_orientation(Gtk::Orientation::VERTICAL);
   if (GetMode() == ControlMode::Primary) {
     _fadeUpButton.set_image_from_icon_name("go-up");
@@ -83,24 +83,13 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
     _overlay.add_overlay(_fadeDownButton);
     _fadeDownButton.set_visible(false);
 
-    // The flash button label is added manually because it takes less space
-    // like this.
-    _flashButton.set_child(flash_button_label_);
-    flash_button_label_.set_hexpand(false);
-    // The flash_events_ box is to capture the click signals. Connecting the
-    // event controller directly to the button doesn't work in gtkmm 4.
-    flash_events_.append(_flashButton);
-    auto flash_gesture = Gtk::GestureClick::create();
-    flash_gesture->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
-    flash_gesture->set_button(1);
-    flash_gesture->signal_pressed().connect(
-        sigc::mem_fun(*this, &FaderWidget::onFlashButtonPressed), false);
-    flash_gesture->signal_released().connect(
-        sigc::mem_fun(*this, &FaderWidget::onFlashButtonReleased), false);
-    flash_events_.add_controller(flash_gesture);
-    append(flash_events_);
-    _flashButton.set_visible(state.DisplayFlashButton());
-    _flashButton.set_hexpand(false);
+    flash_button_.SignalPress().connect(
+        sigc::mem_fun(*this, &FaderWidget::onFlashButtonPressed));
+    flash_button_.SignalRelease().connect(
+        sigc::mem_fun(*this, &FaderWidget::onFlashButtonReleased));
+    append(flash_button_);
+    flash_button_.set_visible(state.DisplayFlashButton());
+    flash_button_.set_hexpand(false);
   }
 
   _checkButton.set_halign(Gtk::Align::CENTER);
@@ -137,12 +126,12 @@ void FaderWidget::onOnButtonClicked() {
   }
 }
 
-void FaderWidget::onFlashButtonPressed(int buttons, double x, double y) {
-  _scale.set_value(ControlValue::MaxUInt());
+void FaderWidget::onFlashButtonPressed(int button) {
+  if (button == 1) _scale.set_value(ControlValue::MaxUInt());
 }
 
-void FaderWidget::onFlashButtonReleased(int buttons, double x, double y) {
-  _scale.set_value(0);
+void FaderWidget::onFlashButtonReleased(int button) {
+  if (button == 1) _scale.set_value(0);
 }
 
 void FaderWidget::onScaleChange() {
@@ -254,8 +243,8 @@ void FaderWidget::HandleRightRelease(int, double, double) {
 
 void FaderWidget::UpdateDisplaySettings() {
   _nameLabel.set_visible(State().DisplayName());
-  _flashButton.set_visible(State().DisplayFlashButton() &&
-                           GetMode() == ControlMode::Primary);
+  flash_button_.set_visible(State().DisplayFlashButton() &&
+                            GetMode() == ControlMode::Primary);
   _checkButton.set_visible(State().DisplayCheckButton());
 }
 

@@ -3,13 +3,12 @@
 
 #include "controlwidget.h"
 
-#include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
 #include <gtkmm/label.h>
 #include <gtkmm/overlay.h>
 #include <gtkmm/scale.h>
 
+#include "../components/controlbutton.h"
 #include "../components/iconbutton.h"
 
 #include "../../theatre/forwards.h"
@@ -43,8 +42,8 @@ class FaderWidget final : public ControlWidget {
   void ShowFadeButtons(bool mouse_in);
   void onScaleChange();
   void onOnButtonClicked();
-  void onFlashButtonPressed(int, double, double);
-  void onFlashButtonReleased(int, double, double);
+  void onFlashButtonPressed(int button);
+  void onFlashButtonReleased(int button);
   void onFadeUp();
   void onFadeDown();
   void HandleRightPress(int, double, double);
@@ -56,9 +55,7 @@ class FaderWidget final : public ControlWidget {
   Gtk::Button _fadeUpButton;
   Gtk::Scale _scale;
   Gtk::Button _fadeDownButton;
-  Gtk::Box flash_events_;
-  Gtk::Button _flashButton;
-  Gtk::Label flash_button_label_;
+  ControlButton flash_button_;
   IconButton _checkButton;
   Gtk::Label _nameLabel{"<..>"};
   bool _mouseIn = false;

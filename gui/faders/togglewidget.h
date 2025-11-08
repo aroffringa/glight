@@ -3,12 +3,11 @@
 
 #include "controlwidget.h"
 
+#include "../components/controlbutton.h"
 #include "../components/iconbutton.h"
 #include "../scopedconnection.h"
 
-#include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
 #include <gtkmm/label.h>
 
 namespace glight::gui {
@@ -26,9 +25,7 @@ class ToggleWidget final : public ControlWidget {
   virtual void Limit(double value) override;
 
  private:
-  Gtk::Label flash_button_label_;
-  Gtk::Box flash_events_;
-  Gtk::Button flash_button_;
+  ControlButton flash_button_;
   Gtk::Button fade_button_;
   IconButton icon_button_;
   Gtk::Label name_label_{"<..>"};

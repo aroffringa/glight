@@ -244,11 +244,14 @@ void FaderWindow::initializeMenu() {
   auto layout_menu = Gio::Menu::create();
   layout_action_ = Gio::SimpleAction::create_radio_string("layout", "primary");
   layout_action_->signal_change_state().connect(
-      [&](const Glib::VariantBase &) { onLayoutChanged(); });
+      [&](const Glib::VariantBase &new_value) {
+        onLayoutChanged(
+            static_cast<const Glib::Variant<Glib::ustring> &>(new_value).get());
+      });
   actions->add_action(layout_action_);
-  layout_menu->append("Primary", "layout::primary");
-  layout_menu->append("Secondary", "layout::secondary");
-  layout_menu->append("Dual", "layout::dual");
+  layout_menu->append("Primary", "win.layout::primary");
+  layout_menu->append("Secondary", "win.layout::secondary");
+  layout_menu->append("Dual", "win.layout::dual");
   submenu_section->append_submenu("Layout", layout_menu);
 
   auto fade_in = Gio::Menu::create();
@@ -744,14 +747,15 @@ void FaderWindow::CrossFadeImmediately() {
   AssignTopToBottom();
 }
 
-void FaderWindow::onLayoutChanged() {
+void FaderWindow::onLayoutChanged(const std::string &new_value) {
   if (_recursionLock.IsFirst()) {
     RecursionLock::Token token(_recursionLock);
-    if (GetLayout() == "primary")
+    layout_action_->set_state(Glib::Variant<Glib::ustring>::create(new_value));
+    if (new_value == "primary") {
       _state->mode = FaderSetMode::Primary;
-    else if (GetLayout() == "secondary")
+    } else if (new_value == "secondary")
       _state->mode = FaderSetMode::Secondary;
-    else  // GetLayout() == "dual"
+    else  // new_value == "dual"
       _state->mode = FaderSetMode::Dual;
     loadState();
   }

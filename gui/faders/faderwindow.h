@@ -104,7 +104,7 @@ class FaderWindow : public Gtk::Window {
   void onRemove5FadersClicked() {
     for (size_t i = 0; i != 5; ++i) onRemoveFaderClicked();
   }
-  void onLayoutChanged();
+  void onLayoutChanged(const std::string &new_value);
   void onAssignClicked();
   void onAssignChasesClicked();
   void unassign();

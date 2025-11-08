@@ -73,7 +73,6 @@ include_directories(SYSTEM ${AUBIO_INCLUDE_DIR})
 
 set(GUIFILES
   gui/application.cpp
-  gui/components/nameframe.cpp
   gui/functions.cpp
   gui/instance.cpp
   gui/renderengine.cpp
@@ -81,10 +80,12 @@ set(GUIFILES
   gui/components/beatinput.cpp
   gui/components/colorselectwidget.cpp
   gui/components/colorsequencewidget.cpp
+  gui/components/controlbutton.cpp
   gui/components/durationinput.cpp
   gui/components/fixturelist.cpp
   gui/components/foldercombo.cpp
   gui/components/iconbutton.cpp
+  gui/components/nameframe.cpp
   gui/components/objectlist.cpp
   gui/components/powermonitor.cpp
   gui/components/propertiesbox.cpp
