@@ -108,7 +108,7 @@ class FaderWindow : public Gtk::Window {
   void onAssignClicked();
   void onAssignChasesClicked();
   void unassign();
-  void onSoloToggled();
+  void onSoloToggled(bool new_value);
   void onSetNameClicked();
   void onControlValueChanged(ControlWidget *widget);
   void onControlAssigned(size_t widgetIndex);

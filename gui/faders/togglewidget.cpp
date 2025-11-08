@@ -32,8 +32,11 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
   // The flash button label is added manually because it takes less space
   // like this.
   flash_button_.set_child(flash_button_label_);
+  flash_button_.set_valign(Gtk::Align::CENTER);
+  flash_button_.set_vexpand(false);
   flash_events_.append(flash_button_);
   auto flash_gesture = Gtk::GestureClick::create();
+  flash_gesture->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
   flash_gesture->set_button(0);
   flash_gesture->signal_pressed().connect(
       [this, g = flash_gesture.get()](int, double, double) {
@@ -41,12 +44,11 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
       });
   flash_gesture->signal_released().connect(
       [this, g = flash_gesture.get()](int, double, double) {
+        std::cout << "released\n";
         OnFlashButtonReleased(g->get_current_button());
       });
   flash_events_.add_controller(flash_gesture);
   append(flash_events_);
-  flash_button_.set_valign(Gtk::Align::CENTER);
-  flash_button_.set_vexpand(false);
 
   fade_button_.set_image_from_icon_name("go-up");
   auto fade_gesture = Gtk::GestureClick::create();

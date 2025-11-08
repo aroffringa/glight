@@ -9,6 +9,7 @@
 
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
+#include "gui/menufunctions.h"
 
 #include "gui/state/guistate.h"
 #include "gui/dialogs/stringinputdialog.h"
@@ -227,26 +228,15 @@ void FaderWindow::initializeMenu() {
                               const Glib::ustring &label,
                               const Glib::ustring &action_name,
                               const sigc::slot<void()> &slot) {
-    menu->append(label, action_name);
-    return actions->add_action(action_name, slot);
+    return AddMenuItem(*actions, menu, label, action_name, slot);
   };
-  const auto Toggle = [&actions](std::shared_ptr<Gio::Menu> &menu,
-                                 const Glib::ustring &label,
-                                 const Glib::ustring &action_name,
-                                 const sigc::slot<void()> &slot) {
-    auto action_toggle = Gio::SimpleAction::create_bool(action_name, false);
-    menu->append(label, action_name);
-    actions->add_action(action_toggle);
-    action_toggle->signal_activate().connect(
-        [slot, action_toggle](const Glib::VariantBase &) {
-          bool active = false;
-          action_toggle->get_state(active);
-          active = !active;
-          action_toggle->change_state(Glib::Variant<bool>::create(active));
-          slot();
-        });
-    return action_toggle;
-  };
+  const auto Toggle =
+      [&actions](std::shared_ptr<Gio::Menu> &menu, const Glib::ustring &label,
+                 const Glib::ustring &action_name, bool initial_value,
+                 const sigc::slot<void(bool)> &slot) {
+        return AddToggleMenuItem(*actions, menu, label, action_name,
+                                 initial_value, slot);
+      };
 
   auto menu = Gio::Menu::create();
   auto submenu_section = Gio::Menu::create();
@@ -283,44 +273,43 @@ void FaderWindow::initializeMenu() {
   menu->append_section(submenu_section);
 
   auto options_section = Gio::Menu::create();
-  Add(options_section, "Set name...", "set_name",
-      [&]() { onSetNameClicked(); });
-  solo_action_ =
-      Toggle(options_section, "Solo", "set_name", [&]() { onSoloToggled(); });
-  Add(options_section, "Assign", "set_name", [&]() { onAssignClicked(); });
-  Add(options_section, "Assign to chases", "set_name",
+  solo_action_ = Toggle(options_section, "Solo", "solo", false,
+                        [&](bool new_value) { onSoloToggled(new_value); });
+  Add(options_section, "Assign", "assign", [&]() { onAssignClicked(); });
+  Add(options_section, "Assign to chases", "assign_chases",
       [&]() { onAssignChasesClicked(); });
-  Add(options_section, "Clear", "set_name", [&]() { unassign(); });
+  Add(options_section, "Clear", "clear", [&]() { unassign(); });
   Add(options_section, "Set name...", "set_name",
       [&]() { onSetNameClicked(); });
   menu->append_section(options_section);
 
   auto controls_section = Gio::Menu::create();
-  Add(controls_section, "Add fader", "set_name",
+  Add(controls_section, "Add fader", "add_1_fader",
       [&]() { onAddFaderClicked(); });
-  Add(controls_section, "Add 5 faders", "set_name",
+  Add(controls_section, "Add 5 faders", "add_5_faders",
       [&]() { onAdd5FadersClicked(); });
-  Add(controls_section, "Add toggle control", "set_name",
+  Add(controls_section, "Add toggle control", "add_1_toggle",
       [&]() { onAddToggleClicked(); });
-  Add(controls_section, "Add 5 toggle controls", "set_name",
+  Add(controls_section, "Add 5 toggle controls", "add_5_toggle",
       [&]() { onAdd5ToggleControlsClicked(); });
-  Add(controls_section, "Add color button", "set_name",
+  Add(controls_section, "Add color button", "add_color",
       [&]() { onAddColorButtonClicked(); });
-  Add(controls_section, "Add combo button", "set_name",
+  Add(controls_section, "Add combo button", "add_combo",
       [&]() { onAddComboButtonClicked(); });
-  Add(controls_section, "Add mover control", "set_name",
+  Add(controls_section, "Add mover control", "add_mover",
       [&]() { onAddMoverButtonClicked(); });
-  Add(controls_section, "Add toggle column", "set_name",
+  Add(controls_section, "Add toggle column", "add_toggle",
       [&]() { onAddToggleColumnClicked(); });
-  Add(controls_section, "Remove 1", "set_name",
+  Add(controls_section, "Remove 1", "remove_1",
       [&]() { onRemoveFaderClicked(); });
-  Add(controls_section, "Remove 5", "set_name",
+  Add(controls_section, "Remove 5", "remove_5",
       [&]() { onRemove5FadersClicked(); });
-  Add(controls_section, "Input device...", "set_name",
+  Add(controls_section, "Input device...", "set_input_device",
       [&]() { onInputDeviceClicked(); });
   menu->append_section(controls_section);
 
   _menuButton.set_menu_model(menu);
+  insert_action_group("win", actions);
 }
 
 void FaderWindow::SaveSize() {
@@ -513,9 +502,9 @@ void FaderWindow::onAssignChasesClicked() {
   }
 }
 
-void FaderWindow::onSoloToggled() {
+void FaderWindow::onSoloToggled(bool new_value) {
   if (_recursionLock.IsFirst()) {
-    _state->isSolo = GetSolo();
+    _state->isSolo = new_value;
   }
 }
 
