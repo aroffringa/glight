@@ -5,6 +5,7 @@
 
 #include <sigc++/signal.h>
 
+#include <giomm/actionmap.h>
 #include <giomm/menu.h>
 #include <giomm/simpleaction.h>
 #include <giomm/simpleactiongroup.h>
@@ -29,17 +30,17 @@ class ControlMenu : public Gtk::PopoverMenu {
   sigc::signal<void()>& SignalAssign() { return signal_assign_; }
   sigc::signal<void()>& SignalUnassign() { return signal_unassign_; }
 
-  sigc::signal<void()>& SignalToggleName() { return signal_toggle_name_; }
+  sigc::signal<void(bool)>& SignalToggleName() { return signal_toggle_name_; }
 
-  sigc::signal<void()>& SignalToggleFlashButton() {
+  sigc::signal<void(bool)>& SignalToggleFlashButton() {
     return signal_toggle_flash_button_;
   }
 
-  sigc::signal<void()>& SignalToggleCheckButton() {
+  sigc::signal<void(bool)>& SignalToggleCheckButton() {
     return signal_toggle_check_button_;
   }
 
-  sigc::signal<void()>& SignalToggleFadeButtons() {
+  sigc::signal<void(bool)>& SignalToggleFadeButtons() {
     return signal_toggle_fade_buttons_;
   }
 
@@ -47,6 +48,10 @@ class ControlMenu : public Gtk::PopoverMenu {
   void AddExtraItem(const std::string& label, Function function) {
     assign_section_->append("Assign...", "assign");
     actions_->add_action("assign", function);
+  }
+
+  const std::shared_ptr<Gio::SimpleActionGroup>& GetActionGroup() const {
+    return actions_;
   }
 
  private:
@@ -58,16 +63,26 @@ class ControlMenu : public Gtk::PopoverMenu {
   void SetState(const std::shared_ptr<Gio::SimpleAction>& action, bool state) {
     action->set_state(Glib::Variant<bool>::create(state));
   }
+  std::shared_ptr<Gio::SimpleAction> Add(std::shared_ptr<Gio::Menu>& menu,
+                                         const Glib::ustring& label,
+                                         const Glib::ustring& action_name,
+                                         const sigc::slot<void()>& slot);
+
+  std::shared_ptr<Gio::SimpleAction> Toggle(std::shared_ptr<Gio::Menu>& menu,
+                                            const Glib::ustring& label,
+                                            const Glib::ustring& action_name,
+                                            bool initial_value,
+                                            const sigc::slot<void(bool)>& slot);
 
   std::shared_ptr<Gio::SimpleActionGroup> actions_;
   std::shared_ptr<Gio::Menu> assign_section_;
 
   sigc::signal<void()> signal_assign_;
   sigc::signal<void()> signal_unassign_;
-  sigc::signal<void()> signal_toggle_name_;
-  sigc::signal<void()> signal_toggle_flash_button_;
-  sigc::signal<void()> signal_toggle_check_button_;
-  sigc::signal<void()> signal_toggle_fade_buttons_;
+  sigc::signal<void(bool)> signal_toggle_name_;
+  sigc::signal<void(bool)> signal_toggle_flash_button_;
+  sigc::signal<void(bool)> signal_toggle_check_button_;
+  sigc::signal<void(bool)> signal_toggle_fade_buttons_;
 
   std::shared_ptr<Gio::SimpleAction> display_name_;
   std::shared_ptr<Gio::SimpleAction> display_flash_button_;

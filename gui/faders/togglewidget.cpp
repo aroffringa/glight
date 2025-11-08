@@ -32,7 +32,7 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
   // The flash button label is added manually because it takes less space
   // like this.
   flash_button_.set_child(flash_button_label_);
-  flash_button_label_.show();
+  flash_events_.append(flash_button_);
   auto flash_gesture = Gtk::GestureClick::create();
   flash_gesture->set_button(0);
   flash_gesture->signal_pressed().connect(
@@ -43,11 +43,10 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
       [this, g = flash_gesture.get()](int, double, double) {
         OnFlashButtonReleased(g->get_current_button());
       });
-  flash_button_.add_controller(flash_gesture);
-  append(flash_button_);
+  flash_events_.add_controller(flash_gesture);
+  append(flash_events_);
   flash_button_.set_valign(Gtk::Align::CENTER);
   flash_button_.set_vexpand(false);
-  flash_button_.show();
 
   fade_button_.set_image_from_icon_name("go-up");
   auto fade_gesture = Gtk::GestureClick::create();
@@ -57,7 +56,6 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
   fade_button_.signal_clicked().connect([&]() { OnFade(); });
   append(fade_button_);
   fade_button_.set_vexpand(false);
-  fade_button_.show();
 
   icon_button_.SignalChanged().connect([&]() { OnIconClicked(); });
   auto icon_gesture = Gtk::GestureClick::create();
@@ -66,7 +64,6 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
   icon_gesture->signal_released().connect(right_release);
   icon_button_.add_controller(icon_gesture);
   append(icon_button_);
-  icon_button_.show();
 
   auto label_gesture = Gtk::GestureClick::create();
   name_label_.set_halign(Gtk::Align::START);
@@ -215,13 +212,14 @@ void ToggleWidget::HandleRightRelease() {
   menu = std::make_unique<ControlMenu>(State());
   menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
   menu->SignalToggleName().connect(
-      [&]() { State().SetDisplayName(menu->DisplayName()); });
+      [&](bool new_value) { State().SetDisplayName(new_value); });
   menu->SignalToggleFlashButton().connect(
-      [&]() { State().SetDisplayFlashButton(menu->DisplayFlashButton()); });
+      [&](bool new_value) { State().SetDisplayFlashButton(new_value); });
   menu->SignalToggleCheckButton().connect(
-      [&]() { State().SetDisplayCheckButton(menu->DisplayCheckButton()); });
+      [&](bool new_value) { State().SetDisplayCheckButton(new_value); });
   menu->SignalToggleFadeButtons().connect(
-      [&]() { State().SetOverlayFadeButtons(menu->OverlayFadeButtons()); });
+      [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
+  insert_action_group("win", menu->GetActionGroup());
   menu->popup();
 }
 

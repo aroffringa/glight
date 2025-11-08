@@ -3,6 +3,8 @@
 #include "theatre/color.h"
 #include "theatre/management.h"
 
+#include "gui/menufunctions.h"
+
 namespace glight::gui {
 
 using theatre::Color;
@@ -12,8 +14,7 @@ VisualizationMenu::VisualizationMenu(Gio::ActionMap& actions) {
                               const Glib::ustring& label,
                               const Glib::ustring& action_name,
                               const sigc::slot<void()>& slot) {
-    menu->append(label, "win." + action_name);
-    return actions.add_action(action_name, slot);
+    return AddMenuItem(actions, menu, label, action_name, slot);
   };
 
   auto menu = Gio::Menu::create();

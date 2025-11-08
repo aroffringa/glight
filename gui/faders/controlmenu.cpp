@@ -1,49 +1,50 @@
 #include "controlmenu.h"
 
-#include "../state/faderstate.h"
+#include "gui/menufunctions.h"
+#include "gui/state/faderstate.h"
 
 namespace glight::gui {
 
-ControlMenu::ControlMenu(const FaderState& state) {
+ControlMenu::ControlMenu(const FaderState& state)
+    : actions_(Gio::SimpleActionGroup::create()) {
   auto menu = Gio::Menu::create();
   assign_section_ = Gio::Menu::create();
-  actions_ = Gio::SimpleActionGroup::create();
 
-  assign_section_->append("Assign...", "assign");
-  actions_->add_action("assign", signal_assign_);
-
-  assign_section_->append("Unassign", "unassign");
-  actions_->add_action("unassign", signal_unassign_);
+  Add(assign_section_, "Assign...", "assign", signal_assign_);
+  Add(assign_section_, "Unassign", "unassign", signal_unassign_);
 
   menu->append_section(assign_section_);
 
   auto rest_section = Gio::Menu::create();
 
-  rest_section->append("Display label", "toggle_display_name");
-  std::shared_ptr<Gio::SimpleAction> display_name = Gio::SimpleAction::create(
-      "toggle_display_name", Glib::Variant<bool>::create(state.DisplayName()));
-  actions_->add_action(display_name);
-
-  rest_section->append("Display label", "toggle_display_flash");
-  std::shared_ptr<Gio::SimpleAction> display_flash = Gio::SimpleAction::create(
-      "toggle_display_flash",
-      Glib::Variant<bool>::create(state.DisplayFlashButton()));
-  actions_->add_action(display_flash);
-
-  rest_section->append("Display label", "toggle_display_check");
-  std::shared_ptr<Gio::SimpleAction> display_check = Gio::SimpleAction::create(
-      "toggle_display_check",
-      Glib::Variant<bool>::create(state.DisplayCheckButton()));
-  actions_->add_action(display_check);
-
-  rest_section->append("Display label", "toggle_overlay_fade");
-  std::shared_ptr<Gio::SimpleAction> display_fade = Gio::SimpleAction::create(
-      "toggle_overlay_fade",
-      Glib::Variant<bool>::create(state.OverlayFadeButtons()));
-  actions_->add_action(display_fade);
+  display_name_ = Toggle(rest_section, "Display label", "toggle_display_name",
+                         state.DisplayName(), signal_toggle_name_);
+  display_flash_button_ =
+      Toggle(rest_section, "Display label", "toggle_display_flash",
+             state.DisplayFlashButton(), signal_toggle_flash_button_);
+  display_check_button_ =
+      Toggle(rest_section, "Display label", "toggle_display_check",
+             state.DisplayCheckButton(), signal_toggle_check_button_);
+  overlay_fade_buttons_ =
+      Toggle(rest_section, "Overlay fade buttons", "toggle_overlay_fade",
+             state.OverlayFadeButtons(), signal_toggle_fade_buttons_);
 
   menu->append_section(rest_section);
   set_menu_model(menu);
 }
+
+std::shared_ptr<Gio::SimpleAction> ControlMenu::Add(
+    std::shared_ptr<Gio::Menu>& menu, const Glib::ustring& label,
+    const Glib::ustring& action_name, const sigc::slot<void()>& slot) {
+  return AddMenuItem(*actions_, menu, label, action_name, slot);
+};
+
+std::shared_ptr<Gio::SimpleAction> ControlMenu::Toggle(
+    std::shared_ptr<Gio::Menu>& menu, const Glib::ustring& label,
+    const Glib::ustring& action_name, bool initial_value,
+    const sigc::slot<void(bool)>& slot) {
+  return AddToggleMenuItem(*actions_, menu, label, action_name, initial_value,
+                           slot);
+};
 
 }  // namespace glight::gui

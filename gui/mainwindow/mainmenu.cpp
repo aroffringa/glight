@@ -5,6 +5,7 @@
 #include <giomm/menu.h>
 
 #include "gui/state/fadersetstate.h"
+#include "gui/menufunctions.h"
 
 #include <iostream>  // DEBUG
 
@@ -15,27 +16,15 @@ MainMenu::MainMenu(Gio::ActionMap& actions) {
                               const Glib::ustring& label,
                               const Glib::ustring& action_name,
                               const sigc::slot<void()>& slot) {
-    menu->append(label, "win." + action_name);
-    return actions.add_action(action_name, slot);
+    return AddMenuItem(actions, menu, label, action_name, slot);
   };
 
   const auto Toggle =
       [&actions](std::shared_ptr<Gio::Menu>& menu, const Glib::ustring& label,
                  const Glib::ustring& action_name, bool initial_value,
                  const sigc::slot<void(bool)>& slot) {
-        auto action_toggle =
-            Gio::SimpleAction::create_bool(action_name, initial_value);
-        menu->append(label, "win." + action_name);
-        action_toggle->signal_activate().connect(
-            [slot, action_toggle](const Glib::VariantBase&) {
-              bool active = false;
-              action_toggle->get_state(active);
-              active = !active;
-              action_toggle->change_state(Glib::Variant<bool>::create(active));
-              slot(active);
-            });
-        actions.add_action(action_toggle);
-        return action_toggle;
+        return AddToggleMenuItem(actions, menu, label, action_name,
+                                 initial_value, slot);
       };
 
   // File menu

@@ -137,13 +137,14 @@ void MoverWidget::HandleRightRelease() {
   menu = std::make_unique<ControlMenu>(State());
   menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
   menu->SignalToggleName().connect(
-      [&]() { State().SetDisplayName(menu->DisplayName()); });
+      [&](bool new_value) { State().SetDisplayName(new_value); });
   menu->SignalToggleFlashButton().connect(
-      [&]() { State().SetDisplayFlashButton(menu->DisplayFlashButton()); });
+      [&](bool new_value) { State().SetDisplayFlashButton(new_value); });
   menu->SignalToggleCheckButton().connect(
-      [&]() { State().SetDisplayCheckButton(menu->DisplayCheckButton()); });
+      [&](bool new_value) { State().SetDisplayCheckButton(new_value); });
   menu->SignalToggleFadeButtons().connect(
-      [&]() { State().SetOverlayFadeButtons(menu->OverlayFadeButtons()); });
+      [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
+  insert_action_group("win", menu->GetActionGroup());
   menu->popup();
 }
 

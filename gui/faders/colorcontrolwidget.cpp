@@ -125,7 +125,8 @@ bool ColorControlWidget::HandleRightRelease() {
   menu = std::make_unique<ControlMenu>(State());
   menu->SignalAssign().connect([&]() { ShowAssignControllableDialog(); });
   menu->SignalToggleName().connect(
-      [&]() { State().SetDisplayName(menu->DisplayName()); });
+      [&](bool new_value) { State().SetDisplayName(new_value); });
+  insert_action_group("win", menu->GetActionGroup());
   menu->popup();
   return true;
 }

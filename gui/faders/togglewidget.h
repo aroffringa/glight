@@ -27,6 +27,7 @@ class ToggleWidget final : public ControlWidget {
 
  private:
   Gtk::Label flash_button_label_;
+  Gtk::Box flash_events_;
   Gtk::Button flash_button_;
   Gtk::Button fade_button_;
   IconButton icon_button_;

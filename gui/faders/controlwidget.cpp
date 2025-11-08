@@ -134,7 +134,8 @@ std::unique_ptr<ControlMenu>& ControlWidget::PrepareMenu() {
   menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
   menu->SignalUnassign().connect([&]() { Assign({}, true); });
   menu->SignalToggleName().connect(
-      [&]() { State().SetDisplayName(menu->DisplayName()); });
+      [&](bool new_value) { State().SetDisplayName(new_value); });
+  insert_action_group("win", menu->GetActionGroup());
   return menu;
 }
 
