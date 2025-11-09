@@ -3,7 +3,9 @@
 
 #include "controlwidget.h"
 
-#include "../scopedconnection.h"
+#include "gui/components/controlbutton.h"
+
+#include <sigc++/scoped_connection.h>
 
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
@@ -24,6 +26,9 @@ class MoverWidget final : public ControlWidget {
 
   virtual void Limit(double value) override {}
 
+  bool PanIsAssigned() const { return GetSourceValue(0) != nullptr; }
+  bool TiltIsAssigned() const { return GetSourceValue(1) != nullptr; }
+
  private:
   virtual void OnAssigned(bool moveFader) override;
   void HandleRightRelease();
@@ -36,15 +41,15 @@ class MoverWidget final : public ControlWidget {
   void StopTilt();
 
   Gtk::Grid grid_;
-  Gtk::Button left_button_;
-  Gtk::Button right_button_;
-  Gtk::Button up_button_;
-  Gtk::Button down_button_;
+  ControlButton left_button_;
+  ControlButton right_button_;
+  ControlButton up_button_;
+  ControlButton down_button_;
   Gtk::Label name_label_{"<..>\n<..>"};
 
   bool hold_updates_ = false;
 
-  ScopedConnection update_display_settings_connection_;
+  sigc::scoped_connection update_display_settings_connection_;
 };
 
 }  // namespace glight::gui

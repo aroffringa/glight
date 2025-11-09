@@ -25,40 +25,30 @@ MoverWidget::MoverWidget(FaderWindow &fader_window, FaderState &state,
     : ControlWidget(fader_window, state, mode) {
   SetDefaultSourceCount(2);
 
-  left_button_.set_image_from_icon_name("go-previous");
-  auto left_gesture = Gtk::GestureClick::create();
-  const auto stop_pan = [&](int, double, double) { StopPan(); };
-  left_gesture->set_button(1);
-  left_gesture->signal_pressed().connect(
-      [&](int, double, double) { MoveLeft(); });
-  left_gesture->signal_released().connect(stop_pan);
-  left_button_.add_controller(left_gesture);
+  left_button_.SetIconName("go-previous");
+  const auto stop_pan = [&](int) { StopPan(); };
+  left_button_.SetSignalButton(1);
+  left_button_.SignalPress().connect([&](int) { MoveLeft(); });
+  left_button_.SignalRelease().connect(stop_pan);
   grid_.attach(left_button_, 0, 1);
 
-  right_button_.set_image_from_icon_name("go-next");
-  auto right_gesture = Gtk::GestureClick::create();
-  right_gesture->set_button(1);
-  right_gesture->signal_pressed().connect(
-      [&](int, double, double) { MoveRight(); });
-  right_gesture->signal_released().connect(stop_pan);
+  right_button_.SetIconName("go-next");
+  right_button_.SetSignalButton(1);
+  right_button_.SignalPress().connect([&](int) { MoveRight(); });
+  right_button_.SignalRelease().connect(stop_pan);
   grid_.attach(right_button_, 2, 1);
 
-  up_button_.set_image_from_icon_name("go-up");
-  auto up_gesture = Gtk::GestureClick::create();
-  up_gesture->set_button(1);
-  const auto stop_tilt = [&](int, double, double) { StopPan(); };
-  up_gesture->signal_pressed().connect([&](int, double, double) { MoveUp(); });
-  up_gesture->signal_released().connect(stop_tilt);
-  up_button_.add_controller(up_gesture);
+  up_button_.SetIconName("go-up");
+  up_button_.SetSignalButton(1);
+  const auto stop_tilt = [&](int) { StopTilt(); };
+  up_button_.SignalPress().connect([&](int) { MoveUp(); });
+  up_button_.SignalRelease().connect(stop_tilt);
   grid_.attach(up_button_, 1, 0);
 
-  down_button_.set_image_from_icon_name("go-down");
-  auto down_gesture = Gtk::GestureClick::create();
-  down_gesture->set_button(1);
-  down_gesture->signal_pressed().connect(
-      [&](int, double, double) { MoveDown(); });
-  down_gesture->signal_released().connect(stop_tilt);
-  down_button_.add_controller(down_gesture);
+  down_button_.SetIconName("go-down");
+  down_button_.SetSignalButton(1);
+  down_button_.SignalPress().connect([&](int) { MoveDown(); });
+  down_button_.SignalRelease().connect(stop_tilt);
   grid_.attach(down_button_, 1, 2);
 
   auto label_gesture = Gtk::GestureClick::create();
@@ -96,8 +86,10 @@ void MoverWidget::MoveRight() {
 }
 
 void MoverWidget::StopPan() {
-  theatre::SingleSourceValue &value = GetSingleSourceValue(0);
-  value.Set(value.Value());
+  if (PanIsAssigned()) {
+    theatre::SingleSourceValue &value = GetSingleSourceValue(0);
+    value.Set(value.Value());
+  }
 }
 
 void MoverWidget::MoveUp() {
@@ -113,8 +105,10 @@ void MoverWidget::MoveDown() {
 }
 
 void MoverWidget::StopTilt() {
-  theatre::SingleSourceValue &value = GetSingleSourceValue(1);
-  value.Set(value.Value());
+  if (TiltIsAssigned()) {
+    theatre::SingleSourceValue &value = GetSingleSourceValue(1);
+    value.Set(value.Value());
+  }
 }
 
 void MoverWidget::OnAssigned(bool move_fader) {
@@ -144,6 +138,7 @@ void MoverWidget::HandleRightRelease() {
       [&](bool new_value) { State().SetDisplayCheckButton(new_value); });
   menu->SignalToggleFadeButtons().connect(
       [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
+  menu->set_parent(GetFaderWindow());
   insert_action_group("win", menu->GetActionGroup());
   menu->popup();
 }

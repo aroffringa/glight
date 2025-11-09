@@ -41,9 +41,6 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
     _fadeUpButton.set_visible(false);
   }
 
-  auto right_press = [&](int buttons, double x, double y) {
-    return HandleRightPress(buttons, x, y);
-  };
   auto right_release = [&](int buttons, double x, double y) {
     return HandleRightRelease(buttons, x, y);
   };
@@ -54,7 +51,7 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
   _scale.signal_value_changed().connect(
       sigc::mem_fun(*this, &FaderWidget::onScaleChange));
   auto scale_gesture = Gtk::GestureClick::create();
-  scale_gesture->signal_pressed().connect(right_press, false);
+  scale_gesture->signal_released().connect(right_release, false);
   _scale.add_controller(scale_gesture);
   _overlay.set_child(_scale);
   _scale.show();
@@ -67,7 +64,6 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
   _overlay.add_controller(overlay_focus);
   auto overlay_gesture = Gtk::GestureClick::create();
   overlay_gesture->set_button(3);
-  overlay_gesture->signal_pressed().connect(right_press, false);
   overlay_gesture->signal_released().connect(right_release, false);
   _overlay.add_controller(overlay_gesture);
 
@@ -222,8 +218,6 @@ void FaderWidget::ShowFadeButtons(bool mouse_in) {
     }
   }
 }
-
-void FaderWidget::HandleRightPress(int, double, double) {}
 
 void FaderWidget::HandleRightRelease(int, double, double) {
   std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();

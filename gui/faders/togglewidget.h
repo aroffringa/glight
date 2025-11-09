@@ -5,7 +5,8 @@
 
 #include "../components/controlbutton.h"
 #include "../components/iconbutton.h"
-#include "../scopedconnection.h"
+
+#include <sigc++/scoped_connection.h>
 
 #include <gtkmm/button.h>
 #include <gtkmm/label.h>
@@ -32,7 +33,7 @@ class ToggleWidget final : public ControlWidget {
 
   bool hold_updates_ = false;
 
-  ScopedConnection update_display_settings_connection_;
+  sigc::scoped_connection update_display_settings_connection_;
   size_t counter_ = 0;
 
   virtual void OnAssigned(bool moveFader) override;

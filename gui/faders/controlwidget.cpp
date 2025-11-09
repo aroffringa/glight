@@ -120,6 +120,8 @@ void ControlWidget::ShowAssignDialog() {
     }
     dialog_.reset();
   });
+  dialog_->set_transient_for(GetFaderWindow());
+  dialog_->show();
 }
 
 void ControlWidget::OnStateChange() {

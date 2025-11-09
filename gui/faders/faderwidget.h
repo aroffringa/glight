@@ -46,7 +46,6 @@ class FaderWidget final : public ControlWidget {
   void onFlashButtonReleased(int button);
   void onFadeUp();
   void onFadeDown();
-  void HandleRightPress(int, double, double);
   void HandleRightRelease(int, double, double);
   void MakeMenu();
   void UpdateDisplaySettings();

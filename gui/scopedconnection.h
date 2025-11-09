@@ -8,13 +8,13 @@ namespace glight::gui {
 /**
  * Class that will automatically disconnect a single connection when destructed.
  */
-class ScopedConnection {
+class [[deprecated("Use sigc::scoped_connection")]] ScopedConnection {
  public:
   ScopedConnection() noexcept = default;
-  ScopedConnection(sigc::connection&& sigc_connection) noexcept
+  ScopedConnection(sigc::connection && sigc_connection) noexcept
       : connection_(std::move(sigc_connection)) {}
   ScopedConnection(const ScopedConnection&) = delete;
-  ScopedConnection(ScopedConnection&& rhs) noexcept {
+  ScopedConnection(ScopedConnection && rhs) noexcept {
     connection_ = std::move(rhs.connection_);
     rhs.connection_ = sigc::connection();
   }
