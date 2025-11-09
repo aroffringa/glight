@@ -17,7 +17,7 @@
 #include <gtkmm/window.h>
 
 #include "gui/recursionlock.h"
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 
 #include "gui/components/durationinput.h"
 #include "gui/components/inputselectwidget.h"
@@ -108,7 +108,7 @@ class TimeSequencePropertiesWindow final : public PropertiesWindow {
   RecursionLock _recursionLock;
 
   theatre::TimeSequence *_timeSequence;
-  ScopedConnection update_connection_;
+  sigc::scoped_connection update_connection_;
 };
 
 }  // namespace glight::gui

@@ -19,18 +19,18 @@ class MoverWidget final : public ControlWidget {
   MoverWidget(FaderWindow &fader_window, FaderState &state, ControlMode mode,
               char key);
 
-  virtual void Toggle() override {}
-  virtual void FlashOn() override {}
-  virtual void FlashOff() override {}
-  virtual void SyncFader() override {}
+  void Toggle() final {}
+  void FlashOn() final {}
+  void FlashOff() final {}
+  void SyncFader() final {}
 
-  virtual void Limit(double value) override {}
+  void Limit(double value) final {}
 
   bool PanIsAssigned() const { return GetSourceValue(0) != nullptr; }
   bool TiltIsAssigned() const { return GetSourceValue(1) != nullptr; }
 
  private:
-  virtual void OnAssigned(bool moveFader) override;
+  void OnAssigned(bool moveFader) final;
   void HandleRightRelease();
   void UpdateDisplaySettings();
   void MoveLeft();

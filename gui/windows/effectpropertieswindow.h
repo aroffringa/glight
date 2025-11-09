@@ -5,7 +5,7 @@
 
 #include "theatre/forwards.h"
 
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 #include "gui/components/propertiesbox.h"
 
 #include <gtkmm/dialog.h>
@@ -55,7 +55,7 @@ class EffectPropertiesWindow : public PropertiesWindow {
   Gtk::Frame _propertiesFrame{"Properties"};
   std::unique_ptr<theatre::PropertySet> _propertySet;
   PropertiesBox _propertiesBox;
-  ScopedConnection update_connection_;
+  sigc::scoped_connection update_connection_;
 
   Gtk::ScrolledWindow _connectionsScrolledWindow;
   Gtk::Box _connectionsButtonBox;

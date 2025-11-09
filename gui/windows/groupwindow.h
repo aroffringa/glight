@@ -5,7 +5,7 @@
 
 #include "propertieswindow.h"
 
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 #include "gui/components/fixturelist.h"
 #include "gui/components/reorderwidget.h"
 
@@ -27,7 +27,7 @@ class GroupWindow final : public PropertiesWindow {
   components::FixtureList fixture_list_;
   Gtk::Button add_button_;
   components::ReorderWidget reorder_widget_;
-  ScopedConnection group_delete_connection_;
+  sigc::scoped_connection group_delete_connection_;
 };
 
 }  // namespace glight::gui::windows

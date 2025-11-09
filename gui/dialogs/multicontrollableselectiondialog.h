@@ -10,7 +10,7 @@
 #include <gtkmm/window.h>
 
 #include "gui/recursionlock.h"
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 
 #include "gui/components/objectbrowser.h"
 
@@ -57,7 +57,7 @@ class MultiControllableSelectionDialog : public Gtk::Dialog {
   Gtk::ScrolledWindow selection_scrolled_window_;
 
   RecursionLock recursion_lock_;
-  ScopedConnection update_connection_;
+  sigc::scoped_connection update_connection_;
 };
 
 }  // namespace glight::gui

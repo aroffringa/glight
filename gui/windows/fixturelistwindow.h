@@ -12,7 +12,7 @@
 #include "theatre/forwards.h"
 #include "theatre/fixturemode.h"
 
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 #include "gui/recursionlock.h"
 #include "gui/windows/childwindow.h"
 
@@ -65,8 +65,8 @@ class FixtureListWindow : public ChildWindow {
 
   std::unique_ptr<AddFixtureWindow> add_fixture_window_;
 
-  ScopedConnection update_controllables_connection_;
-  ScopedConnection global_selection_connection_;
+  sigc::scoped_connection update_controllables_connection_;
+  sigc::scoped_connection global_selection_connection_;
   RecursionLock recursion_lock_;
 
   Gtk::TreeView fixtures_list_view_;

@@ -12,7 +12,7 @@
 #include "theatre/valuesnapshot.h"
 
 #include "gui/renderengine.h"
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 
 #include "system/deletableptr.h"
 
@@ -107,13 +107,13 @@ class VisualizationWidget : public Gtk::DrawingArea {
   theatre::Management *_management;
   EventTransmitter *_eventTransmitter;
   FixtureSelection *_globalSelection;
-  ScopedConnection _globalSelectionConnection;
+  sigc::scoped_connection _globalSelectionConnection;
   MainWindow *main_window_;
   system::DeletablePtr<glight::gui::windows::FixtureProperties>
       _propertiesWindow;
   bool _isInitialized, _isTimerRunning;
-  ScopedConnection _timeoutConnection;
-  ScopedConnection update_connection_;
+  sigc::scoped_connection _timeoutConnection;
+  sigc::scoped_connection update_connection_;
   MouseState _dragType;
   std::vector<system::ObservingPtr<theatre::Fixture>> _selectedFixtures;
   std::vector<system::ObservingPtr<theatre::Fixture>> _dragInvolvedFixtures;

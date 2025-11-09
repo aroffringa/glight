@@ -6,7 +6,7 @@
 #include "theatre/forwards.h"
 
 #include "gui/recursionlock.h"
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 #include "gui/windows/childwindow.h"
 
 #include <gtkmm/box.h>
@@ -53,7 +53,7 @@ class FixtureTypesWindow : public ChildWindow {
   void SelectFixtures(const theatre::FixtureType &type);
   void ShowTypeWidgets(bool visible);
 
-  ScopedConnection update_controllables_connection_;
+  sigc::scoped_connection update_controllables_connection_;
   RecursionLock recursion_lock_;
 
   Gtk::TreeView tree_view_;
