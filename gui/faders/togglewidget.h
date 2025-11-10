@@ -26,6 +26,16 @@ class ToggleWidget final : public ControlWidget {
   virtual void Limit(double value) override;
 
  private:
+  void PrepareContextMenu(ControlMenu& menu) final {}
+
+  virtual void OnAssigned(bool moveFader) override;
+  void OnIconClicked();
+  void OnFlashButtonPressed(int button);
+  void OnFlashButtonReleased(int button);
+  void OnFade();
+  void UpdateDisplaySettings();
+  void UpdateActivated(const theatre::SingleSourceValue &value);
+
   ControlButton flash_button_;
   Gtk::Button fade_button_;
   IconButton icon_button_;
@@ -35,15 +45,6 @@ class ToggleWidget final : public ControlWidget {
 
   sigc::scoped_connection update_display_settings_connection_;
   size_t counter_ = 0;
-
-  virtual void OnAssigned(bool moveFader) override;
-  void OnIconClicked();
-  void OnFlashButtonPressed(int button);
-  void OnFlashButtonReleased(int button);
-  void OnFade();
-  void HandleRightRelease();
-  void UpdateDisplaySettings();
-  void UpdateActivated(const theatre::SingleSourceValue &value);
 };
 
 }  // namespace glight::gui

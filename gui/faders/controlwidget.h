@@ -100,6 +100,7 @@ class ControlWidget : public Gtk::Box {
 
  protected:
   virtual void OnAssigned(bool moveFader) = 0;
+  virtual void PrepareContextMenu(ControlMenu& menu) = 0;
 
   void ShowAssignDialog();
 
@@ -132,8 +133,6 @@ class ControlWidget : public Gtk::Box {
   FaderWindow &GetFaderWindow() const { return fader_window_; }
 
   FaderState &State() const { return _state; }
-
-  std::unique_ptr<ControlMenu> &PrepareMenu();
 
  private:
   void OnTheatreUpdate();

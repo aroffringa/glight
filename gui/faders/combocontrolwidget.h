@@ -16,18 +16,19 @@ class ComboControlWidget final : public ControlWidget {
                      ControlMode mode, char key);
   ~ComboControlWidget();
 
-  virtual void Toggle() override;
-  virtual void FlashOn() override;
-  virtual void FlashOff() override;
-  virtual void SyncFader() override;
+  virtual void Toggle() final;
+  virtual void FlashOn() final;
+  virtual void FlashOff() final;
+  virtual void SyncFader() final;
 
-  virtual void Limit(double value) override;
+  virtual void Limit(double value) final;
 
   theatre::SourceValue *SelectedSource() const;
 
  private:
   Gtk::ListStore::iterator FirstNonZeroValue() const;
-  virtual void OnAssigned(bool moveFader) override;
+  virtual void OnAssigned(bool moveFader) final;
+  void PrepareContextMenu(ControlMenu& menu) final;
   void OnChanged();
   void UpdateDisplaySettings();
   void HandleRightRelease();

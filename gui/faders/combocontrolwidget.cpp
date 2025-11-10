@@ -30,15 +30,8 @@ ComboControlWidget::ComboControlWidget(FaderWindow &fader_window,
   append(description_label_);
   description_label_.show();
 
-  auto mouse_handler = [&](int, double, double) {
-    return HandleRightRelease();
-  };
   model_ = Gtk::ListStore::create(columns_);
   combo_.signal_changed().connect([&]() { OnChanged(); });
-  auto combo_gesture = Gtk::GestureClick::create();
-  combo_gesture->set_button(3);
-  combo_gesture->signal_released().connect(mouse_handler);
-  combo_.add_controller(combo_gesture);
   combo_.set_model(model_);
   combo_.set_entry_text_column(columns_.title_);
   append(combo_);
@@ -151,10 +144,8 @@ void ComboControlWidget::FlashOff() { Toggle(); }
 
 void ComboControlWidget::Limit(double value) {}
 
-void ComboControlWidget::HandleRightRelease() {
-  std::unique_ptr<ControlMenu> &menu = PrepareMenu();
-  menu->AddExtraItem("Set description...", [&]() { OpenDescriptionDialog(); });
-  menu->popup();
+void ComboControlWidget::PrepareContextMenu(ControlMenu& menu) {
+  menu.AddExtraItem("Set description...", [&]() { OpenDescriptionDialog(); });
 }
 
 void ComboControlWidget::UpdateDisplaySettings() {

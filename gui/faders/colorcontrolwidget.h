@@ -17,12 +17,12 @@ class ColorControlWidget final : public ControlWidget {
                      ControlMode mode, char key);
   ~ColorControlWidget();
 
-  virtual void Toggle() override;
-  virtual void FlashOn() override;
-  virtual void FlashOff() override;
-  virtual void SyncFader() override;
+  void Toggle() final;
+  void FlashOn() final;
+  void FlashOff() final;
+  void SyncFader() final;
 
-  virtual void Limit(double value) override;
+  void Limit(double value) final;
 
   void SetColor(theatre::Color color) {
     previous_color_ = color_selector_.GetColor();
@@ -30,11 +30,11 @@ class ColorControlWidget final : public ControlWidget {
   }
 
  private:
-  virtual void OnAssigned(bool moveFader) override;
+  void OnAssigned(bool moveFader) final;
+  void PrepareContextMenu(ControlMenu& menu) final;
   void UpdateDisplaySettings();
   void OnColorChanged();
   theatre::Color ColorFromSourceValues() const;
-  bool HandleRightRelease();
   void ShowAssignControllableDialog();
 
   Gtk::Label name_label_{"<..>"};

@@ -120,15 +120,9 @@ void ColorControlWidget::FlashOff() { Toggle(); }
 
 void ColorControlWidget::Limit(double value) {}
 
-bool ColorControlWidget::HandleRightRelease() {
-  std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
-  menu = std::make_unique<ControlMenu>(State());
-  menu->SignalAssign().connect([&]() { ShowAssignControllableDialog(); });
-  menu->SignalToggleName().connect(
-      [&](bool new_value) { State().SetDisplayName(new_value); });
-  insert_action_group("win", menu->GetActionGroup());
-  menu->popup();
-  return true;
+void ColorControlWidget::PrepareContextMenu(ControlMenu& menu) {
+  menu.SignalAssign().clear();
+  menu.SignalAssign().connect([&]() { ShowAssignControllableDialog(); });
 }
 
 void ColorControlWidget::UpdateDisplaySettings() {

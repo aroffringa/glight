@@ -41,18 +41,11 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
     _fadeUpButton.set_visible(false);
   }
 
-  auto right_release = [&](int buttons, double x, double y) {
-    return HandleRightRelease(buttons, x, y);
-  };
-
   _scale.set_inverted(true);
   _scale.set_draw_value(false);
   _scale.set_vexpand(true);
   _scale.signal_value_changed().connect(
       sigc::mem_fun(*this, &FaderWidget::onScaleChange));
-  auto scale_gesture = Gtk::GestureClick::create();
-  scale_gesture->signal_released().connect(right_release, false);
-  _scale.add_controller(scale_gesture);
   _overlay.set_child(_scale);
   _scale.show();
 
@@ -62,10 +55,6 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
   overlay_focus->signal_leave().connect([&]() { ShowFadeButtons(false); },
                                         false);
   _overlay.add_controller(overlay_focus);
-  auto overlay_gesture = Gtk::GestureClick::create();
-  overlay_gesture->set_button(3);
-  overlay_gesture->signal_released().connect(right_release, false);
-  _overlay.add_controller(overlay_gesture);
 
   append(_overlay);
   _overlay.show();
@@ -95,6 +84,7 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
   _checkButton.set_visible(state.DisplayCheckButton());
 
   auto label_gesture = Gtk::GestureClick::create();
+  label_gesture->set_button(1);
   label_gesture->signal_pressed().connect(
       [&](int, double, double) { ShowAssignDialog(); });
   _nameLabel.add_controller(label_gesture);
@@ -217,22 +207,6 @@ void FaderWidget::ShowFadeButtons(bool mouse_in) {
       _fadeDownButton.set_visible(false);
     }
   }
-}
-
-void FaderWidget::HandleRightRelease(int, double, double) {
-  std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
-  menu = std::make_unique<ControlMenu>(State());
-  menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
-  menu->SignalToggleName().connect(
-      [&](bool new_value) { State().SetDisplayName(new_value); });
-  menu->SignalToggleFlashButton().connect(
-      [&](bool new_value) { State().SetDisplayFlashButton(new_value); });
-  menu->SignalToggleCheckButton().connect(
-      [&](bool new_value) { State().SetDisplayCheckButton(new_value); });
-  menu->SignalToggleFadeButtons().connect(
-      [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
-  insert_action_group("win", menu->GetActionGroup());
-  menu->popup();
 }
 
 void FaderWidget::UpdateDisplaySettings() {

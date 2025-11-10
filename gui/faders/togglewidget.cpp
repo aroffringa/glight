@@ -26,9 +26,8 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
       flash_button_(std::string(1, key)) {
   auto gesture = Gtk::GestureClick::create();
   gesture->set_button(3);
-  auto right_press = [&](int, double, double) {};
-  auto right_release = [&](int, double, double) { HandleRightRelease(); };
 
+  flash_button_.SetSignalButton(1);
   flash_button_.SignalPress().connect(
       [this](int button) { OnFlashButtonPressed(button); });
   flash_button_.SignalRelease().connect(
@@ -36,33 +35,21 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
   append(flash_button_);
 
   fade_button_.set_image_from_icon_name("go-up");
-  auto fade_gesture = Gtk::GestureClick::create();
-  fade_gesture->set_button(3);
-  fade_gesture->signal_released().connect(right_release);
-  fade_button_.add_controller(fade_gesture);
   fade_button_.signal_clicked().connect([&]() { OnFade(); });
   append(fade_button_);
   fade_button_.set_vexpand(false);
 
   icon_button_.SignalChanged().connect([&]() { OnIconClicked(); });
-  auto icon_gesture = Gtk::GestureClick::create();
-  icon_gesture->set_button(3);
-  icon_gesture->signal_pressed().connect(right_press);
-  icon_gesture->signal_released().connect(right_release);
-  icon_button_.add_controller(icon_gesture);
   append(icon_button_);
 
   auto label_gesture = Gtk::GestureClick::create();
   name_label_.set_halign(Gtk::Align::START);
   name_label_.set_justify(Gtk::Justification::LEFT);
   name_label_.set_hexpand(true);
-  label_gesture->set_button(0);
+  label_gesture->set_button(1);
   label_gesture->signal_pressed().connect(
       [this, g = label_gesture.get()](int, double, double) {
-        if (g->get_current_button() == 3)
-          HandleRightRelease();
-        else
-          ShowAssignDialog();
+        ShowAssignDialog();
       });
   name_label_.add_controller(label_gesture);
 
@@ -87,17 +74,11 @@ void ToggleWidget::OnIconClicked() {
 }
 
 void ToggleWidget::OnFlashButtonPressed(int button) {
-  if (button == 1) {
-    icon_button_.SetActive(true);
-  }
+  icon_button_.SetActive(true);
 }
 
 void ToggleWidget::OnFlashButtonReleased(int button) {
-  if (button == 3) {
-    HandleRightRelease();
-  } else {
-    icon_button_.SetActive(false);
-  }
+  icon_button_.SetActive(false);
 }
 
 void ToggleWidget::OnFade() {
@@ -192,22 +173,6 @@ void ToggleWidget::FlashOff() { icon_button_.SetActive(false); }
 
 void ToggleWidget::Limit(double value) {
   if (value < theatre::ControlValue::MaxUInt()) icon_button_.SetActive(false);
-}
-
-void ToggleWidget::HandleRightRelease() {
-  std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
-  menu = std::make_unique<ControlMenu>(State());
-  menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
-  menu->SignalToggleName().connect(
-      [&](bool new_value) { State().SetDisplayName(new_value); });
-  menu->SignalToggleFlashButton().connect(
-      [&](bool new_value) { State().SetDisplayFlashButton(new_value); });
-  menu->SignalToggleCheckButton().connect(
-      [&](bool new_value) { State().SetDisplayCheckButton(new_value); });
-  menu->SignalToggleFadeButtons().connect(
-      [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
-  insert_action_group("win", menu->GetActionGroup());
-  menu->popup();
 }
 
 void ToggleWidget::UpdateDisplaySettings() {

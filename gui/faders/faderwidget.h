@@ -39,6 +39,8 @@ class FaderWidget final : public ControlWidget {
   Gtk::Widget &NameLabel() { return _nameLabel; }
 
  private:
+  void PrepareContextMenu(ControlMenu& menu) final {}
+
   void ShowFadeButtons(bool mouse_in);
   void onScaleChange();
   void onOnButtonClicked();
@@ -46,7 +48,6 @@ class FaderWidget final : public ControlWidget {
   void onFlashButtonReleased(int button);
   void onFadeUp();
   void onFadeDown();
-  void HandleRightRelease(int, double, double);
   void MakeMenu();
   void UpdateDisplaySettings();
 

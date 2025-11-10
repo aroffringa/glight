@@ -55,13 +55,10 @@ MoverWidget::MoverWidget(FaderWindow &fader_window, FaderState &state,
   name_label_.set_halign(Gtk::Align::START);
   name_label_.set_justify(Gtk::Justification::LEFT);
   name_label_.set_hexpand(true);
-  label_gesture->set_button(0);
+  label_gesture->set_button(1);
   label_gesture->signal_pressed().connect(
       [this, g = label_gesture.get()](int, double, double) {
-        if (g->get_current_button() == 3)
-          HandleRightRelease();
-        else
-          ShowAssignDialog();
+        ShowAssignDialog();
       });
   name_label_.add_controller(label_gesture);
   grid_.attach(name_label_, 0, 3, 3, 1);
@@ -124,23 +121,6 @@ void MoverWidget::OnAssigned(bool move_fader) {
     name += "<..>";
   }
   name_label_.set_text(name);
-}
-
-void MoverWidget::HandleRightRelease() {
-  std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
-  menu = std::make_unique<ControlMenu>(State());
-  menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
-  menu->SignalToggleName().connect(
-      [&](bool new_value) { State().SetDisplayName(new_value); });
-  menu->SignalToggleFlashButton().connect(
-      [&](bool new_value) { State().SetDisplayFlashButton(new_value); });
-  menu->SignalToggleCheckButton().connect(
-      [&](bool new_value) { State().SetDisplayCheckButton(new_value); });
-  menu->SignalToggleFadeButtons().connect(
-      [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
-  menu->set_parent(GetFaderWindow());
-  insert_action_group("win", menu->GetActionGroup());
-  menu->popup();
 }
 
 void MoverWidget::UpdateDisplaySettings() {
