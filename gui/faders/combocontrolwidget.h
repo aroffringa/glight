@@ -28,7 +28,7 @@ class ComboControlWidget final : public ControlWidget {
  private:
   Gtk::ListStore::iterator FirstNonZeroValue() const;
   virtual void OnAssigned(bool moveFader) final;
-  void PrepareContextMenu(ControlMenu& menu) final;
+  void PrepareContextMenu(ControlMenu &menu) final;
   void OnChanged();
   void UpdateDisplaySettings();
   void HandleRightRelease();

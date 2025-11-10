@@ -144,7 +144,7 @@ void ComboControlWidget::FlashOff() { Toggle(); }
 
 void ComboControlWidget::Limit(double value) {}
 
-void ComboControlWidget::PrepareContextMenu(ControlMenu& menu) {
+void ComboControlWidget::PrepareContextMenu(ControlMenu &menu) {
   menu.AddExtraItem("Set description...", [&]() { OpenDescriptionDialog(); });
 }
 

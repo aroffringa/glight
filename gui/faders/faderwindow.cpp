@@ -212,8 +212,6 @@ void FaderWindow::initializeWidgets() {
 
   set_child(_hBox);
 
-  _menuButton.set_tooltip_text("Open options menu");
-  _leftBox.append(_menuButton);
   _hBox.append(_leftBox);
 
   _controlGrid.set_column_spacing(3);
@@ -311,8 +309,14 @@ void FaderWindow::initializeMenu() {
       [&]() { onInputDeviceClicked(); });
   menu->append_section(controls_section);
 
-  _menuButton.set_menu_model(menu);
+  menu_button_.set_icon_name("open-menu-symbolic");
+  menu_button_.set_menu_model(menu);
+  menu_button_.set_tooltip_text("Control options menu");
+  menu_button_.set_has_frame(false);
   insert_action_group("win", actions);
+
+  header_bar_.pack_end(menu_button_);
+  set_titlebar(header_bar_);
 }
 
 void FaderWindow::SaveSize() {
@@ -444,8 +448,16 @@ void FaderWindow::removeFader() {
     _upperColumns.pop_back();
     if (hasLower) _lowerColumns.pop_back();
   }
+  if (state.GetFaderType() == FaderControlType::Fader) {
+    FaderWidget &fader = static_cast<FaderWidget &>(*_upperControls.back());
+    _controlGrid.remove(fader.NameLabel());
+  }
+  _controlGrid.remove(*_upperControls.back());
   _upperControls.pop_back();
-  if (hasLower) _lowerControls.pop_back();
+  if (hasLower) {
+    _controlGrid.remove(*_lowerControls.back());
+    _lowerControls.pop_back();
+  }
   _state->faders.pop_back();
 }
 

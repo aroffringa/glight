@@ -39,7 +39,7 @@ class FaderWidget final : public ControlWidget {
   Gtk::Widget &NameLabel() { return _nameLabel; }
 
  private:
-  void PrepareContextMenu(ControlMenu& menu) final {}
+  void PrepareContextMenu(ControlMenu &menu) final {}
 
   void ShowFadeButtons(bool mouse_in);
   void onScaleChange();

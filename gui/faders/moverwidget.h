@@ -31,7 +31,7 @@ class MoverWidget final : public ControlWidget {
 
  private:
   void OnAssigned(bool moveFader) final;
-  void PrepareContextMenu(ControlMenu& menu) final {}
+  void PrepareContextMenu(ControlMenu &menu) final {}
   void UpdateDisplaySettings();
   void MoveLeft();
   void MoveRight();

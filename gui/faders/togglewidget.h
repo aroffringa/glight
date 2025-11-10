@@ -26,7 +26,7 @@ class ToggleWidget final : public ControlWidget {
   virtual void Limit(double value) override;
 
  private:
-  void PrepareContextMenu(ControlMenu& menu) final {}
+  void PrepareContextMenu(ControlMenu &menu) final {}
 
   virtual void OnAssigned(bool moveFader) override;
   void OnIconClicked();

@@ -100,7 +100,7 @@ class ControlWidget : public Gtk::Box {
 
  protected:
   virtual void OnAssigned(bool moveFader) = 0;
-  virtual void PrepareContextMenu(ControlMenu& menu) = 0;
+  virtual void PrepareContextMenu(ControlMenu &menu) = 0;
 
   void ShowAssignDialog();
 

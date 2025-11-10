@@ -120,7 +120,7 @@ void ColorControlWidget::FlashOff() { Toggle(); }
 
 void ColorControlWidget::Limit(double value) {}
 
-void ColorControlWidget::PrepareContextMenu(ControlMenu& menu) {
+void ColorControlWidget::PrepareContextMenu(ControlMenu &menu) {
   menu.SignalAssign().clear();
   menu.SignalAssign().connect([&]() { ShowAssignControllableDialog(); });
 }

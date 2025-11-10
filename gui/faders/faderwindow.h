@@ -5,12 +5,13 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/dialog.h>
-#include <gtkmm/menubutton.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/grid.h>
+#include <gtkmm/headerbar.h>
 #include <gtkmm/image.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/menubutton.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/window.h>
 
@@ -147,10 +148,12 @@ class FaderWindow : public Gtk::Window {
   std::shared_ptr<Gio::SimpleAction> fade_out_action_;
   size_t _keyRowIndex;
 
+  Gtk::HeaderBar header_bar_;
+  Gtk::MenuButton menu_button_;
+
   Gtk::Box _hBox;
   Gtk::Box _leftBox{Gtk::Orientation::VERTICAL};
   Gtk::Grid _controlGrid;
-  Gtk::MenuButton _menuButton;
 
   std::vector<std::unique_ptr<ControlWidget>> _upperControls;
   std::vector<std::unique_ptr<ControlWidget>> _lowerControls;

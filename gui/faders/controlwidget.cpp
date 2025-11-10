@@ -32,28 +32,28 @@ ControlWidget::ControlWidget(FaderWindow& fader_window, FaderState& state,
   auto menu_gesture = Gtk::GestureClick::create();
   menu_gesture->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
   menu_gesture->set_button(3);
-  menu_gesture->signal_released().connect([this](int buttons, double x, double y){
-    std::unique_ptr<ControlMenu>& menu = GetFaderWindow().GetControlMenu();
-    menu = std::make_unique<ControlMenu>(State());
-    menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
-    menu->SignalUnassign().connect([&]() { Assign({}, true); });
-    menu->SignalToggleName().connect(
-        [&](bool new_value) { State().SetDisplayName(new_value); });
-    menu->SignalToggleFlashButton().connect(
-        [&](bool new_value) { State().SetDisplayFlashButton(new_value); });
-    menu->SignalToggleCheckButton().connect(
-        [&](bool new_value) { State().SetDisplayCheckButton(new_value); });
-    menu->SignalToggleFadeButtons().connect(
-        [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
-    PrepareContextMenu(*menu);
+  menu_gesture->signal_released().connect(
+      [this](int buttons, double x, double y) {
+        std::unique_ptr<ControlMenu>& menu = GetFaderWindow().GetControlMenu();
+        menu = std::make_unique<ControlMenu>(State());
+        menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
+        menu->SignalUnassign().connect([&]() { Assign({}, true); });
+        menu->SignalToggleName().connect(
+            [&](bool new_value) { State().SetDisplayName(new_value); });
+        menu->SignalToggleFlashButton().connect(
+            [&](bool new_value) { State().SetDisplayFlashButton(new_value); });
+        menu->SignalToggleCheckButton().connect(
+            [&](bool new_value) { State().SetDisplayCheckButton(new_value); });
+        menu->SignalToggleFadeButtons().connect(
+            [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
+        PrepareContextMenu(*menu);
 
-    insert_action_group("win", menu->GetActionGroup());
-    menu->set_parent(GetFaderWindow());
-    this->posi
-    menu->set_pointing_to(Gdk::Rectangle(x, y, 1, 1));
-    GetFaderWindow().insert_action_group("win", menu->GetActionGroup());
-    menu->popup();
-  });
+        insert_action_group("win", menu->GetActionGroup());
+        menu->set_parent(GetFaderWindow());
+        menu->set_pointing_to(Gdk::Rectangle(x, y, 1, 1));
+        GetFaderWindow().insert_action_group("win", menu->GetActionGroup());
+        menu->popup();
+      });
   add_controller(menu_gesture);
 }
 

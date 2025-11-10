@@ -31,7 +31,7 @@ class ColorControlWidget final : public ControlWidget {
 
  private:
   void OnAssigned(bool moveFader) final;
-  void PrepareContextMenu(ControlMenu& menu) final;
+  void PrepareContextMenu(ControlMenu &menu) final;
   void UpdateDisplaySettings();
   void OnColorChanged();
   theatre::Color ColorFromSourceValues() const;
