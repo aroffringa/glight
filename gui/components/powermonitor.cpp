@@ -23,7 +23,7 @@ PowerMonitor::PowerMonitor() {
 
 void PowerMonitor::Start() {
   timeout_connection_ = Glib::signal_timeout().connect(
-      [&]() {
+      [this]() {
         TimeUpdate();
         return true;
       },

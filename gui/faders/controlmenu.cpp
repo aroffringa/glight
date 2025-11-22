@@ -17,13 +17,13 @@ ControlMenu::ControlMenu(const FaderState& state)
 
   auto rest_section = Gio::Menu::create();
 
-  display_name_ = Toggle(rest_section, "Display label", "toggle_display_name",
+  display_name_ = Toggle(rest_section, "Label", "toggle_display_name",
                          state.DisplayName(), signal_toggle_name_);
   display_flash_button_ =
-      Toggle(rest_section, "Display label", "toggle_display_flash",
+      Toggle(rest_section, "Flash button", "toggle_display_flash",
              state.DisplayFlashButton(), signal_toggle_flash_button_);
   display_check_button_ =
-      Toggle(rest_section, "Display label", "toggle_display_check",
+      Toggle(rest_section, "Check button", "toggle_display_check",
              state.DisplayCheckButton(), signal_toggle_check_button_);
   overlay_fade_buttons_ =
       Toggle(rest_section, "Overlay fade buttons", "toggle_overlay_fade",

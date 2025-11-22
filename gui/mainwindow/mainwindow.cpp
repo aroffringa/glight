@@ -277,6 +277,7 @@ bool MainWindow::onDelete() {
     dialog.set_secondary_text("All lights will be stopped.");
     dialog.signal_response().connect([this](int response) {
       if (response == Gtk::ResponseType::OK) hide();
+      dialog_.reset();
     });
     dialog.show();
   }
@@ -312,12 +313,14 @@ void MainWindow::onMINewClicked() {
   if (_management->IsEmpty())
     NewShow();
   else {
-    Gtk::MessageDialog dialog(
+    dialog_ = std::make_unique<Gtk::MessageDialog>(
         *this, "Are you sure you want to start a new show?", false,
         Gtk::MessageType::QUESTION, Gtk::ButtonsType::OK_CANCEL);
+    Gtk::MessageDialog &dialog = static_cast<Gtk::MessageDialog &>(*dialog_);
     dialog.set_secondary_text("All lights will be stopped.");
     dialog.signal_response().connect([this](int response) {
       if (response == Gtk::ResponseType::OK) NewShow();
+      dialog_.reset();
     });
     dialog.show();
   }
@@ -371,11 +374,17 @@ void MainWindow::Open() {
   filter->add_mime_type("text/gshow+json");
   dialog.add_filter(filter);
 
-  dialog.signal_response().connect([&](int response) {
+  dialog.signal_response().connect([this](int response) {
     if (response == Gtk::ResponseType::OK) {
       Gtk::FileChooserDialog &dialog =
           static_cast<Gtk::FileChooserDialog &>(*dialog_);
-      OpenFile(dialog.get_file()->get_path());
+      const std::string filename = dialog.get_file()->get_path();
+      // resetting the dialog will delete the lambda, so store this beforehand.
+      MainWindow &me = *this;
+      dialog_.reset();
+      me.OpenFile(filename);
+    } else {
+      dialog_.reset();
     }
   });
   dialog.show();
@@ -385,12 +394,17 @@ void MainWindow::onMIOpenClicked() {
   if (_management->IsEmpty())
     Open();
   else {
-    Gtk::MessageDialog dialog(
+    dialog_ = std::make_unique<Gtk::MessageDialog>(
         *this, "Are you sure you want to open a new show?", false,
         Gtk::MessageType::QUESTION, Gtk::ButtonsType::OK_CANCEL);
+    Gtk::MessageDialog &dialog = static_cast<Gtk::MessageDialog &>(*dialog_);
     dialog.set_secondary_text("Lights will change to the new show.");
     dialog.signal_response().connect([this](int response) {
-      if (response == Gtk::ResponseType::OK) Open();
+      // Open will reset dialog_, so we should not reset it in that case
+      if (response == Gtk::ResponseType::OK)
+        Open();
+      else
+        dialog_.reset();
     });
     dialog.show();
   }
@@ -420,6 +434,7 @@ void MainWindow::onMISaveClicked() {
       std::lock_guard<std::mutex> lock(_management->Mutex());
       system::Write(filename, *_management, &_state);
     }
+    dialog_.reset();
   });
   dialog.show();
 }
@@ -460,6 +475,7 @@ void MainWindow::onMIImportClicked() {
         system::ReadOpenFixture(*_management, *root);
       }
       EmitUpdate();
+      dialog_.reset();
     }
   });
   dialog.show();
