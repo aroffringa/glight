@@ -115,6 +115,8 @@ VisualizationWidget::VisualizationWidget(theatre::Management *management,
       [&]() { Update(); });
 }
 
+VisualizationWidget::~VisualizationWidget() { context_menu_.unparent(); }
+
 void VisualizationWidget::initializeContextMenu() {
   context_menu_.SignalSetFullOn.connect([&]() {
     theatre::SetAllFixtures(*_management, _selectedFixtures, Color::White());

@@ -44,6 +44,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
                       EventTransmitter *eventTransmitter,
                       FixtureSelection *fixtureSelection,
                       MainWindow *showWindow);
+  ~VisualizationWidget();
 
   void Update() { queue_draw(); }
 

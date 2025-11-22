@@ -95,6 +95,11 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
 }
 
 FaderWidget::~FaderWidget() {
+  auto &menu = GetFaderWindow().GetControlMenu();
+  if (menu) {
+    menu->unparent();
+    menu.reset();
+  }
   update_display_settings_connection_.disconnect();
 }
 
