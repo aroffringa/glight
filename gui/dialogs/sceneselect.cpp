@@ -1,6 +1,7 @@
 #include "sceneselect.h"
 
 #include "../eventtransmitter.h"
+#include "../instance.h"
 
 #include <gtkmm/messagedialog.h>
 
@@ -10,14 +11,12 @@
 
 namespace glight::gui::dialogs {
 
-SceneSelect::SceneSelect(theatre::Management &management,
-                         EventTransmitter &event_hub)
-    : management_(management), event_hub_(event_hub) {
+SceneSelect::SceneSelect() {
   set_title("Glight - select scene");
   set_size_request(200, 400);
 
   update_controllables_connection_ =
-      event_hub.SignalUpdateControllables().connect(
+      Instance::Events().SignalUpdateControllables().connect(
           [&]() { SceneSelect::FillScenesList(); });
 
   model_ = Gtk::ListStore::create(columns_);
@@ -45,9 +44,10 @@ SceneSelect::~SceneSelect() { update_controllables_connection_.disconnect(); }
 void SceneSelect::FillScenesList() {
   model_->clear();
 
-  std::lock_guard<std::mutex> lock(management_.Mutex());
+  theatre::Management &management = Instance::Management();
+  std::lock_guard<std::mutex> lock(management.Mutex());
   const std::vector<system::TrackablePtr<theatre::Controllable>>
-      &controllables = management_.Controllables();
+      &controllables = management.Controllables();
   for (const system::TrackablePtr<theatre::Controllable> &controllable :
        controllables) {
     if (theatre::Scene *scene =

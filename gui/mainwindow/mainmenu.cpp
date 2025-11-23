@@ -105,8 +105,7 @@ MainMenu::MainMenu(Gio::ActionMap& actions) {
       Toggle(window_menu, "Fixtures", "fixture_list", false, FixtureList);
   fixture_types_ = Toggle(window_menu, "Fixture types", "fixture_types", false,
                           FixtureTypes);
-  scene_window_ = Add(window_menu, "Scene", "scene",
-                      [&]() { SceneWindow(GetState(scene_window_)); });
+  scene_window_ = Toggle(window_menu, "Scene", "scene", false, SceneWindow);
 
   auto fader_window_menu = Gio::Menu::create();
   auto fader_window_section = Gio::Menu::create();

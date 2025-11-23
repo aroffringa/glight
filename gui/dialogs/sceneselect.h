@@ -27,7 +27,7 @@ namespace glight::gui::dialogs {
  */
 class SceneSelect : public Gtk::Dialog {
  public:
-  SceneSelect(theatre::Management &management, EventTransmitter &eventHub);
+  SceneSelect();
   ~SceneSelect();
 
   void SetSelection(theatre::Scene &scene);
@@ -37,9 +37,6 @@ class SceneSelect : public Gtk::Dialog {
   void FillScenesList();
   void OnSelectButtonClicked();
   void OnSelectionChanged();
-
-  theatre::Management &management_;
-  EventTransmitter &event_hub_;
 
   sigc::connection update_controllables_connection_;
 

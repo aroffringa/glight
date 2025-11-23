@@ -98,7 +98,6 @@ MainWindow::MainWindow() : main_menu_(*this) {
 }
 
 MainWindow::~MainWindow() {
-  _sceneWindow.reset();
   _visualizationWidget.reset();
   child_windows_.Clear();
 
@@ -250,7 +249,6 @@ bool MainWindow::onKeyDown(guint keyval) {
   } else if (keyval == GDK_KEY_BackSpace) {
     // black out
   } else {
-    if (_sceneWindow->HandleKeyDown(keyval)) return true;
     bool handled = false;
     for (std::unique_ptr<FaderWindow> &cw : _faderWindows)
       if (!handled) handled = cw->HandleKeyDown(keyval);
@@ -297,8 +295,9 @@ void MainWindow::NewShow() {
   std::unique_lock<std::mutex> lock(_management->Mutex());
   _management->Clear();
   _faderWindows.clear();
-  _sceneWindow.reset();
+  child_windows_.Clear();
   _state.Clear();
+
   lock.unlock();
 
   // It's important to sent an update now, because windows might have
@@ -332,7 +331,7 @@ void MainWindow::OpenFile(const std::string &filename) {
   _management->Clear();
   _faderWindows.clear();
   _state.Clear();
-  _sceneWindow.reset();
+  child_windows_.Clear();
 
   system::Read(filename, *_management, &_state);
 
@@ -556,15 +555,12 @@ PropertiesWindow &MainWindow::OpenPropertiesWindow(
 
 void MainWindow::onSceneWindowClicked(bool active) {
   if (active) {
-    _sceneWindow = std::make_unique<SceneWindow>(*_management, *this, *this);
-    _sceneWindow->present();
-    _sceneWindow->signal_hide().connect([&]() { onHideSceneWindow(); });
+    child_windows_.Open<SceneWindow>(
+        [this]() { main_menu_.SetSceneWindowActive(false); }, *this);
   } else {
-    _sceneWindow->hide();
+    child_windows_.Hide<SceneWindow>();
   }
 }
-
-void MainWindow::onHideSceneWindow() { main_menu_.SetSceneWindowActive(false); }
 
 void MainWindow::onFullscreen() {
   if (main_menu_.FullScreenActive())

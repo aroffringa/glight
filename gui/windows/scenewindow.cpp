@@ -16,6 +16,7 @@
 #include "theatre/scenes/scene.h"
 
 #include "gui/eventtransmitter.h"
+#include "gui/instance.h"
 
 #include "gui/dialogs/inputselectdialog.h"
 #include "gui/dialogs/stringinputdialog.h"
@@ -40,10 +41,8 @@ Scene *FirstScene(glight::theatre::Management &management) {
 
 namespace glight::gui {
 
-SceneWindow::SceneWindow(theatre::Management &management,
-                         MainWindow &parentWindow, EventTransmitter &eventHub)
-    : _management(management),
-      _eventHub(eventHub),
+SceneWindow::SceneWindow(MainWindow &parentWindow)
+    : _management(Instance::Management()),
       _audioLabel("Audio file: -"),
       _sceneItemUButtonBox(Gtk::Orientation::VERTICAL),
       _selectControllableButton("Select..."),
@@ -182,8 +181,8 @@ SceneWindow::SceneWindow(theatre::Management &management,
   _timeoutConnection = Glib::signal_timeout().connect(
       sigc::mem_fun(*this, &SceneWindow::onTimeout), 20);
 
-  _updateConnection =
-      eventHub.SignalUpdateControllables().connect([&]() { Update(); });
+  _updateConnection = Instance::Events().SignalUpdateControllables().connect(
+      [&]() { Update(); });
   Update();
 
   if (Scene *first_scene = FirstScene(_management); first_scene)
@@ -759,13 +758,15 @@ void SceneWindow::NewScene() {
       }
       _sourceValue = &_management.AddSourceValue(scene, 0);
       SetSelectedScene(scene);
-      _eventHub.EmitUpdate();
+      Instance::Events().EmitUpdate();
     }
+    dialog_.reset();
   });
+  dialog.show();
 }
 
 void SceneWindow::LoadScene() {
-  dialog_ = std::make_unique<dialogs::SceneSelect>(_management, _eventHub);
+  dialog_ = std::make_unique<dialogs::SceneSelect>();
   dialogs::SceneSelect &dialog = static_cast<dialogs::SceneSelect &>(*dialog_);
   dialog.SetSelection(*_selectedScene);
   dialog.signal_response().connect([this](int response) {

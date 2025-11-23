@@ -11,12 +11,16 @@ namespace glight::gui::windows {
 
 class ChildWindowList {
  public:
-  template <typename WindowType>
-  WindowType& Open(std::function<void()> on_close = []() {}) {
+  template <typename WindowType, typename... WindowArguments>
+  WindowType& Open(
+      std::function<void()> on_close = []() {},
+      WindowArguments&&... arguments) {
     auto iter = Get<WindowType>();
     if (iter == children_.end()) {
       WindowData& data = children_.emplace_back(
-          WindowData{std::make_unique<WindowType>(), std::move(on_close)});
+          WindowData{std::make_unique<WindowType>(
+                         std::forward<WindowArguments>(arguments)...),
+                     std::move(on_close)});
       ChildWindow* pointer = data.window.get();
       data.window->signal_close_request().connect(
           [this, pointer]() -> bool {

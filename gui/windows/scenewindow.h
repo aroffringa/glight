@@ -18,6 +18,7 @@
 #include <gtkmm/window.h>
 
 #include "gui/components/audiowidget.h"
+#include "gui/windows/childwindow.h"
 
 #include "theatre/forwards.h"
 
@@ -26,13 +27,11 @@
 
 namespace glight::gui {
 
-class EventTransmitter;
 class MainWindow;
 
-class SceneWindow : public Gtk::Window {
+class SceneWindow : public windows::ChildWindow {
  public:
-  SceneWindow(theatre::Management &management, MainWindow &parentWindow,
-              EventTransmitter &eventHub);
+  SceneWindow(MainWindow &parentWindow);
   ~SceneWindow();
 
   bool HandleKeyDown(char key);
@@ -41,7 +40,6 @@ class SceneWindow : public Gtk::Window {
 
  private:
   theatre::Management &_management;
-  EventTransmitter &_eventHub;
 
   struct SceneItemsListColumns : public Gtk::TreeModelColumnRecord {
     SceneItemsListColumns() {

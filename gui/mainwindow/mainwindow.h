@@ -37,7 +37,6 @@ class DesignWizard;
 class FaderWindow;
 class ObjectListFrame;
 class PropertiesWindow;
-class SceneWindow;
 class VisualizationWidget;
 
 /**
@@ -106,7 +105,6 @@ class MainWindow : public Gtk::ApplicationWindow, public EventTransmitter {
   void onFaderWindowSelected(FaderSetState &state);
   FaderWindow *getFaderWindow(const FaderSetState &state);
   void onSceneWindowClicked(bool active);
-  void onHideSceneWindow();
 
   size_t nextControlKeyRow() const;
 
@@ -119,7 +117,6 @@ class MainWindow : public Gtk::ApplicationWindow, public EventTransmitter {
 
   std::vector<std::unique_ptr<FaderWindow>> _faderWindows;
   std::unique_ptr<DesignWizard> _designWizard;
-  std::unique_ptr<SceneWindow> _sceneWindow;
   windows::ChildWindowList child_windows_;
 
   std::unique_ptr<theatre::Management> _management;

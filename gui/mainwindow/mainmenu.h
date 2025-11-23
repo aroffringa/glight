@@ -90,7 +90,7 @@ class MainMenu : public Gtk::PopoverMenuBar {
   bool PowerMonitorActive() const { return GetState(power_monitor_); }
   void SetPowerMonitorActive(bool active) { SetState(power_monitor_, active); }
 
-  void SetSceneWindowActive(bool active) { GetState(scene_window_); }
+  void SetSceneWindowActive(bool active) { SetState(scene_window_, active); }
 
   void SetFaderList(const std::vector<std::unique_ptr<FaderSetState>>& faders);
 
