@@ -9,7 +9,7 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     libaubio-dev \
     libboost-test-dev \
     libflac++-dev \
-    libgtkmm-3.0-dev \
+    libgtkmm-4.0-dev \
     libola-dev
 
 ADD . /src
