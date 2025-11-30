@@ -26,8 +26,7 @@ SettingsWindow::SettingsWindow() {
 
   MakeAudioPage();
 
-  add(notebook_);
-  notebook_.show_all();
+  set_child(notebook_);
 
   FillUniverses();
   UpdateAfterSelection();
@@ -56,33 +55,30 @@ void SettingsWindow::MakeDmxPage() {
   dmx_page_.attach(ola_universe_combo_, 1, 2, 1, 1);
 
   auto save_universe = [&]() { SaveSelectedUniverse(); };
-  Gtk::RadioButton::Group in_out_group;
 
-  dmx_none_rb_.set_group(in_out_group);
-  dmx_none_rb_.signal_clicked().connect(save_universe);
+  dmx_none_rb_.signal_toggled().connect(save_universe);
   dmx_page_.attach(dmx_none_rb_, 0, 3, 2, 1);
 
   // DMX input settings
-  dmx_input_rb_.set_group(in_out_group);
-  dmx_input_rb_.signal_clicked().connect(save_universe);
+  dmx_input_rb_.set_group(dmx_none_rb_);
+  dmx_input_rb_.signal_toggled().connect(save_universe);
   dmx_page_.attach(dmx_input_rb_, 0, 4, 2, 1);
-  Gtk::RadioButton::Group input_function_group;
-  dmx_disconnected_input_rb_.set_group(input_function_group);
-  dmx_disconnected_input_rb_.signal_clicked().connect(save_universe);
-  dmx_input_function_box_.pack_start(dmx_disconnected_input_rb_);
-  dmx_fader_control_rb_.set_group(input_function_group);
-  dmx_fader_control_rb_.signal_clicked().connect(save_universe);
-  dmx_input_function_box_.pack_start(dmx_fader_control_rb_);
-  dmx_merge_rb_.set_group(input_function_group);
-  dmx_merge_rb_.signal_clicked().connect(save_universe);
-  dmx_input_function_box_.pack_start(dmx_merge_rb_);
-  dmx_input_function_frame_.add(dmx_input_function_box_);
+
+  dmx_disconnected_input_rb_.signal_toggled().connect(save_universe);
+  dmx_input_function_box_.append(dmx_disconnected_input_rb_);
+  dmx_fader_control_rb_.set_group(dmx_disconnected_input_rb_);
+  dmx_fader_control_rb_.signal_toggled().connect(save_universe);
+  dmx_input_function_box_.append(dmx_fader_control_rb_);
+  dmx_merge_rb_.set_group(dmx_disconnected_input_rb_);
+  dmx_merge_rb_.signal_toggled().connect(save_universe);
+  dmx_input_function_box_.append(dmx_merge_rb_);
+  dmx_input_function_frame_.set_child(dmx_input_function_box_);
   dmx_input_function_frame_.set_hexpand(true);
   dmx_page_.attach(dmx_input_function_frame_, 1, 5, 1, 1);
 
   // DMX output settings
-  dmx_output_rb_.set_group(in_out_group);
-  dmx_output_rb_.signal_clicked().connect(save_universe);
+  dmx_output_rb_.set_group(dmx_none_rb_);
+  dmx_output_rb_.signal_toggled().connect(save_universe);
   dmx_page_.attach(dmx_output_rb_, 0, 6, 2, 1);
   notebook_.append_page(dmx_page_, "DMX");
 }
@@ -129,7 +125,7 @@ void SettingsWindow::MakeAudioPage() {
   }
   input_devices_combo_.signal_changed().connect([&]() { SetInputAudio(); });
   output_devices_combo_.signal_changed().connect([&]() { SetOutputAudio(); });
-  audio_page_label_.set_line_wrap(true);
+  audio_page_label_.set_wrap(true);
   audio_page_label_.set_max_width_chars(40);
   audio_page_label_.set_margin_start(8);
   audio_page_label_.set_margin_end(8);
@@ -215,7 +211,7 @@ void SettingsWindow::UpdateAfterSelection() {
     dmx_input_rb_.set_sensitive(true);
     dmx_output_rb_.set_sensitive(true);
 
-    Gtk::TreeRow row(iter);
+    Gtk::TreeRow row(*iter);
     const size_t universe = row[universe_columns_.universe_];
     const theatre::devices::UniverseMap& universes =
         Instance::Management().GetUniverses();
@@ -267,7 +263,7 @@ void SettingsWindow::SaveSelectedUniverse() {
   Gtk::TreeModel::iterator iter =
       universe_list_view_.get_selection()->get_selected();
   if (iter && recursion_lock_.IsFirst()) {
-    Gtk::TreeRow row(iter);
+    Gtk::TreeRow row(*iter);
     const size_t universe_index = row[universe_columns_.universe_];
     theatre::devices::UniverseMap& universes =
         Instance::Management().GetUniverses();
@@ -306,7 +302,7 @@ void SettingsWindow::SaveSelectedOlaUniverse() {
     system::OptionalNumber<size_t> ola_universe;
     if (ola_universe_combo_.get_active_text() != "-")
       ola_universe = std::atoi(ola_universe_combo_.get_active_text().c_str());
-    Gtk::TreeRow row(iter);
+    Gtk::TreeRow row(*iter);
     const size_t universe_index = row[universe_columns_.universe_];
     theatre::devices::UniverseMap& universes =
         Instance::Management().GetUniverses();

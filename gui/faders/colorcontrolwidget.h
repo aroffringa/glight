@@ -6,7 +6,7 @@
 #include "gui/components/colorselectwidget.h"
 
 #include <gtkmm/box.h>
-#include <gtkmm/eventbox.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/label.h>
 
 namespace glight::gui {
@@ -17,12 +17,12 @@ class ColorControlWidget final : public ControlWidget {
                      ControlMode mode, char key);
   ~ColorControlWidget();
 
-  virtual void Toggle() override;
-  virtual void FlashOn() override;
-  virtual void FlashOff() override;
-  virtual void SyncFader() override;
+  void Toggle() final;
+  void FlashOn() final;
+  void FlashOff() final;
+  void SyncFader() final;
 
-  virtual void Limit(double value) override;
+  void Limit(double value) final;
 
   void SetColor(theatre::Color color) {
     previous_color_ = color_selector_.GetColor();
@@ -30,15 +30,13 @@ class ColorControlWidget final : public ControlWidget {
   }
 
  private:
-  virtual void OnAssigned(bool moveFader) override;
+  void OnAssigned(bool moveFader) final;
+  void PrepareContextMenu(ControlMenu &menu) final;
   void UpdateDisplaySettings();
   void OnColorChanged();
   theatre::Color ColorFromSourceValues() const;
-  bool HandleRightRelease(GdkEventButton *event);
   void ShowAssignControllableDialog();
 
-  Gtk::HBox box_;
-  Gtk::EventBox event_box_;
   Gtk::Label name_label_{"<..>"};
   ColorSelectWidget color_selector_;
 
@@ -46,6 +44,7 @@ class ColorControlWidget final : public ControlWidget {
 
   sigc::connection update_display_settings_connection_;
   theatre::Color previous_color_ = theatre::Color::Black();
+  std::unique_ptr<Gtk::Dialog> dialog_;
 };
 
 }  // namespace glight::gui

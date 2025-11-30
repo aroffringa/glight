@@ -12,7 +12,7 @@
 #include <gtkmm/treeview.h>
 
 #include "gui/recursionlock.h"
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 
 #include "gui/components/inputselectwidget.h"
 
@@ -45,10 +45,10 @@ class PresetCollectionWindow : public PropertiesWindow {
   bool selectedPresetIndex(size_t &index);
   void selectPreset(size_t index);
 
-  Gtk::HBox _topBox;
+  Gtk::Box _topBox;
   InputSelectWidget _inputSelector;
 
-  Gtk::VBox _buttonBox;
+  Gtk::Box _buttonBox{Gtk::Orientation::VERTICAL};
   Gtk::Button _addPresetButton;
   Gtk::Button _removePresetButton;
 
@@ -74,7 +74,7 @@ class PresetCollectionWindow : public PropertiesWindow {
   RecursionLock _recursionLock;
 
   theatre::PresetCollection *_presetCollection;
-  ScopedConnection update_connection_;
+  sigc::scoped_connection update_connection_;
 };
 
 }  // namespace glight::gui

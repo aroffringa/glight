@@ -16,16 +16,15 @@ using theatre::NamedObject;
 
 GroupWindow::GroupWindow(theatre::FixtureGroup& group)
     : group_(group), fixture_list_(), reorder_widget_() {
-  box_.pack_start(fixture_list_);
+  box_.append(fixture_list_);
   add_button_.signal_clicked().connect([&]() { Append(); });
-  box_.pack_start(add_button_, false, false);
-  add_button_.set_valign(Gtk::Align::ALIGN_CENTER);
+  box_.append(add_button_);
+  add_button_.set_valign(Gtk::Align::CENTER);
   add_button_.set_image_from_icon_name("go-next");
-  box_.pack_start(reorder_widget_);
+  box_.append(reorder_widget_);
   reorder_widget_.SignalChanged().connect([&]() { StoreGroup(); });
   group_delete_connection_ = group.SignalDelete().connect([&]() { hide(); });
-  add(box_);
-  show_all_children();
+  set_child(box_);
   LoadGroup();
 }
 

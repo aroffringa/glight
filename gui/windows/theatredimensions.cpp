@@ -24,12 +24,11 @@ TheatreDimensions::TheatreDimensions() {
   fixture_size_entry_.signal_changed().connect(enable_set);
   grid_.attach(fixture_size_entry_, 1, 3);
   set_button_.signal_clicked().connect([&]() { StoreValues(); });
-  button_box_.pack_end(set_button_);
+  button_box_.append(set_button_);
   grid_.attach(button_box_, 0, 4, 2, 1);
-  add(grid_);
+  set_child(grid_);
   FillValues();
   set_button_.set_sensitive(false);
-  show_all_children();
 }
 
 void TheatreDimensions::FillValues() {

@@ -17,18 +17,18 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
       _sustainCB("Sustain"),
       _maxRepeatCB("Max repeats:"),
       _maxRepeatCount(Gtk::Adjustment::create(1.0, 1.0, 100.0, 1.0),
-                      Gtk::ORIENTATION_HORIZONTAL),
+                      Gtk::Orientation::HORIZONTAL),
 
       _delayTriggerCheckButton("Delayed trigger (s):"),
       _triggerDuration(500.0),
 
       _synchronizedTriggerCheckButton("Synchronized, count:"),
       _synchronizationsCount(Gtk::Adjustment::create(1.0, 1.0, 100.0, 1.0),
-                             Gtk::ORIENTATION_HORIZONTAL),
+                             Gtk::Orientation::HORIZONTAL),
 
       _beatTriggerCheckButton("Trigger by beat, count:"),
       _beatSpeed(Gtk::Adjustment::create(0.25, 0.25, 4.0, 0.25),
-                 Gtk::ORIENTATION_HORIZONTAL),
+                 Gtk::Orientation::HORIZONTAL),
 
       _transitionSpeedLabel("Transition speed"),
       _transitionDuration("Duration (s):", 500.0),
@@ -42,27 +42,27 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
 
   _inputSelector.SignalSelectionChange().connect(sigc::mem_fun(
       *this, &TimeSequencePropertiesWindow::onInputSelectionChanged));
-  _topBox.pack_start(_inputSelector);
+  _topBox.append(_inputSelector);
   _inputSelector.set_size_request(200, 200);
 
   _addStepButton.set_image_from_icon_name("go-next");
   _addStepButton.set_sensitive(false);
   _addStepButton.signal_clicked().connect(
       sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onAddStep));
-  _buttonBox.pack_start(_addStepButton, false, false, 4);
+  _buttonBox.append(_addStepButton);
 
   _removeStepButton.set_image_from_icon_name("go-previous");
   _removeStepButton.signal_clicked().connect(
       sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onRemoveStep));
-  _buttonBox.pack_start(_removeStepButton, false, false, 4);
+  _buttonBox.append(_removeStepButton);
 
-  _buttonBox.set_valign(Gtk::ALIGN_CENTER);
-  _topBox.pack_start(_buttonBox);
+  _buttonBox.set_valign(Gtk::Align::CENTER);
+  _topBox.append(_buttonBox);
 
-  _sustainCB.signal_clicked().connect(
+  _sustainCB.signal_toggled().connect(
       sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onSustainChanged));
   _grid.attach(_sustainCB, 0, 0, 2, 1);
-  _maxRepeatCB.signal_clicked().connect(
+  _maxRepeatCB.signal_toggled().connect(
       sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onRepeatChanged));
   _grid.attach(_maxRepeatCB, 0, 1, 1, 1);
   _maxRepeatCount.signal_value_changed().connect(
@@ -77,24 +77,23 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
   fillStepsList();
   _stepsView.get_selection()->signal_changed().connect(sigc::mem_fun(
       *this, &TimeSequencePropertiesWindow::onSelectedStepChanged));
-  _stepsScrolledWindow.add(_stepsView);
+  _stepsScrolledWindow.set_child(_stepsView);
 
   _stepsScrolledWindow.set_size_request(200, 200);
-  _stepsScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+  _stepsScrolledWindow.set_policy(Gtk::PolicyType::NEVER,
+                                  Gtk::PolicyType::AUTOMATIC);
   _grid.attach(_stepsScrolledWindow, 0, 2, 2, 1);
 
-  Gtk::RadioButtonGroup group;
   _grid.attach(_delayTriggerCheckButton, 0, 3, 1, 1);
-  _delayTriggerCheckButton.set_group(group);
-  _delayTriggerCheckButton.signal_clicked().connect(sigc::mem_fun(
+  _delayTriggerCheckButton.signal_toggled().connect(sigc::mem_fun(
       *this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
   _grid.attach(_triggerDuration, 1, 3, 1, 1);
   _triggerDuration.SignalValueChanged().connect(sigc::mem_fun(
       *this, &TimeSequencePropertiesWindow::onTriggerSpeedChanged));
 
   _grid.attach(_synchronizedTriggerCheckButton, 0, 4, 1, 1);
-  _synchronizedTriggerCheckButton.set_group(group);
-  _synchronizedTriggerCheckButton.signal_clicked().connect(sigc::mem_fun(
+  _synchronizedTriggerCheckButton.set_group(_delayTriggerCheckButton);
+  _synchronizedTriggerCheckButton.signal_toggled().connect(sigc::mem_fun(
       *this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
   _grid.attach(_synchronizationsCount, 1, 4, 1, 1);
   _synchronizationsCount.set_value(1.0);
@@ -102,8 +101,8 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
       sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onSyncCountChanged));
 
   _grid.attach(_beatTriggerCheckButton, 0, 5, 1, 1);
-  _beatTriggerCheckButton.set_group(group);
-  _beatTriggerCheckButton.signal_clicked().connect(sigc::mem_fun(
+  _beatTriggerCheckButton.set_group(_delayTriggerCheckButton);
+  _beatTriggerCheckButton.signal_toggled().connect(sigc::mem_fun(
       *this, &TimeSequencePropertiesWindow::onTriggerTypeChanged));
   _grid.attach(_beatSpeed, 1, 5, 1, 1);
   _beatSpeed.set_hexpand(true);
@@ -111,7 +110,7 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
   _beatSpeed.signal_value_changed().connect(
       sigc::mem_fun(*this, &TimeSequencePropertiesWindow::onBeatSpeedChanged));
 
-  _transitionSpeedLabel.set_halign(Gtk::ALIGN_END);
+  _transitionSpeedLabel.set_halign(Gtk::Align::END);
   _grid.attach(_transitionDuration, 0, 6, 2, 1);
   _transitionDuration.SignalValueChanged().connect(sigc::mem_fun(
       *this, &TimeSequencePropertiesWindow::onTransitionSpeedChanged));
@@ -121,9 +120,8 @@ TimeSequencePropertiesWindow::TimeSequencePropertiesWindow(
   _grid.attach(_transitionTypeBox, 0, 7, 2, 1);
 
   _grid.set_hexpand(true);
-  _topBox.add(_grid);
-  add(_topBox);
-  show_all_children();
+  _topBox.append(_grid);
+  set_child(_topBox);
 
   load();
   onSelectedStepChanged();
@@ -155,7 +153,7 @@ theatre::TimeSequence::Step *TimeSequencePropertiesWindow::selectedStep() {
 }
 
 void TimeSequencePropertiesWindow::selectStep(size_t index) {
-  _stepsView.get_selection()->select(_stepsStore->children()[index]);
+  _stepsView.get_selection()->select(_stepsStore->children()[index].get_iter());
 }
 
 void TimeSequencePropertiesWindow::fillStepsList() {
@@ -170,7 +168,7 @@ void TimeSequencePropertiesWindow::fillStepsList() {
   _stepsStore->clear();
   for (size_t i = 0; i != _timeSequence->Size(); ++i) {
     Gtk::TreeModel::iterator iter = _stepsStore->append();
-    const Gtk::TreeModel::Row &row = *iter;
+    Gtk::TreeModel::Row &row = *iter;
     theatre::Input &input = _timeSequence->Sequence().List()[i];
     row[_stepsListColumns._title] =
         input.GetControllable()->InputName(input.InputIndex());
@@ -178,7 +176,7 @@ void TimeSequencePropertiesWindow::fillStepsList() {
         _timeSequence->GetStep(i).trigger.ToString();
     row[_stepsListColumns._step] = i;
     if (hasSelection && i == index) {
-      _stepsView.get_selection()->select(row);
+      _stepsView.get_selection()->select(row.get_iter());
     }
   }
   token.Release();
@@ -199,11 +197,11 @@ void TimeSequencePropertiesWindow::onAddStep() {
     if (Instance::Management().HasCycle()) {
       _timeSequence->RemoveStep(_timeSequence->Size() - 1);
       lock.unlock();
-      Gtk::MessageDialog dialog(
+      dialog_ = std::make_unique<Gtk::MessageDialog>(
           "Can not add this object to the time sequence: "
           "this would create a cycle in the connections.",
-          false, Gtk::MESSAGE_ERROR);
-      dialog.run();
+          false, Gtk::MessageType::ERROR);
+      dialog_->show();
     } else {
       lock.unlock();
       fillStepsList();

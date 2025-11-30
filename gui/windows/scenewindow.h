@@ -3,21 +3,22 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/dialog.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/radiotoolbutton.h>
 #include <gtkmm/scale.h>
+#include <gtkmm/separator.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm/separatortoolitem.h>
-#include <gtkmm/toolbar.h>
-#include <gtkmm/toolbutton.h>
+#include <gtkmm/togglebutton.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
 #include "gui/components/audiowidget.h"
+#include "gui/windows/childwindow.h"
 
 #include "theatre/forwards.h"
 
@@ -26,13 +27,11 @@
 
 namespace glight::gui {
 
-class EventTransmitter;
 class MainWindow;
 
-class SceneWindow : public Gtk::Window {
+class SceneWindow : public windows::ChildWindow {
  public:
-  SceneWindow(theatre::Management &management, MainWindow &parentWindow,
-              EventTransmitter &eventHub);
+  SceneWindow(MainWindow &parentWindow);
   ~SceneWindow();
 
   bool HandleKeyDown(char key);
@@ -41,7 +40,6 @@ class SceneWindow : public Gtk::Window {
 
  private:
   theatre::Management &_management;
-  EventTransmitter &_eventHub;
 
   struct SceneItemsListColumns : public Gtk::TreeModelColumnRecord {
     SceneItemsListColumns() {
@@ -72,7 +70,7 @@ class SceneWindow : public Gtk::Window {
   } _controllablesListColumns;
 
   template <typename SigType>
-  void addTool(Gtk::ToolButton &tool, const char *label, const char *tooltip,
+  void addTool(Gtk::Button &tool, const char *label, const char *tooltip,
                const char *icon, const SigType &sig) {
     tool.set_label(label);
     tool.set_tooltip_text(tooltip);
@@ -80,36 +78,36 @@ class SceneWindow : public Gtk::Window {
     tool.signal_clicked().connect(sig);
     _toolbar.append(tool);
   }
-  Gtk::ToolButton new_scene_tb_;
-  Gtk::ToolButton load_scene_tb_;
-  Gtk::SeparatorToolItem separator1_;
-  Gtk::ToolButton rewind_tb_;
-  Gtk::ToolButton pause_tb_;
-  Gtk::ToolButton start_tb_;
-  Gtk::ToolButton seek_backward_tb_;
-  Gtk::ToolButton seek_forward_tb_;
-  Gtk::ToolButton change_audio_tb_;
-  Gtk::SeparatorToolItem separator2_;
-  Gtk::RadioToolButton move_cursor_tb_;
-  Gtk::RadioToolButton set_start_tb_;
-  Gtk::RadioToolButton set_end_tb_;
-  Gtk::RadioToolButton add_key_tb_;
-  Gtk::RadioToolButton add_item_tb_;
+  Gtk::Button new_scene_tb_;
+  Gtk::Button load_scene_tb_;
+  Gtk::Separator separator1_;
+  Gtk::Button rewind_tb_;
+  Gtk::Button pause_tb_;
+  Gtk::Button start_tb_;
+  Gtk::Button seek_backward_tb_;
+  Gtk::Button seek_forward_tb_;
+  Gtk::Button change_audio_tb_;
+  Gtk::Separator separator2_;
+  Gtk::ToggleButton move_cursor_tb_;
+  Gtk::ToggleButton set_start_tb_;
+  Gtk::ToggleButton set_end_tb_;
+  Gtk::ToggleButton add_key_tb_;
+  Gtk::ToggleButton add_item_tb_;
 
-  Gtk::Toolbar _toolbar;
+  Gtk::Box _toolbar;
   AudioWidget _audioWidget;
   Gtk::TreeView _sceneItemsListView;
   Glib::RefPtr<Gtk::ListStore> _sceneItemsListModel;
   Gtk::ComboBox _controllablesComboBox;
   Glib::RefPtr<Gtk::ListStore> _controllablesListModel;
   theatre::Controllable *_latestSelectedControllable = nullptr;
-  Gtk::VBox _vBox;
-  Gtk::HBox _hBox;
-  Gtk::HBox _audioBox;
+  Gtk::Box _vBox{Gtk::Orientation::VERTICAL};
+  Gtk::Box _hBox;
+  Gtk::Box _audioBox;
   Gtk::Label _audioLabel;
   Gtk::ScrolledWindow _listScrolledWindow;
-  Gtk::VBox _sceneItemBox;
-  Gtk::HBox _scalesBox;
+  Gtk::Box _sceneItemBox{Gtk::Orientation::VERTICAL};
+  Gtk::Box _scalesBox;
   Gtk::Box _sceneItemUButtonBox;
 
   Gtk::Button _selectControllableButton;
@@ -120,6 +118,8 @@ class SceneWindow : public Gtk::Window {
   Gtk::Button _restoreButton;
   Gtk::Button _setFadeSpeedButton;
   Gtk::Scale _startScale, _endScale;
+  std::unique_ptr<Gtk::Dialog> dialog_;
+  Gtk::Entry dialog_entry_;
 
   sigc::connection _updateConnection;
   sigc::connection _timeoutConnection;
@@ -130,7 +130,7 @@ class SceneWindow : public Gtk::Window {
   theatre::SourceValue *_sourceValue;
   bool _isUpdating;
 
-  bool NewScene();
+  void NewScene();
   void LoadScene();
   void Update();
 
@@ -138,7 +138,7 @@ class SceneWindow : public Gtk::Window {
   void createControllablesList();
   void fillSceneItemList();
   void setSceneItemListRow(theatre::SceneItem *sceneItem,
-                           const Gtk::TreeModel::Row &row) const;
+                           Gtk::TreeModel::Row &row) const;
   void updateSelectedSceneItems();
   void fillControllablesList();
   void addKey(theatre::KeySceneLevel level);

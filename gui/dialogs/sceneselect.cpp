@@ -1,10 +1,9 @@
 #include "sceneselect.h"
 
 #include "../eventtransmitter.h"
+#include "../instance.h"
 
-#include <gtkmm/main.h>
 #include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
 
 #include "../../theatre/scenes/scene.h"
 
@@ -12,14 +11,12 @@
 
 namespace glight::gui::dialogs {
 
-SceneSelect::SceneSelect(theatre::Management &management,
-                         EventTransmitter &event_hub)
-    : management_(management), event_hub_(event_hub) {
+SceneSelect::SceneSelect() {
   set_title("Glight - select scene");
   set_size_request(200, 400);
 
   update_controllables_connection_ =
-      event_hub.SignalUpdateControllables().connect(
+      Instance::Events().SignalUpdateControllables().connect(
           [&]() { SceneSelect::FillScenesList(); });
 
   model_ = Gtk::ListStore::create(columns_);
@@ -28,15 +25,15 @@ SceneSelect::SceneSelect(theatre::Management &management,
   view_.append_column("Scene", columns_.title_);
   view_.append_column("Items", columns_.items_);
   FillScenesList();
-  scrolled_window_.add(view_);
+  scrolled_window_.set_child(view_);
 
-  scrolled_window_.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-  get_content_area()->pack_start(scrolled_window_);
-  scrolled_window_.show_all();
+  scrolled_window_.set_policy(Gtk::PolicyType::NEVER,
+                              Gtk::PolicyType::AUTOMATIC);
+  get_content_area()->append(scrolled_window_);
 
-  select_button_ = add_button("Select", Gtk::RESPONSE_OK);
+  select_button_ = add_button("Select", Gtk::ResponseType::OK);
   select_button_->set_sensitive(false);
-  add_button("Cancel", Gtk::RESPONSE_CANCEL);
+  add_button("Cancel", Gtk::ResponseType::CANCEL);
 
   view_.get_selection()->signal_changed().connect(
       [&]() { OnSelectionChanged(); });
@@ -47,16 +44,17 @@ SceneSelect::~SceneSelect() { update_controllables_connection_.disconnect(); }
 void SceneSelect::FillScenesList() {
   model_->clear();
 
-  std::lock_guard<std::mutex> lock(management_.Mutex());
+  theatre::Management &management = Instance::Management();
+  std::lock_guard<std::mutex> lock(management.Mutex());
   const std::vector<system::TrackablePtr<theatre::Controllable>>
-      &controllables = management_.Controllables();
+      &controllables = management.Controllables();
   for (const system::TrackablePtr<theatre::Controllable> &controllable :
        controllables) {
     if (theatre::Scene *scene =
             dynamic_cast<theatre::Scene *>(controllable.Get());
         scene) {
       Gtk::TreeModel::iterator iter = model_->append();
-      const Gtk::TreeModel::Row &row = *iter;
+      Gtk::TreeModel::Row &row = *iter;
       row[columns_.title_] = scene->Name();
       row[columns_.items_] = scene->SceneItems().size();
       row[columns_.scene_] = scene;
@@ -69,8 +67,8 @@ void SceneSelect::SetSelection(theatre::Scene &scene) {
   selection->unselect_all();
 
   for (const Gtk::TreeRow &row : model_->children()) {
-    if ((*row)[columns_.scene_] == &scene) {
-      selection->select(row);
+    if (row[columns_.scene_] == &scene) {
+      selection->select(row.get_iter());
       break;
     }
   }

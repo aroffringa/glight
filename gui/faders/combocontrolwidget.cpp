@@ -1,5 +1,7 @@
 #include "combocontrolwidget.h"
 
+#include <gtkmm/gestureclick.h>
+
 #include "controlmenu.h"
 #include "faderwindow.h"
 
@@ -24,34 +26,22 @@ ComboControlWidget::ComboControlWidget(FaderWindow &fader_window,
                                        FaderState &state, ControlMode mode,
                                        char key)
     : ControlWidget(fader_window, state, mode) {
-  box_.pack_start(description_label_, true, true, 0);
+  set_orientation(Gtk::Orientation::VERTICAL);
+  append(description_label_);
   description_label_.show();
 
-  auto mouse_handler = [&](GdkEventButton *button) {
-    return HandleRightRelease(button);
-  };
   model_ = Gtk::ListStore::create(columns_);
   combo_.signal_changed().connect([&]() { OnChanged(); });
-  combo_.signal_button_release_event().connect(mouse_handler);
   combo_.set_model(model_);
-  combo_.pack_start(columns_.title_);
-  box_.pack_start(combo_);
+  combo_.set_entry_text_column(columns_.title_);
+  append(combo_);
   combo_.show();
 
-  event_box_.add(box_);
-  box_.show();
-
-  event_box_.set_events(Gdk::BUTTON_PRESS_MASK);
-  event_box_.signal_button_press_event().connect([&](GdkEventButton *button) {
-    if (button->button == 1) {
-      ShowAssignDialog();
-      return true;
-    }
-    return false;
-  });
-  event_box_.signal_button_release_event().connect(mouse_handler);
-  add(event_box_);
-  event_box_.show();
+  auto gesture = Gtk::GestureClick::create();
+  gesture->set_button(1);
+  gesture->signal_pressed().connect(
+      [&](int, double, double) { ShowAssignDialog(); });
+  add_controller(gesture);
 
   SetDefaultSourceCount(0);
   UpdateDisplaySettings();
@@ -64,7 +54,7 @@ ComboControlWidget::~ComboControlWidget() {
 }
 
 SourceValue *ComboControlWidget::SelectedSource() const {
-  Gtk::TreeModel::iterator selected = combo_.get_active();
+  Gtk::TreeModel::const_iterator selected = combo_.get_active();
   if (selected)
     return (*selected)[columns_.source_];
   else
@@ -113,7 +103,7 @@ Gtk::ListStore::iterator ComboControlWidget::FirstNonZeroValue() const {
     SourceValue *source = child[columns_.source_];
     if (source) {
       if (GetSingleSourceValue(*source).Value()) {
-        return child;
+        return child.get_iter();
       }
     }
   }
@@ -154,16 +144,8 @@ void ComboControlWidget::FlashOff() { Toggle(); }
 
 void ComboControlWidget::Limit(double value) {}
 
-bool ComboControlWidget::HandleRightRelease(GdkEventButton *event) {
-  if (event->button == 3) {
-    std::unique_ptr<ControlMenu> &menu = PrepareMenu();
-    menu->AddExtraItem("Set description...",
-                       [&]() { OpenDescriptionDialog(); });
-    menu->popup_at_pointer(reinterpret_cast<const GdkEvent *>(event));
-    return true;
-  } else {
-    return false;
-  }
+void ComboControlWidget::PrepareContextMenu(ControlMenu &menu) {
+  menu.AddExtraItem("Set description...", [&]() { OpenDescriptionDialog(); });
 }
 
 void ComboControlWidget::UpdateDisplaySettings() {
@@ -175,11 +157,16 @@ void ComboControlWidget::UpdateDisplaySettings() {
 }
 
 void ComboControlWidget::OpenDescriptionDialog() {
-  StringInputDialog dialog("Combo control description",
-                           "New description:", description_label_.get_text());
-  if (dialog.run() == Gtk::RESPONSE_OK) {
-    State().SetLabel(dialog.Value());
-  }
+  dialog_ = std::make_unique<StringInputDialog>(
+      "Combo control description",
+      "New description:", description_label_.get_text());
+  dialog_->signal_response().connect([this](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      StringInputDialog &dialog = static_cast<StringInputDialog &>(*dialog_);
+      State().SetLabel(dialog.Value());
+    }
+  });
+  dialog_->show();
 }
 
 }  // namespace glight::gui

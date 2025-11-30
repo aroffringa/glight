@@ -569,8 +569,9 @@ void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
   state.writer.Number("fade-out", guiState.fadeOutSpeed);
   state.writer.Number("width", guiState.width);
   state.writer.Number("height", guiState.height);
-  state.writer.Number("position-x", guiState.position_x);
-  state.writer.Number("position-y", guiState.position_y);
+  // Removed in change to gtkmm 4
+  // state.writer.Number("position-x", guiState.position_x);
+  // state.writer.Number("position-y", guiState.position_y);
   state.writer.StartArray("faders");
   for (const std::unique_ptr<gui::FaderState> &fader : guiState.faders) {
     writeFaderState(state, *fader);
@@ -591,8 +592,11 @@ void writeGUIState(WriteState &state) {
     state.writer.Boolean("show-crosshairs", false);
   if (!state.guiState->ShowStageBorders())
     state.writer.Boolean("show-stage-borders", false);
-  state.writer.Number("window-position-x", state.guiState->WindowPositionX());
-  state.writer.Number("window-position-y", state.guiState->WindowPositionY());
+  // window position not available since gtkmm 4
+  // state.writer.Number("window-position-x",
+  // state.guiState->WindowPositionX());
+  // state.writer.Number("window-position-y",
+  // state.guiState->WindowPositionY());
   state.writer.Number("window-width", state.guiState->WindowWidth());
   state.writer.Number("window-height", state.guiState->WindowHeight());
 

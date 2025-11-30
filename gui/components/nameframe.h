@@ -1,6 +1,8 @@
 #ifndef GUI_NAMEFRAME_H_
 #define GUI_NAMEFRAME_H_
 
+#include <sigc++/signal.h>
+
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/entry.h>
@@ -12,7 +14,7 @@ namespace glight::gui {
 
 class MainWindow;
 
-class NameFrame : public Gtk::HBox {
+class NameFrame : public Gtk::Box {
  public:
   NameFrame();
   ~NameFrame();
@@ -26,7 +28,7 @@ class NameFrame : public Gtk::HBox {
     _namedObject = nullptr;
     update();
   }
-  sigc::signal<void> &SignalNameChange() { return _signalNameChange; }
+  sigc::signal<void()> &SignalNameChange() { return _signalNameChange; }
 
  private:
   void onButtonClicked();
@@ -38,7 +40,7 @@ class NameFrame : public Gtk::HBox {
   Gtk::Label _label;
   Gtk::Box _buttonBox;
   Gtk::Button _button;
-  sigc::signal<void> _signalNameChange;
+  sigc::signal<void()> _signalNameChange;
 };
 
 }  // namespace glight::gui

@@ -15,22 +15,21 @@ class GradientWindow : public Gtk::Window {
     _colorSequence.SetMinCount(2);
     _colorSequence.SetMaxCount(maxCount);
     _colorSequence.SetAllowVariables(false);
-    _box.pack_start(_colorSequence);
+    _box.append(_colorSequence);
 
     _buttonBox.set_homogeneous(true);
 
     _cancelButton.signal_clicked().connect([&] { hide(); });
-    _buttonBox.pack_start(_cancelButton);
+    _buttonBox.append(_cancelButton);
     _okayButton.signal_clicked().connect([&] {
       _result = true;
       hide();
     });
-    _buttonBox.pack_start(_okayButton);
+    _buttonBox.append(_okayButton);
 
-    _box.pack_start(_buttonBox);
+    _box.append(_buttonBox);
 
-    add(_box);
-    show_all_children();
+    set_child(_box);
   }
 
   bool Result() const { return _result; }
@@ -38,7 +37,7 @@ class GradientWindow : public Gtk::Window {
   std::vector<Color> GetColors() const { return _colorSequence.GetColors(); }
 
  private:
-  Gtk::VBox _box;
+  Gtk::Box _box{Gtk::Orientation::VERTICAL};
   ColorSequenceWidget _colorSequence;
   Gtk::Box _buttonBox;
   Gtk::Button _cancelButton, _okayButton;

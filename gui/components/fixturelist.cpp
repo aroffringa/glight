@@ -15,9 +15,9 @@ FixtureList::FixtureList() {
   view_.append_column("Fixture", columns_.title_);
   view_.append_column("Type", columns_.type_);
   view_.set_rubber_banding(true);
-  view_.get_selection()->set_mode(Gtk::SelectionMode::SELECTION_MULTIPLE);
+  view_.get_selection()->set_mode(Gtk::SelectionMode::MULTIPLE);
   Fill();
-  add(view_);
+  set_child(view_);
   set_size_request(300, 400);
 }
 
@@ -31,7 +31,7 @@ void FixtureList::Fill() {
   for (const system::TrackablePtr<theatre::FixtureGroup> &group_ptr : groups) {
     theatre::FixtureGroup &group = *group_ptr;
     Gtk::TreeModel::iterator iter = model_->append();
-    const Gtk::TreeModel::Row &row = *iter;
+    Gtk::TreeModel::Row &row = *iter;
     row[columns_.title_] = group.Name();
     row[columns_.type_] = "Group";
     row[columns_.fixture_] = nullptr;
@@ -41,7 +41,7 @@ void FixtureList::Fill() {
       management_.GetTheatre().Fixtures();
   for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
     Gtk::TreeModel::iterator iter = model_->append();
-    const Gtk::TreeModel::Row &row = *iter;
+    Gtk::TreeModel::Row &row = *iter;
     row[columns_.title_] = fixture->Name();
     row[columns_.type_] = fixture->Mode().Name();
     row[columns_.fixture_] = fixture.GetObserver();
@@ -58,7 +58,7 @@ void FixtureList::Select(
     const system::ObservingPtr<theatre::Fixture> &fixture =
         child.get_value(columns_.fixture_);
     const auto iter = std::find(fixtures.begin(), fixtures.end(), fixture);
-    if (iter != fixtures.end()) view_.get_selection()->select(child);
+    if (iter != fixtures.end()) view_.get_selection()->select(child.get_iter());
   }
 }
 

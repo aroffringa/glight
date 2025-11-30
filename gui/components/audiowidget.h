@@ -60,7 +60,7 @@ class AudioWidget : public Gtk::DrawingArea {
     if (_buffer) bufferToScreen(context);
     return true;
   }
-  bool onButtonPressed(GdkEventButton *event);
+  void onButtonPressed(int, double, double);
   void verticalLine(guint8 *dataPtr, size_t rowStride, int x, unsigned char r,
                     unsigned char g, unsigned char b) {
     if (x >= 0 && x < _width) {

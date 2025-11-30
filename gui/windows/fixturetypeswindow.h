@@ -6,14 +6,13 @@
 #include "theatre/forwards.h"
 
 #include "gui/recursionlock.h"
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 #include "gui/windows/childwindow.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
-#include <gtkmm/menu.h>
 #include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
@@ -54,7 +53,7 @@ class FixtureTypesWindow : public ChildWindow {
   void SelectFixtures(const theatre::FixtureType &type);
   void ShowTypeWidgets(bool visible);
 
-  ScopedConnection update_controllables_connection_;
+  sigc::scoped_connection update_controllables_connection_;
   RecursionLock recursion_lock_;
 
   Gtk::TreeView tree_view_;
@@ -79,7 +78,7 @@ class FixtureTypesWindow : public ChildWindow {
   Gtk::Grid main_grid_;
   Gtk::Paned paned_;
 
-  Gtk::VBox left_box_;
+  Gtk::Box left_box_{Gtk::Orientation::VERTICAL};
 
   Gtk::Grid right_grid_;
   Gtk::Label name_label_{"Name:"};

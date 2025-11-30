@@ -2,6 +2,7 @@
 #define GLIGHT_GUI_COMPONENTS_DISPLAY_COLOR_H_
 
 #include <gtkmm/drawingarea.h>
+#include <gtkmm/gestureclick.h>
 
 #include "theatre/color.h"
 
@@ -11,15 +12,15 @@ class ColorButton : public Gtk::DrawingArea {
  public:
   ColorButton(const theatre::Color& color = theatre::Color::White())
       : color_(color) {
-    signal_draw().connect([&](const Cairo::RefPtr<Cairo::Context>& cr) {
-      DrawColor(cr);
-      return true;
+    set_draw_func([&](const Cairo::RefPtr<Cairo::Context>& cairo, int, int) {
+      DrawColor(cairo);
     });
-    set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-    signal_button_release_event().connect([&](GdkEventButton*) {
-      signal_clicked_();
-      return false;
-    });
+
+    auto gesture = Gtk::GestureClick::create();
+    gesture->set_button(1);
+    gesture->signal_released().connect(
+        [this](int, double, double) { signal_clicked_(); });
+    add_controller(gesture);
   }
 
   void SetColor(const theatre::Color& color) {

@@ -1,8 +1,6 @@
 
 #include "createchasedialog.h"
 
-#include <gtkmm/stock.h>
-
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
 
@@ -28,27 +26,25 @@ CreateChaseDialog::CreateChaseDialog()
   initListPart();
   initNewSequencePart();
 
-  _paned.set_orientation(Gtk::ORIENTATION_VERTICAL);
-  _paned.pack1(_listFrame);
-  _paned.pack2(_newChaseFrame);
-  get_content_area()->pack_start(_paned);
+  _paned.set_orientation(Gtk::Orientation::VERTICAL);
+  _paned.set_start_child(_listFrame);
+  _paned.set_end_child(_newChaseFrame);
+  get_content_area()->append(_paned);
 
-  add_button("Cancel", Gtk::RESPONSE_CANCEL);
-  _makeChaseButton = add_button("Make chase", Gtk::RESPONSE_OK);
+  add_button("Cancel", Gtk::ResponseType::CANCEL);
+  _makeChaseButton = add_button("Make chase", Gtk::ResponseType::OK);
   _makeChaseButton->signal_clicked().connect(
       sigc::mem_fun(*this, &CreateChaseDialog::onCreateChaseButtonClicked));
   _makeChaseButton->set_sensitive(false);
-
-  show_all_children();
 }
 
 void CreateChaseDialog::initListPart() {
   _list.SignalSelectionChange().connect(
-      sigc::mem_fun(this, &CreateChaseDialog::onSelectedObjectChanged));
+      sigc::mem_fun(*this, &CreateChaseDialog::onSelectedObjectChanged));
   _list.SetDisplayType(ObjectListType::OnlyPresetCollections);
 
-  _listVBox.pack_start(_list);
-  _listFrame.add(_listVBox);
+  _listVBox.append(_list);
+  _listFrame.set_child(_listVBox);
 }
 
 void CreateChaseDialog::initNewSequencePart() {
@@ -56,27 +52,28 @@ void CreateChaseDialog::initNewSequencePart() {
   _addObjectToChaseButton.set_image_from_icon_name("list-add");
   _addObjectToChaseButton.signal_clicked().connect(sigc::mem_fun(
       *this, &CreateChaseDialog::onAddObjectToChaseButtonClicked));
-  _newChaseButtonBox.set_orientation(Gtk::ORIENTATION_VERTICAL);
+  _newChaseButtonBox.set_orientation(Gtk::Orientation::VERTICAL);
   _newChaseButtonBox.set_homogeneous(true);
-  _newChaseButtonBox.pack_start(_addObjectToChaseButton);
+  _newChaseButtonBox.append(_addObjectToChaseButton);
 
   _clearChaseButton.signal_clicked().connect(
       sigc::mem_fun(*this, &CreateChaseDialog::onClearSequenceButtonClicked));
-  _newChaseButtonBox.pack_start(_clearChaseButton);
+  _newChaseButtonBox.append(_clearChaseButton);
 
-  _newChaseBox.pack_start(_newChaseButtonBox, false, false, 5);
+  _newChaseBox.append(_newChaseButtonBox);
 
   _newChaseListModel = Gtk::ListStore::create(_newChaseListColumns);
 
   _newChaseListView.set_model(_newChaseListModel);
   _newChaseListView.append_column("Chase object list",
                                   _newChaseListColumns._title);
-  _newChaseScrolledWindow.add(_newChaseListView);
+  _newChaseScrolledWindow.set_child(_newChaseListView);
 
-  _newChaseScrolledWindow.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-  _newChaseBox.pack_start(_newChaseScrolledWindow);
+  _newChaseScrolledWindow.set_policy(Gtk::PolicyType::NEVER,
+                                     Gtk::PolicyType::AUTOMATIC);
+  _newChaseBox.append(_newChaseScrolledWindow);
 
-  _newChaseFrame.add(_newChaseBox);
+  _newChaseFrame.set_child(_newChaseBox);
 }
 
 void CreateChaseDialog::onAddObjectToChaseButtonClicked() {

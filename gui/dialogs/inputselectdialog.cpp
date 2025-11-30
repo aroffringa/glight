@@ -13,15 +13,13 @@ InputSelectDialog::InputSelectDialog(bool allow_stay_open)
 
   _inputSelector.SignalSelectionChange().connect(
       [&]() { onSelectionChanged(); });
-  get_content_area()->pack_start(_inputSelector);
+  get_content_area()->append(_inputSelector);
   if (allow_stay_open) {
-    get_content_area()->pack_start(_stayOpenCheckButton, false, false);
+    get_content_area()->append(_stayOpenCheckButton);
   }
-  add_button("Cancel", Gtk::RESPONSE_CANCEL);
-  _selectButton = add_button("Select", Gtk::RESPONSE_OK);
+  add_button("Cancel", Gtk::ResponseType::CANCEL);
+  _selectButton = add_button("Select", Gtk::ResponseType::OK);
   _selectButton->set_sensitive(false);
-
-  show_all_children();
 }
 
 theatre::SourceValue* InputSelectDialog::SelectedSourceValue() const {

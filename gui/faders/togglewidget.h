@@ -3,13 +3,12 @@
 
 #include "controlwidget.h"
 
+#include "../components/controlbutton.h"
 #include "../components/iconbutton.h"
-#include "../scopedconnection.h"
 
-#include <gtkmm/box.h>
+#include <sigc++/scoped_connection.h>
+
 #include <gtkmm/button.h>
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
 
 namespace glight::gui {
@@ -27,27 +26,25 @@ class ToggleWidget final : public ControlWidget {
   virtual void Limit(double value) override;
 
  private:
-  Gtk::HBox box_;
-  Gtk::Label flash_button_label_;
-  Gtk::Button flash_button_;
+  void PrepareContextMenu(ControlMenu &menu) final {}
+
+  virtual void OnAssigned(bool moveFader) override;
+  void OnIconClicked();
+  void OnFlashButtonPressed(int button);
+  void OnFlashButtonReleased(int button);
+  void OnFade();
+  void UpdateDisplaySettings();
+  void UpdateActivated(const theatre::SingleSourceValue &value);
+
+  ControlButton flash_button_;
   Gtk::Button fade_button_;
   IconButton icon_button_;
-  Gtk::EventBox event_box_;
   Gtk::Label name_label_{"<..>"};
 
   bool hold_updates_ = false;
 
-  ScopedConnection update_display_settings_connection_;
+  sigc::scoped_connection update_display_settings_connection_;
   size_t counter_ = 0;
-
-  virtual void OnAssigned(bool moveFader) override;
-  void OnIconClicked();
-  bool OnFlashButtonPressed(GdkEventButton *event);
-  bool OnFlashButtonReleased(GdkEventButton *event);
-  void OnFade();
-  bool HandleRightRelease(GdkEventButton *event);
-  void UpdateDisplaySettings();
-  void UpdateActivated(const theatre::SingleSourceValue &value);
 };
 
 }  // namespace glight::gui

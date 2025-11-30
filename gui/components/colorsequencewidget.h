@@ -25,7 +25,7 @@ using theatre::ColorOrVariable;
 class EventTransmitter;
 class GradientWindow;
 
-class ColorSequenceWidget : public Gtk::VBox {
+class ColorSequenceWidget : public Gtk::Box {
  public:
   ColorSequenceWidget(Gtk::Window *parent, bool showGradientButton = true,
                       bool showShuffleButton = true);
@@ -70,11 +70,10 @@ class ColorSequenceWidget : public Gtk::VBox {
     if (min_count_ > maxCount && maxCount != 0) SetMinCount(maxCount);
     max_count_ = maxCount;
     if (max_count_ != 0) {
-      if (_widgets.size() > max_count_) {
-        _widgets.resize(max_count_);
+      while (_widgets.size() > max_count_ && _widgets.size() > min_count_) {
+        OnDecreaseColors();
       }
     }
-    updateSensitivities();
   }
 
   void SetAllowVariables(bool allow_variables) {
@@ -87,8 +86,8 @@ class ColorSequenceWidget : public Gtk::VBox {
  private:
   Gtk::Frame _frame{"Colors"};
   Gtk::ScrolledWindow _scrolledWindow;
-  Gtk::VBox _box;
-  Gtk::HBox repeat_box_;
+  Gtk::Box _box;
+  Gtk::Box repeat_box_;
   Gtk::Label repeat_label_{"Repeat color:"};
   Gtk::ComboBox repeat_combo_;
   Glib::RefPtr<Gtk::ListStore> repeat_list_;
@@ -102,7 +101,7 @@ class ColorSequenceWidget : public Gtk::VBox {
   Gtk::Button _gradientButton{"Gradient"};
   Gtk::Button _shuffleButton{"Shuffle"};
   Gtk::Button _minButton{"-"};
-  Gtk::HBox _loadDefaultBox;
+  Gtk::Box _loadDefaultBox;
   Gtk::ComboBox _loadDefaultCombo;
   Gtk::Button _loadDefaultButton{"Load"};
   Glib::RefPtr<Gtk::ListStore> _loadDefaultList;
@@ -118,12 +117,7 @@ class ColorSequenceWidget : public Gtk::VBox {
 
   void LoadDefault();
 
-  void onDecreaseColors() {
-    if (_widgets.size() > min_count_) {
-      _widgets.pop_back();
-      updateSensitivities();
-    }
-  }
+  void OnDecreaseColors();
   void OnIncreaseColors();
 
   void updateSensitivities() {

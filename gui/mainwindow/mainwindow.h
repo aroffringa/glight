@@ -10,7 +10,10 @@
 #include "gui/windows/childwindowlist.h"
 #include "theatre/forwards.h"
 
+#include <gtkmm/applicationwindow.h>
 #include <gtkmm/box.h>
+#include <gtkmm/dialog.h>
+#include <gtkmm/eventcontrollerkey.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/revealer.h>
 #include <gtkmm/togglebutton.h>
@@ -34,13 +37,12 @@ class DesignWizard;
 class FaderWindow;
 class ObjectListFrame;
 class PropertiesWindow;
-class SceneWindow;
 class VisualizationWidget;
 
 /**
  * @author Andre Offringa
  */
-class MainWindow : public Gtk::Window, public EventTransmitter {
+class MainWindow : public Gtk::ApplicationWindow, public EventTransmitter {
  public:
   MainWindow();
   ~MainWindow();
@@ -65,6 +67,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
 
  private:
   void InitializeMenu();
+  std::shared_ptr<Gtk::EventController> GetKeyController();
 
   void onFixtureListButtonClicked();
   void onFixtureTypesButtonClicked();
@@ -78,11 +81,13 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   void addFaderWindow(FaderSetState *stateOrNull = nullptr);
 
   void increaseManualBeat(int val);
-  bool onKeyDown(GdkEventKey *event);
-  bool onKeyUp(GdkEventKey *event);
-  bool onDelete(GdkEventAny *event);
+  bool onKeyDown(guint keyval);
+  bool onKeyUp(guint keyval);
+  bool onDelete();
 
+  void NewShow();
   void onMINewClicked();
+  void Open();
   void onMIOpenClicked();
   void onMISaveClicked();
   void onMIImportClicked();
@@ -100,20 +105,18 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   void onFaderWindowSelected(FaderSetState &state);
   FaderWindow *getFaderWindow(const FaderSetState &state);
   void onSceneWindowClicked(bool active);
-  void onHideSceneWindow();
 
   size_t nextControlKeyRow() const;
 
   void UpdateLayoutLock();
   void LoadMenuOptionsFromState();
 
-  Gtk::VBox _box;
-  Gtk::HBox revealer_box_;
-  Gtk::VBox right_box_;
+  Gtk::Box _box{Gtk::Orientation::VERTICAL};
+  Gtk::Box revealer_box_;
+  Gtk::Box right_box_{Gtk::Orientation::VERTICAL};
 
   std::vector<std::unique_ptr<FaderWindow>> _faderWindows;
   std::unique_ptr<DesignWizard> _designWizard;
-  std::unique_ptr<SceneWindow> _sceneWindow;
   windows::ChildWindowList child_windows_;
 
   std::unique_ptr<theatre::Management> _management;
@@ -129,6 +132,7 @@ class MainWindow : public Gtk::Window, public EventTransmitter {
   sigc::signal<void()> _signalUpdateControllables;
   MainMenu main_menu_;
   std::unique_ptr<system::midi::Manager> midi_manager_;
+  std::unique_ptr<Gtk::Dialog> dialog_;
 };
 
 }  // namespace glight::gui

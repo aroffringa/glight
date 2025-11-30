@@ -587,10 +587,11 @@ void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,
   fader_set.fadeOutSpeed = ToNum(node["fade-out"]).AsSize();
   fader_set.width = ToNum(node["width"]).AsSize();
   fader_set.height = ToNum(node["height"]).AsSize();
-  if (node.contains("position-x")) {
+  // The position is no longer stored as this is not possible in gtk 4
+  /*if (node.contains("position-x")) {
     fader_set.position_x = ToNum(node["position-x"]).AsInt();
     fader_set.position_y = ToNum(node["position-y"]).AsInt();
-  }
+  }*/
   const Array &faders = ToArr(node["faders"]);
   for (const Node &item : faders) {
     const Object &fader_node = ToObj(item);
@@ -608,11 +609,12 @@ void ParseGui(const Object &node, gui::GUIState &guiState,
   guiState.SetShowStageBorders(OptionalBool(node, "show-stage-borders", true));
 
   if (node.contains("window-position-x")) {
-    const int x = ToNum(node["window-position-x"]).AsInt();
-    const int y = ToNum(node["window-position-y"]).AsInt();
+    // window position not available since gtkmm 4
+    // const int x = ToNum(node["window-position-x"]).AsInt();
+    // const int y = ToNum(node["window-position-y"]).AsInt();
     const size_t width = ToNum(node["window-width"]).AsSize();
     const size_t height = ToNum(node["window-height"]).AsSize();
-    guiState.SetWindowPosition(x, y, width, height);
+    guiState.SetWindowDimensions(width, height);
   }
   const Array &states = ToArr(node["states"]);
   for (const Node &item : states) {

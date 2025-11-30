@@ -1,5 +1,7 @@
 #include "moverwidget.h"
 
+#include <gtkmm/gestureclick.h>
+
 #include "controlmenu.h"
 #include "faderwindow.h"
 
@@ -23,84 +25,45 @@ MoverWidget::MoverWidget(FaderWindow &fader_window, FaderState &state,
     : ControlWidget(fader_window, state, mode) {
   SetDefaultSourceCount(2);
 
-  left_button_.set_image_from_icon_name("go-previous");
-  left_button_.set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-  left_button_.signal_button_press_event().connect(
-      [&](GdkEventButton *event) {
-        if (event->button == 1) MoveLeft();
-        return false;
-      },
-      false);
-  left_button_.signal_button_release_event().connect(
-      [&](GdkEventButton *event) {
-        if (event->button == 1) StopPan();
-        return false;
-      },
-      false);
+  left_button_.SetIconName("go-previous");
+  const auto stop_pan = [&](int) { StopPan(); };
+  left_button_.SetSignalButton(1);
+  left_button_.SignalPress().connect([&](int) { MoveLeft(); });
+  left_button_.SignalRelease().connect(stop_pan);
   grid_.attach(left_button_, 0, 1);
-  right_button_.set_image_from_icon_name("go-next");
-  right_button_.set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-  right_button_.signal_button_press_event().connect(
-      [&](GdkEventButton *event) {
-        if (event->button == 1) MoveRight();
-        return false;
-      },
-      false);
-  right_button_.signal_button_release_event().connect(
-      [&](GdkEventButton *event) {
-        if (event->button == 1) StopPan();
-        return false;
-      },
-      false);
+
+  right_button_.SetIconName("go-next");
+  right_button_.SetSignalButton(1);
+  right_button_.SignalPress().connect([&](int) { MoveRight(); });
+  right_button_.SignalRelease().connect(stop_pan);
   grid_.attach(right_button_, 2, 1);
-  up_button_.set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-  up_button_.signal_button_press_event().connect(
-      [&](GdkEventButton *event) {
-        if (event->button == 1) MoveUp();
-        return false;
-      },
-      false);
-  up_button_.signal_button_release_event().connect(
-      [&](GdkEventButton *event) {
-        if (event->button == 1) StopTilt();
-        return false;
-      },
-      false);
-  up_button_.set_image_from_icon_name("go-up");
+
+  up_button_.SetIconName("go-up");
+  up_button_.SetSignalButton(1);
+  const auto stop_tilt = [&](int) { StopTilt(); };
+  up_button_.SignalPress().connect([&](int) { MoveUp(); });
+  up_button_.SignalRelease().connect(stop_tilt);
   grid_.attach(up_button_, 1, 0);
-  down_button_.set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
-  down_button_.signal_button_press_event().connect(
-      [&](GdkEventButton *event) {
-        if (event->button == 1) MoveDown();
-        return false;
-      },
-      false);
-  down_button_.signal_button_release_event().connect(
-      [&](GdkEventButton *event) {
-        if (event->button == 1) StopTilt();
-        return false;
-      },
-      false);
-  down_button_.set_image_from_icon_name("go-down");
+
+  down_button_.SetIconName("go-down");
+  down_button_.SetSignalButton(1);
+  down_button_.SignalPress().connect([&](int) { MoveDown(); });
+  down_button_.SignalRelease().connect(stop_tilt);
   grid_.attach(down_button_, 1, 2);
 
-  name_label_.set_halign(Gtk::ALIGN_START);
-  name_label_.set_justify(Gtk::JUSTIFY_LEFT);
-  event_box_.add(name_label_);
+  auto label_gesture = Gtk::GestureClick::create();
+  name_label_.set_halign(Gtk::Align::START);
+  name_label_.set_justify(Gtk::Justification::LEFT);
   name_label_.set_hexpand(true);
+  label_gesture->set_button(1);
+  label_gesture->signal_pressed().connect(
+      [this, g = label_gesture.get()](int, double, double) {
+        ShowAssignDialog();
+      });
+  name_label_.add_controller(label_gesture);
+  grid_.attach(name_label_, 0, 3, 3, 1);
 
-  event_box_.set_events(Gdk::BUTTON_PRESS_MASK);
-  event_box_.signal_button_press_event().connect([&](GdkEventButton *event) {
-    if (event->button == 3)
-      HandleRightRelease(event);
-    else
-      ShowAssignDialog();
-    return true;
-  });
-  grid_.attach(event_box_, 0, 3, 3, 1);
-
-  add(grid_);
-  grid_.show_all();
+  append(grid_);
 
   UpdateDisplaySettings();
   update_display_settings_connection_ =
@@ -120,8 +83,10 @@ void MoverWidget::MoveRight() {
 }
 
 void MoverWidget::StopPan() {
-  theatre::SingleSourceValue &value = GetSingleSourceValue(0);
-  value.Set(value.Value());
+  if (PanIsAssigned()) {
+    theatre::SingleSourceValue &value = GetSingleSourceValue(0);
+    value.Set(value.Value());
+  }
 }
 
 void MoverWidget::MoveUp() {
@@ -137,8 +102,10 @@ void MoverWidget::MoveDown() {
 }
 
 void MoverWidget::StopTilt() {
-  theatre::SingleSourceValue &value = GetSingleSourceValue(1);
-  value.Set(value.Value());
+  if (TiltIsAssigned()) {
+    theatre::SingleSourceValue &value = GetSingleSourceValue(1);
+    value.Set(value.Value());
+  }
 }
 
 void MoverWidget::OnAssigned(bool move_fader) {
@@ -154,22 +121,6 @@ void MoverWidget::OnAssigned(bool move_fader) {
     name += "<..>";
   }
   name_label_.set_text(name);
-}
-
-bool MoverWidget::HandleRightRelease(GdkEventButton *event) {
-  std::unique_ptr<ControlMenu> &menu = GetFaderWindow().GetControlMenu();
-  menu = std::make_unique<ControlMenu>(State());
-  menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
-  menu->SignalToggleName().connect(
-      [&]() { State().SetDisplayName(menu->DisplayName()); });
-  menu->SignalToggleFlashButton().connect(
-      [&]() { State().SetDisplayFlashButton(menu->DisplayFlashButton()); });
-  menu->SignalToggleCheckButton().connect(
-      [&]() { State().SetDisplayCheckButton(menu->DisplayCheckButton()); });
-  menu->SignalToggleFadeButtons().connect(
-      [&]() { State().SetOverlayFadeButtons(menu->OverlayFadeButtons()); });
-  menu->popup_at_pointer(reinterpret_cast<const GdkEvent *>(event));
-  return true;
 }
 
 void MoverWidget::UpdateDisplaySettings() {

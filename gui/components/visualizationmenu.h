@@ -1,10 +1,13 @@
 #ifndef GLIGHT_GUI_VISUALIZATION_MENU_H_
 #define GLIGHT_GUI_VISUALIZATION_MENU_H_
 
-#include <gtkmm/checkmenuitem.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/radiomenuitem.h>
-#include <gtkmm/separatormenuitem.h>
+#include <vector>
+
+#include <giomm/actionmap.h>
+#include <giomm/menu.h>
+#include <giomm/menuitem.h>
+
+#include <gtkmm/popovermenu.h>
 
 #include "theatre/fixturesymbol.h"
 
@@ -16,9 +19,9 @@ namespace glight::gui {
 
 enum class DryModeStyle { Primary, Secondary, Vertical, Horizontal, Shadow };
 
-class VisualizationMenu : public Gtk::Menu {
+class VisualizationMenu : public Gtk::PopoverMenu {
  public:
-  VisualizationMenu();
+  VisualizationMenu(Gio::ActionMap& map);
 
   sigc::signal<void()> SignalSetFullOn;
   sigc::signal<void()> SignalSetOff;
@@ -46,37 +49,27 @@ class VisualizationMenu : public Gtk::Menu {
   void SetSensitivity(bool is_layout_locked, size_t n_selected);
 
  private:
-  Gtk::SeparatorMenuItem _miSeparator1, _miSeparator2;
-  Gtk::MenuItem mi_set_menu_{"Set"};
-  Gtk::Menu set_menu_;
-  Gtk::MenuItem mi_set_full_on_{"Full on"};
-  Gtk::MenuItem mi_set_off_{"Off"};
-  Gtk::MenuItem mi_set_color_{"Set color..."};
-  Gtk::MenuItem mi_track_{"Track"};
-  Gtk::MenuItem mi_track_pan_{"Track with pan"};
+  std::shared_ptr<Gio::SimpleAction> set_full_on_;
+  std::shared_ptr<Gio::SimpleAction> set_off_;
+  std::shared_ptr<Gio::SimpleAction> set_color_;
+  std::shared_ptr<Gio::SimpleAction> set_track_;
+  std::shared_ptr<Gio::SimpleAction> set_pan_track_;
 
-  Gtk::MenuItem _miSymbolMenu{"Symbol"};
-  Gtk::Menu _symbolMenu;
-  std::vector<Gtk::MenuItem> _miSymbols;
+  std::shared_ptr<Gio::SimpleAction> align_horizontally_;
+  std::shared_ptr<Gio::SimpleAction> align_vertically_;
+  std::shared_ptr<Gio::SimpleAction> distribute_evenly_;
 
-  Gtk::MenuItem _miDryModeStyle{"Dry mode style"};
-  Gtk::Menu _dryModeStyleMenu;
-  Gtk::RadioMenuItem _miDMSPrimary{"Primary"};
-  Gtk::RadioMenuItem _miDMSSecondary{"Secondary"};
-  Gtk::RadioMenuItem _miDMSVertical{"Vertical"};
-  Gtk::RadioMenuItem _miDMSHorizontal{"Horizontal"};
-  Gtk::RadioMenuItem _miDMSShadow{"Shadow"};
+  std::shared_ptr<Gio::SimpleAction> add_fixture_;
+  std::shared_ptr<Gio::SimpleAction> add_preset_;
+  std::shared_ptr<Gio::SimpleAction> remove_fixtures_;
+  std::shared_ptr<Gio::SimpleAction> group_fixtures_;
+  std::shared_ptr<Gio::SimpleAction> design_;
 
-  Gtk::MenuItem _miAlignHorizontally{"Align horizontally"};
-  Gtk::MenuItem _miAlignVertically{"Align vertically"};
-  Gtk::MenuItem _miDistributeEvenly{"Distribute evenly"};
-  Gtk::MenuItem _miAdd{"Add fixture..."};
-  Gtk::MenuItem _miAddPreset{"Add preset"};
-  Gtk::MenuItem _miRemove{"Remove"};
-  Gtk::MenuItem _miGroup{"Group..."};
-  Gtk::MenuItem _miDesign{"Design..."};
-  Gtk::MenuItem _miProperties{"Properties"};
-  Gtk::MenuItem _miSaveImage{"Save image..."};
+  std::shared_ptr<Gio::SimpleAction> properties_;
+  std::shared_ptr<Gio::SimpleAction> save_image_;
+
+  std::vector<std::shared_ptr<Gio::SimpleAction>> symbols_;
+  DryModeStyle dry_mode_style_ = DryModeStyle::Primary;
 };
 
 }  // namespace glight::gui

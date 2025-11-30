@@ -22,14 +22,13 @@ class ControllableSelectionDialog : public Gtk::Dialog {
 
     object_browser_.SignalSelectionChange().connect(
         [&]() { OnSelectionChanged(); });
-    get_content_area()->pack_start(object_browser_);
-    object_browser_.show_all();
+    get_content_area()->append(object_browser_);
 
     new_button_.signal_clicked().connect([&]() { OnNew(); });
-    get_content_area()->pack_start(new_button_, false, false);
+    get_content_area()->append(new_button_);
 
-    add_button("Cancel", Gtk::RESPONSE_CANCEL);
-    select_button_ = add_button("Select", Gtk::RESPONSE_OK);
+    add_button("Cancel", Gtk::ResponseType::CANCEL);
+    select_button_ = add_button("Select", Gtk::ResponseType::OK);
     select_button_->set_sensitive(false);
   }
 
@@ -37,7 +36,7 @@ class ControllableSelectionDialog : public Gtk::Dialog {
     object_browser_.SelectObject(object);
   }
 
-  system::ObservingPtr<theatre::FolderObject> SelectedObject() {
+  system::ObservingPtr<theatre::FolderObject> SelectedObject() const {
     return object_browser_.SelectedObject();
   }
   theatre::Folder& SelectedFolder() { return object_browser_.SelectedFolder(); }

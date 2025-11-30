@@ -65,14 +65,10 @@ class GUIState {
     return nullptr;
   }
 
-  void SetWindowPosition(int x, int y, size_t width, size_t height) {
-    window_position_x = x;
-    window_position_y = y;
+  void SetWindowDimensions(size_t width, size_t height) {
     window_width = width;
     window_height = height;
   }
-  int WindowPositionX() const { return window_position_x; }
-  int WindowPositionY() const { return window_position_y; }
   size_t WindowWidth() const { return window_width; }
   size_t WindowHeight() const { return window_height; }
   void SetTheatreDimensions(double width, double depth, double height) {
@@ -110,8 +106,6 @@ class GUIState {
 
  private:
   bool layout_locked_ = false;
-  int window_position_x = 0;
-  int window_position_y = 0;
   size_t window_width = 0;
   size_t window_height = 0;
   double theatre_width = 0;

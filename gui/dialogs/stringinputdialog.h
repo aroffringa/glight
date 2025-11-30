@@ -9,7 +9,6 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
-#include <gtkmm/stock.h>
 
 namespace glight::gui {
 
@@ -19,18 +18,17 @@ class StringInputDialog : public Gtk::Dialog {
                     const Glib::ustring& value_caption,
                     const std::string& default_value)
       : Dialog(title, true), label_(value_caption) {
-    h_box_.pack_start(label_, true, true, 10);
+    h_box_.append(label_);
 
     entry_.set_text(default_value);
     entry_.set_activates_default(true);
-    h_box_.pack_end(entry_);
+    h_box_.append(entry_);
 
-    get_content_area()->pack_start(h_box_);
-    h_box_.show_all();
+    get_content_area()->append(h_box_);
 
-    add_button("_Ok", Gtk::RESPONSE_OK);
-    add_button("_Cancel", Gtk::RESPONSE_CANCEL);
-    set_default_response(Gtk::RESPONSE_OK);
+    add_button("_Ok", Gtk::ResponseType::OK);
+    add_button("_Cancel", Gtk::ResponseType::CANCEL);
+    set_default_response(Gtk::ResponseType::OK);
   }
 
   std::string Value() const { return entry_.get_text(); }
@@ -38,7 +36,7 @@ class StringInputDialog : public Gtk::Dialog {
  private:
   Gtk::Label label_;
   Gtk::Entry entry_;
-  Gtk::HBox h_box_;
+  Gtk::Box h_box_;
 };
 
 }  // namespace glight::gui

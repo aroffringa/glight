@@ -85,18 +85,21 @@ DesignWizard::DesignWizard()
   initPage1();
   initPage2();
 
-  _mainBox.pack_start(_vBoxPage1, true, true);
-  _vBoxPage1.show_all();
+  _mainBox.append(_vBoxPage1);
+  _colorsWidgetP4.set_expand(true);
+  _fixtureList.set_expand(true);
+  _reorderWidget.set_expand(true);
+  _typeFrameP3.set_expand(true);
+  _deductionFrameP3.set_expand(true);
 
   _buttonBox.set_homogeneous(true);
 
   _nextButton.signal_clicked().connect(
       sigc::mem_fun(*this, &DesignWizard::onNextClicked));
-  _buttonBox.pack_start(_nextButton);
-  _buttonBox.show_all();
-  _mainBox.pack_end(_buttonBox, false, false);
+  _buttonBox.append(_nextButton);
+  _mainBox.append(_buttonBox);
 
-  add(_mainBox);
+  set_child(_mainBox);
   _mainBox.show();
 
   _fixtureList.Select(Instance::Selection().Selection());
@@ -105,12 +108,12 @@ DesignWizard::DesignWizard()
 DesignWizard::~DesignWizard() = default;
 
 void DesignWizard::initPage1() {
-  _vBoxPage1.pack_start(_notebook);
+  _vBoxPage1.append(_notebook);
 
   _notebook.append_page(_vBoxPage1a, "Fixtures");
-  _vBoxPage1a.pack_start(_selectLabel);
+  _vBoxPage1a.append(_selectLabel);
 
-  _vBoxPage1a.pack_start(_fixtureList);
+  _vBoxPage1a.append(_fixtureList);
 
   _notebook.append_page(_vBoxPage1b, "Any controllables");
 
@@ -120,21 +123,21 @@ void DesignWizard::initPage1() {
       [&](const ObservingPtr<theatre::FolderObject> &object) {
         addControllable(object);
       });
-  _vBoxPage1b.pack_start(_objectBrowser);
+  _vBoxPage1b.append(_objectBrowser);
 
   _addControllableButton.set_image_from_icon_name("go-down");
   _addControllableButton.set_sensitive(false);
   _addControllableButton.signal_clicked().connect(
       sigc::mem_fun(*this, &DesignWizard::onAddControllable));
-  _controllableButtonBox.pack_start(_addControllableButton, false, false, 4);
+  _controllableButtonBox.append(_addControllableButton);
 
   _removeControllableButton.set_image_from_icon_name("go-up");
   _removeControllableButton.signal_clicked().connect(
       sigc::mem_fun(*this, &DesignWizard::onRemoveControllable));
-  _controllableButtonBox.pack_start(_removeControllableButton, false, false, 4);
+  _controllableButtonBox.append(_removeControllableButton);
 
-  _controllableButtonBox.set_halign(Gtk::ALIGN_CENTER);
-  _vBoxPage1b.pack_start(_controllableButtonBox, false, false);
+  _controllableButtonBox.set_halign(Gtk::Align::CENTER);
+  _vBoxPage1b.append(_controllableButtonBox);
 
   _controllablesListModel = Gtk::ListStore::create(_controllablesListColumns);
   _controllablesListView.set_model(_controllablesListModel);
@@ -143,150 +146,138 @@ void DesignWizard::initPage1() {
   _controllablesListView.append_column("Path", _controllablesListColumns._path);
   _controllablesListView.set_rubber_banding(true);
   _controllablesListView.get_selection()->set_mode(
-      Gtk::SelectionMode::SELECTION_MULTIPLE);
-  _controllablesScrolledWindow.add(_controllablesListView);
-  _vBoxPage1b.pack_end(_controllablesScrolledWindow, true, true);
+      Gtk::SelectionMode::MULTIPLE);
+  _controllablesScrolledWindow.set_child(_controllablesListView);
+  _vBoxPage1b.append(_controllablesScrolledWindow);
 }
 
 void DesignWizard::initPage2() {
-  Gtk::RadioButtonGroup group;
-  _colorPresetBtn.set_group(group);
-  _vBoxPage3Type.pack_start(_colorPresetBtn);
-  _runningLightBtn.set_group(group);
-  _vBoxPage3Type.pack_start(_runningLightBtn);
-  _singleColorBtn.set_group(group);
-  _vBoxPage3Type.pack_start(_singleColorBtn);
-  _shiftColorsBtn.set_group(group);
-  _vBoxPage3Type.pack_start(_shiftColorsBtn);
-  _increaseBtn.set_group(group);
-  _vBoxPage3Type.pack_start(_increaseBtn);
-  _rotationBtn.set_group(group);
-  _vBoxPage3Type.pack_start(_rotationBtn);
-  _vuMeterBtn.set_group(group);
-  _vBoxPage3Type.pack_start(_vuMeterBtn);
-  _fireBtn.set_group(group);
-  _vBoxPage3Type.pack_start(_fireBtn);
+  _vBoxPage3Type.append(_colorPresetBtn);
+  _runningLightBtn.set_group(_colorPresetBtn);
+  _vBoxPage3Type.append(_runningLightBtn);
+  _singleColorBtn.set_group(_colorPresetBtn);
+  _vBoxPage3Type.append(_singleColorBtn);
+  _shiftColorsBtn.set_group(_colorPresetBtn);
+  _vBoxPage3Type.append(_shiftColorsBtn);
+  _increaseBtn.set_group(_colorPresetBtn);
+  _vBoxPage3Type.append(_increaseBtn);
+  _rotationBtn.set_group(_colorPresetBtn);
+  _vBoxPage3Type.append(_rotationBtn);
+  _vuMeterBtn.set_group(_colorPresetBtn);
+  _vBoxPage3Type.append(_vuMeterBtn);
+  _fireBtn.set_group(_colorPresetBtn);
+  _vBoxPage3Type.append(_fireBtn);
 
-  _typeFrameP3.add(_vBoxPage3Type);
-  _vBoxPage3.pack_start(_typeFrameP3);
+  _typeFrameP3.set_child(_vBoxPage3Type);
+  _vBoxPage3.append(_typeFrameP3);
 
   _deduceWhite.set_active(true);
-  _vBoxPage3Deduction.pack_start(_deduceWhite);
+  _vBoxPage3Deduction.append(_deduceWhite);
   _deduceAmber.set_active(true);
-  _vBoxPage3Deduction.pack_start(_deduceAmber);
+  _vBoxPage3Deduction.append(_deduceAmber);
   _deduceUV.set_active(true);
-  _vBoxPage3Deduction.pack_start(_deduceUV);
+  _vBoxPage3Deduction.append(_deduceUV);
   _deduceLime.set_active(true);
-  _vBoxPage3Deduction.pack_start(_deduceLime);
+  _vBoxPage3Deduction.append(_deduceLime);
 
-  _deductionFrameP3.add(_vBoxPage3Deduction);
-  _vBoxPage3.pack_start(_deductionFrameP3);
+  _deductionFrameP3.set_child(_vBoxPage3Deduction);
+  _vBoxPage3.append(_deductionFrameP3);
 }
 
 void DesignWizard::initPage4_1RunningLight() {
   initPage4Destination("Running light");
-  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
-  Gtk::RadioButtonGroup group;
-  _increasingRunRB.set_group(group);
-  _vBoxPage4.pack_start(_increasingRunRB, false, false);
-  _decreasingRunRB.set_group(group);
-  _vBoxPage4.pack_start(_decreasingRunRB, false, false);
-  _backAndForthRunRB.set_group(group);
-  _vBoxPage4.pack_start(_backAndForthRunRB, false, false);
-  _inwardRunRB.set_group(group);
-  _vBoxPage4.pack_start(_inwardRunRB, false, false);
-  _outwardRunRB.set_group(group);
-  _vBoxPage4.pack_start(_outwardRunRB, false, false);
-  _randomRunRB.set_group(group);
-  _vBoxPage4.pack_start(_randomRunRB, false, false);
+  _vBoxPage4.append(_colorsWidgetP4);
+  _vBoxPage4.append(_increasingRunRB);
+  _decreasingRunRB.set_group(_increasingRunRB);
+  _vBoxPage4.append(_decreasingRunRB);
+  _backAndForthRunRB.set_group(_increasingRunRB);
+  _vBoxPage4.append(_backAndForthRunRB);
+  _inwardRunRB.set_group(_increasingRunRB);
+  _vBoxPage4.append(_inwardRunRB);
+  _outwardRunRB.set_group(_increasingRunRB);
+  _vBoxPage4.append(_outwardRunRB);
+  _randomRunRB.set_group(_increasingRunRB);
+  _vBoxPage4.append(_randomRunRB);
 }
 
 void DesignWizard::initPage4_2SingleColor() {
   initPage4Destination("Same color run");
-  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
-  _vBoxPage4.pack_start(_variationLabel, false, false);
+  _vBoxPage4.append(_colorsWidgetP4);
+  _vBoxPage4.append(_variationLabel);
   _variation.set_range(0, 100);
   _variation.set_increments(1.0, 10.0);
-  _vBoxPage4.pack_start(_variation, false, false);
+  _vBoxPage4.append(_variation);
 }
 
 void DesignWizard::initPage4_3ShiftColors() {
   initPage4Destination("Shift colors");
-  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
-  Gtk::RadioButtonGroup group;
-  _shiftIncreasingRB.set_group(group);
-  _vBoxPage4.pack_start(_shiftIncreasingRB, false, false);
-  _shiftDecreasingRB.set_group(group);
-  _vBoxPage4.pack_start(_shiftDecreasingRB, false, false);
-  _shiftBackAndForthRB.set_group(group);
-  _vBoxPage4.pack_start(_shiftBackAndForthRB, false, false);
-  _shiftRandomRB.set_group(group);
-  _vBoxPage4.pack_start(_shiftRandomRB, false, false);
+  _vBoxPage4.append(_colorsWidgetP4);
+  _vBoxPage4.append(_shiftIncreasingRB);
+  _shiftDecreasingRB.set_group(_shiftIncreasingRB);
+  _vBoxPage4.append(_shiftDecreasingRB);
+  _shiftBackAndForthRB.set_group(_shiftIncreasingRB);
+  _vBoxPage4.append(_shiftBackAndForthRB);
+  _shiftRandomRB.set_group(_shiftIncreasingRB);
+  _vBoxPage4.append(_shiftRandomRB);
 }
 
 void DesignWizard::initPage4_4VUMeter() {
   initPage4Destination("VUMeter");
-  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
-  Gtk::RadioButtonGroup group;
-  _vuIncreasingRB.set_group(group);
-  _vBoxPage4.pack_start(_vuIncreasingRB, false, false);
-  _vuDecreasingRB.set_group(group);
-  _vBoxPage4.pack_start(_vuDecreasingRB, false, false);
-  _vuInwardRunRB.set_group(group);
-  _vBoxPage4.pack_start(_vuInwardRunRB, false, false);
-  _vuOutwardRunRB.set_group(group);
-  _vBoxPage4.pack_start(_vuOutwardRunRB, false, false);
+  _vBoxPage4.append(_colorsWidgetP4);
+  _vBoxPage4.append(_vuIncreasingRB);
+  _vuDecreasingRB.set_group(_vuIncreasingRB);
+  _vBoxPage4.append(_vuDecreasingRB);
+  _vuInwardRunRB.set_group(_vuIncreasingRB);
+  _vBoxPage4.append(_vuInwardRunRB);
+  _vuOutwardRunRB.set_group(_vuIncreasingRB);
+  _vBoxPage4.append(_vuOutwardRunRB);
 }
 
 void DesignWizard::initPage4_5ColorPreset() {
   initPage4Destination("Color preset");
-  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
-  _vBoxPage4.pack_start(_eachFixtureSeparatelyCB, false, false);
+  _vBoxPage4.append(_colorsWidgetP4);
+  _vBoxPage4.append(_eachFixtureSeparatelyCB);
 }
 
 void DesignWizard::initPage4_6Increasing() {
   initPage4Destination("Increase chase");
-  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
-  Gtk::RadioButtonGroup group;
-  _incForwardRB.set_group(group);
-  _vBoxPage4.pack_start(_incForwardRB, false, false);
-  _incBackwardRB.set_group(group);
-  _vBoxPage4.pack_start(_incBackwardRB, false, false);
-  _incForwardReturnRB.set_group(group);
-  _vBoxPage4.pack_start(_incForwardReturnRB, false, false);
-  _incBackwardReturnRB.set_group(group);
-  _vBoxPage4.pack_start(_incBackwardReturnRB, false, false);
+  _vBoxPage4.append(_colorsWidgetP4);
+  _vBoxPage4.append(_incForwardRB);
+  _incBackwardRB.set_group(_incForwardRB);
+  _vBoxPage4.append(_incBackwardRB);
+  _incForwardReturnRB.set_group(_incForwardRB);
+  _vBoxPage4.append(_incForwardReturnRB);
+  _incBackwardReturnRB.set_group(_incForwardRB);
+  _vBoxPage4.append(_incBackwardReturnRB);
 }
 
 void DesignWizard::initPage4_7Rotation() {
   initPage4Destination("Rotation");
-  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
-  Gtk::RadioButtonGroup group;
-  _rotForwardRB.set_group(group);
-  _vBoxPage4.pack_start(_rotForwardRB, false, false);
-  _rotBackwardRB.set_group(group);
-  _vBoxPage4.pack_start(_rotBackwardRB, false, false);
-  _rotForwardReturnRB.set_group(group);
-  _vBoxPage4.pack_start(_rotForwardReturnRB, false, false);
+  _vBoxPage4.append(_colorsWidgetP4);
+  _vBoxPage4.append(_rotForwardRB);
+  _rotBackwardRB.set_group(_rotForwardRB);
+  _vBoxPage4.append(_rotBackwardRB);
+  _rotForwardReturnRB.set_group(_rotForwardRB);
+  _vBoxPage4.append(_rotForwardReturnRB);
 }
 
 void DesignWizard::initPage4_8Fire() {
   initPage4Destination("Fire");
-  _vBoxPage4.pack_start(_colorsWidgetP4, true, true);
+  _vBoxPage4.append(_colorsWidgetP4);
 }
 
 void DesignWizard::initPage4Destination(const std::string &name) {
   _parentLabel.set_text("Destination:");
-  _vBoxPage4.pack_start(_parentLabel, false, false);
+  _vBoxPage4.append(_parentLabel);
   theatre::Folder &folder = getCurrentFolder();
   _parentFolderCombo.Select(folder);
-  _vBoxPage4.pack_start(_parentFolderCombo, false, false);
+  _vBoxPage4.append(_parentFolderCombo);
   _newFolderCB.set_active(true);
   const std::string new_name = folder.GetAvailableName(name);
   _nameEntry.set_text(new_name);
-  _folderNameBox.pack_start(_nameEntry, true, true);
-  _folderNameBox.pack_start(_newFolderCB, false, false);
-  _vBoxPage4.pack_start(_folderNameBox, false, false);
+  _folderNameBox.append(_nameEntry);
+  _folderNameBox.append(_newFolderCB);
+  _vBoxPage4.append(_folderNameBox);
 }
 
 theatre::Folder &DesignWizard::getCurrentFolder() const {
@@ -307,6 +298,7 @@ theatre::DesignInfo DesignWizard::GetDesign() const {
 void DesignWizard::onNextClicked() {
   theatre::Management &management = Instance::Management();
   gui::EventTransmitter &events = Instance::Events();
+  _mainBox.remove(_buttonBox);
   switch (_currentPage) {
     case Page1_SelFixtures: {
       _selectedControllables.clear();
@@ -320,7 +312,7 @@ void DesignWizard::onNextClicked() {
       } else {
         for (const auto &iter : _controllablesListModel->children()) {
           _selectedControllables.emplace_back(
-              (*iter)[_controllablesListColumns._controllable]);
+              (iter)[_controllablesListColumns._controllable]);
         }
       }
       _mainBox.remove(_vBoxPage1);
@@ -328,7 +320,7 @@ void DesignWizard::onNextClicked() {
       _reorderWidget.SetList(
           std::vector<system::ObservingPtr<theatre::NamedObject>>(
               _selectedControllables.begin(), _selectedControllables.end()));
-      _mainBox.pack_start(_reorderWidget);
+      _mainBox.append(_reorderWidget);
       _reorderWidget.show();
       _currentPage = Page2_Order;
     } break;
@@ -341,8 +333,7 @@ void DesignWizard::onNextClicked() {
         _selectedControllables.emplace_back(
             static_cast<ObservingPtr<theatre::Controllable>>(object));
       _mainBox.remove(_reorderWidget);
-      _mainBox.pack_start(_vBoxPage3, true, true);
-      _vBoxPage3.show_all();
+      _mainBox.append(_vBoxPage3);
       _currentPage = Page3_SelType;
     } break;
 
@@ -354,21 +345,18 @@ void DesignWizard::onNextClicked() {
             std::vector<Color>(_selectedControllables.size(), Color::White()));
         _colorsWidgetP4.SetMinCount(_selectedControllables.size());
         _colorsWidgetP4.SetMaxCount(_selectedControllables.size());
-        _mainBox.pack_start(_vBoxPage4, true, true);
-        _vBoxPage4.show_all();
+        _mainBox.append(_vBoxPage4);
         _currentPage = Page4_5_ColorPreset;
       } else if (_runningLightBtn.get_active()) {
         initPage4_1RunningLight();
         _colorsWidgetP4.SetColors(
             std::vector<Color>(_selectedControllables.size(), Color::White()));
         _colorsWidgetP4.SetMaxCount(_selectedControllables.size());
-        _mainBox.pack_start(_vBoxPage4, true, true);
-        _vBoxPage4.show_all();
+        _mainBox.append(_vBoxPage4);
         _currentPage = Page4_1_RunningLight;
       } else if (_singleColorBtn.get_active()) {
         initPage4_2SingleColor();
-        _mainBox.pack_start(_vBoxPage4, true, true);
-        _vBoxPage4.show_all();
+        _mainBox.append(_vBoxPage4);
         _currentPage = Page4_2_SingleColor;
       } else if (_shiftColorsBtn.get_active()) {
         initPage4_3ShiftColors();
@@ -376,36 +364,31 @@ void DesignWizard::onNextClicked() {
         _colorsWidgetP4.SetMaxCount(_selectedControllables.size());
         _colorsWidgetP4.SetColors(
             std::vector<Color>(_selectedControllables.size(), Color::White()));
-        _mainBox.pack_start(_vBoxPage4, true, true);
-        _vBoxPage4.show_all();
+        _mainBox.append(_vBoxPage4);
         _currentPage = Page4_3_ShiftingColors;
       } else if (_vuMeterBtn.get_active()) {
         initPage4_4VUMeter();
         _colorsWidgetP4.SetMinCount(_selectedControllables.size());
         _colorsWidgetP4.SetMaxCount(_selectedControllables.size());
-        _mainBox.pack_start(_vBoxPage4, true, true);
-        _vBoxPage4.show_all();
+        _mainBox.append(_vBoxPage4);
         _currentPage = Page4_4_VUMeter;
       } else if (_increaseBtn.get_active()) {
         initPage4_6Increasing();
         _colorsWidgetP4.SetMinCount(_selectedControllables.size());
         _colorsWidgetP4.SetMaxCount(_selectedControllables.size());
-        _mainBox.pack_start(_vBoxPage4, true, true);
-        _vBoxPage4.show_all();
+        _mainBox.append(_vBoxPage4);
         _currentPage = Page4_6_Increasing;
       } else if (_rotationBtn.get_active()) {
         initPage4_7Rotation();
         _colorsWidgetP4.SetMinCount(_selectedControllables.size());
         _colorsWidgetP4.SetMaxCount(0);
-        _mainBox.pack_start(_vBoxPage4, true, true);
-        _vBoxPage4.show_all();
+        _mainBox.append(_vBoxPage4);
         _currentPage = Page4_7_Rotation;
       } else {
         initPage4_8Fire();
         _colorsWidgetP4.SetMinCount(1);
         _colorsWidgetP4.SetMaxCount(0);
-        _mainBox.pack_start(_vBoxPage4, true, true);
-        _vBoxPage4.show_all();
+        _mainBox.append(_vBoxPage4);
         _currentPage = Page4_8_Fire;
       }
       break;
@@ -549,6 +532,7 @@ void DesignWizard::onNextClicked() {
       hide();
     } break;
   }
+  _mainBox.append(_buttonBox);
 }
 
 void DesignWizard::addControllable(
@@ -557,7 +541,7 @@ void DesignWizard::addControllable(
       dynamic_cast<theatre::Controllable *>(object.Get());
   if (controllable) {
     Gtk::TreeModel::iterator iter = _controllablesListModel->append();
-    const Gtk::TreeModel::Row &row = *iter;
+    Gtk::TreeModel::Row &row = *iter;
     if (iter) {
       row[_controllablesListColumns._controllable] =
           static_cast<ObservingPtr<theatre::Controllable>>(object);

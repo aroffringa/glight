@@ -5,9 +5,10 @@
 
 #include "theatre/forwards.h"
 
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 #include "gui/components/propertiesbox.h"
 
+#include <gtkmm/dialog.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
@@ -48,19 +49,21 @@ class EffectPropertiesWindow : public PropertiesWindow {
     Gtk::TreeModelColumn<size_t> _inputIndex;
   } _connectionsListColumns;
 
-  Gtk::VBox _topBox;
-  Gtk::HBox _mainHBox, _connectionsBox;
+  Gtk::Box _topBox{Gtk::Orientation::VERTICAL};
+  Gtk::Box _mainHBox, _connectionsBox;
   Gtk::Frame _connectionsFrame{"Connections"};
   Gtk::Frame _propertiesFrame{"Properties"};
   std::unique_ptr<theatre::PropertySet> _propertySet;
   PropertiesBox _propertiesBox;
-  ScopedConnection update_connection_;
+  sigc::scoped_connection update_connection_;
 
   Gtk::ScrolledWindow _connectionsScrolledWindow;
   Gtk::Box _connectionsButtonBox;
   Gtk::Button _addConnectionButton{"Add"};
   Gtk::Button _connectControllablesButton{};
   Gtk::Button _removeConnectionButton{"Remove"};
+
+  std::unique_ptr<Gtk::Dialog> dialog_;
 
   theatre::Effect *_effect;
 };

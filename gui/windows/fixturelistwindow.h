@@ -1,9 +1,10 @@
 #ifndef GUI_FIXTURE_LIST_WINDOW_H_
 #define GUI_FIXTURE_LIST_WINDOW_H_
 
+#include <gtkmm/dialog.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/liststore.h>
-#include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/treeview.h>
@@ -11,7 +12,7 @@
 #include "theatre/forwards.h"
 #include "theatre/fixturemode.h"
 
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 #include "gui/recursionlock.h"
 #include "gui/windows/childwindow.h"
 
@@ -64,8 +65,8 @@ class FixtureListWindow : public ChildWindow {
 
   std::unique_ptr<AddFixtureWindow> add_fixture_window_;
 
-  ScopedConnection update_controllables_connection_;
-  ScopedConnection global_selection_connection_;
+  sigc::scoped_connection update_controllables_connection_;
+  sigc::scoped_connection global_selection_connection_;
   RecursionLock recursion_lock_;
 
   Gtk::TreeView fixtures_list_view_;
@@ -100,6 +101,8 @@ class FixtureListWindow : public ChildWindow {
   Gtk::Button up_button_;
   Gtk::Button down_button_;
   Gtk::Button reassign_button_{"Reassign"};
+  Gtk::Dialog dialog_;
+  Gtk::Entry dialog_entry_;
 };
 
 }  // namespace glight::gui::windows

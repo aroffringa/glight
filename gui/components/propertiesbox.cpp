@@ -3,9 +3,6 @@
 #include "durationinput.h"
 #include "transitiontypebox.h"
 
-#include <gtkmm/radiobutton.h>
-#include <gtkmm/stock.h>
-
 namespace glight::gui {
 
 using theatre::Property;
@@ -13,22 +10,21 @@ using theatre::PropertyType;
 
 PropertiesBox::PropertiesBox()
     : _typeLabel("No object selected"), _applyButton("Apply") {
-  pack_start(_typeLabel);
+  set_orientation(Gtk::Orientation::VERTICAL);
+  append(_typeLabel);
 
   _grid.set_column_homogeneous(false);
   _grid.set_column_spacing(0);
-  pack_start(_grid, true, true);
+  append(_grid);
 
   _propertiesButtonBox.set_homogeneous(true);
 
   _applyButton.set_sensitive(false);
   _applyButton.signal_clicked().connect(
       sigc::mem_fun(*this, &PropertiesBox::onApplyClicked));
-  _propertiesButtonBox.pack_start(_applyButton);
+  _propertiesButtonBox.append(_applyButton);
 
-  pack_end(_propertiesButtonBox);
-
-  show_all_children();
+  append(_propertiesButtonBox);
 }
 
 void PropertiesBox::Clear() {
@@ -45,7 +41,7 @@ void PropertiesBox::fillProperties() {
       theatre::EffectTypeToName(
           static_cast<theatre::Effect &>(_propertySet->Object()).GetType()) +
       ")");
-  for (Property &property : *_propertySet) {
+  for (theatre::Property &property : *_propertySet) {
     size_t rowIndex = _rows.size();
     _rows.emplace_back();
     PropertyRow &row = _rows.back();
@@ -59,20 +55,24 @@ void PropertiesBox::fillProperties() {
         _grid.attach(*row._widgets.back(), 0, rowIndex, 2, 1);
       } break;
       case PropertyType::Choice: {
-        row._widgets.emplace_back(std::make_unique<Gtk::VBox>());
-        Gtk::VBox *box = static_cast<Gtk::VBox *>(row._widgets.back().get());
+        row._widgets.emplace_back(
+            std::make_unique<Gtk::Box>(Gtk::Orientation::VERTICAL));
+        Gtk::Box *box = static_cast<Gtk::Box *>(row._widgets.back().get());
         row._widgets.emplace_back(
             std::make_unique<Gtk::Label>(property.Description()));
-        box->pack_start(*row._widgets.back(), false, false);
-        Gtk::RadioButton::Group group;
+        box->append(*row._widgets.back());
         std::string value = _propertySet->GetChoice(property);
+        Gtk::CheckButton *first_button;
         for (size_t i = 0; i != property.OptionCount(); ++i) {
-          std::unique_ptr<Gtk::RadioButton> button =
-              std::make_unique<Gtk::RadioButton>(property.OptionDescription(i));
-          button->set_group(group);
+          std::unique_ptr<Gtk::CheckButton> button =
+              std::make_unique<Gtk::CheckButton>(property.OptionDescription(i));
+          if (i == 0)
+            first_button = button.get();
+          else
+            button->set_group(*first_button);
           button->set_active(property.OptionName(i) == value);
           row._widgets.emplace_back(std::move(button));
-          box->pack_start(*row._widgets.back(), false, false);
+          box->append(*row._widgets.back());
         }
         _grid.attach(*box, 0, rowIndex, 2, 1);
       } break;
@@ -114,25 +114,25 @@ void PropertiesBox::fillProperties() {
       case PropertyType::Transition: {
         const theatre::Transition transition =
             _propertySet->GetTransition(property);
-        row._widgets.emplace_back(std::make_unique<Gtk::VBox>());
-        Gtk::VBox *box = static_cast<Gtk::VBox *>(row._widgets.back().get());
+        row._widgets.emplace_back(
+            std::make_unique<Gtk::Box>(Gtk::Orientation::VERTICAL));
+        Gtk::Box *box = static_cast<Gtk::Box *>(row._widgets.back().get());
         row._widgets.emplace_back(std::make_unique<DurationInput>(
             property.Description(), transition.LengthInMs()));
-        box->pack_start(*row._widgets.back());
+        box->append(*row._widgets.back());
         row._widgets.emplace_back(
             std::make_unique<TransitionTypeBox>(transition.Type()));
-        box->pack_end(*row._widgets.back());
+        box->append(*row._widgets.back());
         _grid.attach(*box, 0, rowIndex, 2, 1);
       } break;
     }
   }
-  _grid.show_all_children();
   _applyButton.set_sensitive(true);
 }
 
 void PropertiesBox::onApplyClicked() {
   auto rowIter = _rows.begin();
-  for (Property &property : *_propertySet) {
+  for (theatre::Property &property : *_propertySet) {
     switch (property.GetType()) {
       case PropertyType::Boolean: {
         bool value = static_cast<Gtk::CheckButton *>(rowIter->_widgets[0].get())
@@ -141,7 +141,7 @@ void PropertiesBox::onApplyClicked() {
       } break;
       case PropertyType::Choice: {
         for (size_t i = 0; i != property.OptionCount(); ++i) {
-          if (static_cast<Gtk::RadioButton *>(rowIter->_widgets[2 + i].get())
+          if (static_cast<Gtk::CheckButton *>(rowIter->_widgets[2 + i].get())
                   ->get_active()) {
             _propertySet->SetChoice(property, property.OptionName(i));
             break;

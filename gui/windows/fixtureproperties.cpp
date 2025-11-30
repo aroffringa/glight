@@ -5,9 +5,7 @@
 #include "gui/instance.h"
 #include "gui/units.h"
 
-#include <gtkmm/main.h>
 #include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
 
 #include "theatre/fixture.h"
 #include "theatre/fixturecontrol.h"
@@ -42,11 +40,10 @@ FixtureProperties::FixtureProperties() {
   button_box_.set_homogeneous(true);
 
   set_button_.signal_clicked().connect([&]() { onSetClicked(); });
-  button_box_.pack_start(set_button_);
+  button_box_.append(set_button_);
   main_grid_.attach(button_box_, 0, 5, 2, 1);
 
-  add(main_grid_);
-  main_grid_.show_all();
+  set_child(main_grid_);
 
   update();
 }

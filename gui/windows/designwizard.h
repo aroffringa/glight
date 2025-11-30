@@ -16,7 +16,6 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
-#include <gtkmm/radiobutton.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treemodel.h>
@@ -80,8 +79,10 @@ class DesignWizard : public Gtk::Window {
 
   std::string _currentPath;
 
-  Gtk::VBox _mainBox;
-  Gtk::VBox _vBoxPage1, _vBoxPage1a, _vBoxPage1b;
+  Gtk::Box _mainBox{Gtk::Orientation::VERTICAL};
+  Gtk::Box _vBoxPage1{Gtk::Orientation::VERTICAL},
+      _vBoxPage1a{Gtk::Orientation::VERTICAL},
+      _vBoxPage1b{Gtk::Orientation::VERTICAL};
   Gtk::Notebook _notebook;
   std::vector<system::ObservingPtr<theatre::Controllable>>
       _selectedControllables;
@@ -90,7 +91,7 @@ class DesignWizard : public Gtk::Window {
   components::FixtureList _fixtureList;
   // 1b
   ObjectBrowser _objectBrowser;
-  Gtk::HBox _controllableButtonBox;
+  Gtk::Box _controllableButtonBox;
   Gtk::Button _addControllableButton, _removeControllableButton;
   Gtk::TreeView _controllablesListView;
 
@@ -98,23 +99,25 @@ class DesignWizard : public Gtk::Window {
   components::ReorderWidget _reorderWidget;
 
   // 3
-  Gtk::VBox _vBoxPage3, _vBoxPage3Type, _vBoxPage3Deduction;
+  Gtk::Box _vBoxPage3{Gtk::Orientation::VERTICAL},
+      _vBoxPage3Type{Gtk::Orientation::VERTICAL},
+      _vBoxPage3Deduction{Gtk::Orientation::VERTICAL};
   Gtk::Frame _typeFrameP3, _deductionFrameP3;
-  Gtk::RadioButton _colorPresetBtn, _runningLightBtn, _singleColorBtn,
+  Gtk::CheckButton _colorPresetBtn, _runningLightBtn, _singleColorBtn,
       _shiftColorsBtn, _increaseBtn, _rotationBtn, _vuMeterBtn, _fireBtn;
   Gtk::CheckButton _deduceWhite, _deduceAmber, _deduceUV, _deduceLime;
 
   // Page 4 common widgets
-  Gtk::VBox _vBoxPage4;
+  Gtk::Box _vBoxPage4{Gtk::Orientation::VERTICAL};
   ColorSequenceWidget _colorsWidgetP4;
   Gtk::Label _parentLabel;
   FolderCombo _parentFolderCombo;
-  Gtk::HBox _folderNameBox;
+  Gtk::Box _folderNameBox;
   Gtk::Entry _nameEntry;
   Gtk::CheckButton _newFolderCB;
 
   // 4_1
-  Gtk::RadioButton _increasingRunRB, _decreasingRunRB, _backAndForthRunRB,
+  Gtk::CheckButton _increasingRunRB, _decreasingRunRB, _backAndForthRunRB,
       _inwardRunRB, _outwardRunRB, _randomRunRB;
 
   // 4_2
@@ -122,22 +125,22 @@ class DesignWizard : public Gtk::Window {
   Gtk::Scale _variation;
 
   // 4_3
-  Gtk::RadioButton _shiftIncreasingRB, _shiftDecreasingRB, _shiftBackAndForthRB,
+  Gtk::CheckButton _shiftIncreasingRB, _shiftDecreasingRB, _shiftBackAndForthRB,
       _shiftRandomRB;
 
   // 4_4
-  Gtk::RadioButton _vuIncreasingRB, _vuDecreasingRB, _vuInwardRunRB,
+  Gtk::CheckButton _vuIncreasingRB, _vuDecreasingRB, _vuInwardRunRB,
       _vuOutwardRunRB;
 
   // 4_5
   Gtk::CheckButton _eachFixtureSeparatelyCB;
 
   // 4_6
-  Gtk::RadioButton _incForwardRB, _incBackwardRB, _incForwardReturnRB,
+  Gtk::CheckButton _incForwardRB, _incBackwardRB, _incForwardReturnRB,
       _incBackwardReturnRB;
 
   // 4_7
-  Gtk::RadioButton _rotForwardRB, _rotBackwardRB, _rotForwardReturnRB;
+  Gtk::CheckButton _rotForwardRB, _rotBackwardRB, _rotForwardReturnRB;
 
   Gtk::Box _buttonBox;
   Gtk::Button _nextButton;

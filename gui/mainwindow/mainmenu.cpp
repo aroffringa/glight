@@ -1,148 +1,130 @@
 #include "mainmenu.h"
 
+#include <giomm/actionmap.h>
+#include <giomm/simpleactiongroup.h>
+#include <giomm/menu.h>
+
 #include "gui/state/fadersetstate.h"
+#include "gui/menufunctions.h"
+
+#include <iostream>  // DEBUG
 
 namespace glight::gui {
 
-MainMenu::MainMenu() {
+MainMenu::MainMenu(Gio::ActionMap& actions) {
+  const auto Add = [&actions](std::shared_ptr<Gio::Menu>& menu,
+                              const Glib::ustring& label,
+                              const Glib::ustring& action_name,
+                              const sigc::slot<void()>& slot) {
+    return AddMenuItem(actions, menu, label, action_name, slot);
+  };
+
+  const auto Toggle =
+      [&actions](std::shared_ptr<Gio::Menu>& menu, const Glib::ustring& label,
+                 const Glib::ustring& action_name, bool initial_value,
+                 const sigc::slot<void(bool)>& slot) {
+        return AddToggleMenuItem(actions, menu, label, action_name,
+                                 initial_value, slot);
+      };
+
   // File menu
-  _miNew.signal_activate().connect(New);
-  file_menu_.append(_miNew);
+  auto file_menu = Gio::Menu::create();
 
-  _miOpen.signal_activate().connect(Open);
-  file_menu_.append(_miOpen);
+  auto file_section = Gio::Menu::create();
+  Add(file_section, "New", "file_new", New);
+  Add(file_section, "_Open...", "file_open", Open);
+  Add(file_section, "Save _as...", "file_save_as", Save);
+  Add(file_section, "_Import fixtures...", "import_fixtures", Import);
+  file_menu->append_section(file_section);
 
-  _miSave.signal_activate().connect(Save);
-  file_menu_.append(_miSave);
+  auto settings_section = Gio::Menu::create();
+  Add(file_menu, "_Settings...", "file_settings", Settings);
+  file_menu->append_section(settings_section);
 
-  _miImport.signal_activate().connect(Import);
-  file_menu_.append(_miImport);
+  auto quit_section = Gio::Menu::create();
+  Add(file_menu, "_Quit", "file_quit", Quit);
+  file_menu->append_section(quit_section);
 
-  file_menu_.append(file_sep1_mi_);
+  auto design_menu = Gio::Menu::create();
+  auto design_section = Gio::Menu::create();
+  layout_locked_ =
+      Toggle(design_section, "Lock layout", "design_lock", false, LockLayout);
+  auto blackout_action =
+      Add(design_section, "Black-out", "black_out", BlackOut);
+  blackout_action->set_enabled(false);
+  Toggle(design_section, "Protect black-out", "protect_lock", true,
+         [blackout_action](bool new_value) {
+           blackout_action->set_enabled(!new_value);
+         });
 
-  settings_mi_.signal_activate().connect(Settings);
-  file_menu_.append(settings_mi_);
+  design_menu->append_section(design_section);
 
-  file_menu_.append(file_sep2_mi_);
+  auto add_section = Gio::Menu::create();
+  auto preset_menu = Gio::Menu::create();
+  Add(preset_menu, "Empty", "add_empty_preset", AddEmptyPreset);
+  Add(preset_menu, "From current", "add_current_preset", AddCurrentPreset);
+  add_section->append_submenu("Add preset", preset_menu);
 
-  _miQuit.signal_activate().connect(Quit);
-  file_menu_.append(_miQuit);
+  Add(add_section, "Add chase", "design_lock", AddChase);
+  Add(add_section, "Add sequence", "design_lock", AddTimeSequence);
 
-  _miFile.set_submenu(file_menu_);
-  append(_miFile);
-
-  // Design menu
-  _miLockLayout.signal_activate().connect(LockLayout);
-  _menuDesign.append(_miLockLayout);
-
-  _miProtectBlackout.signal_activate().connect([&]() {
-    bool protect = _miProtectBlackout.get_active();
-    _miBlackOut.set_sensitive(!protect);
-  });
-  _miProtectBlackout.set_active(true);
-  _menuDesign.append(_miProtectBlackout);
-
-  _miBlackOut.signal_activate().connect(BlackOut);
-  _miBlackOut.set_sensitive(false);
-  _menuDesign.append(_miBlackOut);
-
-  _menuDesign.append(_miDesignSep1);
-
-  _miAddPreset.set_submenu(preset_sub_menu_);
-  _menuDesign.append(_miAddPreset);
-  _miAddEmptyPreset.signal_activate().connect(AddEmptyPreset);
-  preset_sub_menu_.append(_miAddEmptyPreset);
-  _miAddCurrentPreset.signal_activate().connect(AddCurrentPreset);
-  preset_sub_menu_.append(_miAddCurrentPreset);
-
-  _miAddChase.signal_activate().connect(AddChase);
-  _menuDesign.append(_miAddChase);
-  _miAddSequence.signal_activate().connect(AddTimeSequence);
-  _menuDesign.append(_miAddSequence);
-  _miAddEffect.set_submenu(effect_sub_menu_);
-  _menuDesign.append(_miAddEffect);
+  auto effect_menu = Gio::Menu::create();
   std::vector<theatre::EffectType> effect_types = theatre::GetEffectTypes();
   for (theatre::EffectType t : effect_types) {
-    Gtk::MenuItem& mi = effect_menu_items_.emplace_back(EffectTypeToName(t));
-    mi.signal_activate().connect([&, t]() { AddEffect(t); });
-    effect_sub_menu_.append(mi);
+    Add(effect_menu, EffectTypeToName(t),
+        "add_effect_" + std::to_string(static_cast<int>(t)),
+        [&, t]() { AddEffect(t); });
   }
-  _miAddFolder.signal_activate().connect(AddFolder);
-  _menuDesign.append(_miAddFolder);
-  _miDeleteObject.set_sensitive(false);
-  _miDeleteObject.signal_activate().connect(DeleteObject);
-  _menuDesign.append(_miDeleteObject);
+  add_section->append_submenu("Add effect", effect_menu);
+  Add(add_section, "Add folder", "add_folder", AddFolder);
+  delete_object_ = Add(add_section, "Delete", "design_lock", DeleteObject);
+  Add(add_section, "Design wizard...", "design_wizard", DesignWizard);
+  design_menu->append_section(add_section);
 
-  _miDesignWizard.signal_activate().connect(DesignWizard);
-  _menuDesign.append(_miDesignWizard);
-  _menuDesign.append(_miDesignSep2);
+  auto dimensions_section = Gio::Menu::create();
+  Add(add_section, "Theatre dimensions...", "theatre_dimensions",
+      TheatreDimensions);
+  design_menu->append_section(dimensions_section);
 
-  _miTheatreDimensions.signal_activate().connect(TheatreDimensions);
-  _menuDesign.append(_miTheatreDimensions);
+  auto view_menu = Gio::Menu::create();
+  show_fixtures_ =
+      Toggle(view_menu, "Show fixtures", "show_fixtures", true, ShowFixtures);
+  show_beams_ = Toggle(view_menu, "Show beams", "show_beams", true, ShowBeams);
+  show_projections_ = Toggle(view_menu, "Show projections", "show_projections",
+                             true, ShowProjections);
+  show_stage_borders_ = Toggle(view_menu, "Show theatre walls",
+                               "show_stage_borders", true, ShowStageBorders);
+  full_screen_ =
+      Toggle(view_menu, "Full screen", "full_screen", false, FullScreen);
 
-  _miDesign.set_submenu(_menuDesign);
-  append(_miDesign);
+  auto window_menu = Gio::Menu::create();
+  side_bar_ = Toggle(window_menu, "Side bar", "side_bar", true, SideBar);
+  power_monitor_ = Toggle(window_menu, "Power monitor", "power_monitor", false,
+                          PowerMonitor);
+  fixture_list_ =
+      Toggle(window_menu, "Fixtures", "fixture_list", false, FixtureList);
+  fixture_types_ = Toggle(window_menu, "Fixture types", "fixture_types", false,
+                          FixtureTypes);
+  scene_window_ = Toggle(window_menu, "Scene", "scene", false, SceneWindow);
 
-  // View menu
-  _miShowFixtures.set_active(true);
-  _miShowFixtures.signal_activate().connect(ShowFixtures);
-  _menuView.append(_miShowFixtures);
+  auto fader_window_menu = Gio::Menu::create();
+  auto fader_window_section = Gio::Menu::create();
+  Add(fader_window_section, "New", "new_fader_window",
+      [&]() { NewFaderWindow(); });
+  fader_window_menu->append_section(fader_window_section);
+  window_menu->append_submenu("Fader windows", fader_window_menu);
 
-  _miShowBeams.set_active(true);
-  _miShowBeams.signal_activate().connect(ShowBeams);
-  _menuView.append(_miShowBeams);
-
-  _miShowProjections.set_active(true);
-  _miShowProjections.signal_activate().connect(ShowProjections);
-  _menuView.append(_miShowProjections);
-
-  _miShowStageBorders.set_active(true);
-  _miShowStageBorders.signal_activate().connect(ShowStageBorders);
-  _menuView.append(_miShowStageBorders);
-
-  _menuView.append(_miViewSeperator);
-
-  _miFullScreen.signal_activate().connect(FullScreen);
-  _menuView.append(_miFullScreen);
-
-  _miView.set_submenu(_menuView);
-  append(_miView);
-
-  // Window menu
-  _miSideBar.set_active(true);
-  _miSideBar.signal_activate().connect(SideBar);
-  _menuWindow.append(_miSideBar);
-
-  _miPowerMonitor.signal_activate().connect(PowerMonitor);
-  _menuWindow.append(_miPowerMonitor);
-
-  _miNewFaderWindow.signal_activate().connect([&]() { NewFaderWindow(); });
-  _menuFaderWindows.append(_miNewFaderWindow);
-  _menuFaderWindows.append(_miFaderWindowSeperator);
-
-  _miFaderWindowMenu.set_submenu(_menuFaderWindows);
-  _menuWindow.append(_miFaderWindowMenu);
-
-  _miFixtureListWindow.set_active(false);
-  _miFixtureListWindow.signal_activate().connect(FixtureList);
-  _menuWindow.append(_miFixtureListWindow);
-
-  _miFixtureTypesWindow.set_active(false);
-  _miFixtureTypesWindow.signal_activate().connect(FixtureTypes);
-  _menuWindow.append(_miFixtureTypesWindow);
-
-  _miSceneWindow.set_active(false);
-  _miSceneWindow.signal_activate().connect(
-      [&]() { SceneWindow(_miSceneWindow.get_active()); });
-  _menuWindow.append(_miSceneWindow);
-
-  _miWindow.set_submenu(_menuWindow);
-  append(_miWindow);
+  auto top_level_menu = Gio::Menu::create();
+  top_level_menu->append_submenu("_File", file_menu);
+  top_level_menu->append_submenu("_Design", design_menu);
+  top_level_menu->append_submenu("_View", view_menu);
+  top_level_menu->append_submenu("_Window", window_menu);
+  set_menu_model(top_level_menu);
 }
 
 void MainMenu::SetFaderList(
     const std::vector<std::unique_ptr<FaderSetState>>& faders) {
-  _miFaderWindows.clear();
+  /*_miFaderWindows.clear();
 
   for (const std::unique_ptr<FaderSetState>& state : faders) {
     Gtk::CheckMenuItem& item = _miFaderWindows.emplace_back(state->name);
@@ -150,7 +132,7 @@ void MainMenu::SetFaderList(
     item.signal_toggled().connect([&]() { FaderWindow(*state); });
     item.show();
     _menuFaderWindows.append(item);
-  }
+  }*/
 }
 
 }  // namespace glight::gui

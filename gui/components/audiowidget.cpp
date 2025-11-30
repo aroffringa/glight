@@ -8,6 +8,7 @@
 #include <cairomm/context.h>
 
 #include <gdkmm/general.h>  // set_source_pixbuf()
+#include <gtkmm/gestureclick.h>
 
 namespace {
 
@@ -67,12 +68,15 @@ AudioWidget::AudioWidget()
       _chunkBuffer(kChunkSize) {
   set_size_request(50, 50);
 
-  add_events(Gdk::BUTTON_PRESS_MASK);
-
-  signal_button_press_event().connect(
+  auto gesture = Gtk::GestureClick::create();
+  gesture->set_button(1);
+  gesture->signal_pressed().connect(
       sigc::mem_fun(*this, &AudioWidget::onButtonPressed));
+  add_controller(gesture);
 
-  signal_draw().connect(sigc::mem_fun(*this, &AudioWidget::onExpose));
+  set_draw_func([&](const Cairo::RefPtr<Cairo::Context> &cairo, int, int) {
+    AudioWidget::onExpose(cairo);
+  });
 }
 
 AudioWidget::~AudioWidget() = default;
@@ -124,7 +128,7 @@ void AudioWidget::ResizeBuffer() {
   _height = get_height();
   if (_width > 0) {
     _buffer =
-        Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, _width, _height);
+        Gdk::Pixbuf::create(Gdk::Colorspace::RGB, false, 8, _width, _height);
   } else {
     _buffer.reset();
   }
@@ -209,12 +213,11 @@ void AudioWidget::bufferToScreen(const Cairo::RefPtr<Cairo::Context> &context) {
   context->fill();
 }
 
-bool AudioWidget::onButtonPressed(GdkEventButton *event) {
+void AudioWidget::onButtonPressed(int, double x, double y) {
   const int position = std::clamp<int>(
-      static_cast<int>(event->x) + _renderStartPosition, 0, DataSize() - 1);
+      static_cast<int>(x) + _renderStartPosition, 0, DataSize() - 1);
   _signalClicked.emit(static_cast<double>(position) * kChunkSize /
                       (44.100 * 4.0));
-  return true;
 }
 
 void AudioWidget::SetScene(theatre::Scene &scene) {

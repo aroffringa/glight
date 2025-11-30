@@ -1,7 +1,6 @@
 #include "nameframe.h"
 
 #include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
 
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
@@ -13,21 +12,21 @@
 namespace glight::gui {
 
 NameFrame::NameFrame() : _namedObject(nullptr), _label("Name:"), _button() {
-  pack_start(_label, false, false, 2);
+  append(_label);
   _label.show();
 
-  pack_start(_entry, true, true, 2);
+  append(_entry);
   _entry.show();
 
   _button.set_label("Apply");
   _button.signal_clicked().connect(
       sigc::mem_fun(*this, &NameFrame::onButtonClicked));
   _buttonBox.set_homogeneous(true);
-  _buttonBox.pack_start(_button, false, false, 0);
-  _buttonBox.set_orientation(Gtk::ORIENTATION_HORIZONTAL);
+  _buttonBox.append(_button);
+  _buttonBox.set_orientation(Gtk::Orientation::HORIZONTAL);
   _button.show();
 
-  pack_start(_buttonBox, false, false, 2);
+  append(_buttonBox);
   _buttonBox.show();
 
   update();
@@ -60,8 +59,8 @@ void NameFrame::onButtonClicked() {
         Gtk::MessageDialog dialog(
             "The folder containing this object already has an object named " +
                 newName,
-            false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
-        dialog.run();
+            false, Gtk::MessageType::ERROR, Gtk::ButtonsType::OK);
+        dialog.show();
       } else {
         theatre::Management &management = Instance::Management();
         std::unique_lock<std::mutex> lock(management.Mutex());

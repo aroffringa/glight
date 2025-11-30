@@ -13,30 +13,28 @@ ReorderWidget::ReorderWidget() {
   view_.set_model(model_);
   SetColumns();
   view_.set_rubber_banding(true);
-  view_.get_selection()->set_mode(Gtk::SelectionMode::SELECTION_MULTIPLE);
-  scrolled_window_.add(view_);
+  view_.get_selection()->set_mode(Gtk::SelectionMode::MULTIPLE);
+  scrolled_window_.set_child(view_);
   scrolled_window_.set_size_request(300, 400);
-  pack_start(scrolled_window_);
+  append(scrolled_window_);
 
   button_box_.set_homogeneous(true);
-  button_box_.set_valign(Gtk::Align::ALIGN_CENTER);
+  button_box_.set_valign(Gtk::Align::CENTER);
   up_button_.set_image_from_icon_name("go-up");
   up_button_.signal_clicked().connect([&]() { MoveUp(); });
-  button_box_.pack_start(up_button_, false, false);
+  button_box_.append(up_button_);
   down_button_.set_image_from_icon_name("go-down");
   down_button_.signal_clicked().connect([&]() { MoveDown(); });
-  button_box_.pack_start(down_button_, false, false);
+  button_box_.append(down_button_);
   remove_button_.set_image_from_icon_name("edit-delete");
   remove_button_.signal_clicked().connect([&]() { Remove(); });
-  button_box_.pack_start(remove_button_, false, false);
-  pack_start(button_box_, false, false);
-
-  show_all_children();
+  button_box_.append(remove_button_);
+  append(button_box_);
 }
 
 void ReorderWidget::Append(system::ObservingPtr<theatre::NamedObject> object) {
   Gtk::TreeModel::iterator iter = model_->append();
-  const Gtk::TreeModel::Row& row = *iter;
+  Gtk::TreeModel::Row& row = *iter;
   row[columns_.title_] = object->Name();
   if (const theatre::Fixture* fixture =
           dynamic_cast<const theatre::Fixture*>(object.Get());
@@ -49,9 +47,9 @@ void ReorderWidget::Append(system::ObservingPtr<theatre::NamedObject> object) {
 
 std::vector<system::ObservingPtr<theatre::NamedObject>> ReorderWidget::GetList()
     const {
-  const auto children = model_->children();
+  auto children = model_->children();
   std::vector<system::ObservingPtr<theatre::NamedObject>> list;
-  for (const Gtk::TreeRow& row : children) {
+  for (Gtk::TreeRow& row : children) {
     list.emplace_back(row[columns_.object_]);
   }
   return list;

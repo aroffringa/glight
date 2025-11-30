@@ -16,7 +16,7 @@
 
 namespace glight::gui {
 
-class PropertiesBox : public Gtk::VBox {
+class PropertiesBox : public Gtk::Box {
  public:
   PropertiesBox();
 

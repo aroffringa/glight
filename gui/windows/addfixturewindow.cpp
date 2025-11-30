@@ -32,19 +32,17 @@ AddFixtureWindow::AddFixtureWindow() {
   grid_.set_row_spacing(5);
   grid_.set_column_spacing(2);
 
-  Gtk::RadioButton::Group group;
-  stock_or_project_box_.pack_start(stock_button_);
-  stock_button_.set_group(group);
+  stock_or_project_box_.append(stock_button_);
   stock_button_.set_hexpand(true);
   stock_button_.signal_toggled().connect([&]() { onStockProjectToggled(); });
 
-  stock_or_project_box_.pack_start(project_button_);
-  project_button_.set_group(group);
+  stock_or_project_box_.append(project_button_);
+  project_button_.set_group(stock_button_);
   project_button_.set_hexpand(true);
   project_button_.signal_toggled().connect([&]() { onStockProjectToggled(); });
 
   grid_.attach(stock_or_project_box_, 0, 0, 2, 1);
-  stock_or_project_box_.set_halign(Gtk::ALIGN_CENTER);
+  stock_or_project_box_.set_halign(Gtk::Align::CENTER);
   stock_or_project_box_.set_hexpand(true);
 
   grid_.attach(type_label_, 0, 1, 1, 1);
@@ -72,26 +70,25 @@ AddFixtureWindow::AddFixtureWindow() {
   increase_count_button_.signal_clicked().connect([&]() { onIncCount(); });
   grid_.attach(increase_count_button_, 3, 3, 1, 1);
 
-  filters_box_.pack_start(auto_master_cb_);
-  filters_box_.pack_start(rgb_cb_);
-  filters_box_.pack_start(monochrome_cb_);
-  filters_box_.pack_start(temperature_cb_);
+  filters_box_.append(auto_master_cb_);
+  filters_box_.append(rgb_cb_);
+  filters_box_.append(monochrome_cb_);
+  filters_box_.append(temperature_cb_);
   updateFilters();
 
-  filters_frame_.add(filters_box_);
+  filters_frame_.set_child(filters_box_);
   grid_.attach(filters_frame_, 0, 4, 4, 1);
 
   button_box_.set_homogeneous(true);
 
   cancel_button_.signal_clicked().connect([&]() { onCancel(); });
-  button_box_.pack_start(cancel_button_);
+  button_box_.append(cancel_button_);
   add_button_.signal_clicked().connect([&]() { onAdd(); });
-  button_box_.pack_end(add_button_);
+  button_box_.append(add_button_);
   grid_.attach(button_box_, 0, 5, 4, 1);
 
-  add(grid_);
+  set_child(grid_);
   grid_.set_hexpand(true);
-  show_all_children();
 }
 
 void AddFixtureWindow::onStockProjectToggled() {

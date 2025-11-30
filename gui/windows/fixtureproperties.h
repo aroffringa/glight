@@ -8,10 +8,11 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
+#include <gtkmm/label.h>
 #include <gtkmm/window.h>
 
 #include "gui/recursionlock.h"
-#include "gui/scopedconnection.h"
+#include <sigc++/scoped_connection.h>
 
 #include "theatre/forwards.h"
 
@@ -33,8 +34,8 @@ class FixtureProperties : public Gtk::Window {
   void update();
   void onSetClicked();
 
-  ScopedConnection update_controllables_connection_;
-  ScopedConnection selection_change_connection_;
+  sigc::scoped_connection update_controllables_connection_;
+  sigc::scoped_connection selection_change_connection_;
   RecursionLock recursion_lock_;
 
   Gtk::Grid main_grid_;

@@ -4,11 +4,10 @@
 #include <memory>
 #include <vector>
 
-#include <gtkmm/checkmenuitem.h>
-#include <gtkmm/imagemenuitem.h>
-#include <gtkmm/menu.h>
-#include <gtkmm/menubar.h>
-#include <gtkmm/separatormenuitem.h>
+#include <giomm/actionmap.h>
+#include <giomm/simpleaction.h>
+
+#include <gtkmm/popovermenubar.h>
 
 #include "theatre/effecttype.h"
 
@@ -16,9 +15,9 @@ namespace glight::gui {
 
 class FaderSetState;
 
-class MainMenu : public Gtk::MenuBar {
+class MainMenu : public Gtk::PopoverMenuBar {
  public:
-  MainMenu();
+  MainMenu(Gio::ActionMap& actions);
 
   // File menu
   sigc::signal<void()> New;
@@ -29,7 +28,7 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> Quit;
 
   // Design menu
-  sigc::signal<void()> LockLayout;
+  sigc::signal<void(bool)> LockLayout;
   sigc::signal<void()> BlackOut;
 
   sigc::signal<void()> AddEmptyPreset;
@@ -44,126 +43,88 @@ class MainMenu : public Gtk::MenuBar {
   sigc::signal<void()> TheatreDimensions;
 
   // View menu
-  sigc::signal<void()> ShowFixtures;
-  sigc::signal<void()> ShowBeams;
-  sigc::signal<void()> ShowProjections;
-  sigc::signal<void()> ShowStageBorders;
-  sigc::signal<void()> FullScreen;
+  sigc::signal<void(bool)> ShowFixtures;
+  sigc::signal<void(bool)> ShowBeams;
+  sigc::signal<void(bool)> ShowProjections;
+  sigc::signal<void(bool)> ShowStageBorders;
+  sigc::signal<void(bool)> FullScreen;
 
   // Window menu
   sigc::signal<void()> NewFaderWindow;
-  sigc::signal<void()> FixtureList;
-  sigc::signal<void()> FixtureTypes;
-  sigc::signal<void()> SideBar;
-  sigc::signal<void()> PowerMonitor;
+  sigc::signal<void(bool)> FixtureList;
+  sigc::signal<void(bool)> FixtureTypes;
+  sigc::signal<void(bool)> SideBar;
+  sigc::signal<void(bool)> PowerMonitor;
   sigc::signal<void(bool active)> SceneWindow;
   sigc::signal<void(FaderSetState& fader_set)> FaderWindow;
 
-  bool ShowFixturesActive() const { return _miShowFixtures.get_active(); }
+  bool ShowFixturesActive() const { return GetState(show_fixtures_); }
   void SetShowFixtures(bool show_fixtures) {
-    _miShowFixtures.set_active(show_fixtures);
+    SetState(show_fixtures_, show_fixtures);
   }
 
-  bool ShowBeamsActive() const { return _miShowBeams.get_active(); }
-  void SetShowBeams(bool show_beams) { _miShowBeams.set_active(show_beams); }
+  bool ShowBeamsActive() const { return GetState(show_beams_); }
+  void SetShowBeams(bool show_beams) { SetState(show_beams_, show_beams); }
 
-  bool ShowProjectionsActive() const { return _miShowProjections.get_active(); }
+  bool ShowProjectionsActive() const { return GetState(show_projections_); }
   void SetShowProjections(bool show_projections) {
-    _miShowProjections.set_active(show_projections);
+    SetState(show_projections_, show_projections);
   }
 
-  bool ShowStageBordersActive() const {
-    return _miShowStageBorders.get_active();
-  }
+  bool ShowStageBordersActive() const { return GetState(show_stage_borders_); }
   void SetShowStageBorders(bool show_stage_borders) {
-    _miShowStageBorders.set_active(show_stage_borders);
+    SetState(show_stage_borders_, show_stage_borders);
   }
 
-  bool FullScreenActive() const { return _miFullScreen.get_active(); }
+  bool FullScreenActive() const { return GetState(full_screen_); }
 
-  bool FixtureListActive() const { return _miFixtureListWindow.get_active(); }
-  void SetFixtureListActive(bool active) {
-    _miFixtureListWindow.set_active(active);
-  }
+  bool FixtureListActive() const { return GetState(fixture_list_); }
+  void SetFixtureListActive(bool active) { SetState(fixture_list_, active); }
 
-  bool FixtureTypesActive() const { return _miFixtureTypesWindow.get_active(); }
-  void SetFixtureTypesActive(bool active) {
-    _miFixtureTypesWindow.set_active(active);
-  }
+  bool FixtureTypesActive() const { return GetState(fixture_types_); }
+  void SetFixtureTypesActive(bool active) { SetState(fixture_types_, active); }
 
-  bool SideBarActive() const { return _miSideBar.get_active(); }
-  void SetSideBarActive(bool active) { _miSideBar.set_active(active); }
+  bool SideBarActive() const { return GetState(side_bar_); }
+  void SetSideBarActive(bool active) { SetState(side_bar_, active); }
 
-  bool PowerMonitorActive() const { return _miPowerMonitor.get_active(); }
-  void SetPowerMonitorActive(bool active) {
-    _miPowerMonitor.set_active(active);
-  }
+  bool PowerMonitorActive() const { return GetState(power_monitor_); }
+  void SetPowerMonitorActive(bool active) { SetState(power_monitor_, active); }
 
-  void SetSceneWindowActive(bool active) { _miSceneWindow.set_active(active); }
+  void SetSceneWindowActive(bool active) { SetState(scene_window_, active); }
 
   void SetFaderList(const std::vector<std::unique_ptr<FaderSetState>>& faders);
 
-  bool IsLayoutLocked() const { return _miLockLayout.get_active(); }
-  void SetLayoutLocked(bool lock) { _miLockLayout.set_active(lock); }
+  bool IsLayoutLocked() const { return GetState(layout_locked_); }
+  void SetLayoutLocked(bool lock) { SetState(layout_locked_, lock); }
 
   void SetIsObjectSelected(bool is_selected) {
-    _miDeleteObject.set_sensitive(is_selected);
+    delete_object_->set_enabled(is_selected);
   }
 
  private:
-  Gtk::Menu file_menu_;
-  Gtk::MenuItem _miFile{"_File", true};
-  Gtk::MenuItem _miNew{"New"};
-  Gtk::MenuItem _miOpen{"_Open...", true};
-  Gtk::MenuItem _miSave{"Save _as...", true};
-  Gtk::MenuItem _miImport{"_Import fixtures...", true};
-  Gtk::SeparatorMenuItem file_sep1_mi_;
-  Gtk::MenuItem settings_mi_{"_Settings...", true};
-  Gtk::SeparatorMenuItem file_sep2_mi_;
-  Gtk::MenuItem _miQuit{"_Quit", true};
+  bool GetState(const std::shared_ptr<Gio::SimpleAction>& action) const {
+    bool value;
+    action->get_state(value);
+    return value;
+  }
+  void SetState(const std::shared_ptr<Gio::SimpleAction>& action, bool state) {
+    action->set_state(Glib::Variant<bool>::create(state));
+  }
+  std::shared_ptr<Gio::SimpleAction> layout_locked_;
+  std::shared_ptr<Gio::SimpleAction> delete_object_;
 
-  Gtk::Menu _menuDesign;
-  Gtk::MenuItem _miDesign{"_Design", true};
-  Gtk::CheckMenuItem _miLockLayout{"Lock layout"};
-  Gtk::CheckMenuItem _miProtectBlackout{"Protect black-out"};
-  Gtk::MenuItem _miBlackOut{"Black-out"};
-  Gtk::SeparatorMenuItem _miDesignSep1;
-  Gtk::Menu preset_sub_menu_;
-  Gtk::MenuItem _miAddPreset{"Add preset"};
-  Gtk::MenuItem _miAddEmptyPreset{"Empty"};
-  Gtk::MenuItem _miAddCurrentPreset{"From current"};
-  Gtk::MenuItem _miAddChase{"Add chase"};
-  Gtk::MenuItem _miAddSequence{"Add sequence"};
-  Gtk::MenuItem _miAddEffect{"Add effect"};
-  Gtk::Menu effect_sub_menu_;
-  std::vector<Gtk::MenuItem> effect_menu_items_;
-  Gtk::MenuItem _miAddFolder{"Add folder"};
-  Gtk::MenuItem _miDeleteObject{"Delete"};
-  Gtk::MenuItem _miDesignWizard{"Design wizard..."};
-  Gtk::SeparatorMenuItem _miDesignSep2;
-  Gtk::MenuItem _miTheatreDimensions{"Theatre dimensions..."};
+  std::shared_ptr<Gio::SimpleAction> show_fixtures_;
+  std::shared_ptr<Gio::SimpleAction> show_beams_;
+  std::shared_ptr<Gio::SimpleAction> show_projections_;
+  std::shared_ptr<Gio::SimpleAction> show_stage_borders_;
+  std::shared_ptr<Gio::SimpleAction> full_screen_;
 
-  Gtk::Menu _menuView;
-  Gtk::MenuItem _miView{"_View", true};
-  Gtk::CheckMenuItem _miShowFixtures{"Show fixtures"};
-  Gtk::CheckMenuItem _miShowBeams{"Show beams"};
-  Gtk::CheckMenuItem _miShowProjections{"Show projections"};
-  Gtk::CheckMenuItem _miShowStageBorders{"Show theatre walls"};
-  Gtk::SeparatorMenuItem _miViewSeperator;
-  Gtk::CheckMenuItem _miFullScreen{"Full screen"};
+  std::shared_ptr<Gio::SimpleAction> side_bar_;
+  std::shared_ptr<Gio::SimpleAction> power_monitor_;
+  std::shared_ptr<Gio::SimpleAction> fixture_list_;
+  std::shared_ptr<Gio::SimpleAction> fixture_types_;
 
-  Gtk::Menu _menuWindow;
-  Gtk::MenuItem _miWindow{"_Window", true};
-  Gtk::CheckMenuItem _miSideBar{"Side bar"};
-  Gtk::CheckMenuItem _miPowerMonitor{"Power monitor"};
-  Gtk::CheckMenuItem _miFixtureListWindow{"Fixtures"};
-  Gtk::CheckMenuItem _miFixtureTypesWindow{"Fixture types"};
-  Gtk::Menu _menuFaderWindows;
-  Gtk::MenuItem _miFaderWindowMenu{"Fader windows"};
-  Gtk::MenuItem _miNewFaderWindow{"New"};
-  Gtk::SeparatorMenuItem _miFaderWindowSeperator;
-  std::vector<Gtk::CheckMenuItem> _miFaderWindows;
-  Gtk::CheckMenuItem _miSceneWindow{"Scene"};
+  std::shared_ptr<Gio::SimpleAction> scene_window_;
 };
 
 }  // namespace glight::gui

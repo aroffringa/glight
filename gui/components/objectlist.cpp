@@ -1,5 +1,8 @@
 #include "objectlist.h"
 
+#include <sigc++/signal.h>
+
+#include <gtkmm/gestureclick.h>
 #include <gtkmm/icontheme.h>
 
 #include "gui/eventtransmitter.h"
@@ -35,6 +38,7 @@ ObjectList::ObjectList()
   _listView.append_column("", _listColumns._icon);
   _listView.append_column("object", _listColumns._title);
   _listView.set_enable_search(false);
+  _listView.set_expand(true);
   _listView.get_selection()->signal_changed().connect([&]() {
     if (_avoidRecursion.IsFirst()) _signalSelectionChange.emit();
   });
@@ -45,8 +49,8 @@ ObjectList::ObjectList()
       });
 
   fillList();
-  add(_listView);
-  set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+  set_child(_listView);
+  set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
 }
 
 void ObjectList::SetShowTypeColumn(bool showTypeColumn) {
@@ -112,10 +116,9 @@ void ObjectList::fillListFolder(const Folder &folder,
                      _displayType == ObjectListType::OnlyVariables || almostAll;
   bool showFixtures = _displayType == ObjectListType::All;
 
-  Glib::RefPtr<Gtk::IconTheme> theme = Gtk::IconTheme::get_default();
-  int icon_width = 16;
+  Glib::RefPtr<Gtk::IconTheme> theme =
+      Gtk::IconTheme::get_for_display(Gdk::Display::get_default());
   int icon_height = 16;
-  Gtk::IconSize::lookup(Gtk::ICON_SIZE_MENU, icon_width, icon_height);
   for (ObservingPtr<FolderObject> child : folder.Children()) {
     FolderObject *obj = child.Get();
     Folder *childFolder = showFolders ? dynamic_cast<Folder *>(obj) : nullptr;
@@ -142,7 +145,7 @@ void ObjectList::fillListFolder(const Folder &folder,
     if (childFolder || presetCollection || chase || timeSequence || effect ||
         fixtureControl || fixtureGroup || scene) {
       Gtk::TreeModel::iterator iter = _listModel->append();
-      const Gtk::TreeModel::Row &childRow = *iter;
+      Gtk::TreeModel::Row &childRow = *iter;
       std::string icon_name = "x-office-document";
       if (chase) {
         childRow[_listColumns._type] = "C";
@@ -166,10 +169,15 @@ void ObjectList::fillListFolder(const Folder &folder,
       childRow[_listColumns._title] = obj->Name();
       childRow[_listColumns._object] = child;
       if (!icon_name.empty()) {
-        childRow[_listColumns._icon] = theme->load_icon(icon_name, icon_height);
-      }
-      if (obj == selectedObj) {
-        _listView.get_selection()->select(iter);
+        const auto file =
+            theme->lookup_icon(icon_name, icon_height)->get_file();
+        if (file->query_exists()) {
+          childRow[_listColumns._icon] =
+              Gdk::Pixbuf::create_from_file(file->get_path());
+        }
+        if (obj == selectedObj) {
+          _listView.get_selection()->select(iter);
+        }
       }
     }
   }
@@ -207,12 +215,12 @@ void ObjectList::SelectObject(const FolderObject &object) {
 
 bool ObjectList::selectObject(const FolderObject &object,
                               const Gtk::TreeModel::Children &children) {
-  for (const Gtk::TreeRow &child : children) {
+  for (const Gtk::TreeConstRow &child : children) {
     const ObservingPtr<FolderObject> &row_object_ptr =
         child[_listColumns._object];
     const FolderObject *row_object = row_object_ptr.Get();
     if (row_object == &object) {
-      _listView.get_selection()->select(child);
+      _listView.get_selection()->select(child.get_iter());
       return true;
     }
   }
@@ -220,84 +228,79 @@ bool ObjectList::selectObject(const FolderObject &object,
 }
 
 void ObjectList::constructContextMenu() {
-  _contextMenuItems.clear();
-  _contextMenu = Gtk::Menu();
+  _contextMenu = Gtk::PopoverMenu();
+  std::shared_ptr<Gio::Menu> menu = Gio::Menu::create();
 
   FolderObject *obj = SelectedObject().Get();
   if (obj != &Instance::Management().RootFolder()) {
+    std::shared_ptr<Gio::SimpleActionGroup> actions =
+        Gio::SimpleActionGroup::create();
     // Move up & down
-    std::unique_ptr<Gtk::MenuItem> miMoveUp(
-        new Gtk::MenuItem("Move _up", true));
-    miMoveUp->signal_activate().connect(
-        sigc::mem_fun(this, &ObjectList::onMoveUpSelected));
-    _contextMenu.append(*miMoveUp);
-    miMoveUp->show();
-    _contextMenuItems.emplace_back(std::move(miMoveUp));
+    menu->append("Move up", "move_object_up");
+    actions->add_action("move_object_up",
+                        sigc::mem_fun(*this, &ObjectList::onMoveUpSelected));
 
-    std::unique_ptr<Gtk::MenuItem> miMoveDown(
-        new Gtk::MenuItem("Move _down", true));
-    miMoveDown->signal_activate().connect(
-        sigc::mem_fun(this, &ObjectList::onMoveDownSelected));
-    _contextMenu.append(*miMoveDown);
-    miMoveDown->show();
-    _contextMenuItems.emplace_back(std::move(miMoveDown));
+    menu->append("Move down", "move_object_down");
+    actions->add_action("move_object_down",
+                        sigc::mem_fun(*this, &ObjectList::onMoveDownSelected));
 
-    // Move submenu
-    std::unique_ptr<Gtk::Menu> menuMove(new Gtk::Menu());
-    std::unique_ptr<Gtk::MenuItem> miMove(new Gtk::MenuItem("Move _to", true));
-    _contextMenu.append(*miMove);
-    miMove->show();
+    // Move-to submenu
+    std::shared_ptr<Gio::Menu> move_to_menu = Gio::Menu::create();
 
-    constructFolderMenu(*menuMove, Instance::Management().RootFolder());
-    miMove->set_submenu(*menuMove);
-
-    _contextMenuItems.emplace_back(std::move(miMove));
-    _contextMenuItems.emplace_back(std::move(menuMove));
+    int folder_counter = 0;
+    constructFolderMenu(*move_to_menu, *actions,
+                        Instance::Management().RootFolder(), folder_counter);
+    menu->append_submenu("Move to", move_to_menu);
   }
+
+  _contextMenu.set_menu_model(menu);
+  _contextMenu.set_parent(_listView);
 }
 
-void ObjectList::constructFolderMenu(Gtk::Menu &menu, Folder &folder) {
-  std::unique_ptr<Gtk::MenuItem> item(new Gtk::MenuItem(folder.Name()));
-  menu.append(*item);
-  item->show();
-  if (&folder == SelectedObject())
-    item->set_sensitive(false);
-  else {
-    Gtk::Menu *subMenu = nullptr;
+void ObjectList::constructFolderMenu(Gio::Menu &menu,
+                                     Gio::SimpleActionGroup &actions,
+                                     Folder &folder, int &counter) {
+  if (folder.Children().empty()) {
+    const std::string name = "moveto_" + std::to_string(counter);
+    ++counter;
+    menu.append(folder.Name(), name);
+    std::shared_ptr<Gio::SimpleAction> parent =
+        actions.add_action(name, [&]() { onMoveSelected(&folder); });
+
+    if (&folder == SelectedObject()) parent->set_enabled(false);
+  } else {
+    std::shared_ptr<Gio::Menu> sub_menu;
     for (const ObservingPtr<FolderObject> &object : folder.Children()) {
       Folder *subFolder = dynamic_cast<Folder *>(object.Get());
       if (subFolder) {
-        if (!subMenu) {
-          _contextMenuItems.emplace_back(new Gtk::Menu());
-          subMenu = static_cast<Gtk::Menu *>(_contextMenuItems.back().get());
-          item->set_submenu(*subMenu);
-
-          std::unique_ptr<Gtk::MenuItem> selfMI(new Gtk::MenuItem("."));
-          selfMI->show();
-          selfMI->signal_activate().connect([&]() { onMoveSelected(&folder); });
-          subMenu->append(*selfMI);
-          _contextMenuItems.emplace_back(std::move(selfMI));
+        if (!sub_menu) {
+          sub_menu = Gio::Menu::create();
+          const std::string name = "moveto_" + std::to_string(counter);
+          ++counter;
+          menu.append(".", name);
+          actions.add_action(name, [&]() { onMoveSelected(&folder); });
         }
-        constructFolderMenu(*subMenu, *subFolder);
+        constructFolderMenu(*sub_menu, actions, *subFolder, counter);
       }
     }
-    if (subMenu == nullptr)
-      item->signal_activate().connect([&]() { onMoveSelected(&folder); });
+    menu.append_submenu(folder.Name(), sub_menu);
   }
-  _contextMenuItems.emplace_back(std::move(item));
 }
 
-bool ObjectList::TreeViewWithMenu::on_button_press_event(
-    GdkEventButton *button_event) {
-  bool result = TreeView::on_button_press_event(button_event);
+ObjectList::TreeViewWithMenu::TreeViewWithMenu(ObjectList &parent)
+    : _parent(parent) {
+  auto gesture = Gtk::GestureClick::create();
+  gesture->set_button(3);
+  gesture->signal_pressed().connect(
+      [&](int, double x, double y) { TreeViewWithMenu::OnButtonPress(x, y); });
+  add_controller(gesture);
+}
 
-  if ((button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3)) {
-    _parent.constructContextMenu();
-    _parent._contextMenu.popup_at_pointer(
-        reinterpret_cast<GdkEvent *>(button_event));
-  }
-
-  return result;
+void ObjectList::TreeViewWithMenu::OnButtonPress(double x, double y) {
+  _parent.constructContextMenu();
+  const Gdk::Rectangle rectangle(x, y, 1, 1);
+  _parent._contextMenu.set_pointing_to(rectangle);
+  _parent._contextMenu.popup();
 }
 
 void ObjectList::onMoveSelected(Folder *destination) {

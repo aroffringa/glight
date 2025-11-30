@@ -9,6 +9,7 @@
 
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
+#include "gui/menufunctions.h"
 
 #include "gui/state/guistate.h"
 #include "gui/dialogs/stringinputdialog.h"
@@ -19,7 +20,6 @@
 
 #include <gtkmm/entry.h>
 #include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
 
 #include <glibmm/main.h>
 
@@ -101,6 +101,7 @@ FaderWindow::FaderWindow(size_t keyRowIndex) : _keyRowIndex(keyRowIndex) {
 }
 
 FaderWindow::~FaderWindow() {
+  SaveSize();
   _timeoutConnection.disconnect();
   if (_state) _state->isActive = false;
   Instance::State().EmitFaderSetChangeSignal();
@@ -116,7 +117,6 @@ void FaderWindow::LoadNew() {
 
   _state->width = std::max(100, get_width());
   _state->height = std::max(300, get_height());
-  get_position(_state->position_x, _state->position_y);
   _state->isActive = true;
   RecursionLock::Token token(_recursionLock);
   loadState();
@@ -130,20 +130,22 @@ void FaderWindow::LoadState(FaderSetState *state) {
 }
 
 void FaderWindow::loadState() {
-  _miSolo.set_active(_state->isSolo);
+  solo_action_->set_state(Glib::Variant<bool>::create(_state->isSolo));
   switch (_state->mode) {
     case FaderSetMode::Primary:
-      _miPrimaryLayout.set_active(true);
+      layout_action_->set_state(
+          Glib::Variant<Glib::ustring>::create("primary"));
       break;
     case FaderSetMode::Secondary:
-      _miSecondaryLayout.set_active(true);
+      layout_action_->set_state(
+          Glib::Variant<Glib::ustring>::create("secondary"));
       break;
     case FaderSetMode::Dual:
-      _miDualLayout.set_active(true);
+      layout_action_->set_state(Glib::Variant<Glib::ustring>::create("dual"));
       break;
   }
-  _miFadeInOption[_state->fadeInSpeed].set_active(true);
-  _miFadeOutOption[_state->fadeOutSpeed].set_active(true);
+  fade_in_action_->set_state(Glib::Variant<int>::create(_state->fadeInSpeed));
+  fade_out_action_->set_state(Glib::Variant<int>::create(_state->fadeOutSpeed));
   _crossFader.reset();
   _immediateCrossFadeButton.reset();
   _activateCrossFaderButton.reset();
@@ -153,8 +155,7 @@ void FaderWindow::loadState() {
   _lowerControls.clear();
 
   // Show master cross fader?
-  const bool show_master_fader =
-      _miDualLayout.get_active() || _miSecondaryLayout.get_active();
+  const bool show_master_fader = GetLayout() != "primary";
   if (show_master_fader) {
     _activateCrossFaderButton.emplace();
     _activateCrossFaderButton->set_image_from_icon_name("media-playback-start");
@@ -163,7 +164,7 @@ void FaderWindow::loadState() {
         "setting the primary setting");
     _activateCrossFaderButton->signal_clicked().connect(
         [&]() { onStartCrossFader(); });
-    _leftBox.pack_start(*_activateCrossFaderButton, false, false);
+    _leftBox.append(*_activateCrossFaderButton);
     _activateCrossFaderButton->show();
 
     _immediateCrossFadeButton.emplace();
@@ -172,15 +173,15 @@ void FaderWindow::loadState() {
         "Directly switch the cross-fade");
     _immediateCrossFadeButton->signal_clicked().connect(
         [&]() { CrossFadeImmediately(); });
-    _leftBox.pack_start(*_immediateCrossFadeButton, false, false);
+    _leftBox.append(*_immediateCrossFadeButton);
     _immediateCrossFadeButton->show();
 
     _crossFader.emplace(
         Gtk::Adjustment::create(
             0, 0, ControlValue::MaxUInt() + ControlValue::MaxUInt() / 100,
             (ControlValue::MaxUInt() + 1) / 100),
-        Gtk::ORIENTATION_VERTICAL);
-    _leftBox.pack_start(*_crossFader, true, true);
+        Gtk::Orientation::VERTICAL);
+    _leftBox.append(*_crossFader);
     _crossFader->set_value(0);
     _crossFader->set_draw_value(false);
     _crossFader->set_has_origin(false);
@@ -194,12 +195,11 @@ void FaderWindow::loadState() {
   }
 
   set_title(_state->name);
-  resize(_state->width, _state->height);
-  move(_state->position_x, _state->position_y);
+  set_default_size(_state->width, _state->height);
 
   for (size_t i = 0; i != _state->faders.size(); ++i) {
     _upperControls[i]->Assign(_state->faders[i]->GetSourceValues(), true);
-    if (_miDualLayout.get_active())
+    if (GetLayout() == "dual")
       _lowerControls[i]->Assign(_state->faders[i]->GetSourceValues(), true);
   }
 }
@@ -207,134 +207,123 @@ void FaderWindow::loadState() {
 void FaderWindow::initializeWidgets() {
   set_title("Glight - faders");
 
-  signal_configure_event().connect(sigc::mem_fun(*this, &FaderWindow::onResize),
-                                   false);
-
   _timeoutConnection = Glib::signal_timeout().connect(
       sigc::mem_fun(*this, &FaderWindow::onTimeout), 40);
 
-  add(_hBox);
+  set_child(_hBox);
 
-  _menuButton.set_events(Gdk::BUTTON_PRESS_MASK);
-  _menuButton.set_image_from_icon_name("document-properties");
-  _menuButton.set_tooltip_text("Open options menu");
-  _menuButton.set_popup(_popupMenu);
-  _leftBox.pack_start(_menuButton, false, false, 5);
-  _hBox.pack_start(_leftBox, false, false);
+  _hBox.append(_leftBox);
 
   _controlGrid.set_column_spacing(3);
-  _hBox.pack_start(_controlGrid, true, true);
+  _hBox.append(_controlGrid);
 
-  show_all_children();
   set_default_size(0, 300);
 }
 
 void FaderWindow::initializeMenu() {
-  Gtk::RadioMenuItem::Group layoutGroup;
-  _miPrimaryLayout.set_active(true);
-  _miPrimaryLayout.set_group(layoutGroup);
-  _miPrimaryLayout.signal_activate().connect([&]() { onLayoutChanged(); });
-  _layoutMenu.append(_miPrimaryLayout);
-  _miSecondaryLayout.set_group(layoutGroup);
-  _miSecondaryLayout.signal_activate().connect([&]() { onLayoutChanged(); });
-  _layoutMenu.append(_miSecondaryLayout);
-  _miDualLayout.set_group(layoutGroup);
-  _miDualLayout.signal_activate().connect([&]() { onLayoutChanged(); });
-  _layoutMenu.append(_miDualLayout);
-  _miLayout.set_submenu(_layoutMenu);
-  _popupMenu.append(_miLayout);
+  auto actions = Gio::SimpleActionGroup::create();
+  const auto Add = [&actions](std::shared_ptr<Gio::Menu> &menu,
+                              const Glib::ustring &label,
+                              const Glib::ustring &action_name,
+                              const sigc::slot<void()> &slot) {
+    return AddMenuItem(*actions, menu, label, action_name, slot);
+  };
+  const auto Toggle =
+      [&actions](std::shared_ptr<Gio::Menu> &menu, const Glib::ustring &label,
+                 const Glib::ustring &action_name, bool initial_value,
+                 const sigc::slot<void(bool)> &slot) {
+        return AddToggleMenuItem(*actions, menu, label, action_name,
+                                 initial_value, slot);
+      };
 
-  Gtk::RadioMenuItem::Group fadeInGroup;
-  Gtk::RadioMenuItem::Group fadeOutGroup;
+  auto menu = Gio::Menu::create();
+  auto submenu_section = Gio::Menu::create();
+
+  auto layout_menu = Gio::Menu::create();
+  layout_action_ = Gio::SimpleAction::create_radio_string("layout", "primary");
+  layout_action_->signal_change_state().connect(
+      [&](const Glib::VariantBase &new_value) {
+        onLayoutChanged(
+            static_cast<const Glib::Variant<Glib::ustring> &>(new_value).get());
+      });
+  actions->add_action(layout_action_);
+  layout_menu->append("Primary", "win.layout::primary");
+  layout_menu->append("Secondary", "win.layout::secondary");
+  layout_menu->append("Dual", "win.layout::dual");
+  submenu_section->append_submenu("Layout", layout_menu);
+
+  auto fade_in = Gio::Menu::create();
+  auto fade_out = Gio::Menu::create();
+
+  fade_in_action_ = Gio::SimpleAction::create_radio_integer("fade_in", 0);
+  fade_in_action_->signal_change_state().connect(
+      [&](const Glib::VariantBase &) { onChangeUpSpeed(); });
+  actions->add_action(fade_in_action_);
+
+  fade_out_action_ = Gio::SimpleAction::create_radio_integer("fade_out", 0);
+  fade_out_action_->signal_change_state().connect(
+      [&](const Glib::VariantBase &) { onChangeDownSpeed(); });
+  actions->add_action(fade_out_action_);
+
   for (size_t i = 0; i != 11; ++i) {
-    _miFadeInOption[i].set_label(SpeedLabel(i));
-    _miFadeInOption[i].set_group(fadeInGroup);
-    _miFadeInOption[i].signal_activate().connect([&]() { onChangeUpSpeed(); });
-    _fadeInMenu.append(_miFadeInOption[i]);
-
-    _miFadeOutOption[i].set_label(SpeedLabel(i));
-    _miFadeOutOption[i].set_group(fadeOutGroup);
-    _miFadeOutOption[i].signal_activate().connect(
-        [&]() { onChangeDownSpeed(); });
-    _fadeOutMenu.append(_miFadeOutOption[i]);
+    fade_in->append(SpeedLabel(i), "fade_in(" + std::to_string(i) + ")");
+    fade_out->append(SpeedLabel(i), "fade_out(" + std::to_string(i) + ")");
   }
-  _miFadeInOption[0].set_active(true);
-  _miFadeOutOption[0].set_active(true);
+  submenu_section->append_submenu("Fade in", fade_in);
+  submenu_section->append_submenu("Fade out", fade_out);
+  menu->append_section(submenu_section);
 
-  _miFadeIn.set_submenu(_fadeInMenu);
-  _popupMenu.append(_miFadeIn);
+  auto options_section = Gio::Menu::create();
+  solo_action_ = Toggle(options_section, "Solo", "solo", false,
+                        [&](bool new_value) { onSoloToggled(new_value); });
+  Add(options_section, "Assign", "assign", [&]() { onAssignClicked(); });
+  Add(options_section, "Assign to chases", "assign_chases",
+      [&]() { onAssignChasesClicked(); });
+  Add(options_section, "Clear", "clear", [&]() { unassign(); });
+  Add(options_section, "Set name...", "set_name",
+      [&]() { onSetNameClicked(); });
+  menu->append_section(options_section);
 
-  _miFadeOut.set_submenu(_fadeOutMenu);
-  _popupMenu.append(_miFadeOut);
-
-  _popupMenu.append(_miSep1);
-
-  _miName.signal_activate().connect([&]() { onSetNameClicked(); });
-  _popupMenu.append(_miName);
-
-  _miSolo.signal_activate().connect([&]() { onSoloToggled(); });
-  _popupMenu.append(_miSolo);
-
-  _miAssign.signal_activate().connect([&]() { onAssignClicked(); });
-  _popupMenu.append(_miAssign);
-
-  _miAssignChases.signal_activate().connect([&]() { onAssignChasesClicked(); });
-  _popupMenu.append(_miAssignChases);
-
-  _miClear.signal_activate().connect([&]() { unassign(); });
-  _popupMenu.append(_miClear);
-
-  _popupMenu.append(_miSep2);
-
-  _miAddFader.signal_activate().connect([&]() { onAddFaderClicked(); });
-  _popupMenu.append(_miAddFader);
-
-  _miAdd5Faders.signal_activate().connect([&]() { onAdd5FadersClicked(); });
-  _popupMenu.append(_miAdd5Faders);
-
-  _miAddToggleButton.signal_activate().connect([&]() { onAddToggleClicked(); });
-  _popupMenu.append(_miAddToggleButton);
-
-  _miAdd5ToggleButtons.signal_activate().connect(
+  auto controls_section = Gio::Menu::create();
+  Add(controls_section, "Add fader", "add_1_fader",
+      [&]() { onAddFaderClicked(); });
+  Add(controls_section, "Add 5 faders", "add_5_faders",
+      [&]() { onAdd5FadersClicked(); });
+  Add(controls_section, "Add toggle control", "add_1_toggle",
+      [&]() { onAddToggleClicked(); });
+  Add(controls_section, "Add 5 toggle controls", "add_5_toggle",
       [&]() { onAdd5ToggleControlsClicked(); });
-  _popupMenu.append(_miAdd5ToggleButtons);
-
-  _miAddColorButton.signal_activate().connect(
+  Add(controls_section, "Add color button", "add_color",
       [&]() { onAddColorButtonClicked(); });
-  _popupMenu.append(_miAddColorButton);
-
-  _miAddComboButton.signal_activate().connect(
+  Add(controls_section, "Add combo button", "add_combo",
       [&]() { onAddComboButtonClicked(); });
-  _popupMenu.append(_miAddComboButton);
-
-  _miAddMoverControl.signal_activate().connect(
+  Add(controls_section, "Add mover control", "add_mover",
       [&]() { onAddMoverButtonClicked(); });
-  _popupMenu.append(_miAddMoverControl);
-
-  _miAddToggleColumn.signal_activate().connect(
+  Add(controls_section, "Add toggle column", "add_toggle",
       [&]() { onAddToggleColumnClicked(); });
-  _popupMenu.append(_miAddToggleColumn);
-
-  _miRemoveFader.signal_activate().connect([&]() { onRemoveFaderClicked(); });
-  _popupMenu.append(_miRemoveFader);
-
-  _miRemove5Faders.signal_activate().connect(
+  Add(controls_section, "Remove 1", "remove_1",
+      [&]() { onRemoveFaderClicked(); });
+  Add(controls_section, "Remove 5", "remove_5",
       [&]() { onRemove5FadersClicked(); });
-  _popupMenu.append(_miRemove5Faders);
+  Add(controls_section, "Input device...", "set_input_device",
+      [&]() { onInputDeviceClicked(); });
+  menu->append_section(controls_section);
 
-  _miInputDevice.signal_activate().connect([&]() { onInputDeviceClicked(); });
-  _popupMenu.append(_miInputDevice);
+  menu_button_.set_icon_name("open-menu-symbolic");
+  menu_button_.set_menu_model(menu);
+  menu_button_.set_tooltip_text("Control options menu");
+  menu_button_.set_has_frame(false);
+  insert_action_group("win", actions);
 
-  _popupMenu.show_all_children();
+  header_bar_.pack_end(menu_button_);
+  set_titlebar(header_bar_);
 }
 
-bool FaderWindow::onResize(GdkEventConfigure * /*event*/) {
+void FaderWindow::SaveSize() {
   if (_recursionLock.IsFirst()) {
     _state->height = get_height();
     _state->width = get_width();
-    get_position(_state->position_x, _state->position_y);
   }
-  return false;
 }
 
 void FaderWindow::onAddFaderClicked() {
@@ -374,7 +363,7 @@ void FaderWindow::onAddToggleColumnClicked() {
 void FaderWindow::addControl(FaderState &state, bool isUpper) {
   std::vector<std::unique_ptr<ControlWidget>> &controls =
       isUpper ? _upperControls : _lowerControls;
-  std::vector<Gtk::VBox> &column = isUpper ? _upperColumns : _lowerColumns;
+  std::vector<Gtk::Box> &column = isUpper ? _upperColumns : _lowerColumns;
   bool newToggleColumn = state.NewToggleButtonColumn() || column.empty();
   const bool hasKey = _upperControls.size() < 10 && _keyRowIndex < 3 && isUpper;
   const char key =
@@ -382,7 +371,7 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
 
   Gtk::Widget *nameLabel = nullptr;
   std::unique_ptr<ControlWidget> control;
-  const bool isSecondary = !isUpper || _miSecondaryLayout.get_active();
+  const bool isSecondary = !isUpper || GetLayout() == "secondary";
   const ControlMode controlMode =
       isSecondary ? ControlMode::Secondary : ControlMode::Primary;
   switch (state.GetFaderType()) {
@@ -410,8 +399,8 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
       break;
   }
 
-  control->SetFadeDownSpeed(MapSliderToSpeed(getFadeOutSpeed()));
-  control->SetFadeUpSpeed(MapSliderToSpeed(getFadeInSpeed()));
+  control->SetFadeDownSpeed(MapSliderToSpeed(GetFadeOutValue()));
+  control->SetFadeUpSpeed(MapSliderToSpeed(GetFadeInValue()));
   const size_t controlIndex = controls.size();
   control->SignalValueChange().connect(
       sigc::bind(sigc::mem_fun(*this, &FaderWindow::onControlValueChanged),
@@ -437,13 +426,13 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
     case FaderControlType::ComboButton:
     case FaderControlType::MoverControl:
       if (newToggleColumn) {
-        Gtk::VBox &new_box = column.emplace_back();
+        Gtk::Box &new_box = column.emplace_back(Gtk::Orientation::VERTICAL);
         _controlGrid.attach(new_box, hpos * 2 + 1, vpos, 2, 1);
         new_box.set_vexpand(false);
-        new_box.set_valign(Gtk::ALIGN_START);
+        new_box.set_valign(Gtk::Align::START);
         column.back().show();
       }
-      column.back().pack_start(*control);
+      column.back().append(*control);
       break;
   }
 
@@ -453,14 +442,22 @@ void FaderWindow::addControl(FaderState &state, bool isUpper) {
 
 void FaderWindow::removeFader() {
   FaderState &state = *_state->faders.back();
-  const bool hasLower = _miDualLayout.get_active();
+  const bool hasLower = GetLayout() == "dual";
   if (state.GetFaderType() != FaderControlType::Fader &&
       state.NewToggleButtonColumn()) {
     _upperColumns.pop_back();
     if (hasLower) _lowerColumns.pop_back();
   }
+  if (state.GetFaderType() == FaderControlType::Fader) {
+    FaderWidget &fader = static_cast<FaderWidget &>(*_upperControls.back());
+    _controlGrid.remove(fader.NameLabel());
+  }
+  _controlGrid.remove(*_upperControls.back());
   _upperControls.pop_back();
-  if (hasLower) _lowerControls.pop_back();
+  if (hasLower) {
+    _controlGrid.remove(*_lowerControls.back());
+    _lowerControls.pop_back();
+  }
   _state->faders.pop_back();
 }
 
@@ -475,7 +472,7 @@ std::vector<size_t> FaderWindow::SingleSourceControls() const {
 
 void FaderWindow::onAssignClicked() {
   unassign();
-  const bool hasLower = _miDualLayout.get_active();
+  const bool hasLower = GetLayout() == "dual";
   const std::vector<size_t> single_source_controls = SingleSourceControls();
   if (!single_source_controls.empty()) {
     std::vector<size_t>::const_iterator control_iter =
@@ -501,7 +498,7 @@ void FaderWindow::unassign() {
 
 void FaderWindow::onAssignChasesClicked() {
   unassign();
-  const bool hasLower = _miDualLayout.get_active();
+  const bool hasLower = GetLayout() == "dual";
   const std::vector<size_t> single_source_controls = SingleSourceControls();
   if (!single_source_controls.empty()) {
     std::vector<size_t>::const_iterator control_iter =
@@ -520,14 +517,14 @@ void FaderWindow::onAssignChasesClicked() {
   }
 }
 
-void FaderWindow::onSoloToggled() {
+void FaderWindow::onSoloToggled(bool new_value) {
   if (_recursionLock.IsFirst()) {
-    _state->isSolo = _miSolo.get_active();
+    _state->isSolo = new_value;
   }
 }
 
 void FaderWindow::onControlValueChanged(ControlWidget *widget) {
-  if (_miSolo.get_active()) {
+  if (GetSolo()) {
     // Limitting the controls might generate another control value change, but
     // since it is an auto generated change we will not apply the limit of that
     // change to other faders.
@@ -538,8 +535,8 @@ void FaderWindow::onControlValueChanged(ControlWidget *widget) {
       const double inverse = ControlWidget::MAX_SCALE_VALUE() - new_value -
                              ControlWidget::MAX_SCALE_VALUE() * 0.01;
       const double limitValue = std::max(0.0, inverse);
-      const bool isLower = widget->GetMode() == ControlMode::Secondary &&
-                           _miDualLayout.get_active();
+      const bool isLower =
+          widget->GetMode() == ControlMode::Secondary && GetLayout() == "dual";
       std::vector<std::unique_ptr<glight::gui::ControlWidget>> &controls =
           isLower ? _lowerControls : _upperControls;
       for (std::unique_ptr<ControlWidget> &c : controls) {
@@ -554,7 +551,7 @@ void FaderWindow::onControlAssigned(size_t widgetIndex) {
     const std::vector<theatre::SourceValue *> &sources =
         _upperControls[widgetIndex]->GetSourceValues();
     _state->faders[widgetIndex]->SetSourceValues(sources);
-    if (_miDualLayout.get_active()) {
+    if (GetLayout() == "dual") {
       _lowerControls[widgetIndex]->Assign(sources, true);
     }
   }
@@ -605,21 +602,23 @@ bool FaderWindow::IsAssigned(theatre::SourceValue *source_value) const {
 
 void FaderWindow::onSetNameClicked() {
   Gtk::MessageDialog dialog(*this, "Name fader setup", false,
-                            Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
-  Gtk::Entry entry;
-  dialog.get_message_area()->pack_start(entry, Gtk::PACK_SHRINK);
-  dialog.get_message_area()->show_all_children();
+                            Gtk::MessageType::QUESTION,
+                            Gtk::ButtonsType::OK_CANCEL);
+  std::shared_ptr<Gtk::Entry> entry = std::make_shared<Gtk::Entry>();
+  dialog.get_message_area()->append(*entry);
   dialog.set_secondary_text("Please enter a name for this fader setup");
-  int result = dialog.run();
-  if (result == Gtk::RESPONSE_OK) {
-    _state->name = entry.get_text();
-    set_title(_state->name);
-    Instance::State().EmitFaderSetChangeSignal();
-  }
+  dialog.signal_response().connect([this, entry](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      _state->name = entry->get_text();
+      set_title(_state->name);
+      Instance::State().EmitFaderSetChangeSignal();
+    }
+  });
+  dialog.show();
 }
 
 void FaderWindow::onChangeDownSpeed() {
-  _state->fadeOutSpeed = getFadeOutSpeed();
+  _state->fadeOutSpeed = GetFadeOutValue();
   const double speed = MapSliderToSpeed(_state->fadeOutSpeed);
 
   for (std::unique_ptr<ControlWidget> &cw : _upperControls)
@@ -627,23 +626,11 @@ void FaderWindow::onChangeDownSpeed() {
 }
 
 void FaderWindow::onChangeUpSpeed() {
-  _state->fadeInSpeed = getFadeInSpeed();
+  _state->fadeInSpeed = GetFadeInValue();
   const double speed = MapSliderToSpeed(_state->fadeInSpeed);
 
   for (std::unique_ptr<ControlWidget> &cw : _upperControls)
     cw->SetFadeUpSpeed(speed);
-}
-
-size_t FaderWindow::getFadeInSpeed() const {
-  for (size_t i = 0; i != 11; ++i)
-    if (_miFadeInOption[i].get_active()) return i;
-  return 0;
-}
-
-size_t FaderWindow::getFadeOutSpeed() const {
-  for (size_t i = 0; i != 11; ++i)
-    if (_miFadeOutOption[i].get_active()) return i;
-  return 0;
 }
 
 void FaderWindow::UpdateValues() {
@@ -739,7 +726,7 @@ void FaderWindow::onStartCrossFader() {
   for (std::unique_ptr<ControlWidget> &cw : _upperControls) {
     for (theatre::SourceValue *source : cw->GetSourceValues()) {
       if (source) {
-        source->CrossFader().Set(0.0, MapSliderToSpeed(getFadeInSpeed()));
+        source->CrossFader().Set(0.0, MapSliderToSpeed(GetFadeInValue()));
       }
     }
   }
@@ -772,14 +759,15 @@ void FaderWindow::CrossFadeImmediately() {
   AssignTopToBottom();
 }
 
-void FaderWindow::onLayoutChanged() {
+void FaderWindow::onLayoutChanged(const std::string &new_value) {
   if (_recursionLock.IsFirst()) {
     RecursionLock::Token token(_recursionLock);
-    if (_miPrimaryLayout.get_active())
+    layout_action_->set_state(Glib::Variant<Glib::ustring>::create(new_value));
+    if (new_value == "primary") {
       _state->mode = FaderSetMode::Primary;
-    else if (_miSecondaryLayout.get_active())
+    } else if (new_value == "secondary")
       _state->mode = FaderSetMode::Secondary;
-    else  // if(_miDualLayout.get_active())
+    else  // new_value == "dual"
       _state->mode = FaderSetMode::Dual;
     loadState();
   }
@@ -787,16 +775,22 @@ void FaderWindow::onLayoutChanged() {
 
 void FaderWindow::onInputDeviceClicked() {
   _connectedInputUniverse.reset();
-  StringInputDialog dialog(
+  dialog_ = std::make_unique<StringInputDialog>(
       "Connect input universe to faders",
       "Enter universe number:\n(1 = first universe, leave empty to disconnect)",
       "1");
-  if (dialog.run() == Gtk::RESPONSE_OK) {
-    const size_t value = std::atoi(dialog.Value().c_str());
-    if (value >= 1 &&
-        value <= Instance::Management().GetUniverses().NUniverses())
-      _connectedInputUniverse = value - 1;
-  }
+  dialog_->signal_response().connect([this](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      StringInputDialog &string_dialog(
+          static_cast<StringInputDialog &>(*dialog_));
+      const size_t value = std::atoi(string_dialog.Value().c_str());
+      if (value >= 1 &&
+          value <= Instance::Management().GetUniverses().NUniverses())
+        _connectedInputUniverse = value - 1;
+    }
+    dialog_.reset();
+  });
+  dialog_->show();
 }
 
 std::unique_ptr<ControlMenu> &FaderWindow::GetControlMenu() {

@@ -10,7 +10,7 @@
 
 namespace glight::gui {
 
-class DurationInput : public Gtk::HBox {
+class DurationInput : public Gtk::Box {
  public:
   DurationInput(double value);
 

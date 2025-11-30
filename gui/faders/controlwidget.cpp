@@ -1,5 +1,7 @@
 #include "controlwidget.h"
 
+#include <gtkmm/gestureclick.h>
+
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
 
@@ -26,7 +28,34 @@ ControlWidget::ControlWidget(FaderWindow& fader_window, FaderState& state,
       _updateConnection(Instance::Events().SignalUpdateControllables().connect(
           [&]() { OnTheatreUpdate(); })),
       state_change_connection_(
-          state.SignalChange().connect([&]() { OnStateChange(); })) {}
+          state.SignalChange().connect([&]() { OnStateChange(); })) {
+  auto menu_gesture = Gtk::GestureClick::create();
+  menu_gesture->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
+  menu_gesture->set_button(3);
+  menu_gesture->signal_released().connect(
+      [this](int buttons, double x, double y) {
+        std::unique_ptr<ControlMenu>& menu = GetFaderWindow().GetControlMenu();
+        menu = std::make_unique<ControlMenu>(State());
+        menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
+        menu->SignalUnassign().connect([&]() { Assign({}, true); });
+        menu->SignalToggleName().connect(
+            [&](bool new_value) { State().SetDisplayName(new_value); });
+        menu->SignalToggleFlashButton().connect(
+            [&](bool new_value) { State().SetDisplayFlashButton(new_value); });
+        menu->SignalToggleCheckButton().connect(
+            [&](bool new_value) { State().SetDisplayCheckButton(new_value); });
+        menu->SignalToggleFadeButtons().connect(
+            [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
+        PrepareContextMenu(*menu);
+
+        insert_action_group("win", menu->GetActionGroup());
+        menu->set_parent(GetFaderWindow());
+        menu->set_pointing_to(Gdk::Rectangle(x, y, 1, 1));
+        GetFaderWindow().insert_action_group("win", menu->GetActionGroup());
+        menu->popup();
+      });
+  add_controller(menu_gesture);
+}
 
 ControlWidget::~ControlWidget() {
   _updateConnection.disconnect();
@@ -105,33 +134,29 @@ theatre::SingleSourceValue& ControlWidget::GetSingleSourceValue(
 }
 
 void ControlWidget::ShowAssignDialog() {
-  InputSelectDialog dialog(false);
-  if (dialog.run() == Gtk::RESPONSE_OK) {
-    const bool allow_multi = DefaultSourceCount() != 1;
-    if (allow_multi) {
-      std::vector<SourceValue*> sources = GetSourceValues();
-      sources.emplace_back(dialog.SelectedSourceValue());
-      Assign(sources, true);
-    } else {
-      Assign({dialog.SelectedSourceValue()}, true);
+  dialog_ = std::make_unique<InputSelectDialog>(false);
+  dialog_->signal_response().connect([this](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      InputSelectDialog& dialog = static_cast<InputSelectDialog&>(*dialog_);
+      const bool allow_multi = DefaultSourceCount() != 1;
+      if (allow_multi) {
+        std::vector<SourceValue*> sources = GetSourceValues();
+        sources.emplace_back(dialog.SelectedSourceValue());
+        Assign(sources, true);
+      } else {
+        Assign({dialog.SelectedSourceValue()}, true);
+      }
     }
-  }
+    dialog_.reset();
+  });
+  dialog_->set_transient_for(GetFaderWindow());
+  dialog_->show();
 }
 
 void ControlWidget::OnStateChange() {
   if (sources_ != _state.GetSourceValues()) {
     Assign(_state.GetSourceValues(), true);
   }
-}
-
-std::unique_ptr<ControlMenu>& ControlWidget::PrepareMenu() {
-  std::unique_ptr<ControlMenu>& menu = GetFaderWindow().GetControlMenu();
-  menu = std::make_unique<ControlMenu>(State());
-  menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
-  menu->SignalUnassign().connect([&]() { Assign({}, true); });
-  menu->SignalToggleName().connect(
-      [&]() { State().SetDisplayName(menu->DisplayName()); });
-  return menu;
 }
 
 }  // namespace glight::gui

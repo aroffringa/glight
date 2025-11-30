@@ -14,21 +14,23 @@
 
 namespace glight::gui {
 
-class ObjectBrowser : public Gtk::VBox {
+class ObjectBrowser : public Gtk::Box {
  public:
   ObjectBrowser() : _folderCombo(), _list() {
+    set_orientation(Gtk::Orientation::VERTICAL);
     _parentFolderButton.set_image_from_icon_name("go-up");
     _parentFolderButton.signal_clicked().connect(
         [&]() { onParentFolderClicked(); });
-    _hBox.pack_start(_parentFolderButton, false, false, 5);
+    _hBox.append(_parentFolderButton);
     _parentFolderButton.set_sensitive(false);
     _parentFolderButton.show();
 
     _folderCombo.SignalSelectionChange().connect([&]() { onFolderChanged(); });
-    _hBox.pack_start(_folderCombo, true, true, 5);
+    _folderCombo.set_hexpand(true);
+    _hBox.append(_folderCombo);
     _folderCombo.show();
 
-    pack_start(_hBox, false, false, 5);
+    append(_hBox);
     _hBox.show();
 
     _list.SignalSelectionChange().connect([&]() { onSelectionChanged(); });
@@ -36,7 +38,7 @@ class ObjectBrowser : public Gtk::VBox {
         [&](ObservingPtr<theatre::FolderObject> object) {
           onObjectActivated(object);
         });
-    pack_start(_list, true, true);
+    append(_list);
     _list.show();
   }
 
@@ -104,7 +106,7 @@ class ObjectBrowser : public Gtk::VBox {
     if (!folder.IsRoot()) _folderCombo.Select(folder.Parent());
   }
 
-  Gtk::HBox _hBox;
+  Gtk::Box _hBox;
   Gtk::Button _parentFolderButton;
   FolderCombo _folderCombo;
   ObjectList _list;

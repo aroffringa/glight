@@ -5,7 +5,6 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/combobox.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 
@@ -17,25 +16,24 @@ class ComboControlWidget final : public ControlWidget {
                      ControlMode mode, char key);
   ~ComboControlWidget();
 
-  virtual void Toggle() override;
-  virtual void FlashOn() override;
-  virtual void FlashOff() override;
-  virtual void SyncFader() override;
+  virtual void Toggle() final;
+  virtual void FlashOn() final;
+  virtual void FlashOff() final;
+  virtual void SyncFader() final;
 
-  virtual void Limit(double value) override;
+  virtual void Limit(double value) final;
 
   theatre::SourceValue *SelectedSource() const;
 
  private:
   Gtk::ListStore::iterator FirstNonZeroValue() const;
-  virtual void OnAssigned(bool moveFader) override;
+  virtual void OnAssigned(bool moveFader) final;
+  void PrepareContextMenu(ControlMenu &menu) final;
   void OnChanged();
   void UpdateDisplaySettings();
-  bool HandleRightRelease(GdkEventButton *event);
+  void HandleRightRelease();
   void OpenDescriptionDialog();
 
-  Gtk::VBox box_;
-  Gtk::EventBox event_box_;
   Gtk::Label description_label_{"<No description>"};
   Glib::RefPtr<Gtk::ListStore> model_;
   struct ListColumns : public Gtk::TreeModelColumnRecord {
@@ -51,6 +49,7 @@ class ComboControlWidget final : public ControlWidget {
   bool hold_updates_ = false;
 
   sigc::connection update_display_settings_connection_;
+  std::unique_ptr<Gtk::Dialog> dialog_;
 };
 
 }  // namespace glight::gui

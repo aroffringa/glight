@@ -7,7 +7,6 @@
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/icontheme.h>
 #include <gtkmm/messagedialog.h>
-#include <gtkmm/stock.h>
 
 #include "gui/instance.h"
 
@@ -38,15 +37,15 @@
 
 namespace glight::gui {
 
-MainWindow::MainWindow() {
+MainWindow::MainWindow() : main_menu_(*this) {
   set_title("Glight - show");
   set_default_icon_name("glight");
   set_default_size(800, 500);
 
-  Glib::RefPtr<Gtk::IconTheme> iconTheme = Gtk::IconTheme::get_default();
+  Glib::RefPtr<Gtk::IconTheme> iconTheme = Gtk::IconTheme::create();
   std::filesystem::path iconPath =
       std::filesystem::path(GLIGHT_INSTALL_PATH) / "share/icons";
-  iconTheme->prepend_search_path(iconPath.string());
+  iconTheme->add_search_path(iconPath.string());
 
   Instance::Get().SetState(_state);
   Instance::Get().SetSelection(_fixtureSelection);
@@ -67,39 +66,38 @@ MainWindow::MainWindow() {
   addFaderWindow();
 
   _objectListFrame = std::make_unique<ObjectListFrame>(*this);
-  revealer_.add(*_objectListFrame);
+  _objectListFrame->set_vexpand(true);
+  _objectListFrame->set_hexpand(false);
+  revealer_.set_child(*_objectListFrame);
   revealer_.set_reveal_child(true);
-  revealer_.set_transition_type(
-      Gtk::RevealerTransitionType::REVEALER_TRANSITION_TYPE_SLIDE_RIGHT);
-  revealer_box_.pack_start(revealer_, false, false);
+  revealer_.set_transition_type(Gtk::RevealerTransitionType::SLIDE_RIGHT);
+  revealer_.set_vexpand(true);
+  revealer_.set_hexpand(false);
+  revealer_box_.append(revealer_);
+  revealer_box_.set_vexpand(true);
 
-  right_box_.pack_start(power_monitor_, false, false);
+  right_box_.append(power_monitor_);
+  right_box_.set_expand(true);
   power_monitor_.Start();
 
   _visualizationWidget = std::make_unique<VisualizationWidget>(
       _management.get(), this, &_fixtureSelection, this);
-  _visualizationWidget->signal_key_press_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyDown));
-  _visualizationWidget->signal_key_release_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyUp));
-  right_box_.pack_start(*_visualizationWidget, true, true);
-  revealer_box_.pack_end(right_box_, true, true);
+  _visualizationWidget->set_expand(true);
+  _visualizationWidget->add_controller(GetKeyController());
+  right_box_.append(*_visualizationWidget);
+  revealer_box_.append(right_box_);
 
-  _box.pack_start(revealer_box_, true, true);
+  _box.append(revealer_box_);
 
-  add(_box);
-  _box.show_all();
+  set_child(_box);
   power_monitor_.set_visible(false);
 
-  signal_key_press_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyDown));
-  signal_key_release_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyUp));
-  signal_delete_event().connect(sigc::mem_fun(*this, &MainWindow::onDelete));
+  add_controller(GetKeyController());
+  signal_close_request().connect(sigc::mem_fun(*this, &MainWindow::onDelete),
+                                 false);
 }
 
 MainWindow::~MainWindow() {
-  _sceneWindow.reset();
   _visualizationWidget.reset();
   child_windows_.Clear();
 
@@ -121,48 +119,60 @@ void MainWindow::InitializeMenu() {
       [&]() { child_windows_.Open<windows::SettingsWindow>(); });
   main_menu_.Quit.connect([&]() { hide(); });
 
-  main_menu_.LockLayout.connect([&]() { UpdateLayoutLock(); });
+  main_menu_.LockLayout.connect([&](bool) { UpdateLayoutLock(); });
   main_menu_.BlackOut.connect([&]() { onMIBlackOut(); });
   main_menu_.DesignWizard.connect([&]() { onMIDesignWizardClicked(); });
   main_menu_.TheatreDimensions.connect(
       [&]() { onMITheatreDimensionsClicked(); });
 
-  main_menu_.ShowFixtures.connect([&]() {
-    _visualizationWidget->SetDrawFixtures(main_menu_.ShowFixturesActive());
-    _state.SetShowFixtures(main_menu_.ShowFixturesActive());
+  main_menu_.ShowFixtures.connect([&](bool new_value) {
+    _visualizationWidget->SetDrawFixtures(new_value);
+    _state.SetShowFixtures(new_value);
     _visualizationWidget->Update();
   });
-  main_menu_.ShowBeams.connect([&]() {
-    _visualizationWidget->SetDrawBeams(main_menu_.ShowBeamsActive());
-    _state.SetShowBeams(main_menu_.ShowBeamsActive());
+  main_menu_.ShowBeams.connect([&](bool new_value) {
+    _visualizationWidget->SetDrawBeams(new_value);
+    _state.SetShowBeams(new_value);
     _visualizationWidget->Update();
   });
-  main_menu_.ShowProjections.connect([&]() {
-    _visualizationWidget->SetDrawProjections(
-        main_menu_.ShowProjectionsActive());
-    _state.SetShowProjections(main_menu_.ShowProjectionsActive());
+  main_menu_.ShowProjections.connect([&](bool new_value) {
+    _visualizationWidget->SetDrawProjections(new_value);
+    _state.SetShowProjections(new_value);
     _visualizationWidget->Update();
   });
-  main_menu_.ShowStageBorders.connect([&]() {
-    _visualizationWidget->SetDrawBorders(main_menu_.ShowStageBordersActive());
-    _state.SetShowStageBorders(main_menu_.ShowStageBordersActive());
+  main_menu_.ShowStageBorders.connect([&](bool new_value) {
+    _visualizationWidget->SetDrawBorders(new_value);
+    _state.SetShowStageBorders(new_value);
     _visualizationWidget->Update();
   });
 
-  main_menu_.SideBar.connect([&]() { onSideBarButtonClicked(); });
-  main_menu_.PowerMonitor.connect([&]() { onPowerMonitorButtonClicked(); });
-  main_menu_.FullScreen.connect([&]() { onFullscreen(); });
+  main_menu_.SideBar.connect([&](bool) { onSideBarButtonClicked(); });
+  main_menu_.PowerMonitor.connect([&](bool) { onPowerMonitorButtonClicked(); });
+  main_menu_.FullScreen.connect([&](bool) { onFullscreen(); });
   main_menu_.NewFaderWindow.connect([&]() { addFaderWindow(); });
-  main_menu_.FixtureList.connect(
-      sigc::mem_fun(*this, &MainWindow::onFixtureListButtonClicked));
-  main_menu_.FixtureTypes.connect(
-      sigc::mem_fun(*this, &MainWindow::onFixtureTypesButtonClicked));
+  main_menu_.FixtureList.connect([&](bool) { onFixtureListButtonClicked(); });
+  main_menu_.FixtureTypes.connect([&](bool) { onFixtureTypesButtonClicked(); });
   main_menu_.SceneWindow.connect(
       [&](bool active) { onSceneWindowClicked(active); });
   main_menu_.FaderWindow.connect(
       [&](FaderSetState &fader_set) { onFaderWindowSelected(fader_set); });
 
-  _box.pack_start(main_menu_, false, false);
+  _box.append(main_menu_);
+}
+
+std::shared_ptr<Gtk::EventController> MainWindow::GetKeyController() {
+  std::shared_ptr<Gtk::EventControllerKey> key_controller =
+      Gtk::EventControllerKey::create();
+  key_controller->signal_key_pressed().connect(
+      [&](guint keyval, guint keycode, Gdk::ModifierType state) {
+        return MainWindow::onKeyDown(keyval);
+      },
+      false);
+  key_controller->signal_key_released().connect(
+      [&](guint keyval, guint keycode, Gdk::ModifierType state) {
+        MainWindow::onKeyUp(keyval);
+      });
+  return key_controller;
 }
 
 void MainWindow::EmitUpdate() { _signalUpdateControllables(); }
@@ -178,10 +188,7 @@ void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
     newWindow->LoadNew();
   else
     newWindow->LoadState(stateOrNull);
-  newWindow->signal_key_press_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyDown));
-  newWindow->signal_key_release_event().connect(
-      sigc::mem_fun(*this, &MainWindow::onKeyUp));
+  newWindow->add_controller(GetKeyController());
   newWindow->signal_hide().connect(sigc::bind(
       sigc::mem_fun(*this, &MainWindow::onFaderWindowHidden), newWindow));
   newWindow->show();
@@ -194,10 +201,7 @@ void MainWindow::onFixtureListButtonClicked() {
     windows::FixtureListWindow &window =
         child_windows_.Open<windows::FixtureListWindow>(
             [&]() { main_menu_.SetFixtureListActive(false); });
-    window.signal_key_press_event().connect(
-        sigc::mem_fun(*this, &MainWindow::onKeyDown));
-    window.signal_key_release_event().connect(
-        sigc::mem_fun(*this, &MainWindow::onKeyUp));
+    window.add_controller(GetKeyController());
   } else {
     child_windows_.Hide<windows::FixtureListWindow>();
   }
@@ -209,10 +213,7 @@ void MainWindow::onFixtureTypesButtonClicked() {
     windows::FixtureTypesWindow &window =
         child_windows_.Open<windows::FixtureTypesWindow>(
             [&]() { main_menu_.SetFixtureTypesActive(false); });
-    window.signal_key_press_event().connect(
-        sigc::mem_fun(*this, &MainWindow::onKeyDown));
-    window.signal_key_release_event().connect(
-        sigc::mem_fun(*this, &MainWindow::onKeyUp));
+    window.add_controller(GetKeyController());
   } else {
     child_windows_.Hide<windows::FixtureTypesWindow>();
   }
@@ -232,49 +233,53 @@ void MainWindow::increaseManualBeat(int val) {
   _management->IncreaseManualBeat(val);
 }
 
-bool MainWindow::onKeyDown(GdkEventKey *event) {
-  if (event->keyval == '0')
+bool MainWindow::onKeyDown(guint keyval) {
+  if (keyval == '0')
     increaseManualBeat(0);
-  else if (event->keyval == '1')
+  else if (keyval == '1')
     increaseManualBeat(1);
-  else if (event->keyval == '2')
+  else if (keyval == '2')
     increaseManualBeat(2);
-  else if (event->keyval == '3')
+  else if (keyval == '3')
     increaseManualBeat(3);
-  else if (event->keyval == '4')
+  else if (keyval == '4')
     increaseManualBeat(4);
-  else if (event->keyval == GDK_KEY_Escape) {
+  else if (keyval == GDK_KEY_Escape) {
     // Swap ?
-  } else if (event->keyval == GDK_KEY_BackSpace) {
+  } else if (keyval == GDK_KEY_BackSpace) {
     // black out
   } else {
-    if (_sceneWindow->HandleKeyDown(event->keyval)) return true;
     bool handled = false;
     for (std::unique_ptr<FaderWindow> &cw : _faderWindows)
-      if (!handled) handled = cw->HandleKeyDown(event->keyval);
+      if (!handled) handled = cw->HandleKeyDown(keyval);
     return !handled;
   }
   return false;
 }
 
-bool MainWindow::onKeyUp(GdkEventKey *event) {
+bool MainWindow::onKeyUp(guint keyval) {
   bool handled = false;
   for (std::unique_ptr<FaderWindow> &cw : _faderWindows)
-    if (!handled) handled = cw->HandleKeyUp(event->keyval);
+    if (!handled) handled = cw->HandleKeyUp(keyval);
   return handled;
 }
 
-bool MainWindow::onDelete(GdkEventAny * /*unused*/) {
+bool MainWindow::onDelete() {
   if (_management->IsEmpty())
-    return false;
+    hide();
   else {
-    Gtk::MessageDialog dialog(*this, "Are you sure you want to close glight?",
-                              false, Gtk::MESSAGE_QUESTION,
-                              Gtk::BUTTONS_OK_CANCEL);
+    dialog_ = std::make_unique<Gtk::MessageDialog>(
+        *this, "Are you sure you want to close glight?", false,
+        Gtk::MessageType::QUESTION, Gtk::ButtonsType::OK_CANCEL);
+    auto &dialog = static_cast<Gtk::MessageDialog &>(*dialog_);
     dialog.set_secondary_text("All lights will be stopped.");
-    int result = dialog.run();
-    return result != Gtk::RESPONSE_OK;
+    dialog.signal_response().connect([this](int response) {
+      if (response == Gtk::ResponseType::OK) hide();
+      dialog_.reset();
+    });
+    dialog.show();
   }
+  return true;
 }
 
 void MainWindow::LoadMenuOptionsFromState() {
@@ -285,34 +290,38 @@ void MainWindow::LoadMenuOptionsFromState() {
   main_menu_.SetShowStageBorders(_state.ShowStageBorders());
 }
 
+void MainWindow::NewShow() {
+  Instance::Selection().SetSelection({});
+  std::unique_lock<std::mutex> lock(_management->Mutex());
+  _management->Clear();
+  _faderWindows.clear();
+  child_windows_.Clear();
+  _state.Clear();
+
+  lock.unlock();
+
+  // It's important to sent an update now, because windows might have
+  // references to removed fixtures.
+  EmitUpdate();
+  LoadMenuOptionsFromState();
+
+  addFaderWindow();
+}
+
 void MainWindow::onMINewClicked() {
-  bool confirmed = false;
   if (_management->IsEmpty())
-    confirmed = true;
+    NewShow();
   else {
-    Gtk::MessageDialog dialog(
+    dialog_ = std::make_unique<Gtk::MessageDialog>(
         *this, "Are you sure you want to start a new show?", false,
-        Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
+        Gtk::MessageType::QUESTION, Gtk::ButtonsType::OK_CANCEL);
+    Gtk::MessageDialog &dialog = static_cast<Gtk::MessageDialog &>(*dialog_);
     dialog.set_secondary_text("All lights will be stopped.");
-    int result = dialog.run();
-    confirmed = (result == Gtk::RESPONSE_OK);
-  }
-
-  if (confirmed) {
-    Instance::Selection().SetSelection({});
-    std::unique_lock<std::mutex> lock(_management->Mutex());
-    _management->Clear();
-    _faderWindows.clear();
-    _sceneWindow.reset();
-    _state.Clear();
-    lock.unlock();
-
-    // It's important to sent an update now, because windows might have
-    // references to removed fixtures.
-    EmitUpdate();
-    LoadMenuOptionsFromState();
-
-    addFaderWindow();
+    dialog.signal_response().connect([this](int response) {
+      if (response == Gtk::ResponseType::OK) NewShow();
+      dialog_.reset();
+    });
+    dialog.show();
   }
 }
 
@@ -322,15 +331,14 @@ void MainWindow::OpenFile(const std::string &filename) {
   _management->Clear();
   _faderWindows.clear();
   _state.Clear();
-  _sceneWindow.reset();
+  child_windows_.Clear();
 
   system::Read(filename, *_management, &_state);
 
   lock.unlock();
 
   EmitUpdate();
-  resize(_state.WindowWidth(), _state.WindowHeight());
-  move(_state.WindowPositionX(), _state.WindowPositionY());
+  set_default_size(_state.WindowWidth(), _state.WindowHeight());
   LoadMenuOptionsFromState();
   if (_state.Empty()) {
     std::cout << "File did not contain GUI state info: will start with default "
@@ -351,43 +359,13 @@ void MainWindow::OpenFile(const std::string &filename) {
   _state.EmitFaderSetChangeSignal();
 }
 
-void MainWindow::onMIOpenClicked() {
-  bool confirmed = false;
-  if (_management->IsEmpty())
-    confirmed = true;
-  else {
-    Gtk::MessageDialog dialog(
-        *this, "Are you sure you want to open a new show?", false,
-        Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_OK_CANCEL);
-    dialog.set_secondary_text("Lights will change to the new show.");
-    int result = dialog.run();
-    confirmed = (result == Gtk::RESPONSE_OK);
-  }
-
-  if (confirmed) {
-    Gtk::FileChooserDialog dialog(*this, "Open glight show",
-                                  Gtk::FILE_CHOOSER_ACTION_OPEN);
-
-    dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
-    dialog.add_button("Open", Gtk::RESPONSE_OK);
-
-    Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
-    filter->set_name("Glight show (*.gshow)");
-    filter->add_pattern("*.gshow");
-    filter->add_mime_type("text/gshow+json");
-    dialog.add_filter(filter);
-
-    int result = dialog.run();
-    if (result == Gtk::RESPONSE_OK) OpenFile(dialog.get_filename());
-  }
-}
-
-void MainWindow::onMISaveClicked() {
-  Gtk::FileChooserDialog dialog(*this, "Save glight show",
-                                Gtk::FILE_CHOOSER_ACTION_SAVE);
-
-  dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
-  dialog.add_button("Save", Gtk::RESPONSE_OK);
+void MainWindow::Open() {
+  dialog_ = std::make_unique<Gtk::FileChooserDialog>(
+      *this, "Open glight show", Gtk::FileChooser::Action::OPEN);
+  Gtk::FileChooserDialog &dialog =
+      static_cast<Gtk::FileChooserDialog &>(*dialog_);
+  dialog.add_button("Cancel", Gtk::ResponseType::CANCEL);
+  dialog.add_button("Open", Gtk::ResponseType::OK);
 
   Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
   filter->set_name("Glight show (*.gshow)");
@@ -395,25 +373,79 @@ void MainWindow::onMISaveClicked() {
   filter->add_mime_type("text/gshow+json");
   dialog.add_filter(filter);
 
-  int result = dialog.run();
-  if (result == Gtk::RESPONSE_OK) {
-    Glib::ustring filename(dialog.get_filename());
-    if (filename.find('.') == Glib::ustring::npos) filename += ".gshow";
-    int x;
-    int y;
-    get_position(x, y);
-    _state.SetWindowPosition(x, y, get_width(), get_height());
-    std::lock_guard<std::mutex> lock(_management->Mutex());
-    system::Write(filename, *_management, &_state);
+  dialog.signal_response().connect([this](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      Gtk::FileChooserDialog &dialog =
+          static_cast<Gtk::FileChooserDialog &>(*dialog_);
+      const std::string filename = dialog.get_file()->get_path();
+      // resetting the dialog will delete the lambda, so store this beforehand.
+      MainWindow &me = *this;
+      dialog_.reset();
+      me.OpenFile(filename);
+    } else {
+      dialog_.reset();
+    }
+  });
+  dialog.show();
+}
+
+void MainWindow::onMIOpenClicked() {
+  if (_management->IsEmpty())
+    Open();
+  else {
+    dialog_ = std::make_unique<Gtk::MessageDialog>(
+        *this, "Are you sure you want to open a new show?", false,
+        Gtk::MessageType::QUESTION, Gtk::ButtonsType::OK_CANCEL);
+    Gtk::MessageDialog &dialog = static_cast<Gtk::MessageDialog &>(*dialog_);
+    dialog.set_secondary_text("Lights will change to the new show.");
+    dialog.signal_response().connect([this](int response) {
+      // Open will reset dialog_, so we should not reset it in that case
+      if (response == Gtk::ResponseType::OK)
+        Open();
+      else
+        dialog_.reset();
+    });
+    dialog.show();
   }
 }
 
-void MainWindow::onMIImportClicked() {
-  Gtk::FileChooserDialog dialog(*this, "Import fixture types",
-                                Gtk::FILE_CHOOSER_ACTION_OPEN);
+void MainWindow::onMISaveClicked() {
+  dialog_ = std::make_unique<Gtk::FileChooserDialog>(
+      *this, "Save glight show", Gtk::FileChooser::Action::SAVE);
+  Gtk::FileChooserDialog &dialog =
+      static_cast<Gtk::FileChooserDialog &>(*dialog_);
 
-  dialog.add_button("Cancel", Gtk::RESPONSE_CANCEL);
-  dialog.add_button("Open", Gtk::RESPONSE_OK);
+  dialog.add_button("Cancel", Gtk::ResponseType::CANCEL);
+  dialog.add_button("Save", Gtk::ResponseType::OK);
+
+  Glib::RefPtr<Gtk::FileFilter> filter = Gtk::FileFilter::create();
+  filter->set_name("Glight show (*.gshow)");
+  filter->add_pattern("*.gshow");
+  filter->add_mime_type("text/gshow+json");
+  dialog.add_filter(filter);
+  dialog.signal_response().connect([this](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      Gtk::FileChooserDialog &dialog =
+          static_cast<Gtk::FileChooserDialog &>(*dialog_);
+      Glib::ustring filename(dialog.get_file()->get_path());
+      if (filename.find('.') == Glib::ustring::npos) filename += ".gshow";
+      _state.SetWindowDimensions(get_width(), get_height());
+      std::lock_guard<std::mutex> lock(_management->Mutex());
+      system::Write(filename, *_management, &_state);
+    }
+    dialog_.reset();
+  });
+  dialog.show();
+}
+
+void MainWindow::onMIImportClicked() {
+  dialog_ = std::make_unique<Gtk::FileChooserDialog>(
+      *this, "Import fixture types", Gtk::FileChooser::Action::OPEN);
+  Gtk::FileChooserDialog &dialog =
+      static_cast<Gtk::FileChooserDialog &>(*dialog_);
+
+  dialog.add_button("Cancel", Gtk::ResponseType::CANCEL);
+  dialog.add_button("Open", Gtk::ResponseType::OK);
 
   Glib::RefPtr<Gtk::FileFilter> json_filter = Gtk::FileFilter::create();
   json_filter->set_name("Open fixture file (*.json)");
@@ -426,21 +458,26 @@ void MainWindow::onMIImportClicked() {
   gshow_filter->add_pattern("*.gshow");
   dialog.add_filter(gshow_filter);
 
-  const int result = dialog.run();
-  if (result == Gtk::RESPONSE_OK) {
-    const std::string filename = dialog.get_filename();
+  dialog.signal_response().connect([this, gshow_filter](int response) {
+    if (response == Gtk::ResponseType::OK) {
+      Gtk::FileChooserDialog &dialog =
+          static_cast<Gtk::FileChooserDialog &>(*dialog_);
+      const std::string filename = dialog.get_file()->get_path();
 
-    if (dialog.get_filter() == gshow_filter) {
-      std::lock_guard<std::mutex> lock(_management->Mutex());
-      system::ImportFixtureTypes(filename, *_management);
-    } else {
-      std::ifstream stream(filename);
-      std::unique_ptr<json::Node> root = json::Parse(stream);
-      std::lock_guard<std::mutex> lock(_management->Mutex());
-      system::ReadOpenFixture(*_management, *root);
+      if (dialog.get_filter() == gshow_filter) {
+        std::lock_guard<std::mutex> lock(_management->Mutex());
+        system::ImportFixtureTypes(filename, *_management);
+      } else {
+        std::ifstream stream(filename);
+        std::unique_ptr<json::Node> root = json::Parse(stream);
+        std::lock_guard<std::mutex> lock(_management->Mutex());
+        system::ReadOpenFixture(*_management, *root);
+      }
+      EmitUpdate();
+      dialog_.reset();
     }
-    EmitUpdate();
-  }
+  });
+  dialog.show();
 }
 
 void MainWindow::onFaderWindowHidden(FaderWindow *window) {
@@ -518,15 +555,12 @@ PropertiesWindow &MainWindow::OpenPropertiesWindow(
 
 void MainWindow::onSceneWindowClicked(bool active) {
   if (active) {
-    _sceneWindow = std::make_unique<SceneWindow>(*_management, *this, *this);
-    _sceneWindow->present();
-    _sceneWindow->signal_hide().connect([&]() { onHideSceneWindow(); });
+    child_windows_.Open<SceneWindow>(
+        [this]() { main_menu_.SetSceneWindowActive(false); }, *this);
   } else {
-    _sceneWindow->hide();
+    child_windows_.Hide<SceneWindow>();
   }
 }
-
-void MainWindow::onHideSceneWindow() { main_menu_.SetSceneWindowActive(false); }
 
 void MainWindow::onFullscreen() {
   if (main_menu_.FullScreenActive())

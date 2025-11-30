@@ -39,14 +39,15 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
   functions_view_.set_hexpand(true);
   functions_view_.get_selection()->signal_changed().connect(
       [&]() { onSelectionChanged(); });
-  functions_scrollbars_.add(functions_view_);
-  functions_scrollbars_.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+  functions_scrollbars_.set_child(functions_view_);
+  functions_scrollbars_.set_policy(Gtk::PolicyType::NEVER,
+                                   Gtk::PolicyType::AUTOMATIC);
   grid_.attach(functions_scrollbars_, 0, 0, 3, 1);
 
   add_function_button_.signal_clicked().connect([&]() { onAdd(); });
-  functions_button_box_.pack_start(add_function_button_);
+  functions_button_box_.append(add_function_button_);
   remove_function_button_.signal_clicked().connect([&]() { onRemove(); });
-  functions_button_box_.pack_end(remove_function_button_);
+  functions_button_box_.append(remove_function_button_);
   grid_.attach(functions_button_box_, 0, 1, 3, 1);
   grid_.set_hexpand(true);
   grid_.set_vexpand(true);
@@ -124,7 +125,7 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
     }
   });
 
-  add(grid_);
+  set_child(grid_);
 
   onSelectionChanged();
 }
@@ -133,7 +134,7 @@ void FixtureTypeFunctionsFrame::FillModel() {
   functions_model_->clear();
   for (FixtureModeFunction& f : functions_) {
     Gtk::TreeModel::iterator iter = functions_model_->append();
-    const Gtk::TreeModel::Row& row = *iter;
+    Gtk::TreeModel::Row& row = *iter;
     row[functions_columns_.dmx_offset_] = f.DmxOffset();
     row[functions_columns_.fine_channel_] = FineToString(f.FineChannelOffset());
     row[functions_columns_.function_] = &f;
@@ -144,7 +145,7 @@ void FixtureTypeFunctionsFrame::FillModel() {
 void FixtureTypeFunctionsFrame::UpdateModel() {
   auto row_iter = functions_model_->children().begin();
   for (FixtureModeFunction& f : functions_) {
-    const Gtk::TreeModel::Row& row = *row_iter;
+    Gtk::TreeModel::Row& row = *row_iter;
     row[functions_columns_.dmx_offset_] = f.DmxOffset();
     row[functions_columns_.fine_channel_] = FineToString(f.FineChannelOffset());
     row[functions_columns_.function_] = &f;

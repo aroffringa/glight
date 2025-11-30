@@ -4,7 +4,6 @@
 #include <random>
 
 #include <glibmm/main.h>
-#include <gtkmm/main.h>
 
 #include "gui/windows/gradientwindow.h"
 #include "gui/eventtransmitter.h"
@@ -25,7 +24,8 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
                                          bool showGradientButton,
                                          bool showShuffleButton)
     : _parent(parent) {
-  repeat_box_.pack_start(repeat_label_, false, false);
+  set_orientation(Gtk::Orientation::VERTICAL);
+  repeat_box_.append(repeat_label_);
   repeat_list_ = Gtk::ListStore::create(repeat_columns_);
   repeat_list_->append()->set_value<Glib::ustring>(0, "None");
   for (size_t i = 1; i != repeat_values.size(); ++i) {
@@ -36,37 +36,35 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   repeat_combo_.signal_changed().connect(
       sigc::mem_fun(*this, &ColorSequenceWidget::OnChangeRepeat));
   repeat_combo_.pack_start(repeat_columns_.description_);
-  repeat_box_.pack_end(repeat_combo_, false, false);
+  repeat_box_.append(repeat_combo_);
 
-  pack_start(repeat_box_, false, false);
-  repeat_box_.show_all();
+  append(repeat_box_);
 
   _buttonBox.set_homogeneous(true);
 
   _minButton.set_sensitive(false);
   _minButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &ColorSequenceWidget::onDecreaseColors));
-  _buttonBox.pack_start(_minButton);
+      sigc::mem_fun(*this, &ColorSequenceWidget::OnDecreaseColors));
+  _buttonBox.append(_minButton);
 
   if (showGradientButton) {
     _gradientButton.set_sensitive(false);
     _gradientButton.signal_clicked().connect(
         sigc::mem_fun(*this, &ColorSequenceWidget::OnGradient));
-    _buttonBox.pack_start(_gradientButton);
+    _buttonBox.append(_gradientButton);
   }
 
   if (showShuffleButton) {
     _shuffleButton.set_sensitive(false);
     _shuffleButton.signal_clicked().connect([&]() { Shuffle(); });
-    _buttonBox.pack_start(_shuffleButton);
+    _buttonBox.append(_shuffleButton);
   }
 
   _plusButton.signal_clicked().connect(
       sigc::mem_fun(*this, &ColorSequenceWidget::OnIncreaseColors));
-  _buttonBox.pack_start(_plusButton);
+  _buttonBox.append(_plusButton);
 
-  pack_start(_buttonBox, false, false);
-  _buttonBox.show_all();
+  append(_buttonBox);
 
   _loadDefaultList = Gtk::ListStore::create(_listColumns);
   const std::vector<std::string> list = theatre::GetDefaultColorSequences();
@@ -78,23 +76,24 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   _loadDefaultCombo.set_entry_text_column(_listColumns._title);
   _loadDefaultCombo.pack_start(_listColumns._title);
   _loadDefaultCombo.set_active(0);
-  _loadDefaultBox.pack_start(_loadDefaultCombo);
+  _loadDefaultBox.append(_loadDefaultCombo);
 
   _loadDefaultButton.signal_clicked().connect([&]() { LoadDefault(); });
-  _loadDefaultBox.pack_end(_loadDefaultButton);
-  pack_start(_loadDefaultBox, false, false);
-  _loadDefaultBox.show_all();
+  _loadDefaultBox.append(_loadDefaultButton);
+  append(_loadDefaultBox);
 
   _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
-  _box.pack_start(*_widgets.back(), true, false);
+  _box.append(*_widgets.back());
   _widgets.back()->SignalColorChanged().connect([&]() { OnColorChange(0); });
   _widgets.back()->show();
 
-  _scrolledWindow.add(_box);
+  _scrolledWindow.set_expand(true);
+  _scrolledWindow.set_child(_box);
+  _box.set_orientation(Gtk::Orientation::VERTICAL);
   _box.show();
-  _frame.add(_scrolledWindow);
+  _frame.set_child(_scrolledWindow);
   _scrolledWindow.show();
-  pack_start(_frame, true, true);
+  append(_frame);
   _frame.show();
 }
 
@@ -157,6 +156,14 @@ void ColorSequenceWidget::OnGradientSelected() {
   gradient_window_->close();
 }
 
+void ColorSequenceWidget::OnDecreaseColors() {
+  if (_widgets.size() > min_count_) {
+    _box.remove(*_widgets.back());
+    _widgets.pop_back();
+    updateSensitivities();
+  }
+}
+
 void ColorSequenceWidget::OnIncreaseColors() {
   if (max_count_ == 0 || _widgets.size() < max_count_) {
     const size_t index = _widgets.size();
@@ -171,7 +178,7 @@ void ColorSequenceWidget::OnIncreaseColors() {
       _widgets.back()->set_sensitive(false);
     }
     updateSensitivities();
-    _box.pack_start(*_widgets.back(), true, false);
+    _box.append(*_widgets.back());
     _widgets.back()->show();
     queue_resize();
   }
@@ -214,6 +221,8 @@ void ColorSequenceWidget::SetSelection(
   if (max_count_ < values.size()) max_count_ = 0;
   if (values.size() < min_count_) min_count_ = values.size();
   repeat_combo_.set_active(0);
+  for (std::unique_ptr<ColorSelectWidget> &widget : _widgets)
+    _box.remove(*widget);
   _widgets.clear();
   for (size_t i = 0; i != values.size(); ++i) {
     _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
@@ -221,7 +230,7 @@ void ColorSequenceWidget::SetSelection(
         [&, i]() { OnColorChange(i); });
     _widgets.back()->SetSelection(values[i]);
     _widgets.back()->SetAllowVariables(allow_variables_);
-    _box.pack_start(*_widgets.back(), true, false);
+    _box.append(*_widgets.back());
     _widgets.back()->show();
   }
   updateSensitivities();

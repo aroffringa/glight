@@ -3,14 +3,13 @@
 
 #include <vector>
 
+#include <gtkmm/box.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm/toolbar.h>
-#include <gtkmm/toolbutton.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
@@ -45,9 +44,9 @@ class EditColorRange : public Gtk::Window {
   }
 
   Gtk::Grid grid_;
-  Gtk::Toolbar tool_bar_;
-  Gtk::ToolButton add_button_{"+"};
-  Gtk::ToolButton remove_button_{"-"};
+  Gtk::Box tool_bar_;
+  Gtk::Button add_button_{"+"};
+  Gtk::Button remove_button_{"-"};
   Gtk::TreeView list_view_;
   Glib::RefPtr<Gtk::ListStore> list_model_;
   struct ListColumns : public Gtk::TreeModelColumnRecord {

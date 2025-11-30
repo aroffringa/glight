@@ -1,5 +1,8 @@
 #include "iconbutton.h"
 
+#include <gtkmm/eventcontrollermotion.h>
+#include <gtkmm/gestureclick.h>
+
 namespace glight::gui {
 namespace {
 void DrawCirclePart(const Cairo::RefPtr<Cairo::Context>& cairo,
@@ -57,19 +60,22 @@ void DrawCross(const Cairo::RefPtr<Cairo::Context>& cairo) {
 }  // namespace
 
 IconButton::IconButton() {
-  set_events(Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK |
-             Gdk::ENTER_NOTIFY_MASK | Gdk::LEAVE_NOTIFY_MASK);
-  signal_draw().connect([&](const Cairo::RefPtr<Cairo::Context>& cairo) {
+  set_draw_func([&](const Cairo::RefPtr<Cairo::Context>& cairo, int, int) {
     Draw(cairo);
-    return true;
   });
-  signal_button_press_event().connect(&IconButton::OnPress);
-  signal_button_release_event().connect(
+
+  auto gesture = Gtk::GestureClick::create();
+  gesture->set_button(1);
+  gesture->signal_pressed().connect(&IconButton::OnPress);
+  gesture->signal_released().connect(
       sigc::mem_fun(*this, &IconButton::OnRelease));
-  signal_enter_notify_event().connect(
-      sigc::mem_fun(*this, &IconButton::OnEnter));
-  signal_leave_notify_event().connect(
-      sigc::mem_fun(*this, &IconButton::OnLeave));
+  add_controller(gesture);
+
+  auto motion = Gtk::EventControllerMotion::create();
+  motion->signal_enter().connect(sigc::mem_fun(*this, &IconButton::OnEnter));
+  motion->signal_leave().connect(sigc::mem_fun(*this, &IconButton::OnLeave));
+  add_controller(motion);
+
   set_size_request(24, 24);
 }
 
@@ -103,29 +109,26 @@ void IconButton::Draw(const Cairo::RefPtr<Cairo::Context>& cairo) {
   }
 }
 
-bool IconButton::OnPress(GdkEventButton* /*event*/) { return true; }
+void IconButton::OnPress(int, double, double) {}
 
-bool IconButton::OnRelease(GdkEventButton* /*event*/) {
+void IconButton::OnRelease(int, double, double) {
   active_ = !active_;
   signal_changed_();
   Update();
-  return true;
 }
 
-bool IconButton::OnEnter(GdkEventCrossing* /*event*/) {
+void IconButton::OnEnter(double, double) {
   if (!entered_) {
     entered_ = true;
     Update();
   }
-  return false;
 }
 
-bool IconButton::OnLeave(GdkEventCrossing* /*event*/) {
+void IconButton::OnLeave() {
   if (entered_) {
     entered_ = false;
     Update();
   }
-  return false;
 }
 
 }  // namespace glight::gui

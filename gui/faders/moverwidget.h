@@ -3,11 +3,12 @@
 
 #include "controlwidget.h"
 
-#include "../scopedconnection.h"
+#include "gui/components/controlbutton.h"
+
+#include <sigc++/scoped_connection.h>
 
 #include <gtkmm/button.h>
 #include <gtkmm/checkbutton.h>
-#include <gtkmm/eventbox.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/label.h>
 
@@ -18,16 +19,19 @@ class MoverWidget final : public ControlWidget {
   MoverWidget(FaderWindow &fader_window, FaderState &state, ControlMode mode,
               char key);
 
-  virtual void Toggle() override {}
-  virtual void FlashOn() override {}
-  virtual void FlashOff() override {}
-  virtual void SyncFader() override {}
+  void Toggle() final {}
+  void FlashOn() final {}
+  void FlashOff() final {}
+  void SyncFader() final {}
 
-  virtual void Limit(double value) override {}
+  void Limit(double value) final {}
+
+  bool PanIsAssigned() const { return GetSourceValue(0) != nullptr; }
+  bool TiltIsAssigned() const { return GetSourceValue(1) != nullptr; }
 
  private:
-  virtual void OnAssigned(bool moveFader) override;
-  bool HandleRightRelease(GdkEventButton *event);
+  void OnAssigned(bool moveFader) final;
+  void PrepareContextMenu(ControlMenu &menu) final {}
   void UpdateDisplaySettings();
   void MoveLeft();
   void MoveRight();
@@ -37,16 +41,15 @@ class MoverWidget final : public ControlWidget {
   void StopTilt();
 
   Gtk::Grid grid_;
-  Gtk::Button left_button_;
-  Gtk::Button right_button_;
-  Gtk::Button up_button_;
-  Gtk::Button down_button_;
-  Gtk::EventBox event_box_;
+  ControlButton left_button_;
+  ControlButton right_button_;
+  ControlButton up_button_;
+  ControlButton down_button_;
   Gtk::Label name_label_{"<..>\n<..>"};
 
   bool hold_updates_ = false;
 
-  ScopedConnection update_display_settings_connection_;
+  sigc::scoped_connection update_display_settings_connection_;
 };
 
 }  // namespace glight::gui
