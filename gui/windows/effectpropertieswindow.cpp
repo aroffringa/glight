@@ -30,7 +30,6 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect& effect)
   _addConnectionButton.set_image_from_icon_name("list-add");
   _addConnectionButton.signal_clicked().connect(
       sigc::mem_fun(*this, &EffectPropertiesWindow::onAddConnectionClicked));
-  _connectionsButtonBox.set_homogeneous(true);
   _connectionsButtonBox.set_orientation(Gtk::Orientation::VERTICAL);
   _connectionsButtonBox.append(_addConnectionButton);
 
@@ -58,12 +57,15 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect& effect)
 
   _connectionsScrolledWindow.set_policy(Gtk::PolicyType::NEVER,
                                         Gtk::PolicyType::AUTOMATIC);
+  _connectionsScrolledWindow.set_expand(true);
   _connectionsBox.append(_connectionsScrolledWindow);
+  _connectionsBox.set_expand(true);
   _connectionsFrame.set_child(_connectionsBox);
+  _connectionsFrame.set_expand(true);
   _mainHBox.append(_connectionsFrame);
 
   _propertiesFrame.set_child(_propertiesBox);
-
+  _propertiesFrame.set_expand(true);
   _mainHBox.append(_propertiesFrame);
 
   _topBox.append(_mainHBox);
