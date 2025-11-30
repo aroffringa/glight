@@ -38,13 +38,16 @@ void OpenColorDialog(std::unique_ptr<Gtk::Dialog> &dialog, Gtk::Window &parent,
                                    color.BlueRatio());
   }
   color_dialog.add_palette(Gtk::Orientation::HORIZONTAL, 10, colors);
-  dialog->signal_response().connect([callback, &color_dialog](int response) {
+  dialog->signal_response().connect([callback, &dialog](int response) {
     if (response == Gtk::ResponseType::OK) {
+      Gtk::ColorChooserDialog &color_dialog =
+          static_cast<Gtk::ColorChooserDialog &>(*dialog);
       const Gdk::RGBA rgba_color = color_dialog.get_rgba();
       const theatre::Color color = theatre::Color::FromRatio(
           rgba_color.get_red(), rgba_color.get_green(), rgba_color.get_blue());
       callback(color);
     }
+    dialog.reset();
   });
   dialog->show();
 }

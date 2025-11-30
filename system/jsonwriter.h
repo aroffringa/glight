@@ -61,7 +61,8 @@ class JsonWriter {
 
   void Number(int number) { IntegerNumber(number); }
   void Number(unsigned number) { IntegerNumber(number); }
-  void Number(size_t number) { IntegerNumber(number); }
+  void Number(unsigned long number) { IntegerNumber(number); }
+  void Number(unsigned long long number) { IntegerNumber(number); }
 
   void String(std::string_view str) {
     Next();

@@ -86,6 +86,11 @@ DesignWizard::DesignWizard()
   initPage2();
 
   _mainBox.append(_vBoxPage1);
+  _colorsWidgetP4.set_expand(true);
+  _fixtureList.set_expand(true);
+  _reorderWidget.set_expand(true);
+  _typeFrameP3.set_expand(true);
+  _deductionFrameP3.set_expand(true);
 
   _buttonBox.set_homogeneous(true);
 
@@ -293,6 +298,7 @@ theatre::DesignInfo DesignWizard::GetDesign() const {
 void DesignWizard::onNextClicked() {
   theatre::Management &management = Instance::Management();
   gui::EventTransmitter &events = Instance::Events();
+  _mainBox.remove(_buttonBox);
   switch (_currentPage) {
     case Page1_SelFixtures: {
       _selectedControllables.clear();
@@ -526,6 +532,7 @@ void DesignWizard::onNextClicked() {
       hide();
     } break;
   }
+  _mainBox.append(_buttonBox);
 }
 
 void DesignWizard::addControllable(
