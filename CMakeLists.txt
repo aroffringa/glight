@@ -179,8 +179,10 @@ add_library(glight-object OBJECT
   ${THEATREFILES} ${SYSTEMFILES} ${GUIFILES} ${EXTERNALFILES})
 
 add_executable(glight $<TARGET_OBJECTS:glight-object> glight.cpp)
+add_executable(glight-cli $<TARGET_OBJECTS:glight-object> glight-cli.cpp)
 
 target_link_directories(glight PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
+target_link_directories(glight-cli PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
 
 set(GLIGHT_LIBRARIES
   ${FLACPP_LIBRARIES} 
@@ -192,6 +194,7 @@ set(GLIGHT_LIBRARIES
   ${CMAKE_THREAD_LIBS_INIT})
 
 target_link_libraries(glight ${GLIGHT_LIBRARIES})
+target_link_libraries(glight-cli ${GLIGHT_LIBRARIES})
 
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.30")
     cmake_policy(SET CMP0167 NEW)
@@ -265,5 +268,5 @@ set(CPACK_DEBIAN_PACKAGE_SECTION misc)
 
 include(CPack)
 
-install(TARGETS glight RUNTIME DESTINATION bin)
+install(TARGETS glight glight-cli RUNTIME DESTINATION bin)
 install(DIRECTORY data/icons data/applications DESTINATION share )

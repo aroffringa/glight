@@ -6,6 +6,7 @@
 #include <iostream>
 #include <limits>
 #include <string>
+#include <sstream>
 #include <string_view>
 
 namespace glight::json {
@@ -151,6 +152,7 @@ class JsonWriter {
 
   template <typename T>
   void NumberGeneric(T number) {
+    std::cout << number << '\n';
     Next();
     Out() << number;
     state_ = State::AfterItem;

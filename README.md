@@ -21,7 +21,7 @@ Glight is specifically aimed at shows or events in which the lighting is control
 ## Installation
 The source of Glight can be downloaded from Github, currently from https://github.com/aroffringa/glight/. Glight has a few dependencies. Fortunately, these are all available as precompiled packages in Debian, Ubuntu and most other distributions. Apart from system tools such as cmake, these are the important dependencies:
 
-- [Gtkmm](https://www.gtkmm.org/), the C++ interface to GTK+. `libgtkmm-3.0-dev` on Debian and Ubuntu.
+- [Gtkmm](https://www.gtkmm.org/), the C++ interface to GTK+. `libgtkmm-4.0-dev` on Debian and Ubuntu.
 - [Aubio](https://aubio.org/). `libaubio-dev` on Debian and Ubuntu.
 - [Flac++](https://xiph.org/flac/). `libflac++-dev` on Debian and Ubuntu.
 - [Alsa library](https://www.alsa-project.org/). `libasound2-dev` on Debian and Ubuntu.
