@@ -70,11 +70,10 @@ class ColorSequenceWidget : public Gtk::Box {
     if (min_count_ > maxCount && maxCount != 0) SetMinCount(maxCount);
     max_count_ = maxCount;
     if (max_count_ != 0) {
-      if (_widgets.size() > max_count_) {
-        _widgets.resize(max_count_);
+      while (_widgets.size() > max_count_ && _widgets.size() > min_count_) {
+        OnDecreaseColors();
       }
     }
-    updateSensitivities();
   }
 
   void SetAllowVariables(bool allow_variables) {
@@ -118,12 +117,7 @@ class ColorSequenceWidget : public Gtk::Box {
 
   void LoadDefault();
 
-  void onDecreaseColors() {
-    if (_widgets.size() > min_count_) {
-      _widgets.pop_back();
-      updateSensitivities();
-    }
-  }
+  void OnDecreaseColors();
   void OnIncreaseColors();
 
   void updateSensitivities() {

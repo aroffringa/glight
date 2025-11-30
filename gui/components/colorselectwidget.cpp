@@ -26,9 +26,8 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
     }
   });
   append(static_button_);
-  static_button_.show();
 
-  variable_button_.set_group(variable_button_);
+  variable_button_.set_group(static_button_);
   variable_button_.signal_toggled().connect([&]() {
     if (color_button_.get_parent()) {
       remove(color_button_);
@@ -40,7 +39,6 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
     }
   });
   append(variable_button_);
-  variable_button_.show();
 
   set_button_.signal_clicked().connect([&]() {
     if (static_button_.get_active())
@@ -52,7 +50,6 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
   color_button_.set_size_request(35, 35);
   append(color_button_);
   color_button_.SignalClicked().connect([&]() { OpenColorSelection(); });
-  color_button_.show();
 
   SetAllowVariables(allow_variable);
 }
