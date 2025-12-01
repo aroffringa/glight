@@ -15,6 +15,7 @@ void RunCli(const std::string filename) {
   management.Run();
   std::cout << "Press enter to exit.\n";
   std::cin.get();
+  management.BlackOut(false, 0.0f);
 }
 
 } // namespace glight
