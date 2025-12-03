@@ -103,11 +103,14 @@ BOOST_AUTO_TEST_CASE(number) {
   writer.Number(5);
   writer.Name("day");
   writer.Number(8.3);
+  writer.Name("thousand");
+  writer.Number(1000.0);
   writer.EndObject();
   BOOST_CHECK_EQUAL(s.str(), R"("date": {
   "year": 1982,
   "month": 5,
-  "day": 8.3
+  "day": 8.3,
+  "thousand": 1000
 })");
 }
 

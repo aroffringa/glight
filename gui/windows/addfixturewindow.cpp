@@ -33,6 +33,7 @@ AddFixtureWindow::AddFixtureWindow() {
   grid_.set_column_spacing(2);
 
   stock_or_project_box_.append(stock_button_);
+  stock_button_.set_active(true);
   stock_button_.set_hexpand(true);
   stock_button_.signal_toggled().connect([&]() { onStockProjectToggled(); });
 

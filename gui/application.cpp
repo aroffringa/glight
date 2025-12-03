@@ -8,6 +8,9 @@
 
 namespace glight::gui {
 
+Application::Application()
+    : Gtk::Application("org.glight", Gio::Application::Flags::HANDLES_OPEN) {}
+
 void Application::Run(int argc, char *argv[]) {
   MainWindow window;
   if (argc > 1) {

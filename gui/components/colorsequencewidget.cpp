@@ -221,7 +221,7 @@ void ColorSequenceWidget::SetSelection(
   if (max_count_ < values.size()) max_count_ = 0;
   if (values.size() < min_count_) min_count_ = values.size();
   repeat_combo_.set_active(0);
-  for(std::unique_ptr<ColorSelectWidget>& widget : _widgets)
+  for (std::unique_ptr<ColorSelectWidget> &widget : _widgets)
     _box.remove(*widget);
   _widgets.clear();
   for (size_t i = 0; i != values.size(); ++i) {

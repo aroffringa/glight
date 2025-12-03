@@ -109,8 +109,7 @@ void EffectPropertiesWindow::onAddConnectionClicked() {
       InputSelectDialog& dialog = static_cast<InputSelectDialog&>(*dialog_);
       onInputsSelected({dialog.SelectedSourceValue()});
       const bool stay_open = dialog.StayOpenRequested();
-      if (!stay_open)
-        dialog_.reset();
+      if (!stay_open) dialog_.reset();
     } else {
       dialog_.reset();
     }
