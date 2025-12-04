@@ -101,7 +101,7 @@ class FixtureListWindow : public ChildWindow {
   Gtk::Button up_button_;
   Gtk::Button down_button_;
   Gtk::Button reassign_button_{"Reassign"};
-  Gtk::Dialog dialog_;
+  std::unique_ptr<Gtk::Dialog> dialog_;
   Gtk::Entry dialog_entry_;
 };
 

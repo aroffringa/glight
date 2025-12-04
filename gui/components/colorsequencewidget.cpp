@@ -84,8 +84,8 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
 
   _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
   _box.append(*_widgets.back());
+  _widgets.back()->set_hexpand(true);
   _widgets.back()->SignalColorChanged().connect([&]() { OnColorChange(0); });
-  _widgets.back()->show();
 
   _scrolledWindow.set_expand(true);
   _scrolledWindow.set_child(_box);

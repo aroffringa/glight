@@ -99,7 +99,17 @@ std::unique_ptr<Node> ParseObject(std::istream& stream) {
           throw std::runtime_error("Extra trailing comma in object");
       }
     } else {
-      throw std::runtime_error("Expecting name or '}' in object");
+      std::string str(0, t);
+      if (t == 0) str = "null";
+      std::string follows;
+      std::string line;
+      std::getline(stream, follows);
+      std::getline(stream, line);
+      follows += "\n" + line;
+      std::getline(stream, line);
+      follows += "\n" + line;
+      throw std::runtime_error("Expecting name or '}' in object, got '" + str +
+                               "', before:\n" + follows);
     }
   }
   return result;

@@ -177,10 +177,10 @@ void FixtureListWindow::onSetChannelButtonClicked() {
       GetSelection();
   if (selection.size() == 1) {
     const system::ObservingPtr<theatre::Fixture> &fixture = selection[0];
-    dialog_ = Gtk::MessageDialog(*this, "Set DMX channel", false,
-                                 Gtk::MessageType::QUESTION,
-                                 Gtk::ButtonsType::OK_CANCEL);
-    Gtk::MessageDialog &dialog = static_cast<Gtk::MessageDialog &>(dialog_);
+    dialog_ = std::make_unique<Gtk::MessageDialog>(
+        *this, "Set DMX channel", false, Gtk::MessageType::QUESTION,
+        Gtk::ButtonsType::OK_CANCEL);
+    Gtk::MessageDialog &dialog = static_cast<Gtk::MessageDialog &>(*dialog_);
     dialog_entry_ = Gtk::Entry();
     dialog_entry_.set_text(std::to_string(
         fixture->Functions().front()->MainChannel().Channel() + 1));
@@ -206,6 +206,7 @@ void FixtureListWindow::onSetChannelButtonClicked() {
           }
         }
       }
+      dialog_.reset();
     });
     dialog.show();
   }
