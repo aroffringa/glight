@@ -120,7 +120,7 @@ class Chase final : public Controllable {
   void mixDelayChase(const Timing &timing) {
     double timeInMs = timing.TimeInMS() + _phaseOffset;
     double totalDuration = _trigger.DelayInMs() + _transition.LengthInMs();
-    double phase = fmod(timeInMs, totalDuration);
+    double phase = std::fmod(timeInMs, totalDuration);
     unsigned step = (unsigned)fmod(timeInMs / totalDuration, _sequence.Size());
     if (phase < _trigger.DelayInMs()) {
       // We are not in a transition, just mix the corresponding controllable
@@ -128,14 +128,14 @@ class Chase final : public Controllable {
           _sequence.List()[step].InputIndex(), _inputValue);
     } else {
       // We are in a transition
-      double transitionTime = phase - _trigger.DelayInMs();
+      const double transition_time = phase - _trigger.DelayInMs();
       Controllable &first = *_sequence.List()[step].GetControllable();
       Controllable &second =
           *_sequence.List()[(step + 1) % _sequence.Size()].GetControllable();
       _transition.Mix(
           first, _sequence.List()[step].InputIndex(), second,
           _sequence.List()[(step + 1) % _sequence.Size()].InputIndex(),
-          transitionTime, _inputValue, timing);
+          transition_time, _inputValue, timing);
     }
   }
 

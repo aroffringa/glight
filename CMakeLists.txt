@@ -215,6 +215,7 @@ if(Boost_FOUND)
     tests/system/tjsonwriter.cpp
     tests/system/tmath.cpp
     tests/system/tsettings.cpp
+    tests/system/ttimepattern.cpp
     tests/system/ttrackableptr.cpp
     tests/system/topenfixturereader.cpp
     tests/system/toptionalnumber.cpp

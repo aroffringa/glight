@@ -1,6 +1,7 @@
 #include "reader.h"
 
 #include "jsonreader.h"
+#include "timepattern.h"
 
 #include "theatre/chase.h"
 #include "theatre/controllable.h"
@@ -404,6 +405,9 @@ void ParseEffect(const Object &node, Management &management) {
         break;
       case PropertyType::Integer:
         ps->SetInteger(p, ToNum(p_node["value"]).AsInt());
+        break;
+      case PropertyType::TimePattern:
+        ps->SetTimePattern(p, system::TimePattern(ToStr(p_node["value"])));
         break;
       case PropertyType::Transition:
         ps->SetTransition(p, ParseTransition(ToObj(p_node["value"])));

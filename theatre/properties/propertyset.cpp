@@ -16,6 +16,7 @@
 #include "pulseeffectps.h"
 #include "randomselecteffectps.h"
 #include "thresholdeffectps.h"
+#include "timereffectps.h"
 #include "twinkleeffectps.h"
 
 namespace glight::theatre {
@@ -55,6 +56,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
     FXCASE(RandomSelect);
     EMPTYPSCASE(RgbMaster);
     FXCASE(Threshold);
+    FXCASE(Timer);
     FXCASE(Twinkle);
     EMPTYPSCASE(Variable);
   }
@@ -84,6 +86,9 @@ void PropertySet::AssignProperty(const Property &to, const Property &from,
       break;
     case PropertyType::Integer:
       SetInteger(to, fromSet.GetInteger(from));
+      break;
+    case PropertyType::TimePattern:
+      SetTimePattern(to, fromSet.GetTimePattern(from));
       break;
     case PropertyType::Transition:
       SetTransition(to, fromSet.GetTransition(from));
