@@ -3,6 +3,8 @@
 #include "durationinput.h"
 #include "transitiontypebox.h"
 
+#include "system/timepattern.h"
+
 namespace glight::gui {
 
 using theatre::Property;
@@ -111,6 +113,19 @@ void PropertiesBox::fillProperties() {
         _grid.attach(*entry, 1, rowIndex, 1, 1);
         row._widgets.emplace_back(std::move(entry));
       } break;
+      case PropertyType::TimePattern: {
+        const std::string entry_text =
+            ToString(_propertySet->GetTimePattern(property));
+
+        row._widgets.emplace_back(
+            std::make_unique<Gtk::Label>(property.Description()));
+        _grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
+
+        std::unique_ptr<Gtk::Entry> entry = std::make_unique<Gtk::Entry>();
+        entry->set_text(entry_text);
+        _grid.attach(*entry, 1, rowIndex, 1, 1);
+        row._widgets.emplace_back(std::move(entry));
+      } break;
       case PropertyType::Transition: {
         const theatre::Transition transition =
             _propertySet->GetTransition(property);
@@ -162,9 +177,15 @@ void PropertiesBox::onApplyClicked() {
         _propertySet->SetDuration(property, value);
       } break;
       case PropertyType::Integer: {
-        std::string entryText =
+        const std::string entry_text =
             static_cast<Gtk::Entry *>(rowIter->_widgets[1].get())->get_text();
-        _propertySet->SetInteger(property, std::atoi(entryText.c_str()));
+        _propertySet->SetInteger(property, std::atoi(entry_text.c_str()));
+      } break;
+      case PropertyType::TimePattern: {
+        const std::string entry_text =
+            static_cast<Gtk::Entry *>(rowIter->_widgets[1].get())->get_text();
+        _propertySet->SetTimePattern(property,
+                                     system::TimePattern(entry_text.c_str()));
       } break;
       case PropertyType::Transition: {
         const DurationInput *di =
@@ -173,7 +194,7 @@ void PropertiesBox::onApplyClicked() {
             static_cast<TransitionTypeBox *>(rowIter->_widgets[2].get());
         _propertySet->SetTransition(
             property, theatre::Transition(di->Value(), tb->Get()));
-      }
+      } break;
     }
     ++rowIter;
   }

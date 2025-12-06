@@ -27,6 +27,7 @@ enum class EffectType {
   RandomSelect,
   RgbMaster,
   Threshold,
+  Timer,
   Twinkle,
   Variable
 };
@@ -70,6 +71,8 @@ inline std::string EffectTypeToName(EffectType type) {
       return "RGB master";
     case ET::Threshold:
       return "Threshold";
+    case ET::Timer:
+      return "Timer";
     case ET::Twinkle:
       return "Twinkle";
     case ET::Variable:
@@ -116,6 +119,8 @@ inline EffectType NameToEffectType(const std::string &name) {
     return ET::RgbMaster;
   else if (name == "Threshold")
     return ET::Threshold;
+  else if (name == "Timer")
+    return ET::Timer;
   else if (name == "Twinkle")
     return ET::Twinkle;
   else if (name == "Variable")
@@ -144,6 +149,7 @@ inline std::vector<EffectType> GetEffectTypes() {
                          ET::RandomSelect,
                          ET::RgbMaster,
                          ET::Threshold,
+                         ET::Timer,
                          ET::Twinkle,
                          ET::Variable};
 }

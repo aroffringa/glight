@@ -1,6 +1,7 @@
 #include <fstream>
 #include <queue>
 
+#include "timepattern.h"
 #include "writer.h"
 
 #include "theatre/chase.h"
@@ -417,6 +418,9 @@ void writeEffect(WriteState &state, const Effect &effect) {
           break;
         case PropertyType::Integer:
           state.writer.Number("value", ps->GetInteger(p));
+          break;
+        case PropertyType::TimePattern:
+          state.writer.String("value", ToString(ps->GetTimePattern(p)));
           break;
         case PropertyType::Transition:
           writeTransition(state, ps->GetTransition(p), "value");

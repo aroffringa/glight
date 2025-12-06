@@ -18,6 +18,7 @@
 #include "effects/randomselecteffect.h"
 #include "effects/rgbmastereffect.h"
 #include "effects/thresholdeffect.h"
+#include "effects/timereffect.h"
 #include "effects/twinkleeffect.h"
 #include "effects/variableeffect.h"
 
@@ -65,6 +66,8 @@ std::unique_ptr<Effect> Effect::Make(EffectType type) {
       return up(new RgbMasterEffect());
     case ET::Threshold:
       return up(new ThresholdEffect());
+    case ET::Timer:
+      return up(new TimerEffect());
     case ET::Twinkle:
       return up(new TwinkleEffect());
     case ET::Variable:

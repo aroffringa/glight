@@ -11,6 +11,10 @@
 #include <string>
 #include <vector>
 
+namespace glight::system {
+class TimePattern;
+}
+
 namespace glight::theatre {
 
 class PropertySet {
@@ -84,6 +88,15 @@ class PropertySet {
 
   Transition GetTransition(const Property &property) const {
     return getTransition(*_object, property.set_index_);
+  }
+
+  void SetTimePattern(const Property &property,
+                      const system::TimePattern &value) {
+    setTimePattern(*_object, property.set_index_, value);
+  }
+
+  const system::TimePattern &GetTimePattern(const Property &property) const {
+    return getTimePattern(*_object, property.set_index_);
   }
 
   FolderObject &Object() const { return *_object; }
@@ -164,6 +177,16 @@ class PropertySet {
                                    size_t index) const {
     getterNotImplemented();
     return Transition();
+  }
+
+  virtual void setTimePattern(FolderObject &object, size_t index,
+                              const system::TimePattern &value) const {
+    setterNotImplemented();
+  }
+  virtual const system::TimePattern &getTimePattern(const FolderObject &object,
+                                                    size_t index) const {
+    getterNotImplemented();
+    throw;
   }
 
   size_t addProperty(const Property &property) {
