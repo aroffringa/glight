@@ -33,7 +33,9 @@ using system::ObservingPtr;
 using system::TrackablePtr;
 
 Management::Management(const system::Settings &settings)
-    : settings_(settings), _theatre(std::make_unique<Theatre>()) {
+    : settings_(settings),
+      _randomGenerator(std::random_device()()),
+      _theatre(std::make_unique<Theatre>()) {
   _rootFolder = _folders.emplace_back(MakeTrackable<Folder>()).Get();
   _rootFolder->SetName("Root");
 }

@@ -24,7 +24,9 @@ class CreateChaseDialog : public Gtk::Dialog {
  public:
   CreateChaseDialog();
 
-  theatre::Chase &CreatedChase() { return *_newChase; }
+  sigc::signal<void(theatre::Chase &)> SignalNewChase() {
+    return signal_new_chase_;
+  }
 
  private:
   void initListPart();
@@ -65,7 +67,7 @@ class CreateChaseDialog : public Gtk::Dialog {
   Gtk::Button *_makeChaseButton;
 
   RecursionLock _delayUpdates;
-  system::ObservingPtr<theatre::Chase> _newChase;
+  sigc::signal<void(theatre::Chase &)> signal_new_chase_;
 };
 
 }  // namespace glight::gui

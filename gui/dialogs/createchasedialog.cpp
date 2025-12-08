@@ -19,8 +19,7 @@ CreateChaseDialog::CreateChaseDialog()
       _list(),
       _newChaseFrame("Chase objects"),
       _addObjectToChaseButton(),
-      _clearChaseButton("Clear"),
-      _newChase(nullptr) {
+      _clearChaseButton("Clear") {
   set_size_request(600, 400);
 
   initListPart();
@@ -34,7 +33,8 @@ CreateChaseDialog::CreateChaseDialog()
   add_button("Cancel", Gtk::ResponseType::CANCEL);
   _makeChaseButton = add_button("Make chase", Gtk::ResponseType::OK);
   _makeChaseButton->signal_clicked().connect(
-      sigc::mem_fun(*this, &CreateChaseDialog::onCreateChaseButtonClicked));
+      sigc::mem_fun(*this, &CreateChaseDialog::onCreateChaseButtonClicked),
+      false);
   _makeChaseButton->set_sensitive(false);
 }
 
@@ -104,12 +104,12 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
     theatre::Management &management = Instance::Management();
     std::unique_lock<std::mutex> lock(management.Mutex());
 
-    _newChase = management.AddChasePtr();
-    management.AddSourceValue(*_newChase, 0);
-    _newChase->SetName(folder.GetAvailableName("Chase"));
-    folder.Add(_newChase);
+    system::ObservingPtr<theatre::Chase> new_chase = management.AddChasePtr();
+    management.AddSourceValue(*new_chase, 0);
+    new_chase->SetName(folder.GetAvailableName("Chase"));
+    folder.Add(new_chase);
 
-    theatre::Sequence &sequence = _newChase->GetSequence();
+    theatre::Sequence &sequence = new_chase->GetSequence();
     Gtk::TreeModel::Children children = _newChaseListModel->children();
     for (const Gtk::TreeRow &row : children) {
       theatre::Controllable *object = row[_newChaseListColumns._controllable];
@@ -121,6 +121,8 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
     Instance::Events().EmitUpdate();
     _newChaseListModel->clear();
     _makeChaseButton->set_sensitive(false);
+
+    signal_new_chase_(*new_chase);
   }
 }
 

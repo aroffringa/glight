@@ -125,6 +125,11 @@ inline constexpr ControlValue operator+(const ControlValue& lhs,
   return ControlValue(lhs.UInt() + rhs.UInt());
 }
 
+inline constexpr ControlValue operator-(const ControlValue& lhs,
+                                        const ControlValue& rhs) noexcept {
+  return ControlValue(lhs.UInt() - rhs.UInt());
+}
+
 inline constexpr ControlValue operator*(const ControlValue& lhs,
                                         const ControlValue& rhs) noexcept {
   return ControlValue(ControlValue::MultiplyValues(lhs.UInt(), rhs.UInt()));

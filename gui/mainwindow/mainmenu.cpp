@@ -65,8 +65,8 @@ MainMenu::MainMenu(Gio::ActionMap& actions) {
   Add(preset_menu, "From current", "add_current_preset", AddCurrentPreset);
   add_section->append_submenu("Add preset", preset_menu);
 
-  Add(add_section, "Add chase", "design_lock", AddChase);
-  Add(add_section, "Add sequence", "design_lock", AddTimeSequence);
+  Add(add_section, "Add chase", "add_chase", AddChase);
+  Add(add_section, "Add sequence", "add_sequence", AddTimeSequence);
 
   auto effect_menu = Gio::Menu::create();
   std::vector<theatre::EffectType> effect_types = theatre::GetEffectTypes();
@@ -77,7 +77,7 @@ MainMenu::MainMenu(Gio::ActionMap& actions) {
   }
   add_section->append_submenu("Add effect", effect_menu);
   Add(add_section, "Add folder", "add_folder", AddFolder);
-  delete_object_ = Add(add_section, "Delete", "design_lock", DeleteObject);
+  delete_object_ = Add(add_section, "Delete", "delete_object", DeleteObject);
   Add(add_section, "Design wizard...", "design_wizard", DesignWizard);
   design_menu->append_section(add_section);
 

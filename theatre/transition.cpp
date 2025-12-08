@@ -215,8 +215,9 @@ void Transition::Mix(Controllable &first, size_t first_input,
         second.MixInput(second_input, value);
       break;
     case TransitionType::Fade: {
-      first.MixInput(first_input, value * (1.0 - ratio));
-      second.MixInput(second_input, value * ratio);
+      const ControlValue second_value = value * ratio;
+      first.MixInput(first_input, value - second_value);
+      second.MixInput(second_input, second_value);
     } break;
     case TransitionType::FadeThroughBlack: {
       const unsigned scaled_ratio = (unsigned)(ratio * (65536 * 2.0));
