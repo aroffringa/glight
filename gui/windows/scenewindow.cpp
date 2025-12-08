@@ -105,6 +105,7 @@ SceneWindow::SceneWindow(MainWindow &parentWindow)
 
   _audioWidget.SignalClicked().connect(
       sigc::mem_fun(*this, &SceneWindow::onAudioWidgetClicked));
+  _audioWidget.set_expand(true);
   _vBox.append(_audioWidget);
 
   _audioBox.append(_audioLabel);
@@ -154,6 +155,14 @@ SceneWindow::SceneWindow(MainWindow &parentWindow)
   _setFadeSpeedButton.set_sensitive(false);
   _sceneItemUButtonBox.append(_setFadeSpeedButton);
 
+  copy_button_.signal_clicked().connect([&]() { CopySelection(); });
+  copy_button_.set_sensitive(false);
+  _sceneItemUButtonBox.append(copy_button_);
+
+  paste_button_.signal_clicked().connect([&]() { PasteSelection(); });
+  paste_button_.set_sensitive(false);
+  _sceneItemUButtonBox.append(paste_button_);
+
   _sceneItemBox.append(_sceneItemUButtonBox);
 
   _startScale.set_inverted(true);
@@ -161,6 +170,7 @@ SceneWindow::SceneWindow(MainWindow &parentWindow)
   _startScale.set_sensitive(false);
   _startScale.signal_value_changed().connect(
       sigc::mem_fun(*this, &SceneWindow::onScalesChanged));
+  _startScale.set_expand(true);
   _scalesBox.append(_startScale);
 
   _endScale.set_inverted(true);
@@ -168,6 +178,7 @@ SceneWindow::SceneWindow(MainWindow &parentWindow)
   _endScale.set_sensitive(false);
   _endScale.signal_value_changed().connect(
       sigc::mem_fun(*this, &SceneWindow::onScalesChanged));
+  _endScale.set_expand(true);
   _scalesBox.append(_endScale);
 
   _sceneItemBox.append(_scalesBox);
@@ -203,6 +214,8 @@ void SceneWindow::Update() {
   fillSceneItemList();
   updateAudio();
   UpdateAudioWidgetKeys();
+  copy_buffer_.clear();
+  paste_button_.set_sensitive(false);
 }
 
 void SceneWindow::createSceneItemsList() {
@@ -223,12 +236,11 @@ void SceneWindow::createSceneItemsList() {
       sigc::mem_fun(*this, &SceneWindow::onSelectedSceneItemChanged));
   _sceneItemsListView.set_rubber_banding(true);
   _listScrolledWindow.set_child(_sceneItemsListView);
-  _sceneItemsListView.show();
 
   _listScrolledWindow.set_policy(Gtk::PolicyType::NEVER,
                                  Gtk::PolicyType::AUTOMATIC);
+  _listScrolledWindow.set_expand(true);
   _hBox.append(_listScrolledWindow);
-  _listScrolledWindow.show();
 }
 
 void SceneWindow::createControllablesList() {
@@ -455,6 +467,7 @@ void SceneWindow::onSelectedSceneItemChanged() {
         _setFadeSpeedButton.set_sensitive(false);
         _startScale.set_sensitive(false);
         _endScale.set_sensitive(false);
+        copy_button_.set_sensitive(false);
         break;
       case 1: {
         std::unique_lock<std::mutex> lock(_management.Mutex());
@@ -482,6 +495,7 @@ void SceneWindow::onSelectedSceneItemChanged() {
         _setFadeSpeedButton.set_sensitive(is_blackout);
         _startScale.set_sensitive(true);
         _endScale.set_sensitive(true);
+        copy_button_.set_sensitive(true);
       } break;
       default:
         _createControlItemButton.set_sensitive(true);
@@ -492,6 +506,7 @@ void SceneWindow::onSelectedSceneItemChanged() {
         _setFadeSpeedButton.set_sensitive(false);
         _startScale.set_sensitive(true);
         _endScale.set_sensitive(true);
+        copy_button_.set_sensitive(true);
         break;
     }
   }
@@ -650,10 +665,16 @@ void SceneWindow::onAudioWidgetClicked(double timeInMS) {
     std::vector<Gtk::TreeModel::Path> pathHandle =
         selection->get_selected_rows();
     std::unique_lock<std::mutex> lock(_management.Mutex());
-    for (const Gtk::TreeModel::Path &path : pathHandle) {
-      theatre::SceneItem *item =
-          (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
-      _selectedScene->ChangeSceneItemStartTime(item, timeInMS);
+    if (!pathHandle.empty()) {
+      theatre::SceneItem *first_item = (*_sceneItemsListModel->get_iter(
+          pathHandle[0]))[_sceneItemsListColumns._item];
+      const double shift = timeInMS - first_item->OffsetInMS();
+      for (const Gtk::TreeModel::Path &path : pathHandle) {
+        theatre::SceneItem *item = (*_sceneItemsListModel->get_iter(
+            path))[_sceneItemsListColumns._item];
+        const double new_time = item->OffsetInMS() + shift;
+        _selectedScene->ChangeSceneItemStartTime(item, new_time);
+      }
     }
     lock.unlock();
     _isUpdating = false;
@@ -840,6 +861,52 @@ void SceneWindow::SetFadeSpeed() {
       }
     });
     dialog_->show();
+  }
+}
+
+void SceneWindow::CopySelection() {
+  copy_buffer_.clear();
+  Glib::RefPtr<Gtk::TreeSelection> selection =
+      _sceneItemsListView.get_selection();
+  std::vector<Gtk::TreeModel::Path> pathHandle = selection->get_selected_rows();
+  for (const Gtk::TreeModel::Path &path : pathHandle) {
+    theatre::SceneItem *item =
+        (*_sceneItemsListModel->get_iter(path))[_sceneItemsListColumns._item];
+    copy_buffer_.push_back(item);
+  }
+  if (!copy_buffer_.empty()) paste_button_.set_sensitive(true);
+}
+
+void SceneWindow::PasteSelection() {
+  if (!copy_buffer_.empty()) {
+    _isUpdating = true;
+
+    std::unique_lock<std::mutex> lock(_management.Mutex());
+    const double shift =
+        _audioWidget.Position() - copy_buffer_.front()->OffsetInMS();
+    for (theatre::SceneItem *item : copy_buffer_) {
+      if (theatre::ControlSceneItem *ct_item =
+              dynamic_cast<theatre::ControlSceneItem *>(item);
+          ct_item) {
+        theatre::ControlSceneItem *new_item =
+            _selectedScene->AddControlSceneItem(item->OffsetInMS() + shift,
+                                                ct_item->GetControllable(),
+                                                ct_item->GetInput());
+        if (_management.HasCycle())
+          _selectedScene->Remove(new_item);
+        else {
+          new_item->SetDurationInMS(ct_item->DurationInMS());
+          new_item->StartValue() = ct_item->StartValue();
+          new_item->EndValue() = ct_item->EndValue();
+        }
+      }
+    }
+    lock.unlock();
+
+    fillSceneItemList();
+    UpdateAudioWidgetKeys();
+    _isUpdating = false;
+    onSelectedSceneItemChanged();
   }
 }
 

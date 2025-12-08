@@ -101,7 +101,12 @@ MainWindow::~MainWindow() {
   _visualizationWidget.reset();
   child_windows_.Clear();
 
-  _faderWindows.clear();
+  while (!_faderWindows.empty()) {
+    // First move the window out of the list so that the hide signal won't
+    // cause a double delete of the window.
+    std::unique_ptr<FaderWindow> window = std::move(_faderWindows.back());
+    _faderWindows.erase(_faderWindows.end() - 1);
+  }
 
   _management.reset();
 
@@ -189,8 +194,7 @@ void MainWindow::addFaderWindow(FaderSetState *stateOrNull) {
   else
     newWindow->LoadState(stateOrNull);
   newWindow->add_controller(GetKeyController());
-  newWindow->signal_hide().connect(sigc::bind(
-      sigc::mem_fun(*this, &MainWindow::onFaderWindowHidden), newWindow));
+  newWindow->signal_hide().connect([&]() { onFaderWindowHidden(newWindow); });
   newWindow->show();
   _state.EmitFaderSetChangeSignal();
 }

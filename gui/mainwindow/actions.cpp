@@ -127,16 +127,16 @@ void NewChase(std::unique_ptr<Gtk::Dialog> &dialog, ObjectBrowser &browser,
               ObjectWindowList<PropertiesWindow> &property_windows,
               Gtk::Window &parent) {
   dialog = std::make_unique<CreateChaseDialog>();
-  dialog->signal_response().connect(
-      [d = dialog.get(), &browser, &property_windows, &parent](int response) {
-        if (response == Gtk::ResponseType::OK) {
-          theatre::Chase &new_chase =
-              static_cast<CreateChaseDialog *>(d)->CreatedChase();
-          browser.SelectObject(new_chase);
-          AssignFader(new_chase);
-          OpenPropertiesWindow(property_windows, new_chase, parent);
-        }
-      });
+  CreateChaseDialog &chase_dialog = static_cast<CreateChaseDialog &>(*dialog);
+  chase_dialog.set_transient_for(parent);
+  chase_dialog.SignalNewChase().connect([&dialog, &browser, &property_windows,
+                                         &parent](theatre::Chase &new_chase) {
+    browser.SelectObject(new_chase);
+    AssignFader(new_chase);
+    dialog.reset();
+    OpenPropertiesWindow(property_windows, new_chase, parent);
+  });
+  dialog->show();
 }
 
 void NewTimeSequence(ObjectBrowser &browser,

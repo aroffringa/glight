@@ -117,6 +117,8 @@ class SceneWindow : public windows::ChildWindow {
   Gtk::Button _blackoutButton;
   Gtk::Button _restoreButton;
   Gtk::Button _setFadeSpeedButton;
+  Gtk::Button copy_button_{"Copy"};
+  Gtk::Button paste_button_{"Paste"};
   Gtk::Scale _startScale, _endScale;
   std::unique_ptr<Gtk::Dialog> dialog_;
   Gtk::Entry dialog_entry_;
@@ -128,6 +130,8 @@ class SceneWindow : public windows::ChildWindow {
 
   theatre::Scene *_selectedScene;
   theatre::SourceValue *_sourceValue;
+  std::vector<theatre::SceneItem *> copy_buffer_;
+
   bool _isUpdating;
 
   void NewScene();
@@ -163,6 +167,9 @@ class SceneWindow : public windows::ChildWindow {
   void updateAudio();
   void UpdateAudioWidgetKeys();
   void SetFadeSpeed();
+
+  void CopySelection();
+  void PasteSelection();
 
   size_t selectedSceneItemCount() const {
     return _sceneItemsListView.get_selection()->count_selected_rows();
