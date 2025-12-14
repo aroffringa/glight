@@ -2,11 +2,13 @@
 
 #include <sigc++/signal.h>
 
+#include <gtkmm/applicationwindow.h>
 #include <gtkmm/gestureclick.h>
 #include <gtkmm/icontheme.h>
 
 #include "gui/eventtransmitter.h"
 #include "gui/instance.h"
+#include "gui/menufunctions.h"
 
 #include "theatre/chase.h"
 #include "theatre/effect.h"
@@ -233,22 +235,19 @@ void ObjectList::constructContextMenu() {
 
   FolderObject *obj = SelectedObject().Get();
   if (obj != &Instance::Management().RootFolder()) {
-    std::shared_ptr<Gio::SimpleActionGroup> actions =
-        Gio::SimpleActionGroup::create();
+    Gio::ActionMap &actions = Instance::MainWindow();
     // Move up & down
-    menu->append("Move up", "move_object_up");
-    actions->add_action("move_object_up",
-                        sigc::mem_fun(*this, &ObjectList::onMoveUpSelected));
+    AddMenuItem(actions, menu, "Move up", "move_object_up",
+                sigc::mem_fun(*this, &ObjectList::onMoveUpSelected));
 
-    menu->append("Move down", "move_object_down");
-    actions->add_action("move_object_down",
-                        sigc::mem_fun(*this, &ObjectList::onMoveDownSelected));
+    AddMenuItem(actions, menu, "Move down", "move_object_down",
+                sigc::mem_fun(*this, &ObjectList::onMoveDownSelected));
 
     // Move-to submenu
     std::shared_ptr<Gio::Menu> move_to_menu = Gio::Menu::create();
 
     int folder_counter = 0;
-    constructFolderMenu(*move_to_menu, *actions,
+    constructFolderMenu(move_to_menu, actions,
                         Instance::Management().RootFolder(), folder_counter);
     menu->append_submenu("Move to", move_to_menu);
   }
@@ -257,33 +256,34 @@ void ObjectList::constructContextMenu() {
   _contextMenu.set_parent(_listView);
 }
 
-void ObjectList::constructFolderMenu(Gio::Menu &menu,
-                                     Gio::SimpleActionGroup &actions,
-                                     Folder &folder, int &counter) {
-  if (folder.Children().empty()) {
+void ObjectList::constructFolderMenu(const std::shared_ptr<Gio::Menu> &menu,
+                                     Gio::ActionMap &actions, Folder &folder,
+                                     int &counter) {
+  std::shared_ptr<Gio::Menu> sub_menu;
+  for (const ObservingPtr<FolderObject> &object : folder.Children()) {
+    Folder *subFolder = dynamic_cast<Folder *>(object.Get());
+    if (subFolder) {
+      if (!sub_menu) {
+        sub_menu = Gio::Menu::create();
+        const std::string name = "moveto_" + std::to_string(counter);
+        ++counter;
+        AddMenuItem(actions, sub_menu, ".", name,
+                    [&]() { onMoveSelected(&folder); });
+      }
+      constructFolderMenu(sub_menu, actions, *subFolder, counter);
+    }
+  }
+
+  if (sub_menu) {
+    menu->append_submenu(folder.Name(), sub_menu);
+  } else {
+    // If the folder is empty, we create a single menu item
     const std::string name = "moveto_" + std::to_string(counter);
     ++counter;
-    menu.append(folder.Name(), name);
-    std::shared_ptr<Gio::SimpleAction> parent =
-        actions.add_action(name, [&]() { onMoveSelected(&folder); });
+    std::shared_ptr<Gio::SimpleAction> item = AddMenuItem(
+        actions, menu, folder.Name(), name, [&]() { onMoveSelected(&folder); });
 
-    if (&folder == SelectedObject()) parent->set_enabled(false);
-  } else {
-    std::shared_ptr<Gio::Menu> sub_menu;
-    for (const ObservingPtr<FolderObject> &object : folder.Children()) {
-      Folder *subFolder = dynamic_cast<Folder *>(object.Get());
-      if (subFolder) {
-        if (!sub_menu) {
-          sub_menu = Gio::Menu::create();
-          const std::string name = "moveto_" + std::to_string(counter);
-          ++counter;
-          menu.append(".", name);
-          actions.add_action(name, [&]() { onMoveSelected(&folder); });
-        }
-        constructFolderMenu(*sub_menu, actions, *subFolder, counter);
-      }
-    }
-    menu.append_submenu(folder.Name(), sub_menu);
+    if (&folder == SelectedObject()) item->set_enabled(false);
   }
 }
 
@@ -304,8 +304,17 @@ void ObjectList::TreeViewWithMenu::OnButtonPress(double x, double y) {
 }
 
 void ObjectList::onMoveSelected(Folder *destination) {
-  Folder::Move(SelectedObject(), *destination);
-  Instance::Events().EmitUpdate();
+  try {
+    Folder::Move(SelectedObject(), *destination);
+    Instance::Events().EmitUpdate();
+  } catch (std::exception &e) {
+    dialog_ = std::make_unique<Gtk::MessageDialog>(
+        Instance::MainWindow(),
+        "Could not move item to " + destination->Name() + ": " + e.what(),
+        false, Gtk::MessageType::ERROR, Gtk::ButtonsType::OK, true);
+    dialog_->signal_response().connect([this](int) { dialog_.reset(); });
+    dialog_->show();
+  }
 }
 
 void ObjectList::onMoveUpSelected() {

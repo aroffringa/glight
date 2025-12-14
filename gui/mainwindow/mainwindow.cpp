@@ -50,6 +50,7 @@ MainWindow::MainWindow() : main_menu_(*this) {
   Instance::Get().SetState(_state);
   Instance::Get().SetSelection(_fixtureSelection);
   Instance::Get().SetEvents(*this);
+  Instance::Get().SetMainWindow(*this);
   Instance::Settings() = system::LoadSettings();
   _management = std::make_unique<theatre::Management>(Instance::Settings());
   Instance::Get().SetManagement(*_management);

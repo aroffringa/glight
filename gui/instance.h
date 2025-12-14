@@ -3,6 +3,10 @@
 
 #include <memory>
 
+namespace Gtk {
+class ApplicationWindow;
+}
+
 namespace glight {
 namespace theatre {
 class Management;
@@ -51,6 +55,11 @@ class Instance {
 
   static system::Settings& Settings() { return *Get().settings_; }
 
+  static Gtk::ApplicationWindow& MainWindow() { return *Get().main_window_; }
+  void SetMainWindow(Gtk::ApplicationWindow& main_window) {
+    main_window_ = &main_window;
+  }
+
  private:
   // Because this class is used in many places, all members are pointers
   // so that extra includes can be avoided.
@@ -58,6 +67,7 @@ class Instance {
   EventTransmitter* events_;
   FixtureSelection* selection_;
   GUIState* state_;
+  Gtk::ApplicationWindow* main_window_;
   std::unique_ptr<system::Settings> settings_;
 };
 

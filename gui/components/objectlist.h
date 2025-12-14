@@ -9,6 +9,7 @@
 #include <gtkmm/iconpaintable.h>
 #include <gtkmm/image.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/popovermenu.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
@@ -114,8 +115,9 @@ class ObjectList : public Gtk::ScrolledWindow {
   bool selectObject(const theatre::FolderObject &object,
                     const Gtk::TreeModel::Children &children);
   void constructContextMenu();
-  void constructFolderMenu(Gio::Menu &menu, Gio::SimpleActionGroup &actions,
-                           theatre::Folder &folder, int &counter);
+  void constructFolderMenu(const std::shared_ptr<Gio::Menu> &menu,
+                           Gio::ActionMap &actions, theatre::Folder &folder,
+                           int &counter);
   void onMoveSelected(theatre::Folder *destination);
   void onMoveUpSelected();
   void onMoveDownSelected();
@@ -126,6 +128,7 @@ class ObjectList : public Gtk::ScrolledWindow {
 
   RecursionLock _avoidRecursion;
   Gtk::PopoverMenu _contextMenu;
+  std::unique_ptr<Gtk::MessageDialog> dialog_;
 };
 
 }  // namespace glight::gui
