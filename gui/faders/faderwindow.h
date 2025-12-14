@@ -24,14 +24,17 @@
 
 #include "../recursionlock.h"
 
+namespace glight::uistate {
+class FaderState;
+class FaderSetState;
+class UIState;
+}  // namespace glight::uistate
+
 namespace glight::gui {
 
 class ControlMenu;
 class ControlWidget;
 class EventTransmitter;
-class FaderState;
-class FaderSetState;
-class GUIState;
 
 class FaderWindow : public Gtk::Window {
  public:
@@ -43,7 +46,7 @@ class FaderWindow : public Gtk::Window {
   ~FaderWindow();
 
   void LoadNew();
-  void LoadState(FaderSetState *state);
+  void LoadState(uistate::FaderSetState *state);
 
   /**
    * Set all sliders to the source values
@@ -55,7 +58,7 @@ class FaderWindow : public Gtk::Window {
   bool IsAssigned(theatre::SourceValue *presetValue) const;
   size_t KeyRowIndex() const { return _keyRowIndex; }
 
-  FaderSetState *State() { return _state; }
+  uistate::FaderSetState *State() { return _state; }
 
   /// The fader menu is stored here so that only one menu is allocated at one
   /// time (instead of each fader allocating its own menu)
@@ -127,8 +130,8 @@ class FaderWindow : public Gtk::Window {
   void FlipCrossFader();
   void CrossFadeImmediately();
 
-  void addControl(FaderState &state, bool isUpper);
-  void addControlInLayout(FaderState &state) {
+  void addControl(uistate::FaderState &state, bool isUpper);
+  void addControlInLayout(uistate::FaderState &state) {
     addControl(state, true);
     if (GetLayout() == "dual") addControl(state, false);
   }
@@ -159,7 +162,7 @@ class FaderWindow : public Gtk::Window {
   std::vector<std::unique_ptr<ControlWidget>> _lowerControls;
   std::vector<Gtk::Box> _upperColumns;
   std::vector<Gtk::Box> _lowerColumns;
-  FaderSetState *_state = nullptr;
+  uistate::FaderSetState *_state = nullptr;
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;
   static const char _keyRowsUpper[3][10];

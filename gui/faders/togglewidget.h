@@ -15,8 +15,8 @@ namespace glight::gui {
 
 class ToggleWidget final : public ControlWidget {
  public:
-  ToggleWidget(FaderWindow &fader_window, FaderState &state, ControlMode mode,
-               char key);
+  ToggleWidget(FaderWindow &fader_window, uistate::FaderState &state,
+               ControlMode mode, char key);
 
   virtual void Toggle() override;
   virtual void FlashOn() override;

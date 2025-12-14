@@ -7,8 +7,8 @@
 
 #include "instance.h"
 
-#include "gui/state/faderstate.h"
-#include "gui/state/guistate.h"
+#include "uistate/faderstate.h"
+#include "uistate/uistate.h"
 
 #include "theatre/controllable.h"
 #include "theatre/management.h"
@@ -55,7 +55,7 @@ void OpenColorDialog(std::unique_ptr<Gtk::Dialog> &dialog, Gtk::Window &parent,
 void AssignFader(theatre::Controllable &controllable) {
   if (controllable.NInputs() == 1) {
     theatre::Management &management = Instance::Management();
-    glight::gui::FaderState *fader =
+    glight::uistate::FaderState *fader =
         Instance::State().GetFirstUnassignedFader();
     if (fader) {
       theatre::SourceValue *source_value =

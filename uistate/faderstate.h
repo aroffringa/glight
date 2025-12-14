@@ -13,7 +13,7 @@ class Management;
 class SourceValue;
 }  // namespace glight::theatre
 
-namespace glight::gui {
+namespace glight::uistate {
 
 enum class FaderControlType {
   Fader,
@@ -152,6 +152,6 @@ class FaderState {
   std::vector<sigc::connection> source_value_deleted_connections_;
 };
 
-}  // namespace glight::gui
+}  // namespace glight::uistate
 
 #endif

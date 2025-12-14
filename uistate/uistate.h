@@ -8,9 +8,9 @@
 
 #include "fadersetstate.h"
 
-namespace glight::gui {
+namespace glight::uistate {
 
-class GUIState {
+class UIState {
  public:
   std::vector<std::unique_ptr<FaderSetState>> &FaderSets() {
     return fader_sets_;
@@ -121,6 +121,6 @@ class GUIState {
   std::vector<std::unique_ptr<FaderSetState>> fader_sets_;
 };
 
-}  // namespace glight::gui
+}  // namespace glight::uistate
 
 #endif

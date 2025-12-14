@@ -12,13 +12,15 @@
 
 #include <gtkmm/popovermenu.h>
 
-namespace glight::gui {
-
+namespace glight::uistate {
 class FaderState;
+}
+
+namespace glight::gui {
 
 class ControlMenu : public Gtk::PopoverMenu {
  public:
-  ControlMenu(const FaderState& state);
+  ControlMenu(const uistate::FaderState& state);
 
   bool DisplayName() const { return GetState(display_name_); }
   bool DisplayFlashButton() const { return GetState(display_flash_button_); }

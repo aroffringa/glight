@@ -5,7 +5,7 @@
 #include "controlmenu.h"
 #include "faderwindow.h"
 
-#include "gui/state/faderstate.h"
+#include "uistate/faderstate.h"
 
 #include "gui/dialogs/inputselectdialog.h"
 #include "gui/dialogs/stringinputdialog.h"
@@ -23,8 +23,8 @@ using theatre::ControlValue;
 using theatre::SourceValue;
 
 ComboControlWidget::ComboControlWidget(FaderWindow &fader_window,
-                                       FaderState &state, ControlMode mode,
-                                       char key)
+                                       uistate::FaderState &state,
+                                       ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode) {
   set_orientation(Gtk::Orientation::VERTICAL);
   append(description_label_);

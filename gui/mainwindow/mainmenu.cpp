@@ -4,8 +4,9 @@
 #include <giomm/simpleactiongroup.h>
 #include <giomm/menu.h>
 
-#include "gui/state/fadersetstate.h"
 #include "gui/menufunctions.h"
+
+#include "uistate/fadersetstate.h"
 
 #include <iostream>  // DEBUG
 
@@ -123,7 +124,7 @@ MainMenu::MainMenu(Gio::ActionMap& actions) {
 }
 
 void MainMenu::SetFaderList(
-    const std::vector<std::unique_ptr<FaderSetState>>& faders) {
+    const std::vector<std::unique_ptr<uistate::FaderSetState>>& faders) {
   /*_miFaderWindows.clear();
 
   for (const std::unique_ptr<FaderSetState>& state : faders) {

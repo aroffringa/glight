@@ -26,7 +26,7 @@
 #include "theatre/scenes/keysceneitem.h"
 #include "theatre/scenes/scene.h"
 
-#include "gui/state/guistate.h"
+#include "uistate/uistate.h"
 
 namespace glight::system {
 
@@ -42,7 +42,7 @@ struct WriteState {
   std::set<const Controllable *> controllablesWritten;
   std::map<const Folder *, size_t> folderIds;
   Management &management;
-  gui::GUIState *guiState = nullptr;
+  uistate::UIState *uiState = nullptr;
 };
 
 void writeControllable(WriteState &state, const Controllable &controllable);
@@ -551,7 +551,7 @@ void writeControllable(WriteState &state, const Controllable &controllable) {
   state.controllablesWritten.insert(&controllable);
 }
 
-void writeFaderState(WriteState &state, const gui::FaderState &fader) {
+void writeFaderState(WriteState &state, const uistate::FaderState &fader) {
   state.writer.StartObject();
   state.writer.String("fader-type", ToString(fader.GetFaderType()));
   if (!IsFullColumnType(fader.GetFaderType()))
@@ -578,21 +578,22 @@ void writeFaderState(WriteState &state, const gui::FaderState &fader) {
   state.writer.EndObject();
 }
 
-void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
+void writeFaderSetState(WriteState &state,
+                        const uistate::FaderSetState &uiState) {
   state.writer.StartObject();
-  state.writer.String("name", guiState.name);
-  state.writer.Boolean("active", guiState.isActive);
-  state.writer.Boolean("solo", guiState.isSolo);
-  state.writer.String("mode", ToString(guiState.mode));
-  state.writer.Number("fade-in", guiState.fadeInSpeed);
-  state.writer.Number("fade-out", guiState.fadeOutSpeed);
-  state.writer.Number("width", guiState.width);
-  state.writer.Number("height", guiState.height);
+  state.writer.String("name", uiState.name);
+  state.writer.Boolean("active", uiState.isActive);
+  state.writer.Boolean("solo", uiState.isSolo);
+  state.writer.String("mode", ToString(uiState.mode));
+  state.writer.Number("fade-in", uiState.fadeInSpeed);
+  state.writer.Number("fade-out", uiState.fadeOutSpeed);
+  state.writer.Number("width", uiState.width);
+  state.writer.Number("height", uiState.height);
   // Removed in change to gtkmm 4
-  // state.writer.Number("position-x", guiState.position_x);
-  // state.writer.Number("position-y", guiState.position_y);
+  // state.writer.Number("position-x", uiState.position_x);
+  // state.writer.Number("position-y", uiState.position_y);
   state.writer.StartArray("faders");
-  for (const std::unique_ptr<gui::FaderState> &fader : guiState.faders) {
+  for (const std::unique_ptr<uistate::FaderState> &fader : uiState.faders) {
     writeFaderState(state, *fader);
   }
   state.writer.EndArray();  // faders
@@ -600,28 +601,28 @@ void writeFaderSetState(WriteState &state, const gui::FaderSetState &guiState) {
 }
 
 void writeGUIState(WriteState &state) {
-  if (state.guiState->LayoutLocked())
+  if (state.uiState->LayoutLocked())
     state.writer.Boolean("layout-locked", true);
-  if (!state.guiState->ShowFixtures())
+  if (!state.uiState->ShowFixtures())
     state.writer.Boolean("show-fixtures", false);
-  if (!state.guiState->ShowBeams()) state.writer.Boolean("show-beams", false);
-  if (!state.guiState->ShowProjections())
+  if (!state.uiState->ShowBeams()) state.writer.Boolean("show-beams", false);
+  if (!state.uiState->ShowProjections())
     state.writer.Boolean("show-projections", false);
-  if (!state.guiState->ShowCrosshairs())
+  if (!state.uiState->ShowCrosshairs())
     state.writer.Boolean("show-crosshairs", false);
-  if (!state.guiState->ShowStageBorders())
+  if (!state.uiState->ShowStageBorders())
     state.writer.Boolean("show-stage-borders", false);
   // window position not available since gtkmm 4
   // state.writer.Number("window-position-x",
-  // state.guiState->WindowPositionX());
+  // state.uiState->WindowPositionX());
   // state.writer.Number("window-position-y",
-  // state.guiState->WindowPositionY());
-  state.writer.Number("window-width", state.guiState->WindowWidth());
-  state.writer.Number("window-height", state.guiState->WindowHeight());
+  // state.uiState->WindowPositionY());
+  state.writer.Number("window-width", state.uiState->WindowWidth());
+  state.writer.Number("window-height", state.uiState->WindowHeight());
 
   state.writer.StartArray("states");
-  for (const std::unique_ptr<gui::FaderSetState> &fState :
-       state.guiState->FaderSets())
+  for (const std::unique_ptr<uistate::FaderSetState> &fState :
+       state.uiState->FaderSets())
     writeFaderSetState(state, *fState);
   state.writer.EndArray();  // states
 }
@@ -680,7 +681,7 @@ void writeGlightShow(WriteState &state) {
     writeSourceValue(state, *sv);
   state.writer.EndArray();  // source_values
 
-  if (state.guiState != nullptr) {
+  if (state.uiState != nullptr) {
     state.writer.StartObject("gui");
     writeGUIState(state);
     state.writer.EndObject();  // gui
@@ -692,18 +693,18 @@ void writeGlightShow(WriteState &state) {
 }  // namespace
 
 void Write(std::ostream &stream, Management &management,
-           gui::GUIState *guiState) {
+           uistate::UIState *uiState) {
   WriteState state(management);
   state.writer = json::JsonWriter(stream);
-  state.guiState = guiState;
+  state.uiState = uiState;
 
   writeGlightShow(state);
 }
 
 void Write(const std::string &filename, Management &management,
-           gui::GUIState *guiState) {
+           uistate::UIState *uiState) {
   std::ofstream file(filename);
-  Write(file, management, guiState);
+  Write(file, management, uiState);
 }
 
 }  // namespace glight::system

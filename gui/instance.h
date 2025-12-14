@@ -16,11 +16,14 @@ namespace system {
 struct Settings;
 }
 
+namespace uistate {
+class UIState;
+}
+
 namespace gui {
 
 class EventTransmitter;
 class FixtureSelection;
-class GUIState;
 
 /**
  * Class to store data that is unique to the instance and that
@@ -50,8 +53,8 @@ class Instance {
   static FixtureSelection& Selection() { return *Get().selection_; }
   void SetSelection(FixtureSelection& selection) { selection_ = &selection; }
 
-  static GUIState& State() { return *Get().state_; }
-  void SetState(GUIState& state) { state_ = &state; }
+  static uistate::UIState& State() { return *Get().state_; }
+  void SetState(uistate::UIState& state) { state_ = &state; }
 
   static system::Settings& Settings() { return *Get().settings_; }
 
@@ -66,7 +69,7 @@ class Instance {
   theatre::Management* management_;
   EventTransmitter* events_;
   FixtureSelection* selection_;
-  GUIState* state_;
+  uistate::UIState* state_;
   Gtk::ApplicationWindow* main_window_;
   std::unique_ptr<system::Settings> settings_;
 };

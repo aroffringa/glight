@@ -10,6 +10,7 @@ pkg_check_modules(ALSA alsa REQUIRED)
 pkg_check_modules(LIBOLA libola REQUIRED)
 
 find_package(Threads REQUIRED)
+find_package(Curses)
 
 find_library(AUBIO_LIBRARY NAMES aubio)
 find_path(AUBIO_INCLUDE_DIR NAMES aubio/aubio.h)
@@ -64,12 +65,14 @@ set(CMAKE_CXX_EXTENSIONS NO)
 
 add_definitions(-DGLIGHT_INSTALL_PATH="${CMAKE_INSTALL_PREFIX}")
 
-include_directories(SYSTEM ${GTKMM_INCLUDE_DIRS})
-include_directories(SYSTEM ${SIGCXX2_INCLUDE_DIRS})
-include_directories(SYSTEM ${FLACPP_INCLUDE_DIRS})
-include_directories(SYSTEM ${ALSA_INCLUDE_DIRS})
-include_directories(SYSTEM ${LIBOLA_INCLUDE_DIRS})
-include_directories(SYSTEM ${AUBIO_INCLUDE_DIR})
+include_directories(SYSTEM
+  ${GTKMM_INCLUDE_DIRS}
+  ${SIGCXX2_INCLUDE_DIRS}
+  ${FLACPP_INCLUDE_DIRS}
+  ${ALSA_INCLUDE_DIRS}
+  ${LIBOLA_INCLUDE_DIRS}
+  ${AUBIO_INCLUDE_DIR}
+  ${CURSES_INCLUDE_DIRS})
 
 set(GUIFILES
   gui/application.cpp
@@ -108,7 +111,6 @@ set(GUIFILES
   gui/mainwindow/mainmenu.cpp
   gui/mainwindow/mainwindow.cpp
   gui/mainwindow/objectlistframe.cpp
-  gui/state/faderstate.cpp
   gui/windows/addfixturewindow.cpp  
   gui/windows/chasepropertieswindow.cpp
   gui/windows/designwizard.cpp
@@ -136,6 +138,7 @@ set(SYSTEMFILES
   system/writer.cpp
   system/midi/controller.cpp
   system/midi/manager.cpp
+  uistate/faderstate.cpp
 )
 
 set(THEATREFILES
@@ -176,13 +179,9 @@ include_directories(external/hsluv)
 include_directories($<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 add_library(glight-object OBJECT
-  ${THEATREFILES} ${SYSTEMFILES} ${GUIFILES} ${EXTERNALFILES})
+  ${THEATREFILES} ${SYSTEMFILES} ${EXTERNALFILES})
 
-add_executable(glight $<TARGET_OBJECTS:glight-object> glight.cpp)
-add_executable(glight-cli $<TARGET_OBJECTS:glight-object> glight-cli.cpp)
-
-target_link_directories(glight PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
-target_link_directories(glight-cli PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
+add_library(glight-graphical OBJECT ${GUIFILES})
 
 set(GLIGHT_LIBRARIES
   ${FLACPP_LIBRARIES} 
@@ -193,16 +192,28 @@ set(GLIGHT_LIBRARIES
   ${LIBOLA_LIBRARIES}
   ${CMAKE_THREAD_LIBS_INIT})
 
+add_executable(glight $<TARGET_OBJECTS:glight-graphical> $<TARGET_OBJECTS:glight-object> glight.cpp)
+target_link_directories(glight PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
 target_link_libraries(glight ${GLIGHT_LIBRARIES})
-target_link_libraries(glight-cli ${GLIGHT_LIBRARIES})
+
+add_executable(glight-player $<TARGET_OBJECTS:glight-object> glight-player.cpp)
+target_link_directories(glight-player PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
+target_link_libraries(glight-player ${GLIGHT_LIBRARIES})
+
+if(Curses_FOUND)
+  add_executable(glight-cli $<TARGET_OBJECTS:glight-object> glight-cli.cpp)
+  target_link_directories(glight-cli PRIVATE ${GTKMM_LIBDIR} ${LIBOLA_LIBDIR})
+  target_link_libraries(glight-cli ${GLIGHT_LIBRARIES} ${CURSES_LIBRARIES})
+endif()
 
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.30")
-    cmake_policy(SET CMP0167 NEW)
+  cmake_policy(SET CMP0167 NEW)
 endif()
 find_package(Boost COMPONENTS unit_test_framework)
 if(Boost_FOUND)
 	include_directories(SYSTEM ${Boost_INCLUDE_DIR})
   add_executable(runtests EXCLUDE_FROM_ALL
+    $<TARGET_OBJECTS:glight-graphical>
     $<TARGET_OBJECTS:glight-object>
     tests/runtests.cpp 
     tests/gui/tunits.cpp
@@ -269,5 +280,5 @@ set(CPACK_DEBIAN_PACKAGE_SECTION misc)
 
 include(CPack)
 
-install(TARGETS glight glight-cli RUNTIME DESTINATION bin)
+install(TARGETS glight glight-player RUNTIME DESTINATION bin)
 install(DIRECTORY data/icons data/applications DESTINATION share )

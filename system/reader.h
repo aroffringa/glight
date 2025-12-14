@@ -6,9 +6,10 @@
 
 namespace glight {
 
-namespace gui {
-class GUIState;
+namespace uistate {
+class UIState;
 }
+
 namespace theatre {
 class Management;
 }
@@ -19,9 +20,9 @@ void ImportFixtureTypes(const std::string &filename,
                         theatre::Management &management);
 
 void Read(const std::string &filename, theatre::Management &management,
-          gui::GUIState *guiState = nullptr);
+          uistate::UIState *ui_state = nullptr);
 void Read(std::istream &stream, theatre::Management &management,
-          gui::GUIState *guiState = nullptr);
+          uistate::UIState *ui_state = nullptr);
 }  // namespace system
 }  // namespace glight
 

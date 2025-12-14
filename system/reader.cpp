@@ -23,7 +23,7 @@
 #include "theatre/scenes/blackoutsceneitem.h"
 #include "theatre/scenes/scene.h"
 
-#include "gui/state/guistate.h"
+#include "uistate/uistate.h"
 
 #include <fstream>
 #include <list>
@@ -521,7 +521,7 @@ void ParseSourceValues(const Array &node, Management &management) {
   }
 }
 
-void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
+void ParseGuiPresetRef(const Object &node, uistate::FaderSetState &fader,
                        Management &management) {
   if (node.contains("name")) {
     // Old way of storing inputs ; support to be removed at a later time
@@ -532,7 +532,7 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
     Controllable &controllable =
         static_cast<Controllable &>(folder->GetChild(name));
     SourceValue *source = management.GetSourceValue(controllable, input);
-    fader.faders.emplace_back(std::make_unique<gui::FaderState>(
+    fader.faders.emplace_back(std::make_unique<uistate::FaderState>(
         std::vector<theatre::SourceValue *>{source}));
   } else if (node.contains("source-values")) {
     std::vector<SourceValue *> sources;
@@ -552,19 +552,20 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
       }
     }
     fader.faders.emplace_back(
-        std::make_unique<gui::FaderState>(std::move(sources)));
+        std::make_unique<uistate::FaderState>(std::move(sources)));
   } else {
-    fader.faders.emplace_back(std::make_unique<gui::FaderState>());
+    fader.faders.emplace_back(std::make_unique<uistate::FaderState>());
   }
 
-  std::unique_ptr<gui::FaderState> &state = fader.faders.back();
+  std::unique_ptr<uistate::FaderState> &state = fader.faders.back();
   if (node.contains("is-toggle")) {
     // This is for older files and can be removed in the future
     state->SetFaderType(ToBool(node["is-toggle"])
-                            ? gui::FaderControlType::ToggleButton
-                            : gui::FaderControlType::Fader);
+                            ? uistate::FaderControlType::ToggleButton
+                            : uistate::FaderControlType::Fader);
   } else {
-    state->SetFaderType(gui::GetFaderControlType(ToStr(node["fader-type"])));
+    state->SetFaderType(
+        uistate::GetFaderControlType(ToStr(node["fader-type"])));
   }
   if (!IsFullColumnType(state->GetFaderType()))
     state->SetColumn(ToBool(node["new-toggle-column"]));
@@ -579,14 +580,14 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
   state->SetLabel(OptionalString(node, "label", state->Label()));
 }
 
-void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,
+void ParseGuiFaderSet(const Object &node, uistate::UIState &uiState,
                       Management &management) {
-  guiState.FaderSets().emplace_back(std::make_unique<gui::FaderSetState>());
-  gui::FaderSetState &fader_set = *guiState.FaderSets().back();
+  uiState.FaderSets().emplace_back(std::make_unique<uistate::FaderSetState>());
+  uistate::FaderSetState &fader_set = *uiState.FaderSets().back();
   fader_set.name = ToStr(node["name"]);
   fader_set.isActive = ToBool(node["active"]);
   fader_set.isSolo = ToBool(node["solo"]);
-  fader_set.mode = gui::ToFaderSetMode(ToStr(node["mode"]));
+  fader_set.mode = uistate::ToFaderSetMode(ToStr(node["mode"]));
   fader_set.fadeInSpeed = ToNum(node["fade-in"]).AsSize();
   fader_set.fadeOutSpeed = ToNum(node["fade-out"]).AsSize();
   fader_set.width = ToNum(node["width"]).AsSize();
@@ -603,14 +604,14 @@ void ParseGuiFaderSet(const Object &node, gui::GUIState &guiState,
   }
 }
 
-void ParseGui(const Object &node, gui::GUIState &guiState,
+void ParseGui(const Object &node, uistate::UIState &uiState,
               Management &management) {
-  guiState.SetLayoutLocked(OptionalBool(node, "layout-locked", false));
-  guiState.SetShowFixtures(OptionalBool(node, "show-fixtures", true));
-  guiState.SetShowBeams(OptionalBool(node, "show-beams", true));
-  guiState.SetShowProjections(OptionalBool(node, "show-projections", true));
-  guiState.SetShowCrosshairs(OptionalBool(node, "show-crosshairs", true));
-  guiState.SetShowStageBorders(OptionalBool(node, "show-stage-borders", true));
+  uiState.SetLayoutLocked(OptionalBool(node, "layout-locked", false));
+  uiState.SetShowFixtures(OptionalBool(node, "show-fixtures", true));
+  uiState.SetShowBeams(OptionalBool(node, "show-beams", true));
+  uiState.SetShowProjections(OptionalBool(node, "show-projections", true));
+  uiState.SetShowCrosshairs(OptionalBool(node, "show-crosshairs", true));
+  uiState.SetShowStageBorders(OptionalBool(node, "show-stage-borders", true));
 
   if (node.contains("window-position-x")) {
     // window position not available since gtkmm 4
@@ -618,42 +619,42 @@ void ParseGui(const Object &node, gui::GUIState &guiState,
     // const int y = ToNum(node["window-position-y"]).AsInt();
     const size_t width = ToNum(node["window-width"]).AsSize();
     const size_t height = ToNum(node["window-height"]).AsSize();
-    guiState.SetWindowDimensions(width, height);
+    uiState.SetWindowDimensions(width, height);
   }
   const Array &states = ToArr(node["states"]);
   for (const Node &item : states) {
     const Object &state_node = ToObj(item);
-    ParseGuiFaderSet(state_node, guiState, management);
+    ParseGuiFaderSet(state_node, uiState, management);
   }
 }
 
 void parseGlightShow(const Object &node, Management &management,
-                     gui::GUIState *guiState) {
+                     uistate::UIState *uiState) {
   ParseFolders(ToArr(node["folders"]), management);
   ParseTheatre(ToObj(node["theatre"]), management);
   ParseFixtureGroups(ToArr(node["fixture-groups"]), management);
   ParseControls(ToArr(node["controls"]), management);
   ParseSourceValues(ToArr(node["source-values"]), management);
-  if (guiState != nullptr) {
+  if (uiState != nullptr) {
     const auto &gui = node.children.find("gui");
     if (gui != node.children.end())
-      ParseGui(ToObj(*gui->second), *guiState, management);
+      ParseGui(ToObj(*gui->second), *uiState, management);
   }
 }
 
 }  // namespace
 
 void Read(std::istream &stream, Management &management,
-          gui::GUIState *guiState) {
+          uistate::UIState *uiState) {
   std::unique_ptr<Node> root = json::Parse(stream);
-  parseGlightShow(ToObj(*root), management, guiState);
+  parseGlightShow(ToObj(*root), management, uiState);
 }
 
 void Read(const std::string &filename, Management &management,
-          gui::GUIState *guiState) {
+          uistate::UIState *uiState) {
   std::ifstream stream(filename);
   if (!stream) throw std::runtime_error("Failed to open file");
-  Read(stream, management, guiState);
+  Read(stream, management, uiState);
 }
 
 void ImportFixtureTypes(const std::string &filename,

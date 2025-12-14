@@ -12,7 +12,7 @@ namespace glight::gui {
 
 class ComboControlWidget final : public ControlWidget {
  public:
-  ComboControlWidget(FaderWindow &fader_window, FaderState &state,
+  ComboControlWidget(FaderWindow &fader_window, uistate::FaderState &state,
                      ControlMode mode, char key);
   ~ComboControlWidget();
 

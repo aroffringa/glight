@@ -8,11 +8,14 @@
 
 #include "../../theatre/forwards.h"
 
+namespace glight::uistate {
+class FaderState;
+}
+
 namespace glight::gui {
 
 class ControlMenu;
 class EventTransmitter;
-class FaderState;
 class FaderWindow;
 
 enum class ControlMode { Primary, Secondary };
@@ -24,7 +27,8 @@ enum class ControlMode { Primary, Secondary };
  */
 class ControlWidget : public Gtk::Box {
  public:
-  ControlWidget(FaderWindow &fader_window, FaderState &state, ControlMode mode);
+  ControlWidget(FaderWindow &fader_window, uistate::FaderState &state,
+                ControlMode mode);
   ~ControlWidget() override;
 
   /**
@@ -132,7 +136,7 @@ class ControlWidget : public Gtk::Box {
 
   FaderWindow &GetFaderWindow() const { return fader_window_; }
 
-  FaderState &State() const { return _state; }
+  uistate::FaderState &State() const { return _state; }
 
  private:
   void OnTheatreUpdate();
@@ -140,7 +144,7 @@ class ControlWidget : public Gtk::Box {
 
   double _fadeUpSpeed, _fadeDownSpeed;
   ControlMode _mode;
-  FaderState &_state;
+  uistate::FaderState &_state;
   size_t default_source_count_ = 1;
   // Should have no nullptr elements. The vector is empty if unassigned.
   std::vector<theatre::SourceValue *> sources_;

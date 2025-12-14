@@ -10,7 +10,7 @@
 #include "gui/faders/controlmenu.h"
 #include "gui/faders/faderwindow.h"
 
-#include "gui/state/faderstate.h"
+#include "uistate/faderstate.h"
 
 #include "theatre/management.h"
 #include "theatre/presetvalue.h"
@@ -20,8 +20,8 @@ namespace glight::gui {
 
 using theatre::SourceValue;
 
-ControlWidget::ControlWidget(FaderWindow& fader_window, FaderState& state,
-                             ControlMode mode)
+ControlWidget::ControlWidget(FaderWindow& fader_window,
+                             uistate::FaderState& state, ControlMode mode)
     : _mode(mode),
       _state(state),
       fader_window_(fader_window),
