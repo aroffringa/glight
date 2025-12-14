@@ -8,7 +8,7 @@
 namespace glight::gui {
 
 inline std::shared_ptr<Gio::SimpleAction> AddMenuItem(
-    Gio::ActionMap& actions, std::shared_ptr<Gio::Menu>& menu,
+    Gio::ActionMap& actions, const std::shared_ptr<Gio::Menu>& menu,
     const Glib::ustring& label, const Glib::ustring& action_name,
     const sigc::slot<void()>& slot) {
   menu->append(label, "win." + action_name);
@@ -16,7 +16,7 @@ inline std::shared_ptr<Gio::SimpleAction> AddMenuItem(
 };
 
 inline std::shared_ptr<Gio::SimpleAction> AddToggleMenuItem(
-    Gio::ActionMap& actions, std::shared_ptr<Gio::Menu>& menu,
+    Gio::ActionMap& actions, const std::shared_ptr<Gio::Menu>& menu,
     const Glib::ustring& label, const Glib::ustring& action_name,
     bool initial_value, const sigc::slot<void(bool)>& slot) {
   auto action_toggle =

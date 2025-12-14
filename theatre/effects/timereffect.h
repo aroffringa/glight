@@ -4,6 +4,7 @@
 #include "../effect.h"
 #include "../transition.h"
 
+#include "system/optionalnumber.h"
 #include "system/timepattern.h"
 
 namespace glight::theatre {
@@ -35,40 +36,59 @@ class TimerEffect final : public Effect {
                                  const Timing& timing, bool primary) final {
     if (values[0]) {
       if (NowInRange(start_, end_)) {
-        if (!is_on_) {
-          is_on_ = true;
-          transition_start_ = timing.TimeInMS();
-        }
-        if (timing.TimeInMS() - transition_start_ >
-            transition_in_.LengthInMs()) {
-          setAllOutputs(values[0]);
-        } else {
-          ControlValue multiplier = transition_in_.InValue(
-              timing.TimeInMS() - transition_start_, timing);
-          setAllOutputs(values[0] * multiplier);
-        }
+        MixOn(values[0], timing, primary);
       } else {
-        if (is_on_) {
-          is_on_ = false;
-          transition_start_ = timing.TimeInMS();
-        }
-        if (timing.TimeInMS() - transition_start_ <=
-            transition_out_.LengthInMs()) {
-          ControlValue multiplier = transition_out_.OutValue(
-              timing.TimeInMS() - transition_start_, timing);
-          setAllOutputs(values[0] * multiplier);
-        }
+        MixOff(values[0], timing, primary);
       }
     }
   }
 
  private:
+  void MixOn(const ControlValue& input, const Timing& timing, bool primary) {
+    if (!is_on_[primary]) {
+      is_on_[primary] = true;
+      transition_start_[primary] = timing.TimeInMS();
+    }
+    if (transition_start_[primary]) {
+      const int start = *transition_start_[primary];
+      if (timing.TimeInMS() - start < transition_in_.LengthInMs()) {
+        const ControlValue multiplier =
+            transition_in_.InValue(timing.TimeInMS() - start, timing);
+        setAllOutputs(input * multiplier);
+      } else {
+        transition_start_[primary].Reset();
+      }
+    }
+    if (!transition_start_[primary]) {
+      setAllOutputs(input);
+    }
+  }
+
+  void MixOff(const ControlValue& input, const Timing& timing, bool primary) {
+    if (is_on_[primary]) {
+      is_on_[primary] = false;
+      transition_start_[primary] = timing.TimeInMS();
+    }
+    if (transition_start_[primary]) {
+      const int start = *transition_start_[primary];
+      if (timing.TimeInMS() - start < transition_out_.LengthInMs()) {
+        const ControlValue multiplier =
+            transition_out_.OutValue(timing.TimeInMS() - start, timing);
+        setAllOutputs(input * multiplier);
+      } else {
+        transition_start_[primary].Reset();
+      }
+    }
+  }
+
   Transition transition_in_ = Transition(300, TransitionType::Fade);
   Transition transition_out_ = Transition(300, TransitionType::Fade);
   system::TimePattern start_;
   system::TimePattern end_;
-  int transition_start_ = 0;
-  bool is_on_ = false;
+  /// If unset, no transition is ongoing. If set, it is the transition start
+  /// time.
+  system::OptionalNumber<int> transition_start_[2];
+  bool is_on_[2] = {false, false};
 };
 
 }  // namespace glight::theatre

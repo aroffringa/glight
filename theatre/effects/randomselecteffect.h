@@ -10,16 +10,9 @@ namespace glight::theatre {
 
 class RandomSelectEffect final : public Effect {
  public:
-  RandomSelectEffect()
-      : Effect(1),
-        _active{false, false},
-        _startTime{0.0, 0.0},
-        _delay(10000.0),
-        _count(1){};
+  RandomSelectEffect() : Effect(1){};
 
-  virtual EffectType GetType() const override {
-    return EffectType::RandomSelect;
-  }
+  virtual EffectType GetType() const final { return EffectType::RandomSelect; }
 
   double Delay() const { return _delay; }
   void SetDelay(double delay) { _delay = delay; }
@@ -29,26 +22,23 @@ class RandomSelectEffect final : public Effect {
 
  private:
   virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing,
-                                 bool primary) final override {
-    size_t count = std::min(_count, Connections().size());
-    if (values[0] && count != 0) {
+                                 const Timing &timing, bool primary) final {
+    size_t n_active = std::min(_count, Connections().size());
+    if (values[0] && n_active != 0) {
       std::vector<size_t> &activeConnections = _activeConnections[primary];
       if (Connections().size() != activeConnections.size()) {
         activeConnections.resize(Connections().size());
         for (size_t i = 0; i != activeConnections.size(); ++i)
           activeConnections[i] = i;
-        std::shuffle(activeConnections.begin(), activeConnections.end(),
-                     timing.RNG());
+        Shuffle(activeConnections, timing, false);
       }
       if (!_active[primary] ||
           timing.TimeInMS() - _startTime[primary] > _delay) {
         _active[primary] = true;
         _startTime[primary] = timing.TimeInMS();
-        std::shuffle(activeConnections.begin(), activeConnections.end(),
-                     timing.RNG());
+        Shuffle(activeConnections, timing, true);
       }
-      for (size_t i = 0; i != count; ++i) {
+      for (size_t i = 0; i != n_active; ++i) {
         if (activeConnections[i] < Connections().size()) {
           const std::pair<Controllable *, size_t> &connection =
               Connections()[activeConnections[i]];
@@ -60,12 +50,25 @@ class RandomSelectEffect final : public Effect {
     }
   }
 
-  bool _active[2];
-  std::array<std::vector<size_t>, 2> _activeConnections;
-  double _startTime[2];
+  void Shuffle(std::vector<size_t> &list, const Timing &timing,
+               bool is_restart) {
+    if (!list.empty()) {
+      // If only one output is active, require the output to change
+      // when reshuffling if it is a restart.
+      bool must_change = _count == 1 && list.size() > 1 && is_restart;
+      size_t first_active = list.front();
+      do {
+        std::shuffle(list.begin(), list.end(), timing.RNG());
+      } while (must_change && first_active == list.front());
+    }
+  }
 
-  double _delay;
-  size_t _count;
+  bool _active[2] = {false, false};
+  std::array<std::vector<size_t>, 2> _activeConnections;
+  double _startTime[2] = {0.0, 0.0};
+
+  double _delay = 10000.0;
+  size_t _count = 1;
 };
 
 }  // namespace glight::theatre

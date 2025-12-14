@@ -40,6 +40,7 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   tree_view_.append_column("Functions", list_columns_.functions_);
   tree_view_.get_selection()->signal_changed().connect(
       [&]() { onSelectionChanged(); });
+  tree_view_.set_expand(true);
   fillList();
   type_scrollbars_.set_child(tree_view_);
 
@@ -48,8 +49,7 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   left_box_.append(type_scrollbars_);
 
   paned_.set_start_child(left_box_);
-  left_box_.set_hexpand(true);
-  left_box_.set_vexpand(true);
+  left_box_.set_expand(true);
 
   // Right part
   right_grid_.attach(name_label_, 0, 0);
