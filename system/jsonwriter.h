@@ -57,6 +57,14 @@ class JsonWriter {
     Number(number);
   }
 
+  template <typename T>
+  void OptionalNumber(const char* name, T number, T default_value = T(0)) {
+    if (number != default_value) {
+      Name(name);
+      Number(number);
+    }
+  }
+
   void Number(double number) { NumberGeneric(number); }
 
   void Number(int number) { IntegerNumber(number); }

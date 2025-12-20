@@ -1,5 +1,7 @@
 #include "propertyset.h"
 
+#include <cassert>
+
 #include "audioleveleffectps.h"
 #include "colorcontroleffectps.h"
 #include "colortemperatureeffectps.h"
@@ -69,8 +71,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
 
 void PropertySet::AssignProperty(const Property &to, const Property &from,
                                  const PropertySet &fromSet) {
-  if (from.type_ != to.type_)
-    throw std::runtime_error("Copying different types");
+  assert(from.type_ == to.type_);
   switch (from.type_) {
     case PropertyType::Boolean:
       SetBool(to, fromSet.GetBool(from));
@@ -94,6 +95,32 @@ void PropertySet::AssignProperty(const Property &to, const Property &from,
       SetTransition(to, fromSet.GetTransition(from));
       break;
   }
+}
+
+bool PropertySet::EqualPropertyValues(const Property &property,
+                                      const Effect &rhs) {
+  assert(dynamic_cast<Effect *>(_object));
+  const Effect &effect = static_cast<const Effect &>(*_object);
+  assert(effect.GetType() == rhs.GetType());
+  switch (property.type_) {
+    case PropertyType::Boolean:
+      return GetBool(property) == getBool(rhs, property.set_index_);
+    case PropertyType::Choice:
+      return GetChoice(property) == getChoice(rhs, property.set_index_);
+    case PropertyType::ControlValue:
+      return GetControlValue(property) ==
+             getControlValue(rhs, property.set_index_);
+    case PropertyType::Duration:
+      return GetDuration(property) == getDuration(rhs, property.set_index_);
+    case PropertyType::Integer:
+      return GetInteger(property) == getInteger(rhs, property.set_index_);
+    case PropertyType::TimePattern:
+      return GetTimePattern(property) ==
+             getTimePattern(rhs, property.set_index_);
+    case PropertyType::Transition:
+      return GetTransition(property) == getTransition(rhs, property.set_index_);
+  }
+  return false;
 }
 
 }  // namespace glight::theatre
