@@ -7,7 +7,7 @@
 #include <gtkmm/eventcontrollermotion.h>
 #include <gtkmm/gestureclick.h>
 
-#include "../state/faderstate.h"
+#include "uistate/faderstate.h"
 
 #include "gui/instance.h"
 
@@ -22,7 +22,7 @@ namespace glight::gui {
 
 using theatre::ControlValue;
 
-FaderWidget::FaderWidget(FaderWindow &fader_window, FaderState &state,
+FaderWidget::FaderWidget(FaderWindow &fader_window, uistate::FaderState &state,
                          ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode),
       _scale(Gtk::Adjustment::create(

@@ -10,7 +10,7 @@
 
 #include "gui/components/colorselectwidget.h"
 
-#include "gui/state/guistate.h"
+#include "uistate/uistate.h"
 
 #include "theatre/chase.h"
 #include "theatre/colordeduction.h"

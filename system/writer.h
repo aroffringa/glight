@@ -10,9 +10,10 @@
 
 namespace glight {
 
-namespace gui {
-class GUIState;
+namespace uistate {
+class UIState;
 }
+
 namespace theatre {
 class Management;
 }
@@ -25,9 +26,9 @@ class WriterException : public std::runtime_error {
 };
 
 void Write(std::ostream &stream, theatre::Management &management,
-           gui::GUIState *guiState);
+           uistate::UIState *uiState);
 void Write(const std::string &filename, theatre::Management &management,
-           gui::GUIState *guiState);
+           uistate::UIState *uiState);
 
 }  // namespace system
 }  // namespace glight

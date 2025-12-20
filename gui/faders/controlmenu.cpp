@@ -1,11 +1,11 @@
 #include "controlmenu.h"
 
 #include "gui/menufunctions.h"
-#include "gui/state/faderstate.h"
+#include "uistate/faderstate.h"
 
 namespace glight::gui {
 
-ControlMenu::ControlMenu(const FaderState& state)
+ControlMenu::ControlMenu(const uistate::FaderState& state)
     : actions_(Gio::SimpleActionGroup::create()) {
   auto menu = Gio::Menu::create();
   assign_section_ = Gio::Menu::create();

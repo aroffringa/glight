@@ -6,9 +6,11 @@
 #include "gui/eventtransmitter.h"
 #include "gui/fixtureselection.h"
 #include "gui/components/powermonitor.h"
-#include "gui/state/guistate.h"
 #include "gui/windows/childwindowlist.h"
+
 #include "theatre/forwards.h"
+
+#include "uistate/uistate.h"
 
 #include <gtkmm/applicationwindow.h>
 #include <gtkmm/box.h>
@@ -78,7 +80,7 @@ class MainWindow : public Gtk::ApplicationWindow, public EventTransmitter {
    * If stateOrNull is nullptr, the first inactive state is selected, or
    * if no states are inactive, a new state is created.
    */
-  void addFaderWindow(FaderSetState *stateOrNull = nullptr);
+  void addFaderWindow(uistate::FaderSetState *stateOrNull = nullptr);
 
   void increaseManualBeat(int val);
   bool onKeyDown(guint keyval);
@@ -102,8 +104,8 @@ class MainWindow : public Gtk::ApplicationWindow, public EventTransmitter {
   void onFullscreen();
   void onFaderWindowHidden(FaderWindow *window);
   void onFaderListChange();
-  void onFaderWindowSelected(FaderSetState &state);
-  FaderWindow *getFaderWindow(const FaderSetState &state);
+  void onFaderWindowSelected(uistate::FaderSetState &state);
+  FaderWindow *getFaderWindow(const uistate::FaderSetState &state);
   void onSceneWindowClicked(bool active);
 
   size_t nextControlKeyRow() const;
@@ -126,7 +128,7 @@ class MainWindow : public Gtk::ApplicationWindow, public EventTransmitter {
   std::unique_ptr<ObjectListFrame> _objectListFrame;
   std::unique_ptr<VisualizationWidget> _visualizationWidget;
 
-  GUIState _state;
+  uistate::UIState _state;
   FixtureSelection _fixtureSelection;
 
   sigc::signal<void()> _signalUpdateControllables;

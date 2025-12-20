@@ -11,12 +11,13 @@
 #include "gui/instance.h"
 #include "gui/menufunctions.h"
 
-#include "gui/state/guistate.h"
 #include "gui/dialogs/stringinputdialog.h"
 
 #include "theatre/chase.h"
 #include "theatre/management.h"
 #include "theatre/presetvalue.h"
+
+#include "uistate/uistate.h"
 
 #include <gtkmm/entry.h>
 #include <gtkmm/messagedialog.h>
@@ -26,6 +27,11 @@
 namespace glight::gui {
 
 using theatre::ControlValue;
+using uistate::FaderControlType;
+using uistate::FaderSetMode;
+using uistate::FaderSetState;
+using uistate::FaderState;
+using uistate::UIState;
 
 namespace {
 constexpr double MapSliderToSpeed(int sliderVal) {
@@ -108,7 +114,7 @@ FaderWindow::~FaderWindow() {
 }
 
 void FaderWindow::LoadNew() {
-  GUIState &state = Instance::State();
+  UIState &state = Instance::State();
   state.FaderSets().emplace_back(std::make_unique<FaderSetState>());
   _state = state.FaderSets().back().get();
   _state->name = "Unnamed fader setup";

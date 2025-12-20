@@ -5,7 +5,7 @@
 #include "controlmenu.h"
 #include "faderwindow.h"
 
-#include "../state/faderstate.h"
+#include "uistate/faderstate.h"
 
 #include "../eventtransmitter.h"
 
@@ -20,7 +20,7 @@
 
 namespace glight::gui {
 
-MoverWidget::MoverWidget(FaderWindow &fader_window, FaderState &state,
+MoverWidget::MoverWidget(FaderWindow &fader_window, uistate::FaderState &state,
                          ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode) {
   SetDefaultSourceCount(2);

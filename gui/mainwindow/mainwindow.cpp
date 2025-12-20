@@ -35,6 +35,8 @@
 
 #include "system/midi/manager.h"
 
+using glight::uistate::FaderSetState;
+
 namespace glight::gui {
 
 MainWindow::MainWindow() : main_menu_(*this) {

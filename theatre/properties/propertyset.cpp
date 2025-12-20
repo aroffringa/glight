@@ -100,8 +100,7 @@ void PropertySet::AssignProperty(const Property &to, const Property &from,
 bool PropertySet::EqualPropertyValues(const Property &property,
                                       const Effect &rhs) {
   assert(dynamic_cast<Effect *>(_object));
-  const Effect &effect = static_cast<const Effect &>(*_object);
-  assert(effect.GetType() == rhs.GetType());
+  assert(static_cast<const Effect &>(*_object).GetType() == rhs.GetType());
   switch (property.type_) {
     case PropertyType::Boolean:
       return GetBool(property) == getBool(rhs, property.set_index_);

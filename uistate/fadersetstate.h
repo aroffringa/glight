@@ -10,7 +10,7 @@ namespace glight::theatre {
 class SourceValue;
 }  // namespace glight::theatre
 
-namespace glight::gui {
+namespace glight::uistate {
 
 enum class FaderSetMode { Primary, Secondary, Dual };
 
@@ -83,6 +83,6 @@ class FaderSetState {
   std::vector<std::unique_ptr<FaderState>> faders;
 };
 
-}  // namespace glight::gui
+}  // namespace glight::uistate
 
 #endif

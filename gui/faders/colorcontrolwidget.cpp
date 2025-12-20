@@ -3,7 +3,7 @@
 #include "controlmenu.h"
 #include "faderwindow.h"
 
-#include "gui/state/faderstate.h"
+#include "uistate/faderstate.h"
 
 #include "gui/dialogs/controllableselectiondialog.h"
 
@@ -19,8 +19,8 @@ namespace glight::gui {
 using theatre::Color;
 
 ColorControlWidget::ColorControlWidget(FaderWindow &fader_window,
-                                       FaderState &state, ControlMode mode,
-                                       char key)
+                                       uistate::FaderState &state,
+                                       ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode),
       color_selector_(&fader_window, false) {
   color_selector_.SignalColorChanged().connect([&]() { OnColorChanged(); });

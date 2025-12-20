@@ -11,9 +11,11 @@
 
 #include "theatre/effecttype.h"
 
-namespace glight::gui {
-
+namespace glight::uistate {
 class FaderSetState;
+}
+
+namespace glight::gui {
 
 class MainMenu : public Gtk::PopoverMenuBar {
  public:
@@ -56,7 +58,7 @@ class MainMenu : public Gtk::PopoverMenuBar {
   sigc::signal<void(bool)> SideBar;
   sigc::signal<void(bool)> PowerMonitor;
   sigc::signal<void(bool active)> SceneWindow;
-  sigc::signal<void(FaderSetState& fader_set)> FaderWindow;
+  sigc::signal<void(uistate::FaderSetState& fader_set)> FaderWindow;
 
   bool ShowFixturesActive() const { return GetState(show_fixtures_); }
   void SetShowFixtures(bool show_fixtures) {
@@ -92,7 +94,8 @@ class MainMenu : public Gtk::PopoverMenuBar {
 
   void SetSceneWindowActive(bool active) { SetState(scene_window_, active); }
 
-  void SetFaderList(const std::vector<std::unique_ptr<FaderSetState>>& faders);
+  void SetFaderList(
+      const std::vector<std::unique_ptr<uistate::FaderSetState>>& faders);
 
   bool IsLayoutLocked() const { return GetState(layout_locked_); }
   void SetLayoutLocked(bool lock) { SetState(layout_locked_, lock); }

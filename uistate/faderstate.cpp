@@ -1,10 +1,10 @@
-#include "guistate.h"
+#include "uistate.h"
 
 #include "../../theatre/controllable.h"
 #include "../../theatre/management.h"
 #include "../../theatre/sourcevalue.h"
 
-namespace glight::gui {
+namespace glight::uistate {
 
 using theatre::SourceValue;
 
@@ -47,4 +47,4 @@ void FaderState::onPresetValueDeleted() {
   signal_change_();
 }
 
-}  // namespace glight::gui
+}  // namespace glight::uistate

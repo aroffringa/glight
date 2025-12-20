@@ -5,23 +5,24 @@
 #include "controlmenu.h"
 #include "faderwindow.h"
 
-#include "../state/faderstate.h"
+#include "gui/eventtransmitter.h"
 
-#include "../eventtransmitter.h"
+#include "uistate/faderstate.h"
 
-#include "../../theatre/controlvalue.h"
-#include "../../theatre/management.h"
-#include "../../theatre/presetvalue.h"
-#include "../../theatre/sourcevalue.h"
+#include "theatre/controlvalue.h"
+#include "theatre/management.h"
+#include "theatre/presetvalue.h"
+#include "theatre/sourcevalue.h"
 
-#include "../../theatre/scenes/scene.h"
+#include "theatre/scenes/scene.h"
 
-#include "../../system/uniquewithoutordering.h"
+#include "system/uniquewithoutordering.h"
 
 namespace glight::gui {
 
-ToggleWidget::ToggleWidget(FaderWindow &fader_window, FaderState &state,
-                           ControlMode mode, char key)
+ToggleWidget::ToggleWidget(FaderWindow &fader_window,
+                           uistate::FaderState &state, ControlMode mode,
+                           char key)
     : ControlWidget(fader_window, state, mode),
       flash_button_(std::string(1, key)) {
   auto gesture = Gtk::GestureClick::create();

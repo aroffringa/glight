@@ -18,7 +18,7 @@
 
 #include "system/settings.h"
 
-#include "gui/state/guistate.h"
+#include "uistate/uistate.h"
 
 #include "system/reader.h"
 #include "system/writer.h"
@@ -297,14 +297,14 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   Management write_management(settings);
   FillManagement(write_management);
 
-  glight::gui::GUIState guiState;
-  std::vector<std::unique_ptr<glight::gui::FaderSetState>> &setups =
+  glight::uistate::UIState guiState;
+  std::vector<std::unique_ptr<glight::uistate::FaderSetState>> &setups =
       guiState.FaderSets();
-  std::unique_ptr<glight::gui::FaderSetState> &setup =
-      setups.emplace_back(std::make_unique<glight::gui::FaderSetState>());
+  std::unique_ptr<glight::uistate::FaderSetState> &setup =
+      setups.emplace_back(std::make_unique<glight::uistate::FaderSetState>());
   setup->name = "testfader";
-  glight::gui::FaderState &state =
-      *setup->faders.emplace_back(std::make_unique<glight::gui::FaderState>());
+  glight::uistate::FaderState &state = *setup->faders.emplace_back(
+      std::make_unique<glight::uistate::FaderState>());
   state.SetSourceValues({write_management.SourceValues()[0].get()});
 
   glight::system::Write("tmp-testfileformat.gshow", write_management,
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   // Read and check if the result is correct
   //
   BOOST_TEST_CHECKPOINT("Start of reading");
-  glight::gui::GUIState resultGuiState;
+  glight::uistate::UIState resultGuiState;
   std::istringstream istream(stream.str());
   glight::system::Read(istream, read_management, &resultGuiState);
 
