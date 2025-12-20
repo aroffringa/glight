@@ -18,7 +18,7 @@
 
 #include "system/settings.h"
 
-#include "gui/state/guistate.h"
+#include "uistate/uistate.h"
 
 #include "system/reader.h"
 #include "system/writer.h"
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   Management write_management(settings);
   FillManagement(write_management);
 
-  glight::gui::GUIState guiState;
+  glight::uistate::UIState guiState;
   std::vector<std::unique_ptr<glight::uistate::FaderSetState>> &setups =
       guiState.FaderSets();
   std::unique_ptr<glight::uistate::FaderSetState> &setup =
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE(ReadAndWrite) {
   // Read and check if the result is correct
   //
   BOOST_TEST_CHECKPOINT("Start of reading");
-  glight::gui::GUIState resultGuiState;
+  glight::uistate::UIState resultGuiState;
   std::istringstream istream(stream.str());
   glight::system::Read(istream, read_management, &resultGuiState);
 
