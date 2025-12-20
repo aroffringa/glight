@@ -185,6 +185,8 @@ class Transition {
   constexpr Transition(double length_in_ms, TransitionType type) noexcept
       : length_in_ms_(length_in_ms), type_(type) {}
 
+  constexpr bool operator==(const Transition &rhs) const = default;
+
   constexpr TransitionType Type() const { return type_; }
   void SetType(TransitionType type) { type_ = type; }
 

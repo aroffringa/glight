@@ -73,26 +73,22 @@ ControlValue Transition::InValue(double transition_time,
         return ControlValue::Zero();
     }
     case TransitionType::SlowStrobe:
-      return timing.TimestepNumber() % 8 == 0 ? ControlValue::Max()
-                                              : ControlValue::Zero();
+      return (timing.TimestepNumber() % 8) == 0 ? ControlValue::Max()
+                                                : ControlValue::Zero();
     case TransitionType::FastStrobe:
-      return timing.TimestepNumber() % 2 == 0 ? ControlValue::Max()
-                                              : ControlValue::Zero();
+      return (timing.TimestepNumber() % 2) == 0 ? ControlValue::Max()
+                                                : ControlValue::Zero();
     case TransitionType::StrobeAB:
-      return transition_time * 2.0 < length_in_ms_ &&
+      return transition_time * 2.0 >= length_in_ms_ &&
                      timing.TimestepNumber() % 2 == 0
                  ? ControlValue::Max()
                  : ControlValue::Zero();
     case TransitionType::Black:
+    case TransitionType::FadeToBlack:
       return ControlValue::Zero();
     case TransitionType::Full:
     case TransitionType::FadeFromFull:
       return ControlValue::Max();
-    case TransitionType::FadeToBlack: {
-      const unsigned ratio = (unsigned)((transition_time / length_in_ms_) *
-                                        ControlValue::MaxUInt());
-      return ControlValue(ControlValue::MaxUInt() - ratio);
-    }
   }
   assert(false);
   return ControlValue::Zero();
@@ -173,14 +169,14 @@ ControlValue Transition::OutValue(double transition_time,
         return ControlValue::Zero();
     }
     case TransitionType::SlowStrobe:
-      return timing.TimestepNumber() % 8 + 4 == 0 ? ControlValue::Max()
-                                                  : ControlValue::Zero();
+      return (timing.TimestepNumber() % 8) == 4 ? ControlValue::Max()
+                                                : ControlValue::Zero();
     case TransitionType::FastStrobe:
-      return timing.TimestepNumber() % 2 == 1 ? ControlValue::Max()
-                                              : ControlValue::Zero();
+      return (timing.TimestepNumber() % 2) == 1 ? ControlValue::Max()
+                                                : ControlValue::Zero();
     case TransitionType::StrobeAB:
-      return transition_time * 2.0 >= length_in_ms_ &&
-                     timing.TimestepNumber() % 2 == 0
+      return transition_time * 2.0 < length_in_ms_ &&
+                     timing.TimestepNumber() % 2 == 1
                  ? ControlValue::Max()
                  : ControlValue::Zero();
     case TransitionType::Black:

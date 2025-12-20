@@ -20,30 +20,48 @@ class RandomSelectEffect final : public Effect {
   size_t Count() const { return _count; }
   void SetCount(size_t count) { _count = count; }
 
+  void SetTransition(const Transition &transition) { transition_ = transition; }
+  const Transition &GetTransition() const { return transition_; }
+
  private:
   virtual void MixImplementation(const ControlValue *values,
                                  const Timing &timing, bool primary) final {
     size_t n_active = std::min(_count, Connections().size());
     if (values[0] && n_active != 0) {
       std::vector<size_t> &activeConnections = _activeConnections[primary];
+      std::vector<size_t> &transition_connections =
+          transition_connections_[primary];
       if (Connections().size() != activeConnections.size()) {
         activeConnections.resize(Connections().size());
-        for (size_t i = 0; i != activeConnections.size(); ++i)
+        for (size_t i = 0; i != activeConnections.size(); ++i) {
           activeConnections[i] = i;
+        }
+        transition_connections = activeConnections;
         Shuffle(activeConnections, timing, false);
+        active_transition_[primary] = false;
       }
-      if (!_active[primary] ||
-          timing.TimeInMS() - _startTime[primary] > _delay) {
+      const bool delay_expired =
+          timing.TimeInMS() - _startTime[primary] >= _delay;
+      if (!_active[primary] || delay_expired) {
         _active[primary] = true;
         _startTime[primary] = timing.TimeInMS();
+        transition_connections = activeConnections;
         Shuffle(activeConnections, timing, true);
+        active_transition_[primary] = delay_expired;
       }
-      for (size_t i = 0; i != n_active; ++i) {
-        if (activeConnections[i] < Connections().size()) {
-          const std::pair<Controllable *, size_t> &connection =
-              Connections()[activeConnections[i]];
-          connection.first->MixInput(connection.second, values[0]);
-        }
+      double transition_time;
+      if (active_transition_[primary]) {
+        transition_time = timing.TimeInMS() - _startTime[primary];
+        active_transition_[primary] =
+            transition_time < transition_.LengthInMs();
+      }
+      if (active_transition_[primary]) {
+        MixDirect(transition_connections,
+                  values[0] * transition_.OutValue(transition_time, timing));
+        MixDirect(activeConnections,
+                  values[0] * transition_.InValue(transition_time, timing));
+      } else {
+        MixDirect(activeConnections, values[0]);
       }
     } else {
       _active[primary] = false;
@@ -63,12 +81,27 @@ class RandomSelectEffect final : public Effect {
     }
   }
 
+  void MixDirect(const std::vector<size_t> &connections,
+                 const ControlValue value) {
+    size_t n_active = std::min(_count, Connections().size());
+    for (size_t i = 0; i != n_active; ++i) {
+      if (connections[i] < Connections().size()) {
+        const std::pair<Controllable *, size_t> &connection =
+            Connections()[connections[i]];
+        connection.first->MixInput(connection.second, value);
+      }
+    }
+  }
+
   bool _active[2] = {false, false};
   std::array<std::vector<size_t>, 2> _activeConnections;
+  std::array<std::vector<size_t>, 2> transition_connections_;
   double _startTime[2] = {0.0, 0.0};
+  bool active_transition_[2] = {false, false};
 
   double _delay = 10000.0;
   size_t _count = 1;
+  Transition transition_;
 };
 
 }  // namespace glight::theatre

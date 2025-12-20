@@ -13,11 +13,12 @@ class RandomSelectEffectPS final : public PropertySet {
     addProperty(
         Property("delay", "Delay for reselection", PropertyType::Duration));
     addProperty(Property("count", "Number of outputs", PropertyType::Integer));
+    addProperty(Property("transition", "Transition", PropertyType::Transition));
   }
 
  protected:
   virtual void setDuration(FolderObject &object, size_t index,
-                           double value) const final override {
+                           double value) const final {
     RandomSelectEffect &rfx = static_cast<RandomSelectEffect &>(object);
     switch (index) {
       case 0:
@@ -27,7 +28,7 @@ class RandomSelectEffectPS final : public PropertySet {
   }
 
   virtual double getDuration(const FolderObject &object,
-                             size_t index) const final override {
+                             size_t index) const final {
     const RandomSelectEffect &rfx =
         static_cast<const RandomSelectEffect &>(object);
     switch (index) {
@@ -38,7 +39,7 @@ class RandomSelectEffectPS final : public PropertySet {
   }
 
   virtual void setInteger(FolderObject &object, size_t index,
-                          int value) const final override {
+                          int value) const final {
     RandomSelectEffect &rfx = static_cast<RandomSelectEffect &>(object);
     switch (index) {
       case 1:
@@ -47,8 +48,7 @@ class RandomSelectEffectPS final : public PropertySet {
     }
   }
 
-  virtual int getInteger(const FolderObject &object,
-                         size_t index) const final override {
+  virtual int getInteger(const FolderObject &object, size_t index) const final {
     const RandomSelectEffect &rfx =
         static_cast<const RandomSelectEffect &>(object);
     switch (index) {
@@ -56,6 +56,23 @@ class RandomSelectEffectPS final : public PropertySet {
         return rfx.Count();
     }
     return 0;
+  }
+
+  virtual void setTransition(FolderObject &object, size_t index,
+                             const Transition &value) const final {
+    RandomSelectEffect &rfx = static_cast<RandomSelectEffect &>(object);
+    switch (index) {
+      case 2:
+        rfx.SetTransition(value);
+        break;
+    }
+  }
+
+  virtual Transition getTransition(const FolderObject &object,
+                                   size_t index) const final {
+    const RandomSelectEffect &rfx =
+        static_cast<const RandomSelectEffect &>(object);
+    return rfx.GetTransition();
   }
 };
 
