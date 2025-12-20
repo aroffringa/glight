@@ -125,6 +125,12 @@ inline unsigned OptionalUInt(const Object &parent, const char *name,
   return iter == parent.end() ? default_value : ToNum(*iter).AsUInt();
 }
 
+inline int OptionalInt(const Object &parent, const char *name,
+                       int default_value) {
+  const Object::const_iterator iter = parent.find(name);
+  return iter == parent.end() ? default_value : ToNum(*iter).AsInt();
+}
+
 inline double OptionalDouble(const Object &parent, const char *name,
                              double default_value) {
   const Object::const_iterator iter = parent.find(name);

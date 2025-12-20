@@ -94,7 +94,8 @@ void writeFolderAttributes(WriteState &state, const FolderObject &obj) {
 void writeDmxChannel(WriteState &state, const DmxChannel &dmxChannel,
                      const char *name) {
   state.writer.StartObject(name);
-  state.writer.Number("universe", dmxChannel.Universe());
+  if (dmxChannel.Universe() != 0)
+    state.writer.Number("universe", dmxChannel.Universe());
   state.writer.Number("channel", dmxChannel.Channel());
   state.writer.EndObject();
 }
@@ -248,9 +249,12 @@ void writeFixtureType(WriteState &state, const FixtureType &fixture_type) {
 
 void writeSingleSourceValue(WriteState &state,
                             const SingleSourceValue &singleSourceValue) {
-  state.writer.Number("value", singleSourceValue.Value().UInt());
-  state.writer.Number("target-value", singleSourceValue.TargetValue());
-  state.writer.Number("fade-speed", singleSourceValue.FadeSpeed());
+  if (singleSourceValue.Value())
+    state.writer.Number("value", singleSourceValue.Value().UInt());
+  if (singleSourceValue.TargetValue())
+    state.writer.Number("target-value", singleSourceValue.TargetValue());
+  if (singleSourceValue.FadeSpeed() != 0.0)
+    state.writer.Number("fade-speed", singleSourceValue.FadeSpeed());
 }
 
 void writeSourceValue(WriteState &state, const SourceValue &sourceValue) {
@@ -258,9 +262,10 @@ void writeSourceValue(WriteState &state, const SourceValue &sourceValue) {
 
   state.writer.StartObject();
   state.writer.String("controllable-ref", sourceValue.GetControllable().Name());
-  state.writer.Number("input-index", sourceValue.InputIndex());
-  state.writer.Number("folder",
-                      state.folderIds[&sourceValue.GetControllable().Parent()]);
+  if (sourceValue.InputIndex())
+    state.writer.Number("input-index", sourceValue.InputIndex());
+  state.writer.OptionalNumber(
+      "folder", state.folderIds[&sourceValue.GetControllable().Parent()]);
   state.writer.StartObject("a");
   writeSingleSourceValue(state, sourceValue.A());
   state.writer.EndObject();
@@ -275,9 +280,10 @@ void writePresetValue(WriteState &state, const PresetValue &presetValue) {
 
   state.writer.StartObject();
   state.writer.String("controllable-ref", presetValue.GetControllable().Name());
-  state.writer.Number("input-index", presetValue.InputIndex());
-  state.writer.Number("folder",
-                      state.folderIds[&presetValue.GetControllable().Parent()]);
+  if (presetValue.InputIndex())
+    state.writer.Number("input-index", presetValue.InputIndex());
+  state.writer.OptionalNumber(
+      "folder", state.folderIds[&presetValue.GetControllable().Parent()]);
   state.writer.Number("value", presetValue.Value().UInt());
   state.writer.EndObject();
 }
@@ -338,9 +344,10 @@ void writeSequence(WriteState &state, const Sequence &sequence) {
   state.writer.StartArray("inputs");
   for (const Input &input : sequence.List()) {
     state.writer.StartObject();
-    state.writer.Number("input-index", input.InputIndex());
-    state.writer.Number("folder",
-                        state.folderIds[&input.GetControllable()->Parent()]);
+    if (input.InputIndex())
+      state.writer.Number("input-index", input.InputIndex());
+    state.writer.OptionalNumber(
+        "folder", state.folderIds[&input.GetControllable()->Parent()]);
     state.writer.String("name", input.GetControllable()->Name());
     state.writer.EndObject();
   }
@@ -396,44 +403,51 @@ void writeEffect(WriteState &state, const Effect &effect) {
     state.writer.String("effect_type", EffectTypeToName(effect.GetType()));
     std::unique_ptr<PropertySet> ps = PropertySet::Make(effect);
 
+    std::unique_ptr<Effect> default_effect = Effect::Make(effect.GetType());
+
     // the number and name of the effect controls are implied from the
     // effect type, so do not require to be stored.
 
     state.writer.StartArray("properties");
     for (const Property &p : *ps) {
-      state.writer.StartObject();
-      state.writer.String("name", p.Name());
-      switch (p.GetType()) {
-        case PropertyType::Choice:
-          state.writer.String("value", ps->GetChoice(p));
-          break;
-        case PropertyType::ControlValue:
-          state.writer.Number("value", ps->GetControlValue(p));
-          break;
-        case PropertyType::Duration:
-          state.writer.Number("value", ps->GetDuration(p));
-          break;
-        case PropertyType::Boolean:
-          state.writer.Boolean("value", ps->GetBool(p));
-          break;
-        case PropertyType::Integer:
-          state.writer.Number("value", ps->GetInteger(p));
-          break;
-        case PropertyType::TimePattern:
-          state.writer.String("value", ToString(ps->GetTimePattern(p)));
-          break;
-        case PropertyType::Transition:
-          writeTransition(state, ps->GetTransition(p), "value");
-          break;
+      const bool has_default_value =
+          ps->EqualPropertyValues(p, *default_effect);
+      if (!has_default_value) {
+        state.writer.StartObject();
+        state.writer.String("name", p.Name());
+        switch (p.GetType()) {
+          case PropertyType::Choice:
+            state.writer.String("value", ps->GetChoice(p));
+            break;
+          case PropertyType::ControlValue:
+            state.writer.Number("value", ps->GetControlValue(p));
+            break;
+          case PropertyType::Duration:
+            state.writer.Number("value", ps->GetDuration(p));
+            break;
+          case PropertyType::Boolean:
+            state.writer.Boolean("value", ps->GetBool(p));
+            break;
+          case PropertyType::Integer:
+            state.writer.Number("value", ps->GetInteger(p));
+            break;
+          case PropertyType::TimePattern:
+            state.writer.String("value", ToString(ps->GetTimePattern(p)));
+            break;
+          case PropertyType::Transition:
+            writeTransition(state, ps->GetTransition(p), "value");
+            break;
+        }
+        state.writer.EndObject();
       }
-      state.writer.EndObject();
     }
     state.writer.EndArray();  // properties
     state.writer.StartArray("connections");
     for (const std::pair<Controllable *, size_t> &c : effect.Connections()) {
       state.writer.StartObject();
-      state.writer.Number("input-index", c.second);
-      state.writer.Number("folder", state.folderIds[&c.first->Parent()]);
+      if (c.second) state.writer.Number("input-index", c.second);
+      state.writer.OptionalNumber("folder",
+                                  state.folderIds[&c.first->Parent()]);
       state.writer.String("name", c.first->Name());
       state.writer.EndObject();
     }
@@ -453,8 +467,8 @@ void writeControlSceneItem(WriteState &state, const ControlSceneItem &item) {
   state.writer.Number("start-value", item.StartValue().UInt());
   state.writer.Number("end-value", item.EndValue().UInt());
   state.writer.String("controllable-ref", item.GetControllable().Name());
-  state.writer.Number("folder",
-                      state.folderIds[&item.GetControllable().Parent()]);
+  state.writer.OptionalNumber(
+      "folder", state.folderIds[&item.GetControllable().Parent()]);
 }
 
 void writeBlackoutSceneItem(WriteState &state, const BlackoutSceneItem &item) {
@@ -552,10 +566,11 @@ void writeFaderState(WriteState &state, const gui::FaderState &fader) {
   for (SourceValue *source : sources) {
     state.writer.StartObject();
     if (source != nullptr) {
-      state.writer.Number("folder",
-                          state.folderIds[&source->GetControllable().Parent()]);
+      state.writer.OptionalNumber(
+          "folder", state.folderIds[&source->GetControllable().Parent()]);
       state.writer.String("name", source->GetControllable().Name());
-      state.writer.Number("input-index", source->InputIndex());
+      if (source->InputIndex())
+        state.writer.Number("input-index", source->InputIndex());
     }
     state.writer.EndObject();
   }

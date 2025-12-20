@@ -198,8 +198,8 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
 
 DmxChannel ParseDmxChannel(const Object &node) {
   DmxChannel channel;
-  channel.SetUniverse(ToNum(node["universe"]).AsInt());
-  channel.SetChannel(ToNum(node["channel"]).AsInt());
+  channel.SetUniverse(OptionalUInt(node, "universe", 0));
+  channel.SetChannel(ToNum(node["channel"]).AsUInt());
   return channel;
 }
 
@@ -305,9 +305,9 @@ void ParsePresetCollection(const Object &node, Management &management) {
   const Array &values = ToArr(node["values"]);
   for (const Node &value : values) {
     const Object &v = ToObj(value);
-    Folder &folder = *management.Folders()[ToNum(v["folder"]).AsSize()];
+    Folder &folder = *management.Folders()[OptionalSize(v, "folder", 0)];
     FolderObject &obj = folder.GetChild(ToStr(v["controllable-ref"]));
-    const size_t inputIndex = ToNum(v["input-index"]).AsSize();
+    const size_t inputIndex = OptionalSize(v, "input-index", 0);
     Controllable *controllable = dynamic_cast<Controllable *>(&obj);
     if (controllable == nullptr)
       throw std::runtime_error(
@@ -325,8 +325,8 @@ void ParseSequence(const Object &node, Sequence &sequence,
   const Array &inputs = ToArr(node["inputs"]);
   for (Node &item_node : inputs) {
     const Object &item = ToObj(item_node);
-    size_t input = ToNum(item["input-index"]).AsSize();
-    size_t folderId = ToNum(item["folder"]).AsSize();
+    size_t input = OptionalSize(item, "input-index", 0);
+    size_t folderId = OptionalSize(item, "folder", 0);
     Controllable &c = dynamic_cast<Controllable &>(
         management.Folders()[folderId]->GetChild(ToStr(item["name"])));
     sequence.Add(c, input);
@@ -419,8 +419,8 @@ void ParseEffect(const Object &node, Management &management) {
   for (const Node &item : connections) {
     const Object &c_node = ToObj(item);
     const std::string &cName = ToStr(c_node["name"]);
-    const size_t cInputIndex = ToNum(c_node["input-index"]).AsSize();
-    const size_t folderId = ToNum(c_node["folder"]).AsSize();
+    const size_t cInputIndex = OptionalSize(c_node, "input-index", 0);
+    const size_t folderId = OptionalSize(c_node, "folder", 0);
     Folder *folder = management.Folders()[folderId].Get();
     effect.AddConnection(dynamic_cast<Controllable &>(folder->GetChild(cName)),
                          cInputIndex);
@@ -435,7 +435,7 @@ KeySceneItem &ParseKeySceneItem(const Object &node, Scene &scene) {
 
 ControlSceneItem &ParseControlSceneItem(const Object &node, Scene &scene,
                                         Management &management) {
-  const size_t folderId = ToNum(node["folder"]).AsSize();
+  const size_t folderId = OptionalSize(node, "folder", 0);
   Folder *folder = management.Folders()[folderId].Get();
   Controllable &controllable = static_cast<Controllable &>(
       folder->GetChild(ToStr(node["controllable-ref"])));
@@ -500,21 +500,21 @@ void ParseControls(const Array &node, Management &management) {
 
 SingleSourceValue ParseSingleSourceValue(const Object &object) {
   SingleSourceValue result;
-  result.SetValue(ControlValue(ToNum(object["value"]).AsUInt()));
-  result.SetTargetValue(ToNum(object["target-value"]).AsUInt());
-  result.SetFadeSpeed(ToNum(object["fade-speed"]).AsDouble());
+  result.SetValue(ControlValue(OptionalUInt(object, "value", 0)));
+  result.SetTargetValue(OptionalUInt(object, "target-value", 0));
+  result.SetFadeSpeed(OptionalUInt(object, "fade-speed", 0.0));
   return result;
 }
 
 void ParseSourceValues(const Array &node, Management &management) {
   for (const Node &element : node) {
     const Object &object = ToObj(element);
-    size_t folderId = ToNum(object["folder"]).AsSize();
+    size_t folderId = OptionalSize(object, "folder", 0);
     const std::string name = ToStr(object["controllable-ref"]);
     Folder *folder = management.Folders()[folderId].Get();
     Controllable &controllable =
         dynamic_cast<Controllable &>(folder->GetChild(name));
-    const size_t inputIndex = ToNum(object["input-index"]).AsSize();
+    const size_t inputIndex = OptionalSize(object, "input-index", 0);
     SourceValue &value = management.AddSourceValue(controllable, inputIndex);
     value.A() = ParseSingleSourceValue(ToObj(object["a"]));
     value.B() = ParseSingleSourceValue(ToObj(object["b"]));
@@ -525,8 +525,8 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
                        Management &management) {
   if (node.contains("name")) {
     // Old way of storing inputs ; support to be removed at a later time
-    const size_t input = ToNum(node["input-index"]).AsSize();
-    const size_t folder_id = ToNum(node["folder"]).AsSize();
+    const size_t input = OptionalSize(node, "input-index", 0);
+    const size_t folder_id = OptionalSize(node, "folder", 0);
     const std::string name = ToStr(node["name"]);
     Folder *folder = management.Folders()[folder_id].Get();
     Controllable &controllable =
@@ -540,8 +540,8 @@ void ParseGuiPresetRef(const Object &node, gui::FaderSetState &fader,
     for (const Node &source_value_item : source_value_node) {
       const Object &object = ToObj(source_value_item);
       if (object.contains("name")) {
-        const size_t input = ToNum(object["input-index"]).AsSize();
-        const size_t folder_id = ToNum(object["folder"]).AsSize();
+        const size_t input = OptionalSize(object, "input-index", 0);
+        const size_t folder_id = OptionalSize(object, "folder", 0);
         const std::string name = ToStr(object["name"]);
         Folder *folder = management.Folders()[folder_id].Get();
         Controllable &controllable =

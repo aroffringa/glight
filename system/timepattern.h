@@ -25,6 +25,8 @@ class TimePattern {
 
   constexpr TimePattern() = default;
 
+  bool operator==(const TimePattern& rhs) const = default;
+
   TimePattern(const std::string& date_time_str) {
     SetDate(date_time_str);
     SetTime(date_time_str.substr(11));

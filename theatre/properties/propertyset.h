@@ -17,6 +17,10 @@ class TimePattern;
 
 namespace glight::theatre {
 
+/**
+ * A property set describes the properties of an object, and knows how to
+ * get and set the values. It also keeps a pointer to the object itself.
+ */
 class PropertySet {
  public:
   using iterator = std::vector<Property>::iterator;
@@ -110,6 +114,8 @@ class PropertySet {
 
   void AssignProperty(const Property &to, const Property &from,
                       const PropertySet &fromSet);
+
+  bool EqualPropertyValues(const Property &property, const Effect &rhs);
 
  protected:
   /**
