@@ -188,6 +188,7 @@ void DesignWizard::initPage4_1RunningLight() {
   initPage4Destination("Running light");
   _vBoxPage4.append(_colorsWidgetP4);
   _vBoxPage4.append(_increasingRunRB);
+  _increasingRunRB.set_active(true);
   _decreasingRunRB.set_group(_increasingRunRB);
   _vBoxPage4.append(_decreasingRunRB);
   _backAndForthRunRB.set_group(_increasingRunRB);
@@ -213,6 +214,7 @@ void DesignWizard::initPage4_3ShiftColors() {
   initPage4Destination("Shift colors");
   _vBoxPage4.append(_colorsWidgetP4);
   _vBoxPage4.append(_shiftIncreasingRB);
+  _shiftIncreasingRB.set_active(true);
   _shiftDecreasingRB.set_group(_shiftIncreasingRB);
   _vBoxPage4.append(_shiftDecreasingRB);
   _shiftBackAndForthRB.set_group(_shiftIncreasingRB);
@@ -225,6 +227,7 @@ void DesignWizard::initPage4_4VUMeter() {
   initPage4Destination("VUMeter");
   _vBoxPage4.append(_colorsWidgetP4);
   _vBoxPage4.append(_vuIncreasingRB);
+  _vuIncreasingRB.set_active(true);
   _vuDecreasingRB.set_group(_vuIncreasingRB);
   _vBoxPage4.append(_vuDecreasingRB);
   _vuInwardRunRB.set_group(_vuIncreasingRB);
@@ -243,6 +246,7 @@ void DesignWizard::initPage4_6Increasing() {
   initPage4Destination("Increase chase");
   _vBoxPage4.append(_colorsWidgetP4);
   _vBoxPage4.append(_incForwardRB);
+  _incForwardRB.set_active(true);
   _incBackwardRB.set_group(_incForwardRB);
   _vBoxPage4.append(_incBackwardRB);
   _incForwardReturnRB.set_group(_incForwardRB);
@@ -255,6 +259,7 @@ void DesignWizard::initPage4_7Rotation() {
   initPage4Destination("Rotation");
   _vBoxPage4.append(_colorsWidgetP4);
   _vBoxPage4.append(_rotForwardRB);
+  _rotForwardRB.set_active(true);
   _rotBackwardRB.set_group(_rotForwardRB);
   _vBoxPage4.append(_rotBackwardRB);
   _rotForwardReturnRB.set_group(_rotForwardRB);

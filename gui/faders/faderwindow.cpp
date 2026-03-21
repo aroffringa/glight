@@ -607,9 +607,10 @@ bool FaderWindow::IsAssigned(theatre::SourceValue *source_value) const {
 }
 
 void FaderWindow::onSetNameClicked() {
-  Gtk::MessageDialog dialog(*this, "Name fader setup", false,
+  dialog_ = std::make_unique<Gtk::MessageDialog>(*this, "Name fader setup", false,
                             Gtk::MessageType::QUESTION,
                             Gtk::ButtonsType::OK_CANCEL);
+  Gtk::MessageDialog& dialog = static_cast<Gtk::MessageDialog&>(*dialog_);
   std::shared_ptr<Gtk::Entry> entry = std::make_shared<Gtk::Entry>();
   dialog.get_message_area()->append(*entry);
   dialog.set_secondary_text("Please enter a name for this fader setup");
@@ -619,6 +620,7 @@ void FaderWindow::onSetNameClicked() {
       set_title(_state->name);
       Instance::State().EmitFaderSetChangeSignal();
     }
+    dialog_.reset();
   });
   dialog.show();
 }
