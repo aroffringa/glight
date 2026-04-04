@@ -4,7 +4,7 @@ project(glight)
 
 find_package(PkgConfig)
 pkg_check_modules(GTKMM gtkmm-4.0>=4.0.0 REQUIRED)
-pkg_check_modules(SIGCXX2 sigc++-2.0 REQUIRED)
+pkg_check_modules(SIGCXX3 sigc++-3.0 REQUIRED)
 pkg_check_modules(FLACPP flac++ REQUIRED)
 pkg_check_modules(ALSA alsa REQUIRED)
 pkg_check_modules(LIBOLA libola REQUIRED)
@@ -67,7 +67,7 @@ add_definitions(-DGLIGHT_INSTALL_PATH="${CMAKE_INSTALL_PREFIX}")
 
 include_directories(SYSTEM
   ${GTKMM_INCLUDE_DIRS}
-  ${SIGCXX2_INCLUDE_DIRS}
+  ${SIGCXX3_INCLUDE_DIRS}
   ${FLACPP_INCLUDE_DIRS}
   ${ALSA_INCLUDE_DIRS}
   ${LIBOLA_INCLUDE_DIRS}
