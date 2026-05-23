@@ -119,7 +119,7 @@ set(GUIFILES
   gui/windows/fixturelistwindow.cpp
   gui/windows/fixtureproperties.cpp
   gui/windows/fixturetypeswindow.cpp
-  gui/windows/fixturetypefunctionsframe.cpp
+  gui/windows/fixturemodeframe.cpp
   gui/windows/groupwindow.cpp
   gui/windows/presetcollectionwindow.cpp
   gui/windows/scenewindow.cpp

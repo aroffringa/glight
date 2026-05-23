@@ -1,5 +1,5 @@
-#ifndef GUI_WINDOWS_FIXTURE_TYPE_FUNCTIONS_FRAME_H_
-#define GUI_WINDOWS_FIXTURE_TYPE_FUNCTIONS_FRAME_H_
+#ifndef GUI_WINDOWS_FIXTURE_MODE_FRAME_H_
+#define GUI_WINDOWS_FIXTURE_MODE_FRAME_H_
 
 #include "../../theatre/fixturemode.h"
 
@@ -15,14 +15,19 @@
 
 namespace glight::gui {
 
-class FixtureTypeFunctionsFrame : public Gtk::Frame {
+class FixtureModeFrame : public Gtk::Frame {
  public:
-  FixtureTypeFunctionsFrame(Gtk::Window& parent_window);
+  FixtureModeFrame(Gtk::Window& parent_window);
+
   const std::vector<theatre::FixtureModeFunction>& GetFunctions() const {
     return functions_;
   }
-  void SetFunctions(
-      const std::vector<theatre::FixtureModeFunction>& functions) {
+
+  std::string GetName() const { return name_entry_.get_text(); }
+
+  void SetData(const std::string& name,
+               const std::vector<theatre::FixtureModeFunction>& functions) {
+    name_entry_.set_text(name);
     functions_ = functions;
     FillModel();
   }
@@ -34,6 +39,9 @@ class FixtureTypeFunctionsFrame : public Gtk::Frame {
   void OpenFunctionParametersEditWindow();
   void UpdateModel();
   void FillModel();
+
+  Gtk::Label name_label_{"Mode name:"};
+  Gtk::Entry name_entry_;
 
   Gtk::ScrolledWindow functions_scrollbars_;
   Gtk::TreeView functions_view_;

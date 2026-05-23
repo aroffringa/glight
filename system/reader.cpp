@@ -365,13 +365,11 @@ void ParseTimeSequence(const Object &node, Management &management) {
   time_sequence.SetRepeatCount(ToNum(node["repeat-count"]).AsSize());
   ParseSequence(ToObj(node["sequence"]), time_sequence.Sequence(), management);
   const Array &steps = ToArr(node["steps"]);
-  size_t stepIndex = 0;
   for (Node &item : steps) {
     const Object &step_obj = ToObj(item);
     TimeSequence::Step &step = time_sequence.Steps().emplace_back();
     ParseTrigger(ToObj(step_obj["trigger"]), step.trigger);
     step.transition = ParseTransition(ToObj(step_obj["transition"]));
-    ++stepIndex;
   }
   if (time_sequence.Steps().size() != time_sequence.Sequence().Size())
     throw std::runtime_error(
