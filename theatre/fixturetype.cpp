@@ -105,6 +105,14 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions.emplace_back(FunctionType::Lime, 3, empty_channel, 0);
       data_.short_name_ = "RGBL";
       break;
+    case StockFixture::Rgbal:
+      functions.emplace_back(FunctionType::Red, 0, empty_channel, 0);
+      functions.emplace_back(FunctionType::Green, 1, empty_channel, 0);
+      functions.emplace_back(FunctionType::Blue, 2, empty_channel, 0);
+      functions.emplace_back(FunctionType::Amber, 3, empty_channel, 0);
+      functions.emplace_back(FunctionType::Lime, 4, empty_channel, 0);
+      data_.short_name_ = "RGBAL";
+      break;
     case StockFixture::CwWw:
       functions.emplace_back(FunctionType::ColdWhite, 0, empty_channel, 0);
       functions.emplace_back(FunctionType::WarmWhite, 1, empty_channel, 0);

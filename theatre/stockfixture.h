@@ -15,6 +15,7 @@ enum class StockFixture {
   Rgbaw,
   RgbawUv,
   Rgbl,
+  Rgbal,
   Uv3Ch,
   H2ODmxPro,
   AyraTDCSunrise,
@@ -45,6 +46,8 @@ inline constexpr std::string_view ToString(StockFixture fixtureClass) {
       return "RGBAW+UV light";
     case StockFixture::Rgbl:
       return "RGBL light";
+    case StockFixture::Rgbal:
+      return "RGBAL light";
     case StockFixture::CwWw:
       return "CW/WW light";
     case StockFixture::CwWwA:
@@ -71,15 +74,25 @@ inline constexpr std::string_view ToString(StockFixture fixtureClass) {
 
 inline std::vector<StockFixture> GetStockFixtureList() {
   using SF = StockFixture;
-  return std::vector<SF>{SF::Light,        SF::Rgb,
-                         SF::Rgba,         SF::Rgbw,
-                         SF::RgbUv,        SF::Rgbaw,
-                         SF::RgbawUv,      SF::Rgbl,
-                         SF::CwWw,         SF::CwWwA,
-                         SF::Uv3Ch,        SF::H2ODmxPro,
-                         SF::AdjStarBurst, SF::AyraTDCSunrise,
-                         SF::BtVintage,    SF::ZoomLight,
-                         SF::MovingHead,   SF::ZoomingMovingHead};
+  return std::vector<SF>{SF::Light,
+                         SF::Rgb,
+                         SF::Rgba,
+                         SF::Rgbw,
+                         SF::RgbUv,
+                         SF::Rgbaw,
+                         SF::RgbawUv,
+                         SF::Rgbl,
+                         SF::Rgbal,
+                         SF::CwWw,
+                         SF::CwWwA,
+                         SF::Uv3Ch,
+                         SF::H2ODmxPro,
+                         SF::AdjStarBurst,
+                         SF::AyraTDCSunrise,
+                         SF::BtVintage,
+                         SF::ZoomLight,
+                         SF::MovingHead,
+                         SF::ZoomingMovingHead};
 }
 
 }  // namespace glight::theatre
