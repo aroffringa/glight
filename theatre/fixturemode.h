@@ -25,7 +25,10 @@ class FixtureMode : public NamedObject {
   explicit FixtureMode(FixtureType &parent_type) : type_(&parent_type) {}
 
   FixtureMode(const FixtureMode &fixture_mode) = delete;
-  FixtureMode(FixtureMode &&) = default;
+  FixtureMode(FixtureMode &&) noexcept = default;
+
+  FixtureMode &operator=(const FixtureMode &) = delete;
+  FixtureMode &operator=(FixtureMode &&) noexcept = default;
 
   FixtureType &Type() { return *type_; }
   const FixtureType &Type() const { return *type_; }

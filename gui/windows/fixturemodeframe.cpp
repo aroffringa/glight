@@ -1,4 +1,4 @@
-#include "fixturetypefunctionsframe.h"
+#include "fixturemodeframe.h"
 
 #include <cassert>
 
@@ -27,9 +27,22 @@ OptionalNumber<size_t> GetFine(const std::string& str) {
 
 }  // namespace
 
-FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
+FixtureModeFrame::FixtureModeFrame(Gtk::Window& parent_window)
     : Gtk::Frame("Functions"), parent_window_(parent_window) {
   functions_model_ = Gtk::ListStore::create(functions_columns_);
+
+  grid_.attach(name_label_, 0, 0);
+  dmx_offset_entry_.signal_changed().connect([&]() {
+    Gtk::TreeModel::iterator selected =
+        functions_view_.get_selection()->get_selected();
+    if (selected) {
+      const int val =
+          std::clamp(std::atoi(dmx_offset_entry_.get_text().c_str()), 0, 511);
+      (*selected)[functions_columns_.dmx_offset_] = val;
+      (*(*selected)[functions_columns_.function_]).SetDmxOffset(val);
+    }
+  });
+  grid_.attach(name_entry_, 1, 0);
 
   functions_view_.set_model(functions_model_);
   functions_view_.append_column("DMX", functions_columns_.dmx_offset_);
@@ -42,17 +55,17 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
   functions_scrollbars_.set_child(functions_view_);
   functions_scrollbars_.set_policy(Gtk::PolicyType::NEVER,
                                    Gtk::PolicyType::AUTOMATIC);
-  grid_.attach(functions_scrollbars_, 0, 0, 3, 1);
+  grid_.attach(functions_scrollbars_, 0, 1, 3, 1);
 
   add_function_button_.signal_clicked().connect([&]() { onAdd(); });
   functions_button_box_.append(add_function_button_);
   remove_function_button_.signal_clicked().connect([&]() { onRemove(); });
   functions_button_box_.append(remove_function_button_);
-  grid_.attach(functions_button_box_, 0, 1, 3, 1);
+  grid_.attach(functions_button_box_, 0, 2, 3, 1);
   grid_.set_hexpand(true);
   grid_.set_vexpand(true);
 
-  grid_.attach(dmx_offset_label_, 0, 2);
+  grid_.attach(dmx_offset_label_, 0, 3);
   dmx_offset_entry_.signal_changed().connect([&]() {
     Gtk::TreeModel::iterator selected =
         functions_view_.get_selection()->get_selected();
@@ -63,7 +76,7 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
       (*(*selected)[functions_columns_.function_]).SetDmxOffset(val);
     }
   });
-  grid_.attach(dmx_offset_entry_, 1, 2, 2, 1);
+  grid_.attach(dmx_offset_entry_, 1, 3, 2, 1);
   fine_channel_entry_.signal_changed().connect([&]() {
     Gtk::TreeModel::iterator selected =
         functions_view_.get_selection()->get_selected();
@@ -74,9 +87,9 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
       (*(*selected)[functions_columns_.function_]).SetFineChannelOffset(fine);
     }
   });
-  grid_.attach(fine_channel_label_, 0, 3);
-  grid_.attach(fine_channel_entry_, 1, 3, 2, 1);
-  grid_.attach(function_type_label_, 0, 4);
+  grid_.attach(fine_channel_label_, 0, 4);
+  grid_.attach(fine_channel_entry_, 1, 4, 2, 1);
+  grid_.attach(function_type_label_, 0, 5);
 
   function_type_model_ = Gtk::ListStore::create(function_type_columns_);
   const std::vector<theatre::FunctionType> types = theatre::GetFunctionTypes();
@@ -106,15 +119,15 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
       }
     }
   });
-  grid_.attach(function_type_combo_, 1, 4);
+  grid_.attach(function_type_combo_, 1, 5);
 
   function_parameters_button_.signal_clicked().connect(
       [&]() { OpenFunctionParametersEditWindow(); });
   function_parameters_button_.set_hexpand(false);
-  grid_.attach(function_parameters_button_, 2, 4);
+  grid_.attach(function_parameters_button_, 2, 5);
 
-  grid_.attach(power_label_, 0, 5);
-  grid_.attach(power_entry_, 1, 5, 2, 1);
+  grid_.attach(power_label_, 0, 6);
+  grid_.attach(power_entry_, 1, 6, 2, 1);
   power_entry_.signal_changed().connect([&]() {
     Gtk::TreeModel::iterator selected =
         functions_view_.get_selection()->get_selected();
@@ -130,7 +143,7 @@ FixtureTypeFunctionsFrame::FixtureTypeFunctionsFrame(Gtk::Window& parent_window)
   onSelectionChanged();
 }
 
-void FixtureTypeFunctionsFrame::FillModel() {
+void FixtureModeFrame::FillModel() {
   functions_model_->clear();
   for (FixtureModeFunction& f : functions_) {
     Gtk::TreeModel::iterator iter = functions_model_->append();
@@ -142,7 +155,7 @@ void FixtureTypeFunctionsFrame::FillModel() {
   }
 }
 
-void FixtureTypeFunctionsFrame::UpdateModel() {
+void FixtureModeFrame::UpdateModel() {
   auto row_iter = functions_model_->children().begin();
   for (FixtureModeFunction& f : functions_) {
     Gtk::TreeModel::Row& row = *row_iter;
@@ -154,7 +167,7 @@ void FixtureTypeFunctionsFrame::UpdateModel() {
   }
 }
 
-void FixtureTypeFunctionsFrame::onAdd() {
+void FixtureModeFrame::onAdd() {
   size_t dmx_offset = 0;
   if (!functions_model_->children().empty()) {
     Gtk::TreeIter end_iter = functions_model_->children().end();
@@ -177,7 +190,7 @@ void FixtureTypeFunctionsFrame::onAdd() {
   UpdateModel();
 }
 
-void FixtureTypeFunctionsFrame::onRemove() {
+void FixtureModeFrame::onRemove() {
   Glib::RefPtr<Gtk::TreeSelection> selection = functions_view_.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
   if (selected) {
@@ -196,7 +209,7 @@ void FixtureTypeFunctionsFrame::onRemove() {
   }
 }
 
-void FixtureTypeFunctionsFrame::onSelectionChanged() {
+void FixtureModeFrame::onSelectionChanged() {
   Gtk::TreeModel::iterator selected =
       functions_view_.get_selection()->get_selected();
   const bool is_selected = static_cast<bool>(selected);
@@ -223,7 +236,7 @@ void FixtureTypeFunctionsFrame::onSelectionChanged() {
   }
 }
 
-void FixtureTypeFunctionsFrame::OpenFunctionParametersEditWindow() {
+void FixtureModeFrame::OpenFunctionParametersEditWindow() {
   Gtk::TreeModel::iterator selected =
       functions_view_.get_selection()->get_selected();
   const bool is_selected = static_cast<bool>(selected);

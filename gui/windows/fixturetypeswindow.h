@@ -1,7 +1,7 @@
 #ifndef GUI_FIXTURE_TYPES_WINDOW_H_
 #define GUI_FIXTURE_TYPES_WINDOW_H_
 
-#include "fixturetypefunctionsframe.h"
+#include "fixturemodeframe.h"
 
 #include "theatre/forwards.h"
 
@@ -43,10 +43,17 @@ class FixtureTypesWindow : public ChildWindow {
   void update() { fillList(); }
   void fillList();
   void onNewButtonClicked();
+  void OnAddModeButtonClicked();
   void onRemoveClicked();
   void onSaveClicked();
   void onSelectionChanged();
-  std::pair<theatre::FixtureType *, theatre::FixtureMode *> GetSelected();
+  struct SelectionData {
+    bool has_selection = false;
+    theatre::FixtureType *type = nullptr;
+    theatre::FixtureMode *mode = nullptr;
+    bool IsNewType() const { return has_selection && type == nullptr; }
+  };
+  SelectionData GetSelected() const;
   void Select(const theatre::FixtureMode &selection);
   void Select(const theatre::FixtureType &selection);
   void SelectFixtures(const theatre::FixtureMode &mode);
@@ -109,11 +116,12 @@ class FixtureTypesWindow : public ChildWindow {
   Gtk::Label idle_power_label_{"Idle power drawn:"};
   Gtk::Entry idle_power_entry_;
 
-  FixtureTypeFunctionsFrame functions_frame_;
+  FixtureModeFrame functions_frame_;
 
   // Bottom
   Gtk::Box button_box_;
   Gtk::Button new_button_{"New"};
+  Gtk::Button add_mode_button_{"Add mode"};
   Gtk::Button remove_button_{"Remove"};
   Gtk::Button save_button_{"Save"};
 

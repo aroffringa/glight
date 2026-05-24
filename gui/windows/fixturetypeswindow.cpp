@@ -109,6 +109,10 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
       sigc::mem_fun(*this, &FixtureTypesWindow::onNewButtonClicked), false);
   button_box_.append(new_button_);
 
+  add_mode_button_.signal_clicked().connect(
+      sigc::mem_fun(*this, &FixtureTypesWindow::OnAddModeButtonClicked), false);
+  button_box_.append(add_mode_button_);
+
   remove_button_.set_image_from_icon_name("edit-delete");
   remove_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureTypesWindow::onRemoveClicked));
@@ -129,7 +133,7 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
 
 void FixtureTypesWindow::fillList() {
   RecursionLock::Token token(recursion_lock_);
-  const auto [selected_type, selected_mode] = GetSelected();
+  const SelectionData selected = GetSelected();
   tree_model_->clear();
 
   theatre::Management &management = Instance::Management();
@@ -142,12 +146,13 @@ void FixtureTypesWindow::fillList() {
     row[list_columns_.fixture_type_] = project_type.Get();
     row[list_columns_.name_] = project_type->Name();
     row[list_columns_.in_use_] = management.GetTheatre().IsUsed(*project_type);
-    if (selected_type && selected_type == project_type.Get()) {
+    if (selected.has_selection && selected.type == project_type.Get()) {
       tree_view_.get_selection()->select(row.get_iter());
     }
     for (FixtureMode &mode : project_type->Modes()) {
       Gtk::TreeModel::iterator child_iter = tree_model_->append(row.children());
       Gtk::TreeModel::Row &child_row = *child_iter;
+      child_row[list_columns_.fixture_type_] = project_type.Get();
       child_row[list_columns_.fixture_mode_] = &mode;
       child_row[list_columns_.name_] = mode.Name();
       child_row[list_columns_.functions_] = FunctionSummary(mode);
@@ -172,13 +177,35 @@ void FixtureTypesWindow::onNewButtonClicked() {
   tree_view_.get_selection()->select(iter);
 }
 
+void FixtureTypesWindow::OnAddModeButtonClicked() {
+  SelectionData selected = GetSelected();
+  if (selected.IsNewType()) {
+    onSaveClicked();
+    selected = GetSelected();
+  }
+  if (!selected.has_selection || selected.type == nullptr) return;
+
+  FixtureMode &new_mode = selected.type->AddMode();
+  fillList();
+  Select(new_mode);
+}
+
 void FixtureTypesWindow::onRemoveClicked() {
-  const auto [type, mode] = GetSelected();
-  if (type) {
+  const SelectionData selected = GetSelected();
+  if (selected.mode) {
     {
       theatre::Management &management = Instance::Management();
       std::lock_guard<std::mutex> lock(management.Mutex());
-      management.RemoveFixtureType(*type);
+      const size_t index = selected.type->ModeIndex(*selected.mode);
+      selected.type->Modes().erase(selected.type->Modes().begin() + index);
+    }
+    Instance::Events().EmitUpdate();
+    Select(*selected.type);
+  } else if (selected.type) {
+    {
+      theatre::Management &management = Instance::Management();
+      std::lock_guard<std::mutex> lock(management.Mutex());
+      management.RemoveFixtureType(*selected.type);
       Instance::Selection().UpdateAfterDelete();
     }
     Instance::Events().EmitUpdate();
@@ -190,14 +217,23 @@ void FixtureTypesWindow::onRemoveClicked() {
 }
 
 void FixtureTypesWindow::onSaveClicked() {
-  auto [type, mode] = GetSelected();
-  if (mode) {
-    const bool is_used = Instance::Management().GetTheatre().IsUsed(*type);
+  const SelectionData selected = GetSelected();
+  if (!selected.has_selection) return;
+  if (selected.mode) {
+    const bool is_used =
+        Instance::Management().GetTheatre().IsUsed(*selected.type);
     if (!is_used) {
-      mode->SetFunctions(functions_frame_.GetFunctions());
+      selected.mode->SetFunctions(functions_frame_.GetFunctions());
+      const std::string new_name = functions_frame_.GetName();
+      if (new_name != selected.mode->Name()) {
+        selected.mode->SetName(new_name);
+        Instance::Events().EmitUpdate();
+        Select(*selected.mode);
+      }
     }
   } else {
-    if (!type) {
+    FixtureType *type;
+    if (selected.IsNewType()) {
       ObservingPtr<FixtureType> new_type =
           Instance::Management()
               .GetTheatre()
@@ -205,6 +241,8 @@ void FixtureTypesWindow::onSaveClicked() {
               .GetObserver<FixtureType>();
       type = new_type.Get();
       Instance::Management().RootFolder().Add(std::move(new_type));
+    } else {
+      type = selected.type;
     }
     type->SetName(name_entry_.get_text());
     type->SetShortName(short_name_entry_.get_text());
@@ -263,19 +301,16 @@ void FixtureTypesWindow::Select(const FixtureType &selection) {
   }
 }
 
-std::pair<FixtureType *, FixtureMode *> FixtureTypesWindow::GetSelected() {
-  Glib::RefPtr<Gtk::TreeSelection> selection = tree_view_.get_selection();
+FixtureTypesWindow::SelectionData FixtureTypesWindow::GetSelected() const {
+  Glib::RefPtr<const Gtk::TreeSelection> selection = tree_view_.get_selection();
   const Gtk::TreeModel::const_iterator selected = selection->get_selected();
+  SelectionData result;
   if (selected) {
-    FixtureMode *mode = (*selected)[list_columns_.fixture_mode_];
-    FixtureType *type = (*selected)[list_columns_.fixture_type_];
-    if (mode)
-      return {nullptr, mode};
-    else
-      return {type, nullptr};
-  } else {
-    return {nullptr, nullptr};
+    result.has_selection = true;
+    result.mode = (*selected)[list_columns_.fixture_mode_];
+    result.type = (*selected)[list_columns_.fixture_type_];
   }
+  return result;
 }
 
 void FixtureTypesWindow::SelectFixtures(const FixtureMode &mode) {
@@ -303,18 +338,17 @@ void FixtureTypesWindow::SelectFixtures(const FixtureType &type) {
 void FixtureTypesWindow::onSelectionChanged() {
   if (recursion_lock_.IsFirst()) {
     RecursionLock::Token token(recursion_lock_);
-    Glib::RefPtr<Gtk::TreeSelection> selection = tree_view_.get_selection();
-    const auto [type, mode] = GetSelected();
-    const bool has_selection = type || mode;
+    const SelectionData selection = GetSelected();
+    const bool has_selection = selection.has_selection;
     remove_button_.set_sensitive(has_selection && !layout_locked_);
     save_button_.set_sensitive(has_selection && !layout_locked_);
     right_grid_.set_sensitive(has_selection && !layout_locked_);
-    if (mode) {
+    if (FixtureMode *mode = selection.mode; mode) {
       ShowTypeWidgets(false);
       const bool is_used = Instance::Management().GetTheatre().IsUsed(*mode);
       functions_frame_.set_sensitive(!is_used && !layout_locked_);
-      functions_frame_.SetFunctions(mode->Functions());
-    } else if (type) {
+      functions_frame_.SetData(mode->Name(), mode->Functions());
+    } else if (FixtureType *type = selection.type; type) {
       ShowTypeWidgets(true);
       SelectFixtures(*type);
       const bool is_used = Instance::Management().GetTheatre().IsUsed(*type);
@@ -353,7 +387,7 @@ void FixtureTypesWindow::onSelectionChanged() {
           std::string(ToString(theatre::FixtureClass::Par)));
       max_power_entry_.set_text("0");
       idle_power_entry_.set_text("0");
-      functions_frame_.SetFunctions({});
+      functions_frame_.SetData("", {});
     }
   }
 }
