@@ -20,19 +20,15 @@
 
 namespace glight::gui {
 
-ToggleWidget::ToggleWidget(FaderWindow &fader_window,
-                           uistate::FaderState &state, ControlMode mode,
+ToggleWidget::ToggleWidget(FaderWindow &fader_window, uistate::FaderState &state, ControlMode mode,
                            char key)
-    : ControlWidget(fader_window, state, mode),
-      flash_button_(std::string(1, key)) {
+    : ControlWidget(fader_window, state, mode), flash_button_(std::string(1, key)) {
   auto gesture = Gtk::GestureClick::create();
   gesture->set_button(3);
 
   flash_button_.SetSignalButton(1);
-  flash_button_.SignalPress().connect(
-      [this](int button) { OnFlashButtonPressed(button); });
-  flash_button_.SignalRelease().connect(
-      [this](int button) { OnFlashButtonReleased(button); });
+  flash_button_.SignalPress().connect([this](int button) { OnFlashButtonPressed(button); });
+  flash_button_.SignalRelease().connect([this](int button) { OnFlashButtonReleased(button); });
   append(flash_button_);
 
   fade_button_.set_image_from_icon_name("go-up");
@@ -49,9 +45,7 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window,
   name_label_.set_hexpand(true);
   label_gesture->set_button(1);
   label_gesture->signal_pressed().connect(
-      [this, g = label_gesture.get()](int, double, double) {
-        ShowAssignDialog();
-      });
+      [this, g = label_gesture.get()](int, double, double) { ShowAssignDialog(); });
   name_label_.add_controller(label_gesture);
 
   append(name_label_);
@@ -74,13 +68,9 @@ void ToggleWidget::OnIconClicked() {
   }
 }
 
-void ToggleWidget::OnFlashButtonPressed(int button) {
-  icon_button_.SetActive(true);
-}
+void ToggleWidget::OnFlashButtonPressed(int button) { icon_button_.SetActive(true); }
 
-void ToggleWidget::OnFlashButtonReleased(int button) {
-  icon_button_.SetActive(false);
-}
+void ToggleWidget::OnFlashButtonReleased(int button) { icon_button_.SetActive(false); }
 
 void ToggleWidget::OnFade() {
   if (icon_button_.GetActive()) {
@@ -107,8 +97,7 @@ void ToggleWidget::OnAssigned(bool moveFader) {
   if (source) {
     name_label_.set_text(source->Name());
     const theatre::Controllable *controllable = &source->GetControllable();
-    const std::vector<theatre::Color> colors =
-        controllable->InputColors(source->InputIndex());
+    const std::vector<theatre::Color> colors = controllable->InputColors(source->InputIndex());
     icon_button_.SetColors(UniqueWithoutOrdering(colors));
     if (moveFader) {
       UpdateActivated(GetSingleSourceValue(*source));
@@ -164,9 +153,7 @@ void ToggleWidget::SyncFader() {
   }
 }
 
-void ToggleWidget::Toggle() {
-  icon_button_.SetActive(!icon_button_.GetActive());
-}
+void ToggleWidget::Toggle() { icon_button_.SetActive(!icon_button_.GetActive()); }
 
 void ToggleWidget::FlashOn() { icon_button_.SetActive(true); }
 

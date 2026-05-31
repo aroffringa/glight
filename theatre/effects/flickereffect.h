@@ -22,24 +22,21 @@ class FlickerEffect final : public Effect {
   void SetSpeed(unsigned speed) { _speed = speed; }
 
   bool IndependentOutputs() const { return _independentOutputs; }
-  void SetIndependentOutputs(bool independentOutputs) {
-    _independentOutputs = independentOutputs;
-  }
+  void SetIndependentOutputs(bool independentOutputs) { _independentOutputs = independentOutputs; }
 
  private:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
     if (values[0]) {
       const size_t count = _independentOutputs ? Connections().size() : 1;
       std::vector<unsigned> &value = _value[primary];
       value.resize(count);
-      double delta = 2.0 * (timing.TimeInMS() - _previousTime[primary]) *
-                     _speed / ControlValue::MaxUInt();
+      double delta =
+          2.0 * (timing.TimeInMS() - _previousTime[primary]) * _speed / ControlValue::MaxUInt();
       _previousTime[primary] = timing.TimeInMS();
 
       for (size_t i = 0; i != count; ++i) {
-        int rnd =
-            int(timing.DrawRandomValue()) - int(ControlValue::MaxUInt() / 2);
+        int rnd = int(timing.DrawRandomValue()) - int(ControlValue::MaxUInt() / 2);
         int newValue = rnd * delta + int(value[i]);
         if (newValue < 0)
           newValue = 0;

@@ -19,16 +19,12 @@ class FadeEffect final : public Effect {
 
   virtual EffectType GetType() const override { return EffectType::Fade; }
 
-  double FadeUpDuration() const {
-    return _fadeUpSpeed == 0.0 ? 0.0 : 1.0e3 / _fadeUpSpeed;
-  }
+  double FadeUpDuration() const { return _fadeUpSpeed == 0.0 ? 0.0 : 1.0e3 / _fadeUpSpeed; }
   void SetFadeUpDuration(double durationMS) {
     _fadeUpSpeed = durationMS == 0.0 ? 0.0 : 1.0e3 / durationMS;
   }
 
-  double FadeDownDuration() const {
-    return _fadeDownSpeed == 0.0 ? 0.0 : 1.0e3 / _fadeDownSpeed;
-  }
+  double FadeDownDuration() const { return _fadeDownSpeed == 0.0 ? 0.0 : 1.0e3 / _fadeDownSpeed; }
   void SetFadeDownDuration(double durationMS) {
     _fadeDownSpeed = durationMS == 0.0 ? 0.0 : 1.0e3 / durationMS;
   }
@@ -37,8 +33,8 @@ class FadeEffect final : public Effect {
   void SetSustain(double sustainMS) { _sustain = 1e-3 * sustainMS; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
     double timePassed = 0.001 * (timing.TimeInMS() - _previousTime[primary]);
     _previousTime[primary] = timing.TimeInMS();
     const unsigned targetValue = values[0].UInt();
@@ -48,9 +44,9 @@ class FadeEffect final : public Effect {
         if (_fadeUpSpeed == 0.0)
           _fadingValue[primary] = targetValue;
         else {
-          unsigned stepSize = unsigned(std::min<double>(
-              timePassed * _fadeUpSpeed * double(ControlValue::MaxUInt()),
-              double(ControlValue::MaxUInt())));
+          unsigned stepSize =
+              unsigned(std::min<double>(timePassed * _fadeUpSpeed * double(ControlValue::MaxUInt()),
+                                        double(ControlValue::MaxUInt())));
           if (_fadingValue[primary] + stepSize > targetValue)
             _fadingValue[primary] = targetValue;
           else
@@ -65,9 +61,9 @@ class FadeEffect final : public Effect {
           if (_fadeDownSpeed == 0.0)
             _fadingValue[primary] = targetValue;
           else {
-            unsigned stepSize = unsigned(std::min<double>(
-                timePassed * _fadeDownSpeed * double(ControlValue::MaxUInt()),
-                double(ControlValue::MaxUInt())));
+            unsigned stepSize = unsigned(
+                std::min<double>(timePassed * _fadeDownSpeed * double(ControlValue::MaxUInt()),
+                                 double(ControlValue::MaxUInt())));
             if (targetValue + stepSize > _fadingValue[primary])
               _fadingValue[primary] = targetValue;
             else

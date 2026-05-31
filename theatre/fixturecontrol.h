@@ -15,9 +15,7 @@ namespace glight::theatre {
 class FixtureControl final : public Controllable {
  public:
   FixtureControl(Fixture &fixture)
-      : Controllable(fixture.Name()),
-        fixture_(&fixture),
-        values_(fixture.Functions().size()) {}
+      : Controllable(fixture.Name()), fixture_(&fixture), values_(fixture.Functions().size()) {}
 
   Fixture &GetFixture() const { return *fixture_; }
 
@@ -37,9 +35,7 @@ class FixtureControl final : public Controllable {
       return filters_.back()->InputTypes()[index].Type();
   }
 
-  Color InputColor(size_t index) const {
-    return GetFunctionColor(InputType(index));
-  }
+  Color InputColor(size_t index) const { return GetFunctionColor(InputType(index)); }
 
   virtual std::vector<Color> InputColors(size_t index) const override {
     return {InputColor(index)};
@@ -54,8 +50,7 @@ class FixtureControl final : public Controllable {
 
   void Mix(const Timing &, bool is_primary) override {
     // Propagate control values through the filters
-    for (auto iterator = filters_.rbegin(); iterator != filters_.rend();
-         ++iterator) {
+    for (auto iterator = filters_.rbegin(); iterator != filters_.rend(); ++iterator) {
       std::unique_ptr<Filter> &filter = *iterator;
       scratch_.resize(filter->OutputTypes().size());
       values_.resize(filter->InputTypes().size());
@@ -68,8 +63,7 @@ class FixtureControl final : public Controllable {
   void GetChannelValues(unsigned *channelValues, unsigned universe) const {
     for (size_t i = 0; i != fixture_->Functions().size(); ++i) {
       const std::unique_ptr<FixtureFunction> &ff = fixture_->Functions()[i];
-      ff->MixChannels(values_[i].UInt(), MixStyle::Default, channelValues,
-                      universe);
+      ff->MixChannels(values_[i].UInt(), MixStyle::Default, channelValues, universe);
     }
   }
 
@@ -89,9 +83,7 @@ class FixtureControl final : public Controllable {
     values_.resize(NInputs());
   }
 
-  const std::vector<std::unique_ptr<Filter>> &Filters() const {
-    return filters_;
-  }
+  const std::vector<std::unique_ptr<Filter>> &Filters() const { return filters_; }
 
  private:
   Fixture *fixture_;

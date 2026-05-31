@@ -22,9 +22,8 @@ class VariableEffect;
  * Add a single preset value to a PresetCollection constructed
  * from a given color.
  */
-void AddPresetValue(Management &management, Controllable &control,
-                    PresetCollection &pc, const Color &color,
-                    const ColorDeduction &deduction);
+void AddPresetValue(Management &management, Controllable &control, PresetCollection &pc,
+                    const Color &color, const ColorDeduction &deduction);
 
 /**
  * Add a single preset value to a PresetCollection for which the color
@@ -32,19 +31,14 @@ void AddPresetValue(Management &management, Controllable &control,
  * between the preset collection and the variable to let the preset
  * collection control the intensity.
  */
-void AddPresetValue(Management &management, Controllable &control,
-                    PresetCollection &pc, VariableEffect *variable,
-                    const ColorDeduction &deduction);
+void AddPresetValue(Management &management, Controllable &control, PresetCollection &pc,
+                    VariableEffect *variable, const ColorDeduction &deduction);
 
-inline void AddPresetValue(Management &management, Controllable &control,
-                           PresetCollection &pc,
+inline void AddPresetValue(Management &management, Controllable &control, PresetCollection &pc,
                            const ColorOrVariable &color_or_variable,
                            const ColorDeduction &deduction) {
-  std::visit(
-      [&](auto &&arg) {
-        AddPresetValue(management, control, pc, arg, deduction);
-      },
-      color_or_variable);
+  std::visit([&](auto &&arg) { AddPresetValue(management, control, pc, arg, deduction); },
+             color_or_variable);
 }
 
 /**

@@ -25,10 +25,8 @@ class WriterException : public std::runtime_error {
   WriterException(const std::string &msg) : std::runtime_error(msg) {}
 };
 
-void Write(std::ostream &stream, theatre::Management &management,
-           uistate::UIState *uiState);
-void Write(const std::string &filename, theatre::Management &management,
-           uistate::UIState *uiState);
+void Write(std::ostream &stream, theatre::Management &management, uistate::UIState *uiState);
+void Write(const std::string &filename, theatre::Management &management, uistate::UIState *uiState);
 
 }  // namespace system
 }  // namespace glight

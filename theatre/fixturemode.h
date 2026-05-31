@@ -33,8 +33,7 @@ class FixtureMode : public NamedObject {
   FixtureType &Type() { return *type_; }
   const FixtureType &Type() const { return *type_; }
 
-  Color GetColor(const Fixture &fixture, const ValueSnapshot &snapshot,
-                 size_t shape_index) const;
+  Color GetColor(const Fixture &fixture, const ValueSnapshot &snapshot, size_t shape_index) const;
 
   /**
    * Determine the rotation speed of the fixture corresponding with the
@@ -44,20 +43,15 @@ class FixtureMode : public NamedObject {
   int GetRotationSpeed(const Fixture &fixture, const ValueSnapshot &snapshot,
                        size_t shape_index) const;
 
-  double GetPan(const Fixture &fixture, const ValueSnapshot &snapshot,
-                size_t shape_index) const;
+  double GetPan(const Fixture &fixture, const ValueSnapshot &snapshot, size_t shape_index) const;
 
-  double GetTilt(const Fixture &fixture, const ValueSnapshot &snapshot,
-                 size_t shape_index) const;
+  double GetTilt(const Fixture &fixture, const ValueSnapshot &snapshot, size_t shape_index) const;
 
-  double GetZoom(const Fixture &fixture, const ValueSnapshot &snapshot,
-                 size_t shape_index) const;
+  double GetZoom(const Fixture &fixture, const ValueSnapshot &snapshot, size_t shape_index) const;
 
   double GetPower(const Fixture &fixture, const ValueSnapshot &snapshot) const;
 
-  const std::vector<FixtureModeFunction> &Functions() const {
-    return functions_;
-  }
+  const std::vector<FixtureModeFunction> &Functions() const { return functions_; }
 
   void SetFunctions(const std::vector<FixtureModeFunction> &functions) {
     functions_ = functions;

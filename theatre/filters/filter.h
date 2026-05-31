@@ -9,12 +9,7 @@
 
 namespace glight::theatre {
 
-enum class FilterType {
-  AutoMaster,
-  ColorTemperature,
-  Monochrome,
-  RgbColorspace
-};
+enum class FilterType { AutoMaster, ColorTemperature, Monochrome, RgbColorspace };
 
 std::string ToString(FilterType type);
 FilterType GetFilterType(const std::string& filter_type_string);
@@ -27,12 +22,8 @@ class Filter {
 
   static std::unique_ptr<Filter> Make(FilterType type);
 
-  const std::vector<FixtureModeFunction>& InputTypes() const {
-    return input_types_;
-  }
-  const std::vector<FixtureModeFunction>& OutputTypes() const {
-    return output_types_;
-  }
+  const std::vector<FixtureModeFunction>& InputTypes() const { return input_types_; }
+  const std::vector<FixtureModeFunction>& OutputTypes() const { return output_types_; }
 
   virtual FilterType GetType() const = 0;
 
@@ -63,8 +54,7 @@ class Filter {
    * @param output Output parameter. On input, should have a size equal to
    * OutputTypes().size().
    */
-  virtual void Apply(const std::vector<ControlValue>& input,
-                     std::vector<ControlValue>& output) = 0;
+  virtual void Apply(const std::vector<ControlValue>& input, std::vector<ControlValue>& output) = 0;
 
  protected:
   void SetInputTypes(std::vector<FixtureModeFunction> input_types) {

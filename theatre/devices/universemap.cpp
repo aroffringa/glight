@@ -15,14 +15,11 @@ void UniverseMap::Open() {
     for (size_t universe : universes) {
       switch (ola_->GetUniverseType(universe)) {
         case UniverseType::Input:
-          mappings_.emplace_back(
-              InputMapping{InputMappingFunction::NoFunction,
-                           {},
-                           system::OptionalNumber<size_t>(universe)});
+          mappings_.emplace_back(InputMapping{
+              InputMappingFunction::NoFunction, {}, system::OptionalNumber<size_t>(universe)});
           break;
         case UniverseType::Output:
-          mappings_.emplace_back(
-              OutputMapping{system::OptionalNumber<size_t>(universe)});
+          mappings_.emplace_back(OutputMapping{system::OptionalNumber<size_t>(universe)});
           has_output = true;
           break;
         case UniverseType::Uninitialized:
@@ -40,8 +37,7 @@ void UniverseMap::Open() {
     ola_.reset();
     mappings_.reserve(2);
     mappings_.emplace_back(OutputMapping());
-    mappings_.emplace_back(
-        InputMapping{InputMappingFunction::NoFunction, {}, {}});
+    mappings_.emplace_back(InputMapping{InputMappingFunction::NoFunction, {}, {}});
   }
 }
 

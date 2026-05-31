@@ -20,8 +20,7 @@ class FixtureList : public Gtk::ScrolledWindow {
   FixtureList();
 
   std::vector<system::ObservingPtr<theatre::Fixture>> Selection() const;
-  void Select(
-      const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures);
+  void Select(const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures);
 
  private:
   void Fill();

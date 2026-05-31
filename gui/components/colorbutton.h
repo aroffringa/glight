@@ -10,16 +10,12 @@ namespace glight::gui::components {
 
 class ColorButton : public Gtk::DrawingArea {
  public:
-  ColorButton(const theatre::Color& color = theatre::Color::White())
-      : color_(color) {
-    set_draw_func([&](const Cairo::RefPtr<Cairo::Context>& cairo, int, int) {
-      DrawColor(cairo);
-    });
+  ColorButton(const theatre::Color& color = theatre::Color::White()) : color_(color) {
+    set_draw_func([&](const Cairo::RefPtr<Cairo::Context>& cairo, int, int) { DrawColor(cairo); });
 
     auto gesture = Gtk::GestureClick::create();
     gesture->set_button(1);
-    gesture->signal_released().connect(
-        [this](int, double, double) { signal_clicked_(); });
+    gesture->signal_released().connect([this](int, double, double) { signal_clicked_(); });
     add_controller(gesture);
   }
 

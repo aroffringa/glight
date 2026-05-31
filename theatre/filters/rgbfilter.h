@@ -25,8 +25,7 @@ class RgbFilter : public Filter {
 
   void SetMode(RgbFilterMode mode) { mode_ = mode; }
 
-  void Apply(const std::vector<ControlValue>& input,
-             std::vector<ControlValue>& output) override {
+  void Apply(const std::vector<ControlValue>& input, std::vector<ControlValue>& output) override {
     unsigned red = input[0].UInt();
     unsigned green = input[1].UInt();
     unsigned blue = input[2].UInt();
@@ -41,25 +40,23 @@ class RgbFilter : public Filter {
         green = ControlValue::Fraction(green, m);
         blue = ControlValue::Fraction(blue, m);
       }
-      const Color color(ControlValue(red).ToUChar(),
-                        ControlValue(green).ToUChar(),
+      const Color color(ControlValue(red).ToUChar(), ControlValue(green).ToUChar(),
                         ControlValue(blue).ToUChar());
       const unsigned short index = color_map_.GetIndex(color);
       const std::vector<theatre::ColorRangeParameters::Range>& ranges =
           OutputTypes()[*macro_index_].GetColorRangeParameters().GetRanges();
       assert(index < ranges.size());
-      output[*macro_index_] = ControlValue::FromUChar(
-          (ranges[index].input_min + ranges[index].input_max) / 2);
+      output[*macro_index_] =
+          ControlValue::FromUChar((ranges[index].input_min + ranges[index].input_max) / 2);
       output[*master_index_] = ControlValue(m);
     } else if (macro_index_) {
-      const Color color(input[0].ToUChar(), input[1].ToUChar(),
-                        input[2].ToUChar());
+      const Color color(input[0].ToUChar(), input[1].ToUChar(), input[2].ToUChar());
       const unsigned short index = color_map_.GetIndex(color);
       const std::vector<theatre::ColorRangeParameters::Range>& ranges =
           OutputTypes()[*macro_index_].GetColorRangeParameters().GetRanges();
       assert(index < ranges.size());
-      output[*macro_index_] = ControlValue::FromUChar(
-          (ranges[index].input_min + ranges[index].input_max) / 2);
+      output[*macro_index_] =
+          ControlValue::FromUChar((ranges[index].input_min + ranges[index].input_max) / 2);
     } else if (cw_index_ && ww_index_ && amber_index_) {
       unsigned ww;
       unsigned cw;
@@ -192,10 +189,9 @@ class RgbFilter : public Filter {
     macro_index_.Reset();
     master_index_.Reset();
 
-    std::vector<FixtureModeFunction> input_types{
-        FixtureModeFunction(FunctionType::Red, 0, {}, 0),
-        FixtureModeFunction(FunctionType::Green, 0, {}, 0),
-        FixtureModeFunction(FunctionType::Blue, 0, {}, 0)};
+    std::vector<FixtureModeFunction> input_types{FixtureModeFunction(FunctionType::Red, 0, {}, 0),
+                                                 FixtureModeFunction(FunctionType::Green, 0, {}, 0),
+                                                 FixtureModeFunction(FunctionType::Blue, 0, {}, 0)};
     for (size_t i = 0; i != OutputTypes().size(); ++i) {
       const FunctionType type = OutputTypes()[i].Type();
       switch (type) {
@@ -238,8 +234,8 @@ class RgbFilter : public Filter {
     }
     if (macro_index_) {
       // Macro is only used if there is no other means to set the color.
-      if (red_index_ || green_index_ || blue_index_ || lime_index_ ||
-          amber_index_ || white_index_ || cw_index_ || ww_index_) {
+      if (red_index_ || green_index_ || blue_index_ || lime_index_ || amber_index_ ||
+          white_index_ || cw_index_ || ww_index_) {
         macro_index_.Reset();
         master_index_.Reset();
       } else {
@@ -254,8 +250,7 @@ class RgbFilter : public Filter {
         }
         color_map_ = system::ColorMap(colors, 8);
         if (master_index_) {
-          for (auto iter = input_types.begin(); iter != input_types.end();
-               ++iter) {
+          for (auto iter = input_types.begin(); iter != input_types.end(); ++iter) {
             if (iter->Type() == FunctionType::Master) {
               input_types.erase(iter);
               break;

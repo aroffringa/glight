@@ -15,15 +15,13 @@ class VariableEffect;
 class Color {
  public:
   constexpr Color() = default;
-  constexpr Color(unsigned char red, unsigned char green,
-                  unsigned char blue) noexcept
+  constexpr Color(unsigned char red, unsigned char green, unsigned char blue) noexcept
       : red_(red), green_(green), blue_(blue) {}
   constexpr Color(const Color &) noexcept = default;
   Color &operator=(const Color &) noexcept = default;
 
   static constexpr Color FromRatio(double r, double g, double b) {
-    return theatre::Color(unsigned(r * 255.4), unsigned(g * 255.4),
-                          unsigned(b * 255.4));
+    return theatre::Color(unsigned(r * 255.4), unsigned(g * 255.4), unsigned(b * 255.4));
   }
   static constexpr Color FromHexString(const char *s) {
     const auto from_hex = [](char c) -> int {
@@ -119,23 +117,19 @@ class Color {
 };
 
 inline Color operator*(const Color &lhs, unsigned char rhs) {
-  return Color(lhs.Red() * rhs / 255, lhs.Green() * rhs / 255,
-               lhs.Blue() * rhs / 255);
+  return Color(lhs.Red() * rhs / 255, lhs.Green() * rhs / 255, lhs.Blue() * rhs / 255);
 }
 
 inline Color operator*(unsigned char lhs, const Color &rhs) {
-  return Color(rhs.Red() * lhs / 255, rhs.Green() * lhs / 255,
-               rhs.Blue() * lhs / 255);
+  return Color(rhs.Red() * lhs / 255, rhs.Green() * lhs / 255, rhs.Blue() * lhs / 255);
 }
 
 inline bool operator==(const Color &lhs, const Color &rhs) {
-  return lhs.Red() == rhs.Red() && lhs.Green() == rhs.Green() &&
-         lhs.Blue() == rhs.Blue();
+  return lhs.Red() == rhs.Red() && lhs.Green() == rhs.Green() && lhs.Blue() == rhs.Blue();
 }
 
 inline bool operator!=(const Color &lhs, const Color &rhs) {
-  return lhs.Red() != rhs.Red() || lhs.Green() != rhs.Green() ||
-         lhs.Blue() != rhs.Blue();
+  return lhs.Red() != rhs.Red() || lhs.Green() != rhs.Green() || lhs.Blue() != rhs.Blue();
 }
 
 inline bool operator<(const Color &lhs, const Color &rhs) {
@@ -156,8 +150,7 @@ inline bool operator<(const Color &lhs, const Color &rhs) {
  * @param s saturation, value in the 0-1.
  * @param l lightness, value in the range 0-1.
  */
-inline void HslToRgb(double h, double s, double l, double &r, double &g,
-                     double &b) {
+inline void HslToRgb(double h, double s, double l, double &r, double &g, double &b) {
   const double d = s * (1.0 - std::fabs(2.0 * l - 1.0));
   const double m = 255.0 * (l - 0.5 * d);
   const double x = d * (1.0 - std::fabs(std::fmod((h / 60.0), 2.0) - 1.0));
@@ -192,8 +185,7 @@ inline void HslToRgb(double h, double s, double l, double &r, double &g,
   }
 }
 
-inline double ColorDistance(double r1, double g1, double b1, double r2,
-                            double g2, double b2) {
+inline double ColorDistance(double r1, double g1, double b1, double r2, double g2, double b2) {
   // from https://www.compuphase.com/cmetric.htm
   const double rmean = (r1 + r2) * 0.5;
   const double r = r1 - r2;
@@ -205,8 +197,7 @@ inline double ColorDistance(double r1, double g1, double b1, double r2,
 
 inline std::string ToString(const Color &c) {
   return std::string("Red=") + std::to_string(int(c.Red())) +
-         ", green=" + std::to_string(int(c.Green())) +
-         ", blue=" + std::to_string(int(c.Blue()));
+         ", green=" + std::to_string(int(c.Green())) + ", blue=" + std::to_string(int(c.Blue()));
 }
 
 using ColorOrVariable = std::variant<Color, VariableEffect *>;

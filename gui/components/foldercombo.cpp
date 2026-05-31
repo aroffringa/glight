@@ -35,8 +35,7 @@ void FolderCombo::fillList() {
   RecursionLock::Token token(_avoidRecursion);
   Gtk::TreeModel::iterator selected = get_active();
   Folder *selectedObj =
-      selected ? static_cast<Folder *>((*selected)[_listColumns._folder])
-               : nullptr;
+      selected ? static_cast<Folder *>((*selected)[_listColumns._folder]) : nullptr;
   _listModel->clear();
 
   theatre::Management &management = Instance::Management();
@@ -56,8 +55,7 @@ void FolderCombo::fillList() {
   }
 }
 
-void FolderCombo::fillListFolder(const Folder &folder, size_t depth,
-                                 const Folder *selectedObj) {
+void FolderCombo::fillListFolder(const Folder &folder, size_t depth, const Folder *selectedObj) {
   for (const ObservingPtr<FolderObject> &obj : folder.Children()) {
     Folder *childFolder = dynamic_cast<Folder *>(obj.Get());
     if (childFolder) {
@@ -82,8 +80,7 @@ void FolderCombo::Select(const Folder &object) {
   Gtk::TreeModel::iterator selected = get_active();
   if (!selected || (*selected)[_listColumns._folder] != &object) {
     if (!selectObject(object, _listModel->children()))
-      throw std::runtime_error("Object to select ('" + object.Name() +
-                               "') not found in list");
+      throw std::runtime_error("Object to select ('" + object.Name() + "') not found in list");
     _signalSelectionChange.emit();
   }
 }

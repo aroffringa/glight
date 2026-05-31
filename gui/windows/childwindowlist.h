@@ -13,21 +13,18 @@ class ChildWindowList {
  public:
   template <typename WindowType, typename... WindowArguments>
   WindowType& Open(
-      std::function<void()> on_close = []() {},
-      WindowArguments&&... arguments) {
+      std::function<void()> on_close = []() {}, WindowArguments&&... arguments) {
     auto iter = Get<WindowType>();
     if (iter == children_.end()) {
       WindowData& data = children_.emplace_back(
-          WindowData{std::make_unique<WindowType>(
-                         std::forward<WindowArguments>(arguments)...),
+          WindowData{std::make_unique<WindowType>(std::forward<WindowArguments>(arguments)...),
                      std::move(on_close)});
       ChildWindow* pointer = data.window.get();
       data.window->signal_close_request().connect(
           [this, pointer]() -> bool {
-            auto iter = std::find_if(children_.begin(), children_.end(),
-                                     [pointer](const WindowData& item) {
-                                       return item.window.get() == pointer;
-                                     });
+            auto iter = std::find_if(
+                children_.begin(), children_.end(),
+                [pointer](const WindowData& item) { return item.window.get() == pointer; });
             iter->on_hide();
             children_.erase(iter);
             return false;
@@ -65,10 +62,9 @@ class ChildWindowList {
 
   template <typename WindowType>
   std::vector<WindowData>::iterator Get() {
-    return std::find_if(
-        children_.begin(), children_.end(), [](const WindowData& data) {
-          return dynamic_cast<const WindowType*>(data.window.get()) != nullptr;
-        });
+    return std::find_if(children_.begin(), children_.end(), [](const WindowData& data) {
+      return dynamic_cast<const WindowType*>(data.window.get()) != nullptr;
+    });
   }
 
   std::vector<WindowData> children_;

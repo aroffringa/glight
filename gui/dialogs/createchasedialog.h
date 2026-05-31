@@ -24,9 +24,7 @@ class CreateChaseDialog : public Gtk::Dialog {
  public:
   CreateChaseDialog();
 
-  sigc::signal<void(theatre::Chase &)> SignalNewChase() {
-    return signal_new_chase_;
-  }
+  sigc::signal<void(theatre::Chase &)> SignalNewChase() { return signal_new_chase_; }
 
  private:
   void initListPart();

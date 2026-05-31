@@ -12,8 +12,7 @@ class VariableEffect final : public Effect {
   virtual EffectType GetType() const override { return EffectType::Variable; }
 
   virtual FunctionType InputType(size_t index) const override {
-    constexpr FunctionType type[3] = {FunctionType::Red, FunctionType::Green,
-                                      FunctionType::Blue};
+    constexpr FunctionType type[3] = {FunctionType::Red, FunctionType::Green, FunctionType::Blue};
     return type[index];
   }
 
@@ -30,12 +29,10 @@ class VariableEffect final : public Effect {
   }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
-    for (size_t connection_index = 0; connection_index != NConnections();
-         ++connection_index) {
-      const std::pair<const Controllable *, size_t> &connection =
-          GetConnection(connection_index);
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
+    for (size_t connection_index = 0; connection_index != NConnections(); ++connection_index) {
+      const std::pair<const Controllable *, size_t> &connection = GetConnection(connection_index);
       const size_t input_index = connection.second;
       switch (connection.first->InputType(input_index)) {
         case FunctionType::Red:

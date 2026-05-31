@@ -41,8 +41,8 @@ class TimePattern {
     day_of_week.Reset();
     if (date_str.size() >= 4 && IsDigit(date_str[0]) && IsDigit(date_str[1]) &&
         IsDigit(date_str[2]) && IsDigit(date_str[3])) {
-      year = 1000 * (date_str[0] - '0') + 100 * (date_str[1] - '0') +
-             10 * (date_str[2] - '0') + (date_str[3] - '0');
+      year = 1000 * (date_str[0] - '0') + 100 * (date_str[1] - '0') + 10 * (date_str[2] - '0') +
+             (date_str[3] - '0');
     } else {
       year.Reset();
     }
@@ -168,8 +168,7 @@ class TimePattern {
   }
 };
 
-constexpr inline bool InRange(const TimePattern& start, const TimePattern& end,
-                              const tm& value) {
+constexpr inline bool InRange(const TimePattern& start, const TimePattern& end, const tm& value) {
   TimePattern e = end;
   if (!e.year) e.year = start.year;
   if (!e.month) e.month = start.month;

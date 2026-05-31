@@ -8,8 +8,7 @@ namespace glight::theatre {
 
 FixtureType::FixtureType(const std::string &name) : FolderObject(name) {}
 
-FixtureType::FixtureType(StockFixture stock_fixture)
-    : FolderObject(ToString(stock_fixture)) {
+FixtureType::FixtureType(StockFixture stock_fixture) : FolderObject(ToString(stock_fixture)) {
   constexpr OptionalNumber<size_t> empty_channel;
   FixtureMode *mode = &modes_.emplace_back(*this);
   std::vector<FixtureModeFunction> functions;
@@ -31,12 +30,9 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       mode->SetName("4 ch (RGBM)");
       mode = &modes_.emplace_back(*this);
       functions.clear();
-      functions.emplace_back(FunctionType::Red, 0, OptionalNumber<size_t>(1),
-                             0);
-      functions.emplace_back(FunctionType::Green, 2, OptionalNumber<size_t>(3),
-                             0);
-      functions.emplace_back(FunctionType::Blue, 4, OptionalNumber<size_t>(5),
-                             0);
+      functions.emplace_back(FunctionType::Red, 0, OptionalNumber<size_t>(1), 0);
+      functions.emplace_back(FunctionType::Green, 2, OptionalNumber<size_t>(3), 0);
+      functions.emplace_back(FunctionType::Blue, 4, OptionalNumber<size_t>(5), 0);
       mode->SetFunctions(functions);
       mode->SetName("6 ch (RGB 16-bit)");
       mode = &modes_.emplace_back(*this);
@@ -141,8 +137,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       break;
     case StockFixture::H2ODmxPro: {
       functions.emplace_back(FunctionType::Master, 0, empty_channel, 0);
-      FixtureModeFunction &rotation = functions.emplace_back(
-          FunctionType::RotationSpeed, 1, empty_channel, 0);
+      FixtureModeFunction &rotation =
+          functions.emplace_back(FunctionType::RotationSpeed, 1, empty_channel, 0);
       std::vector<RotationSpeedParameters::Range> &ranges =
           rotation.GetRotationParameters().GetRanges();
       constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
@@ -162,8 +158,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions.emplace_back(FunctionType::UV, 5, empty_channel, 0);
       functions.emplace_back(FunctionType::Strobe, 6, empty_channel, 0);
       functions.emplace_back(FunctionType::Master, 7, empty_channel, 0);
-      FixtureModeFunction &rotation = functions.emplace_back(
-          FunctionType::RotationSpeed, 8, empty_channel, 0);
+      FixtureModeFunction &rotation =
+          functions.emplace_back(FunctionType::RotationSpeed, 8, empty_channel, 0);
       functions.emplace_back(FunctionType::ColorMacro, 9, empty_channel, 0);
       functions.emplace_back(FunctionType::Effect, 10, empty_channel, 0);
       functions.emplace_back(FunctionType::Effect, 11, empty_channel, 0);
@@ -182,8 +178,8 @@ FixtureType::FixtureType(StockFixture stock_fixture)
       functions.emplace_back(FunctionType::Green, 2, empty_channel, 0);
       functions.emplace_back(FunctionType::Blue, 3, empty_channel, 0);
       functions.emplace_back(FunctionType::Strobe, 4, empty_channel, 0);
-      FixtureModeFunction &rotation = functions.emplace_back(
-          FunctionType::RotationSpeed, 5, empty_channel, 0);
+      FixtureModeFunction &rotation =
+          functions.emplace_back(FunctionType::RotationSpeed, 5, empty_channel, 0);
       constexpr int max_speed = (1 << 24) / 100;  // 1 times per second
       std::vector<RotationSpeedParameters::Range> &ranges =
           rotation.GetRotationParameters().GetRanges();

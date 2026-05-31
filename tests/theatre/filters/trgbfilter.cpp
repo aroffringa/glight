@@ -88,22 +88,19 @@ BOOST_AUTO_TEST_CASE(cold_and_warm_white) {
   BOOST_CHECK_EQUAL(output[1].UInt(), 0);
 
   // Pastel red
-  filter.Apply({kFullCV, ControlValue(kFull / 2), ControlValue(kFull / 2)},
-               output);
+  filter.Apply({kFullCV, ControlValue(kFull / 2), ControlValue(kFull / 2)}, output);
   ToleranceCheck(output[0], kFull * 64 / (2 * 57));
   BOOST_CHECK_EQUAL(output[1].UInt(), 0);
 
   // Pastel blue
-  filter.Apply({ControlValue(kFull / 2), ControlValue(kFull / 2), kFullCV},
-               output);
+  filter.Apply({ControlValue(kFull / 2), ControlValue(kFull / 2), kFullCV}, output);
   BOOST_CHECK_EQUAL(output[0].UInt(), 0);
   ToleranceCheck(output[1], kFull * 64 / (2 * 57));
 }
 
 BOOST_AUTO_TEST_CASE(macro) {
   RgbFilter filter;
-  std::vector<FixtureModeFunction> functions =
-      MakeFunctionList({FunctionType::ColorMacro});
+  std::vector<FixtureModeFunction> functions = MakeFunctionList({FunctionType::ColorMacro});
   std::vector<ColorRangeParameters::Range>& ranges =
       functions.back().GetColorRangeParameters().GetRanges();
   ranges.emplace_back(0, 16, std::optional<Color>());

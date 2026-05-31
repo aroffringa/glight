@@ -15,9 +15,8 @@ namespace glight::theatre {
 
 using system::ObservingPtr;
 
-void AddPresetValue(Management &management, Controllable &control,
-                    PresetCollection &pc, const Color &color,
-                    const ColorDeduction &deduction) {
+void AddPresetValue(Management &management, Controllable &control, PresetCollection &pc,
+                    const Color &color, const ColorDeduction &deduction) {
   const ControlValue red = ControlValue::FromUChar(color.Red());
   const ControlValue green = ControlValue::FromUChar(color.Green());
   const ControlValue blue = ControlValue::FromUChar(color.Blue());
@@ -30,8 +29,7 @@ void AddPresetValue(Management &management, Controllable &control,
     switch (type) {
       case FunctionType::Master:
         if (master != 0) {
-          pc.AddPresetValue(control, sourceValue->InputIndex())
-              .SetValue(ControlValue(master));
+          pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(ControlValue(master));
         }
         break;
       case FunctionType::Red:
@@ -53,8 +51,7 @@ void AddPresetValue(Management &management, Controllable &control,
         if (deduction.whiteFromRGB) {
           const ControlValue white = DeduceWhite(red, green, blue);
           if (white) {
-            pc.AddPresetValue(control, sourceValue->InputIndex())
-                .SetValue(ControlValue(white));
+            pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(ControlValue(white));
           }
         }
         break;
@@ -62,8 +59,7 @@ void AddPresetValue(Management &management, Controllable &control,
         if (deduction.whiteFromRGB) {
           const ControlValue ww = DeduceWarmWhite(red, green, blue);
           if (ww) {
-            pc.AddPresetValue(control, sourceValue->InputIndex())
-                .SetValue(ControlValue(ww));
+            pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(ControlValue(ww));
           }
         }
         break;
@@ -71,8 +67,7 @@ void AddPresetValue(Management &management, Controllable &control,
         if (deduction.whiteFromRGB) {
           const ControlValue cw = DeduceColdWhite(red, green, blue);
           if (cw) {
-            pc.AddPresetValue(control, sourceValue->InputIndex())
-                .SetValue(ControlValue(cw));
+            pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(ControlValue(cw));
           }
         }
         break;
@@ -80,8 +75,7 @@ void AddPresetValue(Management &management, Controllable &control,
         if (deduction.amberFromRGB) {
           const ControlValue amber = DeduceAmber(red, green, blue);
           if (amber) {
-            pc.AddPresetValue(control, sourceValue->InputIndex())
-                .SetValue(amber);
+            pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(amber);
           }
         }
         break;
@@ -97,8 +91,7 @@ void AddPresetValue(Management &management, Controllable &control,
         if (deduction.limeFromRGB) {
           const ControlValue lime = DeduceLime(red, green, blue);
           if (lime) {
-            pc.AddPresetValue(control, sourceValue->InputIndex())
-                .SetValue(lime);
+            pc.AddPresetValue(control, sourceValue->InputIndex()).SetValue(lime);
           }
         }
         break;
@@ -108,18 +101,16 @@ void AddPresetValue(Management &management, Controllable &control,
   }
 }
 
-void AddPresetValue(Management &management, Controllable &control,
-                    PresetCollection &pc, VariableEffect *variable,
-                    const ColorDeduction &deduction) {
+void AddPresetValue(Management &management, Controllable &control, PresetCollection &pc,
+                    VariableEffect *variable, const ColorDeduction &deduction) {
   std::unique_ptr<RgbMasterEffect> effect = std::make_unique<RgbMasterEffect>();
   effect->SetName(pc.Parent().GetAvailableName(pc.Name() + "_var"));
-  Effect &added_effect = static_cast<Effect &>(
-      *management.AddEffect(std::move(effect), pc.Parent()));
+  Effect &added_effect =
+      static_cast<Effect &>(*management.AddEffect(std::move(effect), pc.Parent()));
   for (size_t inp = 0; inp != added_effect.NInputs(); ++inp)
     management.AddSourceValue(added_effect, inp);
 
-  pc.AddPresetValue(added_effect, RgbMasterEffect::kMasterInput)
-      .SetValue(ControlValue::Max());
+  pc.AddPresetValue(added_effect, RgbMasterEffect::kMasterInput).SetValue(ControlValue::Max());
   variable->AddConnection(added_effect, RgbMasterEffect::kRedInput);
   variable->AddConnection(added_effect, RgbMasterEffect::kGreenInput);
   variable->AddConnection(added_effect, RgbMasterEffect::kBlueInput);
@@ -144,8 +135,8 @@ PresetCollection &MakeColorPreset(const DesignInfo &design,
   destination.Add(pc);
   for (size_t cIndex = 0; cIndex != design.controllables->size(); ++cIndex) {
     size_t colorIndex = cIndex % colors.size();
-    AddPresetValue(management, *(*design.controllables)[cIndex], *pc,
-                   colors[colorIndex], design.deduction);
+    AddPresetValue(management, *(*design.controllables)[cIndex], *pc, colors[colorIndex],
+                   design.deduction);
   }
   management.AddSourceValue(*pc, 0);
   return *pc;
@@ -154,14 +145,13 @@ PresetCollection &MakeColorPreset(const DesignInfo &design,
 void MakeColorPresetPerFixture(const DesignInfo &design,
                                const std::vector<ColorOrVariable> &colors) {
   for (size_t cIndex = 0; cIndex != design.controllables->size(); ++cIndex) {
-    ObservingPtr<PresetCollection> pc_ptr =
-        design.management->AddPresetCollectionPtr();
+    ObservingPtr<PresetCollection> pc_ptr = design.management->AddPresetCollectionPtr();
     PresetCollection &pc = *pc_ptr;
     pc.SetName(GetValidName(design, "Colourpreset"));
     design.destination->Add(std::move(pc_ptr));
     size_t colorIndex = cIndex % colors.size();
-    AddPresetValue(*design.management, *(*design.controllables)[cIndex], pc,
-                   colors[colorIndex], design.deduction);
+    AddPresetValue(*design.management, *(*design.controllables)[cIndex], pc, colors[colorIndex],
+                   design.deduction);
     design.management->AddSourceValue(pc, 0);
   }
 }

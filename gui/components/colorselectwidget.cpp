@@ -55,11 +55,10 @@ ColorSelectWidget::ColorSelectWidget(Gtk::Window *parent, bool allow_variable)
 }
 
 void ColorSelectWidget::OpenColorSelection() {
-  OpenColorDialog(dialog_, *parent_, color_button_.GetColor(),
-                  [this](theatre::Color color) {
-                    color_button_.SetColor(color);
-                    signal_color_changed_();
-                  });
+  OpenColorDialog(dialog_, *parent_, color_button_.GetColor(), [this](theatre::Color color) {
+    color_button_.SetColor(color);
+    signal_color_changed_();
+  });
 }
 
 void ColorSelectWidget::OpenVariableSelection() {
@@ -67,19 +66,16 @@ void ColorSelectWidget::OpenVariableSelection() {
   dialog.SetFilter(ObjectListType::OnlyVariables);
   dialog.ShowNewButton(true);
   dialog.SignalNewClicked().connect([&]() {
-    StringInputDialog string_dialog("New variable",
-                                    "Name of new variable:", "");
+    StringInputDialog string_dialog("New variable", "Name of new variable:", "");
     string_dialog.signal_response().connect([&](int response) {
       if (response == Gtk::ResponseType::OK) {
-        std::unique_ptr<theatre::Effect> effect =
-            std::make_unique<theatre::VariableEffect>();
+        std::unique_ptr<theatre::Effect> effect = std::make_unique<theatre::VariableEffect>();
         theatre::Folder &parent = dialog.SelectedFolder();
         effect->SetName(string_dialog.Value());
         theatre::Management &management = Instance::Management();
         system::ObservingPtr<theatre::Effect> added =
             management.AddEffectPtr(std::move(effect), parent);
-        for (size_t i = 0; i != added->NInputs(); ++i)
-          management.AddSourceValue(*added, i);
+        for (size_t i = 0; i != added->NInputs(); ++i) management.AddSourceValue(*added, i);
         Instance::Events().EmitUpdate();
         dialog.SelectObject(*added);
       }

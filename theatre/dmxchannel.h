@@ -20,12 +20,8 @@ class DmxChannel {
 
   constexpr void SetUniverse(unsigned universe) { universe_ = universe; }
   constexpr void SetChannel(unsigned channel) { channel_ = channel; }
-  DmxChannel Next() const {
-    return DmxChannel((channel_ + 1) % 512, universe_);
-  }
-  DmxChannel Previous() const {
-    return DmxChannel((channel_ + 512 - 1) % 512, universe_);
-  }
+  DmxChannel Next() const { return DmxChannel((channel_ + 1) % 512, universe_); }
+  DmxChannel Previous() const { return DmxChannel((channel_ + 512 - 1) % 512, universe_); }
   /**
    * Returns the DmxChannel with given offset from this channel. If the
    * resulting channel would be higher than 512, it will wrap around in the same

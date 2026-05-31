@@ -33,11 +33,9 @@ FixtureModeFrame::FixtureModeFrame(Gtk::Window& parent_window)
 
   grid_.attach(name_label_, 0, 0);
   dmx_offset_entry_.signal_changed().connect([&]() {
-    Gtk::TreeModel::iterator selected =
-        functions_view_.get_selection()->get_selected();
+    Gtk::TreeModel::iterator selected = functions_view_.get_selection()->get_selected();
     if (selected) {
-      const int val =
-          std::clamp(std::atoi(dmx_offset_entry_.get_text().c_str()), 0, 511);
+      const int val = std::clamp(std::atoi(dmx_offset_entry_.get_text().c_str()), 0, 511);
       (*selected)[functions_columns_.dmx_offset_] = val;
       (*(*selected)[functions_columns_.function_]).SetDmxOffset(val);
     }
@@ -50,11 +48,9 @@ FixtureModeFrame::FixtureModeFrame(Gtk::Window& parent_window)
   functions_view_.append_column("Type", functions_columns_.function_type_str_);
   functions_view_.set_vexpand(true);
   functions_view_.set_hexpand(true);
-  functions_view_.get_selection()->signal_changed().connect(
-      [&]() { onSelectionChanged(); });
+  functions_view_.get_selection()->signal_changed().connect([&]() { onSelectionChanged(); });
   functions_scrollbars_.set_child(functions_view_);
-  functions_scrollbars_.set_policy(Gtk::PolicyType::NEVER,
-                                   Gtk::PolicyType::AUTOMATIC);
+  functions_scrollbars_.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
   grid_.attach(functions_scrollbars_, 0, 1, 3, 1);
 
   add_function_button_.signal_clicked().connect([&]() { onAdd(); });
@@ -67,22 +63,18 @@ FixtureModeFrame::FixtureModeFrame(Gtk::Window& parent_window)
 
   grid_.attach(dmx_offset_label_, 0, 3);
   dmx_offset_entry_.signal_changed().connect([&]() {
-    Gtk::TreeModel::iterator selected =
-        functions_view_.get_selection()->get_selected();
+    Gtk::TreeModel::iterator selected = functions_view_.get_selection()->get_selected();
     if (selected) {
-      const int val =
-          std::clamp(std::atoi(dmx_offset_entry_.get_text().c_str()), 0, 511);
+      const int val = std::clamp(std::atoi(dmx_offset_entry_.get_text().c_str()), 0, 511);
       (*selected)[functions_columns_.dmx_offset_] = val;
       (*(*selected)[functions_columns_.function_]).SetDmxOffset(val);
     }
   });
   grid_.attach(dmx_offset_entry_, 1, 3, 2, 1);
   fine_channel_entry_.signal_changed().connect([&]() {
-    Gtk::TreeModel::iterator selected =
-        functions_view_.get_selection()->get_selected();
+    Gtk::TreeModel::iterator selected = functions_view_.get_selection()->get_selected();
     if (selected) {
-      const OptionalNumber<size_t> fine =
-          GetFine(fine_channel_entry_.get_text());
+      const OptionalNumber<size_t> fine = GetFine(fine_channel_entry_.get_text());
       (*selected)[functions_columns_.fine_channel_] = FineToString(fine);
       (*(*selected)[functions_columns_.function_]).SetFineChannelOffset(fine);
     }
@@ -101,13 +93,11 @@ FixtureModeFrame::FixtureModeFrame(Gtk::Window& parent_window)
   function_type_combo_.set_model(function_type_model_);
   function_type_combo_.pack_start(function_type_columns_.function_type_str_);
   function_type_combo_.signal_changed().connect([&]() {
-    Gtk::TreeModel::iterator selected =
-        functions_view_.get_selection()->get_selected();
+    Gtk::TreeModel::iterator selected = functions_view_.get_selection()->get_selected();
     if (selected) {
       Gtk::TreeModel::const_iterator iter = function_type_combo_.get_active();
       if (iter) {
-        FixtureModeFunction* function =
-            (*selected)[functions_columns_.function_];
+        FixtureModeFunction* function = (*selected)[functions_columns_.function_];
         FunctionType type = (*iter)[function_type_columns_.function_type_];
         // We should not update the type if no change is made, as it would
         // also destroy the parameters of the type (like macro color range)
@@ -129,11 +119,9 @@ FixtureModeFrame::FixtureModeFrame(Gtk::Window& parent_window)
   grid_.attach(power_label_, 0, 6);
   grid_.attach(power_entry_, 1, 6, 2, 1);
   power_entry_.signal_changed().connect([&]() {
-    Gtk::TreeModel::iterator selected =
-        functions_view_.get_selection()->get_selected();
+    Gtk::TreeModel::iterator selected = functions_view_.get_selection()->get_selected();
     if (selected) {
-      const unsigned val =
-          std::max(0LL, std::atoll(power_entry_.get_text().c_str()));
+      const unsigned val = std::max(0LL, std::atoll(power_entry_.get_text().c_str()));
       (*(*selected)[functions_columns_.function_]).SetPower(val);
     }
   });
@@ -173,11 +161,9 @@ void FixtureModeFrame::onAdd() {
     Gtk::TreeIter end_iter = functions_model_->children().end();
     --end_iter;
     Gtk::TreeModel::Row row = *end_iter;
-    OptionalNumber<size_t> fine =
-        GetFine(Glib::ustring(row[functions_columns_.fine_channel_]));
+    OptionalNumber<size_t> fine = GetFine(Glib::ustring(row[functions_columns_.fine_channel_]));
     if (fine)
-      dmx_offset =
-          std::max<size_t>(row[functions_columns_.dmx_offset_], *fine) + 1;
+      dmx_offset = std::max<size_t>(row[functions_columns_.dmx_offset_], *fine) + 1;
     else
       dmx_offset = row[functions_columns_.dmx_offset_] + 1;
   }
@@ -195,11 +181,9 @@ void FixtureModeFrame::onRemove() {
   Gtk::TreeModel::iterator selected = selection->get_selected();
   if (selected) {
     FixtureModeFunction* function = (*selected)[functions_columns_.function_];
-    auto iter =
-        std::find_if(functions_.begin(), functions_.end(),
-                     [function](const FixtureModeFunction& ftf) -> bool {
-                       return &ftf == function;
-                     });
+    auto iter = std::find_if(
+        functions_.begin(), functions_.end(),
+        [function](const FixtureModeFunction& ftf) -> bool { return &ftf == function; });
     assert(iter != functions_.end());
     // This might change the address of functions, so we need
     // to call UpdateModel() after removing the element.
@@ -210,8 +194,7 @@ void FixtureModeFrame::onRemove() {
 }
 
 void FixtureModeFrame::onSelectionChanged() {
-  Gtk::TreeModel::iterator selected =
-      functions_view_.get_selection()->get_selected();
+  Gtk::TreeModel::iterator selected = functions_view_.get_selection()->get_selected();
   const bool is_selected = static_cast<bool>(selected);
   dmx_offset_label_.set_sensitive(is_selected);
   dmx_offset_entry_.set_sensitive(is_selected);
@@ -221,8 +204,7 @@ void FixtureModeFrame::onSelectionChanged() {
   function_type_combo_.set_sensitive(is_selected);
   function_parameters_button_.set_sensitive(is_selected);
   if (is_selected) {
-    const FixtureModeFunction& function =
-        *(*selected)[functions_columns_.function_];
+    const FixtureModeFunction& function = *(*selected)[functions_columns_.function_];
     dmx_offset_entry_.set_text(std::to_string(function.DmxOffset()));
     fine_channel_entry_.set_text((*selected)[functions_columns_.fine_channel_]);
     const int ft_index = static_cast<int>(function.Type());
@@ -237,21 +219,19 @@ void FixtureModeFrame::onSelectionChanged() {
 }
 
 void FixtureModeFrame::OpenFunctionParametersEditWindow() {
-  Gtk::TreeModel::iterator selected =
-      functions_view_.get_selection()->get_selected();
+  Gtk::TreeModel::iterator selected = functions_view_.get_selection()->get_selected();
   const bool is_selected = static_cast<bool>(selected);
   if (is_selected) {
     FixtureModeFunction& function = *(*selected)[functions_columns_.function_];
     if (function.Type() == FunctionType::ColorMacro ||
         function.Type() == FunctionType::ColorWheel) {
-      sub_window_ = std::make_unique<windows::EditColorRange>(
-          function.GetColorRangeParameters().GetRanges());
+      sub_window_ =
+          std::make_unique<windows::EditColorRange>(function.GetColorRangeParameters().GetRanges());
       sub_window_->set_modal(true);
       sub_window_->set_transient_for(parent_window_);
       sub_window_->signal_hide().connect([&]() {
         function.GetColorRangeParameters().GetRanges() =
-            static_cast<windows::EditColorRange*>(sub_window_.get())
-                ->GetRanges();
+            static_cast<windows::EditColorRange*>(sub_window_.get())->GetRanges();
         sub_window_.reset();
       });
       sub_window_->show();

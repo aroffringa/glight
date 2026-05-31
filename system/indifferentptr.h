@@ -29,8 +29,7 @@ class IndifferentPtr {
 
   IndifferentPtr(const IndifferentPtr& source) = delete;
 
-  constexpr IndifferentPtr(IndifferentPtr&& source)
-      : pointer_(source.pointer_) {
+  constexpr IndifferentPtr(IndifferentPtr&& source) : pointer_(source.pointer_) {
     source.pointer_ = nullptr;
   }
 
@@ -70,12 +69,10 @@ class IndifferentPtr {
 
   explicit operator bool() const noexcept { return pointer_ != nullptr; }
 
-  friend bool operator==(const IndifferentPtr& a,
-                         const IndifferentPtr& b) noexcept {
+  friend bool operator==(const IndifferentPtr& a, const IndifferentPtr& b) noexcept {
     return a.pointer_ == b.pointer_;
   }
-  friend bool operator!=(const IndifferentPtr& a,
-                         const IndifferentPtr& b) noexcept {
+  friend bool operator!=(const IndifferentPtr& a, const IndifferentPtr& b) noexcept {
     return a.pointer_ != b.pointer_;
   }
 

@@ -21,15 +21,13 @@ void FaderState::Connect() {
   for (size_t i = 0; i != source_values_.size(); ++i) {
     if (source_values_[i]) {
       source_value_deleted_connections_[i] =
-          source_values_[i]->SignalDelete().connect(
-              [&]() { onPresetValueDeleted(); });
+          source_values_[i]->SignalDelete().connect([&]() { onPresetValueDeleted(); });
     }
   }
 }
 
 void FaderState::Disconnect() {
-  for (sigc::connection& connection : source_value_deleted_connections_)
-    connection.disconnect();
+  for (sigc::connection& connection : source_value_deleted_connections_) connection.disconnect();
 }
 
 void FaderState::SetSourceValues(std::vector<SourceValue*> source_values) {

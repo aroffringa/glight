@@ -16,8 +16,7 @@ class BeatFinder {
  public:
   class AlsaError : public std::runtime_error {
    public:
-    AlsaError(const std::string &message)
-        : runtime_error(std::string("Alsa error: ") + message) {}
+    AlsaError(const std::string &message) : runtime_error(std::string("Alsa error: ") + message) {}
   };
 
   BeatFinder(const std::string &device_name) : device_name_(device_name) {}

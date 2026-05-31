@@ -40,8 +40,7 @@ std::vector<double> MakeInverseTable(const std::vector<double> &table) {
     while (table[h_table + 1] < h_star && h_table < 360) ++h_table;
     const double h_star_low = table[h_table];
     const double h_star_high = table[h_table + 1];
-    const double h =
-        h_table + (h_star - h_star_low) / (h_star_high - h_star_low);
+    const double h = h_table + (h_star - h_star_low) / (h_star_high - h_star_low);
     inverse_table.emplace_back(h);
   }
   return inverse_table;
@@ -50,11 +49,10 @@ std::vector<double> MakeInverseTable(const std::vector<double> &table) {
 }  // namespace
 
 const std::vector<double> HueSaturationLightnessEffect::table_ = MakeTable();
-const std::vector<double> HueSaturationLightnessEffect::inverted_table_ =
-    MakeInverseTable(table_);
+const std::vector<double> HueSaturationLightnessEffect::inverted_table_ = MakeInverseTable(table_);
 
-std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(
-    ControlValue h, ControlValue s, ControlValue l) {
+std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(ControlValue h, ControlValue s,
+                                                                  ControlValue l) {
   switch (color_space_) {
     case HslColorSpace::LinearHsl: {
       double r;
@@ -69,10 +67,8 @@ std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(
       double r;
       double g;
       double b;
-      hsluv2rgb(360.0 * h.Ratio(), 100.0 * s.Ratio(), 100.0 * l.Ratio(), &r, &g,
-                &b);
-      return std::array<ControlValue, 3>{ControlValue::FromRatio(r),
-                                         ControlValue::FromRatio(g),
+      hsluv2rgb(360.0 * h.Ratio(), 100.0 * s.Ratio(), 100.0 * l.Ratio(), &r, &g, &b);
+      return std::array<ControlValue, 3>{ControlValue::FromRatio(r), ControlValue::FromRatio(g),
                                          ControlValue::FromRatio(b)};
     }
     default:
@@ -95,14 +91,11 @@ std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(
 }
 
 void HueSaturationLightnessEffect::MixImplementation(const ControlValue *values,
-                                                     const Timing & /*timing*/,
-                                                     bool primary) {
+                                                     const Timing & /*timing*/, bool primary) {
   // TODO cache
   std::array<ControlValue, 3> rgb = Convert(values[0], values[1], values[2]);
-  for (size_t connection_index = 0; connection_index != NConnections();
-       ++connection_index) {
-    const std::pair<const Controllable *, size_t> &connection =
-        GetConnection(connection_index);
+  for (size_t connection_index = 0; connection_index != NConnections(); ++connection_index) {
+    const std::pair<const Controllable *, size_t> &connection = GetConnection(connection_index);
     switch (connection.first->InputType(connection.second)) {
       case FunctionType::Red:
         MixConnection(connection_index, rgb[0], primary);
@@ -114,28 +107,22 @@ void HueSaturationLightnessEffect::MixImplementation(const ControlValue *values,
         MixConnection(connection_index, rgb[2], primary);
         break;
       case FunctionType::White:
-        MixConnection(connection_index, DeduceWhite(rgb[0], rgb[1], rgb[2]),
-                      primary);
+        MixConnection(connection_index, DeduceWhite(rgb[0], rgb[1], rgb[2]), primary);
         break;
       case FunctionType::Amber:
-        MixConnection(connection_index, DeduceAmber(rgb[0], rgb[1], rgb[2]),
-                      primary);
+        MixConnection(connection_index, DeduceAmber(rgb[0], rgb[1], rgb[2]), primary);
         break;
       case FunctionType::UV:
-        MixConnection(connection_index, DeduceUv(rgb[0], rgb[1], rgb[2]),
-                      primary);
+        MixConnection(connection_index, DeduceUv(rgb[0], rgb[1], rgb[2]), primary);
         break;
       case FunctionType::Lime:
-        MixConnection(connection_index, DeduceLime(rgb[0], rgb[1], rgb[2]),
-                      primary);
+        MixConnection(connection_index, DeduceLime(rgb[0], rgb[1], rgb[2]), primary);
         break;
       case FunctionType::ColdWhite:
-        MixConnection(connection_index, DeduceColdWhite(rgb[0], rgb[1], rgb[2]),
-                      primary);
+        MixConnection(connection_index, DeduceColdWhite(rgb[0], rgb[1], rgb[2]), primary);
         break;
       case FunctionType::WarmWhite:
-        MixConnection(connection_index, DeduceWarmWhite(rgb[0], rgb[1], rgb[2]),
-                      primary);
+        MixConnection(connection_index, DeduceWarmWhite(rgb[0], rgb[1], rgb[2]), primary);
         break;
       case FunctionType::Hue:
         MixConnection(connection_index, values[0], primary);

@@ -47,12 +47,9 @@ class ObjectList : public Gtk::ScrolledWindow {
 
   std::vector<system::ObservingPtr<theatre::FolderObject>> Selection() const;
 
-  sigc::signal<void()> &SignalSelectionChange() {
-    return _signalSelectionChange;
-  }
+  sigc::signal<void()> &SignalSelectionChange() { return _signalSelectionChange; }
 
-  sigc::signal<void(ObservingPtr<theatre::FolderObject> object)>
-      &SignalObjectActivated() {
+  sigc::signal<void(ObservingPtr<theatre::FolderObject> object)> &SignalObjectActivated() {
     return _signalObjectActivated;
   }
 
@@ -61,8 +58,7 @@ class ObjectList : public Gtk::ScrolledWindow {
   void SetFolder(theatre::Folder &folder) {
     if (&folder != _openFolder) {
       _openFolder = &folder;
-      bool doChangeSelection =
-          (_listView.get_selection()->count_selected_rows() != 0);
+      bool doChangeSelection = (_listView.get_selection()->count_selected_rows() != 0);
       if (doChangeSelection) _listView.get_selection()->unselect_all();
       fillList();
       if (doChangeSelection) _signalSelectionChange.emit();
@@ -73,9 +69,8 @@ class ObjectList : public Gtk::ScrolledWindow {
   bool ShowTypeColumn() const { return _showTypeColumn; }
 
   void SetAllowMultiSelection(bool allow_multi_selection) {
-    _listView.get_selection()->set_mode(allow_multi_selection
-                                            ? Gtk::SelectionMode::MULTIPLE
-                                            : Gtk::SelectionMode::SINGLE);
+    _listView.get_selection()->set_mode(allow_multi_selection ? Gtk::SelectionMode::MULTIPLE
+                                                              : Gtk::SelectionMode::SINGLE);
     _listView.set_rubber_banding(allow_multi_selection);
   }
 
@@ -110,21 +105,17 @@ class ObjectList : public Gtk::ScrolledWindow {
   } _listColumns;
 
   void fillList();
-  void fillListFolder(const theatre::Folder &folder,
-                      const theatre::FolderObject *selectedObj);
-  bool selectObject(const theatre::FolderObject &object,
-                    const Gtk::TreeModel::Children &children);
+  void fillListFolder(const theatre::Folder &folder, const theatre::FolderObject *selectedObj);
+  bool selectObject(const theatre::FolderObject &object, const Gtk::TreeModel::Children &children);
   void constructContextMenu();
-  void constructFolderMenu(const std::shared_ptr<Gio::Menu> &menu,
-                           Gio::ActionMap &actions, theatre::Folder &folder,
-                           int &counter);
+  void constructFolderMenu(const std::shared_ptr<Gio::Menu> &menu, Gio::ActionMap &actions,
+                           theatre::Folder &folder, int &counter);
   void onMoveSelected(theatre::Folder *destination);
   void onMoveUpSelected();
   void onMoveDownSelected();
 
   sigc::signal<void()> _signalSelectionChange;
-  sigc::signal<void(system::ObservingPtr<theatre::FolderObject> object)>
-      _signalObjectActivated;
+  sigc::signal<void(system::ObservingPtr<theatre::FolderObject> object)> _signalObjectActivated;
 
   RecursionLock _avoidRecursion;
   Gtk::PopoverMenu _contextMenu;

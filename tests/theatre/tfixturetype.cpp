@@ -21,8 +21,7 @@ BOOST_AUTO_TEST_CASE(ClassList) {
     BOOST_CHECK(GetFixtureClass(ToString(cl)) == cl);
   }
   BOOST_CHECK_NO_THROW(ToString((FixtureClass)std::numeric_limits<int>::max()));
-  BOOST_CHECK_THROW(GetFixtureClass("This is not a class! ~!@"),
-                    std::runtime_error);
+  BOOST_CHECK_THROW(GetFixtureClass("This is not a class! ~!@"), std::runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(StockList) {
@@ -66,8 +65,7 @@ Color testColor(StockFixture cl, const std::vector<unsigned char> &values) {
   const glight::system::Settings settings;
   Management management(settings);
   const FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(cl);
-  Fixture &rgbFixture =
-      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  Fixture &rgbFixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   uni.SetValues(values.data(), values.size());
@@ -87,26 +85,22 @@ BOOST_AUTO_TEST_CASE(GetColor_RGBAWUV) {
   BOOST_TEST(colorRed.Green() == 0);
   BOOST_TEST(colorRed.Blue() == 0);
 
-  const Color colorGreen =
-      testColor(StockFixture::RgbawUv, {0, 255, 0, 0, 0, 0});
+  const Color colorGreen = testColor(StockFixture::RgbawUv, {0, 255, 0, 0, 0, 0});
   BOOST_TEST(colorGreen.Red() == 0);
   BOOST_TEST(colorGreen.Green() >= 64);
   BOOST_TEST(colorGreen.Blue() == 0);
 
-  const Color colorBlue =
-      testColor(StockFixture::RgbawUv, {0, 0, 255, 0, 0, 0});
+  const Color colorBlue = testColor(StockFixture::RgbawUv, {0, 0, 255, 0, 0, 0});
   BOOST_TEST(colorBlue.Red() == 0);
   BOOST_TEST(colorBlue.Green() == 0);
   BOOST_TEST(colorBlue.Blue() >= 64);
 
-  const Color colorAmber =
-      testColor(StockFixture::RgbawUv, {0, 0, 0, 255, 0, 0});
+  const Color colorAmber = testColor(StockFixture::RgbawUv, {0, 0, 0, 255, 0, 0});
   BOOST_TEST(colorAmber.Red() >= 32);
   BOOST_TEST(colorAmber.Green() >= 24);
   BOOST_TEST(colorAmber.Blue() == 0);
 
-  const Color colorWhite =
-      testColor(StockFixture::RgbawUv, {0, 0, 0, 0, 255, 0});
+  const Color colorWhite = testColor(StockFixture::RgbawUv, {0, 0, 0, 0, 255, 0});
   BOOST_TEST(colorWhite.Red() >= 64);
   BOOST_TEST(colorWhite.Green() >= 64);
   BOOST_TEST(colorWhite.Blue() >= 64);
@@ -122,8 +116,7 @@ BOOST_AUTO_TEST_CASE(GetRotation_AyraTDCSunrise) {
   Management management(settings);
   const FixtureType &fixtureType =
       *management.GetTheatre().AddFixtureType(StockFixture::AyraTDCSunrise);
-  Fixture &fixture =
-      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
   ValueSnapshot snapShot(true, 1);
   ValueUniverseSnapshot &uni = snapShot.GetUniverseSnapshot(0);
   // Master, R, G, B, Strobe, Rotation, Macro
@@ -137,12 +130,10 @@ BOOST_AUTO_TEST_CASE(function_summary) {
   const glight::system::Settings settings;
   Management management(settings);
 
-  const FixtureType &rgb_type =
-      *management.GetTheatre().AddFixtureType(StockFixture::Rgb);
+  const FixtureType &rgb_type = *management.GetTheatre().AddFixtureType(StockFixture::Rgb);
   BOOST_CHECK_EQUAL(FunctionSummary(rgb_type.Modes().front()), "R-G-B");
 
-  const FixtureType &btv_type =
-      *management.GetTheatre().AddFixtureType(StockFixture::BtVintage);
+  const FixtureType &btv_type = *management.GetTheatre().AddFixtureType(StockFixture::BtVintage);
   BOOST_CHECK_EQUAL(FunctionSummary(btv_type.Modes()[2]), "W-M-S-R-G-B-C");
 }
 

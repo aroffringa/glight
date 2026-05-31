@@ -18,9 +18,7 @@ class FolderCombo : public Gtk::ComboBox {
 
   theatre::Folder &Selection() const;
 
-  sigc::signal<void()> &SignalSelectionChange() {
-    return _signalSelectionChange;
-  }
+  sigc::signal<void()> &SignalSelectionChange() { return _signalSelectionChange; }
 
   void Select(const theatre::Folder &object);
 
@@ -39,8 +37,7 @@ class FolderCombo : public Gtk::ComboBox {
   void fillList();
   void fillListFolder(const theatre::Folder &folder, size_t depth,
                       const theatre::Folder *selectedObj);
-  bool selectObject(const theatre::Folder &object,
-                    const Gtk::TreeModel::ConstChildren &children);
+  bool selectObject(const theatre::Folder &object, const Gtk::TreeModel::ConstChildren &children);
 
   sigc::signal<void()> _signalSelectionChange;
   RecursionLock _avoidRecursion;

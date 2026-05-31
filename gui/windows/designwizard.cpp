@@ -95,8 +95,7 @@ DesignWizard::DesignWizard()
 
   _buttonBox.set_homogeneous(true);
 
-  _nextButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &DesignWizard::onNextClicked));
+  _nextButton.signal_clicked().connect(sigc::mem_fun(*this, &DesignWizard::onNextClicked));
   _buttonBox.append(_nextButton);
   _mainBox.append(_buttonBox);
 
@@ -118,12 +117,9 @@ void DesignWizard::initPage1() {
 
   _notebook.append_page(_vBoxPage1b, "Any controllables");
 
-  _objectBrowser.SignalSelectionChange().connect(
-      [&]() { onControllableSelected(); });
+  _objectBrowser.SignalSelectionChange().connect([&]() { onControllableSelected(); });
   _objectBrowser.SignalObjectActivated().connect(
-      [&](const ObservingPtr<theatre::FolderObject> &object) {
-        addControllable(object);
-      });
+      [&](const ObservingPtr<theatre::FolderObject> &object) { addControllable(object); });
   _vBoxPage1b.append(_objectBrowser);
 
   _addControllableButton.set_image_from_icon_name("go-down");
@@ -142,12 +138,10 @@ void DesignWizard::initPage1() {
 
   _controllablesListModel = Gtk::ListStore::create(_controllablesListColumns);
   _controllablesListView.set_model(_controllablesListModel);
-  _controllablesListView.append_column("Controllable",
-                                       _controllablesListColumns._title);
+  _controllablesListView.append_column("Controllable", _controllablesListColumns._title);
   _controllablesListView.append_column("Path", _controllablesListColumns._path);
   _controllablesListView.set_rubber_banding(true);
-  _controllablesListView.get_selection()->set_mode(
-      Gtk::SelectionMode::MULTIPLE);
+  _controllablesListView.get_selection()->set_mode(Gtk::SelectionMode::MULTIPLE);
   _controllablesScrolledWindow.set_child(_controllablesListView);
   _vBoxPage1b.append(_controllablesScrolledWindow);
 }
@@ -297,8 +291,7 @@ theatre::Folder &DesignWizard::getCurrentFolder() const {
 
 theatre::DesignInfo DesignWizard::GetDesign() const {
   return theatre::DesignInfo{&Instance::Management(), &makeDestinationFolder(),
-                             _nameEntry.get_text(), &_selectedControllables,
-                             colorDeduction()};
+                             _nameEntry.get_text(), &_selectedControllables, colorDeduction()};
 }
 
 void DesignWizard::onNextClicked() {
@@ -312,28 +305,24 @@ void DesignWizard::onNextClicked() {
         for (std::vector<system::ObservingPtr<theatre::Fixture>> fixtures =
                  _fixtureList.Selection();
              const system::ObservingPtr<theatre::Fixture> &fixture : fixtures) {
-          _selectedControllables.emplace_back(
-              management.GetFixtureControl(*fixture));
+          _selectedControllables.emplace_back(management.GetFixtureControl(*fixture));
         }
       } else {
         for (const auto &iter : _controllablesListModel->children()) {
-          _selectedControllables.emplace_back(
-              (iter)[_controllablesListColumns._controllable]);
+          _selectedControllables.emplace_back((iter)[_controllablesListColumns._controllable]);
         }
       }
       _mainBox.remove(_vBoxPage1);
 
-      _reorderWidget.SetList(
-          std::vector<system::ObservingPtr<theatre::NamedObject>>(
-              _selectedControllables.begin(), _selectedControllables.end()));
+      _reorderWidget.SetList(std::vector<system::ObservingPtr<theatre::NamedObject>>(
+          _selectedControllables.begin(), _selectedControllables.end()));
       _mainBox.append(_reorderWidget);
       _reorderWidget.show();
       _currentPage = Page2_Order;
     } break;
 
     case Page2_Order: {
-      std::vector<ObservingPtr<theatre::NamedObject>> list =
-          _reorderWidget.GetList();
+      std::vector<ObservingPtr<theatre::NamedObject>> list = _reorderWidget.GetList();
       _selectedControllables.clear();
       for (const ObservingPtr<theatre::NamedObject> &object : list)
         _selectedControllables.emplace_back(
@@ -415,8 +404,8 @@ void DesignWizard::onNextClicked() {
       else  // if(_randomRunRB.get_active())
         runType = RunType::RandomRun;
       std::unique_lock lock(management.Mutex());
-      theatre::Chase &chase = AutoDesign::MakeRunningLight(
-          GetDesign(), _colorsWidgetP4.GetSelection(), runType);
+      theatre::Chase &chase =
+          AutoDesign::MakeRunningLight(GetDesign(), _colorsWidgetP4.GetSelection(), runType);
       lock.unlock();
       events.EmitUpdate();
       AssignFader(chase);
@@ -445,8 +434,8 @@ void DesignWizard::onNextClicked() {
       else
         shiftType = ShiftType::RandomShift;
       std::unique_lock lock(management.Mutex());
-      theatre::Chase &chase = AutoDesign::MakeColorShift(
-          GetDesign(), _colorsWidgetP4.GetSelection(), shiftType);
+      theatre::Chase &chase =
+          AutoDesign::MakeColorShift(GetDesign(), _colorsWidgetP4.GetSelection(), shiftType);
       lock.unlock();
       events.EmitUpdate();
       AssignFader(chase);
@@ -465,8 +454,8 @@ void DesignWizard::onNextClicked() {
       else  // if(_vuOutwardRunRB.get_active())
         direction = VUMeterDirection::VUOutward;
       std::unique_lock lock(management.Mutex());
-      glight::theatre::Controllable &vu_meter = AutoDesign::MakeVUMeter(
-          GetDesign(), _colorsWidgetP4.GetSelection(), direction);
+      glight::theatre::Controllable &vu_meter =
+          AutoDesign::MakeVUMeter(GetDesign(), _colorsWidgetP4.GetSelection(), direction);
       lock.unlock();
       events.EmitUpdate();
       AssignFader(vu_meter);
@@ -501,8 +490,8 @@ void DesignWizard::onNextClicked() {
       else  // if(_incBackwardReturnRB.get_active())
         incType = IncreasingType::IncBackwardReturn;
       std::unique_lock lock(management.Mutex());
-      glight::theatre::Chase &chase = AutoDesign::MakeIncreasingChase(
-          GetDesign(), _colorsWidgetP4.GetSelection(), incType);
+      glight::theatre::Chase &chase =
+          AutoDesign::MakeIncreasingChase(GetDesign(), _colorsWidgetP4.GetSelection(), incType);
       lock.unlock();
       events.EmitUpdate();
       AssignFader(chase);
@@ -530,8 +519,7 @@ void DesignWizard::onNextClicked() {
     case Page4_8_Fire: {
       using theatre::RotationType;
       std::unique_lock lock(management.Mutex());
-      theatre::Effect &fire =
-          AutoDesign::MakeFire(GetDesign(), _colorsWidgetP4.GetSelection());
+      theatre::Effect &fire = AutoDesign::MakeFire(GetDesign(), _colorsWidgetP4.GetSelection());
       lock.unlock();
       events.EmitUpdate();
       AssignFader(fire);
@@ -541,10 +529,8 @@ void DesignWizard::onNextClicked() {
   _mainBox.append(_buttonBox);
 }
 
-void DesignWizard::addControllable(
-    const system::ObservingPtr<theatre::FolderObject> &object) {
-  theatre::Controllable *controllable =
-      dynamic_cast<theatre::Controllable *>(object.Get());
+void DesignWizard::addControllable(const system::ObservingPtr<theatre::FolderObject> &object) {
+  theatre::Controllable *controllable = dynamic_cast<theatre::Controllable *>(object.Get());
   if (controllable) {
     Gtk::TreeModel::iterator iter = _controllablesListModel->append();
     Gtk::TreeModel::Row &row = *iter;
@@ -567,13 +553,12 @@ void DesignWizard::onRemoveControllable() {
       _controllablesListView.get_selection()->get_selected_rows();
 
   for (Gtk::TreeModel::Path &elementIter : std::ranges::reverse_view(rows))
-    _controllablesListModel->erase(
-        _controllablesListModel->get_iter(elementIter));
+    _controllablesListModel->erase(_controllablesListModel->get_iter(elementIter));
 }
 
 void DesignWizard::onControllableSelected() {
-  theatre::Controllable *object = dynamic_cast<theatre::Controllable *>(
-      _objectBrowser.SelectedObject().Get());
+  theatre::Controllable *object =
+      dynamic_cast<theatre::Controllable *>(_objectBrowser.SelectedObject().Get());
   _addControllableButton.set_sensitive(object != nullptr);
 }
 

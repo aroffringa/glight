@@ -13,8 +13,7 @@ using theatre::FixtureModeFunction;
 using theatre::FixtureType;
 
 namespace {
-void ParseCapabilities(const json::Array& capabilities,
-                       const std::string& channel_name,
+void ParseCapabilities(const json::Array& capabilities, const std::string& channel_name,
                        std::map<std::string, FixtureModeFunction>& functions) {
   std::vector<std::pair<unsigned, unsigned>> empty_ranges;
 
@@ -31,51 +30,42 @@ void ParseCapabilities(const json::Array& capabilities,
 
     } else if (type == "ColorPreset") {
       if (!function)
-        function =
-            &functions
-                 .emplace(std::piecewise_construct,
-                          std::make_tuple(channel_name),
-                          std::make_tuple(theatre::FunctionType::ColorMacro, 0,
-                                          OptionalNumber<size_t>(), 0))
-                 .first->second;
+        function = &functions
+                        .emplace(std::piecewise_construct, std::make_tuple(channel_name),
+                                 std::make_tuple(theatre::FunctionType::ColorMacro, 0,
+                                                 OptionalNumber<size_t>(), 0))
+                        .first->second;
       if (function->Type() == theatre::FunctionType::ColorMacro) {
         std::vector<glight::theatre::ColorRangeParameters::Range>& ranges =
             function->GetColorRangeParameters().GetRanges();
         if (!empty_ranges.empty()) {
           for (const std::pair<unsigned, unsigned>& r : empty_ranges) {
-            ranges.emplace_back(r.first, r.second,
-                                std::optional<theatre::Color>());
+            ranges.emplace_back(r.first, r.second, std::optional<theatre::Color>());
           }
           empty_ranges.clear();
         }
-        const std::string& color_str =
-            ToStr(*ToArr(capability["colors"]).items[0]);
-        theatre::Color color =
-            theatre::Color::FromHexString(color_str.c_str() + 1);
+        const std::string& color_str = ToStr(*ToArr(capability["colors"]).items[0]);
+        theatre::Color color = theatre::Color::FromHexString(color_str.c_str() + 1);
         ranges.emplace_back(start, end, color);
       }
     }
   }
 }
 
-std::map<std::string, FixtureModeFunction> ParseFunctions(
-    const json::Object& fixture_object) {
+std::map<std::string, FixtureModeFunction> ParseFunctions(const json::Object& fixture_object) {
   std::map<std::string, FixtureModeFunction> functions;
   const json::Object& channels = ToObj(fixture_object["availableChannels"]);
-  for (const std::pair<const std::string, std::unique_ptr<json::Node>>& child :
-       channels.children) {
+  for (const std::pair<const std::string, std::unique_ptr<json::Node>>& child : channels.children) {
     const std::string channel_name = child.first;
     const json::Object& availableChannel(ToObj(*child.second));
-    const json::Object::const_iterator& capability_iter =
-        availableChannel.find("capability");
+    const json::Object::const_iterator& capability_iter = availableChannel.find("capability");
     if (capability_iter != availableChannel.end()) {
       const json::Object& capability = ToObj(*capability_iter);
       const std::string& type = ToStr(capability["type"]);
       if (type == "Intensity") {
-        functions.emplace(std::piecewise_construct,
-                          std::make_tuple(channel_name),
-                          std::make_tuple(theatre::FunctionType::Master, 0,
-                                          OptionalNumber<size_t>(), 0));
+        functions.emplace(
+            std::piecewise_construct, std::make_tuple(channel_name),
+            std::make_tuple(theatre::FunctionType::Master, 0, OptionalNumber<size_t>(), 0));
       } else if (type == "ColorIntensity") {
         theatre::FunctionType t = theatre::FunctionType::Unknown;
         const std::string& color_str = ToStr(capability["color"]);
@@ -97,14 +87,12 @@ std::map<std::string, FixtureModeFunction> ParseFunctions(
           t = theatre::FunctionType::ColdWhite;
         else if (color_str == "WarmWhite")
           t = theatre::FunctionType::WarmWhite;
-        functions.emplace(std::piecewise_construct,
-                          std::make_tuple(channel_name),
+        functions.emplace(std::piecewise_construct, std::make_tuple(channel_name),
                           std::make_tuple(t, 0, OptionalNumber<size_t>(), 0));
       } else if (type == "EffectSpeed") {
-        functions.emplace(std::piecewise_construct,
-                          std::make_tuple(channel_name),
-                          std::make_tuple(theatre::FunctionType::Strobe, 0,
-                                          OptionalNumber<size_t>(), 0));
+        functions.emplace(
+            std::piecewise_construct, std::make_tuple(channel_name),
+            std::make_tuple(theatre::FunctionType::Strobe, 0, OptionalNumber<size_t>(), 0));
       }
     } else {
       const json::Array& capabilities = ToArr(availableChannel["capabilities"]);
@@ -118,12 +106,10 @@ std::map<std::string, FixtureModeFunction> ParseFunctions(
 void ReadOpenFixture(theatre::Management& management, const json::Node& node) {
   const json::Object& fixture_object = ToObj(node);
 
-  std::map<std::string, FixtureModeFunction> functions =
-      ParseFunctions(fixture_object);
+  std::map<std::string, FixtureModeFunction> functions = ParseFunctions(fixture_object);
   const std::string fixture_name = ToStr(fixture_object["name"]);
   const json::Array& modes = ToArr(fixture_object["modes"]);
-  TrackablePtr<FixtureType> fixture_type =
-      MakeTrackable<FixtureType>(fixture_name);
+  TrackablePtr<FixtureType> fixture_type = MakeTrackable<FixtureType>(fixture_name);
   for (const json::Node& mode_node : modes) {
     const json::Object& mode = ToObj(mode_node);
     const std::string mode_name = ToStr(mode["name"]);

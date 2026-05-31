@@ -20,8 +20,7 @@ EditColorRange::EditColorRange(std::vector<ColorRangeParameters::Range> ranges)
   list_model_ = Gtk::ListStore::create(list_columns_);
 
   list_view_.get_selection()->set_mode(Gtk::SelectionMode::MULTIPLE);
-  list_view_.get_selection()->signal_changed().connect(
-      [&]() { OnSelectionChanged(); });
+  list_view_.get_selection()->signal_changed().connect([&]() { OnSelectionChanged(); });
   list_view_.set_model(list_model_);
   list_view_.append_column("Start", list_columns_.start_);
   list_view_.append_column("End", list_columns_.end_);
@@ -30,8 +29,7 @@ EditColorRange::EditColorRange(std::vector<ColorRangeParameters::Range> ranges)
   FillList();
   scrolled_window_.set_child(list_view_);
 
-  scrolled_window_.set_policy(Gtk::PolicyType::NEVER,
-                              Gtk::PolicyType::AUTOMATIC);
+  scrolled_window_.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
   scrolled_window_.set_hexpand(true);
   scrolled_window_.set_vexpand(true);
   grid_.attach(scrolled_window_, 0, 1, 2, 1);
@@ -76,8 +74,7 @@ void EditColorRange::FillList() {
 
 void EditColorRange::UpdateList() {
   for (auto row : list_model_->children()) {
-    const ColorRangeParameters::Range& range =
-        ranges_[row[list_columns_.index_]];
+    const ColorRangeParameters::Range& range = ranges_[row[list_columns_.index_]];
     row[list_columns_.start_] = range.input_min;
     row[list_columns_.end_] = range.input_max;
     const std::string color_str = range.color ? ToString(*range.color) : "-";
@@ -100,8 +97,7 @@ void EditColorRange::Remove() {
       list_view_.get_selection()->get_selected_rows();
   if (!selection.empty()) {
     for (auto iter = selection.rbegin(); iter != selection.rend(); ++iter) {
-      const size_t range_index =
-          (*list_model_->get_iter(*iter))[list_columns_.index_];
+      const size_t range_index = (*list_model_->get_iter(*iter))[list_columns_.index_];
       ranges_.erase(ranges_.begin() + range_index);
     }
   }
@@ -120,8 +116,7 @@ void EditColorRange::OnSelectionChanged() {
     color_selection_.SetColor(theatre::Color::White());
   } else {
     SetSensitive(true);
-    const size_t range_index =
-        (*list_model_->get_iter(selection.front()))[list_columns_.index_];
+    const size_t range_index = (*list_model_->get_iter(selection.front()))[list_columns_.index_];
     const ColorRangeParameters::Range& range = ranges_[range_index];
     start_entry_.set_text(std::to_string(range.input_min));
     end_entry_.set_text(std::to_string(range.input_max));
@@ -139,13 +134,12 @@ void EditColorRange::SaveChange() {
     const std::vector<Gtk::TreeModel::Path> selection =
         list_view_.get_selection()->get_selected_rows();
     for (const Gtk::TreeModel::Path& path : selection) {
-      const size_t range_index =
-          (*list_model_->get_iter(path))[list_columns_.index_];
+      const size_t range_index = (*list_model_->get_iter(path))[list_columns_.index_];
       ColorRangeParameters::Range& range = ranges_[range_index];
 
       range.input_min = std::max(0, std::atoi(start_entry_.get_text().c_str()));
-      range.input_max = std::max<unsigned>(
-          range.input_min, std::atoi(end_entry_.get_text().c_str()));
+      range.input_max =
+          std::max<unsigned>(range.input_min, std::atoi(end_entry_.get_text().c_str()));
       if (color_check_button_.get_active())
         range.color = color_selection_.GetColor();
       else
@@ -158,13 +152,11 @@ void EditColorRange::SaveChange() {
 std::vector<ColorRangeParameters::Range> EditColorRange::GetRanges() const {
   std::vector<ColorRangeParameters::Range> ranges = ranges_;
   std::sort(ranges.begin(), ranges.end(),
-            [](const ColorRangeParameters::Range& a,
-               const ColorRangeParameters::Range& b) {
+            [](const ColorRangeParameters::Range& a, const ColorRangeParameters::Range& b) {
               return a.input_min < b.input_min;
             });
   for (size_t i = 1; i < ranges.size(); ++i) {
-    ranges[i].input_min =
-        std::max(ranges[i].input_min, ranges[i - 1].input_max);
+    ranges[i].input_min = std::max(ranges[i].input_min, ranges[i - 1].input_max);
     ranges[i].input_max = std::max(ranges[i].input_min, ranges[i].input_max);
   }
   return ranges;

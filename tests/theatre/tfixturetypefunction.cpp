@@ -9,13 +9,10 @@ namespace glight::theatre {
 BOOST_AUTO_TEST_SUITE(fixture_type_function)
 
 BOOST_AUTO_TEST_CASE(copy) {
-  FixtureModeFunction a(FunctionType::ColorMacro, 12,
-                        system::OptionalNumber<size_t>(), 0);
+  FixtureModeFunction a(FunctionType::ColorMacro, 12, system::OptionalNumber<size_t>(), 0);
   a.GetColorRangeParameters().GetRanges().emplace_back(100, 200, Color::Lime());
-  a.GetColorRangeParameters().GetRanges().emplace_back(300, 500,
-                                                       std::optional<Color>());
-  FixtureModeFunction b(FunctionType::White, 11,
-                        system::OptionalNumber<size_t>(), 0);
+  a.GetColorRangeParameters().GetRanges().emplace_back(300, 500, std::optional<Color>());
+  FixtureModeFunction b(FunctionType::White, 11, system::OptionalNumber<size_t>(), 0);
   b = std::move(a);
   BOOST_CHECK(b.Type() == FunctionType::ColorMacro);
   BOOST_CHECK_EQUAL(b.DmxOffset(), 12);
@@ -31,8 +28,7 @@ BOOST_AUTO_TEST_CASE(range_function) {
   BOOST_CHECK(!f.FineChannelOffset());
   BOOST_CHECK_EQUAL(f.Shape(), 2);
 
-  std::vector<RotationSpeedParameters::Range>& ranges =
-      f.GetRotationParameters().GetRanges();
+  std::vector<RotationSpeedParameters::Range>& ranges = f.GetRotationParameters().GetRanges();
   ranges.emplace_back(10, 110, 0, 100000);
   ranges.emplace_back(110, 210, 100000, 100100);
   ranges.emplace_back(210, 256, -46, 0);

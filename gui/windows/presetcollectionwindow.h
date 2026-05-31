@@ -27,9 +27,7 @@ class PresetCollectionWindow : public PropertiesWindow {
   PresetCollectionWindow(theatre::PresetCollection &presetCollection);
 
   theatre::FolderObject &GetObject() final override;
-  theatre::PresetCollection &GetPresetCollection() {
-    return *_presetCollection;
-  }
+  theatre::PresetCollection &GetPresetCollection() { return *_presetCollection; }
 
  private:
   void onInputSelectionChanged();

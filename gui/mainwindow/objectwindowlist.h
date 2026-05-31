@@ -15,8 +15,7 @@ class ObjectWindowList {
  public:
   void Add(std::unique_ptr<T> window) {
     T *window_ptr = window.get();
-    window->signal_hide().connect(
-        [&, window_ptr]() { onHideWindow(window_ptr); });
+    window->signal_hide().connect([&, window_ptr]() { onHideWindow(window_ptr); });
     list_.emplace_back(std::move(window));
   }
 

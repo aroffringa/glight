@@ -17,8 +17,8 @@ namespace {
 void Check(int result) {
   if (result < 0) {
     const char* error_str = snd_strerror(result);
-    throw std::runtime_error(
-        std::string("Alsa raw midi interface returned an error: ") + error_str);
+    throw std::runtime_error(std::string("Alsa raw midi interface returned an error: ") +
+                             error_str);
   }
 }
 
@@ -56,14 +56,10 @@ std::vector<Color> ReadColorList() {
     for (glight::json::Node& color_node : colors_node) {
       const std::string& color_str = ToStr(color_node);
       if (color_str.size() != 6)
-        throw std::runtime_error(
-            "Invalid color string: should contain 6 characters");
-      const unsigned char red =
-          (FromHex(color_str[0]) << 4) | FromHex(color_str[1]);
-      const unsigned char green =
-          (FromHex(color_str[2]) << 4) | FromHex(color_str[3]);
-      const unsigned char blue =
-          (FromHex(color_str[4]) << 4) | FromHex(color_str[5]);
+        throw std::runtime_error("Invalid color string: should contain 6 characters");
+      const unsigned char red = (FromHex(color_str[0]) << 4) | FromHex(color_str[1]);
+      const unsigned char green = (FromHex(color_str[2]) << 4) | FromHex(color_str[3]);
+      const unsigned char blue = (FromHex(color_str[4]) << 4) | FromHex(color_str[5]);
       colors.emplace_back(red, green, blue);
     }
   }
@@ -83,8 +79,7 @@ std::vector<std::string> Controller::DeviceNames() {
   void** name_iterator = names;
   std::vector<std::string> devices;
   while (*name_iterator != nullptr) {
-    devices.emplace_back(
-        CopyAndFree(snd_device_name_get_hint(*name_iterator, "NAME")));
+    devices.emplace_back(CopyAndFree(snd_device_name_get_hint(*name_iterator, "NAME")));
     ++name_iterator;
   }
   snd_device_name_free_hint(names);
@@ -112,8 +107,7 @@ std::vector<Device> DeviceList() {
 
       devices.emplace_back(device);
     } catch (std::exception& e) {
-      std::cerr << "Ignoring midi device '" << device_name
-                << "' because of alsa error:\n"
+      std::cerr << "Ignoring midi device '" << device_name << "' because of alsa error:\n"
                 << e.what() << '\n';
     }
   }
@@ -126,8 +120,7 @@ Controller::Controller(const std::string& device_name) {
   Check(snd_rawmidi_open(&in_rmidi_, &out_rmidi_, device_name.c_str(), 0));
   Check(snd_rawmidi_nonblock(out_rmidi_, 1 /*non-block*/));
   running_ = true;
-  if (pipe(signal_pipe_fd_) < 0)
-    throw std::runtime_error("Failed to create pipe");
+  if (pipe(signal_pipe_fd_) < 0) throw std::runtime_error("Failed to create pipe");
   input_thread_ = std::thread([&]() { HandleInput(); });
   /*
   for(unsigned char red =0; red!=0x78; red+=8) {
@@ -146,8 +139,7 @@ Controller::Controller(const std::string& device_name) {
 Controller::~Controller() noexcept {
   running_ = false;
   unsigned char signal_buffer = 0;
-  [[maybe_unused]] ssize_t write_result =
-      write(signal_pipe_fd_[1], &signal_buffer, 1);
+  [[maybe_unused]] ssize_t write_result = write(signal_pipe_fd_[1], &signal_buffer, 1);
   input_thread_.join();
   close(signal_pipe_fd_[1]);
   close(signal_pipe_fd_[0]);
@@ -157,10 +149,9 @@ Controller::~Controller() noexcept {
 
 std::unique_ptr<Controller> Controller::GetController() {
   std::vector<Device> devices = DeviceList();
-  std::vector<Device>::iterator apc_mini_mk2 =
-      std::find_if(devices.begin(), devices.end(), [](const Device& device) {
-        return boost::to_lower_copy(device.name) == "apc mini mk2";
-      });
+  std::vector<Device>::iterator apc_mini_mk2 = std::find_if(
+      devices.begin(), devices.end(),
+      [](const Device& device) { return boost::to_lower_copy(device.name) == "apc mini mk2"; });
 
   if (apc_mini_mk2 != devices.end()) {
     return make_unique<Controller>(apc_mini_mk2->device);
@@ -169,15 +160,13 @@ std::unique_ptr<Controller> Controller::GetController() {
   }
 }
 
-void Controller::SetPixelColor(size_t column, size_t row,
-                               const theatre::Color& color, bool blink) {
+void Controller::SetPixelColor(size_t column, size_t row, const theatre::Color& color, bool blink) {
   const unsigned char color_index = color_map_.GetIndex(color);
   const unsigned char pad = column + row * 8;
   if (current_colors_[pad] != std::pair(color_index, blink)) {
     constexpr unsigned char pad_full = 0x96;
     constexpr unsigned char pad_blink = 0x9F;
-    const unsigned char buffer[] = {blink ? pad_blink : pad_full, pad,
-                                    color_index};
+    const unsigned char buffer[] = {blink ? pad_blink : pad_full, pad, color_index};
     // Return value is unchecked: errors are explicitly ignored
     snd_rawmidi_write(out_rmidi_, buffer, 3);
 
@@ -205,8 +194,7 @@ void Controller::HandleInput() {
     if (poll_result < 0) {
       error = true;
     } else if (poll_result > 0) {
-      const ssize_t read_size =
-          snd_rawmidi_read(in_rmidi_, buffer.data(), buffer.size());
+      const ssize_t read_size = snd_rawmidi_read(in_rmidi_, buffer.data(), buffer.size());
       if (read_size > 0) {
         ProcessInput(buffer.data(), read_size);
       }
@@ -258,13 +246,13 @@ void Controller::ProcessMessage() {
   switch (input_state_) {
     case InputState::NoteOn: {
       std::scoped_lock lock(mutex_);
-      AddButton(input_data_[1], press_event_buttons_,
-                std::size(press_event_buttons_), press_event_count_);
+      AddButton(input_data_[1], press_event_buttons_, std::size(press_event_buttons_),
+                press_event_count_);
     } break;
     case InputState::NoteOff: {
       std::scoped_lock lock(mutex_);
-      AddButton(input_data_[1], release_event_buttons_,
-                std::size(release_event_buttons_), release_event_count_);
+      AddButton(input_data_[1], release_event_buttons_, std::size(release_event_buttons_),
+                release_event_count_);
     } break;
     case InputState::Controller: {
       size_t fader = std::max<unsigned char>(48, input_data_[1]) - 48;

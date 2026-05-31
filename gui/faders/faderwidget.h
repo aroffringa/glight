@@ -22,8 +22,7 @@ class ControlMenu;
  */
 class FaderWidget final : public ControlWidget {
  public:
-  FaderWidget(FaderWindow &fader_window, uistate::FaderState &state,
-              ControlMode mode, char key);
+  FaderWidget(FaderWindow &fader_window, uistate::FaderState &state, ControlMode mode, char key);
   ~FaderWidget();
 
   void Toggle() override;

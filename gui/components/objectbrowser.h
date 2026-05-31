@@ -19,8 +19,7 @@ class ObjectBrowser : public Gtk::Box {
   ObjectBrowser() : _folderCombo(), _list() {
     set_orientation(Gtk::Orientation::VERTICAL);
     _parentFolderButton.set_image_from_icon_name("go-up");
-    _parentFolderButton.signal_clicked().connect(
-        [&]() { onParentFolderClicked(); });
+    _parentFolderButton.signal_clicked().connect([&]() { onParentFolderClicked(); });
     _hBox.append(_parentFolderButton);
     _parentFolderButton.set_sensitive(false);
     _parentFolderButton.show();
@@ -35,21 +34,15 @@ class ObjectBrowser : public Gtk::Box {
 
     _list.SignalSelectionChange().connect([&]() { onSelectionChanged(); });
     _list.SignalObjectActivated().connect(
-        [&](ObservingPtr<theatre::FolderObject> object) {
-          onObjectActivated(object);
-        });
+        [&](ObservingPtr<theatre::FolderObject> object) { onObjectActivated(object); });
     append(_list);
     _list.show();
   }
 
   ObjectListType DisplayType() const { return _list.DisplayType(); }
-  void SetDisplayType(ObjectListType displayType) {
-    _list.SetDisplayType(displayType);
-  }
+  void SetDisplayType(ObjectListType displayType) { _list.SetDisplayType(displayType); }
 
-  void SetShowTypeColumn(bool showTypeColumn) {
-    _list.SetShowTypeColumn(showTypeColumn);
-  }
+  void SetShowTypeColumn(bool showTypeColumn) { _list.SetShowTypeColumn(showTypeColumn); }
   bool ShowTypeColumn() const { return _list.ShowTypeColumn(); }
 
   system::ObservingPtr<theatre::FolderObject> SelectedObject() const {
@@ -62,14 +55,11 @@ class ObjectBrowser : public Gtk::Box {
 
   theatre::Folder &SelectedFolder() { return _folderCombo.Selection(); }
 
-  sigc::signal<void()> &SignalSelectionChange() {
-    return _signalSelectionChange;
-  }
+  sigc::signal<void()> &SignalSelectionChange() { return _signalSelectionChange; }
 
   sigc::signal<void()> &SignalFolderChange() { return _signalFolderChange; }
 
-  sigc::signal<void(system::ObservingPtr<theatre::FolderObject> object)>
-      &SignalObjectActivated() {
+  sigc::signal<void(system::ObservingPtr<theatre::FolderObject> object)> &SignalObjectActivated() {
     return _signalObjectActivated;
   }
 
@@ -78,9 +68,7 @@ class ObjectBrowser : public Gtk::Box {
     _list.SelectObject(object);
   }
 
-  void OpenFolder(const theatre::Folder &folder) {
-    _folderCombo.Select(folder);
-  }
+  void OpenFolder(const theatre::Folder &folder) { _folderCombo.Select(folder); }
 
   void SetAllowMultiSelection(bool allow_multi_selection) {
     _list.SetAllowMultiSelection(allow_multi_selection);
@@ -113,8 +101,7 @@ class ObjectBrowser : public Gtk::Box {
 
   sigc::signal<void()> _signalSelectionChange;
   sigc::signal<void()> _signalFolderChange;
-  sigc::signal<void(system::ObservingPtr<theatre::FolderObject> object)>
-      _signalObjectActivated;
+  sigc::signal<void(system::ObservingPtr<theatre::FolderObject> object)> _signalObjectActivated;
 };
 
 }  // namespace glight::gui

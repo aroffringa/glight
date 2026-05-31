@@ -36,8 +36,7 @@ namespace glight::theatre {
 std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
   const Effect *effect = dynamic_cast<const Effect *>(&object);
   if (!effect)
-    throw std::runtime_error(
-        "Non-effect object type specified in call to PropertySet::Make()");
+    throw std::runtime_error("Non-effect object type specified in call to PropertySet::Make()");
   std::unique_ptr<PropertySet> ps;
   switch (effect->GetType()) {
     FXCASE(AudioLevel);
@@ -62,9 +61,7 @@ std::unique_ptr<PropertySet> PropertySet::Make(FolderObject &object) {
     FXCASE(Twinkle);
     EMPTYPSCASE(Variable);
   }
-  if (!ps)
-    throw std::runtime_error(
-        "Unknown effect type in call to PropertySet::Make()");
+  if (!ps) throw std::runtime_error("Unknown effect type in call to PropertySet::Make()");
   ps->_object = &object;
   return ps;
 }
@@ -97,8 +94,7 @@ void PropertySet::AssignProperty(const Property &to, const Property &from,
   }
 }
 
-bool PropertySet::EqualPropertyValues(const Property &property,
-                                      const Effect &rhs) {
+bool PropertySet::EqualPropertyValues(const Property &property, const Effect &rhs) {
   assert(dynamic_cast<Effect *>(_object));
   assert(static_cast<const Effect &>(*_object).GetType() == rhs.GetType());
   switch (property.type_) {
@@ -107,15 +103,13 @@ bool PropertySet::EqualPropertyValues(const Property &property,
     case PropertyType::Choice:
       return GetChoice(property) == getChoice(rhs, property.set_index_);
     case PropertyType::ControlValue:
-      return GetControlValue(property) ==
-             getControlValue(rhs, property.set_index_);
+      return GetControlValue(property) == getControlValue(rhs, property.set_index_);
     case PropertyType::Duration:
       return GetDuration(property) == getDuration(rhs, property.set_index_);
     case PropertyType::Integer:
       return GetInteger(property) == getInteger(rhs, property.set_index_);
     case PropertyType::TimePattern:
-      return GetTimePattern(property) ==
-             getTimePattern(rhs, property.set_index_);
+      return GetTimePattern(property) == getTimePattern(rhs, property.set_index_);
     case PropertyType::Transition:
       return GetTransition(property) == getTransition(rhs, property.set_index_);
   }

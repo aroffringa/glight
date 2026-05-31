@@ -17,17 +17,15 @@ class MusicActivationEffect final : public Effect {
         _offDelay(2000)  // two seconds
   {}
 
-  virtual EffectType GetType() const override {
-    return EffectType::MusicActivation;
-  }
+  virtual EffectType GetType() const override { return EffectType::MusicActivation; }
 
   unsigned OffDelay() const { return _offDelay; }
 
   void SetOffDelay(unsigned offDelay) { _offDelay = offDelay; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
     if (_lastBeatValue[primary] != timing.BeatValue()) {
       _lastBeatValue[primary] = timing.BeatValue();
       _lastBeatTime[primary] = timing.TimeInMS();

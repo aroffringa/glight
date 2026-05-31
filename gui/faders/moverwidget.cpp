@@ -20,8 +20,8 @@
 
 namespace glight::gui {
 
-MoverWidget::MoverWidget(FaderWindow &fader_window, uistate::FaderState &state,
-                         ControlMode mode, char key)
+MoverWidget::MoverWidget(FaderWindow &fader_window, uistate::FaderState &state, ControlMode mode,
+                         char key)
     : ControlWidget(fader_window, state, mode) {
   SetDefaultSourceCount(2);
 
@@ -57,9 +57,7 @@ MoverWidget::MoverWidget(FaderWindow &fader_window, uistate::FaderState &state,
   name_label_.set_hexpand(true);
   label_gesture->set_button(1);
   label_gesture->signal_pressed().connect(
-      [this, g = label_gesture.get()](int, double, double) {
-        ShowAssignDialog();
-      });
+      [this, g = label_gesture.get()](int, double, double) { ShowAssignDialog(); });
   name_label_.add_controller(label_gesture);
   grid_.attach(name_label_, 0, 3, 3, 1);
 
@@ -123,8 +121,6 @@ void MoverWidget::OnAssigned(bool move_fader) {
   name_label_.set_text(name);
 }
 
-void MoverWidget::UpdateDisplaySettings() {
-  name_label_.set_visible(State().DisplayName());
-}
+void MoverWidget::UpdateDisplaySettings() { name_label_.set_visible(State().DisplayName()); }
 
 }  // namespace glight::gui

@@ -52,14 +52,12 @@ class Controllable : public FolderObject {
    * output of this controllable and connects to the input of another
    * controllable.
    */
-  virtual std::pair<const Controllable *, size_t> GetConnection(
-      size_t index) const = 0;
+  virtual std::pair<const Controllable *, size_t> GetConnection(size_t index) const = 0;
 
   std::pair<Controllable *, size_t> GetConnection(size_t index) {
     const std::pair<const Controllable *, size_t> output =
         const_cast<const Controllable *>(this)->GetConnection(index);
-    return std::make_pair(const_cast<Controllable *>(output.first),
-                          output.second);
+    return std::make_pair(const_cast<Controllable *>(output.first), output.second);
   }
 
   virtual std::vector<Color> InputColors(size_t index) const {
@@ -91,11 +89,9 @@ class Controllable : public FolderObject {
   /**
    * Sets the value at the controllable's input.
    */
-  void MixInput(size_t index, ControlValue new_value,
-                ControlValue previous_value) {
+  void MixInput(size_t index, ControlValue new_value, ControlValue previous_value) {
     const FunctionType input_type = InputType(index);
-    InputValue(index) = theatre::MixInput(InputValue(index), new_value,
-                                          previous_value, input_type);
+    InputValue(index) = theatre::MixInput(InputValue(index), new_value, previous_value, input_type);
   }
 
   bool HasOutputConnection(const Controllable &controllable) const {

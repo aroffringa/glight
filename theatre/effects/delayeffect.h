@@ -28,15 +28,13 @@ class DelayEffect final : public Effect {
   void SetDelayInMS(double delayInMS) { _delayInMS = delayInMS; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
     std::vector<std::pair<double, ControlValue>> &buffer = _buffer[primary];
     if (_previousTimestep[primary] == timing.TimestepNumber()) {
-      unsigned prevWritePos =
-          (_bufferWritePos[primary] + buffer.size() - 1) % buffer.size();
-      buffer[prevWritePos].second.Set(
-          ControlValue::Mix(buffer[prevWritePos].second.UInt(),
-                            values[0].UInt(), MixStyle::Default));
+      unsigned prevWritePos = (_bufferWritePos[primary] + buffer.size() - 1) % buffer.size();
+      buffer[prevWritePos].second.Set(ControlValue::Mix(buffer[prevWritePos].second.UInt(),
+                                                        values[0].UInt(), MixStyle::Default));
     } else {
       _previousTimestep[primary] = timing.TimestepNumber();
       buffer[_bufferWritePos[primary]].first = timing.TimeInMS();
@@ -47,13 +45,11 @@ class DelayEffect final : public Effect {
         size_t n = buffer.size();
         _bufferReadPos[primary] += n;
         buffer.resize(buffer.size() * 2);
-        std::copy_backward(buffer.begin() + _bufferWritePos[primary],
-                           buffer.begin() + n,
+        std::copy_backward(buffer.begin() + _bufferWritePos[primary], buffer.begin() + n,
                            buffer.begin() + _bufferReadPos[primary]);
       }
       while (_bufferReadPos[primary] != _bufferWritePos[primary] &&
-             buffer[_bufferReadPos[primary]].first + _delayInMS <
-                 timing.TimeInMS()) {
+             buffer[_bufferReadPos[primary]].first + _delayInMS < timing.TimeInMS()) {
         _bufferReadPos[primary] = (_bufferReadPos[primary] + 1) % buffer.size();
       }
     }

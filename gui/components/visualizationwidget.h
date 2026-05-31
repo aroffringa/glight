@@ -40,19 +40,15 @@ enum class MouseState {
 
 class VisualizationWidget : public Gtk::DrawingArea {
  public:
-  VisualizationWidget(theatre::Management *management,
-                      EventTransmitter *eventTransmitter,
-                      FixtureSelection *fixtureSelection,
-                      MainWindow *showWindow);
+  VisualizationWidget(theatre::Management *management, EventTransmitter *eventTransmitter,
+                      FixtureSelection *fixtureSelection, MainWindow *showWindow);
   ~VisualizationWidget();
 
   void Update() { queue_draw(); }
 
   void SetDrawFixtures(bool draw_fixtures) { draw_fixtures_ = draw_fixtures; }
   void SetDrawBeams(bool draw_beams) { draw_beams_ = draw_beams; }
-  void SetDrawProjections(bool draw_projections) {
-    draw_projections_ = draw_projections;
-  }
+  void SetDrawProjections(bool draw_projections) { draw_projections_ = draw_projections; }
   void SetDrawBorders(bool draw_borders) { draw_borders_ = draw_borders; }
 
  private:
@@ -62,10 +58,9 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void initializeContextMenu();
   void initialize();
   void drawAll(const Cairo::RefPtr<Cairo::Context> &cairo);
-  void DrawShapshot(
-      const Cairo::RefPtr<Cairo::Context> &cairo,
-      const std::vector<system::ObservingPtr<theatre::Fixture>> &selection,
-      size_t width, size_t height);
+  void DrawShapshot(const Cairo::RefPtr<Cairo::Context> &cairo,
+                    const std::vector<system::ObservingPtr<theatre::Fixture>> &selection,
+                    size_t width, size_t height);
   void updateMidiColors();
   void onTheatreChanged();
   void onLeftButtonPress(int, double, double);
@@ -92,10 +87,8 @@ class VisualizationWidget : public Gtk::DrawingArea {
   void OnTrack();
   void OnTrackWithPan();
 
-  void selectFixtures(const theatre::Coordinate2D &a,
-                      const theatre::Coordinate2D &b);
-  void addFixtures(const theatre::Coordinate2D &a,
-                   const theatre::Coordinate2D &b);
+  void selectFixtures(const theatre::Coordinate2D &a, const theatre::Coordinate2D &b);
+  void addFixtures(const theatre::Coordinate2D &a, const theatre::Coordinate2D &b);
   void SetTilt(const theatre::Coordinate2D &position);
   void SetPan(const theatre::Coordinate2D &position);
   void SetCursor(const std::string &cursor_name);
@@ -110,8 +103,7 @@ class VisualizationWidget : public Gtk::DrawingArea {
   FixtureSelection *_globalSelection;
   sigc::scoped_connection _globalSelectionConnection;
   MainWindow *main_window_;
-  system::DeletablePtr<glight::gui::windows::FixtureProperties>
-      _propertiesWindow;
+  system::DeletablePtr<glight::gui::windows::FixtureProperties> _propertiesWindow;
   bool _isInitialized, _isTimerRunning;
   sigc::scoped_connection _timeoutConnection;
   sigc::scoped_connection update_connection_;

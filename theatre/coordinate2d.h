@@ -18,9 +18,7 @@ class Coordinate2D {
   constexpr double &Y() { return y_; }
   constexpr double Y() const { return y_; }
 
-  constexpr bool operator==(const Coordinate2D &rhs) const {
-    return p() == rhs.p();
-  }
+  constexpr bool operator==(const Coordinate2D &rhs) const { return p() == rhs.p(); }
 
   constexpr Coordinate2D &operator+=(const Coordinate2D &rhs) {
     x_ += rhs.x_;
@@ -34,17 +32,11 @@ class Coordinate2D {
     return *this;
   }
 
-  constexpr bool operator<(const Coordinate2D &rhs) const {
-    return p() < rhs.p();
-  }
+  constexpr bool operator<(const Coordinate2D &rhs) const { return p() < rhs.p(); }
 
-  constexpr Coordinate2D operator*(double rhs) const {
-    return Coordinate2D(x_ * rhs, y_ * rhs);
-  }
+  constexpr Coordinate2D operator*(double rhs) const { return Coordinate2D(x_ * rhs, y_ * rhs); }
 
-  constexpr Coordinate2D operator/(double rhs) const {
-    return Coordinate2D(x_ / rhs, y_ / rhs);
-  }
+  constexpr Coordinate2D operator/(double rhs) const { return Coordinate2D(x_ / rhs, y_ / rhs); }
 
   constexpr Coordinate2D operator+(const Coordinate2D &rhs) const {
     return Coordinate2D(x_ + rhs.x_, y_ + rhs.y_);
@@ -64,13 +56,10 @@ class Coordinate2D {
 
   constexpr bool InsideRectangle(const Coordinate2D &topleft,
                                  const Coordinate2D &bottomright) const {
-    return x_ >= topleft.x_ && y_ >= topleft.y_ && x_ < bottomright.x_ &&
-           y_ < bottomright.y_;
+    return x_ >= topleft.x_ && y_ >= topleft.y_ && x_ < bottomright.x_ && y_ < bottomright.y_;
   }
 
-  constexpr Coordinate2D Add(double x, double y) const {
-    return Coordinate2D(x_ + x, y_ + y);
-  }
+  constexpr Coordinate2D Add(double x, double y) const { return Coordinate2D(x_ + x, y_ + y); }
 
   constexpr double SquaredDistance(Coordinate2D other) const {
     const double dx = x_ - other.x_, dy = y_ - other.y_;
@@ -80,9 +69,7 @@ class Coordinate2D {
   double Angle() const { return std::atan2(y_, x_); }
 
  private:
-  constexpr std::pair<double, double> p() const {
-    return std::make_pair(x_, y_);
-  }
+  constexpr std::pair<double, double> p() const { return std::make_pair(x_, y_); }
 
   double x_ = 0.0;
   double y_ = 0.0;

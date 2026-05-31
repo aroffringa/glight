@@ -27,8 +27,7 @@ class AudioPlayer : private SyncListener {
  public:
   class AlsaError : public std::runtime_error {
    public:
-    AlsaError(const std::string &message)
-        : runtime_error(std::string("Alsa error: ") + message) {}
+    AlsaError(const std::string &message) : runtime_error(std::string("Alsa error: ") + message) {}
   };
 
   AudioPlayer(FlacDecoder &decoder, const std::string &device_name)

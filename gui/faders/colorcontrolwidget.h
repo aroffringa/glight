@@ -13,8 +13,8 @@ namespace glight::gui {
 
 class ColorControlWidget final : public ControlWidget {
  public:
-  ColorControlWidget(FaderWindow &fader_window, uistate::FaderState &state,
-                     ControlMode mode, char key);
+  ColorControlWidget(FaderWindow &fader_window, uistate::FaderState &state, ControlMode mode,
+                     char key);
   ~ColorControlWidget();
 
   void Toggle() final;

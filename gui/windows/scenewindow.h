@@ -70,8 +70,8 @@ class SceneWindow : public windows::ChildWindow {
   } _controllablesListColumns;
 
   template <typename SigType>
-  void addTool(Gtk::Button &tool, const char *label, const char *tooltip,
-               const char *icon, const SigType &sig) {
+  void addTool(Gtk::Button &tool, const char *label, const char *tooltip, const char *icon,
+               const SigType &sig) {
     tool.set_label(label);
     tool.set_tooltip_text(tooltip);
     tool.set_icon_name(icon);
@@ -141,8 +141,7 @@ class SceneWindow : public windows::ChildWindow {
   void createSceneItemsList();
   void createControllablesList();
   void fillSceneItemList();
-  void setSceneItemListRow(theatre::SceneItem *sceneItem,
-                           Gtk::TreeModel::Row &row) const;
+  void setSceneItemListRow(theatre::SceneItem *sceneItem, Gtk::TreeModel::Row &row) const;
   void updateSelectedSceneItems();
   void fillControllablesList();
   void addKey(theatre::KeySceneLevel level);
@@ -177,11 +176,9 @@ class SceneWindow : public windows::ChildWindow {
 
   theatre::SceneItem *selectedItem() {
     if (selectedSceneItemCount() == 1) {
-      Glib::RefPtr<Gtk::TreeSelection> selection =
-          _sceneItemsListView.get_selection();
+      Glib::RefPtr<Gtk::TreeSelection> selection = _sceneItemsListView.get_selection();
       Gtk::TreeModel::Path selected = *selection->get_selected_rows().begin();
-      return (*_sceneItemsListModel->get_iter(
-          selected))[_sceneItemsListColumns._item];
+      return (*_sceneItemsListModel->get_iter(selected))[_sceneItemsListColumns._item];
     } else {
       return nullptr;
     }

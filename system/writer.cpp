@@ -86,23 +86,18 @@ void writeNameAttributes(WriteState &state, const NamedObject &obj) {
 
 void writeFolderAttributes(WriteState &state, const FolderObject &obj) {
   writeNameAttributes(state, obj);
-  if (obj.IsRoot())
-    throw std::runtime_error("Folder object '" + obj.Name() +
-                             "' has no parent");
+  if (obj.IsRoot()) throw std::runtime_error("Folder object '" + obj.Name() + "' has no parent");
   state.writer.Number("parent", state.folderIds.find(&obj.Parent())->second);
 }
 
-void writeDmxChannel(WriteState &state, const DmxChannel &dmxChannel,
-                     const char *name) {
+void writeDmxChannel(WriteState &state, const DmxChannel &dmxChannel, const char *name) {
   state.writer.StartObject(name);
-  if (dmxChannel.Universe() != 0)
-    state.writer.Number("universe", dmxChannel.Universe());
+  if (dmxChannel.Universe() != 0) state.writer.Number("universe", dmxChannel.Universe());
   state.writer.Number("channel", dmxChannel.Channel());
   state.writer.EndObject();
 }
 
-void writeFixtureFunction(WriteState &state,
-                          const FixtureFunction &fixtureFunction) {
+void writeFixtureFunction(WriteState &state, const FixtureFunction &fixtureFunction) {
   state.writer.StartObject();
   state.writer.String("name", fixtureFunction.Name());
   writeDmxChannel(state, fixtureFunction.MainChannel(), "dmx-channel");
@@ -116,8 +111,7 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   state.writer.StartObject();
   writeNameAttributes(state, fixture);
   state.writer.String("type", fixture.Mode().Type().Name());
-  state.writer.Number("mode-index",
-                      fixture.Mode().Type().ModeIndex(fixture.Mode()));
+  state.writer.Number("mode-index", fixture.Mode().Type().ModeIndex(fixture.Mode()));
   state.writer.Number("position-x", fixture.GetPosition().X());
   state.writer.Number("position-y", fixture.GetPosition().Y());
   if (fixture.GetPosition().Z() != Fixture::kDefaultHeight)
@@ -125,16 +119,12 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
   state.writer.Number("direction", fixture.Direction());
   if (fixture.StaticTilt() != Fixture::kDefaultTilt)
     state.writer.Number("tilt", fixture.StaticTilt());
-  if (fixture.IsUpsideDown())
-    state.writer.Boolean("upside-down", fixture.IsUpsideDown());
-  if (fixture.ElectricPhase() != 0)
-    state.writer.Number("electric-phase", fixture.ElectricPhase());
+  if (fixture.IsUpsideDown()) state.writer.Boolean("upside-down", fixture.IsUpsideDown());
+  if (fixture.ElectricPhase() != 0) state.writer.Number("electric-phase", fixture.ElectricPhase());
   state.writer.String("symbol", fixture.Symbol().Name());
-  const std::vector<std::unique_ptr<FixtureFunction>> &functions =
-      fixture.Functions();
+  const std::vector<std::unique_ptr<FixtureFunction>> &functions = fixture.Functions();
   state.writer.StartArray("functions");
-  for (const std::unique_ptr<FixtureFunction> &ff : functions)
-    writeFixtureFunction(state, *ff);
+  for (const std::unique_ptr<FixtureFunction> &ff : functions) writeFixtureFunction(state, *ff);
   state.writer.EndArray();   // functions
   state.writer.EndObject();  // fixture
 }
@@ -142,8 +132,7 @@ void writeFixture(WriteState &state, const Fixture &fixture) {
 void writeFixtureGroup(WriteState &state, const FixtureGroup &group) {
   state.writer.StartObject();
   writeFolderAttributes(state, group);
-  const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures =
-      group.Fixtures();
+  const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures = group.Fixtures();
   state.writer.StartArray("fixtures");
   for (const system::ObservingPtr<theatre::Fixture> &fixture : fixtures) {
     // TODO fixture should become a FolderObject and this should be the full
@@ -176,8 +165,7 @@ void witeMacroParameters(WriteState &state, const ColorRangeParameters &pars) {
   state.writer.EndObject();  // parameters
 }
 
-void writeRotationParameters(WriteState &state,
-                             const RotationSpeedParameters &pars) {
+void writeRotationParameters(WriteState &state, const RotationSpeedParameters &pars) {
   state.writer.StartObject("parameters");
   state.writer.StartArray("ranges");
   for (const RotationSpeedParameters::Range &range : pars.GetRanges()) {
@@ -192,8 +180,7 @@ void writeRotationParameters(WriteState &state,
   state.writer.EndObject();  // parameters
 }
 
-void writeFixtureTypeFunction(WriteState &state,
-                              const FixtureModeFunction &function) {
+void writeFixtureTypeFunction(WriteState &state, const FixtureModeFunction &function) {
   state.writer.StartObject();
   state.writer.String("type", ToString(function.Type()));
   state.writer.Number("dmx-offset", function.DmxOffset());
@@ -219,8 +206,7 @@ void writeFixtureType(WriteState &state, const FixtureType &fixture_type) {
   state.writer.StartObject();
   writeFolderAttributes(state, fixture_type);
   state.writer.String("short-name", fixture_type.ShortName());
-  state.writer.String("fixture-class",
-                      ToString(fixture_type.GetFixtureClass()));
+  state.writer.String("fixture-class", ToString(fixture_type.GetFixtureClass()));
   state.writer.Number("shape-count", fixture_type.ShapeCount());
   state.writer.Number("min-beam-angle", fixture_type.MinBeamAngle());
   state.writer.Number("max-beam-angle", fixture_type.MaxBeamAngle());
@@ -229,10 +215,8 @@ void writeFixtureType(WriteState &state, const FixtureType &fixture_type) {
   state.writer.Number("min-tilt", fixture_type.MinTilt());
   state.writer.Number("max-tilt", fixture_type.MaxTilt());
   state.writer.Number("brightness", fixture_type.Brightness());
-  if (fixture_type.MaxPower() != 0.0)
-    state.writer.Number("max-power", fixture_type.MaxPower());
-  if (fixture_type.IdlePower() != 0.0)
-    state.writer.Number("idle-power", fixture_type.IdlePower());
+  if (fixture_type.MaxPower() != 0.0) state.writer.Number("max-power", fixture_type.MaxPower());
+  if (fixture_type.IdlePower() != 0.0) state.writer.Number("idle-power", fixture_type.IdlePower());
   state.writer.StartArray("modes");
   for (const FixtureMode &mode : fixture_type.Modes()) {
     state.writer.StartObject();
@@ -248,10 +232,8 @@ void writeFixtureType(WriteState &state, const FixtureType &fixture_type) {
   state.writer.EndObject();
 }
 
-void writeSingleSourceValue(WriteState &state,
-                            const SingleSourceValue &singleSourceValue) {
-  if (singleSourceValue.Value())
-    state.writer.Number("value", singleSourceValue.Value().UInt());
+void writeSingleSourceValue(WriteState &state, const SingleSourceValue &singleSourceValue) {
+  if (singleSourceValue.Value()) state.writer.Number("value", singleSourceValue.Value().UInt());
   if (singleSourceValue.TargetValue())
     state.writer.Number("target-value", singleSourceValue.TargetValue());
   if (singleSourceValue.FadeSpeed() != 0.0)
@@ -263,10 +245,8 @@ void writeSourceValue(WriteState &state, const SourceValue &sourceValue) {
 
   state.writer.StartObject();
   state.writer.String("controllable-ref", sourceValue.GetControllable().Name());
-  if (sourceValue.InputIndex())
-    state.writer.Number("input-index", sourceValue.InputIndex());
-  state.writer.OptionalNumber(
-      "folder", state.folderIds[&sourceValue.GetControllable().Parent()]);
+  if (sourceValue.InputIndex()) state.writer.Number("input-index", sourceValue.InputIndex());
+  state.writer.OptionalNumber("folder", state.folderIds[&sourceValue.GetControllable().Parent()]);
   state.writer.StartObject("a");
   writeSingleSourceValue(state, sourceValue.A());
   state.writer.EndObject();
@@ -281,18 +261,14 @@ void writePresetValue(WriteState &state, const PresetValue &presetValue) {
 
   state.writer.StartObject();
   state.writer.String("controllable-ref", presetValue.GetControllable().Name());
-  if (presetValue.InputIndex())
-    state.writer.Number("input-index", presetValue.InputIndex());
-  state.writer.OptionalNumber(
-      "folder", state.folderIds[&presetValue.GetControllable().Parent()]);
+  if (presetValue.InputIndex()) state.writer.Number("input-index", presetValue.InputIndex());
+  state.writer.OptionalNumber("folder", state.folderIds[&presetValue.GetControllable().Parent()]);
   state.writer.Number("value", presetValue.Value().UInt());
   state.writer.EndObject();
 }
 
-void writePresetCollection(WriteState &state,
-                           const PresetCollection &presetCollection) {
-  const std::vector<std::unique_ptr<PresetValue>> &values =
-      presetCollection.PresetValues();
+void writePresetCollection(WriteState &state, const PresetCollection &presetCollection) {
+  const std::vector<std::unique_ptr<PresetValue>> &values = presetCollection.PresetValues();
   for (const std::unique_ptr<PresetValue> &pv : values)
     writeControllable(state, pv->GetControllable());
 
@@ -300,8 +276,7 @@ void writePresetCollection(WriteState &state,
   state.writer.String("type", "preset-collection");
   writeFolderAttributes(state, presetCollection);
   state.writer.StartArray("values");
-  for (const std::unique_ptr<PresetValue> &pv : values)
-    writePresetValue(state, *pv);
+  for (const std::unique_ptr<PresetValue> &pv : values) writePresetValue(state, *pv);
   state.writer.EndArray();
   state.writer.EndObject();
 }
@@ -345,10 +320,8 @@ void writeSequence(WriteState &state, const std::vector<Input> &sequence) {
   state.writer.StartArray("inputs");
   for (const Input &input : sequence) {
     state.writer.StartObject();
-    if (input.InputIndex())
-      state.writer.Number("input-index", input.InputIndex());
-    state.writer.OptionalNumber(
-        "folder", state.folderIds[&input.GetControllable()->Parent()]);
+    if (input.InputIndex()) state.writer.Number("input-index", input.InputIndex());
+    state.writer.OptionalNumber("folder", state.folderIds[&input.GetControllable()->Parent()]);
     state.writer.String("name", input.GetControllable()->Name());
     state.writer.EndObject();
   }
@@ -358,8 +331,7 @@ void writeSequence(WriteState &state, const std::vector<Input> &sequence) {
 
 void writeChase(WriteState &state, const Chase &chase) {
   const std::vector<Input> &list = chase.GetSequence();
-  for (const Input &input : list)
-    writeControllable(state, *input.GetControllable());
+  for (const Input &input : list) writeControllable(state, *input.GetControllable());
 
   state.writer.StartObject();
   state.writer.String("type", "chase");
@@ -372,8 +344,7 @@ void writeChase(WriteState &state, const Chase &chase) {
 
 void writeTimeSequence(WriteState &state, const TimeSequence &timeSequence) {
   const std::vector<Input> &list = timeSequence.Sequence();
-  for (const Input &input : list)
-    writeControllable(state, *input.GetControllable());
+  for (const Input &input : list) writeControllable(state, *input.GetControllable());
 
   state.writer.StartObject();
   state.writer.String("type", "time-sequence");
@@ -411,8 +382,7 @@ void writeEffect(WriteState &state, const Effect &effect) {
 
     state.writer.StartArray("properties");
     for (const Property &p : *ps) {
-      const bool has_default_value =
-          ps->EqualPropertyValues(p, *default_effect);
+      const bool has_default_value = ps->EqualPropertyValues(p, *default_effect);
       if (!has_default_value) {
         state.writer.StartObject();
         state.writer.String("name", p.Name());
@@ -447,8 +417,7 @@ void writeEffect(WriteState &state, const Effect &effect) {
     for (const std::pair<Controllable *, size_t> &c : effect.Connections()) {
       state.writer.StartObject();
       if (c.second) state.writer.Number("input-index", c.second);
-      state.writer.OptionalNumber("folder",
-                                  state.folderIds[&c.first->Parent()]);
+      state.writer.OptionalNumber("folder", state.folderIds[&c.first->Parent()]);
       state.writer.String("name", c.first->Name());
       state.writer.EndObject();
     }
@@ -468,8 +437,7 @@ void writeControlSceneItem(WriteState &state, const ControlSceneItem &item) {
   state.writer.Number("start-value", item.StartValue().UInt());
   state.writer.Number("end-value", item.EndValue().UInt());
   state.writer.String("controllable-ref", item.GetControllable().Name());
-  state.writer.OptionalNumber(
-      "folder", state.folderIds[&item.GetControllable().Parent()]);
+  state.writer.OptionalNumber("folder", state.folderIds[&item.GetControllable().Parent()]);
 }
 
 void writeBlackoutSceneItem(WriteState &state, const BlackoutSceneItem &item) {
@@ -484,16 +452,13 @@ void writeSceneItem(WriteState &state, const SceneItem &item) {
   state.writer.Number("offset", item.OffsetInMS());
   state.writer.Number("duration", item.DurationInMS());
 
-  if (const KeySceneItem *keyItem = dynamic_cast<const KeySceneItem *>(&item);
-      keyItem)
+  if (const KeySceneItem *keyItem = dynamic_cast<const KeySceneItem *>(&item); keyItem)
     writeKeySceneItem(state, *keyItem);
-  else if (const ControlSceneItem *controlItem =
-               dynamic_cast<const ControlSceneItem *>(&item);
+  else if (const ControlSceneItem *controlItem = dynamic_cast<const ControlSceneItem *>(&item);
            controlItem)
     writeControlSceneItem(state, *controlItem);
   else {
-    const BlackoutSceneItem *blackout =
-        dynamic_cast<const BlackoutSceneItem *>(&item);
+    const BlackoutSceneItem *blackout = dynamic_cast<const BlackoutSceneItem *>(&item);
     writeBlackoutSceneItem(state, *blackout);
   }
 
@@ -512,10 +477,8 @@ void writeScene(WriteState &state, const Scene &scene) {
   state.writer.String("audio-file", scene.AudioFile());
 
   state.writer.StartArray("items");
-  const std::multimap<double, std::unique_ptr<SceneItem>> &items =
-      scene.SceneItems();
-  for (const std::pair<const double, std::unique_ptr<SceneItem>> &sceneItem :
-       items) {
+  const std::multimap<double, std::unique_ptr<SceneItem>> &items = scene.SceneItems();
+  for (const std::pair<const double, std::unique_ptr<SceneItem>> &sceneItem : items) {
     writeSceneItem(state, *sceneItem.second);
   }
   state.writer.EndArray();  // items
@@ -525,26 +488,21 @@ void writeScene(WriteState &state, const Scene &scene) {
 
 void writeControllable(WriteState &state, const Controllable &controllable) {
   if (!state.controllablesWritten.contains(&controllable)) {
-    if (const FixtureControl *fixtureControl =
-            dynamic_cast<const FixtureControl *>(&controllable);
+    if (const FixtureControl *fixtureControl = dynamic_cast<const FixtureControl *>(&controllable);
         fixtureControl)
       writeFixtureControl(state, *fixtureControl);
-    else if (const Chase *chase = dynamic_cast<const Chase *>(&controllable);
-             chase)
+    else if (const Chase *chase = dynamic_cast<const Chase *>(&controllable); chase)
       writeChase(state, *chase);
-    else if (const TimeSequence *tSequence =
-                 dynamic_cast<const TimeSequence *>(&controllable);
+    else if (const TimeSequence *tSequence = dynamic_cast<const TimeSequence *>(&controllable);
              tSequence)
       writeTimeSequence(state, *tSequence);
     else if (const PresetCollection *presetCollection =
                  dynamic_cast<const PresetCollection *>(&controllable);
              presetCollection)
       writePresetCollection(state, *presetCollection);
-    else if (const Effect *effect = dynamic_cast<const Effect *>(&controllable);
-             effect)
+    else if (const Effect *effect = dynamic_cast<const Effect *>(&controllable); effect)
       writeEffect(state, *effect);
-    else if (const Scene *scene = dynamic_cast<const Scene *>(&controllable);
-             scene)
+    else if (const Scene *scene = dynamic_cast<const Scene *>(&controllable); scene)
       writeScene(state, *scene);
     else
       throw std::runtime_error("Unknown controllable");
@@ -567,11 +525,9 @@ void writeFaderState(WriteState &state, const uistate::FaderState &fader) {
   for (SourceValue *source : sources) {
     state.writer.StartObject();
     if (source != nullptr) {
-      state.writer.OptionalNumber(
-          "folder", state.folderIds[&source->GetControllable().Parent()]);
+      state.writer.OptionalNumber("folder", state.folderIds[&source->GetControllable().Parent()]);
       state.writer.String("name", source->GetControllable().Name());
-      if (source->InputIndex())
-        state.writer.Number("input-index", source->InputIndex());
+      if (source->InputIndex()) state.writer.Number("input-index", source->InputIndex());
     }
     state.writer.EndObject();
   }
@@ -579,8 +535,7 @@ void writeFaderState(WriteState &state, const uistate::FaderState &fader) {
   state.writer.EndObject();
 }
 
-void writeFaderSetState(WriteState &state,
-                        const uistate::FaderSetState &uiState) {
+void writeFaderSetState(WriteState &state, const uistate::FaderSetState &uiState) {
   state.writer.StartObject();
   state.writer.String("name", uiState.name);
   state.writer.Boolean("active", uiState.isActive);
@@ -602,17 +557,12 @@ void writeFaderSetState(WriteState &state,
 }
 
 void writeGUIState(WriteState &state) {
-  if (state.uiState->LayoutLocked())
-    state.writer.Boolean("layout-locked", true);
-  if (!state.uiState->ShowFixtures())
-    state.writer.Boolean("show-fixtures", false);
+  if (state.uiState->LayoutLocked()) state.writer.Boolean("layout-locked", true);
+  if (!state.uiState->ShowFixtures()) state.writer.Boolean("show-fixtures", false);
   if (!state.uiState->ShowBeams()) state.writer.Boolean("show-beams", false);
-  if (!state.uiState->ShowProjections())
-    state.writer.Boolean("show-projections", false);
-  if (!state.uiState->ShowCrosshairs())
-    state.writer.Boolean("show-crosshairs", false);
-  if (!state.uiState->ShowStageBorders())
-    state.writer.Boolean("show-stage-borders", false);
+  if (!state.uiState->ShowProjections()) state.writer.Boolean("show-projections", false);
+  if (!state.uiState->ShowCrosshairs()) state.writer.Boolean("show-crosshairs", false);
+  if (!state.uiState->ShowStageBorders()) state.writer.Boolean("show-stage-borders", false);
   // window position not available since gtkmm 4
   // state.writer.Number("window-position-x",
   // state.uiState->WindowPositionX());
@@ -622,8 +572,7 @@ void writeGUIState(WriteState &state) {
   state.writer.Number("window-height", state.uiState->WindowHeight());
 
   state.writer.StartArray("states");
-  for (const std::unique_ptr<uistate::FaderSetState> &fState :
-       state.uiState->FaderSets())
+  for (const std::unique_ptr<uistate::FaderSetState> &fState : state.uiState->FaderSets())
     writeFaderSetState(state, *fState);
   state.writer.EndArray();  // states
 }
@@ -642,44 +591,34 @@ void writeGlightShow(WriteState &state) {
   state.writer.Number("height", theatre.Height());
   state.writer.Number("fixture-symbol-size", theatre.FixtureSymbolSize());
 
-  const std::vector<TrackablePtr<FixtureType>> &fixture_types =
-      theatre.FixtureTypes();
+  const std::vector<TrackablePtr<FixtureType>> &fixture_types = theatre.FixtureTypes();
 
   state.writer.StartArray("fixture-types");
-  for (const TrackablePtr<FixtureType> &ft : fixture_types)
-    writeFixtureType(state, *ft);
+  for (const TrackablePtr<FixtureType> &ft : fixture_types) writeFixtureType(state, *ft);
   state.writer.EndArray();  // fixture-types
 
   state.writer.StartArray("fixtures");
-  const std::vector<system::TrackablePtr<Fixture>> &fixtures =
-      theatre.Fixtures();
-  for (const system::TrackablePtr<Fixture> &f : fixtures)
-    writeFixture(state, *f);
+  const std::vector<system::TrackablePtr<Fixture>> &fixtures = theatre.Fixtures();
+  for (const system::TrackablePtr<Fixture> &f : fixtures) writeFixture(state, *f);
   state.writer.EndArray();  // fixtures
 
   state.writer.EndObject();  // theatre
 
   state.writer.StartArray("fixture-groups");
-  const std::vector<TrackablePtr<FixtureGroup>> &groups =
-      state.management.FixtureGroups();
-  for (const TrackablePtr<FixtureGroup> &f : groups)
-    writeFixtureGroup(state, *f);
+  const std::vector<TrackablePtr<FixtureGroup>> &groups = state.management.FixtureGroups();
+  for (const TrackablePtr<FixtureGroup> &f : groups) writeFixtureGroup(state, *f);
   state.writer.EndArray();  // fixture-groups
 
   state.writer.StartArray("controls");
 
-  const std::vector<TrackablePtr<Controllable>> &controllables =
-      state.management.Controllables();
-  for (const TrackablePtr<Controllable> &c : controllables)
-    writeControllable(state, *c);
+  const std::vector<TrackablePtr<Controllable>> &controllables = state.management.Controllables();
+  for (const TrackablePtr<Controllable> &c : controllables) writeControllable(state, *c);
   state.writer.EndArray();  // controls
 
-  const std::vector<std::unique_ptr<SourceValue>> &sourceValues =
-      state.management.SourceValues();
+  const std::vector<std::unique_ptr<SourceValue>> &sourceValues = state.management.SourceValues();
 
   state.writer.StartArray("source-values");
-  for (const std::unique_ptr<SourceValue> &sv : sourceValues)
-    writeSourceValue(state, *sv);
+  for (const std::unique_ptr<SourceValue> &sv : sourceValues) writeSourceValue(state, *sv);
   state.writer.EndArray();  // source_values
 
   if (state.uiState != nullptr) {
@@ -693,8 +632,7 @@ void writeGlightShow(WriteState &state) {
 
 }  // namespace
 
-void Write(std::ostream &stream, Management &management,
-           uistate::UIState *uiState) {
+void Write(std::ostream &stream, Management &management, uistate::UIState *uiState) {
   WriteState state(management);
   state.writer = json::JsonWriter(stream);
   state.uiState = uiState;
@@ -702,8 +640,7 @@ void Write(std::ostream &stream, Management &management,
   writeGlightShow(state);
 }
 
-void Write(const std::string &filename, Management &management,
-           uistate::UIState *uiState) {
+void Write(const std::string &filename, Management &management, uistate::UIState *uiState) {
   std::ofstream file(filename);
   Write(file, management, uiState);
 }

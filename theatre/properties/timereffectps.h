@@ -10,14 +10,10 @@ namespace glight::theatre {
 class TimerEffectPS final : public PropertySet {
  public:
   TimerEffectPS() {
-    addProperty(
-        Property("start_pattern", "Start pattern", PropertyType::TimePattern));
-    addProperty(
-        Property("end_pattern", "End pattern", PropertyType::TimePattern));
-    addProperty(
-        Property("transition_in", "Transition in", PropertyType::Transition));
-    addProperty(
-        Property("transition_out", "Transition out", PropertyType::Transition));
+    addProperty(Property("start_pattern", "Start pattern", PropertyType::TimePattern));
+    addProperty(Property("end_pattern", "End pattern", PropertyType::TimePattern));
+    addProperty(Property("transition_in", "Transition in", PropertyType::Transition));
+    addProperty(Property("transition_out", "Transition out", PropertyType::Transition));
   }
 
  protected:
@@ -34,8 +30,7 @@ class TimerEffectPS final : public PropertySet {
     }
   }
 
-  const system::TimePattern &getTimePattern(const FolderObject &object,
-                                            size_t index) const final {
+  const system::TimePattern &getTimePattern(const FolderObject &object, size_t index) const final {
     const TimerEffect &tfx = static_cast<const TimerEffect &>(object);
     switch (index) {
       case 0:
@@ -46,8 +41,7 @@ class TimerEffectPS final : public PropertySet {
     }
   }
 
-  void setTransition(FolderObject &object, size_t index,
-                     const Transition &value) const final {
+  void setTransition(FolderObject &object, size_t index, const Transition &value) const final {
     TimerEffect &tfx = static_cast<TimerEffect &>(object);
     switch (index) {
       case 2:
@@ -59,8 +53,7 @@ class TimerEffectPS final : public PropertySet {
     }
   }
 
-  Transition getTransition(const FolderObject &object,
-                           size_t index) const final {
+  Transition getTransition(const FolderObject &object, size_t index) const final {
     const TimerEffect &tfx = static_cast<const TimerEffect &>(object);
     if (index == 2)
       return tfx.GetTransitionIn();

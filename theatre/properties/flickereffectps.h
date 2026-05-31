@@ -11,8 +11,7 @@ class FlickerEffectPS final : public PropertySet {
  public:
   FlickerEffectPS() {
     addProperty(Property("speed", "Speed", PropertyType::ControlValue));
-    addProperty(Property("independentoutputs", "Independent outputs",
-                         PropertyType::Boolean));
+    addProperty(Property("independentoutputs", "Independent outputs", PropertyType::Boolean));
   }
 
  protected:
@@ -26,8 +25,7 @@ class FlickerEffectPS final : public PropertySet {
     }
   }
 
-  virtual unsigned getControlValue(const FolderObject &object,
-                                   size_t index) const final override {
+  virtual unsigned getControlValue(const FolderObject &object, size_t index) const final override {
     const FlickerEffect &fx = static_cast<const FlickerEffect &>(object);
     switch (index) {
       case 0:
@@ -36,8 +34,7 @@ class FlickerEffectPS final : public PropertySet {
     return 0;
   }
 
-  virtual void setBool(FolderObject &object, size_t index,
-                       bool value) const override {
+  virtual void setBool(FolderObject &object, size_t index, bool value) const override {
     FlickerEffect &fx = static_cast<FlickerEffect &>(object);
     switch (index) {
       case 1:
@@ -46,8 +43,7 @@ class FlickerEffectPS final : public PropertySet {
     }
   }
 
-  virtual bool getBool(const FolderObject &object,
-                       size_t index) const final override {
+  virtual bool getBool(const FolderObject &object, size_t index) const final override {
     const FlickerEffect &fx = static_cast<const FlickerEffect &>(object);
     switch (index) {
       case 1:

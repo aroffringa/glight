@@ -36,8 +36,7 @@ void ReorderWidget::Append(system::ObservingPtr<theatre::NamedObject> object) {
   Gtk::TreeModel::iterator iter = model_->append();
   Gtk::TreeModel::Row& row = *iter;
   row[columns_.title_] = object->Name();
-  if (const theatre::Fixture* fixture =
-          dynamic_cast<const theatre::Fixture*>(object.Get());
+  if (const theatre::Fixture* fixture = dynamic_cast<const theatre::Fixture*>(object.Get());
       fixture) {
     row[columns_.type_] = fixture->Mode().Type().Name();
   }
@@ -45,8 +44,7 @@ void ReorderWidget::Append(system::ObservingPtr<theatre::NamedObject> object) {
   signal_changed_();
 }
 
-std::vector<system::ObservingPtr<theatre::NamedObject>> ReorderWidget::GetList()
-    const {
+std::vector<system::ObservingPtr<theatre::NamedObject>> ReorderWidget::GetList() const {
   auto children = model_->children();
   std::vector<system::ObservingPtr<theatre::NamedObject>> list;
   for (Gtk::TreeRow& row : children) {
@@ -56,8 +54,7 @@ std::vector<system::ObservingPtr<theatre::NamedObject>> ReorderWidget::GetList()
 }
 
 void ReorderWidget::MoveUp() {
-  std::vector<Gtk::TreeModel::Path> rows =
-      view_.get_selection()->get_selected_rows();
+  std::vector<Gtk::TreeModel::Path> rows = view_.get_selection()->get_selected_rows();
   for (const Gtk::TreeModel::Path& row : rows) {
     Gtk::TreeModel::iterator iter = model_->get_iter(row);
     Gtk::TreeModel::iterator previous_iter = iter;
@@ -68,8 +65,7 @@ void ReorderWidget::MoveUp() {
 }
 
 void ReorderWidget::MoveDown() {
-  std::vector<Gtk::TreeModel::Path> rows =
-      view_.get_selection()->get_selected_rows();
+  std::vector<Gtk::TreeModel::Path> rows = view_.get_selection()->get_selected_rows();
   std::ranges::reverse_view rev_view(rows);
   for (const Gtk::TreeModel::Path& row : rev_view) {
     Gtk::TreeModel::iterator iter = model_->get_iter(row);
@@ -81,8 +77,7 @@ void ReorderWidget::MoveDown() {
 }
 
 void ReorderWidget::Remove() {
-  std::vector<Gtk::TreeModel::Path> rows =
-      view_.get_selection()->get_selected_rows();
+  std::vector<Gtk::TreeModel::Path> rows = view_.get_selection()->get_selected_rows();
   for (const Gtk::TreeModel::Path& row : rows) {
     model_->erase(model_->get_iter(row));
   }

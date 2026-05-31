@@ -20,22 +20,16 @@ class TwinkleEffect final : public Effect {
   void SetHoldTime(double hold) { hold_time_ = hold; }
   double HoldTime() const { return hold_time_; }
 
-  void SetTransitionIn(const Transition& transition) {
-    transition_in_ = transition;
-  }
+  void SetTransitionIn(const Transition& transition) { transition_in_ = transition; }
   const Transition& GetTransitionIn() const { return transition_in_; }
 
-  void SetTransitionOut(const Transition& transition) {
-    transition_out_ = transition;
-  }
+  void SetTransitionOut(const Transition& transition) { transition_out_ = transition; }
   const Transition& GetTransitionOut() const { return transition_out_; }
 
  protected:
-  void MixImplementation(const ControlValue* values, const Timing& timing,
-                         bool primary) override {
+  void MixImplementation(const ControlValue* values, const Timing& timing, bool primary) override {
     if (values[0]) {
-      if (previous_time_[primary] == -1.0)
-        previous_time_[primary] = timing.TimeInMS();
+      if (previous_time_[primary] == -1.0) previous_time_[primary] = timing.TimeInMS();
       inputs_[primary].resize(NConnections());
       for (size_t i = 0; i != NConnections(); ++i) {
         MixInput(i, inputs_[primary][i], values[0], timing, primary);
@@ -51,8 +45,8 @@ class TwinkleEffect final : public Effect {
     double state_timer = 0.0;
   };
 
-  void MixInput(size_t connection_index, InputData& input,
-                const ControlValue& value, const Timing& timing, bool primary) {
+  void MixInput(size_t connection_index, InputData& input, const ControlValue& value,
+                const Timing& timing, bool primary) {
     const double time_passed = timing.TimeInMS() - previous_time_[primary];
     input.state_timer -= time_passed;
     switch (input.state) {
@@ -68,10 +62,8 @@ class TwinkleEffect final : public Effect {
           input.state = State::Hold;
           MixConnection(connection_index, value, primary);
         } else {
-          const double transition_point =
-              transition_out_.LengthInMs() - input.state_timer;
-          const ControlValue transition_value =
-              transition_in_.InValue(transition_point, timing);
+          const double transition_point = transition_out_.LengthInMs() - input.state_timer;
+          const ControlValue transition_value = transition_in_.InValue(transition_point, timing);
           MixConnection(connection_index, transition_value * value, primary);
         }
         break;
@@ -84,13 +76,11 @@ class TwinkleEffect final : public Effect {
         break;
       case State::TransitionOut:
         if (input.state_timer <= 0.0) {
-          std::exponential_distribution<double> distribution(1.0 /
-                                                             average_delay_);
+          std::exponential_distribution<double> distribution(1.0 / average_delay_);
           input.state_timer = distribution(timing.RNG());
           input.state = State::Waiting;
         } else {
-          const ControlValue transition_value =
-              transition_out_.InValue(input.state_timer, timing);
+          const ControlValue transition_value = transition_out_.InValue(input.state_timer, timing);
           MixConnection(connection_index, transition_value * value, primary);
         }
         break;

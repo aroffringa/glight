@@ -28,39 +28,30 @@ class Theatre {
     return AddFixture(mode).GetObserver();
   }
 
-  const system::TrackablePtr<FixtureType> &AddFixtureType(
-      StockFixture stock_fixture);
-  system::ObservingPtr<FixtureType> AddFixtureTypePtr(
-      StockFixture stock_fixture) {
+  const system::TrackablePtr<FixtureType> &AddFixtureType(StockFixture stock_fixture);
+  system::ObservingPtr<FixtureType> AddFixtureTypePtr(StockFixture stock_fixture) {
     return AddFixtureType(stock_fixture).GetObserver();
   }
 
-  const system::TrackablePtr<FixtureType> &AddFixtureType(
-      system::TrackablePtr<FixtureType> &&type);
-  system::ObservingPtr<FixtureType> AddFixtureTypePtr(
-      system::TrackablePtr<FixtureType> &&type) {
+  const system::TrackablePtr<FixtureType> &AddFixtureType(system::TrackablePtr<FixtureType> &&type);
+  system::ObservingPtr<FixtureType> AddFixtureTypePtr(system::TrackablePtr<FixtureType> &&type) {
     return AddFixtureType(std::move(type)).GetObserver();
   }
 
   bool Contains(Fixture &fixture) const;
 
-  const std::vector<system::TrackablePtr<Fixture>> &Fixtures() const {
-    return _fixtures;
-  }
+  const std::vector<system::TrackablePtr<Fixture>> &Fixtures() const { return _fixtures; }
   const std::vector<system::TrackablePtr<FixtureType>> &FixtureTypes() const {
     return _fixtureTypes;
   }
 
   Fixture &GetFixture(const std::string &name) const;
   system::ObservingPtr<Fixture> GetFixturePtr(const std::string &name) const;
-  const system::TrackablePtr<FixtureType> &GetFixtureType(
-      const std::string &name) const;
-  system::ObservingPtr<FixtureType> GetFixtureTypePtr(
-      const std::string &name) const {
+  const system::TrackablePtr<FixtureType> &GetFixtureType(const std::string &name) const;
+  system::ObservingPtr<FixtureType> GetFixtureTypePtr(const std::string &name) const {
     return GetFixtureType(name).GetObserver();
   }
-  system::ObservingPtr<FixtureType> GetFixtureTypePtr(
-      const FixtureType &type) const;
+  system::ObservingPtr<FixtureType> GetFixtureTypePtr(const FixtureType &type) const;
   FixtureFunction &GetFixtureFunction(const std::string &name) const;
 
   void RemoveFixture(const Fixture &fixture);

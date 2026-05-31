@@ -33,11 +33,7 @@ inline TriggerType GetTriggerType(const std::string& str) {
  */
 class Trigger {
  public:
-  Trigger()
-      : _type(TriggerType::Delay),
-        _delayInMs(500.0),
-        _delaySynced(1),
-        _delayInBeats(1.0) {}
+  Trigger() : _type(TriggerType::Delay), _delayInMs(500.0), _delaySynced(1), _delayInBeats(1.0) {}
 
   double DelayInMs() const { return _delayInMs; }
   void SetDelayInMs(double delay) { _delayInMs = delay; }

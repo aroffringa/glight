@@ -4,8 +4,6 @@
 
 namespace glight::theatre {
 
-std::string PresetValue::Name() const {
-  return _controllable->InputName(_inputIndex);
-}
+std::string PresetValue::Name() const { return _controllable->InputName(_inputIndex); }
 
 }  // namespace glight::theatre

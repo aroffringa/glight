@@ -14,8 +14,7 @@ class TimeSequence;
 
 enum class RotationType { Forward, Backward, ForwardBackward };
 
-TimeSequence &MakeRotation(const DesignInfo &design,
-                           const std::vector<ColorOrVariable> &colors,
+TimeSequence &MakeRotation(const DesignInfo &design, const std::vector<ColorOrVariable> &colors,
                            RotationType type);
 }  // namespace glight::theatre
 

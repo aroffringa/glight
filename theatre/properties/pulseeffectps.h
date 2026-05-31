@@ -11,17 +11,14 @@ class PulseEffectPS final : public PropertySet {
  public:
   PulseEffectPS() {
     addProperty(Property("repeat", "Repeat", PropertyType::Boolean));
-    addProperty(
-        Property("transition_in", "Transition in", PropertyType::Transition));
+    addProperty(Property("transition_in", "Transition in", PropertyType::Transition));
     addProperty(Property("hold", "Hold", PropertyType::Duration));
-    addProperty(
-        Property("transition_out", "Transition out", PropertyType::Transition));
+    addProperty(Property("transition_out", "Transition out", PropertyType::Transition));
     addProperty(Property("sleep", "Sleep", PropertyType::Duration));
   }
 
  protected:
-  void setDuration(FolderObject &object, size_t index,
-                   double value) const final override {
+  void setDuration(FolderObject &object, size_t index, double value) const final override {
     PulseEffect &pfx = static_cast<PulseEffect &>(object);
     switch (index) {
       case 2:
@@ -33,8 +30,7 @@ class PulseEffectPS final : public PropertySet {
     }
   }
 
-  double getDuration(const FolderObject &object,
-                     size_t index) const final override {
+  double getDuration(const FolderObject &object, size_t index) const final override {
     const PulseEffect &pfx = static_cast<const PulseEffect &>(object);
     switch (index) {
       case 2:
@@ -55,8 +51,7 @@ class PulseEffectPS final : public PropertySet {
     return pfx.Repeat();
   }
 
-  void setTransition(FolderObject &object, size_t index,
-                     const Transition &value) const override {
+  void setTransition(FolderObject &object, size_t index, const Transition &value) const override {
     PulseEffect &pfx = static_cast<PulseEffect &>(object);
     if (index == 1)
       pfx.SetTransitionIn(value);
@@ -64,8 +59,7 @@ class PulseEffectPS final : public PropertySet {
       pfx.SetTransitionOut(value);
   }
 
-  Transition getTransition(const FolderObject &object,
-                           size_t index) const override {
+  Transition getTransition(const FolderObject &object, size_t index) const override {
     const PulseEffect &pfx = static_cast<const PulseEffect &>(object);
     if (index == 1)
       return pfx.TransitionIn();

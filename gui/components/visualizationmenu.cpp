@@ -10,10 +10,8 @@ namespace glight::gui {
 using theatre::Color;
 
 VisualizationMenu::VisualizationMenu(Gio::ActionMap& actions) {
-  const auto Add = [&actions](std::shared_ptr<Gio::Menu>& menu,
-                              const Glib::ustring& label,
-                              const Glib::ustring& action_name,
-                              const sigc::slot<void()>& slot) {
+  const auto Add = [&actions](std::shared_ptr<Gio::Menu>& menu, const Glib::ustring& label,
+                              const Glib::ustring& action_name, const sigc::slot<void()>& slot) {
     return AddMenuItem(actions, menu, label, action_name, slot);
   };
 
@@ -29,8 +27,7 @@ VisualizationMenu::VisualizationMenu(Gio::ActionMap& actions) {
   menu->append_submenu("Set", set_menu);
 
   auto symbol_menu = Gio::Menu::create();
-  const std::vector<theatre::FixtureSymbol::Symbol> symbols(
-      theatre::FixtureSymbol::List());
+  const std::vector<theatre::FixtureSymbol::Symbol> symbols(theatre::FixtureSymbol::List());
   for (theatre::FixtureSymbol::Symbol symbol : symbols) {
     auto action = Add(symbol_menu, theatre::FixtureSymbol(symbol).Name(),
                       "symbol_" + theatre::FixtureSymbol(symbol).Name(),
@@ -65,40 +62,33 @@ VisualizationMenu::VisualizationMenu(Gio::ActionMap& actions) {
   menu->append_submenu("Dry mode style", dry_mode_style_menu);
 
   auto position_section = Gio::Menu::create();
-  align_horizontally_ = Add(position_section, "Align horizontally",
-                            "align_horizontally", SignalAlignHorizontally);
-  align_vertically_ = Add(position_section, "Align vertically",
-                          "align_vertically", SignalAlignVertically);
-  distribute_evenly_ = Add(position_section, "Distribute evenly",
-                           "distribute_evenly", SignalDistributeEvenly);
+  align_horizontally_ =
+      Add(position_section, "Align horizontally", "align_horizontally", SignalAlignHorizontally);
+  align_vertically_ =
+      Add(position_section, "Align vertically", "align_vertically", SignalAlignVertically);
+  distribute_evenly_ =
+      Add(position_section, "Distribute evenly", "distribute_evenly", SignalDistributeEvenly);
   menu->append_section(position_section);
 
   auto edit_section = Gio::Menu::create();
-  add_fixture_ =
-      Add(edit_section, "Add fixture...", "add_fixture", SignalAddFixtures);
+  add_fixture_ = Add(edit_section, "Add fixture...", "add_fixture", SignalAddFixtures);
   add_preset_ = Add(edit_section, "Add preset", "add_preset", SignalAddPreset);
-  remove_fixtures_ =
-      Add(edit_section, "Remove", "remove_fixtures", SignalRemoveFixtures);
-  group_fixtures_ =
-      Add(edit_section, "Group...", "group_fixtures", SignalGroupFixtures);
+  remove_fixtures_ = Add(edit_section, "Remove", "remove_fixtures", SignalRemoveFixtures);
+  group_fixtures_ = Add(edit_section, "Group...", "group_fixtures", SignalGroupFixtures);
   design_ = Add(edit_section, "Design...", "design", SignalDesignFixtures);
   menu->append_section(edit_section);
 
   auto extra_section = Gio::Menu::create();
-  properties_ =
-      Add(extra_section, "Properties", "properties", SignalFixtureProperties);
+  properties_ = Add(extra_section, "Properties", "properties", SignalFixtureProperties);
   Add(extra_section, "Save image...", "save_image", SignalSaveImage);
   menu->append_section(extra_section);
 
   set_menu_model(menu);
 }
 
-DryModeStyle VisualizationMenu::GetDryModeStyle() const {
-  return dry_mode_style_;
-}
+DryModeStyle VisualizationMenu::GetDryModeStyle() const { return dry_mode_style_; }
 
-void VisualizationMenu::SetSensitivity(bool is_layout_locked,
-                                       size_t n_selected) {
+void VisualizationMenu::SetSensitivity(bool is_layout_locked, size_t n_selected) {
   const bool has_selection = n_selected != 0;
   const bool selection_enabled = !is_layout_locked && has_selection;
   const bool dual_enabled = !is_layout_locked && n_selected >= 2;

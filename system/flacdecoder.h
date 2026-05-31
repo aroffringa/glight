@@ -16,8 +16,7 @@ class FlacDecoder : private FLAC::Decoder::File {
  public:
   class FlacError : public std::runtime_error {
    public:
-    FlacError(const std::string &message)
-        : runtime_error(std::string("Alsa error: ") + message) {}
+    FlacError(const std::string &message) : runtime_error(std::string("Alsa error: ") + message) {}
   };
 
   FlacDecoder(const std::string &filename)
@@ -40,13 +39,10 @@ class FlacDecoder : private FLAC::Decoder::File {
   }
 
   void Seek(double offsetInMS) {
-    if (!seek_absolute((FLAC__uint64)(44.1000 * offsetInMS)))
-      throw FlacError("Seek failed");
+    if (!seek_absolute((FLAC__uint64)(44.1000 * offsetInMS))) throw FlacError("Seek failed");
   }
 
-  void GetSamples(unsigned char *buffer, size_t &count) {
-    count = _lane.read(buffer, count);
-  }
+  void GetSamples(unsigned char *buffer, size_t &count) { count = _lane.read(buffer, count); }
 
   bool HasMore() const { return !_lane.is_end_and_empty(); }
 
@@ -61,8 +57,8 @@ class FlacDecoder : private FLAC::Decoder::File {
   void open();
   void close();
 
-  FLAC__StreamDecoderWriteStatus write_callback(
-      const FLAC__Frame *frame, const FLAC__int32 *const buffer[]) override;
+  FLAC__StreamDecoderWriteStatus write_callback(const FLAC__Frame *frame,
+                                                const FLAC__int32 *const buffer[]) override;
   void error_callback(FLAC__StreamDecoderErrorStatus status) override;
   // void metadata_callback(const ::FLAC__StreamMetadata *metadata) override;
 };

@@ -19,9 +19,7 @@ class FixtureModeFrame : public Gtk::Frame {
  public:
   FixtureModeFrame(Gtk::Window& parent_window);
 
-  const std::vector<theatre::FixtureModeFunction>& GetFunctions() const {
-    return functions_;
-  }
+  const std::vector<theatre::FixtureModeFunction>& GetFunctions() const { return functions_; }
 
   std::string GetName() const { return name_entry_.get_text(); }
 

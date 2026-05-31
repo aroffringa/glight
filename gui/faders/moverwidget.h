@@ -16,8 +16,7 @@ namespace glight::gui {
 
 class MoverWidget final : public ControlWidget {
  public:
-  MoverWidget(FaderWindow &fader_window, uistate::FaderState &state,
-              ControlMode mode, char key);
+  MoverWidget(FaderWindow &fader_window, uistate::FaderState &state, ControlMode mode, char key);
 
   void Toggle() final {}
   void FlashOn() final {}

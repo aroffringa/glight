@@ -16,12 +16,10 @@ using glight::system::OptionalNumber;
 namespace glight::gui {
 
 namespace {
-inline constexpr std::array<size_t, 10> repeat_values{0, 1, 2, 3,  4,
-                                                      5, 6, 8, 10, 12};
+inline constexpr std::array<size_t, 10> repeat_values{0, 1, 2, 3, 4, 5, 6, 8, 10, 12};
 }  // namespace
 
-ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
-                                         bool showGradientButton,
+ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent, bool showGradientButton,
                                          bool showShuffleButton)
     : _parent(parent) {
   set_orientation(Gtk::Orientation::VERTICAL);
@@ -29,8 +27,7 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   repeat_list_ = Gtk::ListStore::create(repeat_columns_);
   repeat_list_->append()->set_value<Glib::ustring>(0, "None");
   for (size_t i = 1; i != repeat_values.size(); ++i) {
-    repeat_list_->append()->set_value<Glib::ustring>(
-        0, std::to_string(repeat_values[i]));
+    repeat_list_->append()->set_value<Glib::ustring>(0, std::to_string(repeat_values[i]));
   }
   repeat_combo_.set_model(repeat_list_);
   repeat_combo_.signal_changed().connect(
@@ -43,8 +40,7 @@ ColorSequenceWidget::ColorSequenceWidget(Gtk::Window *parent,
   _buttonBox.set_homogeneous(true);
 
   _minButton.set_sensitive(false);
-  _minButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &ColorSequenceWidget::OnDecreaseColors));
+  _minButton.signal_clicked().connect(sigc::mem_fun(*this, &ColorSequenceWidget::OnDecreaseColors));
   _buttonBox.append(_minButton);
 
   if (showGradientButton) {
@@ -139,17 +135,13 @@ void ColorSequenceWidget::OnGradientSelected() {
     _widgets.back()->SetColor(colors.back());
 
     for (size_t i = 1; i < _widgets.size() - 1; ++i) {
-      double floatIndex =
-          static_cast<double>(i) * (colors.size() - 1) / (_widgets.size() - 1);
+      double floatIndex = static_cast<double>(i) * (colors.size() - 1) / (_widgets.size() - 1);
       const Color leftColor = colors[floor(floatIndex)];
       const Color rightColor = colors[floor(floatIndex) + 1];
       const double balance = floatIndex - floor(floatIndex);
-      const unsigned red =
-          (rightColor.Red() * balance + leftColor.Red() * (1.0 - balance));
-      const unsigned green =
-          (rightColor.Green() * balance + leftColor.Green() * (1.0 - balance));
-      const unsigned blue =
-          (rightColor.Blue() * balance + leftColor.Blue() * (1.0 - balance));
+      const unsigned red = (rightColor.Red() * balance + leftColor.Red() * (1.0 - balance));
+      const unsigned green = (rightColor.Green() * balance + leftColor.Green() * (1.0 - balance));
+      const unsigned blue = (rightColor.Blue() * balance + leftColor.Blue() * (1.0 - balance));
       _widgets[i]->SetColor(Color(red, green, blue));
     }
   }
@@ -168,13 +160,11 @@ void ColorSequenceWidget::OnIncreaseColors() {
   if (max_count_ == 0 || _widgets.size() < max_count_) {
     const size_t index = _widgets.size();
     _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
-    _widgets.back()->SignalColorChanged().connect(
-        [&, index]() { OnColorChange(index); });
+    _widgets.back()->SignalColorChanged().connect([&, index]() { OnColorChange(index); });
     _widgets.back()->SetAllowVariables(allow_variables_);
     const OptionalNumber<size_t> repeat_count = RepeatCount();
     if (repeat_count && index >= *repeat_count) {
-      _widgets.back()->SetSelection(
-          _widgets[index % (*repeat_count)]->GetSelection());
+      _widgets.back()->SetSelection(_widgets[index % (*repeat_count)]->GetSelection());
       _widgets.back()->set_sensitive(false);
     }
     updateSensitivities();
@@ -192,8 +182,7 @@ void ColorSequenceWidget::Shuffle() {
 
 void ColorSequenceWidget::LoadDefault() {
   Gtk::TreeIter active = _loadDefaultCombo.get_active();
-  const std::string default_name =
-      Glib::ustring((*active)[_listColumns._title]);
+  const std::string default_name = Glib::ustring((*active)[_listColumns._title]);
   const std::vector<theatre::Color> colors =
       theatre::GetDefaultColorSequence(default_name, _widgets.size());
   if (!colors.empty()) SetColors(colors);
@@ -216,18 +205,15 @@ void ColorSequenceWidget::OnChangeRepeat() {
   }
 }
 
-void ColorSequenceWidget::SetSelection(
-    const std::vector<ColorOrVariable> &values) {
+void ColorSequenceWidget::SetSelection(const std::vector<ColorOrVariable> &values) {
   if (max_count_ < values.size()) max_count_ = 0;
   if (values.size() < min_count_) min_count_ = values.size();
   repeat_combo_.set_active(0);
-  for (std::unique_ptr<ColorSelectWidget> &widget : _widgets)
-    _box.remove(*widget);
+  for (std::unique_ptr<ColorSelectWidget> &widget : _widgets) _box.remove(*widget);
   _widgets.clear();
   for (size_t i = 0; i != values.size(); ++i) {
     _widgets.emplace_back(std::make_unique<ColorSelectWidget>(_parent, true));
-    _widgets.back()->SignalColorChanged().connect(
-        [&, i]() { OnColorChange(i); });
+    _widgets.back()->SignalColorChanged().connect([&, i]() { OnColorChange(i); });
     _widgets.back()->SetSelection(values[i]);
     _widgets.back()->SetAllowVariables(allow_variables_);
     _box.append(*_widgets.back());

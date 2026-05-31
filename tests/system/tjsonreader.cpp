@@ -30,8 +30,7 @@ void SCheck(const char* input, bool expected_result, const char* output) {
   std::istringstream stream(input);
   std::string output_string;
   const bool result = details::ReadString(stream, output_string);
-  BOOST_TEST_INFO("input=\"" << input << "\", output=\"" << output_string
-                             << "\"");
+  BOOST_TEST_INFO("input=\"" << input << "\", output=\"" << output_string << "\"");
   BOOST_TEST(result == expected_result);
   BOOST_CHECK_EQUAL(output_string, output);
 }
@@ -83,8 +82,7 @@ BOOST_AUTO_TEST_CASE(read_string) {
   SCheck(R"(\" <- quotes")", true, "\" <- quotes");
   SCheck("Line 1\\nNewline\"\n", true, "Line 1\nNewline");
   SCheck("Unicode: — André\"}", true, "Unicode: — André");
-  SCheck(R"(Escapes:\"\n\r\b\\\/\f\tend."])", true,
-         "Escapes:\"\n\r\b\\/\f\tend.");
+  SCheck(R"(Escapes:\"\n\r\b\\\/\f\tend."])", true, "Escapes:\"\n\r\b\\/\f\tend.");
   SCheck("This: \\x wrong escape", false, "This: ");
 }
 
@@ -126,8 +124,7 @@ BOOST_AUTO_TEST_CASE(string) {
 }
 
 BOOST_AUTO_TEST_CASE(object) {
-  std::unique_ptr<Node> node =
-      Parse("{ \"name\": \"André\", \"person\": true, \"age\": 40 }");
+  std::unique_ptr<Node> node = Parse("{ \"name\": \"André\", \"person\": true, \"age\": 40 }");
   Object* o = dynamic_cast<Object*>(node.get());
   BOOST_REQUIRE(o);
   BOOST_CHECK_EQUAL(o->children.size(), 3);

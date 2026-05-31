@@ -38,30 +38,25 @@ class RenderEngine {
   RenderEngine(const theatre::Management &management);
 
   void DrawSnapshot(const Cairo::RefPtr<Cairo::Context> &cairo,
-                    const theatre::ValueSnapshot &snapshot,
-                    const DrawStyle &style,
-                    const std::vector<system::ObservingPtr<theatre::Fixture>>
-                        &selected_fixtures);
+                    const theatre::ValueSnapshot &snapshot, const DrawStyle &style,
+                    const std::vector<system::ObservingPtr<theatre::Fixture>> &selected_fixtures);
   void DrawSelectedFixtures(
       const Cairo::RefPtr<Cairo::Context> &cairo,
-      const std::vector<system::ObservingPtr<theatre::Fixture>>
-          &selected_fixtures) const;
+      const std::vector<system::ObservingPtr<theatre::Fixture>> &selected_fixtures) const;
   void DrawSelectionRectangle(const Cairo::RefPtr<Cairo::Context> &cairo,
                               const theatre::Coordinate2D &from,
                               const theatre::Coordinate2D &to) const;
 
-  system::ObservingPtr<theatre::Fixture> FixtureAt(
-      const theatre::Coordinate2D &position) const;
-  system::ObservingPtr<theatre::Fixture> FixtureAt(double mouse_x,
-                                                   double mouse_y, double width,
+  system::ObservingPtr<theatre::Fixture> FixtureAt(const theatre::Coordinate2D &position) const;
+  system::ObservingPtr<theatre::Fixture> FixtureAt(double mouse_x, double mouse_y, double width,
                                                    double height) const {
     return FixtureAt(MouseToPosition(mouse_x, mouse_y, width, height));
   }
   system::ObservingPtr<theatre::Fixture> GetDirectionHandleAt(
       const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures,
       const theatre::Coordinate2D &position) const;
-  theatre::Coordinate2D MouseToPosition(double mouse_x, double mouse_y,
-                                        double width, double height) const;
+  theatre::Coordinate2D MouseToPosition(double mouse_x, double mouse_y, double width,
+                                        double height) const;
   bool IsMoving() const { return is_moving_; }
 
  private:

@@ -14,8 +14,7 @@ namespace glight::theatre {
 
 using system::ObservingPtr;
 
-TimeSequence &MakeRotation(const DesignInfo &design,
-                           const std::vector<ColorOrVariable> &colors,
+TimeSequence &MakeRotation(const DesignInfo &design, const std::vector<ColorOrVariable> &colors,
                            RotationType type) {
   Management &management = *design.management;
   Folder &destination = *design.destination;
@@ -35,8 +34,7 @@ TimeSequence &MakeRotation(const DesignInfo &design,
     modified_colors.emplace_back(Color::Black());
   }
 
-  std::vector<ColorOrVariable> step_colors(design.controllables->size(),
-                                           Color::Black());
+  std::vector<ColorOrVariable> step_colors(design.controllables->size(), Color::Black());
   for (size_t offset = 0; offset != colors.size(); ++offset) {
     for (size_t i = 0; i != design.controllables->size(); ++i) {
       step_colors[i] = modified_colors[(i + offset) % modified_colors.size()];

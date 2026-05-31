@@ -22,8 +22,7 @@ namespace glight::gui {
 using theatre::ControlValue;
 using theatre::SourceValue;
 
-ComboControlWidget::ComboControlWidget(FaderWindow &fader_window,
-                                       uistate::FaderState &state,
+ComboControlWidget::ComboControlWidget(FaderWindow &fader_window, uistate::FaderState &state,
                                        ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode) {
   set_orientation(Gtk::Orientation::VERTICAL);
@@ -39,8 +38,7 @@ ComboControlWidget::ComboControlWidget(FaderWindow &fader_window,
 
   auto gesture = Gtk::GestureClick::create();
   gesture->set_button(1);
-  gesture->signal_pressed().connect(
-      [&](int, double, double) { ShowAssignDialog(); });
+  gesture->signal_pressed().connect([&](int, double, double) { ShowAssignDialog(); });
   add_controller(gesture);
 
   SetDefaultSourceCount(0);
@@ -49,9 +47,7 @@ ComboControlWidget::ComboControlWidget(FaderWindow &fader_window,
       State().SignalChange().connect([&]() { UpdateDisplaySettings(); });
 }
 
-ComboControlWidget::~ComboControlWidget() {
-  update_display_settings_connection_.disconnect();
-}
+ComboControlWidget::~ComboControlWidget() { update_display_settings_connection_.disconnect(); }
 
 SourceValue *ComboControlWidget::SelectedSource() const {
   Gtk::TreeModel::const_iterator selected = combo_.get_active();
@@ -157,9 +153,8 @@ void ComboControlWidget::UpdateDisplaySettings() {
 }
 
 void ComboControlWidget::OpenDescriptionDialog() {
-  dialog_ = std::make_unique<StringInputDialog>(
-      "Combo control description",
-      "New description:", description_label_.get_text());
+  dialog_ = std::make_unique<StringInputDialog>("Combo control description",
+                                                "New description:", description_label_.get_text());
   dialog_->signal_response().connect([this](int response) {
     if (response == Gtk::ResponseType::OK) {
       StringInputDialog &dialog = static_cast<StringInputDialog &>(*dialog_);

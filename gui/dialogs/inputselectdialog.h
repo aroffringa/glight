@@ -20,8 +20,7 @@ class InputSelectDialog : public Gtk::Dialog {
   InputSelectDialog(bool allow_stay_open);
 
   theatre::Input SelectedInput() const {
-    return theatre::Input(*_inputSelector.SelectedObject(),
-                          _inputSelector.SelectedInput());
+    return theatre::Input(*_inputSelector.SelectedObject(), _inputSelector.SelectedInput());
   }
 
   theatre::SourceValue *SelectedSourceValue() const;
@@ -29,9 +28,7 @@ class InputSelectDialog : public Gtk::Dialog {
   bool StayOpenRequested() const { return _stayOpenCheckButton.get_active(); }
 
  private:
-  void onSelectionChanged() {
-    _selectButton->set_sensitive(_inputSelector.HasInputSelected());
-  }
+  void onSelectionChanged() { _selectButton->set_sensitive(_inputSelector.HasInputSelected()); }
   InputSelectWidget _inputSelector;
   Gtk::CheckButton _stayOpenCheckButton;
   Gtk::Button *_selectButton;

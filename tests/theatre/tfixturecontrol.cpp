@@ -27,12 +27,10 @@ BOOST_AUTO_TEST_CASE(SetValue) {
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Light);
   BOOST_REQUIRE_EQUAL(fixture_type->Modes().size(), 1);
   BOOST_REQUIRE_EQUAL(fixture_type->Modes().front().Functions().size(), 1);
-  Fixture &fixture =
-      *management.GetTheatre().AddFixture(fixture_type->Modes().front());
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixture_type->Modes().front());
   BOOST_REQUIRE_EQUAL(fixture.Functions().size(), 1);
   fixture.SetChannel(DmxChannel(100, 0));
-  ObservingPtr<FixtureControl> control =
-      management.AddFixtureControlPtr(fixture);
+  ObservingPtr<FixtureControl> control = management.AddFixtureControlPtr(fixture);
   BOOST_REQUIRE_EQUAL(control->NInputs(), 1);
   BOOST_CHECK_EQUAL(fixture.Functions().size(), 1);
   BOOST_CHECK_EQUAL(fixture.Functions().front()->MainChannel().Channel(), 100);
@@ -60,8 +58,7 @@ BOOST_AUTO_TEST_CASE(Filters) {
         management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba);
     const FixtureMode &mode = fixtureType->Modes().front();
     Fixture &fixture = *management.GetTheatre().AddFixture(mode);
-    ObservingPtr<FixtureControl> control =
-        management.AddFixtureControlPtr(fixture);
+    ObservingPtr<FixtureControl> control = management.AddFixtureControlPtr(fixture);
     control->AddFilter(std::make_unique<RgbFilter>());
     control->AddFilter(std::make_unique<MonochromeFilter>());
     BOOST_REQUIRE_EQUAL(control->NInputs(), 1);
@@ -72,8 +69,7 @@ BOOST_AUTO_TEST_CASE(Filters) {
         management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba);
     const FixtureMode &mode = fixtureType->Modes().front();
     Fixture &fixture = *management.GetTheatre().AddFixture(mode);
-    ObservingPtr<FixtureControl> control =
-        management.AddFixtureControlPtr(fixture);
+    ObservingPtr<FixtureControl> control = management.AddFixtureControlPtr(fixture);
     control->AddFilter(std::make_unique<AutoMasterFilter>());
     control->AddFilter(std::make_unique<RgbFilter>());
     BOOST_REQUIRE_EQUAL(control->NInputs(), 3);

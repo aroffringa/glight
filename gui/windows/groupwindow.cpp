@@ -31,8 +31,7 @@ GroupWindow::GroupWindow(theatre::FixtureGroup& group)
 theatre::FolderObject& GroupWindow::GetObject() { return group_; }
 
 void GroupWindow::Append() {
-  std::vector<ObservingPtr<theatre::Fixture>> fixtures =
-      fixture_list_.Selection();
+  std::vector<ObservingPtr<theatre::Fixture>> fixtures = fixture_list_.Selection();
   std::vector<ObservingPtr<NamedObject>> objects = reorder_widget_.GetList();
   std::sort(objects.begin(), objects.end());
   for (const ObservingPtr<theatre::Fixture>& fixture : fixtures) {

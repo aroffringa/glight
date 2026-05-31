@@ -50,8 +50,7 @@ class FixtureType : public FolderObject {
 
   FixtureType(const std::string& name);
 
-  FixtureType(const FixtureType& source)
-      : FolderObject(source), data_(source.data_) {
+  FixtureType(const FixtureType& source) : FolderObject(source), data_(source.data_) {
     // The modes have a pointer to the fixture type, so need to
     // be explicitly copied.
     for (const FixtureMode& source_mode : source.Modes()) {
@@ -89,9 +88,7 @@ class FixtureType : public FolderObject {
   }
 
   const std::string& ShortName() const { return data_.short_name_; }
-  void SetShortName(const std::string& short_name) {
-    data_.short_name_ = short_name;
-  }
+  void SetShortName(const std::string& short_name) { data_.short_name_ = short_name; }
 
   /**
    * For a non-zoomable fixture, the static full-width half-maximum angle
@@ -100,14 +97,10 @@ class FixtureType : public FolderObject {
    * be zero.
    */
   double MinBeamAngle() const { return data_.min_beam_angle_; }
-  void SetMinBeamAngle(double min_beam_angle) {
-    data_.min_beam_angle_ = min_beam_angle;
-  }
+  void SetMinBeamAngle(double min_beam_angle) { data_.min_beam_angle_ = min_beam_angle; }
 
   double MaxBeamAngle() const { return data_.max_beam_angle_; }
-  void SetMaxBeamAngle(double max_beam_angle) {
-    data_.max_beam_angle_ = max_beam_angle;
-  }
+  void SetMaxBeamAngle(double max_beam_angle) { data_.max_beam_angle_ = max_beam_angle; }
 
   /**
    * Pan is the horizonal / primary axis rotation of a beamed device (e.g.
@@ -129,9 +122,7 @@ class FixtureType : public FolderObject {
   double MaxTilt() const { return data_.max_tilt_; }
   void SetMaxTilt(double max_tilt) { data_.max_tilt_ = max_tilt; }
 
-  bool CanZoom() const {
-    return data_.min_beam_angle_ != data_.max_beam_angle_;
-  }
+  bool CanZoom() const { return data_.min_beam_angle_ != data_.max_beam_angle_; }
   bool CanBeamRotate() const { return data_.min_pan_ != data_.max_pan_; }
   bool CanBeamTilt() const { return data_.min_tilt_ != data_.max_tilt_; }
 

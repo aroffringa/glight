@@ -14,8 +14,7 @@ namespace glight::gui {
 
 class StringInputDialog : public Gtk::Dialog {
  public:
-  StringInputDialog(const Glib::ustring& title,
-                    const Glib::ustring& value_caption,
+  StringInputDialog(const Glib::ustring& title, const Glib::ustring& value_caption,
                     const std::string& default_value)
       : Dialog(title, true), label_(value_caption) {
     h_box_.append(label_);

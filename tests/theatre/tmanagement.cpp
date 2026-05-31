@@ -55,21 +55,16 @@ BOOST_AUTO_TEST_CASE(RemoveObject) {
 BOOST_AUTO_TEST_CASE(GetSpecificControllables) {
   const glight::system::Settings settings;
   Management management(settings);
-  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(),
-                    0);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(), 0);
   management.AddEffect(Effect::Make(EffectType::Fade));
-  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(),
-                    1);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(), 1);
   BOOST_CHECK_EQUAL(management.GetSpecificControllables<Effect>().size(), 1);
-  BOOST_CHECK_EQUAL(management.GetSpecificControllables<FadeEffect>().size(),
-                    1);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<FadeEffect>().size(), 1);
   BOOST_CHECK_EQUAL(management.GetSpecificControllables<Chase>().size(), 0);
   management.AddEffect(Effect::Make(EffectType::Variable));
-  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(),
-                    2);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<Controllable>().size(), 2);
   BOOST_CHECK_EQUAL(management.GetSpecificControllables<Effect>().size(), 2);
-  BOOST_CHECK_EQUAL(management.GetSpecificControllables<FadeEffect>().size(),
-                    1);
+  BOOST_CHECK_EQUAL(management.GetSpecificControllables<FadeEffect>().size(), 1);
   BOOST_CHECK_EQUAL(management.GetSpecificControllables<Chase>().size(), 0);
 }
 
@@ -77,18 +72,15 @@ BOOST_AUTO_TEST_CASE(RemoveUnusedFixtureType) {
   const glight::system::Settings settings;
   Management management(settings);
 
-  ObservingPtr<FixtureType> typeA =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Light);
+  ObservingPtr<FixtureType> typeA = management.GetTheatre().AddFixtureTypePtr(StockFixture::Light);
   management.RootFolder().Add(typeA);
   BOOST_CHECK(typeA);
 
-  ObservingPtr<FixtureType> typeB =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb);
+  ObservingPtr<FixtureType> typeB = management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgb);
   management.RootFolder().Add(typeB);
   BOOST_CHECK(typeB);
 
-  ObservingPtr<FixtureType> typeC =
-      management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba);
+  ObservingPtr<FixtureType> typeC = management.GetTheatre().AddFixtureTypePtr(StockFixture::Rgba);
   management.RootFolder().Add(typeC);
   BOOST_CHECK(typeC);
 
@@ -105,10 +97,8 @@ BOOST_AUTO_TEST_CASE(RemoveUsedFixtureType) {
   ObservingPtr<FixtureType> fixtureType =
       management.GetTheatre().AddFixtureTypePtr(StockFixture::Light);
   management.RootFolder().Add(fixtureType);
-  Fixture &fixture =
-      *management.GetTheatre().AddFixture(fixtureType->Modes().front());
-  FixtureControl &control =
-      *management.AddFixtureControlPtr(fixture, management.RootFolder());
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType->Modes().front());
+  FixtureControl &control = *management.AddFixtureControlPtr(fixture, management.RootFolder());
   SourceValue &value = management.AddSourceValue(control, 0);
   value.A().SetValue(ControlValue::Max());
 

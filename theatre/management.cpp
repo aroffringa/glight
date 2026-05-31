@@ -85,15 +85,13 @@ void Management::Run() {
     throw std::runtime_error("Invalid call to Run(): already running");
 }
 
-void Management::InferInputUniverse(unsigned universe, ValueSnapshot &snapshot,
-                                    bool is_primary) {
+void Management::InferInputUniverse(unsigned universe, ValueSnapshot &snapshot, bool is_primary) {
   unsigned values[kChannelsPerUniverse];
 
   std::fill_n(values, kChannelsPerUniverse, 0);
 
   for (const TrackablePtr<Controllable> &controllable : _controllables) {
-    if (FixtureControl *fc =
-            dynamic_cast<FixtureControl *>(controllable.Get())) {
+    if (FixtureControl *fc = dynamic_cast<FixtureControl *>(controllable.Get())) {
       fc->GetChannelValues(values, universe);
     }
   }
@@ -105,21 +103,17 @@ void Management::InferInputUniverse(unsigned universe, ValueSnapshot &snapshot,
     values_char[i] = static_cast<unsigned char>(val);
   }
 
-  ValueUniverseSnapshot &universe_values =
-      snapshot.GetUniverseSnapshot(universe);
+  ValueUniverseSnapshot &universe_values = snapshot.GetUniverseSnapshot(universe);
   universe_values.SetValues(values_char, _theatre->HighestChannel() + 1);
 }
 
-void Management::MergeInputUniverse(ValueSnapshot &snapshot,
-                                    size_t input_universe) {
+void Management::MergeInputUniverse(ValueSnapshot &snapshot, size_t input_universe) {
   const system::OptionalNumber<size_t> destination_universe =
       universe_map_.GetInputMapping(input_universe).merge_universe;
-  if (destination_universe &&
-      *destination_universe < snapshot.UniverseCount()) {
+  if (destination_universe && *destination_universe < snapshot.UniverseCount()) {
     unsigned char values[kChannelsPerUniverse];
     universe_map_.GetInputValues(input_universe, values, kChannelsPerUniverse);
-    ValueUniverseSnapshot &universe_snapshot =
-        snapshot.GetUniverseSnapshot(*destination_universe);
+    ValueUniverseSnapshot &universe_snapshot = snapshot.GetUniverseSnapshot(*destination_universe);
     for (size_t ch = 0; ch != kChannelsPerUniverse; ++ch) {
       universe_snapshot[ch] = std::max(universe_snapshot[ch], values[ch]);
     }
@@ -166,8 +160,7 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
     audioLevel = 0;
 
   const unsigned randomValue = _rndDistribution(_randomGenerator);
-  const Timing timing(relTimeInMs, timestep_number, beatValue, audioLevel,
-                      randomValue);
+  const Timing timing(relTimeInMs, timestep_number, beatValue, audioLevel, randomValue);
   const double timePassed = (relTimeInMs - _previousTime) * 1e-3;
   _previousTime = relTimeInMs;
 
@@ -178,8 +171,7 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
 
   // Solve dependency graph of controllables
   std::vector<Controllable *> unorderedList;
-  for (const TrackablePtr<Controllable> &c : _controllables)
-    unorderedList.emplace_back(c.Get());
+  for (const TrackablePtr<Controllable> &c : _controllables) unorderedList.emplace_back(c.Get());
   std::vector<Controllable *> orderedList;
   if (!topologicalSort(unorderedList, orderedList))
     throw std::runtime_error("Cycle in dependencies");
@@ -188,10 +180,8 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
     // Reset all inputs (except if they are LTP)
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
       Controllable &controllable = sv->GetControllable();
-      for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs();
-           ++inputIndex) {
-        const MixStyle mix_style =
-            GetMixStyle(controllable.InputType(inputIndex));
+      for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs(); ++inputIndex) {
+        const MixStyle mix_style = GetMixStyle(controllable.InputType(inputIndex));
         if (mix_style != MixStyle::LastTakesPrecedence)
           controllable.InputValue(inputIndex) = ControlValue(0);
       }
@@ -201,15 +191,13 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
     if (is_primary) {
       for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
         const ControlValue value(sv->PrimaryValue());
-        sv->GetControllable().MixInput(sv->InputIndex(), value,
-                                       sv->PreviousPrimary());
+        sv->GetControllable().MixInput(sv->InputIndex(), value, sv->PreviousPrimary());
         sv->PreviousPrimary() = value;
       }
     } else {
       for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
         const ControlValue value(sv->SecondaryValue());
-        sv->GetControllable().MixInput(sv->InputIndex(), value,
-                                       sv->PreviousSecondary());
+        sv->GetControllable().MixInput(sv->InputIndex(), value, sv->PreviousSecondary());
         sv->PreviousSecondary() = value;
       }
     }
@@ -242,9 +230,8 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
       // Output universes
       for (unsigned universe = 0; universe != n_universes; ++universe) {
         if (universe_map_.GetUniverseType(universe) == UniverseType::Output) {
-          universe_map_.SetOutputValues(
-              universe, snapshot.GetUniverseSnapshot(universe).Data(),
-              kChannelsPerUniverse);
+          universe_map_.SetOutputValues(universe, snapshot.GetUniverseSnapshot(universe).Data(),
+                                        kChannelsPerUniverse);
         }
       }
     }
@@ -254,19 +241,16 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
 bool Management::HasCycle() const {
   std::vector<Controllable *> unorderedList;
   std::vector<Controllable *> orderedList;
-  for (const TrackablePtr<Controllable> &c : _controllables)
-    unorderedList.emplace_back(c.Get());
+  for (const TrackablePtr<Controllable> &c : _controllables) unorderedList.emplace_back(c.Get());
   return !topologicalSort(unorderedList, orderedList);
 }
 
 const TrackablePtr<Controllable> &Management::AddPresetCollection() {
-  return _controllables.emplace_back(
-      TrackablePtr<Controllable>(new PresetCollection()));
+  return _controllables.emplace_back(TrackablePtr<Controllable>(new PresetCollection()));
 }
 
 system::ObservingPtr<PresetCollection> Management::AddPresetCollectionPtr() {
-  return static_cast<system::ObservingPtr<PresetCollection>>(
-      AddPresetCollection().GetObserver());
+  return static_cast<system::ObservingPtr<PresetCollection>>(AddPresetCollection().GetObserver());
 }
 
 Folder &Management::AddFolder(Folder &parent, const std::string &name) {
@@ -284,16 +268,14 @@ void Management::RemoveObject(FolderObject &object) {
     RemoveFolder(*folder);
   else if (FixtureGroup *group = dynamic_cast<FixtureGroup *>(&object); group)
     RemoveFixtureGroup(*group);
-  else if (Controllable *controllable = dynamic_cast<Controllable *>(&object);
-           controllable)
+  else if (Controllable *controllable = dynamic_cast<Controllable *>(&object); controllable)
     RemoveControllable(*controllable);
   else
     throw std::runtime_error("Can not remove unknown object " + object.Name());
 }
 
 void Management::RemoveFolder(Folder &folder) {
-  if (&folder == _rootFolder)
-    throw std::runtime_error("Can not remove root folder");
+  if (&folder == _rootFolder) throw std::runtime_error("Can not remove root folder");
   // Removing a child might remove dependent children from the same folder
   // so we have to recheck whether the folder is empty after each removal
   while (!folder.Children().empty()) {
@@ -319,11 +301,10 @@ void Management::removeControllable(
 
   _controllables.erase(controllablePtr);
 
-  auto result =
-      std::remove_if(_sourceValues.begin(), _sourceValues.end(),
-                     [&controllable](std::unique_ptr<SourceValue> &pv) {
-                       return &pv->GetControllable() == controllable.Get();
-                     });
+  auto result = std::remove_if(_sourceValues.begin(), _sourceValues.end(),
+                               [&controllable](std::unique_ptr<SourceValue> &pv) {
+                                 return &pv->GetControllable() == controllable.Get();
+                               });
   _sourceValues.erase(result, _sourceValues.end());
 
   controllable->Parent().Remove(*controllable);
@@ -348,35 +329,31 @@ bool Management::Contains(const Controllable &controllable) const {
   return false;
 }
 
-const TrackablePtr<Controllable> &Management::AddFixtureControl(
-    const Fixture &fixture) {
-  return _controllables.emplace_back(TrackablePtr<Controllable>(
-      new FixtureControl(const_cast<Fixture &>(fixture))));
+const TrackablePtr<Controllable> &Management::AddFixtureControl(const Fixture &fixture) {
+  return _controllables.emplace_back(
+      TrackablePtr<Controllable>(new FixtureControl(const_cast<Fixture &>(fixture))));
 }
 
-const TrackablePtr<Controllable> &Management::AddFixtureControl(
-    const Fixture &fixture, const Folder &parent) {
-  const TrackablePtr<Controllable> &fixture_control =
-      _controllables.emplace_back(TrackablePtr<Controllable>(
-          new FixtureControl(const_cast<Fixture &>(fixture))));
+const TrackablePtr<Controllable> &Management::AddFixtureControl(const Fixture &fixture,
+                                                                const Folder &parent) {
+  const TrackablePtr<Controllable> &fixture_control = _controllables.emplace_back(
+      TrackablePtr<Controllable>(new FixtureControl(const_cast<Fixture &>(fixture))));
   const_cast<Folder &>(parent).Add(fixture_control.GetObserver());
   return fixture_control;
 }
 
-system::ObservingPtr<FixtureControl> Management::AddFixtureControlPtr(
-    const Fixture &fixture) {
+system::ObservingPtr<FixtureControl> Management::AddFixtureControlPtr(const Fixture &fixture) {
   return static_cast<system::ObservingPtr<FixtureControl>>(
       AddFixtureControl(fixture).GetObserver());
 }
 
-system::ObservingPtr<FixtureControl> Management::AddFixtureControlPtr(
-    const Fixture &fixture, const Folder &parent) {
+system::ObservingPtr<FixtureControl> Management::AddFixtureControlPtr(const Fixture &fixture,
+                                                                      const Folder &parent) {
   return static_cast<system::ObservingPtr<FixtureControl>>(
       AddFixtureControl(fixture, parent).GetObserver());
 };
 
-ObservingPtr<FixtureControl> Management::GetFixtureControl(
-    const Fixture &fixture) const {
+ObservingPtr<FixtureControl> Management::GetFixtureControl(const Fixture &fixture) const {
   for (const TrackablePtr<Controllable> &contr : _controllables) {
     FixtureControl *fc = dynamic_cast<FixtureControl *>(contr.Get());
     if (fc) {
@@ -394,8 +371,7 @@ void Management::RemoveFixture(const Fixture &fixture) {
 }
 
 void Management::RemoveFixtureType(const FixtureType &fixture_type) {
-  const std::vector<system::TrackablePtr<Fixture>> &fixtures =
-      _theatre->Fixtures();
+  const std::vector<system::TrackablePtr<Fixture>> &fixtures = _theatre->Fixtures();
   size_t i = 0;
   while (i != fixtures.size()) {
     // Go backward through the list, as fixtures might be removed
@@ -414,17 +390,16 @@ const TrackablePtr<FixtureGroup> &Management::AddFixtureGroup() {
   return _groups.emplace_back(MakeTrackable<FixtureGroup>());
 }
 
-const TrackablePtr<FixtureGroup> &Management::AddFixtureGroup(
-    const Folder &parent, const std::string &name) {
-  const TrackablePtr<FixtureGroup> &group =
-      _groups.emplace_back(MakeTrackable<FixtureGroup>(name));
+const TrackablePtr<FixtureGroup> &Management::AddFixtureGroup(const Folder &parent,
+                                                              const std::string &name) {
+  const TrackablePtr<FixtureGroup> &group = _groups.emplace_back(MakeTrackable<FixtureGroup>(name));
   const_cast<Folder &>(parent).Add(group.GetObserver());
   return group;
 }
 
 void Management::RemoveFixtureGroup(const FixtureGroup &group) {
-  for (std::vector<TrackablePtr<FixtureGroup>>::iterator i = _groups.begin();
-       i != _groups.end(); ++i) {
+  for (std::vector<TrackablePtr<FixtureGroup>>::iterator i = _groups.begin(); i != _groups.end();
+       ++i) {
     if (i->Get() == &group) {
       i->Get()->Parent().Remove(**i);
       _groups.erase(i);
@@ -434,16 +409,13 @@ void Management::RemoveFixtureGroup(const FixtureGroup &group) {
   assert(false);
 }
 
-SourceValue &Management::AddSourceValue(Controllable &controllable,
-                                        size_t inputIndex) {
-  _sourceValues.emplace_back(
-      std::make_unique<SourceValue>(controllable, inputIndex));
+SourceValue &Management::AddSourceValue(Controllable &controllable, size_t inputIndex) {
+  _sourceValues.emplace_back(std::make_unique<SourceValue>(controllable, inputIndex));
   return *_sourceValues.back();
 }
 
 void Management::RemoveSourceValue(SourceValue &sourceValue) {
-  for (std::vector<std::unique_ptr<SourceValue>>::iterator i =
-           _sourceValues.begin();
+  for (std::vector<std::unique_ptr<SourceValue>>::iterator i = _sourceValues.begin();
        i != _sourceValues.end(); ++i) {
     if (i->get() == &sourceValue) {
       _sourceValues.erase(i);
@@ -469,35 +441,30 @@ system::ObservingPtr<Chase> Management::AddChasePtr() {
 }
 
 const TrackablePtr<Controllable> &Management::AddTimeSequence() {
-  return _controllables.emplace_back(
-      TrackablePtr<Controllable>(new TimeSequence()));
+  return _controllables.emplace_back(TrackablePtr<Controllable>(new TimeSequence()));
 }
 
 system::ObservingPtr<TimeSequence> Management::AddTimeSequencePtr() {
-  return static_cast<system::ObservingPtr<TimeSequence>>(
-      AddTimeSequence().GetObserver());
+  return static_cast<system::ObservingPtr<TimeSequence>>(AddTimeSequence().GetObserver());
 }
 
-const TrackablePtr<Controllable> &Management::AddEffect(
-    std::unique_ptr<Effect> effect) {
-  return _controllables.emplace_back(
-      TrackablePtr<Controllable>(std::move(effect)));
+const TrackablePtr<Controllable> &Management::AddEffect(std::unique_ptr<Effect> effect) {
+  return _controllables.emplace_back(TrackablePtr<Controllable>(std::move(effect)));
 }
 
-system::ObservingPtr<Effect> Management::AddEffectPtr(
-    std::unique_ptr<Effect> effect) {
+system::ObservingPtr<Effect> Management::AddEffectPtr(std::unique_ptr<Effect> effect) {
   return StaticObserverCast<Effect>(AddEffect(std::move(effect)).GetObserver());
 }
 
-const TrackablePtr<Controllable> &Management::AddEffect(
-    std::unique_ptr<Effect> effect, Folder &folder) {
+const TrackablePtr<Controllable> &Management::AddEffect(std::unique_ptr<Effect> effect,
+                                                        Folder &folder) {
   const TrackablePtr<Controllable> &newEffect = AddEffect(std::move(effect));
   folder.Add(newEffect.GetObserver());
   return newEffect;
 }
 
-system::ObservingPtr<Effect> Management::AddEffectPtr(
-    std::unique_ptr<Effect> effect, Folder &folder) {
+system::ObservingPtr<Effect> Management::AddEffectPtr(std::unique_ptr<Effect> effect,
+                                                      Folder &folder) {
   return static_cast<system::ObservingPtr<Effect>>(
       AddEffect(std::move(effect), folder).GetObserver());
 }
@@ -516,8 +483,7 @@ system::ObservingPtr<Scene> Management::AddScenePtr(bool in_folder) {
   return StaticObserverCast<Scene>(AddScene(in_folder).GetObserver());
 }
 
-FolderObject *Management::GetObjectFromPathIfExists(
-    const std::string &path) const {
+FolderObject *Management::GetObjectFromPathIfExists(const std::string &path) const {
   auto sep = std::find(path.begin(), path.end(), '/');
   if (sep == path.end()) {
     if (path == _rootFolder->Name()) return _rootFolder;
@@ -541,12 +507,9 @@ size_t Management::ControllableIndex(const Controllable *controllable) const {
   return FolderObject::FindIndex(_controllables, controllable);
 }
 
-SourceValue *Management::GetSourceValue(const Controllable &controllable,
-                                        size_t inputIndex) {
+SourceValue *Management::GetSourceValue(const Controllable &controllable, size_t inputIndex) {
   for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-    if (&sv->GetControllable() == &controllable &&
-        sv->InputIndex() == inputIndex)
-      return sv.get();
+    if (&sv->GetControllable() == &controllable && sv->InputIndex() == inputIndex) return sv.get();
   return nullptr;
 }
 
@@ -607,10 +570,8 @@ void Management::BlackOut(bool skip_scenes, double fade_speed) {
 
 SourceValueStore Management::StoreSourceValues(bool use_a) const {
   SourceValueStore result;
-  for (const std::unique_ptr<glight::theatre::SourceValue> &source_value :
-       _sourceValues) {
-    const ControlValue value =
-        use_a ? source_value->A().Value() : source_value->B().Value();
+  for (const std::unique_ptr<glight::theatre::SourceValue> &source_value : _sourceValues) {
+    const ControlValue value = use_a ? source_value->A().Value() : source_value->B().Value();
     if (value) {
       Controllable &controllable = source_value->GetControllable();
       if (!dynamic_cast<Scene *>(&controllable)) {
@@ -621,8 +582,7 @@ SourceValueStore Management::StoreSourceValues(bool use_a) const {
   return result;
 }
 
-void Management::LoadSourceValues(const SourceValueStore &store, bool use_a,
-                                  double fade_speed) {
+void Management::LoadSourceValues(const SourceValueStore &store, bool use_a, double fade_speed) {
   const std::vector<SourceValueStoreItem> &items = store.GetItems();
   for (const SourceValueStoreItem &item : items) {
     SourceValue &source_value = item.GetSourceValue();

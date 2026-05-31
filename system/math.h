@@ -33,8 +33,7 @@ inline T RadialClamp(T angle, T low, T high) {
   if (angle > high) angle -= 2.0 * M_PI;
   if (angle < low) {
     // Chose closest side
-    return RadialDistance(angle, low) > RadialDistance(angle, high) ? high
-                                                                    : low;
+    return RadialDistance(angle, low) > RadialDistance(angle, high) ? high : low;
   }
   return angle;
 }
@@ -42,12 +41,11 @@ inline T RadialClamp(T angle, T low, T high) {
 /**
  * Calculates the orthogonal distance to a line given by two points.
  */
-inline double DistanceToLine(double ref_x, double ref_y, double x1, double y1,
-                             double x2, double y2) {
+inline double DistanceToLine(double ref_x, double ref_y, double x1, double y1, double x2,
+                             double y2) {
   const double dx = x2 - x1;
   const double dy = y2 - y1;
-  return (dy * ref_x - dx * ref_y + x2 * y1 - y2 * x1) /
-         std::sqrt(dy * dy + dx * dx);
+  return (dy * ref_x - dx * ref_y + x2 * y1 - y2 * x1) / std::sqrt(dy * dy + dx * dx);
 }
 
 }  // namespace glight::system

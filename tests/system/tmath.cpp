@@ -25,14 +25,10 @@ BOOST_AUTO_TEST_CASE(radial_clamp) {
   BOOST_CHECK_CLOSE_FRACTION(result, 1.0, 1e-6);
   BOOST_CHECK_CLOSE_FRACTION(RadialClamp(0.0, 1.0, 2.0), 1.0, 1e-6);
   BOOST_CHECK_CLOSE_FRACTION(RadialClamp(3.0, 1.0, 2.0), 2.0, 1e-6);
-  BOOST_CHECK_CLOSE_FRACTION(RadialClamp(1.5 - 2.0 * M_PI, 1.0, 2.0), 1.5,
-                             1e-6);
-  BOOST_CHECK_CLOSE_FRACTION(RadialClamp(1.5 + 2.0 * M_PI, 1.0, 2.0), 1.5,
-                             1e-6);
-  BOOST_CHECK_CLOSE_FRACTION(RadialClamp(1.5 - 4.0 * M_PI, -1.0, 2.0), 1.5,
-                             1e-6);
-  BOOST_CHECK_CLOSE_FRACTION(RadialClamp(1.5 + 4.0 * M_PI, -1.0, 2.0), 1.5,
-                             1e-6);
+  BOOST_CHECK_CLOSE_FRACTION(RadialClamp(1.5 - 2.0 * M_PI, 1.0, 2.0), 1.5, 1e-6);
+  BOOST_CHECK_CLOSE_FRACTION(RadialClamp(1.5 + 2.0 * M_PI, 1.0, 2.0), 1.5, 1e-6);
+  BOOST_CHECK_CLOSE_FRACTION(RadialClamp(1.5 - 4.0 * M_PI, -1.0, 2.0), 1.5, 1e-6);
+  BOOST_CHECK_CLOSE_FRACTION(RadialClamp(1.5 + 4.0 * M_PI, -1.0, 2.0), 1.5, 1e-6);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

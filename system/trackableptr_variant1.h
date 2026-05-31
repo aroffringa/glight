@@ -15,8 +15,7 @@ namespace internal {
 struct ObservingPtrData;
 
 struct TrackablePtrData {
-  constexpr TrackablePtrData(void* ptr,
-                             ObservingPtrData* list_head = nullptr) noexcept
+  constexpr TrackablePtrData(void* ptr, ObservingPtrData* list_head = nullptr) noexcept
       : ptr_(ptr), observer_list_(list_head) {}
   void* ptr_;
   mutable ObservingPtrData* observer_list_;
@@ -28,8 +27,7 @@ struct TrackablePtrData {
 };
 
 struct ObservingPtrData {
-  constexpr ObservingPtrData(const TrackablePtrData* parent,
-                             ObservingPtrData* previous,
+  constexpr ObservingPtrData(const TrackablePtrData* parent, ObservingPtrData* previous,
                              ObservingPtrData* next) noexcept
       : parent_(parent), previous_(previous), next_(next) {}
   const TrackablePtrData* parent_ = nullptr;
@@ -71,14 +69,12 @@ template <typename T>
 class TrackablePtr : private internal::TrackablePtrData {
  public:
   constexpr TrackablePtr() noexcept : TrackablePtrData(nullptr) {}
-  constexpr explicit TrackablePtr(std::nullptr_t) noexcept
-      : TrackablePtrData(nullptr) {}
+  constexpr explicit TrackablePtr(std::nullptr_t) noexcept : TrackablePtrData(nullptr) {}
   /**
    * The new TrackablePtr will become the owner of the pointer and
    * make sure it is destructed.
    */
-  constexpr explicit TrackablePtr(T* object) noexcept
-      : TrackablePtrData(object) {}
+  constexpr explicit TrackablePtr(T* object) noexcept : TrackablePtrData(object) {}
   constexpr explicit TrackablePtr(std::unique_ptr<T> object) noexcept
       : TrackablePtrData(object.release()) {}
   /**
@@ -97,8 +93,7 @@ class TrackablePtr : private internal::TrackablePtrData {
   TrackablePtr<T>& operator=(TrackablePtr<T>&& rhs) noexcept;
 
   constexpr TrackablePtr(const TrackablePtr&) noexcept = delete;
-  constexpr TrackablePtr<T>& operator=(const TrackablePtr<T>& rhs) noexcept =
-      delete;
+  constexpr TrackablePtr<T>& operator=(const TrackablePtr<T>& rhs) noexcept = delete;
 
   /**
    * If set, destroys the object being pointed to and unlinks
@@ -134,9 +129,7 @@ class TrackablePtr : private internal::TrackablePtrData {
     return static_cast<T*>(ptr_);
   }
 
-  constexpr explicit operator bool() const noexcept {
-    return static_cast<bool>(ptr_);
-  }
+  constexpr explicit operator bool() const noexcept { return static_cast<bool>(ptr_); }
 
   constexpr friend bool operator==(const TrackablePtr<T>& lhs,
                                    const TrackablePtr<T>& rhs) noexcept {
@@ -146,12 +139,10 @@ class TrackablePtr : private internal::TrackablePtrData {
                                    const TrackablePtr<T>& rhs) noexcept {
     return lhs.ptr_ != rhs.ptr_;
   }
-  constexpr friend bool operator<(const TrackablePtr<T>& lhs,
-                                  const TrackablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator<(const TrackablePtr<T>& lhs, const TrackablePtr<T>& rhs) noexcept {
     return lhs.ptr_ < rhs.ptr_;
   }
-  constexpr friend bool operator>(const TrackablePtr<T>& lhs,
-                                  const TrackablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator>(const TrackablePtr<T>& lhs, const TrackablePtr<T>& rhs) noexcept {
     return lhs.ptr_ > rhs.ptr_;
   }
   constexpr friend bool operator<=(const TrackablePtr<T>& lhs,
@@ -171,12 +162,10 @@ class TrackablePtr : private internal::TrackablePtrData {
                                    const ObservingPtr<T>& rhs) noexcept {
     return lhs.Get() != rhs.Get();
   }
-  constexpr friend bool operator<(const TrackablePtr<T>& lhs,
-                                  const ObservingPtr<T>& rhs) noexcept {
+  constexpr friend bool operator<(const TrackablePtr<T>& lhs, const ObservingPtr<T>& rhs) noexcept {
     return lhs.Get() < rhs.Get();
   }
-  constexpr friend bool operator>(const TrackablePtr<T>& lhs,
-                                  const ObservingPtr<T>& rhs) noexcept {
+  constexpr friend bool operator>(const TrackablePtr<T>& lhs, const ObservingPtr<T>& rhs) noexcept {
     return lhs.Get() > rhs.Get();
   }
   constexpr friend bool operator<=(const TrackablePtr<T>& lhs,
@@ -196,12 +185,10 @@ class TrackablePtr : private internal::TrackablePtrData {
                                    const TrackablePtr<T>& rhs) noexcept {
     return lhs.Get() != rhs.Get();
   }
-  constexpr friend bool operator<(const ObservingPtr<T>& lhs,
-                                  const TrackablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator<(const ObservingPtr<T>& lhs, const TrackablePtr<T>& rhs) noexcept {
     return lhs.Get() < rhs.Get();
   }
-  constexpr friend bool operator>(const ObservingPtr<T>& lhs,
-                                  const TrackablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator>(const ObservingPtr<T>& lhs, const TrackablePtr<T>& rhs) noexcept {
     return lhs.Get() > rhs.Get();
   }
   constexpr friend bool operator<=(const ObservingPtr<T>& lhs,
@@ -251,9 +238,7 @@ class TrackablePtr : private internal::TrackablePtrData {
  private:
   friend class internal::ObservingPtrData;
 
-  static internal::ObservingPtrData* Next(internal::ObservingPtrData& p) {
-    return p.next_;
-  }
+  static internal::ObservingPtrData* Next(internal::ObservingPtrData& p) { return p.next_; }
 };
 
 /**
@@ -266,10 +251,8 @@ class TrackablePtr : private internal::TrackablePtrData {
 template <typename T>
 class ObservingPtr : private internal::ObservingPtrData {
  public:
-  constexpr ObservingPtr() noexcept
-      : ObservingPtrData(nullptr, nullptr, nullptr) {}
-  constexpr ObservingPtr(std::nullptr_t) noexcept
-      : ObservingPtrData(nullptr, nullptr, nullptr) {}
+  constexpr ObservingPtr() noexcept : ObservingPtrData(nullptr, nullptr, nullptr) {}
+  constexpr ObservingPtr(std::nullptr_t) noexcept : ObservingPtrData(nullptr, nullptr, nullptr) {}
   /**
    * Copy construct an ObservingPtr. The new ObservingPtr will track
    * the same pointer as the @p source.
@@ -386,24 +369,12 @@ class ObservingPtr : private internal::ObservingPtrData {
     else
       return ObservingPtr<ImplicitCastableType>();
   }
-  constexpr bool operator==(const ObservingPtr& rhs) const {
-    return Get() == rhs.Get();
-  }
-  constexpr bool operator!=(const ObservingPtr& rhs) const {
-    return Get() != rhs.Get();
-  }
-  constexpr bool operator<(const ObservingPtr& rhs) const {
-    return Get() < rhs.Get();
-  }
-  constexpr bool operator>(const ObservingPtr& rhs) const {
-    return Get() > rhs.Get();
-  }
-  constexpr bool operator<=(const ObservingPtr& rhs) const {
-    return Get() <= rhs.Get();
-  }
-  constexpr bool operator>=(const ObservingPtr& rhs) const {
-    return Get() >= rhs.Get();
-  }
+  constexpr bool operator==(const ObservingPtr& rhs) const { return Get() == rhs.Get(); }
+  constexpr bool operator!=(const ObservingPtr& rhs) const { return Get() != rhs.Get(); }
+  constexpr bool operator<(const ObservingPtr& rhs) const { return Get() < rhs.Get(); }
+  constexpr bool operator>(const ObservingPtr& rhs) const { return Get() > rhs.Get(); }
+  constexpr bool operator<=(const ObservingPtr& rhs) const { return Get() <= rhs.Get(); }
+  constexpr bool operator>=(const ObservingPtr& rhs) const { return Get() >= rhs.Get(); }
   constexpr friend bool operator==(const ObservingPtr& lhs, const T* rhs) {
     return lhs.Get() == rhs;
   }
@@ -416,18 +387,10 @@ class ObservingPtr : private internal::ObservingPtrData {
   constexpr friend bool operator!=(const T* lhs, const ObservingPtr& rhs) {
     return lhs != rhs.Get();
   }
-  constexpr friend bool operator<(const ObservingPtr& lhs, const T* rhs) {
-    return lhs.Get() < rhs;
-  }
-  constexpr friend bool operator<(const T* lhs, const ObservingPtr& rhs) {
-    return lhs < rhs.Get();
-  }
-  constexpr friend bool operator>(const ObservingPtr& lhs, const T* rhs) {
-    return lhs.Get() > rhs;
-  }
-  constexpr friend bool operator>(const T* lhs, const ObservingPtr& rhs) {
-    return lhs > rhs.Get();
-  }
+  constexpr friend bool operator<(const ObservingPtr& lhs, const T* rhs) { return lhs.Get() < rhs; }
+  constexpr friend bool operator<(const T* lhs, const ObservingPtr& rhs) { return lhs < rhs.Get(); }
+  constexpr friend bool operator>(const ObservingPtr& lhs, const T* rhs) { return lhs.Get() > rhs; }
+  constexpr friend bool operator>(const T* lhs, const ObservingPtr& rhs) { return lhs > rhs.Get(); }
   constexpr friend bool operator<=(const ObservingPtr& lhs, const T* rhs) {
     return lhs.Get() <= rhs;
   }
@@ -440,9 +403,7 @@ class ObservingPtr : private internal::ObservingPtrData {
   constexpr friend bool operator>=(const T* lhs, const ObservingPtr& rhs) {
     return lhs >= rhs.Get();
   }
-  constexpr T* Get() const {
-    return parent_ ? static_cast<T*>(parent_->ptr_) : nullptr;
-  }
+  constexpr T* Get() const { return parent_ ? static_cast<T*>(parent_->ptr_) : nullptr; }
   constexpr T& operator*() const noexcept {
     assert(parent_);
     assert(parent_->ptr_);
@@ -504,8 +465,7 @@ void TrackablePtr<T>::Reset() noexcept {
 }
 
 template <typename ObserverType>
-ObservingPtr<ObserverType> internal::TrackablePtrData::GetObserver()
-    const noexcept {
+ObservingPtr<ObserverType> internal::TrackablePtrData::GetObserver() const noexcept {
   ObservingPtr<ObserverType> observer(this, nullptr, observer_list_);
   if (observer_list_) observer_list_->previous_ = &observer;
   observer_list_ = &observer;

@@ -115,9 +115,7 @@ static_assert(OptionalNumber<std::uint8_t>::UnsetValue == 255);
 static_assert(OptionalNumber<std::int8_t>::UnsetValue == -128);
 static_assert(OptionalNumber<std::uint16_t>::UnsetValue == 65535);
 static_assert(OptionalNumber<std::int16_t>::UnsetValue == -32768);
-static_assert(OptionalNumber<float>::UnsetValue ==
-              std::numeric_limits<float>::lowest());
-static_assert(OptionalNumber<double>::UnsetValue ==
-              std::numeric_limits<double>::lowest());
+static_assert(OptionalNumber<float>::UnsetValue == std::numeric_limits<float>::lowest());
+static_assert(OptionalNumber<double>::UnsetValue == std::numeric_limits<double>::lowest());
 
 }  // namespace

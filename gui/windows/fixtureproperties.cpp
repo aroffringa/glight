@@ -24,8 +24,7 @@ FixtureProperties::FixtureProperties() {
   auto update_lambda = [&]() { FixtureProperties::update(); };
   update_controllables_connection_ =
       Instance::Events().SignalUpdateControllables().connect(update_lambda);
-  selection_change_connection_ =
-      Instance::Selection().SignalChange().connect(update_lambda);
+  selection_change_connection_ = Instance::Selection().SignalChange().connect(update_lambda);
 
   main_grid_.attach(height_label_, 0, 0);
   main_grid_.attach(height_entry_, 1, 0);
@@ -66,10 +65,8 @@ void FixtureProperties::update() {
 
 void FixtureProperties::onSetClicked() {
   const double height = std::atof(height_entry_.get_text().c_str());
-  const double direction_degrees =
-      std::atof(direction_entry_.get_text().c_str());
-  const double direction =
-      std::clamp(direction_degrees, 0.0, 360.0) * M_PI / 180.0;
+  const double direction_degrees = std::atof(direction_entry_.get_text().c_str());
+  const double direction = std::clamp(direction_degrees, 0.0, 360.0) * M_PI / 180.0;
   const double tilt_degrees = std::atof(static_tilt_entry_.get_text().c_str());
   const double tilt = std::clamp(tilt_degrees, -180.0, 180.0) * M_PI / 180.0;
   const bool upside_down = upside_down_cb_.get_active();

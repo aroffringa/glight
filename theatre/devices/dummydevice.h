@@ -24,16 +24,13 @@ class DummyDevice {
     return universe == 0 ? UniverseType::Output : UniverseType::Input;
   }
 
-  void SetOutputValues(unsigned universe, const unsigned char *new_values,
-                       size_t size) {}
+  void SetOutputValues(unsigned universe, const unsigned char *new_values, size_t size) {}
 
-  void GetOutputValues(unsigned universe, unsigned char *destination,
-                       size_t size) {
+  void GetOutputValues(unsigned universe, unsigned char *destination, size_t size) {
     std::fill_n(destination, size, 0);
   }
 
-  void GetInputValues(unsigned universe, unsigned char *destination,
-                      size_t size) {}
+  void GetInputValues(unsigned universe, unsigned char *destination, size_t size) {}
 
   void WaitForNextSync() {
     usleep(40000);

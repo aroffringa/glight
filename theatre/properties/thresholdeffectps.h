@@ -10,14 +10,10 @@ namespace glight::theatre {
 class ThresholdEffectPS final : public PropertySet {
  public:
   ThresholdEffectPS() {
-    addProperty(Property("lowerstartlim", "Lower start limit",
-                         PropertyType::ControlValue));
-    addProperty(Property("upperstartlim", "Upper start limit",
-                         PropertyType::ControlValue));
-    addProperty(
-        Property("lowerendlim", "Lower end limit", PropertyType::ControlValue));
-    addProperty(
-        Property("upperendlim", "Upper end limit", PropertyType::ControlValue));
+    addProperty(Property("lowerstartlim", "Lower start limit", PropertyType::ControlValue));
+    addProperty(Property("upperstartlim", "Upper start limit", PropertyType::ControlValue));
+    addProperty(Property("lowerendlim", "Lower end limit", PropertyType::ControlValue));
+    addProperty(Property("upperendlim", "Upper end limit", PropertyType::ControlValue));
   }
 
  protected:
@@ -40,8 +36,7 @@ class ThresholdEffectPS final : public PropertySet {
     }
   }
 
-  virtual unsigned getControlValue(const FolderObject &object,
-                                   size_t index) const final override {
+  virtual unsigned getControlValue(const FolderObject &object, size_t index) const final override {
     const ThresholdEffect &tfx = static_cast<const ThresholdEffect &>(object);
     switch (index) {
       case 0:

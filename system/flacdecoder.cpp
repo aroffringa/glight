@@ -24,21 +24,17 @@ void FlacDecoder::close() {
   _isOpen = false;
 }
 
-FLAC__StreamDecoderWriteStatus FlacDecoder::write_callback(
-    const FLAC__Frame *frame, const FLAC__int32 *const buffer[]) {
+FLAC__StreamDecoderWriteStatus FlacDecoder::write_callback(const FLAC__Frame *frame,
+                                                           const FLAC__int32 *const buffer[]) {
   if (_lane.is_end()) return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
 
   _buffer.clear();
   _buffer.reserve(frame->header.blocksize * 4);
   for (unsigned i = 0; i < frame->header.blocksize; i++) {
-    _buffer.emplace_back(
-        static_cast<FLAC__int16>(buffer[0][i]));  // left channel
-    _buffer.emplace_back((static_cast<FLAC__int16>(buffer[0][i])) >>
-                         8);  // left channel
-    _buffer.emplace_back(
-        static_cast<FLAC__int16>(buffer[1][i]));  // right channel
-    _buffer.emplace_back((static_cast<FLAC__int16>(buffer[1][i])) >>
-                         8);  // right channel
+    _buffer.emplace_back(static_cast<FLAC__int16>(buffer[0][i]));         // left channel
+    _buffer.emplace_back((static_cast<FLAC__int16>(buffer[0][i])) >> 8);  // left channel
+    _buffer.emplace_back(static_cast<FLAC__int16>(buffer[1][i]));         // right channel
+    _buffer.emplace_back((static_cast<FLAC__int16>(buffer[1][i])) >> 8);  // right channel
   }
   _lane.write(_buffer.data(), _buffer.size());
   return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;

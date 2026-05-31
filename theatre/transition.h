@@ -216,8 +216,8 @@ class Transition {
    * @param transition_time value between 0 and _lengthInMS.
    * @param timing used for randomness, etc.
    */
-  void Mix(Connection &first, Connection &second, double transition_time,
-           ControlValue value, const Timing &timing, bool primary) const;
+  void Mix(Connection &first, Connection &second, double transition_time, ControlValue value,
+           const Timing &timing, bool primary) const;
 
  private:
   double length_in_ms_ = 250.0;

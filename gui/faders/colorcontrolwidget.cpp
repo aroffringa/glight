@@ -18,11 +18,9 @@ namespace glight::gui {
 
 using theatre::Color;
 
-ColorControlWidget::ColorControlWidget(FaderWindow &fader_window,
-                                       uistate::FaderState &state,
+ColorControlWidget::ColorControlWidget(FaderWindow &fader_window, uistate::FaderState &state,
                                        ControlMode mode, char key)
-    : ControlWidget(fader_window, state, mode),
-      color_selector_(&fader_window, false) {
+    : ControlWidget(fader_window, state, mode), color_selector_(&fader_window, false) {
   color_selector_.SignalColorChanged().connect([&]() { OnColorChanged(); });
   append(color_selector_);
   color_selector_.show();
@@ -30,8 +28,7 @@ ColorControlWidget::ColorControlWidget(FaderWindow &fader_window,
   name_label_.set_halign(Gtk::Align::START);
   name_label_.set_justify(Gtk::Justification::LEFT);
   auto gesture = Gtk::GestureClick::create();
-  gesture->signal_pressed().connect(
-      [&](int, double, double) { ShowAssignControllableDialog(); });
+  gesture->signal_pressed().connect([&](int, double, double) { ShowAssignControllableDialog(); });
   name_label_.add_controller(gesture);
   append(name_label_);
 
@@ -42,9 +39,7 @@ ColorControlWidget::ColorControlWidget(FaderWindow &fader_window,
       State().SignalChange().connect([&]() { UpdateDisplaySettings(); });
 }
 
-ColorControlWidget::~ColorControlWidget() {
-  update_display_settings_connection_.disconnect();
-}
+ColorControlWidget::~ColorControlWidget() { update_display_settings_connection_.disconnect(); }
 
 void ColorControlWidget::OnColorChanged() {
   if (!hold_updates_) {
@@ -65,12 +60,9 @@ Color ColorControlWidget::ColorFromSourceValues() const {
   const bool has_green = sources.size() > 1 && sources[1];
   const bool has_blue = sources.size() > 2 && sources[2];
   using theatre::ControlValue;
-  const ControlValue red =
-      has_red ? GetSingleSourceValue(0).Value() : ControlValue();
-  const ControlValue green =
-      has_green ? GetSingleSourceValue(1).Value() : ControlValue();
-  const ControlValue blue =
-      has_blue ? GetSingleSourceValue(2).Value() : ControlValue();
+  const ControlValue red = has_red ? GetSingleSourceValue(0).Value() : ControlValue();
+  const ControlValue green = has_green ? GetSingleSourceValue(1).Value() : ControlValue();
+  const ControlValue blue = has_blue ? GetSingleSourceValue(2).Value() : ControlValue();
   return Color(red.ToUChar(), green.ToUChar(), blue.ToUChar());
 }
 
@@ -79,8 +71,7 @@ void ColorControlWidget::OnAssigned(bool moveFader) {
   if (source) {
     name_label_.set_text(source->GetControllable().Name());
     const theatre::Controllable *controllable = &source->GetControllable();
-    const std::vector<Color> colors =
-        controllable->InputColors(source->InputIndex());
+    const std::vector<Color> colors = controllable->InputColors(source->InputIndex());
     if (moveFader) {
       const Color color = ColorFromSourceValues();
       color_selector_.SetColor(color);
@@ -125,20 +116,15 @@ void ColorControlWidget::PrepareContextMenu(ControlMenu &menu) {
   menu.SignalAssign().connect([&]() { ShowAssignControllableDialog(); });
 }
 
-void ColorControlWidget::UpdateDisplaySettings() {
-  name_label_.set_visible(State().DisplayName());
-}
+void ColorControlWidget::UpdateDisplaySettings() { name_label_.set_visible(State().DisplayName()); }
 
 void ColorControlWidget::ShowAssignControllableDialog() {
-  dialog_ = std::make_unique<ControllableSelectionDialog>(
-      "Select item for color control", false);
-  ControllableSelectionDialog &dialog =
-      static_cast<ControllableSelectionDialog &>(*dialog_);
+  dialog_ = std::make_unique<ControllableSelectionDialog>("Select item for color control", false);
+  ControllableSelectionDialog &dialog = static_cast<ControllableSelectionDialog &>(*dialog_);
   dialog.SetFilter(ObjectListType::All);
   dialog.signal_response().connect([this](int response) {
     if (response == Gtk::ResponseType::OK) {
-      const ControllableSelectionDialog &csd =
-          static_cast<ControllableSelectionDialog &>(*dialog_);
+      const ControllableSelectionDialog &csd = static_cast<ControllableSelectionDialog &>(*dialog_);
       theatre::Controllable *controllable =
           dynamic_cast<theatre::Controllable *>(csd.SelectedObject().Get());
       if (controllable) {

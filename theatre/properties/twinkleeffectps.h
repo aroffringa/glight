@@ -10,18 +10,14 @@ namespace glight::theatre {
 class TwinkleEffectPS final : public PropertySet {
  public:
   TwinkleEffectPS() {
-    addProperty(
-        Property("average_delay", "Average delay", PropertyType::Duration));
+    addProperty(Property("average_delay", "Average delay", PropertyType::Duration));
     addProperty(Property("hold_time", "Hold time", PropertyType::Duration));
-    addProperty(
-        Property("transition_in", "Transition in", PropertyType::Transition));
-    addProperty(
-        Property("transition_out", "Transition out", PropertyType::Transition));
+    addProperty(Property("transition_in", "Transition in", PropertyType::Transition));
+    addProperty(Property("transition_out", "Transition out", PropertyType::Transition));
   }
 
  protected:
-  void setDuration(FolderObject &object, size_t index,
-                   double value) const override {
+  void setDuration(FolderObject &object, size_t index, double value) const override {
     TwinkleEffect &tfx = static_cast<TwinkleEffect &>(object);
     switch (index) {
       case 0:
@@ -44,8 +40,7 @@ class TwinkleEffectPS final : public PropertySet {
     return 0;
   }
 
-  void setTransition(FolderObject &object, size_t index,
-                     const Transition &value) const override {
+  void setTransition(FolderObject &object, size_t index, const Transition &value) const override {
     TwinkleEffect &tfx = static_cast<TwinkleEffect &>(object);
     switch (index) {
       case 2:
@@ -57,8 +52,7 @@ class TwinkleEffectPS final : public PropertySet {
     }
   }
 
-  Transition getTransition(const FolderObject &object,
-                           size_t index) const override {
+  Transition getTransition(const FolderObject &object, size_t index) const override {
     const TwinkleEffect &tfx = static_cast<const TwinkleEffect &>(object);
     if (index == 2)
       return tfx.GetTransitionIn();

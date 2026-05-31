@@ -2,8 +2,7 @@
 
 namespace glight::theatre {
 
-ControlValue Transition::InValue(double transition_time,
-                                 const Timing &timing) const {
+ControlValue Transition::InValue(double transition_time, const Timing &timing) const {
   switch (type_) {
     case TransitionType::None:
       if (transition_time * 2.0 <= length_in_ms_)
@@ -37,14 +36,12 @@ ControlValue Transition::InValue(double transition_time,
         transition_point /= stage_split;
         return ControlValue(ControlValue::Max() * transition_point);
       } else {
-        transition_point =
-            (transition_point - stage_split) / (1.0 - stage_split);
+        transition_point = (transition_point - stage_split) / (1.0 - stage_split);
         return ControlValue::Max();
       }
     }
     case TransitionType::Stepped: {
-      const unsigned value =
-          static_cast<unsigned>((transition_time / length_in_ms_) * 5.0);
+      const unsigned value = static_cast<unsigned>((transition_time / length_in_ms_) * 5.0);
       return ControlValue(value * ControlValue::MaxUInt() / 5);
     }
     case TransitionType::ConstantAcceleration: {
@@ -52,35 +49,28 @@ ControlValue Transition::InValue(double transition_time,
       if (ratio <= 0.5)
         return ControlValue::FromRatio(ratio * ratio * 2.0);
       else
-        return ControlValue::FromRatio(1.0 -
-                                       (ratio - 1.0) * (ratio - 1.0) * 2.0);
+        return ControlValue::FromRatio(1.0 - (ratio - 1.0) * (ratio - 1.0) * 2.0);
     }
     case TransitionType::Random: {
-      const unsigned ratio =
-          (unsigned)((transition_time / length_in_ms_) * 256);
+      const unsigned ratio = (unsigned)((transition_time / length_in_ms_) * 256);
       const unsigned upper_bound = std::min(255u, ratio * 2u);
       const unsigned lower_bound = std::max(ratio * 2u, 256u) - 256u;
-      const unsigned value =
-          timing.DrawRandomValue(upper_bound - lower_bound) + lower_bound;
+      const unsigned value = timing.DrawRandomValue(upper_bound - lower_bound) + lower_bound;
       return ControlValue(value << 16);
     }
     case TransitionType::Erratic: {
-      unsigned ratio = (unsigned)((transition_time / length_in_ms_) *
-                                  ControlValue::MaxUInt());
+      unsigned ratio = (unsigned)((transition_time / length_in_ms_) * ControlValue::MaxUInt());
       if (ratio >= timing.DrawRandomValue())
         return ControlValue::Max();
       else
         return ControlValue::Zero();
     }
     case TransitionType::SlowStrobe:
-      return (timing.TimestepNumber() % 8) == 0 ? ControlValue::Max()
-                                                : ControlValue::Zero();
+      return (timing.TimestepNumber() % 8) == 0 ? ControlValue::Max() : ControlValue::Zero();
     case TransitionType::FastStrobe:
-      return (timing.TimestepNumber() % 2) == 0 ? ControlValue::Max()
-                                                : ControlValue::Zero();
+      return (timing.TimestepNumber() % 2) == 0 ? ControlValue::Max() : ControlValue::Zero();
     case TransitionType::StrobeAB:
-      return transition_time * 2.0 >= length_in_ms_ &&
-                     timing.TimestepNumber() % 2 == 0
+      return transition_time * 2.0 >= length_in_ms_ && timing.TimestepNumber() % 2 == 0
                  ? ControlValue::Max()
                  : ControlValue::Zero();
     case TransitionType::Black:
@@ -97,8 +87,7 @@ ControlValue Transition::InValue(double transition_time,
 /**
  * @param transitionTime value between 0 and _lengthInMS.
  */
-ControlValue Transition::OutValue(double transition_time,
-                                  const Timing &timing) const {
+ControlValue Transition::OutValue(double transition_time, const Timing &timing) const {
   switch (type_) {
     case TransitionType::None:
       if (transition_time * 2.0 > length_in_ms_)
@@ -112,8 +101,7 @@ ControlValue Transition::OutValue(double transition_time,
     }
     case TransitionType::FadeThroughBlack: {
       const double ratio = (transition_time / length_in_ms_) * 2.0;
-      return ratio < 1.0 ? ControlValue::FromRatio(1.0 - ratio)
-                         : ControlValue::Zero();
+      return ratio < 1.0 ? ControlValue::FromRatio(1.0 - ratio) : ControlValue::Zero();
     }
     case TransitionType::FadeThroughFull: {
       const double ratio = (transition_time / length_in_ms_) * 2.0;
@@ -129,18 +117,15 @@ ControlValue Transition::OutValue(double transition_time,
       double transition_point = transition_time / length_in_ms_;
       if (transition_point < stage_split) {
         transition_point /= stage_split;
-        const double x =
-            (1.0 - transition_point) * (1.0 - glow_level) + glow_level;
+        const double x = (1.0 - transition_point) * (1.0 - glow_level) + glow_level;
         return ControlValue::FromRatio(x);
       } else {
-        transition_point =
-            (transition_point - stage_split) / (1.0 - stage_split);
+        transition_point = (transition_point - stage_split) / (1.0 - stage_split);
         return ControlValue::FromRatio((1.0 - transition_point) * glow_level);
       }
     }
     case TransitionType::Stepped: {
-      double ratio =
-          1.0 - std::floor(4.999 * transition_time / length_in_ms_) / 5.0;
+      double ratio = 1.0 - std::floor(4.999 * transition_time / length_in_ms_) / 5.0;
       return ControlValue::FromRatio(ratio);
     }
     case TransitionType::ConstantAcceleration: {
@@ -151,32 +136,26 @@ ControlValue Transition::OutValue(double transition_time,
         return ControlValue::FromRatio((ratio - 1.0) * (ratio - 1.0) * 2.0);
     }
     case TransitionType::Random: {
-      const unsigned ratio =
-          (unsigned)((transition_time / length_in_ms_) * 256);
+      const unsigned ratio = (unsigned)((transition_time / length_in_ms_) * 256);
       const unsigned upper_bound = std::min(255u, ratio * 2u);
       const unsigned lower_bound = std::max(ratio * 2u, 256u) - 256u;
       const unsigned value =
-          255 -
-          (timing.DrawRandomValue(upper_bound - lower_bound) + lower_bound);
+          255 - (timing.DrawRandomValue(upper_bound - lower_bound) + lower_bound);
       return ControlValue(value << 16);
     }
     case TransitionType::Erratic: {
-      unsigned ratio = (unsigned)((transition_time / length_in_ms_) *
-                                  ControlValue::MaxUInt());
+      unsigned ratio = (unsigned)((transition_time / length_in_ms_) * ControlValue::MaxUInt());
       if (ratio < timing.DrawRandomValue())
         return ControlValue::Max();
       else
         return ControlValue::Zero();
     }
     case TransitionType::SlowStrobe:
-      return (timing.TimestepNumber() % 8) == 4 ? ControlValue::Max()
-                                                : ControlValue::Zero();
+      return (timing.TimestepNumber() % 8) == 4 ? ControlValue::Max() : ControlValue::Zero();
     case TransitionType::FastStrobe:
-      return (timing.TimestepNumber() % 2) == 1 ? ControlValue::Max()
-                                                : ControlValue::Zero();
+      return (timing.TimestepNumber() % 2) == 1 ? ControlValue::Max() : ControlValue::Zero();
     case TransitionType::StrobeAB:
-      return transition_time * 2.0 < length_in_ms_ &&
-                     timing.TimestepNumber() % 2 == 1
+      return transition_time * 2.0 < length_in_ms_ && timing.TimestepNumber() % 2 == 1
                  ? ControlValue::Max()
                  : ControlValue::Zero();
     case TransitionType::Black:
@@ -198,36 +177,29 @@ ControlValue Transition::OutValue(double transition_time,
 /**
  * @param transitionTime value between 0 and _lengthInMS.
  */
-void Transition::Mix(Connection &first, Connection &second,
-                     double transition_time, ControlValue value,
-                     const Timing &timing, bool primary) const {
+void Transition::Mix(Connection &first, Connection &second, double transition_time,
+                     ControlValue value, const Timing &timing, bool primary) const {
   const double ratio = std::clamp(transition_time / length_in_ms_, 0.0, 1.0);
   switch (type_) {
     case TransitionType::None:
       if (transition_time * 2.0 <= length_in_ms_)
-        first.to_controllable->MixInput(first.to_input_index, value,
-                                        first.values[primary]);
+        first.to_controllable->MixInput(first.to_input_index, value, first.values[primary]);
       else
-        second.to_controllable->MixInput(second.to_input_index, value,
-                                         second.values[primary]);
+        second.to_controllable->MixInput(second.to_input_index, value, second.values[primary]);
       break;
     case TransitionType::Fade: {
       const ControlValue second_value = value * ratio;
-      first.to_controllable->MixInput(
-          first.to_input_index, value - second_value, first.values[primary]);
-      second.to_controllable->MixInput(second.to_input_index, second_value,
-                                       second.values[primary]);
+      first.to_controllable->MixInput(first.to_input_index, value - second_value,
+                                      first.values[primary]);
+      second.to_controllable->MixInput(second.to_input_index, second_value, second.values[primary]);
     } break;
     case TransitionType::FadeThroughBlack: {
       const unsigned scaled_ratio = (unsigned)(ratio * (65536 * 2.0));
       if (scaled_ratio < 65536) {
-        ControlValue firstValue(
-            ((value.UInt() >> 8) * (65535 - scaled_ratio)) >> 8);
-        first.to_controllable->MixInput(first.to_input_index, firstValue,
-                                        first.values[primary]);
+        ControlValue firstValue(((value.UInt() >> 8) * (65535 - scaled_ratio)) >> 8);
+        first.to_controllable->MixInput(first.to_input_index, firstValue, first.values[primary]);
       } else {
-        ControlValue secondValue(
-            ((value.UInt() >> 8) * (scaled_ratio - 65536)) >> 8);
+        ControlValue secondValue(((value.UInt() >> 8) * (scaled_ratio - 65536)) >> 8);
         second.to_controllable->MixInput(second.to_input_index, secondValue,
                                          second.values[primary]);
       }
@@ -235,19 +207,14 @@ void Transition::Mix(Connection &first, Connection &second,
     case TransitionType::FadeThroughFull: {
       const unsigned scaled_ratio = (unsigned)(ratio * (65536 * 2.0));
       if (scaled_ratio < 65536) {
-        first.to_controllable->MixInput(first.to_input_index, value,
-                                        first.values[primary]);
-        const ControlValue secondValue(((value.UInt() >> 8) * scaled_ratio) >>
-                                       8);
+        first.to_controllable->MixInput(first.to_input_index, value, first.values[primary]);
+        const ControlValue secondValue(((value.UInt() >> 8) * scaled_ratio) >> 8);
         second.to_controllable->MixInput(second.to_input_index, secondValue,
                                          second.values[primary]);
       } else {
-        const ControlValue firstValue(
-            ((value.UInt() >> 8) * (512 - scaled_ratio)) >> 8);
-        first.to_controllable->MixInput(first.to_input_index, firstValue,
-                                        first.values[primary]);
-        second.to_controllable->MixInput(second.to_input_index, value,
-                                         second.values[primary]);
+        const ControlValue firstValue(((value.UInt() >> 8) * (512 - scaled_ratio)) >> 8);
+        first.to_controllable->MixInput(first.to_input_index, firstValue, first.values[primary]);
+        second.to_controllable->MixInput(second.to_input_index, value, second.values[primary]);
       }
     } break;
     case TransitionType::GlowFade: {
@@ -259,53 +226,42 @@ void Transition::Mix(Connection &first, Connection &second,
       double transition_point = ratio;
       if (transition_point < stage_split) {
         transition_point /= stage_split;
-        const double a =
-            (1.0 - transition_point) * (1.0 - glow_level) + glow_level;
-        first.to_controllable->MixInput(first.to_input_index,
-                                        ControlValue(value.UInt() * a),
+        const double a = (1.0 - transition_point) * (1.0 - glow_level) + glow_level;
+        first.to_controllable->MixInput(first.to_input_index, ControlValue(value.UInt() * a),
                                         first.values[primary]);
-        second.to_controllable->MixInput(
-            second.to_input_index,
-            ControlValue(value.UInt() * transition_point),
-            second.values[primary]);
-      } else {
-        transition_point =
-            (transition_point - stage_split) / (1.0 - stage_split);
-        const double a = (1.0 - transition_point) * glow_level;
-        first.to_controllable->MixInput(first.to_input_index,
-                                        ControlValue(value.UInt() * a),
-                                        first.values[primary]);
-        second.to_controllable->MixInput(second.to_input_index, value,
+        second.to_controllable->MixInput(second.to_input_index,
+                                         ControlValue(value.UInt() * transition_point),
                                          second.values[primary]);
+      } else {
+        transition_point = (transition_point - stage_split) / (1.0 - stage_split);
+        const double a = (1.0 - transition_point) * glow_level;
+        first.to_controllable->MixInput(first.to_input_index, ControlValue(value.UInt() * a),
+                                        first.values[primary]);
+        second.to_controllable->MixInput(second.to_input_index, value, second.values[primary]);
       }
     } break;
     case TransitionType::Stepped: {
       unsigned secondRatioValue = (unsigned)(ratio * 256.0);
       secondRatioValue = (secondRatioValue / 51) * 51;
       const unsigned firstRatioValue = 255 - secondRatioValue;
-      first.to_controllable->MixInput(
-          first.to_input_index,
-          ControlValue((value.UInt() * firstRatioValue) >> 8),
-          first.values[primary]);
-      second.to_controllable->MixInput(
-          second.to_input_index,
-          ControlValue((value.UInt() * secondRatioValue) >> 8),
-          second.values[primary]);
+      first.to_controllable->MixInput(first.to_input_index,
+                                      ControlValue((value.UInt() * firstRatioValue) >> 8),
+                                      first.values[primary]);
+      second.to_controllable->MixInput(second.to_input_index,
+                                       ControlValue((value.UInt() * secondRatioValue) >> 8),
+                                       second.values[primary]);
     } break;
     case TransitionType::ConstantAcceleration: {
-      const double fade_value = (ratio <= 0.5)
-                                    ? ratio * ratio * 2.0
-                                    : 1.0 - (ratio - 1.0) * (ratio - 1.0) * 2.0;
+      const double fade_value =
+          (ratio <= 0.5) ? ratio * ratio * 2.0 : 1.0 - (ratio - 1.0) * (ratio - 1.0) * 2.0;
       unsigned secondRatioValue = (unsigned)(fade_value * 65536.0);
       const unsigned firstRatioValue = 65535 - secondRatioValue;
-      first.to_controllable->MixInput(
-          first.to_input_index,
-          ControlValue(((value.UInt() >> 8) * firstRatioValue) >> 8),
-          first.values[primary]);
-      second.to_controllable->MixInput(
-          second.to_input_index,
-          ControlValue(((value.UInt() >> 8) * secondRatioValue) >> 8),
-          second.values[primary]);
+      first.to_controllable->MixInput(first.to_input_index,
+                                      ControlValue(((value.UInt() >> 8) * firstRatioValue) >> 8),
+                                      first.values[primary]);
+      second.to_controllable->MixInput(second.to_input_index,
+                                       ControlValue(((value.UInt() >> 8) * secondRatioValue) >> 8),
+                                       second.values[primary]);
     } break;
     case TransitionType::Random: {
       const unsigned scaled_ratio = (unsigned)(ratio * 256);
@@ -314,89 +270,71 @@ void Transition::Mix(Connection &first, Connection &second,
       const unsigned secondRatioValue =
           timing.DrawRandomValue(upper_bound - lower_bound) + lower_bound;
       const unsigned firstRatioValue = 255 - secondRatioValue;
-      first.to_controllable->MixInput(
-          first.to_input_index,
-          ControlValue((value.UInt() * firstRatioValue) >> 8),
-          first.values[primary]);
-      second.to_controllable->MixInput(
-          second.to_input_index,
-          ControlValue((value.UInt() * secondRatioValue) >> 8),
-          second.values[primary]);
+      first.to_controllable->MixInput(first.to_input_index,
+                                      ControlValue((value.UInt() * firstRatioValue) >> 8),
+                                      first.values[primary]);
+      second.to_controllable->MixInput(second.to_input_index,
+                                       ControlValue((value.UInt() * secondRatioValue) >> 8),
+                                       second.values[primary]);
     } break;
     case TransitionType::Erratic: {
       unsigned scaled_ratio = (unsigned)(ratio * ControlValue::MaxUInt());
       if (scaled_ratio < timing.DrawRandomValue())
-        first.to_controllable->MixInput(first.to_input_index, value,
-                                        first.values[primary]);
+        first.to_controllable->MixInput(first.to_input_index, value, first.values[primary]);
       else
-        second.to_controllable->MixInput(second.to_input_index, value,
-                                         second.values[primary]);
+        second.to_controllable->MixInput(second.to_input_index, value, second.values[primary]);
     } break;
     case TransitionType::SlowStrobe:
       if (timing.TimestepNumber() % 8 == 0)
-        first.to_controllable->MixInput(first.to_input_index, value,
-                                        first.values[primary]);
+        first.to_controllable->MixInput(first.to_input_index, value, first.values[primary]);
       else if (timing.TimestepNumber() % 8 == 4)
-        second.to_controllable->MixInput(second.to_input_index, value,
-                                         second.values[primary]);
+        second.to_controllable->MixInput(second.to_input_index, value, second.values[primary]);
       break;
     case TransitionType::FastStrobe:
       if (timing.TimestepNumber() % 2 == 0)
-        first.to_controllable->MixInput(first.to_input_index, value,
-                                        first.values[primary]);
+        first.to_controllable->MixInput(first.to_input_index, value, first.values[primary]);
       else
-        second.to_controllable->MixInput(second.to_input_index, value,
-                                         second.values[primary]);
+        second.to_controllable->MixInput(second.to_input_index, value, second.values[primary]);
       break;
     case TransitionType::StrobeAB: {
       if (timing.TimestepNumber() % 2 == 0) {
         if (transition_time * 2.0 < length_in_ms_)
-          first.to_controllable->MixInput(first.to_input_index, value,
-                                          first.values[primary]);
+          first.to_controllable->MixInput(first.to_input_index, value, first.values[primary]);
         else
-          second.to_controllable->MixInput(second.to_input_index, value,
-                                           second.values[primary]);
+          second.to_controllable->MixInput(second.to_input_index, value, second.values[primary]);
       }
     } break;
     case TransitionType::Black:
       break;
     case TransitionType::Full:
-      first.to_controllable->MixInput(first.to_input_index, value,
-                                      first.values[primary]);
-      second.to_controllable->MixInput(second.to_input_index, value,
-                                       second.values[primary]);
+      first.to_controllable->MixInput(first.to_input_index, value, first.values[primary]);
+      second.to_controllable->MixInput(second.to_input_index, value, second.values[primary]);
       break;
     case TransitionType::FadeFromBlack: {
       unsigned ratioValue = (unsigned)(ratio * 65536.0);
-      second.to_controllable->MixInput(
-          second.to_input_index,
-          ControlValue(((value.UInt() >> 8) * ratioValue) >> 8),
-          second.values[primary]);
+      second.to_controllable->MixInput(second.to_input_index,
+                                       ControlValue(((value.UInt() >> 8) * ratioValue) >> 8),
+                                       second.values[primary]);
     } break;
     case TransitionType::FadeToBlack: {
       unsigned ratioValue = 65535 - (unsigned)(ratio * 65536.0);
-      first.to_controllable->MixInput(
-          second.to_input_index,
-          ControlValue(((value.UInt() >> 8) * ratioValue) >> 8),
-          second.values[primary]);
+      first.to_controllable->MixInput(second.to_input_index,
+                                      ControlValue(((value.UInt() >> 8) * ratioValue) >> 8),
+                                      second.values[primary]);
     } break;
     case TransitionType::FadeFromFull: {
       const unsigned ratio_value = 65535 - (unsigned)(ratio * 65536.0);
-      first.to_controllable->MixInput(
-          first.to_input_index,
-          ControlValue(((value.UInt() >> 8) * ratio_value) >> 8),
-          first.values[primary]);
-      second.to_controllable->MixInput(second.to_input_index, value,
-                                       second.values[primary]);
+      first.to_controllable->MixInput(first.to_input_index,
+                                      ControlValue(((value.UInt() >> 8) * ratio_value) >> 8),
+                                      first.values[primary]);
+      second.to_controllable->MixInput(second.to_input_index, value, second.values[primary]);
     } break;
     case TransitionType::FadeToFull: {
       unsigned ratio_value = (unsigned)(ratio * 65536.0);
-      first.to_controllable->MixInput(first.to_input_index, value,
-                                      first.values[primary]);
-      second.to_controllable->MixInput(
-          second.to_input_index,
-          ControlValue(((value.UInt() >> 8) * ratio_value) >> 8),
-          second.values[primary]);
+      first.to_controllable->MixInput(first.to_input_index, value, first.values[primary]);
+      second.to_controllable->MixInput(second.to_input_index,
+                                       ControlValue(((value.UInt() >> 8) * ratio_value) >> 8),
+                                       second.values[primary]);
     } break;
   }
 }

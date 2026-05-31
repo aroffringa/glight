@@ -85,8 +85,7 @@ inline double RgbToTemperature(double red, double green, double blue) {
 }
 
 inline double RgbToTemperature(const theatre::Color& color) {
-  return RgbToTemperature(color.RedRatio(), color.GreenRatio(),
-                          color.BlueRatio());
+  return RgbToTemperature(color.RedRatio(), color.GreenRatio(), color.BlueRatio());
 }
 
 }  // namespace glight::system

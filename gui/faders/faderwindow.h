@@ -64,9 +64,7 @@ class FaderWindow : public Gtk::Window {
   /// time (instead of each fader allocating its own menu)
   std::unique_ptr<ControlMenu> &GetControlMenu();
 
-  void SetMidiManager(system::midi::Manager &manager) {
-    _connectedMidiManager = &manager;
-  }
+  void SetMidiManager(system::midi::Manager &manager) { _connectedMidiManager = &manager; }
 
  private:
   std::string GetLayout() const {

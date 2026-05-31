@@ -10,8 +10,7 @@
 
 namespace glight::gui {
 
-PresetCollectionWindow::PresetCollectionWindow(
-    theatre::PresetCollection &presetCollection)
+PresetCollectionWindow::PresetCollectionWindow(theatre::PresetCollection &presetCollection)
     : PropertiesWindow(),
       _inputSelector(),
       _controlValueLabel("Value:"),
@@ -51,8 +50,7 @@ PresetCollectionWindow::PresetCollectionWindow(
   _presetsScrolledWindow.set_child(_presetsView);
 
   _presetsScrolledWindow.set_size_request(200, 200);
-  _presetsScrolledWindow.set_policy(Gtk::PolicyType::NEVER,
-                                    Gtk::PolicyType::AUTOMATIC);
+  _presetsScrolledWindow.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
   _grid.attach(_presetsScrolledWindow, 0, 0, 2, 1);
   _presetsScrolledWindow.set_hexpand(true);
   _presetsScrolledWindow.set_vexpand(true);
@@ -61,8 +59,7 @@ PresetCollectionWindow::PresetCollectionWindow(
   _controlValueLabel.set_hexpand(false);
   _controlValueLabel.set_vexpand(false);
 
-  _controlValueEntry.signal_changed().connect(
-      [&]() { onControlValueChanged(); });
+  _controlValueEntry.signal_changed().connect([&]() { onControlValueChanged(); });
   _grid.attach(_controlValueEntry, 1, 1, 1, 1);
   _controlValueEntry.set_hexpand(false);
   _controlValueEntry.set_vexpand(false);
@@ -77,13 +74,10 @@ PresetCollectionWindow::PresetCollectionWindow(
 
 void PresetCollectionWindow::load() { fillPresetsList(); }
 
-theatre::FolderObject &PresetCollectionWindow::GetObject() {
-  return GetPresetCollection();
-}
+theatre::FolderObject &PresetCollectionWindow::GetObject() { return GetPresetCollection(); }
 
 bool PresetCollectionWindow::selectedPresetIndex(size_t &index) {
-  Gtk::TreeModel::iterator selIter =
-      _presetsView.get_selection()->get_selected();
+  Gtk::TreeModel::iterator selIter = _presetsView.get_selection()->get_selected();
   if (selIter) {
     index = (*selIter)[_presetListColumns._presetIndex];
     return true;
@@ -93,8 +87,7 @@ bool PresetCollectionWindow::selectedPresetIndex(size_t &index) {
 }
 
 void PresetCollectionWindow::selectPreset(size_t index) {
-  _presetsView.get_selection()->select(
-      _presetsStore->children()[index].get_iter());
+  _presetsView.get_selection()->select(_presetsStore->children()[index].get_iter());
 }
 
 void PresetCollectionWindow::fillPresetsList() {
@@ -108,12 +101,10 @@ void PresetCollectionWindow::fillPresetsList() {
   }
   _presetsStore->clear();
   for (size_t i = 0; i != _presetCollection->PresetValues().size(); ++i) {
-    const std::unique_ptr<theatre::PresetValue> &pValue =
-        _presetCollection->PresetValues()[i];
+    const std::unique_ptr<theatre::PresetValue> &pValue = _presetCollection->PresetValues()[i];
     Gtk::TreeModel::iterator iter = _presetsStore->append();
     Gtk::TreeModel::Row &row = *iter;
-    row[_presetListColumns._control] =
-        pValue->GetControllable().InputName(pValue->InputIndex());
+    row[_presetListColumns._control] = pValue->GetControllable().InputName(pValue->InputIndex());
     std::ostringstream str;
     str << pValue->Value().RoundedPercentage();
     row[_presetListColumns._value] = str.str();
@@ -123,8 +114,7 @@ void PresetCollectionWindow::fillPresetsList() {
     }
   }
   token.Release();
-  if (hasSelection && !_presetsView.get_selection()->get_selected())
-    onSelectedPresetChanged();
+  if (hasSelection && !_presetsView.get_selection()->get_selected()) onSelectedPresetChanged();
 }
 
 void PresetCollectionWindow::onInputSelectionChanged() {
@@ -137,8 +127,7 @@ void PresetCollectionWindow::onAddPreset() {
   if (object && input != InputSelectWidget::NO_INPUT_SELECTED) {
     theatre::Management &management = Instance::Management();
     std::unique_lock<std::mutex> lock(management.Mutex());
-    theatre::PresetValue &preset =
-        _presetCollection->AddPresetValue(*object, input);
+    theatre::PresetValue &preset = _presetCollection->AddPresetValue(*object, input);
     if (management.HasCycle()) {
       _presetCollection->RemovePresetValue(_presetCollection->Size() - 1);
       lock.unlock();
@@ -157,8 +146,7 @@ void PresetCollectionWindow::onAddPreset() {
 }
 
 void PresetCollectionWindow::onRemovePreset() {
-  Gtk::TreeModel::iterator selIter =
-      _presetsView.get_selection()->get_selected();
+  Gtk::TreeModel::iterator selIter = _presetsView.get_selection()->get_selected();
   if (selIter) {
     size_t index = (*selIter)[_presetListColumns._presetIndex];
     std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
@@ -183,8 +171,7 @@ void PresetCollectionWindow::onSelectedPresetChanged() {
 
 void PresetCollectionWindow::loadPreset(size_t index) {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  theatre::ControlValue controlValue =
-      _presetCollection->PresetValues()[index]->Value();
+  theatre::ControlValue controlValue = _presetCollection->PresetValues()[index]->Value();
   lock.unlock();
   std::ostringstream str;
   str << controlValue.RoundedPercentage();
@@ -209,8 +196,7 @@ void PresetCollectionWindow::onControlValueChanged() {
   if (selectedPresetIndex(index)) {
     double percentage = std::atof(_controlValueEntry.get_text().c_str());
     if (percentage >= 0.0 && percentage <= 100.0) {
-      theatre::ControlValue controlValue(
-          percentage * theatre::ControlValue::MaxUInt() / 100.0);
+      theatre::ControlValue controlValue(percentage * theatre::ControlValue::MaxUInt() / 100.0);
       _presetCollection->PresetValues()[index]->SetValue(controlValue);
     }
   }

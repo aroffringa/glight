@@ -18,27 +18,22 @@ struct Node {
 
 struct Object : public Node {
   std::map<std::string, std::unique_ptr<Node>> children;
-  using iterator = system::DereferencingMapIterator<
-      std::map<std::string, std::unique_ptr<Node>>::iterator>;
+  using iterator =
+      system::DereferencingMapIterator<std::map<std::string, std::unique_ptr<Node>>::iterator>;
   using const_iterator = system::DereferencingMapIterator<
       std::map<std::string, std::unique_ptr<Node>>::const_iterator>;
 
   const Node &operator[](const char *name) const {
     const auto iter = children.find(name);
     if (iter == children.end())
-      throw std::runtime_error(std::string("Missing field in json file: ") +
-                               name);
+      throw std::runtime_error(std::string("Missing field in json file: ") + name);
     else
       return *iter->second;
   }
 
-  bool contains(const char *name) const {
-    return children.find(name) != children.end();
-  }
+  bool contains(const char *name) const { return children.find(name) != children.end(); }
 
-  const_iterator find(const char *name) const {
-    return const_iterator(children.find(name));
-  }
+  const_iterator find(const char *name) const { return const_iterator(children.find(name)); }
 
   const_iterator begin() const { return const_iterator(children.begin()); }
 
@@ -48,10 +43,9 @@ struct Object : public Node {
 struct Array : public Node {
   std::vector<std::unique_ptr<Node>> items;
 
-  using iterator = system::DereferencingIterator<
-      std::vector<std::unique_ptr<Node>>::iterator>;
-  using const_iterator = system::DereferencingIterator<
-      std::vector<std::unique_ptr<Node>>::const_iterator>;
+  using iterator = system::DereferencingIterator<std::vector<std::unique_ptr<Node>>::iterator>;
+  using const_iterator =
+      system::DereferencingIterator<std::vector<std::unique_ptr<Node>>::const_iterator>;
 
   iterator begin() { return iterator(items.begin()); }
   const_iterator begin() const { return const_iterator(items.begin()); }
@@ -94,52 +88,38 @@ struct Number : public Node {
   }
 };
 
-inline const Array &ToArr(const Node &node) {
-  return dynamic_cast<const Array &>(node);
-}
+inline const Array &ToArr(const Node &node) { return dynamic_cast<const Array &>(node); }
 
-inline bool ToBool(const Node &node) {
-  return dynamic_cast<const Boolean &>(node).value;
-}
+inline bool ToBool(const Node &node) { return dynamic_cast<const Boolean &>(node).value; }
 
-inline bool OptionalBool(const Object &parent, const char *name,
-                         bool default_value) {
+inline bool OptionalBool(const Object &parent, const char *name, bool default_value) {
   const Object::const_iterator iter = parent.find(name);
-  return iter == parent.end() ? default_value
-                              : dynamic_cast<const Boolean &>(*iter).value;
+  return iter == parent.end() ? default_value : dynamic_cast<const Boolean &>(*iter).value;
 }
 
-inline const Number &ToNum(const Node &node) {
-  return dynamic_cast<const Number &>(node);
-}
+inline const Number &ToNum(const Node &node) { return dynamic_cast<const Number &>(node); }
 
-inline size_t OptionalSize(const Object &parent, const char *name,
-                           size_t default_value) {
+inline size_t OptionalSize(const Object &parent, const char *name, size_t default_value) {
   const Object::const_iterator iter = parent.find(name);
   return iter == parent.end() ? default_value : ToNum(*iter).AsSize();
 }
 
-inline unsigned OptionalUInt(const Object &parent, const char *name,
-                             unsigned default_value) {
+inline unsigned OptionalUInt(const Object &parent, const char *name, unsigned default_value) {
   const Object::const_iterator iter = parent.find(name);
   return iter == parent.end() ? default_value : ToNum(*iter).AsUInt();
 }
 
-inline int OptionalInt(const Object &parent, const char *name,
-                       int default_value) {
+inline int OptionalInt(const Object &parent, const char *name, int default_value) {
   const Object::const_iterator iter = parent.find(name);
   return iter == parent.end() ? default_value : ToNum(*iter).AsInt();
 }
 
-inline double OptionalDouble(const Object &parent, const char *name,
-                             double default_value) {
+inline double OptionalDouble(const Object &parent, const char *name, double default_value) {
   const Object::const_iterator iter = parent.find(name);
   return iter == parent.end() ? default_value : ToNum(*iter).AsDouble();
 }
 
-inline const Object &ToObj(const Node &node) {
-  return dynamic_cast<const Object &>(node);
-}
+inline const Object &ToObj(const Node &node) { return dynamic_cast<const Object &>(node); }
 inline const std::string &ToStr(const Node &node) {
   return dynamic_cast<const String &>(node).value;
 }
@@ -150,8 +130,7 @@ inline std::string OptionalString(const Object &parent, const char *name,
   return iter == parent.end() ? default_value : ToStr(*iter);
 }
 
-inline void AssignOptionalString(std::string &value, const Object &parent,
-                                 const char *name) {
+inline void AssignOptionalString(std::string &value, const Object &parent, const char *name) {
   const Object::const_iterator iter = parent.find(name);
   if (iter != parent.end()) value = ToStr(*iter);
 }

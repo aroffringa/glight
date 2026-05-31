@@ -46,8 +46,7 @@ class ColorSequenceWidget : public Gtk::Box {
   std::vector<Color> GetColors() const {
     std::vector<Color> result;
     result.reserve(_widgets.size());
-    for (const std::unique_ptr<ColorSelectWidget> &w : _widgets)
-      result.emplace_back(w->GetColor());
+    for (const std::unique_ptr<ColorSelectWidget> &w : _widgets) result.emplace_back(w->GetColor());
     return result;
   }
 

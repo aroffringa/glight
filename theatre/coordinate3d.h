@@ -8,8 +8,7 @@ namespace glight::theatre {
 class Coordinate3D {
  public:
   constexpr Coordinate3D() noexcept = default;
-  constexpr Coordinate3D(double x, double y, double z) noexcept
-      : x_(x), y_(y), z_(z) {}
+  constexpr Coordinate3D(double x, double y, double z) noexcept : x_(x), y_(y), z_(z) {}
 
   constexpr double &X() { return x_; }
   constexpr double X() const { return x_; }

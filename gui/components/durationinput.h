@@ -16,9 +16,7 @@ class DurationInput : public Gtk::Box {
 
   DurationInput(const std::string &label, double value);
 
-  sigc::signal<void(double)> &SignalValueChanged() {
-    return signal_value_changed_;
-  }
+  sigc::signal<void(double)> &SignalValueChanged() { return signal_value_changed_; }
 
   double Value() const { return atof(entry_.get_text().c_str()) * 1e3; }
 

@@ -53,8 +53,7 @@ BOOST_AUTO_TEST_CASE(value_construct) {
   BOOST_CHECK_EQUAL(n_deletes, 1);
   {
     Tracker* t = new Tracker();
-    DeletablePtr<Tracker> b =
-        DeletablePtr<Tracker>(std::unique_ptr<Tracker>(t));
+    DeletablePtr<Tracker> b = DeletablePtr<Tracker>(std::unique_ptr<Tracker>(t));
     BOOST_CHECK(bool(b));
     BOOST_CHECK_EQUAL(b.Get(), t);
     BOOST_CHECK_EQUAL(n_constructions, 2);

@@ -21,32 +21,27 @@ FixtureListWindow::FixtureListWindow() {
   set_title("Glight - fixtures");
   set_size_request(200, 400);
 
-  update_controllables_connection_ =
-      Instance::Events().SignalUpdateControllables().connect(
-          [&]() { FixtureListWindow::update(); });
+  update_controllables_connection_ = Instance::Events().SignalUpdateControllables().connect(
+      [&]() { FixtureListWindow::update(); });
 
-  global_selection_connection_ = Instance::Selection().SignalChange().connect(
-      [&]() { onGlobalSelectionChange(); });
+  global_selection_connection_ =
+      Instance::Selection().SignalChange().connect([&]() { onGlobalSelectionChange(); });
 
   fixtures_list_model_ = Gtk::ListStore::create(fixtures_list_columns_);
 
   fixtures_list_view_.get_selection()->set_mode(Gtk::SelectionMode::MULTIPLE);
-  fixtures_list_view_.get_selection()->signal_changed().connect(
-      [&]() { onSelectionChanged(); });
+  fixtures_list_view_.get_selection()->signal_changed().connect([&]() { onSelectionChanged(); });
   fixtures_list_view_.set_model(fixtures_list_model_);
   fixtures_list_view_.append_column("Fixture", fixtures_list_columns_.title_);
   fixtures_list_view_.append_column("Type", fixtures_list_columns_.type_);
-  fixtures_list_view_.append_column("Channels",
-                                    fixtures_list_columns_.channels_);
-  fixtures_list_view_.append_column("Universe",
-                                    fixtures_list_columns_.universe_);
+  fixtures_list_view_.append_column("Channels", fixtures_list_columns_.channels_);
+  fixtures_list_view_.append_column("Universe", fixtures_list_columns_.universe_);
   fixtures_list_view_.append_column("Symbol", fixtures_list_columns_.symbol_);
   fixtures_list_view_.set_rubber_banding(true);
   fillFixturesList();
   fixtures_scrolled_window_.set_child(fixtures_list_view_);
 
-  fixtures_scrolled_window_.set_policy(Gtk::PolicyType::NEVER,
-                                       Gtk::PolicyType::AUTOMATIC);
+  fixtures_scrolled_window_.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
   fixtures_scrolled_window_.set_hexpand(true);
   fixtures_scrolled_window_.set_vexpand(true);
 
@@ -55,8 +50,8 @@ FixtureListWindow::FixtureListWindow() {
   grid_.set_vexpand(true);
 
   new_button_.set_image_from_icon_name("document-new");
-  new_button_.signal_clicked().connect(
-      sigc::mem_fun(*this, &FixtureListWindow::onNewButtonClicked), false);
+  new_button_.signal_clicked().connect(sigc::mem_fun(*this, &FixtureListWindow::onNewButtonClicked),
+                                       false);
   grid_.attach(new_button_, 1, 0, 2, 1);
 
   remove_button_.set_image_from_icon_name("edit-delete");
@@ -64,33 +59,27 @@ FixtureListWindow::FixtureListWindow() {
       sigc::mem_fun(*this, &FixtureListWindow::onRemoveButtonClicked));
   grid_.attach(remove_button_, 1, 1, 2, 1);
 
-  dec_channel_button_.signal_clicked().connect(
-      [&]() { IncreaseChannelOrUniverse<-1, 0>(); });
+  dec_channel_button_.signal_clicked().connect([&]() { IncreaseChannelOrUniverse<-1, 0>(); });
   grid_.attach(dec_channel_button_, 1, 2, 1, 1);
 
-  inc_channel_button_.signal_clicked().connect(
-      [&]() { IncreaseChannelOrUniverse<1, 0>(); });
+  inc_channel_button_.signal_clicked().connect([&]() { IncreaseChannelOrUniverse<1, 0>(); });
   grid_.attach(inc_channel_button_, 1, 3, 1, 1);
 
-  dec_universe_button_.signal_clicked().connect(
-      [&]() { IncreaseChannelOrUniverse<0, -1>(); });
+  dec_universe_button_.signal_clicked().connect([&]() { IncreaseChannelOrUniverse<0, -1>(); });
   grid_.attach(dec_universe_button_, 2, 2, 1, 1);
 
-  inc_universe_button_.signal_clicked().connect(
-      [&]() { IncreaseChannelOrUniverse<0, 1>(); });
+  inc_universe_button_.signal_clicked().connect([&]() { IncreaseChannelOrUniverse<0, 1>(); });
   grid_.attach(inc_universe_button_, 2, 3, 1, 1);
 
   set_channel_button_.signal_clicked().connect(
       sigc::mem_fun(*this, &FixtureListWindow::onSetChannelButtonClicked));
   grid_.attach(set_channel_button_, 1, 4, 2, 1);
 
-  up_button_.signal_clicked().connect(
-      sigc::mem_fun(*this, &FixtureListWindow::onUpClicked));
+  up_button_.signal_clicked().connect(sigc::mem_fun(*this, &FixtureListWindow::onUpClicked));
   up_button_.set_image_from_icon_name("go-up");
   grid_.attach(up_button_, 1, 5, 2, 1);
 
-  down_button_.signal_clicked().connect(
-      sigc::mem_fun(*this, &FixtureListWindow::onDownClicked));
+  down_button_.signal_clicked().connect(sigc::mem_fun(*this, &FixtureListWindow::onDownClicked));
   down_button_.set_image_from_icon_name("go-down");
   grid_.attach(down_button_, 1, 6, 2, 1);
 
@@ -121,8 +110,7 @@ void FixtureListWindow::fillFixturesList() {
   }
 }
 
-std::string FixtureListWindow::getChannelString(
-    const theatre::Fixture &fixture) {
+std::string FixtureListWindow::getChannelString(const theatre::Fixture &fixture) {
   std::vector<unsigned> channels = fixture.GetChannels();
 
   std::vector<unsigned>::const_iterator i = channels.begin();
@@ -143,10 +131,8 @@ void FixtureListWindow::onNewButtonClicked() {
   add_fixture_window_->show();
 }
 
-std::vector<system::ObservingPtr<theatre::Fixture>>
-FixtureListWindow::GetSelection() const {
-  Glib::RefPtr<const Gtk::TreeSelection> selection =
-      fixtures_list_view_.get_selection();
+std::vector<system::ObservingPtr<theatre::Fixture>> FixtureListWindow::GetSelection() const {
+  Glib::RefPtr<const Gtk::TreeSelection> selection = fixtures_list_view_.get_selection();
   std::vector<Gtk::TreeModel::Path> rows = selection->get_selected_rows();
   std::vector<system::ObservingPtr<theatre::Fixture>> fixtures;
   for (const Gtk::TreeModel::Path &path : rows) {
@@ -162,8 +148,7 @@ FixtureListWindow::GetSelection() const {
 
 void FixtureListWindow::onRemoveButtonClicked() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
-      GetSelection();
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection = GetSelection();
   for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
     Instance::Management().RemoveFixture(*fixture);
   }
@@ -173,33 +158,27 @@ void FixtureListWindow::onRemoveButtonClicked() {
 }
 
 void FixtureListWindow::onSetChannelButtonClicked() {
-  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
-      GetSelection();
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection = GetSelection();
   if (selection.size() == 1) {
     const system::ObservingPtr<theatre::Fixture> &fixture = selection[0];
     dialog_ = std::make_unique<Gtk::MessageDialog>(
-        *this, "Set DMX channel", false, Gtk::MessageType::QUESTION,
-        Gtk::ButtonsType::OK_CANCEL);
+        *this, "Set DMX channel", false, Gtk::MessageType::QUESTION, Gtk::ButtonsType::OK_CANCEL);
     Gtk::MessageDialog &dialog = static_cast<Gtk::MessageDialog &>(*dialog_);
     dialog_entry_ = Gtk::Entry();
-    dialog_entry_.set_text(std::to_string(
-        fixture->Functions().front()->MainChannel().Channel() + 1));
+    dialog_entry_.set_text(
+        std::to_string(fixture->Functions().front()->MainChannel().Channel() + 1));
     dialog.get_message_area()->append(dialog_entry_);
-    dialog.set_secondary_text(
-        "Please enter the new DMX channel for this fixture");
+    dialog.set_secondary_text("Please enter the new DMX channel for this fixture");
     dialog.signal_response().connect([this](int response) {
       if (response == Gtk::ResponseType::OK) {
         std::string dmxChannel = dialog_entry_.get_text();
         unsigned value = std::atoi(dmxChannel.c_str());
         if (value > 0 && value <= 512) {
-          const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
-              GetSelection();
+          const std::vector<system::ObservingPtr<theatre::Fixture>> selection = GetSelection();
           if (selection.size() == 1) {
-            const system::ObservingPtr<theatre::Fixture> &fixture =
-                selection[0];
+            const system::ObservingPtr<theatre::Fixture> &fixture = selection[0];
             std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-            if (!fixture->IsVisible())
-              fixture->SetSymbol(theatre::FixtureSymbol::Normal);
+            if (!fixture->IsVisible()) fixture->SetSymbol(theatre::FixtureSymbol::Normal);
             const unsigned universe = 0;  // TODO
             fixture->SetChannel(theatre::DmxChannel(value - 1, universe));
             updateFixture(fixture.Get());
@@ -213,8 +192,7 @@ void FixtureListWindow::onSetChannelButtonClicked() {
 }
 
 void FixtureListWindow::updateFixture(const theatre::Fixture *fixture) {
-  for (Gtk::TreeModel::iterator iter = fixtures_list_model_->children().begin();
-       iter; ++iter) {
+  for (Gtk::TreeModel::iterator iter = fixtures_list_model_->children().begin(); iter; ++iter) {
     Gtk::TreeModel::Row row = *iter;
     if (fixture == (*iter)[fixtures_list_columns_.fixture_]) {
       row[fixtures_list_columns_.title_] = fixture->Name();
@@ -225,8 +203,7 @@ void FixtureListWindow::updateFixture(const theatre::Fixture *fixture) {
       return;
     }
   }
-  throw std::runtime_error(
-      "ConfigurationWindow::updateFixture(): Could not find fixture");
+  throw std::runtime_error("ConfigurationWindow::updateFixture(): Could not find fixture");
 }
 
 void FixtureListWindow::onSelectionChanged() {
@@ -245,8 +222,7 @@ void FixtureListWindow::onGlobalSelectionChange() {
     for (const auto &child : fixtures_list_model_->children()) {
       const system::ObservingPtr<theatre::Fixture> &fixture =
           child[fixtures_list_columns_.fixture_];
-      auto iter =
-          std::find(new_selection.begin(), new_selection.end(), fixture);
+      auto iter = std::find(new_selection.begin(), new_selection.end(), fixture);
       if (iter != new_selection.end()) {
         fixtures_list_view_.get_selection()->select(child.get_iter());
       }
@@ -256,16 +232,14 @@ void FixtureListWindow::onGlobalSelectionChange() {
 
 void FixtureListWindow::onUpClicked() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
-      GetSelection();
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection = GetSelection();
   for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
     theatre::Fixture *previous_fixture = nullptr;
     for (const system::TrackablePtr<theatre::Fixture> &f :
          Instance::Management().GetTheatre().Fixtures()) {
       if (f.Get() == fixture) {
         if (previous_fixture) {
-          Instance::Management().GetTheatre().SwapFixturePositions(
-              *previous_fixture, *fixture);
+          Instance::Management().GetTheatre().SwapFixturePositions(*previous_fixture, *fixture);
         }
         break;
       }
@@ -279,17 +253,14 @@ void FixtureListWindow::onUpClicked() {
 
 void FixtureListWindow::onDownClicked() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
-      GetSelection();
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection = GetSelection();
   for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
     for (auto iterator = Instance::Management().GetTheatre().Fixtures().begin();
-         iterator != Instance::Management().GetTheatre().Fixtures().end();
-         ++iterator) {
+         iterator != Instance::Management().GetTheatre().Fixtures().end(); ++iterator) {
       if (iterator->Get() == fixture) {
         ++iterator;
         if (iterator != Instance::Management().GetTheatre().Fixtures().end()) {
-          Instance::Management().GetTheatre().SwapFixturePositions(**iterator,
-                                                                   *fixture);
+          Instance::Management().GetTheatre().SwapFixturePositions(**iterator, *fixture);
         }
         break;
       }
@@ -317,8 +288,7 @@ void FixtureListWindow::onReassignClicked() {
 template <int ChannelIncrease, int UniverseIncrease>
 void FixtureListWindow::IncreaseChannelOrUniverse() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
-  const std::vector<system::ObservingPtr<theatre::Fixture>> selection =
-      GetSelection();
+  const std::vector<system::ObservingPtr<theatre::Fixture>> selection = GetSelection();
   for (const system::ObservingPtr<theatre::Fixture> &fixture : selection) {
     if constexpr (ChannelIncrease > 0) {
       for (int i = 0; i != ChannelIncrease; ++i) fixture->IncChannel();
@@ -326,8 +296,7 @@ void FixtureListWindow::IncreaseChannelOrUniverse() {
       for (int i = 0; i != -ChannelIncrease; ++i) fixture->DecChannel();
     }
     if constexpr (ChannelIncrease != 0) {
-      if (!fixture->IsVisible())
-        fixture->SetSymbol(theatre::FixtureSymbol::Normal);
+      if (!fixture->IsVisible()) fixture->SetSymbol(theatre::FixtureSymbol::Normal);
     }
     const int universe = fixture->GetUniverse();
     if constexpr (UniverseIncrease != 0) {

@@ -587,8 +587,7 @@ BOOST_AUTO_TEST_CASE(in_container) {
   std::vector<TrackablePtr<Tracker>> owners;
   std::vector<ObservingPtr<Tracker>> observers;
   for (size_t i = 0; i != 9; ++i) {
-    const TrackablePtr<Tracker>& tracker =
-        owners.emplace_back(MakeTrackable<Tracker>());
+    const TrackablePtr<Tracker>& tracker = owners.emplace_back(MakeTrackable<Tracker>());
     observers.emplace_back(tracker.GetObserver());
     observers.emplace_back(tracker.GetObserver());
     BOOST_CHECK_EQUAL(owners[i].ShareCount(), 2);
@@ -652,12 +651,10 @@ BOOST_AUTO_TEST_CASE(cast_observable_ptr) {
   ChildTracker* tracker = new ChildTracker();
   const TrackablePtr<ChildTracker> a(tracker);
   {
-    const ObservingPtr<Tracker> x =
-        StaticObserverCast<Tracker>(a.GetObserver());
+    const ObservingPtr<Tracker> x = StaticObserverCast<Tracker>(a.GetObserver());
     BOOST_CHECK(x);
     BOOST_CHECK_EQUAL(x.Get(), tracker);
-    const ObservingPtr<ChildTracker> y =
-        static_cast<ObservingPtr<ChildTracker>>(x);
+    const ObservingPtr<ChildTracker> y = static_cast<ObservingPtr<ChildTracker>>(x);
     BOOST_CHECK(y);
     BOOST_CHECK_EQUAL(y.Get(), tracker);
   }
@@ -666,8 +663,7 @@ BOOST_AUTO_TEST_CASE(cast_observable_ptr) {
   BOOST_CHECK_EQUAL(a.GetObserver().Get(), tracker);
 }
 
-BOOST_AUTO_TEST_CASE(performance_create_trackable,
-                     *boost::unit_test::disabled()) {
+BOOST_AUTO_TEST_CASE(performance_create_trackable, *boost::unit_test::disabled()) {
   constexpr size_t n = 10000000;
   std::vector<TrackablePtr<int>> v;
   v.reserve(n);
@@ -687,8 +683,7 @@ BOOST_AUTO_TEST_CASE(performance_create_shared, *boost::unit_test::disabled()) {
   BOOST_CHECK_EQUAL(v.size(), n);
 }
 
-BOOST_AUTO_TEST_CASE(performance_track_trackable,
-                     *boost::unit_test::disabled()) {
+BOOST_AUTO_TEST_CASE(performance_track_trackable, *boost::unit_test::disabled()) {
   constexpr size_t n = 1000000;
   constexpr size_t n_observers = 100;
   std::vector<TrackablePtr<int>> v;

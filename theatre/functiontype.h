@@ -43,13 +43,12 @@ enum class FunctionType {
 inline std::vector<FunctionType> GetFunctionTypes() {
   using FT = FunctionType;
   return std::vector<FunctionType>{
-      FT::Master,     FT::Red,       FT::Green,     FT::Blue,
-      FT::White,      FT::Amber,     FT::Lime,      FT::UV,
-      FT::ColorMacro, FT::Strobe,    FT::Pulse,     FT::RotationSpeed,
-      FT::Pan,        FT::Tilt,      FT::Zoom,      FT::Focus,
-      FT::Effect,     FT::ColdWhite, FT::WarmWhite, FT::ColorTemperature,
-      FT::ColorWheel, FT::GoboWheel, FT::Prism,     FT::Hue,
-      FT::Saturation, FT::Lightness, FT::Combined,  FT::Unknown};
+      FT::Master,     FT::Red,           FT::Green,     FT::Blue,       FT::White,
+      FT::Amber,      FT::Lime,          FT::UV,        FT::ColorMacro, FT::Strobe,
+      FT::Pulse,      FT::RotationSpeed, FT::Pan,       FT::Tilt,       FT::Zoom,
+      FT::Focus,      FT::Effect,        FT::ColdWhite, FT::WarmWhite,  FT::ColorTemperature,
+      FT::ColorWheel, FT::GoboWheel,     FT::Prism,     FT::Hue,        FT::Saturation,
+      FT::Lightness,  FT::Combined,      FT::Unknown};
 }
 
 inline const char* AbbreviatedFunctionType(FunctionType functionType) {
@@ -336,8 +335,7 @@ inline constexpr bool CanFade(FunctionType type) {
 }
 
 inline constexpr bool IsRgb(FunctionType type) {
-  return type == FunctionType::Red || type == FunctionType::Green ||
-         type == FunctionType::Blue;
+  return type == FunctionType::Red || type == FunctionType::Green || type == FunctionType::Blue;
 }
 
 inline constexpr Color GetFunctionColor(FunctionType type) {

@@ -5,8 +5,7 @@
 
 namespace glight::theatre {
 
-inline std::vector<FixtureModeFunction> MakeFunctionList(
-    const std::vector<FunctionType>& types) {
+inline std::vector<FixtureModeFunction> MakeFunctionList(const std::vector<FunctionType>& types) {
   std::vector<FixtureModeFunction> list;
   for (size_t i = 0; i != types.size(); ++i) {
     list.emplace_back(FixtureModeFunction(types[i], i, {}, 0));
@@ -19,20 +18,18 @@ inline std::vector<FixtureModeFunction> GetWhiteFunctionExample() {
 }
 
 inline std::vector<FixtureModeFunction> GetRGBMFunctionsExample() {
-  return MakeFunctionList({FunctionType::Red, FunctionType::Green,
-                           FunctionType::Blue, FunctionType::Master});
+  return MakeFunctionList(
+      {FunctionType::Red, FunctionType::Green, FunctionType::Blue, FunctionType::Master});
 }
 
 inline std::vector<FixtureModeFunction> GetRGBMSFunctionsExample() {
-  return MakeFunctionList({FunctionType::Red, FunctionType::Green,
-                           FunctionType::Blue, FunctionType::Master,
-                           FunctionType::Strobe});
+  return MakeFunctionList({FunctionType::Red, FunctionType::Green, FunctionType::Blue,
+                           FunctionType::Master, FunctionType::Strobe});
 }
 
 inline std::vector<FixtureModeFunction> GetMRGBSFunctionsExample() {
-  return MakeFunctionList({FunctionType::Master, FunctionType::Red,
-                           FunctionType::Green, FunctionType::Blue,
-                           FunctionType::Strobe});
+  return MakeFunctionList({FunctionType::Master, FunctionType::Red, FunctionType::Green,
+                           FunctionType::Blue, FunctionType::Strobe});
 }
 
 }  // namespace glight::theatre

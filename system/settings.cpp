@@ -18,9 +18,7 @@ using json::ToObj;
 
 namespace {
 
-std::string GetConfigDir() {
-  return std::filesystem::path(Glib::get_user_config_dir()) / "glight";
-}
+std::string GetConfigDir() { return std::filesystem::path(Glib::get_user_config_dir()) / "glight"; }
 
 std::string GetConfigFilename(std::string_view config_dir) {
   return (std::filesystem::path(config_dir) / "config").string();
@@ -44,12 +42,10 @@ bool TryMakeDir(const std::filesystem::path path) {
 void Save(const Settings& settings) {
   const std::string config_dir = GetConfigDir();
   if (!TryMakeDir(config_dir))
-    std::cerr << "Could not create directory for config file (" << config_dir
-              << ")\n";
+    std::cerr << "Could not create directory for config file (" << config_dir << ")\n";
   const std::string config_filename = GetConfigFilename(config_dir);
   std::ofstream file(config_filename);
-  if (!file)
-    std::cerr << "Error saving config file: " << config_filename << '\n';
+  if (!file) std::cerr << "Error saving config file: " << config_filename << '\n';
   json::JsonWriter writer(file);
 
   writer.StartObject();
@@ -91,8 +87,8 @@ Settings LoadSettings() {
       ParseSystem(settings, ToObj(json_config["system"]));
     }
   } catch (std::exception& exception) {
-    std::cerr << "Failed to read configuration file with error '"
-              << exception.what() << "': using default settings.\n";
+    std::cerr << "Failed to read configuration file with error '" << exception.what()
+              << "': using default settings.\n";
     settings = Settings();
   }
   return settings;

@@ -27,34 +27,21 @@ enum class RunType {
   RandomRun
 };
 
-enum class ShiftType {
-  IncreasingShift,
-  DecreasingShift,
-  BackAndForthShift,
-  RandomShift
-};
+enum class ShiftType { IncreasingShift, DecreasingShift, BackAndForthShift, RandomShift };
 
 enum class VUMeterDirection { VUIncreasing, VUDecreasing, VUInward, VUOutward };
 
-enum class IncreasingType {
-  IncForward,
-  IncBackward,
-  IncForwardReturn,
-  IncBackwardReturn
-};
+enum class IncreasingType { IncForward, IncBackward, IncForwardReturn, IncBackwardReturn };
 
 class AutoDesign {
  public:
   static Chase &MakeRunningLight(const DesignInfo &design,
-                                 const std::vector<ColorOrVariable> &colors,
-                                 RunType runType);
+                                 const std::vector<ColorOrVariable> &colors, RunType runType);
 
   static Chase &MakeColorVariation(const DesignInfo &design,
-                                   const std::vector<ColorOrVariable> &colors,
-                                   double variation);
+                                   const std::vector<ColorOrVariable> &colors, double variation);
 
-  static Chase &MakeColorShift(const DesignInfo &design,
-                               const std::vector<ColorOrVariable> &colors,
+  static Chase &MakeColorShift(const DesignInfo &design, const std::vector<ColorOrVariable> &colors,
                                ShiftType shiftType);
 
   static Controllable &MakeVUMeter(const DesignInfo &design,
@@ -65,8 +52,7 @@ class AutoDesign {
                                     const std::vector<ColorOrVariable> &colors,
                                     IncreasingType incType);
 
-  static Effect &MakeFire(const DesignInfo &design,
-                          const std::vector<ColorOrVariable> &colors);
+  static Effect &MakeFire(const DesignInfo &design, const std::vector<ColorOrVariable> &colors);
 };
 
 }  // namespace glight::theatre

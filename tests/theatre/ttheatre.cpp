@@ -18,12 +18,9 @@ BOOST_AUTO_TEST_SUITE(theatre)
 BOOST_AUTO_TEST_CASE(add_fixture) {
   const glight::system::Settings settings;
   Management management(settings);
-  FixtureType &fixtureType =
-      *management.GetTheatre().AddFixtureType(StockFixture::Rgb);
-  Fixture &fixture =
-      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
-  FixtureControl &control =
-      static_cast<FixtureControl &>(*management.AddFixtureControl(fixture));
+  FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(StockFixture::Rgb);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  FixtureControl &control = static_cast<FixtureControl &>(*management.AddFixtureControl(fixture));
   BOOST_CHECK_EQUAL(management.GetFixtureControl(fixture).Get(), &control);
   BOOST_CHECK_EQUAL(&control.GetFixture(), &fixture);
   BOOST_CHECK_EQUAL(control.NInputs(), 3);
@@ -38,8 +35,7 @@ BOOST_AUTO_TEST_CASE(add_fixture) {
 BOOST_AUTO_TEST_CASE(AddMany) {
   const glight::system::Settings settings;
   Management management(settings);
-  FixtureType &fixtureType =
-      *management.GetTheatre().AddFixtureType(StockFixture::Rgb);
+  FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(StockFixture::Rgb);
   const FixtureMode &mode = fixtureType.Modes().front();
   Fixture *fixture = management.GetTheatre().AddFixture(mode).Get();
   BOOST_CHECK_EQUAL(fixture->Name(), "RGB A");
@@ -70,13 +66,10 @@ BOOST_AUTO_TEST_CASE(remove_fixture) {
   const FixtureMode &mode = fixtureType->Modes().front();
   management.RootFolder().Add(fixtureType);
   Fixture &fixture = *management.GetTheatre().AddFixture(mode);
-  FixtureControl &control =
-      *management.AddFixtureControlPtr(fixture, management.RootFolder());
-  const std::vector<std::unique_ptr<FixtureFunction>> &functions =
-      fixture.Functions();
+  FixtureControl &control = *management.AddFixtureControlPtr(fixture, management.RootFolder());
+  const std::vector<std::unique_ptr<FixtureFunction>> &functions = fixture.Functions();
   BOOST_CHECK_EQUAL(functions.size(), 3);
-  for (size_t i = 0; i != functions.size(); ++i)
-    management.AddSourceValue(control, i);
+  for (size_t i = 0; i != functions.size(); ++i) management.AddSourceValue(control, i);
   management.RemoveFixture(fixture);
   BOOST_CHECK_EQUAL(management.GetTheatre().Fixtures().size(), 0);
   BOOST_CHECK_EQUAL(management.Controllables().size(), 0);

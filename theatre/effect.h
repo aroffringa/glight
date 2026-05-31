@@ -31,19 +31,15 @@ class Effect : public Controllable {
   void AddConnection(Controllable &controllable, size_t input) {
     connections_.emplace_back(&controllable, input);
     connection_values_.push_back({ControlValue::Zero(), ControlValue::Zero()});
-    on_delete_connections_.emplace_back(
-        controllable.SignalDelete().connect([&controllable, input, this]() {
-          RemoveConnection(controllable, input);
-        }));
+    on_delete_connections_.emplace_back(controllable.SignalDelete().connect(
+        [&controllable, input, this]() { RemoveConnection(controllable, input); }));
   }
 
   void RemoveConnection(Controllable &controllable, size_t input) {
     std::vector<std::pair<Controllable *, size_t>>::iterator item =
-        std::find(connections_.begin(), connections_.end(),
-                  std::make_pair(&controllable, input));
+        std::find(connections_.begin(), connections_.end(), std::make_pair(&controllable, input));
     if (item == connections_.end())
-      throw std::runtime_error(
-          "RemoveConnection() called for unconnected controllable");
+      throw std::runtime_error("RemoveConnection() called for unconnected controllable");
     // convert to index to also remove corresponding connection
     size_t index = item - connections_.begin();
     RemoveConnection(index);
@@ -56,26 +52,19 @@ class Effect : public Controllable {
     on_delete_connections_.erase(on_delete_connections_.begin() + index);
   }
 
-  const std::vector<std::pair<Controllable *, size_t>> &Connections() const {
-    return connections_;
-  }
+  const std::vector<std::pair<Controllable *, size_t>> &Connections() const { return connections_; }
 
   std::unique_ptr<Effect> Copy() const;
 
   size_t NInputs() const final override { return input_values_.size(); }
 
-  ControlValue &InputValue(size_t index) final override {
-    return input_values_[index];
-  }
+  ControlValue &InputValue(size_t index) final override { return input_values_[index]; }
 
-  virtual FunctionType InputType(size_t) const override {
-    return FunctionType::Master;
-  }
+  virtual FunctionType InputType(size_t) const override { return FunctionType::Master; }
 
   size_t NConnections() const final override { return connections_.size(); }
 
-  std::pair<const Controllable *, size_t> GetConnection(
-      size_t index) const final override {
+  std::pair<const Controllable *, size_t> GetConnection(size_t index) const final override {
     return connections_[index];
   }
 
@@ -84,8 +73,8 @@ class Effect : public Controllable {
   }
 
  protected:
-  virtual void MixImplementation(const ControlValue *inputValues,
-                                 const Timing &timing, bool primary) = 0;
+  virtual void MixImplementation(const ControlValue *inputValues, const Timing &timing,
+                                 bool primary) = 0;
 
   /**
    * Output the provided value to all output connections. Because
@@ -98,10 +87,8 @@ class Effect : public Controllable {
     }
   }
 
-  void MixConnection(size_t connection_index, ControlValue value,
-                     bool primary) const {
-    const std::pair<Controllable *, size_t> &connection =
-        connections_[connection_index];
+  void MixConnection(size_t connection_index, ControlValue value, bool primary) const {
+    const std::pair<Controllable *, size_t> &connection = connections_[connection_index];
     connection.first->MixInput(connection.second, value,
                                connection_values_[connection_index][primary]);
   }

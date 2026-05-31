@@ -9,8 +9,8 @@ class Timing {
  public:
   Timing() noexcept = default;
 
-  Timing(double timeInMS, unsigned timestepNumber, double beatValue,
-         unsigned audioLevel, unsigned randomValue) noexcept
+  Timing(double timeInMS, unsigned timestepNumber, double beatValue, unsigned audioLevel,
+         unsigned randomValue) noexcept
       : time_in_ms_(timeInMS),
         timestep_number_(timestepNumber),
         beat_value_(beatValue),
@@ -31,15 +31,12 @@ class Timing {
 
   unsigned TimestepRandomValue() const { return random_value_; }
   unsigned DrawRandomValue() const {
-    return std::uniform_int_distribution<unsigned>(
-        0, ControlValue::MaxUInt() + 1)(rng_);
+    return std::uniform_int_distribution<unsigned>(0, ControlValue::MaxUInt() + 1)(rng_);
   }
   unsigned DrawRandomValue(size_t maxValue) const {
     return std::uniform_int_distribution<unsigned>(0, maxValue)(rng_);
   }
-  double DrawGaussianValue() const {
-    return std::normal_distribution<double>(0.0, 1.0)(rng_);
-  }
+  double DrawGaussianValue() const { return std::normal_distribution<double>(0.0, 1.0)(rng_); }
 
   std::mt19937 &RNG() const { return rng_; }
 

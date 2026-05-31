@@ -15,14 +15,10 @@ class TimerEffect final : public Effect {
 
   virtual EffectType GetType() const final { return EffectType::Timer; }
 
-  void SetTransitionIn(const Transition& transition) {
-    transition_in_ = transition;
-  }
+  void SetTransitionIn(const Transition& transition) { transition_in_ = transition; }
   const Transition& GetTransitionIn() const { return transition_in_; }
 
-  void SetTransitionOut(const Transition& transition) {
-    transition_out_ = transition;
-  }
+  void SetTransitionOut(const Transition& transition) { transition_out_ = transition; }
   const Transition& GetTransitionOut() const { return transition_out_; }
 
   const system::TimePattern& StartPattern() const { return start_; }
@@ -32,8 +28,8 @@ class TimerEffect final : public Effect {
   void SetEndPattern(const system::TimePattern& end) { end_ = end; }
 
  protected:
-  virtual void MixImplementation(const ControlValue* values,
-                                 const Timing& timing, bool primary) final {
+  virtual void MixImplementation(const ControlValue* values, const Timing& timing,
+                                 bool primary) final {
     if (values[0]) {
       if (NowInRange(start_, end_)) {
         MixOn(values[0], timing, primary);
@@ -52,8 +48,7 @@ class TimerEffect final : public Effect {
     if (transition_start_[primary]) {
       const int start = *transition_start_[primary];
       if (timing.TimeInMS() - start < transition_in_.LengthInMs()) {
-        const ControlValue multiplier =
-            transition_in_.InValue(timing.TimeInMS() - start, timing);
+        const ControlValue multiplier = transition_in_.InValue(timing.TimeInMS() - start, timing);
         setAllOutputs(input * multiplier, primary);
       } else {
         transition_start_[primary].Reset();
@@ -72,8 +67,7 @@ class TimerEffect final : public Effect {
     if (transition_start_[primary]) {
       const int start = *transition_start_[primary];
       if (timing.TimeInMS() - start < transition_out_.LengthInMs()) {
-        const ControlValue multiplier =
-            transition_out_.OutValue(timing.TimeInMS() - start, timing);
+        const ControlValue multiplier = transition_out_.OutValue(timing.TimeInMS() - start, timing);
         setAllOutputs(input * multiplier, primary);
       } else {
         transition_start_[primary].Reset();

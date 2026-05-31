@@ -12,16 +12,15 @@ namespace glight::theatre {
 class CurveEffectPS final : public PropertySet {
  public:
   CurveEffectPS() {
-    addProperty(Property(
-        "function", "Function",
-        std::vector<std::pair<std::string, std::string>>{
-            std::pair<std::string, std::string>("linear", "Linear"),
-            std::pair<std::string, std::string>("quadratic", "Quadratic"),
-            std::pair<std::string, std::string>("exponential", "Exponential"),
-            std::pair<std::string, std::string>("logarithmic", "Logarithmic"),
-            std::pair<std::string, std::string>("sinusoid", "Sinusoid"),
-            std::pair<std::string, std::string>("warmup", "Warm up"),
-            std::pair<std::string, std::string>("squareroot", "Square root")}));
+    addProperty(Property("function", "Function",
+                         std::vector<std::pair<std::string, std::string>>{
+                             std::pair<std::string, std::string>("linear", "Linear"),
+                             std::pair<std::string, std::string>("quadratic", "Quadratic"),
+                             std::pair<std::string, std::string>("exponential", "Exponential"),
+                             std::pair<std::string, std::string>("logarithmic", "Logarithmic"),
+                             std::pair<std::string, std::string>("sinusoid", "Sinusoid"),
+                             std::pair<std::string, std::string>("warmup", "Warm up"),
+                             std::pair<std::string, std::string>("squareroot", "Square root")}));
   }
 
  protected:
@@ -48,8 +47,7 @@ class CurveEffectPS final : public PropertySet {
     }
   }
 
-  virtual std::string getChoice(const FolderObject &object,
-                                size_t index) const final override {
+  virtual std::string getChoice(const FolderObject &object, size_t index) const final override {
     const CurveEffect &cfx = static_cast<const CurveEffect &>(object);
     switch (index) {
       case 0:

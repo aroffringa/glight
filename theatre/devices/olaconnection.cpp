@@ -37,8 +37,7 @@ bool OlaConnection::SendDmx() {
   for (const std::pair<const size_t, OlaUniverse>& u : universes_) {
     const OlaUniverse& ola_universe = u.second;
     if (ola_universe.type == UniverseType::Output) {
-      client_->GetClient()->SendDMX(u.first, *ola_universe.send_buffer,
-                                    send_dmx_args_);
+      client_->GetClient()->SendDMX(u.first, *ola_universe.send_buffer, send_dmx_args_);
     }
   }
   if (abort_) client_->GetSelectServer()->Terminate();
@@ -46,8 +45,7 @@ bool OlaConnection::SendDmx() {
   return true;
 }
 
-void OlaConnection::SetOutputValues(unsigned universe,
-                                    const unsigned char* newValues,
+void OlaConnection::SetOutputValues(unsigned universe, const unsigned char* newValues,
                                     size_t size) {
   const size_t n = std::min<size_t>(512, size);
   std::lock_guard<std::mutex> lock(receive_mutex_);
@@ -63,8 +61,7 @@ void OlaConnection::SetOutputValues(unsigned universe,
   }
 }
 
-void OlaConnection::GetOutputValues(unsigned universe,
-                                    unsigned char* destination, size_t size) {
+void OlaConnection::GetOutputValues(unsigned universe, unsigned char* destination, size_t size) {
   const size_t n = std::min<size_t>(512, size);
   std::lock_guard<std::mutex> lock(receive_mutex_);
   if (universe < universes_.size()) {
@@ -78,8 +75,7 @@ void OlaConnection::GetOutputValues(unsigned universe,
   }
 }
 
-void OlaConnection::GetInputValues(unsigned universe,
-                                   unsigned char* destination, size_t size) {
+void OlaConnection::GetInputValues(unsigned universe, unsigned char* destination, size_t size) {
   std::lock_guard<std::mutex> lock(receive_mutex_);
   const OlaUniverse& ola_universe = universes_.find(universe)->second;
   if (ola_universe.type == UniverseType::Input) {
@@ -97,16 +93,13 @@ void OlaConnection::ReceiveDmx(const ola::client::DMXMetadata& metadata,
   std::lock_guard<std::mutex> lock(receive_mutex_);
   const unsigned universe = metadata.universe;
   std::vector<unsigned char>& buffer = universes_[universe].receive_buffer;
-  std::copy_n(data.GetRaw(), std::min<unsigned>(data.Size(), buffer.size()),
-              buffer.data());
+  std::copy_n(data.GetRaw(), std::min<unsigned>(data.Size(), buffer.size()), buffer.data());
 }
 
-void OlaConnection::RegisterUniverseCallback(
-    const ola::client::Result& result) {}
+void OlaConnection::RegisterUniverseCallback(const ola::client::Result& result) {}
 
-void OlaConnection::ReceiveUniverseList(
-    const ola::client::Result& result,
-    const std::vector<ola::client::OlaUniverse>& universes) {
+void OlaConnection::ReceiveUniverseList(const ola::client::Result& result,
+                                        const std::vector<ola::client::OlaUniverse>& universes) {
   for (const ola::client::OlaUniverse& u : universes) {
     OlaUniverse& ola_universe = universes_[u.Id()];
     if (u.InputPortCount() != 0) {
@@ -115,8 +108,7 @@ void OlaConnection::ReceiveUniverseList(
       ola_universe.receive_buffer.resize(512);
       client_->GetClient()->RegisterUniverse(
           u.Id(), ola::client::REGISTER,
-          ola::NewSingleCallback(this,
-                                 &OlaConnection::RegisterUniverseCallback));
+          ola::NewSingleCallback(this, &OlaConnection::RegisterUniverseCallback));
     } else {
       std::cout << "Output universe " << u.Id() << ": " << u.Name() << '\n';
       ola_universe.type = UniverseType::Output;
@@ -126,11 +118,9 @@ void OlaConnection::ReceiveUniverseList(
   if (universes_.empty()) throw std::runtime_error("No ola universes defined");
 
   // Enable DMX send/receive callbacks
-  client_->GetClient()->SetDMXCallback(
-      ola::NewCallback(this, &OlaConnection::ReceiveDmx));
+  client_->GetClient()->SetDMXCallback(ola::NewCallback(this, &OlaConnection::ReceiveDmx));
   ola::io::SelectServer* ss = client_->GetSelectServer();
-  ss->RegisterRepeatingTimeout(25,
-                               ola::NewCallback(this, &OlaConnection::SendDmx));
+  ss->RegisterRepeatingTimeout(25, ola::NewCallback(this, &OlaConnection::SendDmx));
   ss->Terminate();
 }
 
