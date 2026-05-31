@@ -15,9 +15,8 @@ SceneSelect::SceneSelect() {
   set_title("Glight - select scene");
   set_size_request(200, 400);
 
-  update_controllables_connection_ =
-      Instance::Events().SignalUpdateControllables().connect(
-          [&]() { SceneSelect::FillScenesList(); });
+  update_controllables_connection_ = Instance::Events().SignalUpdateControllables().connect(
+      [&]() { SceneSelect::FillScenesList(); });
 
   model_ = Gtk::ListStore::create(columns_);
 
@@ -27,16 +26,14 @@ SceneSelect::SceneSelect() {
   FillScenesList();
   scrolled_window_.set_child(view_);
 
-  scrolled_window_.set_policy(Gtk::PolicyType::NEVER,
-                              Gtk::PolicyType::AUTOMATIC);
+  scrolled_window_.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
   get_content_area()->append(scrolled_window_);
 
   select_button_ = add_button("Select", Gtk::ResponseType::OK);
   select_button_->set_sensitive(false);
   add_button("Cancel", Gtk::ResponseType::CANCEL);
 
-  view_.get_selection()->signal_changed().connect(
-      [&]() { OnSelectionChanged(); });
+  view_.get_selection()->signal_changed().connect([&]() { OnSelectionChanged(); });
 }
 
 SceneSelect::~SceneSelect() { update_controllables_connection_.disconnect(); }
@@ -46,13 +43,10 @@ void SceneSelect::FillScenesList() {
 
   theatre::Management &management = Instance::Management();
   std::lock_guard<std::mutex> lock(management.Mutex());
-  const std::vector<system::TrackablePtr<theatre::Controllable>>
-      &controllables = management.Controllables();
-  for (const system::TrackablePtr<theatre::Controllable> &controllable :
-       controllables) {
-    if (theatre::Scene *scene =
-            dynamic_cast<theatre::Scene *>(controllable.Get());
-        scene) {
+  const std::vector<system::TrackablePtr<theatre::Controllable>> &controllables =
+      management.Controllables();
+  for (const system::TrackablePtr<theatre::Controllable> &controllable : controllables) {
+    if (theatre::Scene *scene = dynamic_cast<theatre::Scene *>(controllable.Get()); scene) {
       Gtk::TreeModel::iterator iter = model_->append();
       Gtk::TreeModel::Row &row = *iter;
       row[columns_.title_] = scene->Name();
@@ -84,8 +78,6 @@ theatre::Scene *SceneSelect::GetSelection() {
   }
 }
 
-void SceneSelect::OnSelectionChanged() {
-  select_button_->set_sensitive(GetSelection() != nullptr);
-}
+void SceneSelect::OnSelectionChanged() { select_button_->set_sensitive(GetSelection() != nullptr); }
 
 }  // namespace glight::gui::dialogs

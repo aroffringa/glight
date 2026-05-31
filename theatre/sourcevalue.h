@@ -26,9 +26,9 @@ class SingleSourceValue {
       if (fadeSpeed == 0.0) {
         fading_value = target_value_;
       } else {
-        unsigned step_size = unsigned(std::min<double>(
-            time_passed * fadeSpeed * double(ControlValue::MaxUInt() + 1),
-            double(ControlValue::MaxUInt() + 1)));
+        unsigned step_size =
+            unsigned(std::min<double>(time_passed * fadeSpeed * double(ControlValue::MaxUInt() + 1),
+                                      double(ControlValue::MaxUInt() + 1)));
         if (target_value_ > fading_value) {
           if (fading_value + step_size > target_value_)
             fading_value = target_value_;
@@ -122,9 +122,7 @@ class SourceValue {
   SingleSourceValue& CrossFader() { return cross_fader_; }
   const SingleSourceValue& CrossFader() const { return cross_fader_; }
 
-  const Controllable& GetControllable() const {
-    return *input_.GetControllable();
-  }
+  const Controllable& GetControllable() const { return *input_.GetControllable(); }
   Controllable& GetControllable() { return *input_.GetControllable(); }
   size_t InputIndex() const { return input_.InputIndex(); }
   std::string Name() const;
@@ -153,8 +151,7 @@ class SourceValue {
   void Swap() {
     std::swap(a_, b_);
     cross_fader_.SetValue(Invert(cross_fader_.Value()));
-    cross_fader_.SetTargetValue(
-        ControlValue::Invert(cross_fader_.TargetValue()));
+    cross_fader_.SetTargetValue(ControlValue::Invert(cross_fader_.TargetValue()));
   }
 
   ControlValue& PreviousPrimary() { return previous_primary_; }

@@ -6,8 +6,7 @@ namespace glight::json {
 namespace {
 
 std::unique_ptr<Node> ParseValue(std::istream& stream);
-std::unique_ptr<Node> ParseValue(std::istream& stream, char token,
-                                 const std::string& data);
+std::unique_ptr<Node> ParseValue(std::istream& stream, char token, const std::string& data);
 
 void SkipWhitespace(std::istream& stream) {
   std::istream::int_type c = stream.peek();
@@ -89,14 +88,12 @@ std::unique_ptr<Node> ParseObject(std::istream& stream) {
       std::string scratch;
       const char colon = NextToken(stream, scratch);
       if (colon != ':')
-        throw std::runtime_error(
-            std::string("Parse error, expecting colon, got ") + colon);
+        throw std::runtime_error(std::string("Parse error, expecting colon, got ") + colon);
       result->children.emplace(std::move(name), ParseValue(stream));
       t = NextToken(stream, name);
       if (t == ',') {
         t = NextToken(stream, name);
-        if (t == '}')
-          throw std::runtime_error("Extra trailing comma in object");
+        if (t == '}') throw std::runtime_error("Extra trailing comma in object");
       }
     } else {
       std::string str(0, t);
@@ -108,8 +105,8 @@ std::unique_ptr<Node> ParseObject(std::istream& stream) {
       follows += "\n" + line;
       std::getline(stream, line);
       follows += "\n" + line;
-      throw std::runtime_error("Expecting name or '}' in object, got '" + str +
-                               "', before:\n" + follows);
+      throw std::runtime_error("Expecting name or '}' in object, got '" + str + "', before:\n" +
+                               follows);
     }
   }
   return result;
@@ -124,15 +121,13 @@ std::unique_ptr<Node> ParseArray(std::istream& stream) {
     token = NextToken(stream, data);
     if (token == ',') {
       token = NextToken(stream, data);
-      if (token == ']')
-        throw std::runtime_error("Extra trailing comma in array");
+      if (token == ']') throw std::runtime_error("Extra trailing comma in array");
     }
   }
   return result;
 }
 
-std::unique_ptr<Node> ParseValue(std::istream& stream, const char token,
-                                 const std::string& data) {
+std::unique_ptr<Node> ParseValue(std::istream& stream, const char token, const std::string& data) {
   switch (token) {
     case '{':
       return ParseObject(stream);
@@ -149,8 +144,7 @@ std::unique_ptr<Node> ParseValue(std::istream& stream, const char token,
     case 'N':
       return std::make_unique<Number>(data);
     default:
-      throw std::runtime_error("Parse error, unexpected token: '" +
-                               (token + data) + "'");
+      throw std::runtime_error("Parse error, unexpected token: '" + (token + data) + "'");
   }
 }
 

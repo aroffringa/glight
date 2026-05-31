@@ -12,15 +12,15 @@ namespace glight::theatre {
 class FunctionGeneratorEffectPS final : public PropertySet {
  public:
   FunctionGeneratorEffectPS() {
-    addProperty(Property("function", "Function",
-                         std::vector<std::pair<std::string, std::string>>{
-                             {"sine", "Sine"},
-                             {"cosine", "Cosine"},
-                             {"square", "Square"},
-                             {"sawtooth", "Sawtooth"},
-                             {"triange", "Triangle"},
-                             {"staircase", "Staircase"},
-                             {"strobe", "Strobe"}}));
+    addProperty(
+        Property("function", "Function",
+                 std::vector<std::pair<std::string, std::string>>{{"sine", "Sine"},
+                                                                  {"cosine", "Cosine"},
+                                                                  {"square", "Square"},
+                                                                  {"sawtooth", "Sawtooth"},
+                                                                  {"triange", "Triangle"},
+                                                                  {"staircase", "Staircase"},
+                                                                  {"strobe", "Strobe"}}));
     addProperty(Property("amplitude", "Amplitude", PropertyType::ControlValue));
     addProperty(Property("offset", "Offset", PropertyType::ControlValue));
     addProperty(Property("invert", "Invert", PropertyType::Boolean));
@@ -28,54 +28,43 @@ class FunctionGeneratorEffectPS final : public PropertySet {
   }
 
  protected:
-  void setDuration(FolderObject &object, size_t index,
-                   double value) const override {
-    FunctionGeneratorEffect &fgx =
-        static_cast<FunctionGeneratorEffect &>(object);
+  void setDuration(FolderObject &object, size_t index, double value) const override {
+    FunctionGeneratorEffect &fgx = static_cast<FunctionGeneratorEffect &>(object);
     return fgx.SetPeriod(value);
   }
 
   double getDuration(const FolderObject &object, size_t index) const override {
-    const FunctionGeneratorEffect &fgx =
-        static_cast<const FunctionGeneratorEffect &>(object);
+    const FunctionGeneratorEffect &fgx = static_cast<const FunctionGeneratorEffect &>(object);
     return fgx.GetPeriod();
   }
 
   void setBool(FolderObject &object, size_t index, bool value) const override {
-    FunctionGeneratorEffect &fgx =
-        static_cast<FunctionGeneratorEffect &>(object);
+    FunctionGeneratorEffect &fgx = static_cast<FunctionGeneratorEffect &>(object);
     fgx.SetInvert(value);
   }
 
   bool getBool(const FolderObject &object, size_t index) const override {
-    const FunctionGeneratorEffect &fgx =
-        static_cast<const FunctionGeneratorEffect &>(object);
+    const FunctionGeneratorEffect &fgx = static_cast<const FunctionGeneratorEffect &>(object);
     return fgx.GetInvert();
   }
 
-  void setControlValue(FolderObject &object, size_t index,
-                       unsigned value) const override {
-    FunctionGeneratorEffect &fgx =
-        static_cast<FunctionGeneratorEffect &>(object);
+  void setControlValue(FolderObject &object, size_t index, unsigned value) const override {
+    FunctionGeneratorEffect &fgx = static_cast<FunctionGeneratorEffect &>(object);
     if (index == 1)
       fgx.SetAmplitude(ControlValue(value));
     else
       fgx.SetOffset(ControlValue(value));
   }
-  unsigned getControlValue(const FolderObject &object,
-                           size_t index) const override {
-    const FunctionGeneratorEffect &fgx =
-        static_cast<const FunctionGeneratorEffect &>(object);
+  unsigned getControlValue(const FolderObject &object, size_t index) const override {
+    const FunctionGeneratorEffect &fgx = static_cast<const FunctionGeneratorEffect &>(object);
     if (index == 1)
       return fgx.GetAmplitude().UInt();
     else
       return fgx.GetOffset().UInt();
   }
 
-  void setChoice(FolderObject &object, size_t index,
-                 const std::string &value) const override {
-    FunctionGeneratorEffect &fgx =
-        static_cast<FunctionGeneratorEffect &>(object);
+  void setChoice(FolderObject &object, size_t index, const std::string &value) const override {
+    FunctionGeneratorEffect &fgx = static_cast<FunctionGeneratorEffect &>(object);
     using F = FunctionGeneratorEffect::Function;
     switch (index) {
       case 0:
@@ -97,10 +86,8 @@ class FunctionGeneratorEffectPS final : public PropertySet {
     }
   }
 
-  std::string getChoice(const FolderObject &object,
-                        size_t index) const override {
-    const FunctionGeneratorEffect &fgx =
-        static_cast<const FunctionGeneratorEffect &>(object);
+  std::string getChoice(const FolderObject &object, size_t index) const override {
+    const FunctionGeneratorEffect &fgx = static_cast<const FunctionGeneratorEffect &>(object);
     using F = FunctionGeneratorEffect::Function;
     switch (index) {
       case 0:

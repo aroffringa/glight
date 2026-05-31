@@ -34,18 +34,16 @@ class FixtureGroup : public FolderObject {
 
   bool Insert(const system::ObservingPtr<theatre::Fixture>& fixture) {
     const auto [new_item, is_added] = fixtures_.emplace(
-        std::piecewise_construct, std::forward_as_tuple(fixture),
-        std::forward_as_tuple());
+        std::piecewise_construct, std::forward_as_tuple(fixture), std::forward_as_tuple());
     if (is_added) {
-      new_item->second =
-          fixture->SignalDelete().connect([&, fixture]() { Remove(fixture); });
+      new_item->second = fixture->SignalDelete().connect([&, fixture]() { Remove(fixture); });
     }
     return is_added;
   }
 
   bool Remove(const system::ObservingPtr<theatre::Fixture>& fixture) {
-    const iterator item = fixtures_.find(
-        const_cast<system::ObservingPtr<theatre::Fixture>&>(fixture));
+    const iterator item =
+        fixtures_.find(const_cast<system::ObservingPtr<theatre::Fixture>&>(fixture));
     if (item != fixtures_.end()) {
       item->second.disconnect();
       fixtures_.erase(item);
@@ -56,8 +54,7 @@ class FixtureGroup : public FolderObject {
   }
 
   bool Contains(const system::ObservingPtr<theatre::Fixture>& fixture) {
-    return fixtures_.count(const_cast<system::ObservingPtr<theatre::Fixture>&>(
-               fixture)) != 0;
+    return fixtures_.count(const_cast<system::ObservingPtr<theatre::Fixture>&>(fixture)) != 0;
   }
 
   size_t Size() const { return fixtures_.size(); }
@@ -65,10 +62,8 @@ class FixtureGroup : public FolderObject {
   bool Empty() const { return fixtures_.empty(); }
 
  private:
-  using iterator = std::map<system::ObservingPtr<theatre::Fixture>,
-                            sigc::connection>::iterator;
-  using Item =
-      std::pair<system::ObservingPtr<theatre::Fixture> const, sigc::connection>;
+  using iterator = std::map<system::ObservingPtr<theatre::Fixture>, sigc::connection>::iterator;
+  using Item = std::pair<system::ObservingPtr<theatre::Fixture> const, sigc::connection>;
 
   std::map<system::ObservingPtr<theatre::Fixture>, sigc::connection> fixtures_;
 };

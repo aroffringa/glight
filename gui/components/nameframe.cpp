@@ -19,8 +19,7 @@ NameFrame::NameFrame() : _namedObject(nullptr), _label("Name:"), _button() {
   _entry.show();
 
   _button.set_label("Apply");
-  _button.signal_clicked().connect(
-      sigc::mem_fun(*this, &NameFrame::onButtonClicked));
+  _button.signal_clicked().connect(sigc::mem_fun(*this, &NameFrame::onButtonClicked));
   _buttonBox.set_homogeneous(true);
   _buttonBox.append(_button);
   _buttonBox.set_orientation(Gtk::Orientation::HORIZONTAL);
@@ -52,14 +51,12 @@ void NameFrame::onButtonClicked() {
     const std::string newName = _entry.get_text();
 
     if (newName != _namedObject->Name()) {
-      theatre::FolderObject *folderObject =
-          dynamic_cast<theatre::FolderObject *>(_namedObject);
+      theatre::FolderObject *folderObject = dynamic_cast<theatre::FolderObject *>(_namedObject);
       if (folderObject && !folderObject->IsRoot() &&
           folderObject->Parent().GetChildIfExists(newName)) {
         Gtk::MessageDialog dialog(
-            "The folder containing this object already has an object named " +
-                newName,
-            false, Gtk::MessageType::ERROR, Gtk::ButtonsType::OK);
+            "The folder containing this object already has an object named " + newName, false,
+            Gtk::MessageType::ERROR, Gtk::ButtonsType::OK);
         dialog.show();
       } else {
         theatre::Management &management = Instance::Management();

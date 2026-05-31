@@ -11,21 +11,11 @@ namespace glight::theatre {
 
 class FunctionGeneratorEffect final : public Effect {
  public:
-  enum class Function {
-    Sine,
-    Cosine,
-    Square,
-    Sawtooth,
-    Triangle,
-    Staircase,
-    Strobe
-  };
+  enum class Function { Sine, Cosine, Square, Sawtooth, Triangle, Staircase, Strobe };
 
   FunctionGeneratorEffect() : Effect(1) {}
 
-  virtual EffectType GetType() const override {
-    return EffectType::FunctionGenerator;
-  }
+  virtual EffectType GetType() const override { return EffectType::FunctionGenerator; }
 
   void SetPeriod(double period) {
     period_ = std::clamp(period, 25.0, 24 * 60.0 * 60.0 * 1000.0);
@@ -46,8 +36,8 @@ class FunctionGeneratorEffect final : public Effect {
   ControlValue GetOffset() const { return offset_; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
     const double phase = std::fmod(timing.TimeInMS(), period_) / period_;
     double output = 0;
     switch (function_) {
@@ -82,9 +72,7 @@ class FunctionGeneratorEffect final : public Effect {
       output = -output;
     }
     const unsigned input = values[0].UInt();
-    output =
-        std::clamp(output * amplitude_.Ratio() + offset_.Ratio(), 0.0, 1.0) *
-        input;
+    output = std::clamp(output * amplitude_.Ratio() + offset_.Ratio(), 0.0, 1.0) * input;
     setAllOutputs(ControlValue(output), primary);
   }
 

@@ -50,20 +50,15 @@ class ValueSnapshot {
                : 0;
   }
 
-  ValueUniverseSnapshot &GetUniverseSnapshot(size_t index) {
-    return universes_[index];
-  }
-  const ValueUniverseSnapshot &GetUniverseSnapshot(size_t index) const {
-    return universes_[index];
-  }
+  ValueUniverseSnapshot &GetUniverseSnapshot(size_t index) { return universes_[index]; }
+  const ValueUniverseSnapshot &GetUniverseSnapshot(size_t index) const { return universes_[index]; }
 
   friend void swap(ValueSnapshot &left, ValueSnapshot &right) {
     std::swap(left.universes_, right.universes_);
     std::swap(left.is_primary_, right.is_primary_);
   }
 
-  friend bool operator==(const ValueSnapshot &left,
-                         const ValueSnapshot &right) {
+  friend bool operator==(const ValueSnapshot &left, const ValueSnapshot &right) {
     if (left.is_primary_ != right.is_primary_) return false;
     if (left.universes_.size() != right.universes_.size()) return false;
     for (size_t i = 0; i != left.universes_.size(); ++i) {
@@ -72,14 +67,12 @@ class ValueSnapshot {
     return true;
   }
 
-  friend bool operator!=(const ValueSnapshot &left,
-                         const ValueSnapshot &right) {
+  friend bool operator!=(const ValueSnapshot &left, const ValueSnapshot &right) {
     return !(left == right);
   }
 
  private:
-  static std::vector<ValueUniverseSnapshot> Copy(
-      const std::vector<ValueUniverseSnapshot> &source) {
+  static std::vector<ValueUniverseSnapshot> Copy(const std::vector<ValueUniverseSnapshot> &source) {
     std::vector<ValueUniverseSnapshot> result;
     result.reserve(source.size());
     for (const ValueUniverseSnapshot &snapshot : source) {

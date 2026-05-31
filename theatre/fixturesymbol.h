@@ -13,16 +13,13 @@ class FixtureSymbol {
 
   FixtureSymbol(Symbol symbol = Normal) : _symbol(symbol) {}
 
-  explicit FixtureSymbol(const std::string &name)
-      : _symbol(nameToSymbol(name)) {}
+  explicit FixtureSymbol(const std::string &name) : _symbol(nameToSymbol(name)) {}
 
   std::string Name() const { return symbolToName(_symbol); }
 
   Symbol Value() const { return _symbol; }
 
-  static std::vector<Symbol> List() {
-    return std::vector<Symbol>{Hidden, Small, Normal, Large};
-  }
+  static std::vector<Symbol> List() { return std::vector<Symbol>{Hidden, Small, Normal, Large}; }
 
  private:
   static Symbol nameToSymbol(const std::string &name) {

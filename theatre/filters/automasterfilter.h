@@ -13,8 +13,7 @@ class AutoMasterFilter final : public Filter {
  public:
   FilterType GetType() const override { return FilterType::AutoMaster; }
 
-  void Apply(const std::vector<ControlValue>& input,
-             std::vector<ControlValue>& output) override {
+  void Apply(const std::vector<ControlValue>& input, std::vector<ControlValue>& output) override {
     unsigned maximum;
     if (master_channel_index_) {
       maximum = 0;
@@ -27,8 +26,7 @@ class AutoMasterFilter final : public Filter {
           maximum = ControlValue::MaxUInt();
         }
       }
-      maximum =
-          std::ceil(std::sqrt(maximum) * std::sqrt(ControlValue::MaxUInt()));
+      maximum = std::ceil(std::sqrt(maximum) * std::sqrt(ControlValue::MaxUInt()));
     } else {
       maximum = ControlValue::MaxUInt();
     }
@@ -37,8 +35,7 @@ class AutoMasterFilter final : public Filter {
       if (OutputTypes()[i].Type() == FunctionType::Master) {
         output[i] = ControlValue(maximum);
       } else if (IsColor(OutputTypes()[i].Type())) {
-        output[i] = ControlValue(
-            ControlValue::Fraction(input[input_index].UInt(), maximum));
+        output[i] = ControlValue(ControlValue::Fraction(input[input_index].UInt(), maximum));
         ++input_index;
       } else {
         output[i] = input[input_index];

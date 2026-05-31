@@ -61,17 +61,13 @@ class MainMenu : public Gtk::PopoverMenuBar {
   sigc::signal<void(uistate::FaderSetState& fader_set)> FaderWindow;
 
   bool ShowFixturesActive() const { return GetState(show_fixtures_); }
-  void SetShowFixtures(bool show_fixtures) {
-    SetState(show_fixtures_, show_fixtures);
-  }
+  void SetShowFixtures(bool show_fixtures) { SetState(show_fixtures_, show_fixtures); }
 
   bool ShowBeamsActive() const { return GetState(show_beams_); }
   void SetShowBeams(bool show_beams) { SetState(show_beams_, show_beams); }
 
   bool ShowProjectionsActive() const { return GetState(show_projections_); }
-  void SetShowProjections(bool show_projections) {
-    SetState(show_projections_, show_projections);
-  }
+  void SetShowProjections(bool show_projections) { SetState(show_projections_, show_projections); }
 
   bool ShowStageBordersActive() const { return GetState(show_stage_borders_); }
   void SetShowStageBorders(bool show_stage_borders) {
@@ -94,15 +90,12 @@ class MainMenu : public Gtk::PopoverMenuBar {
 
   void SetSceneWindowActive(bool active) { SetState(scene_window_, active); }
 
-  void SetFaderList(
-      const std::vector<std::unique_ptr<uistate::FaderSetState>>& faders);
+  void SetFaderList(const std::vector<std::unique_ptr<uistate::FaderSetState>>& faders);
 
   bool IsLayoutLocked() const { return GetState(layout_locked_); }
   void SetLayoutLocked(bool lock) { SetState(layout_locked_, lock); }
 
-  void SetIsObjectSelected(bool is_selected) {
-    delete_object_->set_enabled(is_selected);
-  }
+  void SetIsObjectSelected(bool is_selected) { delete_object_->set_enabled(is_selected); }
 
  private:
   bool GetState(const std::shared_ptr<Gio::SimpleAction>& action) const {

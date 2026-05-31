@@ -30,8 +30,7 @@ class Controller {
 
   static std::vector<std::string> DeviceNames();
 
-  void SetPixelColor(size_t column, size_t row, const theatre::Color& color,
-                     bool blink);
+  void SetPixelColor(size_t column, size_t row, const theatre::Color& color, bool blink);
 
   void SetTrackButton(size_t index, ButtonState state);
   void SetSceneButton(size_t index, ButtonState state);
@@ -66,19 +65,11 @@ class Controller {
   }
 
   size_t GetNFaders() const { return 9; }
-  unsigned char GetFaderValue(size_t fader_index) {
-    return faders_[fader_index];
-  }
+  unsigned char GetFaderValue(size_t fader_index) { return faders_[fader_index]; }
 
-  static bool IsPadButton(unsigned char button_index) {
-    return button_index < 64;
-  }
-  static size_t PadButtonX(unsigned char button_index) {
-    return button_index % 8;
-  }
-  static size_t PadButtonY(unsigned char button_index) {
-    return button_index / 8;
-  }
+  static bool IsPadButton(unsigned char button_index) { return button_index < 64; }
+  static size_t PadButtonX(unsigned char button_index) { return button_index % 8; }
+  static size_t PadButtonY(unsigned char button_index) { return button_index / 8; }
 
   static char SceneButton(size_t index) { return 0x70 + index; }
   static char TrackButton(size_t index) { return 0x90 + index; }
@@ -96,12 +87,7 @@ class Controller {
   void ProcessMessage();
   void SetButton(unsigned char button_value, ButtonState state);
 
-  enum class InputState {
-    Empty,
-    NoteOn,
-    NoteOff,
-    Controller
-  } input_state_ = InputState::Empty;
+  enum class InputState { Empty, NoteOn, NoteOff, Controller } input_state_ = InputState::Empty;
   unsigned char input_data_[3];
   size_t input_size_ = 0;
 

@@ -20,12 +20,8 @@ class FixtureModeFunction {
    * implies 16 bits are used for this function.
    */
   FixtureModeFunction(FunctionType type, size_t dmx_offset,
-                      system::OptionalNumber<size_t> fine_channel,
-                      unsigned shape)
-      : type_(type),
-        dmx_offset_(dmx_offset),
-        fine_channel_(fine_channel),
-        shape_(shape) {
+                      system::OptionalNumber<size_t> fine_channel, unsigned shape)
+      : type_(type), dmx_offset_(dmx_offset), fine_channel_(fine_channel), shape_(shape) {
     ConstructParameters();
   }
 
@@ -68,9 +64,7 @@ class FixtureModeFunction {
    * fine channel that corresponds to this function. If set, it implies 16 bits
    * are used for this function.
    */
-  system::OptionalNumber<size_t> FineChannelOffset() const {
-    return fine_channel_;
-  }
+  system::OptionalNumber<size_t> FineChannelOffset() const { return fine_channel_; }
   void SetFineChannelOffset(system::OptionalNumber<size_t> fine_channel) {
     fine_channel_ = fine_channel;
   }

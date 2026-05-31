@@ -18,14 +18,10 @@ BOOST_AUTO_TEST_CASE(types) {
   BOOST_CHECK_EQUAL(effect.InputValue(RgbMasterEffect::kGreenInput).UInt(), 0);
   BOOST_CHECK_EQUAL(effect.InputValue(RgbMasterEffect::kBlueInput).UInt(), 0);
   BOOST_CHECK_EQUAL(effect.InputValue(RgbMasterEffect::kMasterInput).UInt(), 0);
-  BOOST_CHECK(effect.InputType(RgbMasterEffect::kRedInput) ==
-              FunctionType::Red);
-  BOOST_CHECK(effect.InputType(RgbMasterEffect::kGreenInput) ==
-              FunctionType::Green);
-  BOOST_CHECK(effect.InputType(RgbMasterEffect::kBlueInput) ==
-              FunctionType::Blue);
-  BOOST_CHECK(effect.InputType(RgbMasterEffect::kMasterInput) ==
-              FunctionType::Master);
+  BOOST_CHECK(effect.InputType(RgbMasterEffect::kRedInput) == FunctionType::Red);
+  BOOST_CHECK(effect.InputType(RgbMasterEffect::kGreenInput) == FunctionType::Green);
+  BOOST_CHECK(effect.InputType(RgbMasterEffect::kBlueInput) == FunctionType::Blue);
+  BOOST_CHECK(effect.InputType(RgbMasterEffect::kMasterInput) == FunctionType::Master);
 }
 
 BOOST_AUTO_TEST_CASE(mix) {

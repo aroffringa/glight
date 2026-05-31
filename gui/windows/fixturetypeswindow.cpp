@@ -27,9 +27,8 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   set_title("Glight - fixture types");
   set_size_request(200, 400);
 
-  update_controllables_connection_ =
-      Instance::Events().SignalUpdateControllables().connect(
-          [&]() { FixtureTypesWindow::update(); });
+  update_controllables_connection_ = Instance::Events().SignalUpdateControllables().connect(
+      [&]() { FixtureTypesWindow::update(); });
 
   // Left part
   tree_model_ = Gtk::TreeStore::create(list_columns_);
@@ -38,14 +37,12 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   tree_view_.append_column("Name", list_columns_.name_);
   tree_view_.append_column("Used", list_columns_.in_use_);
   tree_view_.append_column("Functions", list_columns_.functions_);
-  tree_view_.get_selection()->signal_changed().connect(
-      [&]() { onSelectionChanged(); });
+  tree_view_.get_selection()->signal_changed().connect([&]() { onSelectionChanged(); });
   tree_view_.set_expand(true);
   fillList();
   type_scrollbars_.set_child(tree_view_);
 
-  type_scrollbars_.set_policy(Gtk::PolicyType::NEVER,
-                              Gtk::PolicyType::AUTOMATIC);
+  type_scrollbars_.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
   left_box_.append(type_scrollbars_);
 
   paned_.set_start_child(left_box_);
@@ -61,10 +58,8 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
   short_name_entry_.set_hexpand(true);
 
   right_grid_.attach(class_label_, 0, 2);
-  const std::vector<theatre::FixtureClass> classes =
-      theatre::GetFixtureClassList();
-  for (theatre::FixtureClass c : classes)
-    class_combo_.append(std::string(ToString(c)));
+  const std::vector<theatre::FixtureClass> classes = theatre::GetFixtureClassList();
+  for (theatre::FixtureClass c : classes) class_combo_.append(std::string(ToString(c)));
   right_grid_.attach(class_combo_, 1, 2, 2, 1);
   class_combo_.set_hexpand(true);
 
@@ -118,8 +113,7 @@ FixtureTypesWindow::FixtureTypesWindow() : functions_frame_(*this) {
       sigc::mem_fun(*this, &FixtureTypesWindow::onRemoveClicked));
   button_box_.append(remove_button_);
 
-  save_button_.signal_clicked().connect(
-      sigc::mem_fun(*this, &FixtureTypesWindow::onSaveClicked));
+  save_button_.signal_clicked().connect(sigc::mem_fun(*this, &FixtureTypesWindow::onSaveClicked));
   button_box_.append(save_button_);
 
   main_grid_.attach(button_box_, 0, 1, 1, 1);
@@ -210,8 +204,7 @@ void FixtureTypesWindow::onRemoveClicked() {
     }
     Instance::Events().EmitUpdate();
   } else {
-    const Gtk::TreeModel::iterator selected =
-        tree_view_.get_selection()->get_selected();
+    const Gtk::TreeModel::iterator selected = tree_view_.get_selection()->get_selected();
     if (selected) tree_model_->erase(selected);
   }
 }
@@ -220,8 +213,7 @@ void FixtureTypesWindow::onSaveClicked() {
   const SelectionData selected = GetSelected();
   if (!selected.has_selection) return;
   if (selected.mode) {
-    const bool is_used =
-        Instance::Management().GetTheatre().IsUsed(*selected.type);
+    const bool is_used = Instance::Management().GetTheatre().IsUsed(*selected.type);
     if (!is_used) {
       selected.mode->SetFunctions(functions_frame_.GetFunctions());
       const std::string new_name = functions_frame_.GetName();
@@ -234,11 +226,10 @@ void FixtureTypesWindow::onSaveClicked() {
   } else {
     FixtureType *type;
     if (selected.IsNewType()) {
-      ObservingPtr<FixtureType> new_type =
-          Instance::Management()
-              .GetTheatre()
-              .AddFixtureType(system::MakeTrackable<FixtureType>())
-              .GetObserver<FixtureType>();
+      ObservingPtr<FixtureType> new_type = Instance::Management()
+                                               .GetTheatre()
+                                               .AddFixtureType(system::MakeTrackable<FixtureType>())
+                                               .GetObserver<FixtureType>();
       type = new_type.Get();
       Instance::Management().RootFolder().Add(std::move(new_type));
     } else {
@@ -247,14 +238,10 @@ void FixtureTypesWindow::onSaveClicked() {
     type->SetName(name_entry_.get_text());
     type->SetShortName(short_name_entry_.get_text());
 
-    const double min_beam_angle =
-        std::atof(min_beam_angle_entry_.get_text().c_str());
-    type->SetMinBeamAngle(std::clamp(min_beam_angle, 0.0, 360.0) * M_PI /
-                          180.0);
-    const double max_beam_angle =
-        std::atof(max_beam_angle_entry_.get_text().c_str());
-    type->SetMaxBeamAngle(std::clamp(max_beam_angle, 0.0, 360.0) * M_PI /
-                          180.0);
+    const double min_beam_angle = std::atof(min_beam_angle_entry_.get_text().c_str());
+    type->SetMinBeamAngle(std::clamp(min_beam_angle, 0.0, 360.0) * M_PI / 180.0);
+    const double max_beam_angle = std::atof(max_beam_angle_entry_.get_text().c_str());
+    type->SetMaxBeamAngle(std::clamp(max_beam_angle, 0.0, 360.0) * M_PI / 180.0);
 
     const double min_pan = std::atof(min_pan_entry_.get_text().c_str());
     type->SetMinPan(std::clamp(min_pan, -3600.0, 3600.0) * M_PI / 180.0);
@@ -268,14 +255,11 @@ void FixtureTypesWindow::onSaveClicked() {
 
     const double brightness = std::atof(brightness_entry_.get_text().c_str());
     type->SetBrightness(std::clamp(brightness, 0.0, 100.0));
-    const unsigned max_power =
-        std::max(0LL, std::atoll(max_power_entry_.get_text().c_str()));
+    const unsigned max_power = std::max(0LL, std::atoll(max_power_entry_.get_text().c_str()));
     type->SetMaxPower(max_power);
-    const unsigned idle_power =
-        std::max(0LL, std::atoll(idle_power_entry_.get_text().c_str()));
+    const unsigned idle_power = std::max(0LL, std::atoll(idle_power_entry_.get_text().c_str()));
     type->SetIdlePower(idle_power);
-    type->SetFixtureClass(
-        theatre::GetFixtureClass(class_combo_.get_active_text().data()));
+    type->SetFixtureClass(theatre::GetFixtureClass(class_combo_.get_active_text().data()));
     Instance::Events().EmitUpdate();
     Select(*type);
   }
@@ -318,8 +302,7 @@ void FixtureTypesWindow::SelectFixtures(const FixtureMode &mode) {
       Instance::Management().GetTheatre().Fixtures();
   std::vector<system::ObservingPtr<theatre::Fixture>> selected_fixtures;
   for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
-    if (&fixture->Mode() == &mode)
-      selected_fixtures.emplace_back(fixture.GetObserver());
+    if (&fixture->Mode() == &mode) selected_fixtures.emplace_back(fixture.GetObserver());
   }
   Instance::Selection().SetSelection(std::move(selected_fixtures));
 }
@@ -329,8 +312,7 @@ void FixtureTypesWindow::SelectFixtures(const FixtureType &type) {
       Instance::Management().GetTheatre().Fixtures();
   std::vector<system::ObservingPtr<theatre::Fixture>> selected_fixtures;
   for (const system::TrackablePtr<theatre::Fixture> &fixture : fixtures) {
-    if (&fixture->Mode().Type() == &type)
-      selected_fixtures.emplace_back(fixture.GetObserver());
+    if (&fixture->Mode().Type() == &type) selected_fixtures.emplace_back(fixture.GetObserver());
   }
   Instance::Selection().SetSelection(std::move(selected_fixtures));
 }
@@ -366,8 +348,7 @@ void FixtureTypesWindow::onSelectionChanged() {
 
       brightness_entry_.set_text(std::to_string(type->Brightness()));
       class_combo_.set_sensitive(!is_used && !layout_locked_);
-      class_combo_.set_active_text(
-          std::string(ToString(type->GetFixtureClass())));
+      class_combo_.set_active_text(std::string(ToString(type->GetFixtureClass())));
 
       max_power_entry_.set_text(std::to_string(type->MaxPower()));
       idle_power_entry_.set_text(std::to_string(type->IdlePower()));
@@ -383,8 +364,7 @@ void FixtureTypesWindow::onSelectionChanged() {
       max_beam_tilt_entry_.set_text("0");
       brightness_entry_.set_text("10");
       class_combo_.set_sensitive(!layout_locked_);
-      class_combo_.set_active_text(
-          std::string(ToString(theatre::FixtureClass::Par)));
+      class_combo_.set_active_text(std::string(ToString(theatre::FixtureClass::Par)));
       max_power_entry_.set_text("0");
       idle_power_entry_.set_text("0");
       functions_frame_.SetData("", {});

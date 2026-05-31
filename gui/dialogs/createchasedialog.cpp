@@ -33,8 +33,7 @@ CreateChaseDialog::CreateChaseDialog()
   add_button("Cancel", Gtk::ResponseType::CANCEL);
   _makeChaseButton = add_button("Make chase", Gtk::ResponseType::OK);
   _makeChaseButton->signal_clicked().connect(
-      sigc::mem_fun(*this, &CreateChaseDialog::onCreateChaseButtonClicked),
-      false);
+      sigc::mem_fun(*this, &CreateChaseDialog::onCreateChaseButtonClicked), false);
   _makeChaseButton->set_sensitive(false);
 }
 
@@ -50,8 +49,8 @@ void CreateChaseDialog::initListPart() {
 void CreateChaseDialog::initNewSequencePart() {
   _addObjectToChaseButton.set_sensitive(false);
   _addObjectToChaseButton.set_image_from_icon_name("list-add");
-  _addObjectToChaseButton.signal_clicked().connect(sigc::mem_fun(
-      *this, &CreateChaseDialog::onAddObjectToChaseButtonClicked));
+  _addObjectToChaseButton.signal_clicked().connect(
+      sigc::mem_fun(*this, &CreateChaseDialog::onAddObjectToChaseButtonClicked));
   _newChaseButtonBox.set_orientation(Gtk::Orientation::VERTICAL);
   _newChaseButtonBox.set_homogeneous(true);
   _newChaseButtonBox.append(_addObjectToChaseButton);
@@ -65,23 +64,19 @@ void CreateChaseDialog::initNewSequencePart() {
   _newChaseListModel = Gtk::ListStore::create(_newChaseListColumns);
 
   _newChaseListView.set_model(_newChaseListModel);
-  _newChaseListView.append_column("Chase object list",
-                                  _newChaseListColumns._title);
+  _newChaseListView.append_column("Chase object list", _newChaseListColumns._title);
   _newChaseScrolledWindow.set_child(_newChaseListView);
 
-  _newChaseScrolledWindow.set_policy(Gtk::PolicyType::NEVER,
-                                     Gtk::PolicyType::AUTOMATIC);
+  _newChaseScrolledWindow.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
   _newChaseBox.append(_newChaseScrolledWindow);
 
   _newChaseFrame.set_child(_newChaseBox);
 }
 
 void CreateChaseDialog::onAddObjectToChaseButtonClicked() {
-  const system::ObservingPtr<theatre::FolderObject> selectedObj =
-      _list.SelectedObject();
+  const system::ObservingPtr<theatre::FolderObject> selectedObj = _list.SelectedObject();
   if (selectedObj) {
-    theatre::Controllable *object =
-        dynamic_cast<theatre::Controllable *>(selectedObj.Get());
+    theatre::Controllable *object = dynamic_cast<theatre::Controllable *>(selectedObj.Get());
     if (object) {
       Gtk::TreeModel::iterator newRow = _newChaseListModel->append();
       std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
@@ -130,8 +125,7 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
 void CreateChaseDialog::onSelectedObjectChanged() {
   if (_delayUpdates.IsFirst()) {
     theatre::FolderObject *selectedObj = _list.SelectedObject().Get();
-    theatre::PresetCollection *preset =
-        dynamic_cast<theatre::PresetCollection *>(selectedObj);
+    theatre::PresetCollection *preset = dynamic_cast<theatre::PresetCollection *>(selectedObj);
     if (preset)
       _addObjectToChaseButton.set_sensitive(true);
     else

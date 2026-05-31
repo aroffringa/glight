@@ -38,11 +38,9 @@ void SettingsWindow::MakeDmxPage() {
   universe_list_view_.append_column("Universe", universe_columns_.universe_);
   universe_list_view_.append_column("Type", universe_columns_.type_);
   universe_list_view_.append_column("Ola", universe_columns_.ola_universe_);
-  universe_list_view_.append_column("Description",
-                                    universe_columns_.description_);
+  universe_list_view_.append_column("Description", universe_columns_.description_);
   universe_list_view_.set_size_request(100, 100);
-  universe_list_view_.get_selection()->signal_changed().connect(
-      [&]() { UpdateAfterSelection(); });
+  universe_list_view_.get_selection()->signal_changed().connect([&]() { UpdateAfterSelection(); });
   universe_list_view_.set_hexpand(true);
   universe_list_view_.set_vexpand(true);
   dmx_page_.attach(universe_list_view_, 0, 0, 2, 1);
@@ -50,8 +48,7 @@ void SettingsWindow::MakeDmxPage() {
   dmx_page_.attach(reload_ola_button_, 0, 1, 1, 1);
 
   dmx_page_.attach(ola_universe_label_, 0, 2, 1, 1);
-  ola_universe_combo_.signal_changed().connect(
-      [&]() { SaveSelectedOlaUniverse(); });
+  ola_universe_combo_.signal_changed().connect([&]() { SaveSelectedOlaUniverse(); });
   dmx_page_.attach(ola_universe_combo_, 1, 2, 1, 1);
 
   auto save_universe = [&]() { SaveSelectedUniverse(); };
@@ -94,18 +91,17 @@ void SettingsWindow::MakeAudioPage() {
       char* device_name = snd_device_name_get_hint(hints[hi], "NAME");
       char* device_desc = snd_device_name_get_hint(hints[hi], "DESC");
       char* input_or_output = snd_device_name_get_hint(hints[hi], "IOID");
-      const bool is_input = input_or_output == nullptr ||
-                            std::strcmp(input_or_output, "Input") == 0;
-      const bool is_output = input_or_output == nullptr ||
-                             std::strcmp(input_or_output, "Output") == 0;
+      const bool is_input =
+          input_or_output == nullptr || std::strcmp(input_or_output, "Input") == 0;
+      const bool is_output =
+          input_or_output == nullptr || std::strcmp(input_or_output, "Output") == 0;
       assert(is_input || is_output);
       std::string device_desc_str(device_desc);
       const std::size_t new_line = device_desc_str.find('\n');
       if (new_line != std::string::npos) {
         device_desc_str.resize(new_line);
       }
-      const std::string description_with_name =
-          device_desc_str + " (" + device_name + ")";
+      const std::string description_with_name = device_desc_str + " (" + device_name + ")";
       if (is_input) {
         input_devices_combo_.append(description_with_name);
         input_devices_.emplace_back(device_name);
@@ -150,8 +146,8 @@ void SettingsWindow::FillUniverses() {
   }
 }
 
-void SettingsWindow::SetUniverseRow(const UniverseMap& universes,
-                                    size_t universe, Gtk::TreeRow& row) {
+void SettingsWindow::SetUniverseRow(const UniverseMap& universes, size_t universe,
+                                    Gtk::TreeRow& row) {
   row[universe_columns_.universe_] = universe;
 
   const UniverseType type = universes.GetUniverseType(universe);
@@ -159,11 +155,9 @@ void SettingsWindow::SetUniverseRow(const UniverseMap& universes,
   switch (type) {
     case UniverseType::Input: {
       row[universe_columns_.type_] = "Input";
-      const theatre::devices::InputMapping& mapping =
-          universes.GetInputMapping(universe);
+      const theatre::devices::InputMapping& mapping = universes.GetInputMapping(universe);
       if (mapping.ola_universe) {
-        row[universe_columns_.ola_universe_] =
-            std::to_string(*mapping.ola_universe);
+        row[universe_columns_.ola_universe_] = std::to_string(*mapping.ola_universe);
       } else {
         row[universe_columns_.ola_universe_] = "-";
       }
@@ -178,8 +172,7 @@ void SettingsWindow::SetUniverseRow(const UniverseMap& universes,
           description = "Fader control";
           break;
         case InputMappingFunction::Merge:
-          description =
-              "Merge with output " + std::to_string(*mapping.merge_universe);
+          description = "Merge with output " + std::to_string(*mapping.merge_universe);
           break;
       }
     } break;
@@ -203,8 +196,7 @@ void SettingsWindow::SetUniverseRow(const UniverseMap& universes,
 
 void SettingsWindow::UpdateAfterSelection() {
   RecursionLock::Token token(recursion_lock_);
-  Gtk::TreeModel::iterator iter =
-      universe_list_view_.get_selection()->get_selected();
+  Gtk::TreeModel::iterator iter = universe_list_view_.get_selection()->get_selected();
   ola_universe_combo_.remove_all();
   if (iter) {
     dmx_none_rb_.set_sensitive(true);
@@ -213,8 +205,7 @@ void SettingsWindow::UpdateAfterSelection() {
 
     Gtk::TreeRow row(*iter);
     const size_t universe = row[universe_columns_.universe_];
-    const theatre::devices::UniverseMap& universes =
-        Instance::Management().GetUniverses();
+    const theatre::devices::UniverseMap& universes = Instance::Management().GetUniverses();
     const UniverseType type = universes.GetUniverseType(universe);
     ola_universe_combo_.append("-");
     std::vector<size_t> ola_universes;
@@ -260,15 +251,12 @@ void SettingsWindow::UpdateAfterSelection() {
 
 void SettingsWindow::SaveSelectedUniverse() {
   std::lock_guard lock(Instance::Management().Mutex());
-  Gtk::TreeModel::iterator iter =
-      universe_list_view_.get_selection()->get_selected();
+  Gtk::TreeModel::iterator iter = universe_list_view_.get_selection()->get_selected();
   if (iter && recursion_lock_.IsFirst()) {
     Gtk::TreeRow row(*iter);
     const size_t universe_index = row[universe_columns_.universe_];
-    theatre::devices::UniverseMap& universes =
-        Instance::Management().GetUniverses();
-    theatre::devices::UniverseMapping mapping =
-        universes.GetMapping(universe_index);
+    theatre::devices::UniverseMap& universes = Instance::Management().GetUniverses();
+    theatre::devices::UniverseMapping mapping = universes.GetMapping(universe_index);
     if (dmx_input_rb_.get_active()) {
       if (!std::holds_alternative<InputMapping>(mapping)) {
         mapping = InputMapping();
@@ -278,8 +266,7 @@ void SettingsWindow::SaveSelectedUniverse() {
         function = InputMappingFunction::FaderControl;
       } else if (dmx_merge_rb_.get_active()) {
         function = InputMappingFunction::Merge;
-        std::get<InputMapping>(mapping).merge_universe =
-            universes.FirstOutputUniverse();
+        std::get<InputMapping>(mapping).merge_universe = universes.FirstOutputUniverse();
       }
       std::get<InputMapping>(mapping).function = function;
     } else if (dmx_output_rb_.get_active()) {
@@ -296,18 +283,15 @@ void SettingsWindow::SaveSelectedUniverse() {
 
 void SettingsWindow::SaveSelectedOlaUniverse() {
   std::lock_guard lock(Instance::Management().Mutex());
-  Gtk::TreeModel::iterator iter =
-      universe_list_view_.get_selection()->get_selected();
+  Gtk::TreeModel::iterator iter = universe_list_view_.get_selection()->get_selected();
   if (iter && recursion_lock_.IsFirst() && ola_universe_combo_.get_active()) {
     system::OptionalNumber<size_t> ola_universe;
     if (ola_universe_combo_.get_active_text() != "-")
       ola_universe = std::atoi(ola_universe_combo_.get_active_text().c_str());
     Gtk::TreeRow row(*iter);
     const size_t universe_index = row[universe_columns_.universe_];
-    theatre::devices::UniverseMap& universes =
-        Instance::Management().GetUniverses();
-    theatre::devices::UniverseMapping mapping =
-        universes.GetMapping(universe_index);
+    theatre::devices::UniverseMap& universes = Instance::Management().GetUniverses();
+    theatre::devices::UniverseMapping mapping = universes.GetMapping(universe_index);
     if (std::holds_alternative<InputMapping>(mapping)) {
       std::get<InputMapping>(mapping).ola_universe = ola_universe;
     } else if (std::holds_alternative<OutputMapping>(mapping)) {
@@ -327,8 +311,7 @@ void SettingsWindow::ReloadOla() {
 }
 
 void SettingsWindow::SetInputAudio() {
-  const std::string& selected_device =
-      input_devices_[input_devices_combo_.get_active_row_number()];
+  const std::string& selected_device = input_devices_[input_devices_combo_.get_active_row_number()];
   Instance::Settings().audio_input = selected_device;
   Instance::Management().StartBeatFinder();
 }

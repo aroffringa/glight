@@ -31,9 +31,7 @@ class ReorderWidget : public Gtk::Box {
 
   sigc::signal<void()> &SignalChanged() { return signal_changed_; }
 
-  void SetShowTypeColumn(bool show_type_column) {
-    show_type_column_ = show_type_column;
-  }
+  void SetShowTypeColumn(bool show_type_column) { show_type_column_ = show_type_column; }
 
  private:
   void FillList();
@@ -66,8 +64,7 @@ class ReorderWidget : public Gtk::Box {
 };
 
 template <typename NObject>
-void ReorderWidget::SetList(
-    const std::vector<system::ObservingPtr<NObject>> &objects) {
+void ReorderWidget::SetList(const std::vector<system::ObservingPtr<NObject>> &objects) {
   model_->clear();
 
   for (system::ObservingPtr<theatre::NamedObject> object : objects) {

@@ -43,9 +43,7 @@ class Instance {
   }
 
   static theatre::Management& Management() { return *Get().management_; }
-  void SetManagement(theatre::Management& management) {
-    management_ = &management;
-  }
+  void SetManagement(theatre::Management& management) { management_ = &management; }
 
   static EventTransmitter& Events() { return *Get().events_; }
   void SetEvents(EventTransmitter& events) { events_ = &events; }
@@ -59,9 +57,7 @@ class Instance {
   static system::Settings& Settings() { return *Get().settings_; }
 
   static Gtk::ApplicationWindow& MainWindow() { return *Get().main_window_; }
-  void SetMainWindow(Gtk::ApplicationWindow& main_window) {
-    main_window_ = &main_window;
-  }
+  void SetMainWindow(Gtk::ApplicationWindow& main_window) { main_window_ = &main_window; }
 
  private:
   // Because this class is used in many places, all members are pointers

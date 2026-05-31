@@ -33,9 +33,7 @@ class DesignWizard : public Gtk::Window {
   DesignWizard();
   ~DesignWizard();
 
-  void SetCurrentPath(const std::string &currentPath) {
-    _currentPath = currentPath;
-  }
+  void SetCurrentPath(const std::string &currentPath) { _currentPath = currentPath; }
 
  private:
   enum Page {
@@ -69,8 +67,7 @@ class DesignWizard : public Gtk::Window {
 
   // 1b
   void onAddControllable();
-  void addControllable(
-      const system::ObservingPtr<theatre::FolderObject> &object);
+  void addControllable(const system::ObservingPtr<theatre::FolderObject> &object);
   void onRemoveControllable();
   void onControllableSelected();
 
@@ -80,12 +77,10 @@ class DesignWizard : public Gtk::Window {
   std::string _currentPath;
 
   Gtk::Box _mainBox{Gtk::Orientation::VERTICAL};
-  Gtk::Box _vBoxPage1{Gtk::Orientation::VERTICAL},
-      _vBoxPage1a{Gtk::Orientation::VERTICAL},
+  Gtk::Box _vBoxPage1{Gtk::Orientation::VERTICAL}, _vBoxPage1a{Gtk::Orientation::VERTICAL},
       _vBoxPage1b{Gtk::Orientation::VERTICAL};
   Gtk::Notebook _notebook;
-  std::vector<system::ObservingPtr<theatre::Controllable>>
-      _selectedControllables;
+  std::vector<system::ObservingPtr<theatre::Controllable>> _selectedControllables;
   // 1a
   Gtk::Label _selectLabel;
   components::FixtureList _fixtureList;
@@ -99,12 +94,11 @@ class DesignWizard : public Gtk::Window {
   components::ReorderWidget _reorderWidget;
 
   // 3
-  Gtk::Box _vBoxPage3{Gtk::Orientation::VERTICAL},
-      _vBoxPage3Type{Gtk::Orientation::VERTICAL},
+  Gtk::Box _vBoxPage3{Gtk::Orientation::VERTICAL}, _vBoxPage3Type{Gtk::Orientation::VERTICAL},
       _vBoxPage3Deduction{Gtk::Orientation::VERTICAL};
   Gtk::Frame _typeFrameP3, _deductionFrameP3;
-  Gtk::CheckButton _colorPresetBtn, _runningLightBtn, _singleColorBtn,
-      _shiftColorsBtn, _increaseBtn, _rotationBtn, _vuMeterBtn, _fireBtn;
+  Gtk::CheckButton _colorPresetBtn, _runningLightBtn, _singleColorBtn, _shiftColorsBtn,
+      _increaseBtn, _rotationBtn, _vuMeterBtn, _fireBtn;
   Gtk::CheckButton _deduceWhite, _deduceAmber, _deduceUV, _deduceLime;
 
   // Page 4 common widgets
@@ -117,27 +111,24 @@ class DesignWizard : public Gtk::Window {
   Gtk::CheckButton _newFolderCB;
 
   // 4_1
-  Gtk::CheckButton _increasingRunRB, _decreasingRunRB, _backAndForthRunRB,
-      _inwardRunRB, _outwardRunRB, _randomRunRB;
+  Gtk::CheckButton _increasingRunRB, _decreasingRunRB, _backAndForthRunRB, _inwardRunRB,
+      _outwardRunRB, _randomRunRB;
 
   // 4_2
   Gtk::Label _variationLabel;
   Gtk::Scale _variation;
 
   // 4_3
-  Gtk::CheckButton _shiftIncreasingRB, _shiftDecreasingRB, _shiftBackAndForthRB,
-      _shiftRandomRB;
+  Gtk::CheckButton _shiftIncreasingRB, _shiftDecreasingRB, _shiftBackAndForthRB, _shiftRandomRB;
 
   // 4_4
-  Gtk::CheckButton _vuIncreasingRB, _vuDecreasingRB, _vuInwardRunRB,
-      _vuOutwardRunRB;
+  Gtk::CheckButton _vuIncreasingRB, _vuDecreasingRB, _vuInwardRunRB, _vuOutwardRunRB;
 
   // 4_5
   Gtk::CheckButton _eachFixtureSeparatelyCB;
 
   // 4_6
-  Gtk::CheckButton _incForwardRB, _incBackwardRB, _incForwardReturnRB,
-      _incBackwardReturnRB;
+  Gtk::CheckButton _incForwardRB, _incBackwardRB, _incForwardReturnRB, _incBackwardReturnRB;
 
   // 4_7
   Gtk::CheckButton _rotForwardRB, _rotBackwardRB, _rotForwardReturnRB;
@@ -155,8 +146,7 @@ class DesignWizard : public Gtk::Window {
     }
 
     Gtk::TreeModelColumn<Glib::ustring> _title, _path;
-    Gtk::TreeModelColumn<system::ObservingPtr<theatre::Controllable>>
-        _controllable;
+    Gtk::TreeModelColumn<system::ObservingPtr<theatre::Controllable>> _controllable;
   } _controllablesListColumns;
   Gtk::ScrolledWindow _controllablesScrolledWindow;
 };

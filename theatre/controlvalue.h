@@ -32,27 +32,21 @@ class ControlValue {
   constexpr uint32_t UInt() const noexcept { return value_; }
 
   constexpr static ControlValue Zero() noexcept { return ControlValue(0); }
-  constexpr static ControlValue Max() noexcept {
-    return ControlValue((1 << 24) - 1);
-  }
+  constexpr static ControlValue Max() noexcept { return ControlValue((1 << 24) - 1); }
   constexpr static ControlValue FromRatio(double ratio) noexcept {
-    return ControlValue(
-        static_cast<uint32_t>(std::clamp(ratio, 0.0, 1.0) * MaxUInt()));
+    return ControlValue(static_cast<uint32_t>(std::clamp(ratio, 0.0, 1.0) * MaxUInt()));
   }
   constexpr static ControlValue FromUChar(uint8_t value) noexcept {
     return ControlValue(static_cast<uint32_t>(value) * MaxUInt() / 255);
   }
   constexpr static uint32_t MaxUInt() noexcept { return (1 << 24) - 1; }
 
-  constexpr static uint32_t Invert(uint32_t value) noexcept {
-    return MaxUInt() - value;
-  }
+  constexpr static uint32_t Invert(uint32_t value) noexcept { return MaxUInt() - value; }
   constexpr static uint32_t CharToValue(uint8_t value) noexcept {
     return (static_cast<uint32_t>(value) * MaxUInt()) / 255;
   }
 
-  static uint32_t Mix(uint32_t firstValue, uint32_t secondValue,
-                      MixStyle mixStyle) noexcept {
+  static uint32_t Mix(uint32_t firstValue, uint32_t secondValue, MixStyle mixStyle) noexcept {
     switch (mixStyle) {
       default:
       case MixStyle::HighestValue:
@@ -77,22 +71,19 @@ class ControlValue {
     }
   }
 
-  constexpr static uint32_t MultiplyValues(uint32_t first,
-                                           uint32_t second) noexcept {
+  constexpr static uint32_t MultiplyValues(uint32_t first, uint32_t second) noexcept {
     if (first >= MaxUInt() && second >= MaxUInt()) return MaxUInt();
     first >>= 9;
     second >>= 9;
     return (first * second) >> 6;
   }
 
-  constexpr static uint32_t Fraction(uint32_t numerator,
-                                     uint32_t denominator) noexcept {
+  constexpr static uint32_t Fraction(uint32_t numerator, uint32_t denominator) noexcept {
     if (denominator == 0) {
       return numerator == 0 ? 0 : MaxUInt();
     } else {
-      const uint64_t n =
-          (static_cast<uint64_t>(numerator) << 24u);  // to 48 bits
-      const uint64_t d = denominator;                 // remain 24 bits
+      const uint64_t n = (static_cast<uint64_t>(numerator) << 24u);  // to 48 bits
+      const uint64_t d = denominator;                                // remain 24 bits
       return std::min(MaxUInt(),
                       static_cast<uint32_t>(n / d));  // from 48 bit to 24 bit
     }
@@ -105,9 +96,7 @@ class ControlValue {
     else
       return primaryStyle;
   }
-  constexpr double Ratio() const noexcept {
-    return (double)value_ / (double)((1 << 24) - 1);
-  }
+  constexpr double Ratio() const noexcept { return (double)value_ / (double)((1 << 24) - 1); }
   constexpr double RoundedPercentage() const noexcept {
     return std::round(1000.0 * (double)value_ / (double)((1 << 24) - 1)) * 0.1;
   }
@@ -120,47 +109,39 @@ class ControlValue {
   uint32_t value_;
 };
 
-inline constexpr bool operator==(const ControlValue& lhs,
-                                 const ControlValue& rhs) noexcept {
+inline constexpr bool operator==(const ControlValue& lhs, const ControlValue& rhs) noexcept {
   return lhs.UInt() == rhs.UInt();
 }
 
-inline constexpr ControlValue operator+(const ControlValue& lhs,
-                                        const ControlValue& rhs) noexcept {
+inline constexpr ControlValue operator+(const ControlValue& lhs, const ControlValue& rhs) noexcept {
   return ControlValue(lhs.UInt() + rhs.UInt());
 }
 
-inline constexpr ControlValue operator-(const ControlValue& lhs,
-                                        const ControlValue& rhs) noexcept {
+inline constexpr ControlValue operator-(const ControlValue& lhs, const ControlValue& rhs) noexcept {
   return ControlValue(lhs.UInt() - rhs.UInt());
 }
 
-inline constexpr ControlValue operator*(const ControlValue& lhs,
-                                        const ControlValue& rhs) noexcept {
+inline constexpr ControlValue operator*(const ControlValue& lhs, const ControlValue& rhs) noexcept {
   return ControlValue(ControlValue::MultiplyValues(lhs.UInt(), rhs.UInt()));
 }
 
-inline constexpr ControlValue operator*(const ControlValue& lhs,
-                                        uint32_t factor) noexcept {
+inline constexpr ControlValue operator*(const ControlValue& lhs, uint32_t factor) noexcept {
   return ControlValue(lhs.UInt() * factor);
 }
 
 /**
  * @param ratio Value between 0 and 1.
  */
-inline constexpr ControlValue operator*(const ControlValue& lhs,
-                                        double ratio) noexcept {
+inline constexpr ControlValue operator*(const ControlValue& lhs, double ratio) noexcept {
   return ControlValue(lhs.UInt() * ratio);
 }
 
-inline constexpr ControlValue operator/(const ControlValue& lhs,
-                                        uint32_t factor) noexcept {
+inline constexpr ControlValue operator/(const ControlValue& lhs, uint32_t factor) noexcept {
   return ControlValue(lhs.UInt() / factor);
 }
 
 template <class... Pack>
-inline ControlValue Min(const ControlValue& first,
-                        const ControlValue& second) noexcept {
+inline ControlValue Min(const ControlValue& first, const ControlValue& second) noexcept {
   return ControlValue(std::min(first.UInt(), second.UInt()));
 }
 
@@ -171,13 +152,11 @@ inline ControlValue Min(const ControlValue& first, const ControlValue& second,
 }
 
 inline ControlValue Invert(const ControlValue& v) noexcept {
-  return ControlValue(ControlValue::MaxUInt() -
-                      std::min(v.UInt(), ControlValue::MaxUInt()));
+  return ControlValue(ControlValue::MaxUInt() - std::min(v.UInt(), ControlValue::MaxUInt()));
 }
 
 template <class... Pack>
-inline ControlValue Max(const ControlValue& first,
-                        const ControlValue& second) noexcept {
+inline ControlValue Max(const ControlValue& first, const ControlValue& second) noexcept {
   return ControlValue(std::max(first.UInt(), second.UInt()));
 }
 
@@ -189,12 +168,10 @@ inline ControlValue Max(const ControlValue& first, const ControlValue& second,
 
 inline ControlValue Mix(ControlValue firstValue, ControlValue secondValue,
                         MixStyle mixStyle) noexcept {
-  return ControlValue(
-      ControlValue::Mix(firstValue.UInt(), secondValue.UInt(), mixStyle));
+  return ControlValue(ControlValue::Mix(firstValue.UInt(), secondValue.UInt(), mixStyle));
 }
 
-inline ControlValue MixInput(ControlValue input, ControlValue mix,
-                             ControlValue previous_mix,
+inline ControlValue MixInput(ControlValue input, ControlValue mix, ControlValue previous_mix,
                              FunctionType function_type) noexcept {
   const MixStyle style = GetMixStyle(function_type);
   if (style == MixStyle::LastTakesPrecedence) {

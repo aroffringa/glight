@@ -10,8 +10,7 @@ namespace glight::theatre {
 class InvertEffectPS final : public PropertySet {
  public:
   InvertEffectPS() {
-    addProperty(
-        Property("offthreshold", "Off threshold", PropertyType::ControlValue));
+    addProperty(Property("offthreshold", "Off threshold", PropertyType::ControlValue));
   }
 
  protected:
@@ -25,8 +24,7 @@ class InvertEffectPS final : public PropertySet {
     }
   }
 
-  virtual unsigned getControlValue(const FolderObject &object,
-                                   size_t index) const final override {
+  virtual unsigned getControlValue(const FolderObject &object, size_t index) const final override {
     const InvertEffect &fx = static_cast<const InvertEffect &>(object);
     switch (index) {
       case 0:

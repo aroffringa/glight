@@ -46,21 +46,18 @@ void ParseNameAttr(const Object &node, NamedObject &object) {
   object.SetName(static_cast<const String &>(node["name"]).value);
 }
 
-void ParseFolderAttr(const Object &node,
-                     const ObservingPtr<FolderObject> &object,
+void ParseFolderAttr(const Object &node, const ObservingPtr<FolderObject> &object,
                      Management &management, bool hasFolder) {
   if (hasFolder) {
     size_t parent = ToNum(node["parent"]).AsSize();
     if (parent >= management.Folders().size())
-      throw std::runtime_error("Invalid parent " + std::to_string(parent) +
-                               " specified in file");
+      throw std::runtime_error("Invalid parent " + std::to_string(parent) + " specified in file");
     management.Folders()[parent]->Add(object);
   }
   ParseNameAttr(node, *object);
 }
 
-void ParseFolderAttr(const Object &node,
-                     const ObservingPtr<FolderObject> &object,
+void ParseFolderAttr(const Object &node, const ObservingPtr<FolderObject> &object,
                      Management &management) {
   ParseFolderAttr(node, object, management, true);
 }
@@ -75,37 +72,33 @@ void ParseFolders(const Array &node, Management &management) {
     } else {
       const size_t p = ToNum(*parent->second).AsSize();
       if (p >= management.Folders().size())
-        throw std::runtime_error("Reference to folder index " +
-                                 std::to_string(p) + ", only have " +
+        throw std::runtime_error("Reference to folder index " + std::to_string(p) + ", only have " +
                                  std::to_string(management.Folders().size()));
       management.AddFolder(*management.Folders()[p], name);
     }
   }
 }
 
-void ParseColorRangeParameters(const json::Object &node,
-                               ColorRangeParameters &parameters) {
+void ParseColorRangeParameters(const json::Object &node, ColorRangeParameters &parameters) {
   const json::Array &ranges = ToArr(node["ranges"]);
   for (json::Node &item : ranges) {
     const json::Object &obj = ToObj(item);
     unsigned input_min = ToNum(obj["input-min"]).AsUInt();
     unsigned input_max = ToNum(obj["input-max"]).AsUInt();
     if (dynamic_cast<const json::Null *>(&obj["color"])) {
-      parameters.GetRanges().emplace_back(input_min, input_max,
-                                          std::optional<Color>());
+      parameters.GetRanges().emplace_back(input_min, input_max, std::optional<Color>());
     } else {
       const json::Object &color = ToObj(obj["color"]);
       const unsigned char r = ToNum(color["red"]).AsUChar();
       const unsigned char g = ToNum(color["green"]).AsUChar();
       const unsigned char b = ToNum(color["blue"]).AsUChar();
-      parameters.GetRanges().emplace_back(
-          input_min, input_max, std::optional<Color>(std::in_place, r, g, b));
+      parameters.GetRanges().emplace_back(input_min, input_max,
+                                          std::optional<Color>(std::in_place, r, g, b));
     }
   }
 }
 
-void ParseRotationParameters(const json::Object &node,
-                             RotationSpeedParameters &parameters) {
+void ParseRotationParameters(const json::Object &node, RotationSpeedParameters &parameters) {
   const json::Array &ranges = ToArr(node["ranges"]);
   for (json::Node &item : ranges) {
     const json::Object &obj = ToObj(item);
@@ -113,13 +106,11 @@ void ParseRotationParameters(const json::Object &node,
     const unsigned input_max = ToNum(obj["input-max"]).AsUInt();
     const int speed_min = ToNum(obj["speed-min"]).AsInt();
     const int speed_max = ToNum(obj["speed-max"]).AsInt();
-    parameters.GetRanges().emplace_back(input_min, input_max, speed_min,
-                                        speed_max);
+    parameters.GetRanges().emplace_back(input_min, input_max, speed_min, speed_max);
   }
 }
 
-void ParseFixtureModeFunctions(const json::Array &node,
-                               FixtureMode &fixture_mode) {
+void ParseFixtureModeFunctions(const json::Array &node, FixtureMode &fixture_mode) {
   std::vector<FixtureModeFunction> functions;
   for (const json::Node &child : node) {
     const json::Object &obj = ToObj(child);
@@ -130,18 +121,15 @@ void ParseFixtureModeFunctions(const json::Array &node,
       fine_channel = ToNum(obj["fine-channel-offset"]).AsSize();
     }
     const unsigned shape = ToNum(obj["shape"]).AsUInt();
-    FixtureModeFunction &new_function =
-        functions.emplace_back(ft, dmx_offset, fine_channel, shape);
+    FixtureModeFunction &new_function = functions.emplace_back(ft, dmx_offset, fine_channel, shape);
     new_function.SetPower(OptionalUInt(obj, "power", 0));
     switch (ft) {
       case FunctionType::ColorMacro:
       case FunctionType::ColorWheel:
-        ParseColorRangeParameters(ToObj(obj["parameters"]),
-                                  new_function.GetColorRangeParameters());
+        ParseColorRangeParameters(ToObj(obj["parameters"]), new_function.GetColorRangeParameters());
         break;
       case FunctionType::RotationSpeed:
-        ParseRotationParameters(ToObj(obj["parameters"]),
-                                new_function.GetRotationParameters());
+        ParseRotationParameters(ToObj(obj["parameters"]), new_function.GetRotationParameters());
         break;
       default:
         break;
@@ -191,8 +179,7 @@ void ParseFixtureTypes(const json::Array &node, Management &management) {
         ParseFixtureModeFunctions(ToArr(mode_object["functions"]), new_mode);
       }
     }
-    ObservingPtr<FixtureType> observer =
-        management.GetTheatre().AddFixtureTypePtr(std::move(ft));
+    ObservingPtr<FixtureType> observer = management.GetTheatre().AddFixtureTypePtr(std::move(ft));
     ParseFolderAttr(ft_node, observer, management);
   }
 }
@@ -221,18 +208,15 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     FixtureType &type = *theatre.GetFixtureType(ToStr(f_node["type"]));
     const size_t mode_index = OptionalUInt(f_node, "mode-index", 0);
     if (mode_index >= type.Modes().size())
-      throw std::runtime_error("Invalid mode index (" +
-                               std::to_string(mode_index) +
+      throw std::runtime_error("Invalid mode index (" + std::to_string(mode_index) +
                                ") in fixture of type " + type.Name());
     Fixture &fixture = *theatre.AddFixture(type.Modes()[mode_index]);
     ParseNameAttr(f_node, fixture);
     fixture.GetPosition().X() = ToNum(f_node["position-x"]).AsDouble();
     fixture.GetPosition().Y() = ToNum(f_node["position-y"]).AsDouble();
-    fixture.GetPosition().Z() =
-        OptionalDouble(f_node, "position-z", Fixture::kDefaultHeight);
+    fixture.GetPosition().Z() = OptionalDouble(f_node, "position-z", Fixture::kDefaultHeight);
     fixture.SetDirection(ToNum(f_node["direction"]).AsDouble());
-    fixture.SetStaticTilt(
-        OptionalDouble(f_node, "tilt", Fixture::kDefaultTilt));
+    fixture.SetStaticTilt(OptionalDouble(f_node, "tilt", Fixture::kDefaultTilt));
     fixture.SetUpsideDown(OptionalBool(f_node, "upside-down", false));
     fixture.SetElectricPhase(OptionalSize(f_node, "electric-phase", 0));
     fixture.SetSymbol(FixtureSymbol(ToStr(f_node["symbol"])));
@@ -244,11 +228,9 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
     }
     if (fixture.Functions().size() != fixture.Mode().Functions().size()) {
       throw std::runtime_error(
-          "Corrupted fixture found: " + fixture.Name() + " of type " +
-          type.Name() + " has " + std::to_string(fixture.Functions().size()) +
-          " functions, but should have " +
-          std::to_string(fixture.Mode().Functions().size()) +
-          " functions according to its type");
+          "Corrupted fixture found: " + fixture.Name() + " of type " + type.Name() + " has " +
+          std::to_string(fixture.Functions().size()) + " functions, but should have " +
+          std::to_string(fixture.Mode().Functions().size()) + " functions according to its type");
     }
   }
 }
@@ -256,14 +238,12 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
 void ParseFixtureGroups(const json::Array &node, Management &management) {
   for (const Node &child : node) {
     const Object &f_node = ToObj(child);
-    ObservingPtr<FixtureGroup> group =
-        management.AddFixtureGroup().GetObserver();
+    ObservingPtr<FixtureGroup> group = management.AddFixtureGroup().GetObserver();
     ParseFolderAttr(f_node, group, management);
 
     const Array &fixtures = ToArr(f_node["fixtures"]);
     for (const Node &f : fixtures) {
-      ObservingPtr<Fixture> fixture =
-          management.GetTheatre().GetFixturePtr(ToStr(f));
+      ObservingPtr<Fixture> fixture = management.GetTheatre().GetFixturePtr(ToStr(f));
       group->Insert(std::move(fixture));
     }
   }
@@ -274,18 +254,15 @@ void ParseTheatre(const Object &node, Management &management) {
   theatre.SetWidth(OptionalDouble(node, "width", 10.0));
   theatre.SetDepth(OptionalDouble(node, "depth", 10.0));
   theatre.SetHeight(OptionalDouble(node, "height", 10.0));
-  theatre.SetFixtureSymbolSize(
-      OptionalDouble(node, "fixture-symbol-size", 0.5));
+  theatre.SetFixtureSymbolSize(OptionalDouble(node, "fixture-symbol-size", 0.5));
 
   ParseFixtureTypes(ToArr(node["fixture-types"]), management);
   ParseFixtures(ToArr(node["fixtures"]), management.GetTheatre());
 }
 
 void ParseFixtureControl(const Object &node, Management &management) {
-  Fixture &fixture =
-      management.GetTheatre().GetFixture(ToStr(node["fixture-ref"]));
-  ObservingPtr<FixtureControl> control_ptr =
-      management.AddFixtureControlPtr(fixture);
+  Fixture &fixture = management.GetTheatre().GetFixture(ToStr(node["fixture-ref"]));
+  ObservingPtr<FixtureControl> control_ptr = management.AddFixtureControlPtr(fixture);
   ParseFolderAttr(node, control_ptr, management);
   FixtureControl &control = *control_ptr;
   if (node.contains("filters")) {
@@ -299,8 +276,7 @@ void ParseFixtureControl(const Object &node, Management &management) {
 }
 
 void ParsePresetCollection(const Object &node, Management &management) {
-  ObservingPtr<PresetCollection> collection_ptr =
-      management.AddPresetCollectionPtr();
+  ObservingPtr<PresetCollection> collection_ptr = management.AddPresetCollectionPtr();
   ParseFolderAttr(node, collection_ptr, management);
   PresetCollection &collection = *collection_ptr;
   const Array &values = ToArr(node["values"]);
@@ -314,8 +290,7 @@ void ParsePresetCollection(const Object &node, Management &management) {
       throw std::runtime_error(
           "Expecting a controllable in "
           "controllable-ref, but object named " +
-          obj.Name() + " in folder " + folder.Name() +
-          " is something different");
+          obj.Name() + " in folder " + folder.Name() + " is something different");
     PresetValue &pv = collection.AddPresetValue(*controllable, inputIndex);
     pv.SetValue(ControlValue(ToNum(v["value"]).AsUInt()));
   }
@@ -328,8 +303,8 @@ std::vector<Input> ParseSequence(const Object &node, Management &management) {
     const Object &item = ToObj(item_node);
     size_t input = OptionalSize(item, "input-index", 0);
     size_t folderId = OptionalSize(item, "folder", 0);
-    Controllable &c = dynamic_cast<Controllable &>(
-        management.Folders()[folderId]->GetChild(ToStr(item["name"])));
+    Controllable &c =
+        dynamic_cast<Controllable &>(management.Folders()[folderId]->GetChild(ToStr(item["name"])));
     sequence.emplace_back(c, input);
   }
   return sequence;
@@ -359,8 +334,7 @@ void ParseChase(const Object &node, Management &management) {
 }
 
 void ParseTimeSequence(const Object &node, Management &management) {
-  ObservingPtr<TimeSequence> time_sequence_ptr =
-      management.AddTimeSequencePtr();
+  ObservingPtr<TimeSequence> time_sequence_ptr = management.AddTimeSequencePtr();
   ParseFolderAttr(node, time_sequence_ptr, management);
   TimeSequence &time_sequence = *time_sequence_ptr;
   time_sequence.SetSustain(ToBool(node["sustain"]));
@@ -374,16 +348,13 @@ void ParseTimeSequence(const Object &node, Management &management) {
     step.transition = ParseTransition(ToObj(step_obj["transition"]));
   }
   if (time_sequence.Steps().size() != time_sequence.Sequence().size())
-    throw std::runtime_error(
-        "nr of steps in time sequence doesn't match sequence size");
+    throw std::runtime_error("nr of steps in time sequence doesn't match sequence size");
 }
 
 void ParseEffect(const Object &node, Management &management) {
   EffectType type = NameToEffectType(ToStr(node["effect_type"]));
-  const TrackablePtr<Controllable> &effect_ptr =
-      management.AddEffect(Effect::Make(type));
-  ParseFolderAttr(node, StaticObserverCast<Effect>(effect_ptr.GetObserver()),
-                  management);
+  const TrackablePtr<Controllable> &effect_ptr = management.AddEffect(Effect::Make(type));
+  ParseFolderAttr(node, StaticObserverCast<Effect>(effect_ptr.GetObserver()), management);
   std::unique_ptr<PropertySet> ps = PropertySet::Make(*effect_ptr);
   const Array &properties = ToArr(node["properties"]);
   for (const Node &item : properties) {
@@ -422,8 +393,7 @@ void ParseEffect(const Object &node, Management &management) {
     const size_t cInputIndex = OptionalSize(c_node, "input-index", 0);
     const size_t folderId = OptionalSize(c_node, "folder", 0);
     Folder *folder = management.Folders()[folderId].Get();
-    effect.AddConnection(dynamic_cast<Controllable &>(folder->GetChild(cName)),
-                         cInputIndex);
+    effect.AddConnection(dynamic_cast<Controllable &>(folder->GetChild(cName)), cInputIndex);
   }
 }
 
@@ -433,22 +403,20 @@ KeySceneItem &ParseKeySceneItem(const Object &node, Scene &scene) {
   return *item;
 }
 
-ControlSceneItem &ParseControlSceneItem(const Object &node, Scene &scene,
-                                        Management &management) {
+ControlSceneItem &ParseControlSceneItem(const Object &node, Scene &scene, Management &management) {
   const size_t folderId = OptionalSize(node, "folder", 0);
   Folder *folder = management.Folders()[folderId].Get();
-  Controllable &controllable = static_cast<Controllable &>(
-      folder->GetChild(ToStr(node["controllable-ref"])));
-  ControlSceneItem *item = scene.AddControlSceneItem(
-      ToNum(node["offset"]).AsDouble(), controllable, 0);
+  Controllable &controllable =
+      static_cast<Controllable &>(folder->GetChild(ToStr(node["controllable-ref"])));
+  ControlSceneItem *item =
+      scene.AddControlSceneItem(ToNum(node["offset"]).AsDouble(), controllable, 0);
   item->StartValue().Set(ToNum(node["start-value"]).AsUInt());
   item->EndValue().Set(ToNum(node["end-value"]).AsUInt());
   return *item;
 }
 
 BlackoutSceneItem &ParseBlackoutSceneItem(const Object &node, Scene &scene) {
-  BlackoutSceneItem &item =
-      scene.AddBlackoutItem(ToNum(node["offset"]).AsDouble());
+  BlackoutSceneItem &item = scene.AddBlackoutItem(ToNum(node["offset"]).AsDouble());
   item.SetOperation(GetBlackoutOperation(ToStr(node["operation"])));
   item.SetFadeSpeed(ToNum(node["fade-speed"]).AsDouble());
   return item;
@@ -464,8 +432,7 @@ void ParseSceneItem(const Object &node, Scene &scene, Management &management) {
   else if (type == "blackout")
     item = &ParseBlackoutSceneItem(node, scene);
   else
-    throw std::runtime_error(std::string("Invalid type for scene item: ") +
-                             type);
+    throw std::runtime_error(std::string("Invalid type for scene item: ") + type);
   item->SetDurationInMS(ToNum(node["duration"]).AsDouble());
 }
 
@@ -512,8 +479,7 @@ void ParseSourceValues(const Array &node, Management &management) {
     size_t folderId = OptionalSize(object, "folder", 0);
     const std::string name = ToStr(object["controllable-ref"]);
     Folder *folder = management.Folders()[folderId].Get();
-    Controllable &controllable =
-        dynamic_cast<Controllable &>(folder->GetChild(name));
+    Controllable &controllable = dynamic_cast<Controllable &>(folder->GetChild(name));
     const size_t inputIndex = OptionalSize(object, "input-index", 0);
     SourceValue &value = management.AddSourceValue(controllable, inputIndex);
     value.A() = ParseSingleSourceValue(ToObj(object["a"]));
@@ -521,19 +487,17 @@ void ParseSourceValues(const Array &node, Management &management) {
   }
 }
 
-void ParseGuiPresetRef(const Object &node, uistate::FaderSetState &fader,
-                       Management &management) {
+void ParseGuiPresetRef(const Object &node, uistate::FaderSetState &fader, Management &management) {
   if (node.contains("name")) {
     // Old way of storing inputs ; support to be removed at a later time
     const size_t input = OptionalSize(node, "input-index", 0);
     const size_t folder_id = OptionalSize(node, "folder", 0);
     const std::string name = ToStr(node["name"]);
     Folder *folder = management.Folders()[folder_id].Get();
-    Controllable &controllable =
-        static_cast<Controllable &>(folder->GetChild(name));
+    Controllable &controllable = static_cast<Controllable &>(folder->GetChild(name));
     SourceValue *source = management.GetSourceValue(controllable, input);
-    fader.faders.emplace_back(std::make_unique<uistate::FaderState>(
-        std::vector<theatre::SourceValue *>{source}));
+    fader.faders.emplace_back(
+        std::make_unique<uistate::FaderState>(std::vector<theatre::SourceValue *>{source}));
   } else if (node.contains("source-values")) {
     std::vector<SourceValue *> sources;
     const Array &source_value_node = ToArr(node["source-values"]);
@@ -544,15 +508,13 @@ void ParseGuiPresetRef(const Object &node, uistate::FaderSetState &fader,
         const size_t folder_id = OptionalSize(object, "folder", 0);
         const std::string name = ToStr(object["name"]);
         Folder *folder = management.Folders()[folder_id].Get();
-        Controllable &controllable =
-            static_cast<Controllable &>(folder->GetChild(name));
+        Controllable &controllable = static_cast<Controllable &>(folder->GetChild(name));
         sources.emplace_back(management.GetSourceValue(controllable, input));
       } else {
         sources.emplace_back(nullptr);
       }
     }
-    fader.faders.emplace_back(
-        std::make_unique<uistate::FaderState>(std::move(sources)));
+    fader.faders.emplace_back(std::make_unique<uistate::FaderState>(std::move(sources)));
   } else {
     fader.faders.emplace_back(std::make_unique<uistate::FaderState>());
   }
@@ -560,17 +522,13 @@ void ParseGuiPresetRef(const Object &node, uistate::FaderSetState &fader,
   std::unique_ptr<uistate::FaderState> &state = fader.faders.back();
   if (node.contains("is-toggle")) {
     // This is for older files and can be removed in the future
-    state->SetFaderType(ToBool(node["is-toggle"])
-                            ? uistate::FaderControlType::ToggleButton
-                            : uistate::FaderControlType::Fader);
+    state->SetFaderType(ToBool(node["is-toggle"]) ? uistate::FaderControlType::ToggleButton
+                                                  : uistate::FaderControlType::Fader);
   } else {
-    state->SetFaderType(
-        uistate::GetFaderControlType(ToStr(node["fader-type"])));
+    state->SetFaderType(uistate::GetFaderControlType(ToStr(node["fader-type"])));
   }
-  if (!IsFullColumnType(state->GetFaderType()))
-    state->SetColumn(ToBool(node["new-toggle-column"]));
-  state->SetDisplayName(
-      OptionalBool(node, "display-name", state->DisplayName()));
+  if (!IsFullColumnType(state->GetFaderType())) state->SetColumn(ToBool(node["new-toggle-column"]));
+  state->SetDisplayName(OptionalBool(node, "display-name", state->DisplayName()));
   state->SetDisplayFlashButton(
       OptionalBool(node, "display-flash-button", state->DisplayFlashButton()));
   state->SetDisplayCheckButton(
@@ -580,8 +538,7 @@ void ParseGuiPresetRef(const Object &node, uistate::FaderSetState &fader,
   state->SetLabel(OptionalString(node, "label", state->Label()));
 }
 
-void ParseGuiFaderSet(const Object &node, uistate::UIState &uiState,
-                      Management &management) {
+void ParseGuiFaderSet(const Object &node, uistate::UIState &uiState, Management &management) {
   uiState.FaderSets().emplace_back(std::make_unique<uistate::FaderSetState>());
   uistate::FaderSetState &fader_set = *uiState.FaderSets().back();
   fader_set.name = ToStr(node["name"]);
@@ -604,8 +561,7 @@ void ParseGuiFaderSet(const Object &node, uistate::UIState &uiState,
   }
 }
 
-void ParseGui(const Object &node, uistate::UIState &uiState,
-              Management &management) {
+void ParseGui(const Object &node, uistate::UIState &uiState, Management &management) {
   uiState.SetLayoutLocked(OptionalBool(node, "layout-locked", false));
   uiState.SetShowFixtures(OptionalBool(node, "show-fixtures", true));
   uiState.SetShowBeams(OptionalBool(node, "show-beams", true));
@@ -628,8 +584,7 @@ void ParseGui(const Object &node, uistate::UIState &uiState,
   }
 }
 
-void parseGlightShow(const Object &node, Management &management,
-                     uistate::UIState *uiState) {
+void parseGlightShow(const Object &node, Management &management, uistate::UIState *uiState) {
   ParseFolders(ToArr(node["folders"]), management);
   ParseTheatre(ToObj(node["theatre"]), management);
   ParseFixtureGroups(ToArr(node["fixture-groups"]), management);
@@ -637,28 +592,24 @@ void parseGlightShow(const Object &node, Management &management,
   ParseSourceValues(ToArr(node["source-values"]), management);
   if (uiState != nullptr) {
     const auto &gui = node.children.find("gui");
-    if (gui != node.children.end())
-      ParseGui(ToObj(*gui->second), *uiState, management);
+    if (gui != node.children.end()) ParseGui(ToObj(*gui->second), *uiState, management);
   }
 }
 
 }  // namespace
 
-void Read(std::istream &stream, Management &management,
-          uistate::UIState *uiState) {
+void Read(std::istream &stream, Management &management, uistate::UIState *uiState) {
   std::unique_ptr<Node> root = json::Parse(stream);
   parseGlightShow(ToObj(*root), management, uiState);
 }
 
-void Read(const std::string &filename, Management &management,
-          uistate::UIState *uiState) {
+void Read(const std::string &filename, Management &management, uistate::UIState *uiState) {
   std::ifstream stream(filename);
   if (!stream) throw std::runtime_error("Failed to open file");
   Read(stream, management, uiState);
 }
 
-void ImportFixtureTypes(const std::string &filename,
-                        theatre::Management &management) {
+void ImportFixtureTypes(const std::string &filename, theatre::Management &management) {
   theatre::Management file_management(management.Settings());
   system::Read(filename, file_management);
   const std::vector<TrackablePtr<FixtureType>> &new_types =
@@ -666,8 +617,7 @@ void ImportFixtureTypes(const std::string &filename,
   for (const TrackablePtr<FixtureType> &type : new_types) {
     if (!management.RootFolder().GetChildIfExists(type->Name())) {
       const TrackablePtr<FixtureType> &added_type =
-          management.GetTheatre().AddFixtureType(
-              MakeTrackable<FixtureType>(*type));
+          management.GetTheatre().AddFixtureType(MakeTrackable<FixtureType>(*type));
       management.RootFolder().Add(added_type.GetObserver());
     }
   }

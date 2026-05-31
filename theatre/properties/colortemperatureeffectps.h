@@ -10,17 +10,13 @@ namespace glight::theatre {
 class ColorTemperatureEffectPS final : public PropertySet {
  public:
   ColorTemperatureEffectPS() {
-    addProperty(Property("min-temperature", "Minimum temperature",
-                         PropertyType::Integer));
-    addProperty(Property("max-temperature", "Maximum temperature",
-                         PropertyType::Integer));
+    addProperty(Property("min-temperature", "Minimum temperature", PropertyType::Integer));
+    addProperty(Property("max-temperature", "Maximum temperature", PropertyType::Integer));
   }
 
  protected:
-  virtual void setInteger(FolderObject &object, size_t index,
-                          int value) const override {
-    ColorTemperatureEffect &ctfx =
-        static_cast<ColorTemperatureEffect &>(object);
+  virtual void setInteger(FolderObject &object, size_t index, int value) const override {
+    ColorTemperatureEffect &ctfx = static_cast<ColorTemperatureEffect &>(object);
     switch (index) {
       case 0:
         ctfx.SetMinimumTemperature(value);
@@ -31,10 +27,8 @@ class ColorTemperatureEffectPS final : public PropertySet {
     }
   }
 
-  virtual int getInteger(const FolderObject &object,
-                         size_t index) const override {
-    const ColorTemperatureEffect &ctfx =
-        static_cast<const ColorTemperatureEffect &>(object);
+  virtual int getInteger(const FolderObject &object, size_t index) const override {
+    const ColorTemperatureEffect &ctfx = static_cast<const ColorTemperatureEffect &>(object);
     switch (index) {
       case 0:
         return ctfx.MinimumTemperature();

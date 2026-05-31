@@ -12,16 +12,14 @@ class ConstantValueEffect final : public Effect {
         _value(ControlValue::MaxUInt())  // 2 %
   {}
 
-  virtual EffectType GetType() const override {
-    return EffectType::ConstantValue;
-  }
+  virtual EffectType GetType() const override { return EffectType::ConstantValue; }
 
   unsigned Value() const { return _value; }
   void SetValue(unsigned value) { _value = value; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
     setAllOutputs(ControlValue(_value), primary);
   }
 

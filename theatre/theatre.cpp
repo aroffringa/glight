@@ -49,20 +49,17 @@ const TrackablePtr<Fixture> &Theatre::AddFixture(const FixtureMode &mode) {
       }
     } while (!ready);
   }
-  TrackablePtr<Fixture> &f = _fixtures.emplace_back(
-      system::MakeTrackable<Fixture>(*this, mode, prefix + ext));
+  TrackablePtr<Fixture> &f =
+      _fixtures.emplace_back(system::MakeTrackable<Fixture>(*this, mode, prefix + ext));
   NotifyDmxChange();
   return f;
 }
 
-const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
-    StockFixture stock_fixture) {
-  return _fixtureTypes.emplace_back(
-      system::MakeTrackable<FixtureType>(stock_fixture));
+const TrackablePtr<FixtureType> &Theatre::AddFixtureType(StockFixture stock_fixture) {
+  return _fixtureTypes.emplace_back(system::MakeTrackable<FixtureType>(stock_fixture));
 }
 
-const TrackablePtr<FixtureType> &Theatre::AddFixtureType(
-    TrackablePtr<FixtureType> &&fixture_type) {
+const TrackablePtr<FixtureType> &Theatre::AddFixtureType(TrackablePtr<FixtureType> &&fixture_type) {
   return _fixtureTypes.emplace_back(std::move(fixture_type));
 }
 
@@ -77,38 +74,32 @@ Fixture &Theatre::GetFixture(const std::string &name) const {
   return *NamedObject::FindNamedObject(_fixtures, name);
 }
 
-system::ObservingPtr<Fixture> Theatre::GetFixturePtr(
-    const std::string &name) const {
+system::ObservingPtr<Fixture> Theatre::GetFixturePtr(const std::string &name) const {
   return NamedObject::FindNamedObject(_fixtures, name).GetObserver();
 }
 
-const system::TrackablePtr<FixtureType> &Theatre::GetFixtureType(
-    const std::string &name) const {
+const system::TrackablePtr<FixtureType> &Theatre::GetFixtureType(const std::string &name) const {
   return NamedObject::FindNamedObject(_fixtureTypes, name);
 }
 
-system::ObservingPtr<FixtureType> Theatre::GetFixtureTypePtr(
-    const FixtureType &type) const {
+system::ObservingPtr<FixtureType> Theatre::GetFixtureTypePtr(const FixtureType &type) const {
   std::vector<system::TrackablePtr<FixtureType>>::const_iterator result =
-      std::find_if(
-          _fixtureTypes.begin(), _fixtureTypes.end(),
-          [&type](const system::TrackablePtr<FixtureType> &element) -> bool {
-            return element.Get() == &type;
-          });
+      std::find_if(_fixtureTypes.begin(), _fixtureTypes.end(),
+                   [&type](const system::TrackablePtr<FixtureType> &element) -> bool {
+                     return element.Get() == &type;
+                   });
   assert(result != _fixtureTypes.end());
   return result->GetObserver();
 }
 
 FixtureFunction &Theatre::GetFixtureFunction(const std::string &name) const {
   for (const system::TrackablePtr<Fixture> &f : _fixtures) {
-    const std::vector<std::unique_ptr<FixtureFunction>> &functions =
-        f->Functions();
+    const std::vector<std::unique_ptr<FixtureFunction>> &functions = f->Functions();
     for (const std::unique_ptr<FixtureFunction> &function : functions) {
       if (function->Name() == name) return *function;
     }
   }
-  throw std::runtime_error(
-      std::string("Can not find fixture function with name ") + name);
+  throw std::runtime_error(std::string("Can not find fixture function with name ") + name);
 }
 
 void Theatre::RemoveFixture(const Fixture &fixture) {
@@ -133,8 +124,7 @@ void Theatre::RemoveFixtureType(const FixtureType &fixtureType) {
   _fixtureTypes.erase(_fixtureTypes.begin() + ftIndex);
 }
 
-void Theatre::SwapFixturePositions(const Fixture &fixture_a,
-                                   const Fixture &fixture_b) {
+void Theatre::SwapFixturePositions(const Fixture &fixture_a, const Fixture &fixture_b) {
   system::TrackablePtr<Fixture> *a = nullptr;
   system::TrackablePtr<Fixture> *b = nullptr;
   for (system::TrackablePtr<Fixture> &f : _fixtures) {
@@ -197,9 +187,7 @@ Coordinate3D Theatre::GetFreePosition() const {
     }
   }
   for (size_t i = 0; i != n; ++i) {
-    if (available[i])
-      return Coordinate3D(i % rowLength, i / rowLength,
-                          Fixture::kDefaultHeight);
+    if (available[i]) return Coordinate3D(i % rowLength, i / rowLength, Fixture::kDefaultHeight);
   }
   return Coordinate3D(n % rowLength, n / rowLength, Fixture::kDefaultHeight);
 }

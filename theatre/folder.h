@@ -37,9 +37,8 @@ class Folder : public FolderObject {
   void Add(system::ObservingPtr<FolderObject> object) {
     FolderObject *ptr = object.Get();
     if (GetChildIfExists(ptr->Name()))
-      throw std::runtime_error(
-          "Trying to add object " + ptr->Name() + " to folder " + Name() +
-          ", but an object with that name already exists in this folder");
+      throw std::runtime_error("Trying to add object " + ptr->Name() + " to folder " + Name() +
+                               ", but an object with that name already exists in this folder");
     _objects.emplace_back(std::move(object));
     ptr->SetParent(*this);
   }
@@ -54,8 +53,7 @@ class Folder : public FolderObject {
     std::vector<system::ObservingPtr<FolderObject>>::iterator srciter =
         std::find(_objects.begin(), _objects.end(), &object);
     if (srciter != _objects.begin() && srciter != _objects.end()) {
-      std::vector<system::ObservingPtr<FolderObject>>::iterator previous =
-          srciter;
+      std::vector<system::ObservingPtr<FolderObject>>::iterator previous = srciter;
       --previous;
       std::swap(*previous, *srciter);
     }
@@ -71,9 +69,7 @@ class Folder : public FolderObject {
     }
   }
 
-  const std::vector<system::ObservingPtr<FolderObject>> Children() const {
-    return _objects;
-  }
+  const std::vector<system::ObservingPtr<FolderObject>> Children() const { return _objects; }
 
   Folder *FollowDown(const std::string &path) {
     if (path.empty())
@@ -92,9 +88,7 @@ class Folder : public FolderObject {
   FolderObject *FollowRelPath(const std::string &path);
   FolderObject *FollowRelPath(std::string &&path);
 
-  FolderObject &GetChild(const std::string &name) {
-    return *FindNamedObject(_objects, name);
-  }
+  FolderObject &GetChild(const std::string &name) { return *FindNamedObject(_objects, name); }
 
   FolderObject *GetChildIfExists(std::string_view name) {
     return FindNamedObjectIfExists(_objects, name).Get();
@@ -134,8 +128,7 @@ class Folder : public FolderObject {
     return GetAvailableName(std::string(prefix));
   }
 
-  static void Move(system::ObservingPtr<FolderObject> object,
-                   Folder &destination) {
+  static void Move(system::ObservingPtr<FolderObject> object, Folder &destination) {
     FolderObject *ptr = object.Get();
     if (&destination != &ptr->Parent()) {
       if (destination.GetChildIfExists(ptr->Name()))
@@ -154,14 +147,11 @@ class Folder : public FolderObject {
     auto sep = std::find(path.begin() + strPos, path.end(), '/');
     std::string subpath;
     if (sep == path.end()) {
-      FolderObject *obj =
-          FindNamedObjectIfExists(_objects, path.substr(strPos)).Get();
+      FolderObject *obj = FindNamedObjectIfExists(_objects, path.substr(strPos)).Get();
       return dynamic_cast<Folder *>(obj);
     } else {
       FolderObject *obj =
-          FindNamedObjectIfExists(
-              _objects, path.substr(strPos, sep - path.begin() - strPos))
-              .Get();
+          FindNamedObjectIfExists(_objects, path.substr(strPos, sep - path.begin() - strPos)).Get();
       Folder *folder = dynamic_cast<Folder *>(obj);
       if (folder)
         return folder->followDown(path, sep + 1 - path.begin());
@@ -174,15 +164,11 @@ class Folder : public FolderObject {
     auto sep = std::find(path.begin() + strPos, path.end(), '/');
     std::string subpath;
     if (sep == path.end()) {
-      FolderObject *obj =
-          FindNamedObjectIfExists(_objects, std::move(path).substr(strPos))
-              .Get();
+      FolderObject *obj = FindNamedObjectIfExists(_objects, std::move(path).substr(strPos)).Get();
       return dynamic_cast<Folder *>(obj);
     } else {
       FolderObject *obj =
-          FindNamedObjectIfExists(
-              _objects, path.substr(strPos, sep - path.begin() - strPos))
-              .Get();
+          FindNamedObjectIfExists(_objects, path.substr(strPos, sep - path.begin() - strPos)).Get();
       Folder *folder = dynamic_cast<Folder *>(obj);
       if (folder)
         return folder->followDown(std::move(path), sep + 1 - path.begin());

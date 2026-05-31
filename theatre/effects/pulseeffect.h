@@ -29,8 +29,8 @@ class PulseEffect final : public Effect {
   void SetRepeat(bool repeat) { _repeat = repeat; }
 
  protected:
-  virtual void MixImplementation(const ControlValue* values,
-                                 const Timing& timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue* values, const Timing& timing,
+                                 bool primary) override {
     if (values[0].UInt() == 0) {
       is_active_[primary] = false;
     } else {
@@ -39,8 +39,8 @@ class PulseEffect final : public Effect {
         is_active_[primary] = true;
       }
       double pos = timing.TimeInMS() - start_time_[primary];
-      size_t cycle_duration = transition_in_.LengthInMs() + sustain_ +
-                              transition_out_.LengthInMs() + sleep_;
+      size_t cycle_duration =
+          transition_in_.LengthInMs() + sustain_ + transition_out_.LengthInMs() + sleep_;
       if (_repeat || pos < cycle_duration) {
         pos = std::fmod(pos, cycle_duration);
         bool handled = false;

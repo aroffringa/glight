@@ -23,8 +23,7 @@ namespace glight::theatre {
 using system::ObservingPtr;
 
 Chase &AutoDesign::MakeRunningLight(const DesignInfo &design,
-                                    const std::vector<ColorOrVariable> &colors,
-                                    RunType runType) {
+                                    const std::vector<ColorOrVariable> &colors, RunType runType) {
   ObservingPtr<Chase> chase = design.management->AddChasePtr();
   chase->SetName(GetValidName(design, "Runchase"));
   design.destination->Add(chase);
@@ -45,24 +44,19 @@ Chase &AutoDesign::MakeRunningLight(const DesignInfo &design,
   }
   for (size_t frameIndex = 0; frameIndex != frames; ++frameIndex) {
     size_t nFixInPattern = 1;
-    if ((runType == RunType::InwardRun &&
-         (frameIndex != frames - 1 || colors.size() % 2 == 0)) ||
-        (runType == RunType::OutwardRun &&
-         (frameIndex != 0 || colors.size() % 2 == 0)))
+    if ((runType == RunType::InwardRun && (frameIndex != frames - 1 || colors.size() % 2 == 0)) ||
+        (runType == RunType::OutwardRun && (frameIndex != 0 || colors.size() % 2 == 0)))
       nFixInPattern = 2;
 
-    ObservingPtr<PresetCollection> pc =
-        design.management->AddPresetCollectionPtr();
+    ObservingPtr<PresetCollection> pc = design.management->AddPresetCollectionPtr();
     pc->SetName(design.destination->GetAvailableName(chase->Name() + "_"));
     design.destination->Add(pc);
     // If there are less colours given than fixtures, the sequence is repeated
     // several times. This loop is for that purpose.
     for (size_t patternIndex = 0;
-         patternIndex <
-         (design.controllables->size() + colors.size() - 1) / colors.size();
+         patternIndex < (design.controllables->size() + colors.size() - 1) / colors.size();
          ++patternIndex) {
-      for (size_t fixInPatIndex = 0; fixInPatIndex != nFixInPattern;
-           ++fixInPatIndex) {
+      for (size_t fixInPatIndex = 0; fixInPatIndex != nFixInPattern; ++fixInPatIndex) {
         size_t cIndex = 0;
         switch (runType) {
           case RunType::IncreasingRun:
@@ -79,8 +73,7 @@ Chase &AutoDesign::MakeRunningLight(const DesignInfo &design,
             if (fixInPatIndex == 0)
               cIndex = frameIndex + patternIndex * colors.size();
             else
-              cIndex = (colors.size() - frameIndex - 1) +
-                       patternIndex * colors.size();
+              cIndex = (colors.size() - frameIndex - 1) + patternIndex * colors.size();
             break;
           case RunType::OutwardRun:
             if (fixInPatIndex == 0)
@@ -91,8 +84,8 @@ Chase &AutoDesign::MakeRunningLight(const DesignInfo &design,
         }
         if (cIndex < design.controllables->size()) {
           size_t colourIndex = cIndex % colors.size();
-          AddPresetValue(*design.management, *(*design.controllables)[cIndex],
-                         *pc, colors[colourIndex], design.deduction);
+          AddPresetValue(*design.management, *(*design.controllables)[cIndex], *pc,
+                         colors[colourIndex], design.deduction);
         }
       }
     }
@@ -107,9 +100,9 @@ Chase &AutoDesign::MakeRunningLight(const DesignInfo &design,
   return *chase;
 }
 
-Chase &AutoDesign::MakeColorVariation(
-    const DesignInfo &design, const std::vector<ColorOrVariable> &colors,
-    double variation) {
+Chase &AutoDesign::MakeColorVariation(const DesignInfo &design,
+                                      const std::vector<ColorOrVariable> &colors,
+                                      double variation) {
   Management &management = *design.management;
   Folder &destination = *design.destination;
   ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
@@ -133,19 +126,14 @@ Chase &AutoDesign::MakeColorVariation(
       if (std::holds_alternative<Color>(color_or_var)) {
         const Color color = std::get<Color>(color_or_var);
         Color randomizedColor(
-            std::max<double>(
-                0.0, std::min<double>(static_cast<double>(color.Red()) + redVar,
-                                      255)),
-            std::max<double>(
-                0.0, std::min<double>(
-                         static_cast<double>(color.Green()) + greenVar, 255)),
-            std::max<double>(
-                0.0, std::min<double>(
-                         static_cast<double>(color.Blue()) + blueVar, 255)));
+            std::max<double>(0.0, std::min<double>(static_cast<double>(color.Red()) + redVar, 255)),
+            std::max<double>(0.0,
+                             std::min<double>(static_cast<double>(color.Green()) + greenVar, 255)),
+            std::max<double>(0.0,
+                             std::min<double>(static_cast<double>(color.Blue()) + blueVar, 255)));
         AddPresetValue(management, *c, pc, randomizedColor, design.deduction);
       } else {
-        AddPresetValue(management, *c, pc,
-                       std::get<VariableEffect *>(color_or_var),
+        AddPresetValue(management, *c, pc, std::get<VariableEffect *>(color_or_var),
                        design.deduction);
       }
     }
@@ -157,8 +145,7 @@ Chase &AutoDesign::MakeColorVariation(
 }
 
 Chase &AutoDesign::MakeColorShift(const DesignInfo &design,
-                                  const std::vector<ColorOrVariable> &colors,
-                                  ShiftType shiftType) {
+                                  const std::vector<ColorOrVariable> &colors, ShiftType shiftType) {
   Management &management = *design.management;
   Folder &destination = *design.destination;
   ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
@@ -176,20 +163,17 @@ Chase &AutoDesign::MakeColorShift(const DesignInfo &design,
       pos[frameIndex].resize(frames);
       bool duplicate = false;
       do {
-        for (size_t i = 0; i != pos[frameIndex].size(); ++i)
-          pos[frameIndex][i] = i;
+        for (size_t i = 0; i != pos[frameIndex].size(); ++i) pos[frameIndex][i] = i;
         std::shuffle(pos[frameIndex].begin(), pos[frameIndex].end(), mt);
         duplicate = false;
         // Check whether previous frames are equal to the new frame
-        for (size_t i = 0; i != frameIndex; ++i)
-          duplicate = duplicate || pos[i] == pos[frameIndex];
+        for (size_t i = 0; i != frameIndex; ++i) duplicate = duplicate || pos[i] == pos[frameIndex];
         // Check whether all fixtures are switched to a new position
         // (if all colours are different, this guarantees that the
         //  fixture changes colour)
         if (frameIndex != 0) {
           for (size_t i = 0; i != pos[frameIndex].size(); ++i)
-            duplicate =
-                duplicate || pos[frameIndex][i] == pos[frameIndex - 1][i];
+            duplicate = duplicate || pos[frameIndex][i] == pos[frameIndex - 1][i];
         }
         // For the last frame, also check whether all positions are different
         // compared to the first frame.
@@ -219,37 +203,34 @@ Chase &AutoDesign::MakeColorShift(const DesignInfo &design,
           colourIndex = pos[frameIndex][cIndex % frames];
           break;
       }
-      AddPresetValue(management, *(*design.controllables)[cIndex], pc,
-                     colors[colourIndex], design.deduction);
+      AddPresetValue(management, *(*design.controllables)[cIndex], pc, colors[colourIndex],
+                     design.deduction);
     }
     seq.emplace_back(pc, 0);
     management.AddSourceValue(pc, 0);
   }
   if (shiftType == ShiftType::BackAndForthShift) {
-    for (size_t i = 2; i < frames; ++i)
-      seq.emplace_back(*seq[frames - i].GetControllable(), 0);
+    for (size_t i = 2; i < frames; ++i) seq.emplace_back(*seq[frames - i].GetControllable(), 0);
   }
   chase.SetSequence(std::move(seq));
   return chase;
 }
 
-Controllable &AutoDesign::MakeVUMeter(
-    const DesignInfo &design, const std::vector<ColorOrVariable> &colors,
-    VUMeterDirection direction) {
+Controllable &AutoDesign::MakeVUMeter(const DesignInfo &design,
+                                      const std::vector<ColorOrVariable> &colors,
+                                      VUMeterDirection direction) {
   Management &management = *design.management;
   Folder &destination = *design.destination;
   if (colors.size() != design.controllables->size())
-    throw std::runtime_error(
-        "Number of colours did not match number of fixtures");
+    throw std::runtime_error("Number of colours did not match number of fixtures");
   std::unique_ptr<AudioLevelEffect> audioLevel(new AudioLevelEffect());
   audioLevel->SetName(GetValidName(design, "VUMeter"));
-  Effect &newAudioLevel = static_cast<Effect &>(
-      *management.AddEffect(std::move(audioLevel), destination));
+  Effect &newAudioLevel =
+      static_cast<Effect &>(*management.AddEffect(std::move(audioLevel), destination));
   for (size_t inp = 0; inp != newAudioLevel.NInputs(); ++inp)
     management.AddSourceValue(newAudioLevel, inp);
   size_t nLevels = 0;
-  if (direction == VUMeterDirection::VUInward ||
-      direction == VUMeterDirection::VUOutward)
+  if (direction == VUMeterDirection::VUInward || direction == VUMeterDirection::VUOutward)
     nLevels = (design.controllables->size() + 1) / 2;
   else
     nLevels = design.controllables->size();
@@ -257,10 +238,9 @@ Controllable &AutoDesign::MakeVUMeter(
     std::unique_ptr<ThresholdEffect> threshold(new ThresholdEffect());
     threshold->SetLowerStartLimit(((1 << 24) - 1) * level / nLevels);
     threshold->SetLowerEndLimit(((1 << 24) - 1) * (level + 1) / nLevels);
-    threshold->SetName(
-        destination.GetAvailableName(newAudioLevel.Name() + "_Thr"));
-    Effect &newEffect = static_cast<Effect &>(
-        *management.AddEffect(std::move(threshold), destination));
+    threshold->SetName(destination.GetAvailableName(newAudioLevel.Name() + "_Thr"));
+    Effect &newEffect =
+        static_cast<Effect &>(*management.AddEffect(std::move(threshold), destination));
     for (size_t inp = 0; inp != newEffect.NInputs(); ++inp)
       management.AddSourceValue(newEffect, inp);
 
@@ -294,8 +274,8 @@ Controllable &AutoDesign::MakeVUMeter(
         else  // VUOutward
           fixIndex = nLevels + level;
       }
-      AddPresetValue(management, *(*design.controllables)[fixIndex], pc,
-                     colors[fixIndex], design.deduction);
+      AddPresetValue(management, *(*design.controllables)[fixIndex], pc, colors[fixIndex],
+                     design.deduction);
     }
     management.AddSourceValue(pc, 0);
     newEffect.AddConnection(pc, 0);
@@ -304,14 +284,13 @@ Controllable &AutoDesign::MakeVUMeter(
   return newAudioLevel;
 }
 
-Chase &AutoDesign::MakeIncreasingChase(
-    const DesignInfo &design, const std::vector<ColorOrVariable> &colors,
-    IncreasingType incType) {
+Chase &AutoDesign::MakeIncreasingChase(const DesignInfo &design,
+                                       const std::vector<ColorOrVariable> &colors,
+                                       IncreasingType incType) {
   Management &management = *design.management;
   Folder &destination = *design.destination;
   if (colors.size() != design.controllables->size())
-    throw std::runtime_error(
-        "Number of controllables does not match number of provided colours");
+    throw std::runtime_error("Number of controllables does not match number of provided colours");
   ObservingPtr<Chase> chase_ptr = management.AddChasePtr();
   Chase &chase = *chase_ptr;
   chase.SetName(GetValidName(design, "Increasing chase"));
@@ -358,8 +337,7 @@ Chase &AutoDesign::MakeIncreasingChase(
     destination.Add(pc_ptr);
 
     for (size_t i = startFixture; i != endFixture; ++i) {
-      AddPresetValue(management, *(*design.controllables)[i], pc, colors[i],
-                     design.deduction);
+      AddPresetValue(management, *(*design.controllables)[i], pc, colors[i], design.deduction);
     }
     seq.emplace_back(pc, 0);
     management.AddSourceValue(pc, 0);
@@ -368,33 +346,28 @@ Chase &AutoDesign::MakeIncreasingChase(
   return chase;
 }
 
-Effect &AutoDesign::MakeFire(const DesignInfo &design,
-                             const std::vector<ColorOrVariable> &colors) {
+Effect &AutoDesign::MakeFire(const DesignInfo &design, const std::vector<ColorOrVariable> &colors) {
   Management &management = *design.management;
   Folder &destination = *design.destination;
   std::unique_ptr<FlickerEffect> flicker = std::make_unique<FlickerEffect>();
   flicker->SetSpeed(ControlValue::MaxUInt() / 333);
   flicker->SetName(GetValidName(design, "Fire"));
-  Effect &parent = static_cast<Effect &>(
-      *management.AddEffect(std::move(flicker), destination));
-  for (size_t inp = 0; inp != parent.NInputs(); ++inp)
-    management.AddSourceValue(parent, inp);
+  Effect &parent = static_cast<Effect &>(*management.AddEffect(std::move(flicker), destination));
+  for (size_t inp = 0; inp != parent.NInputs(); ++inp) management.AddSourceValue(parent, inp);
   std::mt19937 mt;
   std::uniform_int_distribution uniform(0, 10);
   for (size_t i = 0; i != design.controllables->size(); ++i) {
     const ObservingPtr<Controllable> &controllable = (*design.controllables)[i];
     if (colors.size() == 1) {
       std::vector preset_controllable{controllable};
-      DesignInfo preset_design{&management, &destination, "",
-                               &preset_controllable, design.deduction};
+      DesignInfo preset_design{&management, &destination, "", &preset_controllable,
+                               design.deduction};
       PresetCollection &preset = MakeColorPreset(preset_design, colors);
       parent.AddConnection(preset, 0);
     } else {
       std::vector chase_controllable{controllable};
-      DesignInfo chase_design{&management, &destination, "",
-                              &chase_controllable, design.deduction};
-      Chase &chase =
-          MakeColorShift(chase_design, colors, ShiftType::IncreasingShift);
+      DesignInfo chase_design{&management, &destination, "", &chase_controllable, design.deduction};
+      Chase &chase = MakeColorShift(chase_design, colors, ShiftType::IncreasingShift);
       parent.AddConnection(chase, 0);
       chase.GetTransition().SetType(TransitionType::Fade);
       chase.GetTransition().SetLengthInMs(1000 + i + uniform(mt) * 10);

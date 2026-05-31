@@ -66,9 +66,7 @@ class PropertySet {
     setBool(*_object, property.set_index_, value);
   }
 
-  bool GetBool(const Property &property) const {
-    return getBool(*_object, property.set_index_);
-  }
+  bool GetBool(const Property &property) const { return getBool(*_object, property.set_index_); }
 
   void SetChoice(const Property &property, const std::string &value) {
     setChoice(*_object, property.set_index_, value);
@@ -94,8 +92,7 @@ class PropertySet {
     return getTransition(*_object, property.set_index_);
   }
 
-  void SetTimePattern(const Property &property,
-                      const system::TimePattern &value) {
+  void SetTimePattern(const Property &property, const system::TimePattern &value) {
     setTimePattern(*_object, property.set_index_, value);
   }
 
@@ -112,8 +109,7 @@ class PropertySet {
     throw std::runtime_error("Property not found: " + name);
   }
 
-  void AssignProperty(const Property &to, const Property &from,
-                      const PropertySet &fromSet);
+  void AssignProperty(const Property &to, const Property &from, const PropertySet &fromSet);
 
   bool EqualPropertyValues(const Property &property, const Effect &rhs);
 
@@ -130,28 +126,23 @@ class PropertySet {
    * @param value The new value of the property (between 0 and
    * ControlValue::MaxUInt()).
    */
-  virtual void setControlValue(FolderObject &object, size_t index,
-                               unsigned value) const {
+  virtual void setControlValue(FolderObject &object, size_t index, unsigned value) const {
     setterNotImplemented();
   }
-  virtual unsigned getControlValue(const FolderObject &object,
-                                   size_t index) const {
+  virtual unsigned getControlValue(const FolderObject &object, size_t index) const {
     getterNotImplemented();
     return 0;
   }
 
-  virtual void setChoice(FolderObject &object, size_t index,
-                         const std::string &value) const {
+  virtual void setChoice(FolderObject &object, size_t index, const std::string &value) const {
     setterNotImplemented();
   }
-  virtual std::string getChoice(const FolderObject &object,
-                                size_t index) const {
+  virtual std::string getChoice(const FolderObject &object, size_t index) const {
     getterNotImplemented();
     throw std::runtime_error("");
   }
 
-  virtual void setDuration(FolderObject &object, size_t index,
-                           double value) const {
+  virtual void setDuration(FolderObject &object, size_t index, double value) const {
     setterNotImplemented();
   }
   virtual double getDuration(const FolderObject &object, size_t index) const {
@@ -175,12 +166,10 @@ class PropertySet {
     return 0;
   }
 
-  virtual void setTransition(FolderObject &object, size_t index,
-                             const Transition &value) const {
+  virtual void setTransition(FolderObject &object, size_t index, const Transition &value) const {
     setterNotImplemented();
   }
-  virtual Transition getTransition(const FolderObject &object,
-                                   size_t index) const {
+  virtual Transition getTransition(const FolderObject &object, size_t index) const {
     getterNotImplemented();
     return Transition();
   }

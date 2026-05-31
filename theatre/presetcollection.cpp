@@ -20,11 +20,9 @@ std::vector<Color> PresetCollection::InputColors(size_t /*index*/) const {
   for (const std::unique_ptr<PresetValue>& preset : _presetValues) {
     ControlValue value = preset->Value();
     const Controllable& controllable = preset->GetControllable();
-    const FixtureControl* fixture_control =
-        dynamic_cast<const FixtureControl*>(&controllable);
+    const FixtureControl* fixture_control = dynamic_cast<const FixtureControl*>(&controllable);
     if (fixture_control) {
-      const FunctionType input_type =
-          fixture_control->InputType(preset->InputIndex());
+      const FunctionType input_type = fixture_control->InputType(preset->InputIndex());
       if (IsColor(input_type)) {
         const Color color = GetFunctionColor(input_type);
         FixtureColorSum& sum = fixture_sum[fixture_control];
@@ -36,13 +34,11 @@ std::vector<Color> PresetCollection::InputColors(size_t /*index*/) const {
         // sum.n = fixture_control->GetFixture().Type().ColorScalingValue();
       }
     } else {
-      const std::vector<Color> colors =
-          controllable.InputColors(preset->InputIndex());
+      const std::vector<Color> colors = controllable.InputColors(preset->InputIndex());
       result.insert(result.end(), colors.begin(), colors.end());
     }
   }
-  for (const std::pair<const FixtureControl* const, FixtureColorSum>& p :
-       fixture_sum) {
+  for (const std::pair<const FixtureControl* const, FixtureColorSum>& p : fixture_sum) {
     const FixtureColorSum& sum = p.second;
     result.emplace_back(std::min(255u, sum.red), std::min(255u, sum.green),
                         std::min(255u, sum.blue));
@@ -55,9 +51,8 @@ void PresetCollection::SetFromCurrentSituation(Management& management) {
   std::vector<std::unique_ptr<SourceValue>>& values = management.SourceValues();
   for (std::unique_ptr<SourceValue>& sv : values) {
     if (!sv->A().IsIgnorable() && (&sv->GetControllable()) != this) {
-      std::unique_ptr<PresetValue>& value =
-          _presetValues.emplace_back(std::make_unique<PresetValue>(
-              sv->GetControllable(), sv->InputIndex()));
+      std::unique_ptr<PresetValue>& value = _presetValues.emplace_back(
+          std::make_unique<PresetValue>(sv->GetControllable(), sv->InputIndex()));
       value->SetValue(sv->A().Value());
     }
   }
@@ -65,19 +60,16 @@ void PresetCollection::SetFromCurrentSituation(Management& management) {
 }
 
 void PresetCollection::SetFromCurrentFixtures(
-    Management& management,
-    const std::set<system::ObservingPtr<Fixture>, std::less<>>& fixtures) {
+    Management& management, const std::set<system::ObservingPtr<Fixture>, std::less<>>& fixtures) {
   Clear();
   std::vector<std::unique_ptr<SourceValue>>& values = management.SourceValues();
   for (std::unique_ptr<SourceValue>& sv : values) {
     if (!sv->A().IsIgnorable() && (&sv->GetControllable()) != this) {
-      FixtureControl* control =
-          dynamic_cast<FixtureControl*>(&sv->GetControllable());
+      FixtureControl* control = dynamic_cast<FixtureControl*>(&sv->GetControllable());
       if (control) {
         if (fixtures.contains(&control->GetFixture())) {
-          std::unique_ptr<PresetValue>& value =
-              _presetValues.emplace_back(std::make_unique<PresetValue>(
-                  sv->GetControllable(), sv->InputIndex()));
+          std::unique_ptr<PresetValue>& value = _presetValues.emplace_back(
+              std::make_unique<PresetValue>(sv->GetControllable(), sv->InputIndex()));
           value->SetValue(sv->A().Value());
         }
       }

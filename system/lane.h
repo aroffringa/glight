@@ -275,13 +275,9 @@ class Lane {
     }
   }
 
-  void write(const value_type* elements, size_t n) {
-    write_generic(elements, n);
-  }
+  void write(const value_type* elements, size_t n) { write_generic(elements, n); }
 
-  void move_write(value_type* elements, size_t n) {
-    write_generic(elements, n);
-  }
+  void move_write(value_type* elements, size_t n) { write_generic(elements, n); }
 
   bool read(value_type& destination) {
     std::unique_lock<std::mutex> lock(_mutex);
@@ -441,16 +437,13 @@ class Lane {
 
   mutable std::mutex _mutex;
 
-  std::condition_variable _writing_possible_condition,
-      _reading_possible_condition;
+  std::condition_variable _writing_possible_condition, _reading_possible_condition;
 
   size_t read_position() const noexcept {
     return (_write_position + _free_write_space) % _capacity;
   }
 
-  size_t free_read_space() const noexcept {
-    return _capacity - _free_write_space;
-  }
+  size_t free_read_space() const noexcept { return _capacity - _free_write_space; }
 
   // This is a template to allow const and non-const (to be able to move)
   template <typename T>
@@ -561,13 +554,9 @@ class Lane {
           << "Capacity: " << _capacity << '\n'
           << "Total read/write ops: " << _debugMeasureCount << '\n'
           << "Average size of buffer, measured per read/write op.: "
-          << round(double(_debugSummedSize) * 100.0 / _debugMeasureCount) /
-                 100.0
-          << '\n'
-          << "Number of wait events during reading: " << _debugReadWaitCount
-          << '\n'
-          << "Number of wait events during writing: " << _debugWriteWaitCount
-          << '\n';
+          << round(double(_debugSummedSize) * 100.0 / _debugMeasureCount) / 100.0 << '\n'
+          << "Number of wait events during reading: " << _debugReadWaitCount << '\n'
+          << "Number of wait events during writing: " << _debugWriteWaitCount << '\n';
       std::cout << str.str();
     }
   }

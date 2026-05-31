@@ -18,13 +18,9 @@ class DereferencingIterator {
 
   value_type& operator*() { return **iterator_; }
 
-  bool operator==(const DereferencingIterator& rhs) const {
-    return iterator_ == rhs.iterator_;
-  }
+  bool operator==(const DereferencingIterator& rhs) const { return iterator_ == rhs.iterator_; }
 
-  bool operator!=(const DereferencingIterator& rhs) const {
-    return iterator_ != rhs.iterator_;
-  }
+  bool operator!=(const DereferencingIterator& rhs) const { return iterator_ != rhs.iterator_; }
 
   IterT iterator_;
 };
@@ -43,13 +39,9 @@ class DereferencingMapIterator {
   value_type& operator*() { return *iterator_->second; }
   const value_type& operator*() const { return *iterator_->second; }
 
-  bool operator==(const DereferencingMapIterator& rhs) const {
-    return iterator_ == rhs.iterator_;
-  }
+  bool operator==(const DereferencingMapIterator& rhs) const { return iterator_ == rhs.iterator_; }
 
-  bool operator!=(const DereferencingMapIterator& rhs) const {
-    return iterator_ != rhs.iterator_;
-  }
+  bool operator!=(const DereferencingMapIterator& rhs) const { return iterator_ != rhs.iterator_; }
 
   IterT iterator_;
 };

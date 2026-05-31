@@ -34,9 +34,7 @@ class PresetValue {
    * controllable.
    */
   PresetValue(const PresetValue &source, Controllable &controllable)
-      : _value(source._value),
-        _controllable(&controllable),
-        _inputIndex(source._inputIndex) {}
+      : _value(source._value), _controllable(&controllable), _inputIndex(source._inputIndex) {}
 
   ~PresetValue() { _signalDelete(); }
 

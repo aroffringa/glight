@@ -23,8 +23,7 @@ using theatre::FixtureModeFunction;
 using theatre::FixtureType;
 
 AddFixtureWindow::AddFixtureWindow() {
-  const std::vector<theatre::StockFixture> stock_fixtures =
-      theatre::GetStockFixtureList();
+  const std::vector<theatre::StockFixture> stock_fixtures = theatre::GetStockFixtureList();
   for (theatre::StockFixture stock_fixture : stock_fixtures) {
     stock_list_.emplace(ToString(stock_fixture), stock_fixture);
   }
@@ -102,11 +101,10 @@ void AddFixtureWindow::onStockProjectToggled() {
 system::ObservingPtr<theatre::FixtureType> AddFixtureWindow::GetSelectedType(
     system::TrackablePtr<theatre::FixtureType> &stock_type) {
   Gtk::TreeModel::const_iterator selected_type = type_combo_.get_active();
-  system::ObservingPtr<theatre::FixtureType> type =
-      (*selected_type)[type_columns_.type_];
+  system::ObservingPtr<theatre::FixtureType> type = (*selected_type)[type_columns_.type_];
   if (!type) {
-    stock_type = system::MakeTrackable<theatre::FixtureType>(
-        (*selected_type)[type_columns_.stock_fixture_]);
+    stock_type =
+        system::MakeTrackable<theatre::FixtureType>((*selected_type)[type_columns_.stock_fixture_]);
     type = stock_type.GetObserver();
   }
   return type;
@@ -117,8 +115,7 @@ void AddFixtureWindow::updateModes() {
   if (selected_type) {
     channel_mode_model_->clear();
     system::TrackablePtr<theatre::FixtureType> stock_type;
-    system::ObservingPtr<theatre::FixtureType> type =
-        GetSelectedType(stock_type);
+    system::ObservingPtr<theatre::FixtureType> type = GetSelectedType(stock_type);
     const std::vector<FixtureMode> &modes = type->Modes();
     for (size_t index = 0; index != modes.size(); ++index) {
       Gtk::TreeModel::iterator iter = channel_mode_model_->append();
@@ -133,8 +130,7 @@ void AddFixtureWindow::updateModes() {
 
 void AddFixtureWindow::updateFilters() {
   Gtk::TreeModel::const_iterator selected_type = type_combo_.get_active();
-  Gtk::TreeModel::const_iterator selected_mode =
-      channel_mode_combo_.get_active();
+  Gtk::TreeModel::const_iterator selected_mode = channel_mode_combo_.get_active();
   bool enable_master = false;
   bool enable_color = false;
   bool enable_monochrome = false;
@@ -142,8 +138,7 @@ void AddFixtureWindow::updateFilters() {
   bool has_temperature = false;
   if (selected_type && selected_mode) {
     system::TrackablePtr<theatre::FixtureType> stock_type;
-    system::ObservingPtr<theatre::FixtureType> type =
-        GetSelectedType(stock_type);
+    system::ObservingPtr<theatre::FixtureType> type = GetSelectedType(stock_type);
     const size_t mode_index = (*selected_mode)[mode_columns_.mode_index_];
     const FixtureMode &mode = type->Modes()[mode_index];
     for (const FixtureModeFunction &function : mode.Functions()) {
@@ -180,8 +175,7 @@ void AddFixtureWindow::updateFilters() {
 
 void AddFixtureWindow::fillStock() {
   type_model_->clear();
-  for (const std::pair<const std::string, theatre::StockFixture> &item :
-       stock_list_) {
+  for (const std::pair<const std::string, theatre::StockFixture> &item : stock_list_) {
     Gtk::TreeModel::iterator iter = type_model_->append();
     (*iter)[type_columns_.type_str_] = item.first;
     (*iter)[type_columns_.stock_fixture_] = item.second;
@@ -212,16 +206,14 @@ void AddFixtureWindow::fillFromProject() {
 void AddFixtureWindow::onAdd() {
   Gtk::TreeModel::const_iterator iter = type_combo_.get_active();
   const int count = std::atoi(count_entry_.get_text().c_str());
-  Gtk::TreeModel::const_iterator selected_mode =
-      channel_mode_combo_.get_active();
+  Gtk::TreeModel::const_iterator selected_mode = channel_mode_combo_.get_active();
   if (iter && selected_mode && count > 0) {
     theatre::Management &management = Instance::Management();
     std::unique_lock<std::mutex> lock(management.Mutex());
 
     system::ObservingPtr<FixtureType> type = (*iter)[type_columns_.type_];
     if (!type) {
-      const theatre::StockFixture stock_fixture =
-          (*iter)[type_columns_.stock_fixture_];
+      const theatre::StockFixture stock_fixture = (*iter)[type_columns_.stock_fixture_];
       FixtureType *project_type = dynamic_cast<FixtureType *>(
           management.RootFolder().GetChildIfExists(ToString(stock_fixture)));
       if (project_type) {
@@ -235,18 +227,15 @@ void AddFixtureWindow::onAdd() {
     const FixtureMode &mode = type->Modes()[mode_index];
 
     for (size_t fixIter = 0; fixIter != static_cast<size_t>(count); ++fixIter) {
-      const theatre::Coordinate3D position =
-          management.GetTheatre().GetFreePosition();
+      const theatre::Coordinate3D position = management.GetTheatre().GetFreePosition();
       theatre::Fixture &fixture = *management.GetTheatre().AddFixture(mode);
-      theatre::DmxChannel channel(
-          fixture.GetFirstChannel().Channel(),
-          management.GetUniverses().FirstOutputUniverse());
+      theatre::DmxChannel channel(fixture.GetFirstChannel().Channel(),
+                                  management.GetUniverses().FirstOutputUniverse());
       fixture.SetChannel(channel);
       fixture.GetPosition() = position;
 
-      theatre::FixtureControl &control =
-          static_cast<theatre::FixtureControl &>(*management.AddFixtureControl(
-              fixture, management.RootFolder() /* TODO */));
+      theatre::FixtureControl &control = static_cast<theatre::FixtureControl &>(
+          *management.AddFixtureControl(fixture, management.RootFolder() /* TODO */));
       if (temperature_cb_.get_active()) {
         control.AddFilter(std::make_unique<theatre::ColorTemperatureFilter>());
       } else {

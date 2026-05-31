@@ -23,8 +23,7 @@ struct DesignInfo {
   ColorDeduction deduction;
 };
 
-std::string GetValidName(const DesignInfo& design,
-                         std::string_view alternative_name);
+std::string GetValidName(const DesignInfo& design, std::string_view alternative_name);
 
 }  // namespace glight::theatre
 

@@ -27,8 +27,7 @@ class ControlSceneItem final : public SceneItem {
   std::string Description() const override { return _controllable.Name(); }
   void Mix(const Timing &timing, bool primary) override {
     const double ratio = (timing.TimeInMS() - OffsetInMS()) / DurationInMS();
-    const ControlValue value(_startValue.UInt() * (1.0 - ratio) +
-                             _endValue.UInt() * ratio);
+    const ControlValue value(_startValue.UInt() * (1.0 - ratio) + _endValue.UInt() * ratio);
     _controllable.MixInput(_input, value, connection_value_);
   }
   Controllable &GetControllable() const { return _controllable; }

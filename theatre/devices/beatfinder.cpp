@@ -14,8 +14,7 @@ void BeatFinder::open() {
   if (_isOpen) throw AlsaError("Alsa was opened twice");
 
   // Open PCM device for capture.
-  int rc =
-      snd_pcm_open(&_handle, device_name_.c_str(), SND_PCM_STREAM_CAPTURE, 0);
+  int rc = snd_pcm_open(&_handle, device_name_.c_str(), SND_PCM_STREAM_CAPTURE, 0);
   if (rc < 0) throw AlsaError(snd_strerror(rc));
   _isOpen = true;
 
@@ -25,8 +24,7 @@ void BeatFinder::open() {
   snd_pcm_hw_params_any(_handle, hw_params);
 
   // Interleaved mode
-  rc = snd_pcm_hw_params_set_access(_handle, hw_params,
-                                    SND_PCM_ACCESS_RW_INTERLEAVED);
+  rc = snd_pcm_hw_params_set_access(_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
   if (rc < 0) throw AlsaError(snd_strerror(rc));
 
   // Signed 16-bit little-endian format
@@ -55,8 +53,7 @@ void BeatFinder::open() {
   snd_pcm_sw_params_malloc(&sw_params);
   snd_pcm_sw_params_current(_handle, sw_params);
 
-  snd_pcm_sw_params_set_start_threshold(_handle, sw_params,
-                                        buffer_size - period_size);
+  snd_pcm_sw_params_set_start_threshold(_handle, sw_params, buffer_size - period_size);
   // snd_pcm_sw_params_set_avail_min(_handle, sw_params, period_size);
 
   rc = snd_pcm_sw_params(_handle, sw_params);
@@ -70,8 +67,7 @@ void BeatFinder::open() {
   fvec_t *tempo_out = new_fvec(2);
   constexpr unsigned hopsPerAudioLevel = 4;
   const char method[] = "default";
-  aubio_tempo_t *tempo =
-      new_aubio_tempo(method, period_size * 2, period_size, samplerate);
+  aubio_tempo_t *tempo = new_aubio_tempo(method, period_size * 2, period_size, samplerate);
   fvec_t *ibuf = new_fvec(period_size);
   const smpl_t silence_threshold = -30.;
   uint_t is_silence = 0;
@@ -107,12 +103,8 @@ void BeatFinder::open() {
       smpl_t s = static_cast<smpl_t>(l) + static_cast<smpl_t>(r);
       fvec_set_sample(ibuf, s, i);
 
-      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(l) *
-                                        static_cast<int32_t>(l)) >>
-                  8;
-      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(r) *
-                                        static_cast<int32_t>(r)) >>
-                  8;
+      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(l) * static_cast<int32_t>(l)) >> 8;
+      audioRMS += static_cast<uint32_t>(static_cast<int32_t>(r) * static_cast<int32_t>(r)) >> 8;
     }
     audio_level_accumulator += audioRMS / (2 * period_size);
     ++nAudioLevels;
@@ -123,8 +115,7 @@ void BeatFinder::open() {
     }
     aubio_tempo_do(tempo, ibuf, tempo_out);
     const smpl_t is_beat = fvec_get_sample(tempo_out, 0);
-    if (silence_threshold != -90)
-      is_silence = aubio_silence_detection(ibuf, silence_threshold);
+    if (silence_threshold != -90) is_silence = aubio_silence_detection(ibuf, silence_threshold);
 
     if (is_beat && !is_silence) {
       const smpl_t confidence = aubio_tempo_get_confidence(tempo);

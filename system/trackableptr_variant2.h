@@ -56,8 +56,7 @@ class TrackablePtr {
    * make sure it is destructed.
    */
   constexpr explicit TrackablePtr(T* object) noexcept : object_(object) {}
-  constexpr explicit TrackablePtr(std::unique_ptr<T> object) noexcept
-      : object_(object.release()) {}
+  constexpr explicit TrackablePtr(std::unique_ptr<T> object) noexcept : object_(object.release()) {}
   /**
    * Move construct a TrackablePtr. The @p source will be reset, and all
    * observers that track the source beforehand, will track the newly
@@ -105,8 +104,7 @@ class TrackablePtr {
   }
 
   constexpr TrackablePtr(const TrackablePtr&) noexcept = delete;
-  constexpr TrackablePtr<T>& operator=(const TrackablePtr<T>& rhs) noexcept =
-      delete;
+  constexpr TrackablePtr<T>& operator=(const TrackablePtr<T>& rhs) noexcept = delete;
 
   /**
    * If set, destroys the object being pointed to and unlinks
@@ -154,9 +152,7 @@ class TrackablePtr {
     return object_;
   }
 
-  constexpr explicit operator bool() const noexcept {
-    return static_cast<bool>(object_);
-  }
+  constexpr explicit operator bool() const noexcept { return static_cast<bool>(object_); }
 
   constexpr friend bool operator==(const TrackablePtr<T>& lhs,
                                    const TrackablePtr<T>& rhs) noexcept {
@@ -166,12 +162,10 @@ class TrackablePtr {
                                    const TrackablePtr<T>& rhs) noexcept {
     return lhs.object_ != rhs.object_;
   }
-  constexpr friend bool operator<(const TrackablePtr<T>& lhs,
-                                  const TrackablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator<(const TrackablePtr<T>& lhs, const TrackablePtr<T>& rhs) noexcept {
     return lhs.object_ < rhs.object_;
   }
-  constexpr friend bool operator>(const TrackablePtr<T>& lhs,
-                                  const TrackablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator>(const TrackablePtr<T>& lhs, const TrackablePtr<T>& rhs) noexcept {
     return lhs.object_ > rhs.object_;
   }
   constexpr friend bool operator<=(const TrackablePtr<T>& lhs,
@@ -191,12 +185,10 @@ class TrackablePtr {
                                    const ObservingPtr<T>& rhs) noexcept {
     return lhs.Get() != rhs.Get();
   }
-  constexpr friend bool operator<(const TrackablePtr<T>& lhs,
-                                  const ObservingPtr<T>& rhs) noexcept {
+  constexpr friend bool operator<(const TrackablePtr<T>& lhs, const ObservingPtr<T>& rhs) noexcept {
     return lhs.Get() < rhs.Get();
   }
-  constexpr friend bool operator>(const TrackablePtr<T>& lhs,
-                                  const ObservingPtr<T>& rhs) noexcept {
+  constexpr friend bool operator>(const TrackablePtr<T>& lhs, const ObservingPtr<T>& rhs) noexcept {
     return lhs.Get() > rhs.Get();
   }
   constexpr friend bool operator<=(const TrackablePtr<T>& lhs,
@@ -216,12 +208,10 @@ class TrackablePtr {
                                    const TrackablePtr<T>& rhs) noexcept {
     return lhs.Get() != rhs.Get();
   }
-  constexpr friend bool operator<(const ObservingPtr<T>& lhs,
-                                  const TrackablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator<(const ObservingPtr<T>& lhs, const TrackablePtr<T>& rhs) noexcept {
     return lhs.Get() < rhs.Get();
   }
-  constexpr friend bool operator>(const ObservingPtr<T>& lhs,
-                                  const TrackablePtr<T>& rhs) noexcept {
+  constexpr friend bool operator>(const ObservingPtr<T>& lhs, const TrackablePtr<T>& rhs) noexcept {
     return lhs.Get() > rhs.Get();
   }
   constexpr friend bool operator<=(const ObservingPtr<T>& lhs,
@@ -235,8 +225,7 @@ class TrackablePtr {
 
   template <typename ObserverType = T>
   requires(std::is_same_v<ObserverType, T> ||
-           std::is_convertible_v<ObserverType, T>)
-      ObservingPtr<ObserverType> GetObserver() const;
+           std::is_convertible_v<ObserverType, T>) ObservingPtr<ObserverType> GetObserver() const;
 
   /**
    * Number of observers that track this pointer.
@@ -294,8 +283,7 @@ class ObservingPtr {
    * Copy construct an ObservingPtr. The new ObservingPtr will track
    * the same pointer as the @p source.
    */
-  constexpr ObservingPtr(const ObservingPtr& source) noexcept
-      : data_(source.data_) {
+  constexpr ObservingPtr(const ObservingPtr& source) noexcept : data_(source.data_) {
     if (data_) {
       ++data_->reference_count;
     }
@@ -354,42 +342,28 @@ class ObservingPtr {
   }
 
   template <typename ExplicitCastableType>
-  requires(
-      !std::is_convertible_v<T*, ExplicitCastableType*> &&
-      internal::StaticConversion<T*, ExplicitCastableType*>) constexpr explicit
+  requires(!std::is_convertible_v<T*, ExplicitCastableType*> &&
+           internal::StaticConversion<T*, ExplicitCastableType*>) constexpr explicit
   operator ObservingPtr<ExplicitCastableType>() const& {
     if (data_) data_->reference_count++;
     return ObservingPtr<ExplicitCastableType>(data_);
   }
 
   template <typename ExplicitCastableType>
-  requires(
-      !std::is_convertible_v<T*, ExplicitCastableType*> &&
-      internal::StaticConversion<T*, ExplicitCastableType*>) constexpr explicit
+  requires(!std::is_convertible_v<T*, ExplicitCastableType*> &&
+           internal::StaticConversion<T*, ExplicitCastableType*>) constexpr explicit
   operator ObservingPtr<ExplicitCastableType>() && {
     ObservingPtr<ExplicitCastableType> result(data_);
     data_ = nullptr;
     return result;
   }
 
-  constexpr bool operator==(const ObservingPtr& rhs) const {
-    return Get() == rhs.Get();
-  }
-  constexpr bool operator!=(const ObservingPtr& rhs) const {
-    return Get() != rhs.Get();
-  }
-  constexpr bool operator<(const ObservingPtr& rhs) const {
-    return Get() < rhs.Get();
-  }
-  constexpr bool operator>(const ObservingPtr& rhs) const {
-    return Get() > rhs.Get();
-  }
-  constexpr bool operator<=(const ObservingPtr& rhs) const {
-    return Get() <= rhs.Get();
-  }
-  constexpr bool operator>=(const ObservingPtr& rhs) const {
-    return Get() >= rhs.Get();
-  }
+  constexpr bool operator==(const ObservingPtr& rhs) const { return Get() == rhs.Get(); }
+  constexpr bool operator!=(const ObservingPtr& rhs) const { return Get() != rhs.Get(); }
+  constexpr bool operator<(const ObservingPtr& rhs) const { return Get() < rhs.Get(); }
+  constexpr bool operator>(const ObservingPtr& rhs) const { return Get() > rhs.Get(); }
+  constexpr bool operator<=(const ObservingPtr& rhs) const { return Get() <= rhs.Get(); }
+  constexpr bool operator>=(const ObservingPtr& rhs) const { return Get() >= rhs.Get(); }
   constexpr friend bool operator==(const ObservingPtr& lhs, const T* rhs) {
     return lhs.Get() == rhs;
   }
@@ -402,18 +376,10 @@ class ObservingPtr {
   constexpr friend bool operator!=(const T* lhs, const ObservingPtr& rhs) {
     return lhs != rhs.Get();
   }
-  constexpr friend bool operator<(const ObservingPtr& lhs, const T* rhs) {
-    return lhs.Get() < rhs;
-  }
-  constexpr friend bool operator<(const T* lhs, const ObservingPtr& rhs) {
-    return lhs < rhs.Get();
-  }
-  constexpr friend bool operator>(const ObservingPtr& lhs, const T* rhs) {
-    return lhs.Get() > rhs;
-  }
-  constexpr friend bool operator>(const T* lhs, const ObservingPtr& rhs) {
-    return lhs > rhs.Get();
-  }
+  constexpr friend bool operator<(const ObservingPtr& lhs, const T* rhs) { return lhs.Get() < rhs; }
+  constexpr friend bool operator<(const T* lhs, const ObservingPtr& rhs) { return lhs < rhs.Get(); }
+  constexpr friend bool operator>(const ObservingPtr& lhs, const T* rhs) { return lhs.Get() > rhs; }
+  constexpr friend bool operator>(const T* lhs, const ObservingPtr& rhs) { return lhs > rhs.Get(); }
   constexpr friend bool operator<=(const ObservingPtr& lhs, const T* rhs) {
     return lhs.Get() <= rhs;
   }
@@ -426,9 +392,7 @@ class ObservingPtr {
   constexpr friend bool operator>=(const T* lhs, const ObservingPtr& rhs) {
     return lhs >= rhs.Get();
   }
-  constexpr T* Get() const {
-    return data_ ? static_cast<T*>(data_->object) : nullptr;
-  }
+  constexpr T* Get() const { return data_ ? static_cast<T*>(data_->object) : nullptr; }
   constexpr T& operator*() const noexcept {
     assert(data_);
     assert(data_->object);
@@ -455,12 +419,10 @@ class ObservingPtr {
 
 template <typename T>
 template <typename ObservingType>
-requires(std::is_same_v<ObservingType, T> ||
-         std::is_convertible_v<ObservingType, T>)
+requires(std::is_same_v<ObservingType, T> || std::is_convertible_v<ObservingType, T>)
     ObservingPtr<ObservingType> TrackablePtr<T>::GetObserver() const {
   if (data_ == nullptr) {
-    data_ =
-        new internal::TrackablePtrData{.object = object_, .reference_count = 2};
+    data_ = new internal::TrackablePtrData{.object = object_, .reference_count = 2};
   } else {
     data_->reference_count++;
   }

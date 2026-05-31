@@ -30,17 +30,15 @@ class FixtureFunction final : public NamedObject {
   FixtureFunction(const FixtureFunction &source) = default;
   FixtureFunction &operator=(const FixtureFunction &source) = default;
 
-  void MixChannels(unsigned value, MixStyle mixStyle, unsigned *channels,
-                   unsigned universe) {
+  void MixChannels(unsigned value, MixStyle mixStyle, unsigned *channels, unsigned universe) {
     if (main_channel_.Universe() == universe) {
       if (!fine_channel_) {
-        channels[main_channel_.Channel()] = ControlValue::Mix(
-            channels[main_channel_.Channel()], value, mixStyle);
+        channels[main_channel_.Channel()] =
+            ControlValue::Mix(channels[main_channel_.Channel()], value, mixStyle);
       } else {  // 16 bit
-        const unsigned currentValue = (channels[main_channel_.Channel()]) +
-                                      (channels[fine_channel_->Channel()] >> 8);
-        const unsigned mixedValue =
-            ControlValue::Mix(currentValue, value, mixStyle);
+        const unsigned currentValue =
+            (channels[main_channel_.Channel()]) + (channels[fine_channel_->Channel()] >> 8);
+        const unsigned mixedValue = ControlValue::Mix(currentValue, value, mixStyle);
         // Set to the first 8 of 24 bits.
         channels[main_channel_.Channel()] = (mixedValue & (~0xFFFF));
         // Set to bits 9-16.
@@ -53,8 +51,7 @@ class FixtureFunction final : public NamedObject {
   const DmxChannel &MainChannel() const { return main_channel_; }
 
   /** The caller must call theatre.NotifyDmxChange(); afterward. */
-  void SetChannel(const DmxChannel &channel,
-                  const std::optional<DmxChannel> &fine_channel = {});
+  void SetChannel(const DmxChannel &channel, const std::optional<DmxChannel> &fine_channel = {});
   /** The caller must call theatre.NotifyDmxChange(); afterward. */
   void IncChannel();
   /** The caller must call theatre.NotifyDmxChange(); afterward. */

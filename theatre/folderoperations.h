@@ -65,8 +65,7 @@ inline std::string Root(const std::string &path) {
   }
 }
 
-inline std::string ShortDescription(const std::string &path,
-                                    size_t max_length) {
+inline std::string ShortDescription(const std::string &path, size_t max_length) {
   if (path.size() <= max_length)
     return path;
   else if (max_length <= 4)
@@ -79,15 +78,12 @@ inline std::string ShortDescription(const std::string &path,
       const std::string root = Root(path);
       std::string scratch = RemoveRoot(path);
       if (scratch.size() + 5 <= max_length)
-        return root.substr(0, max_length - 5 - scratch.size()) + "[..]/" +
-               scratch;
+        return root.substr(0, max_length - 5 - scratch.size()) + "[..]/" + scratch;
       else if (depth == 2)
-        return "[..]" +
-               scratch.substr(scratch.size() + 4 - max_length, max_length - 4);
+        return "[..]" + scratch.substr(scratch.size() + 4 - max_length, max_length - 4);
       else {
         const size_t n = root.size() + 5 + scratch.size();
-        return root + "/[..]" +
-               scratch.substr(n - max_length, max_length - root.size() - 5);
+        return root + "/[..]" + scratch.substr(n - max_length, max_length - root.size() - 5);
       }
     }
   }

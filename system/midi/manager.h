@@ -35,8 +35,7 @@ class Manager {
     }
   }
 
-  void SetFixtureColor(size_t column, size_t row, const theatre::Color& color,
-                       bool blink);
+  void SetFixtureColor(size_t column, size_t row, const theatre::Color& color, bool blink);
   void Update();
 
   void SetBeat(system::OptionalNumber<double> beat);

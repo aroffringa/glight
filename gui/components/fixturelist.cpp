@@ -49,29 +49,25 @@ void FixtureList::Fill() {
   }
 }
 
-void FixtureList::Select(
-    const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures) {
+void FixtureList::Select(const std::vector<system::ObservingPtr<theatre::Fixture>> &fixtures) {
   view_.get_selection()->unselect_all();
   Gtk::TreeModel::iterator iter;
   Gtk::TreeModel::Children children = model_->children();
   for (const auto &child : children) {
-    const system::ObservingPtr<theatre::Fixture> &fixture =
-        child.get_value(columns_.fixture_);
+    const system::ObservingPtr<theatre::Fixture> &fixture = child.get_value(columns_.fixture_);
     const auto iter = std::find(fixtures.begin(), fixtures.end(), fixture);
     if (iter != fixtures.end()) view_.get_selection()->select(child.get_iter());
   }
 }
 
-std::vector<system::ObservingPtr<theatre::Fixture>> FixtureList::Selection()
-    const {
+std::vector<system::ObservingPtr<theatre::Fixture>> FixtureList::Selection() const {
   Glib::RefPtr<const Gtk::TreeSelection> selection = view_.get_selection();
   std::vector<Gtk::TreeModel::Path> selected = selection->get_selected_rows();
   std::vector<system::ObservingPtr<theatre::Fixture>> result;
   for (Gtk::TreePath &row : selected) {
     theatre::FixtureGroup *group = (*model_->get_iter(row))[columns_.group_];
     if (group) {
-      for (const system::ObservingPtr<theatre::Fixture> &fixture :
-           group->Fixtures()) {
+      for (const system::ObservingPtr<theatre::Fixture> &fixture : group->Fixtures()) {
         result.emplace_back(fixture);
       }
     } else {

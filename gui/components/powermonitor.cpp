@@ -28,8 +28,7 @@ void PowerMonitor::Start() {
         return true;
       },
       250);
-  update_connection_ = Instance::Events().SignalUpdateControllables().connect(
-      [&]() { Update(); });
+  update_connection_ = Instance::Events().SignalUpdateControllables().connect([&]() { Update(); });
   Update();
 }
 
@@ -41,16 +40,14 @@ void PowerMonitor::Update() {
 
 void PowerMonitor::TimeUpdate() {
   const theatre::Management& management = Instance::Management();
-  glight::theatre::ValueSnapshot primary_snapshot =
-      management.PrimarySnapshot();
+  glight::theatre::ValueSnapshot primary_snapshot = management.PrimarySnapshot();
   if (snapshot_ != primary_snapshot) {
     snapshot_ = std::move(primary_snapshot);
     UpdateValues();
   }
 }
 
-void PowerMonitor::SetRow(size_t row_index, double used_power,
-                          double max_power) {
+void PowerMonitor::SetRow(size_t row_index, double used_power, double max_power) {
   const double fraction = max_power == 0.0 ? 0.0 : used_power / max_power;
   rows_[row_index].progress_bar_.set_fraction(fraction);
   std::ostringstream text;
@@ -58,8 +55,8 @@ void PowerMonitor::SetRow(size_t row_index, double used_power,
     text << "Total power: ";
   else
     text << "Phase " << row_index << " :  ";
-  text << std::fixed << std::setprecision(1) << used_power * 1e-3 << " KW / "
-       << std::fixed << std::setprecision(1) << max_power * 1e-3 << " KW";
+  text << std::fixed << std::setprecision(1) << used_power * 1e-3 << " KW / " << std::fixed
+       << std::setprecision(1) << max_power * 1e-3 << " KW";
   rows_[row_index].label_.set_text(text.str());
 }
 
@@ -67,8 +64,7 @@ std::map<size_t, std::pair<double, double>> GetPowerPerPhase(
     const theatre::ValueSnapshot& snapshot) {
   const theatre::Theatre& theatre = Instance::Management().GetTheatre();
   std::map<size_t, std::pair<double, double>> phases;
-  for (const system::TrackablePtr<theatre::Fixture>& fixture :
-       theatre.Fixtures()) {
+  for (const system::TrackablePtr<theatre::Fixture>& fixture : theatre.Fixtures()) {
     const double fixture_power = fixture->Mode().GetPower(*fixture, snapshot);
     std::pair<double, double>& phase_power = phases[fixture->ElectricPhase()];
     phase_power.first += fixture_power;
@@ -79,8 +75,7 @@ std::map<size_t, std::pair<double, double>> GetPowerPerPhase(
 }
 
 void PowerMonitor::UpdateValues() {
-  const std::map<size_t, std::pair<double, double>> phases =
-      GetPowerPerPhase(snapshot_);
+  const std::map<size_t, std::pair<double, double>> phases = GetPowerPerPhase(snapshot_);
   const size_t n_rows = phases.size() > 1 ? phases.size() + 1 : 1;
   while (rows_.size() < n_rows) {
     Row& row = rows_.emplace_back();
@@ -105,8 +100,7 @@ void PowerMonitor::UpdateValues() {
 
   auto phase_iter = phases.begin();
   for (size_t phases_index = 0; phases_index != n_rows - 1; ++phases_index) {
-    SetRow(phases_index + 1, phase_iter->second.first,
-           phase_iter->second.second);
+    SetRow(phases_index + 1, phase_iter->second.first, phase_iter->second.second);
     ++phase_iter;
   }
   SetRow(0, total_usage, total_maximum);

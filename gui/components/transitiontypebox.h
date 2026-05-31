@@ -12,14 +12,12 @@ namespace glight::gui {
 
 class TransitionTypeBox : public Gtk::Box {
  public:
-  TransitionTypeBox(
-      theatre::TransitionType value = theatre::TransitionType::Fade) {
+  TransitionTypeBox(theatre::TransitionType value = theatre::TransitionType::Fade) {
     append(label_);
     label_.show();
 
     model_ = Gtk::ListStore::create(columns_);
-    const std::vector<theatre::TransitionType> types =
-        theatre::GetTransitionTypes();
+    const std::vector<theatre::TransitionType> types = theatre::GetTransitionTypes();
     for (theatre::TransitionType type : types) {
       Gtk::TreeModel::iterator iter = model_->append();
       Gtk::TreeModel::Row& row = *iter;
@@ -34,8 +32,7 @@ class TransitionTypeBox : public Gtk::Box {
     combo_.signal_changed().connect([&]() {
       const int index = combo_.get_active_row_number();
       if (index >= 0) {
-        const theatre::TransitionType type =
-            theatre::GetTransitionTypes()[index];
+        const theatre::TransitionType type = theatre::GetTransitionTypes()[index];
         value_ = type;
         signal_changed_(type);
       }
@@ -45,15 +42,11 @@ class TransitionTypeBox : public Gtk::Box {
     Set(value);
   }
 
-  sigc::signal<void(theatre::TransitionType)>& SignalChanged() {
-    return signal_changed_;
-  }
+  sigc::signal<void(theatre::TransitionType)>& SignalChanged() { return signal_changed_; }
 
   void Set(theatre::TransitionType type) {
-    const std::vector<theatre::TransitionType> types =
-        theatre::GetTransitionTypes();
-    const size_t index =
-        std::find(types.begin(), types.end(), type) - types.begin();
+    const std::vector<theatre::TransitionType> types = theatre::GetTransitionTypes();
+    const size_t index = std::find(types.begin(), types.end(), type) - types.begin();
     combo_.set_active(index);
     value_ = type;
   }

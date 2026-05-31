@@ -38,8 +38,7 @@ using UniverseMapping = std::variant<InputMapping, OutputMapping>;
 class UniverseMap {
  public:
   UniverseMap()
-      : mappings_{OutputMapping(),
-                  InputMapping{InputMappingFunction::NoFunction, {}, {}}} {}
+      : mappings_{OutputMapping(), InputMapping{InputMappingFunction::NoFunction, {}, {}}} {}
 
   /**
    * The reason for a separate Open() function instead of handling this in
@@ -65,9 +64,8 @@ class UniverseMap {
     mappings_[universe] = mapping;
   }
   UniverseType GetUniverseType(size_t universe) const {
-    return std::holds_alternative<InputMapping>(mappings_[universe])
-               ? UniverseType::Input
-               : UniverseType::Output;
+    return std::holds_alternative<InputMapping>(mappings_[universe]) ? UniverseType::Input
+                                                                     : UniverseType::Output;
   }
   const InputMapping& GetInputMapping(size_t universe) const {
     return std::get<InputMapping>(mappings_[universe]);
@@ -75,9 +73,7 @@ class UniverseMap {
   const OutputMapping& GetOutputMapping(size_t universe) const {
     return std::get<OutputMapping>(mappings_[universe]);
   }
-  const UniverseMapping& GetMapping(size_t universe) const {
-    return mappings_[universe];
-  }
+  const UniverseMapping& GetMapping(size_t universe) const { return mappings_[universe]; }
   unsigned FirstOutputUniverse() const {
     for (size_t i = 0; i != mappings_.size(); ++i) {
       if (std::holds_alternative<OutputMapping>(mappings_[i])) return i;
@@ -85,26 +81,22 @@ class UniverseMap {
     return 0;
   }
 
-  void SetOutputValues(unsigned universe, const unsigned char* new_values,
-                       size_t size) {
+  void SetOutputValues(unsigned universe, const unsigned char* new_values, size_t size) {
     const OutputMapping& mapping = std::get<OutputMapping>(mappings_[universe]);
     if (mapping.ola_universe) {
       ola_->SetOutputValues(*mapping.ola_universe, new_values, size);
     }
   }
 
-  void GetOutputValues(unsigned universe, unsigned char* destination,
-                       size_t size) {
+  void GetOutputValues(unsigned universe, unsigned char* destination, size_t size) {
     const OutputMapping& mapping = std::get<OutputMapping>(mappings_[universe]);
     if (mapping.ola_universe) {
       ola_->GetOutputValues(*mapping.ola_universe, destination, size);
     }
   }
 
-  void GetInputValues(unsigned universe, unsigned char* destination,
-                      size_t size) {
-    const InputMapping* mapping =
-        std::get_if<InputMapping>(&mappings_[universe]);
+  void GetInputValues(unsigned universe, unsigned char* destination, size_t size) {
+    const InputMapping* mapping = std::get_if<InputMapping>(&mappings_[universe]);
     if (mapping && mapping->ola_universe) {
       ola_->GetInputValues(*mapping->ola_universe, destination, size);
     } else {
@@ -118,8 +110,7 @@ class UniverseMap {
           *destination = 0;
         } else if (sync_ >= 50) {
           const float float_value =
-              (255.0 * 0.5) *
-              (std::cos(-static_cast<float>(sync_) * M_PI / 25.0) + 1.0);
+              (255.0 * 0.5) * (std::cos(-static_cast<float>(sync_) * M_PI / 25.0) + 1.0);
           *destination = std::round(float_value);
         } else {
           *destination = 255;

@@ -27,8 +27,7 @@ enum class ControlMode { Primary, Secondary };
  */
 class ControlWidget : public Gtk::Box {
  public:
-  ControlWidget(FaderWindow &fader_window, uistate::FaderState &state,
-                ControlMode mode);
+  ControlWidget(FaderWindow &fader_window, uistate::FaderState &state, ControlMode mode);
   ~ControlWidget() override;
 
   /**
@@ -58,8 +57,7 @@ class ControlWidget : public Gtk::Box {
    * source's value. Otherwise, the source value will be set to the
    * value of the fader.
    */
-  void Assign(const std::vector<theatre::SourceValue *> &sources,
-              bool sync_fader);
+  void Assign(const std::vector<theatre::SourceValue *> &sources, bool sync_fader);
 
   bool IsAssigned() const;
 
@@ -72,9 +70,7 @@ class ControlWidget : public Gtk::Box {
   sigc::signal<void()> &SignalValueChange() { return _signalValueChange; }
   sigc::signal<void()> &SignalAssigned() { return _signalAssigned; }
 
-  const std::vector<theatre::SourceValue *> &GetSourceValues() const {
-    return sources_;
-  }
+  const std::vector<theatre::SourceValue *> &GetSourceValues() const { return sources_; }
   /**
    * The respective source value or nullptr if that index does
    * not exist (e.g. because it is unassigned).
@@ -84,9 +80,7 @@ class ControlWidget : public Gtk::Box {
   }
   void Unassign() { Assign({}, true); }
   void SetFadeUpSpeed(double fadePerSecond) { _fadeUpSpeed = fadePerSecond; }
-  void SetFadeDownSpeed(double fadePerSecond) {
-    _fadeDownSpeed = fadePerSecond;
-  }
+  void SetFadeDownSpeed(double fadePerSecond) { _fadeDownSpeed = fadePerSecond; }
   ControlMode GetMode() const { return _mode; }
 
   /**
@@ -131,8 +125,7 @@ class ControlWidget : public Gtk::Box {
   void setImmediateValue(size_t source_index, unsigned value);
 
   theatre::SingleSourceValue &GetSingleSourceValue(size_t index) const;
-  theatre::SingleSourceValue &GetSingleSourceValue(
-      theatre::SourceValue &source) const;
+  theatre::SingleSourceValue &GetSingleSourceValue(theatre::SourceValue &source) const;
 
   FaderWindow &GetFaderWindow() const { return fader_window_; }
 

@@ -14,8 +14,7 @@ namespace {
 
 inline constexpr size_t kChunkSize = 800;
 
-void setColor(guint8 *dataPtr, unsigned char r, unsigned char g,
-              unsigned char b) {
+void setColor(guint8 *dataPtr, unsigned char r, unsigned char g, unsigned char b) {
   dataPtr[0] = r;
   dataPtr[1] = g;
   dataPtr[2] = b;
@@ -70,13 +69,11 @@ AudioWidget::AudioWidget()
 
   auto gesture = Gtk::GestureClick::create();
   gesture->set_button(1);
-  gesture->signal_pressed().connect(
-      sigc::mem_fun(*this, &AudioWidget::onButtonPressed));
+  gesture->signal_pressed().connect(sigc::mem_fun(*this, &AudioWidget::onButtonPressed));
   add_controller(gesture);
 
-  set_draw_func([&](const Cairo::RefPtr<Cairo::Context> &cairo, int, int) {
-    AudioWidget::onExpose(cairo);
-  });
+  set_draw_func(
+      [&](const Cairo::RefPtr<Cairo::Context> &cairo, int, int) { AudioWidget::onExpose(cairo); });
 }
 
 AudioWidget::~AudioWidget() = default;
@@ -119,16 +116,13 @@ void AudioWidget::SetPosition(double offsetInMS) {
   queue_draw();
 }
 
-double AudioWidget::Position() const {
-  return _cursorPosition * kChunkSize / (44.100 * 4.0);
-}
+double AudioWidget::Position() const { return _cursorPosition * kChunkSize / (44.100 * 4.0); }
 
 void AudioWidget::ResizeBuffer() {
   _width = get_width();
   _height = get_height();
   if (_width > 0) {
-    _buffer =
-        Gdk::Pixbuf::create(Gdk::Colorspace::RGB, false, 8, _width, _height);
+    _buffer = Gdk::Pixbuf::create(Gdk::Colorspace::RGB, false, 8, _width, _height);
   } else {
     _buffer.reset();
   }
@@ -136,8 +130,8 @@ void AudioWidget::ResizeBuffer() {
 
 void AudioWidget::DrawBuffer(Glib::RefPtr<Gdk::Pixbuf> &buffer) {
   _renderStartPosition = std::max(_cursorPosition - _width / 2, 0);
-  const int renderWidth = std::max(
-      0, std::min(_width, static_cast<int>(DataSize()) - _renderStartPosition));
+  const int renderWidth =
+      std::max(0, std::min(_width, static_cast<int>(DataSize()) - _renderStartPosition));
 
   if (buffer) {
     guint8 *data = buffer->get_pixels();
@@ -145,29 +139,21 @@ void AudioWidget::DrawBuffer(Glib::RefPtr<Gdk::Pixbuf> &buffer) {
     for (int x = 0; x < renderWidth; ++x) {
       int xDataPos = x + _renderStartPosition;
       guint8 *xa = data + x * 3;
-      const int yStd1 = std::clamp(
-          (_height / 2) - (_audioDataStdDev[xDataPos] * _height) / 65536, 0,
-          _height / 2);
-      const int yStd2 = std::clamp(
-          (_audioDataStdDev[xDataPos] * _height) / 65536 + (_height / 2),
-          _height / 2 + 1, _height);
-      const int yStart = std::min(
-          (_height / 2) - (_audioDataMax[xDataPos] * _height) / 65536, yStd1);
-      const int yEnd = std::max(
-          ((_height / 2) - (_audioDataMin[xDataPos] * _height) / 65536), yStd2);
-      for (int y = 0; y < yStart; ++y)
-        setColor(xa + rowStride * y, 255, 255, 255);
-      for (int y = yStart; y < yStd1; ++y)
-        setColor(xa + rowStride * y, 0, 0, 255);
-      for (int y = yStd1; y < _height / 2; ++y)
-        setColor(xa + rowStride * y, 0, 0, 127);
+      const int yStd1 = std::clamp((_height / 2) - (_audioDataStdDev[xDataPos] * _height) / 65536,
+                                   0, _height / 2);
+      const int yStd2 = std::clamp((_audioDataStdDev[xDataPos] * _height) / 65536 + (_height / 2),
+                                   _height / 2 + 1, _height);
+      const int yStart =
+          std::min((_height / 2) - (_audioDataMax[xDataPos] * _height) / 65536, yStd1);
+      const int yEnd =
+          std::max(((_height / 2) - (_audioDataMin[xDataPos] * _height) / 65536), yStd2);
+      for (int y = 0; y < yStart; ++y) setColor(xa + rowStride * y, 255, 255, 255);
+      for (int y = yStart; y < yStd1; ++y) setColor(xa + rowStride * y, 0, 0, 255);
+      for (int y = yStd1; y < _height / 2; ++y) setColor(xa + rowStride * y, 0, 0, 127);
       setColor(xa + rowStride * (_height / 2), 0, 0, 0);
-      for (int y = _height / 2 + 1; y < yStd2; ++y)
-        setColor(xa + rowStride * y, 0, 0, 127);
-      for (int y = yStd2; y < yEnd; ++y)
-        setColor(xa + rowStride * y, 0, 0, 255);
-      for (int y = yEnd; y < _height; ++y)
-        setColor(xa + rowStride * y, 255, 255, 255);
+      for (int y = _height / 2 + 1; y < yStd2; ++y) setColor(xa + rowStride * y, 0, 0, 127);
+      for (int y = yStd2; y < yEnd; ++y) setColor(xa + rowStride * y, 0, 0, 255);
+      for (int y = yEnd; y < _height; ++y) setColor(xa + rowStride * y, 255, 255, 255);
     }
     // Set any remaining part to white
     for (int y = 0; y < _height; ++y) {
@@ -177,28 +163,20 @@ void AudioWidget::DrawBuffer(Glib::RefPtr<Gdk::Pixbuf> &buffer) {
         data_ptr += 3;
       }
     }
-    verticalLine(data, rowStride, _cursorPosition - _renderStartPosition - 1,
-                 255, 0, 0);
-    verticalLine(data, rowStride, _cursorPosition - _renderStartPosition, 255,
-                 0, 0);
-    verticalLine(data, rowStride, _cursorPosition - _renderStartPosition + 1,
-                 255, 0, 0);
+    verticalLine(data, rowStride, _cursorPosition - _renderStartPosition - 1, 255, 0, 0);
+    verticalLine(data, rowStride, _cursorPosition - _renderStartPosition, 255, 0, 0);
+    verticalLine(data, rowStride, _cursorPosition - _renderStartPosition + 1, 255, 0, 0);
 
-    std::map<int, enum KeyType>::const_iterator i =
-        _keys.lower_bound(_renderStartPosition);
+    std::map<int, enum KeyType>::const_iterator i = _keys.lower_bound(_renderStartPosition);
     while (i != _keys.end() && i->first < _renderStartPosition + renderWidth) {
       switch (i->second) {
         case KeyStart:
-          verticalLine(data, rowStride, i->first - _renderStartPosition - 1, 0,
-                       128, 0);
-          verticalLine(data, rowStride, i->first - _renderStartPosition, 0, 128,
-                       0);
-          verticalLine(data, rowStride, i->first - _renderStartPosition + 1, 0,
-                       128, 0);
+          verticalLine(data, rowStride, i->first - _renderStartPosition - 1, 0, 128, 0);
+          verticalLine(data, rowStride, i->first - _renderStartPosition, 0, 128, 0);
+          verticalLine(data, rowStride, i->first - _renderStartPosition + 1, 0, 128, 0);
           break;
         case ItemStart:
-          verticalLine(data, rowStride, i->first - _renderStartPosition, 0, 255,
-                       0);
+          verticalLine(data, rowStride, i->first - _renderStartPosition, 0, 255, 0);
           break;
       }
       ++i;
@@ -214,31 +192,24 @@ void AudioWidget::bufferToScreen(const Cairo::RefPtr<Cairo::Context> &context) {
 }
 
 void AudioWidget::onButtonPressed(int, double x, double y) {
-  const int position = std::clamp<int>(
-      static_cast<int>(x) + _renderStartPosition, 0, DataSize() - 1);
-  _signalClicked.emit(static_cast<double>(position) * kChunkSize /
-                      (44.100 * 4.0));
+  const int position =
+      std::clamp<int>(static_cast<int>(x) + _renderStartPosition, 0, DataSize() - 1);
+  _signalClicked.emit(static_cast<double>(position) * kChunkSize / (44.100 * 4.0));
 }
 
 void AudioWidget::SetScene(theatre::Scene &scene) {
   _keys.clear();
 
-  const std::multimap<double, std::unique_ptr<theatre::SceneItem>> &items =
-      scene.SceneItems();
-  for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>> &p :
-       items) {
+  const std::multimap<double, std::unique_ptr<theatre::SceneItem>> &items = scene.SceneItems();
+  for (const std::pair<const double, std::unique_ptr<theatre::SceneItem>> &p : items) {
     theatre::SceneItem *item = p.second.get();
     theatre::KeySceneItem *key = dynamic_cast<theatre::KeySceneItem *>(item);
     if (key != nullptr)
       _keys.insert(std::pair<int, KeyType>(
-          static_cast<int>(
-              std::round(item->OffsetInMS() * 44.100 * 4.0 / kChunkSize)),
-          KeyStart));
+          static_cast<int>(std::round(item->OffsetInMS() * 44.100 * 4.0 / kChunkSize)), KeyStart));
     else
       _keys.insert(std::pair<int, KeyType>(
-          static_cast<int>(
-              std::round(item->OffsetInMS() * 44.100 * 4.0 / kChunkSize)),
-          ItemStart));
+          static_cast<int>(std::round(item->OffsetInMS() * 44.100 * 4.0 / kChunkSize)), ItemStart));
   }
   _isUpToDate = false;
   queue_draw();

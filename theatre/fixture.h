@@ -26,9 +26,7 @@ class Fixture : public NamedObject {
   static inline constexpr double kDefaultHeight = 5.0;
   static inline constexpr double kDefaultTilt = 0.25 * M_PI;
 
-  const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const {
-    return functions_;
-  }
+  const std::vector<std::unique_ptr<FixtureFunction>> &Functions() const { return functions_; }
 
   const FixtureMode &Mode() const { return mode_; }
 
@@ -36,15 +34,12 @@ class Fixture : public NamedObject {
     std::vector<unsigned> channels;
     for (const std::unique_ptr<FixtureFunction> &ff : functions_) {
       channels.emplace_back(ff->MainChannel().Channel());
-      if (ff->FineChannel())
-        channels.emplace_back(ff->FineChannel()->Channel());
+      if (ff->FineChannel()) channels.emplace_back(ff->FineChannel()->Channel());
     }
     return channels;
   }
 
-  unsigned GetUniverse() const {
-    return functions_.front()->MainChannel().Universe();
-  }
+  unsigned GetUniverse() const { return functions_.front()->MainChannel().Universe(); }
 
   void IncChannel();
 
@@ -61,19 +56,15 @@ class Fixture : public NamedObject {
     functions_.emplace_back(std::make_unique<FixtureFunction>());
     return *functions_.back();
   }
-  inline Color GetColor(const ValueSnapshot &snapshot,
-                        size_t shape_index) const;
+  inline Color GetColor(const ValueSnapshot &snapshot, size_t shape_index) const;
 
-  inline int GetRotationSpeed(const ValueSnapshot &snapshot,
-                              size_t shape_index) const;
+  inline int GetRotationSpeed(const ValueSnapshot &snapshot, size_t shape_index) const;
 
-  inline int GetRotation(const ValueSnapshot &snapshot,
-                         size_t shape_index) const;
+  inline int GetRotation(const ValueSnapshot &snapshot, size_t shape_index) const;
 
   inline int GetTilt(const ValueSnapshot &snapshot, size_t shape_index) const;
 
-  double GetBeamDirection(const ValueSnapshot &snapshot,
-                          size_t shape_index) const;
+  double GetBeamDirection(const ValueSnapshot &snapshot, size_t shape_index) const;
   double GetBeamTilt(const ValueSnapshot &snapshot, size_t shape_index) const;
 
   Coordinate3D &GetPosition() { return position_; }
@@ -118,18 +109,15 @@ class Fixture : public NamedObject {
 
 namespace glight::theatre {
 
-Color Fixture::GetColor(const ValueSnapshot &snapshot,
-                        size_t shape_index) const {
+Color Fixture::GetColor(const ValueSnapshot &snapshot, size_t shape_index) const {
   return mode_.GetColor(*this, snapshot, shape_index);
 }
 
-int Fixture::GetRotationSpeed(const ValueSnapshot &snapshot,
-                              size_t shape_index) const {
+int Fixture::GetRotationSpeed(const ValueSnapshot &snapshot, size_t shape_index) const {
   return mode_.GetRotationSpeed(*this, snapshot, shape_index);
 }
 
-int Fixture::GetRotation(const ValueSnapshot &snapshot,
-                         size_t shape_index) const {
+int Fixture::GetRotation(const ValueSnapshot &snapshot, size_t shape_index) const {
   return mode_.GetPan(*this, snapshot, shape_index);
 }
 

@@ -32,8 +32,7 @@ BOOST_AUTO_TEST_CASE(MixChannels_16bit) {
   BOOST_CHECK_EQUAL(channelValues[4], 1 << 16);
 
   channelValues.assign(512, 0);
-  ff.MixChannels((1 << 24) - 1, MixStyle::HighestValue, channelValues.data(),
-                 0);
+  ff.MixChannels((1 << 24) - 1, MixStyle::HighestValue, channelValues.data(), 0);
   BOOST_CHECK_EQUAL(channelValues[3], ((1 << 24) - 1) & 0xFF0000);
   BOOST_CHECK_EQUAL(channelValues[4], (((1 << 24) - 1) & 0x00FFFF) << 8);
 }

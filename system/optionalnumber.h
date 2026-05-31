@@ -35,25 +35,22 @@ namespace glight::system {
 template <typename NumberType>
 class OptionalNumber {
  public:
-  static NumberType constexpr UnsetValue =
-      std::is_signed_v<NumberType> ? std::numeric_limits<NumberType>::lowest()
-                                   : std::numeric_limits<NumberType>::max();
+  static NumberType constexpr UnsetValue = std::is_signed_v<NumberType>
+                                               ? std::numeric_limits<NumberType>::lowest()
+                                               : std::numeric_limits<NumberType>::max();
 
   constexpr OptionalNumber() noexcept = default;
 
   constexpr explicit OptionalNumber(std::nullopt_t) noexcept {}
 
   template <class T = NumberType>
-  requires(!std::is_same_v<
-           T, OptionalNumber<
-                  T>>) constexpr explicit OptionalNumber(T number) noexcept
+  requires(!std::is_same_v<T, OptionalNumber<T>>) constexpr explicit OptionalNumber(
+      T number) noexcept
       : number_(number) {}
 
-  constexpr OptionalNumber(const OptionalNumber<NumberType>& source) noexcept =
-      default;
+  constexpr OptionalNumber(const OptionalNumber<NumberType>& source) noexcept = default;
 
-  constexpr OptionalNumber(OptionalNumber<NumberType>&& source) noexcept =
-      default;
+  constexpr OptionalNumber(OptionalNumber<NumberType>&& source) noexcept = default;
 
   template <typename T>
   constexpr explicit OptionalNumber(const std::optional<T>& source) noexcept
@@ -70,15 +67,14 @@ class OptionalNumber {
     return *this;
   }
 
-  constexpr OptionalNumber<NumberType>& operator=(
-      const OptionalNumber<NumberType>& rhs) noexcept = default;
+  constexpr OptionalNumber<NumberType>& operator=(const OptionalNumber<NumberType>& rhs) noexcept =
+      default;
 
-  constexpr OptionalNumber<NumberType>& operator=(
-      OptionalNumber<NumberType>&& rhs) noexcept = default;
+  constexpr OptionalNumber<NumberType>& operator=(OptionalNumber<NumberType>&& rhs) noexcept =
+      default;
 
   template <class T = NumberType>
-  constexpr OptionalNumber<NumberType>& operator=(
-      const std::optional<T>& rhs) noexcept {
+  constexpr OptionalNumber<NumberType>& operator=(const std::optional<T>& rhs) noexcept {
     number_ = rhs ? *rhs : UnsetValue;
     return *this;
   }
@@ -94,9 +90,7 @@ class OptionalNumber {
   }
 
   constexpr bool HasValue() const noexcept { return number_ != UnsetValue; }
-  constexpr explicit operator bool() const noexcept {
-    return number_ != UnsetValue;
-  }
+  constexpr explicit operator bool() const noexcept { return number_ != UnsetValue; }
 
   constexpr NumberType Value() const noexcept { return number_; }
   constexpr NumberType ValueOr(NumberType otherwise) const noexcept {
@@ -142,13 +136,9 @@ class OptionalNumber {
     return !(*this <= rhs);
   }
 
-  constexpr bool operator==(NumberType rhs) const noexcept {
-    return number_ == rhs;
-  }
+  constexpr bool operator==(NumberType rhs) const noexcept { return number_ == rhs; }
 
-  constexpr bool operator!=(NumberType rhs) const noexcept {
-    return number_ != rhs;
-  }
+  constexpr bool operator!=(NumberType rhs) const noexcept { return number_ != rhs; }
 
   constexpr bool operator<(NumberType rhs) const noexcept {
     if constexpr (std::is_signed_v<NumberType>)

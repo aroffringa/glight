@@ -10,8 +10,7 @@ namespace glight::gui {
 using theatre::Property;
 using theatre::PropertyType;
 
-PropertiesBox::PropertiesBox()
-    : _typeLabel("No object selected"), _applyButton("Apply") {
+PropertiesBox::PropertiesBox() : _typeLabel("No object selected"), _applyButton("Apply") {
   set_orientation(Gtk::Orientation::VERTICAL);
   append(_typeLabel);
 
@@ -22,8 +21,7 @@ PropertiesBox::PropertiesBox()
   _propertiesButtonBox.set_homogeneous(true);
 
   _applyButton.set_sensitive(false);
-  _applyButton.signal_clicked().connect(
-      sigc::mem_fun(*this, &PropertiesBox::onApplyClicked));
+  _applyButton.signal_clicked().connect(sigc::mem_fun(*this, &PropertiesBox::onApplyClicked));
   _propertiesButtonBox.append(_applyButton);
 
   append(_propertiesButtonBox);
@@ -40,8 +38,7 @@ void PropertiesBox::fillProperties() {
   _rows.clear();
   _typeLabel.set_text(
       _propertySet->Object().Name() + " (" +
-      theatre::EffectTypeToName(
-          static_cast<theatre::Effect &>(_propertySet->Object()).GetType()) +
+      theatre::EffectTypeToName(static_cast<theatre::Effect &>(_propertySet->Object()).GetType()) +
       ")");
   for (theatre::Property &property : *_propertySet) {
     size_t rowIndex = _rows.size();
@@ -57,11 +54,9 @@ void PropertiesBox::fillProperties() {
         _grid.attach(*row._widgets.back(), 0, rowIndex, 2, 1);
       } break;
       case PropertyType::Choice: {
-        row._widgets.emplace_back(
-            std::make_unique<Gtk::Box>(Gtk::Orientation::VERTICAL));
+        row._widgets.emplace_back(std::make_unique<Gtk::Box>(Gtk::Orientation::VERTICAL));
         Gtk::Box *box = static_cast<Gtk::Box *>(row._widgets.back().get());
-        row._widgets.emplace_back(
-            std::make_unique<Gtk::Label>(property.Description()));
+        row._widgets.emplace_back(std::make_unique<Gtk::Label>(property.Description()));
         box->append(*row._widgets.back());
         std::string value = _propertySet->GetChoice(property);
         Gtk::CheckButton *first_button;
@@ -79,13 +74,12 @@ void PropertiesBox::fillProperties() {
         _grid.attach(*box, 0, rowIndex, 2, 1);
       } break;
       case PropertyType::ControlValue: {
-        std::string entryText = std::to_string(
-            round(1000.0 * _propertySet->GetControlValue(property) /
-                  theatre::ControlValue::MaxUInt()) /
-            10.0);
+        std::string entryText =
+            std::to_string(round(1000.0 * _propertySet->GetControlValue(property) /
+                                 theatre::ControlValue::MaxUInt()) /
+                           10.0);
 
-        row._widgets.emplace_back(
-            std::make_unique<Gtk::Label>(property.Description()));
+        row._widgets.emplace_back(std::make_unique<Gtk::Label>(property.Description()));
         _grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
 
         std::unique_ptr<Gtk::Entry> entry = std::make_unique<Gtk::Entry>();
@@ -101,11 +95,9 @@ void PropertiesBox::fillProperties() {
         _grid.attach(*row._widgets.back(), 0, rowIndex, 2, 1);
       } break;
       case PropertyType::Integer: {
-        std::string entryText =
-            std::to_string(_propertySet->GetInteger(property));
+        std::string entryText = std::to_string(_propertySet->GetInteger(property));
 
-        row._widgets.emplace_back(
-            std::make_unique<Gtk::Label>(property.Description()));
+        row._widgets.emplace_back(std::make_unique<Gtk::Label>(property.Description()));
         _grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
 
         std::unique_ptr<Gtk::Entry> entry = std::make_unique<Gtk::Entry>();
@@ -114,11 +106,9 @@ void PropertiesBox::fillProperties() {
         row._widgets.emplace_back(std::move(entry));
       } break;
       case PropertyType::TimePattern: {
-        const std::string entry_text =
-            ToString(_propertySet->GetTimePattern(property));
+        const std::string entry_text = ToString(_propertySet->GetTimePattern(property));
 
-        row._widgets.emplace_back(
-            std::make_unique<Gtk::Label>(property.Description()));
+        row._widgets.emplace_back(std::make_unique<Gtk::Label>(property.Description()));
         _grid.attach(*row._widgets.back(), 0, rowIndex, 1, 1);
 
         std::unique_ptr<Gtk::Entry> entry = std::make_unique<Gtk::Entry>();
@@ -127,16 +117,13 @@ void PropertiesBox::fillProperties() {
         row._widgets.emplace_back(std::move(entry));
       } break;
       case PropertyType::Transition: {
-        const theatre::Transition transition =
-            _propertySet->GetTransition(property);
-        row._widgets.emplace_back(
-            std::make_unique<Gtk::Box>(Gtk::Orientation::VERTICAL));
+        const theatre::Transition transition = _propertySet->GetTransition(property);
+        row._widgets.emplace_back(std::make_unique<Gtk::Box>(Gtk::Orientation::VERTICAL));
         Gtk::Box *box = static_cast<Gtk::Box *>(row._widgets.back().get());
-        row._widgets.emplace_back(std::make_unique<DurationInput>(
-            property.Description(), transition.LengthInMs()));
-        box->append(*row._widgets.back());
         row._widgets.emplace_back(
-            std::make_unique<TransitionTypeBox>(transition.Type()));
+            std::make_unique<DurationInput>(property.Description(), transition.LengthInMs()));
+        box->append(*row._widgets.back());
+        row._widgets.emplace_back(std::make_unique<TransitionTypeBox>(transition.Type()));
         box->append(*row._widgets.back());
         _grid.attach(*box, 0, rowIndex, 2, 1);
       } break;
@@ -150,30 +137,25 @@ void PropertiesBox::onApplyClicked() {
   for (theatre::Property &property : *_propertySet) {
     switch (property.GetType()) {
       case PropertyType::Boolean: {
-        bool value = static_cast<Gtk::CheckButton *>(rowIter->_widgets[0].get())
-                         ->get_active();
+        bool value = static_cast<Gtk::CheckButton *>(rowIter->_widgets[0].get())->get_active();
         _propertySet->SetBool(property, value);
       } break;
       case PropertyType::Choice: {
         for (size_t i = 0; i != property.OptionCount(); ++i) {
-          if (static_cast<Gtk::CheckButton *>(rowIter->_widgets[2 + i].get())
-                  ->get_active()) {
+          if (static_cast<Gtk::CheckButton *>(rowIter->_widgets[2 + i].get())->get_active()) {
             _propertySet->SetChoice(property, property.OptionName(i));
             break;
           }
         }
       } break;
       case PropertyType::ControlValue: {
-        std::string entryText =
-            static_cast<Gtk::Entry *>(rowIter->_widgets[1].get())->get_text();
+        std::string entryText = static_cast<Gtk::Entry *>(rowIter->_widgets[1].get())->get_text();
         _propertySet->SetControlValue(
-            property,
-            static_cast<unsigned>(std::atof(entryText.c_str()) *
-                                  theatre::ControlValue::MaxUInt() / 100.0));
+            property, static_cast<unsigned>(std::atof(entryText.c_str()) *
+                                            theatre::ControlValue::MaxUInt() / 100.0));
       } break;
       case PropertyType::Duration: {
-        double value =
-            static_cast<DurationInput *>(rowIter->_widgets[0].get())->Value();
+        double value = static_cast<DurationInput *>(rowIter->_widgets[0].get())->Value();
         _propertySet->SetDuration(property, value);
       } break;
       case PropertyType::Integer: {
@@ -184,16 +166,12 @@ void PropertiesBox::onApplyClicked() {
       case PropertyType::TimePattern: {
         const std::string entry_text =
             static_cast<Gtk::Entry *>(rowIter->_widgets[1].get())->get_text();
-        _propertySet->SetTimePattern(property,
-                                     system::TimePattern(entry_text.c_str()));
+        _propertySet->SetTimePattern(property, system::TimePattern(entry_text.c_str()));
       } break;
       case PropertyType::Transition: {
-        const DurationInput *di =
-            static_cast<DurationInput *>(rowIter->_widgets[1].get());
-        const TransitionTypeBox *tb =
-            static_cast<TransitionTypeBox *>(rowIter->_widgets[2].get());
-        _propertySet->SetTransition(
-            property, theatre::Transition(di->Value(), tb->Get()));
+        const DurationInput *di = static_cast<DurationInput *>(rowIter->_widgets[1].get());
+        const TransitionTypeBox *tb = static_cast<TransitionTypeBox *>(rowIter->_widgets[2].get());
+        _propertySet->SetTransition(property, theatre::Transition(di->Value(), tb->Get()));
       } break;
     }
     ++rowIter;

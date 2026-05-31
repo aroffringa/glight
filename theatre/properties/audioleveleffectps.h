@@ -10,8 +10,7 @@ namespace glight::theatre {
 class AudioLevelEffectPS final : public PropertySet {
  public:
   AudioLevelEffectPS() {
-    addProperty(
-        Property("decayspeed", "Decay speed", PropertyType::ControlValue));
+    addProperty(Property("decayspeed", "Decay speed", PropertyType::ControlValue));
   }
 
  protected:
@@ -25,8 +24,7 @@ class AudioLevelEffectPS final : public PropertySet {
     }
   }
 
-  virtual unsigned getControlValue(const FolderObject &object,
-                                   size_t index) const final override {
+  virtual unsigned getControlValue(const FolderObject &object, size_t index) const final override {
     const AudioLevelEffect &tfx = static_cast<const AudioLevelEffect &>(object);
     switch (index) {
       case 0:

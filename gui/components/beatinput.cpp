@@ -7,23 +7,20 @@
 namespace glight::gui {
 namespace {
 inline constexpr size_t kNValues = 10;
-inline const double values[kNValues] = {0.25, 0.5, 1.0, 2.0, 3.0,
-                                        4.0,  6.0, 8.0, 16.0};
+inline const double values[kNValues] = {0.25, 0.5, 1.0, 2.0, 3.0, 4.0, 6.0, 8.0, 16.0};
 }  // namespace
-inline const std::string kStringValues[kNValues]{
-    "1/4", "1/2", " 1 ", " 2 ", " 3 ", " 4 ", " 6 ", " 8 ", " 16", "32"};
+inline const std::string kStringValues[kNValues]{"1/4", "1/2", " 1 ", " 2 ", " 3 ",
+                                                 " 4 ", " 6 ", " 8 ", " 16", "32"};
 
 BeatInput::BeatInput(double value)
-    : scale_(Gtk::Adjustment::create(
-                 0, 0, static_cast<double>(kNValues - 1) + 0.1, 1),
+    : scale_(Gtk::Adjustment::create(0, 0, static_cast<double>(kNValues - 1) + 0.1, 1),
              Gtk::Orientation::HORIZONTAL) {
   Initialize(value);
 }
 
 BeatInput::BeatInput(const std::string &label, double value)
     : caption_label_(label),
-      scale_(Gtk::Adjustment::create(
-                 0, 0, static_cast<double>(kNValues - 1) + 0.1, 1),
+      scale_(Gtk::Adjustment::create(0, 0, static_cast<double>(kNValues - 1) + 0.1, 1),
              Gtk::Orientation::HORIZONTAL) {
   caption_label_.set_halign(Gtk::Align::END);
   append(caption_label_);
@@ -75,8 +72,6 @@ void BeatInput::SetValue(double new_value) {
   signal_value_changed_.emit(new_value);
 }
 
-void BeatInput::SetValueLabel(unsigned index) {
-  value_label_.set_text(kStringValues[index]);
-}
+void BeatInput::SetValueLabel(unsigned index) { value_label_.set_text(kStringValues[index]); }
 
 }  // namespace glight::gui

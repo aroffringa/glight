@@ -22,8 +22,7 @@ class Management;
 class PresetCollection final : public Controllable {
  public:
   PresetCollection() : _inputValue(0) {}
-  PresetCollection(const std::string &name)
-      : Controllable(name), _inputValue(0) {}
+  PresetCollection(const std::string &name) : Controllable(name), _inputValue(0) {}
   ~PresetCollection() { Clear(); }
 
   void Clear() {
@@ -33,9 +32,8 @@ class PresetCollection final : public Controllable {
 
   void SetFromCurrentSituation(Management &management);
 
-  void SetFromCurrentFixtures(
-      Management &management,
-      const std::set<system::ObservingPtr<Fixture>, std::less<>> &fixtures);
+  void SetFromCurrentFixtures(Management &management,
+                              const std::set<system::ObservingPtr<Fixture>, std::less<>> &fixtures);
 
   size_t NInputs() const override { return 1; }
 
@@ -47,8 +45,7 @@ class PresetCollection final : public Controllable {
 
   size_t NConnections() const override { return _presetValues.size(); }
 
-  std::pair<const Controllable *, size_t> GetConnection(
-      size_t index) const override {
+  std::pair<const Controllable *, size_t> GetConnection(size_t index) const override {
     return std::make_pair(&_presetValues[index]->GetControllable(),
                           _presetValues[index]->InputIndex());
   }
@@ -58,16 +55,12 @@ class PresetCollection final : public Controllable {
     for (size_t i = 0; i != _presetValues.size(); ++i) {
       const std::unique_ptr<PresetValue> &pv = _presetValues[i];
       unsigned rightHand = pv->Value().UInt();
-      ControlValue value(
-          ControlValue::Mix(leftHand, rightHand, MixStyle::Multiply));
+      ControlValue value(ControlValue::Mix(leftHand, rightHand, MixStyle::Multiply));
 
-      pv->GetControllable().MixInput(pv->InputIndex(), value,
-                                     connection_values_[i][primary]);
+      pv->GetControllable().MixInput(pv->InputIndex(), value, connection_values_[i][primary]);
     }
   }
-  const std::vector<std::unique_ptr<PresetValue>> &PresetValues() const {
-    return _presetValues;
-  }
+  const std::vector<std::unique_ptr<PresetValue>> &PresetValues() const { return _presetValues; }
   PresetValue &AddPresetValue(const PresetValue &source) {
     connection_values_.emplace_back();
     return *_presetValues.emplace_back(new PresetValue(source));
@@ -76,8 +69,7 @@ class PresetCollection final : public Controllable {
     connection_values_.emplace_back();
     return *_presetValues.emplace_back(new PresetValue(controllable, input));
   }
-  PresetValue &AddPresetValue(const PresetValue &source,
-                              Controllable &controllable) {
+  PresetValue &AddPresetValue(const PresetValue &source, Controllable &controllable) {
     connection_values_.emplace_back();
     return *_presetValues.emplace_back(new PresetValue(source, controllable));
   }

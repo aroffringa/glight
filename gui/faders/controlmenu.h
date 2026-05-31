@@ -34,17 +34,11 @@ class ControlMenu : public Gtk::PopoverMenu {
 
   sigc::signal<void(bool)>& SignalToggleName() { return signal_toggle_name_; }
 
-  sigc::signal<void(bool)>& SignalToggleFlashButton() {
-    return signal_toggle_flash_button_;
-  }
+  sigc::signal<void(bool)>& SignalToggleFlashButton() { return signal_toggle_flash_button_; }
 
-  sigc::signal<void(bool)>& SignalToggleCheckButton() {
-    return signal_toggle_check_button_;
-  }
+  sigc::signal<void(bool)>& SignalToggleCheckButton() { return signal_toggle_check_button_; }
 
-  sigc::signal<void(bool)>& SignalToggleFadeButtons() {
-    return signal_toggle_fade_buttons_;
-  }
+  sigc::signal<void(bool)>& SignalToggleFadeButtons() { return signal_toggle_fade_buttons_; }
 
   template <typename Function>
   void AddExtraItem(const std::string& label, Function function) {
@@ -52,9 +46,7 @@ class ControlMenu : public Gtk::PopoverMenu {
     actions_->add_action("assign", function);
   }
 
-  const std::shared_ptr<Gio::SimpleActionGroup>& GetActionGroup() const {
-    return actions_;
-  }
+  const std::shared_ptr<Gio::SimpleActionGroup>& GetActionGroup() const { return actions_; }
 
  private:
   bool GetState(const std::shared_ptr<Gio::SimpleAction>& action) const {
@@ -72,8 +64,7 @@ class ControlMenu : public Gtk::PopoverMenu {
 
   std::shared_ptr<Gio::SimpleAction> Toggle(std::shared_ptr<Gio::Menu>& menu,
                                             const Glib::ustring& label,
-                                            const Glib::ustring& action_name,
-                                            bool initial_value,
+                                            const Glib::ustring& action_name, bool initial_value,
                                             const sigc::slot<void(bool)>& slot);
 
   std::shared_ptr<Gio::SimpleActionGroup> actions_;

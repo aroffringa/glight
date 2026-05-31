@@ -83,8 +83,7 @@ ChasePropertiesWindow::ChasePropertiesWindow(theatre::Chase &chase)
   _grid.set_hexpand(true);
   _box.append(_grid);
 
-  _toTimeSequenceButton.signal_clicked().connect(
-      [&]() { onToTimeSequenceClicked(); });
+  _toTimeSequenceButton.signal_clicked().connect([&]() { onToTimeSequenceClicked(); });
   _buttonBox.set_homogeneous(true);
   _buttonBox.set_orientation(Gtk::Orientation::HORIZONTAL);
   _buttonBox.append(_toTimeSequenceButton);
@@ -143,8 +142,7 @@ void ChasePropertiesWindow::onTransitionSpeedChanged(double newValue) {
   }
 }
 
-void ChasePropertiesWindow::onTransitionTypeChanged(
-    theatre::TransitionType type) {
+void ChasePropertiesWindow::onTransitionTypeChanged(theatre::TransitionType type) {
   std::lock_guard<std::mutex> lock(Instance::Management().Mutex());
   _chase->GetTransition().SetType(type);
 }
@@ -213,8 +211,7 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   }
   theatre::Folder &folder = _chase->Parent();
   std::string name = _chase->Name();
-  theatre::SourceValue *source =
-      Instance::Management().GetSourceValue(*_chase, 0);
+  theatre::SourceValue *source = Instance::Management().GetSourceValue(*_chase, 0);
   source->Reconnect(tSequence, 0);
   Instance::Management().RemoveControllable(*_chase);
   tSequence.SetName(name);

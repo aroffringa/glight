@@ -117,8 +117,7 @@ BOOST_AUTO_TEST_CASE(number) {
 BOOST_AUTO_TEST_CASE(encode) {
   std::ostringstream s;
   BOOST_CHECK_EQUAL(JsonWriter::Encode("André"), "\"André\"");
-  BOOST_CHECK_EQUAL(JsonWriter::Encode("\"\'\\\r\n\f\b\t"),
-                    "\"\\\"\'\\\\\\r\\n\\f\\b\\t\"");
+  BOOST_CHECK_EQUAL(JsonWriter::Encode("\"\'\\\r\n\f\b\t"), "\"\\\"\'\\\\\\r\\n\\f\\b\\t\"");
 }
 
 BOOST_AUTO_TEST_CASE(stringval) {

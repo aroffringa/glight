@@ -16,8 +16,7 @@ class RecursionLock {
     Token(RecursionLock &ar) : _isTaken(&ar._isTaken) {
 #ifndef NDEBUG
       if (ar._isTaken)
-        throw std::runtime_error(
-            "Logical error: DisableRecursion() called from multiple scopes");
+        throw std::runtime_error("Logical error: DisableRecursion() called from multiple scopes");
 #endif
       _owned = true;
       ar._isTaken = true;
@@ -39,12 +38,9 @@ class RecursionLock {
 
     void Release() {
 #ifndef NDEBUG
-      if (!_owned)
-        throw std::runtime_error(
-            "Logical error: Release() was called twice for token");
+      if (!_owned) throw std::runtime_error("Logical error: Release() was called twice for token");
       if (!*_isTaken)
-        throw std::runtime_error(
-            "Logical error: token was released from wrong scope");
+        throw std::runtime_error("Logical error: token was released from wrong scope");
 #endif
       if (_owned) {
         _owned = false;

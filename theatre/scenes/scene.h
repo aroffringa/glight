@@ -37,12 +37,10 @@ class Scene : public Controllable, private system::SyncListener {
    * thread other than the management thread.
    */
   bool IsPlaying() const {
-    return _isPlaying && ((_audioPlayer && _audioPlayer->IsPlaying()) ||
-                          _endOfItems < kWaitSyncs);
+    return _isPlaying && ((_audioPlayer && _audioPlayer->IsPlaying()) || _endOfItems < kWaitSyncs);
   }
 
-  ControlSceneItem *AddControlSceneItem(double offsetInMS,
-                                        Controllable &controllable,
+  ControlSceneItem *AddControlSceneItem(double offsetInMS, Controllable &controllable,
                                         size_t input);
 
   KeySceneItem *AddKeySceneItem(double offsetInMS);
@@ -51,9 +49,7 @@ class Scene : public Controllable, private system::SyncListener {
 
   void ChangeSceneItemStartTime(SceneItem *item, double newOffsetInMS);
 
-  const std::multimap<double, std::unique_ptr<SceneItem>> &SceneItems() const {
-    return _items;
-  }
+  const std::multimap<double, std::unique_ptr<SceneItem>> &SceneItems() const { return _items; }
 
   size_t NInputs() const override { return 1; }
 
@@ -63,8 +59,7 @@ class Scene : public Controllable, private system::SyncListener {
 
   size_t NConnections() const override { return controllables_.size(); }
 
-  std::pair<const Controllable *, size_t> GetConnection(
-      size_t index) const override {
+  std::pair<const Controllable *, size_t> GetConnection(size_t index) const override {
     return controllables_[index];
   }
 
@@ -72,9 +67,8 @@ class Scene : public Controllable, private system::SyncListener {
     if (InputValue(0)) {
       if (primary && !_isPlaying) Start(timing.TimeInMS());
       const double relTimeInMs = timing.TimeInMS() - StartTimeInMS();
-      const Timing relTiming(relTimeInMs, timing.TimestepNumber(),
-                             timing.BeatValue(), timing.AudioLevel(),
-                             timing.TimestepRandomValue());
+      const Timing relTiming(relTimeInMs, timing.TimestepNumber(), timing.BeatValue(),
+                             timing.AudioLevel(), timing.TimestepRandomValue());
       skipTo(relTimeInMs);
 
       for (SceneItem *scene_item : _startedItems) {
@@ -125,9 +119,7 @@ class Scene : public Controllable, private system::SyncListener {
    * True when the last item has been played (irrespectively of
    * whether the audio player is still playing).
    */
-  bool ItemsHaveEnd() const {
-    return _nextStartedItem == _items.end() && _startedItems.empty();
-  }
+  bool ItemsHaveEnd() const { return _nextStartedItem == _items.end() && _startedItems.empty(); }
 
   void initPlayer();
 
@@ -138,10 +130,8 @@ class Scene : public Controllable, private system::SyncListener {
 
   void skipTo(double offsetInMS);
 
-  std::multimap<double, std::unique_ptr<SceneItem>>::iterator find(
-      SceneItem *item) {
-    for (std::multimap<double, std::unique_ptr<SceneItem>>::iterator i =
-             _items.begin();
+  std::multimap<double, std::unique_ptr<SceneItem>>::iterator find(SceneItem *item) {
+    for (std::multimap<double, std::unique_ptr<SceneItem>>::iterator i = _items.begin();
          i != _items.end(); ++i) {
       if (item == i->second.get()) {
         return i;

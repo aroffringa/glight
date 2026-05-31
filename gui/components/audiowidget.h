@@ -61,8 +61,8 @@ class AudioWidget : public Gtk::DrawingArea {
     return true;
   }
   void onButtonPressed(int, double, double);
-  void verticalLine(guint8 *dataPtr, size_t rowStride, int x, unsigned char r,
-                    unsigned char g, unsigned char b) {
+  void verticalLine(guint8 *dataPtr, size_t rowStride, int x, unsigned char r, unsigned char g,
+                    unsigned char b) {
     if (x >= 0 && x < _width) {
       guint8 *xPtr = dataPtr + x * 3;
       for (int y = 0; y < _height; ++y) {

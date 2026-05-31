@@ -12,13 +12,9 @@ class ColorControlEffectPS final : public PropertySet {
   ColorControlEffectPS() {}
 
  protected:
-  void setControlValue(FolderObject &object, size_t index,
-                       unsigned value) const override {}
+  void setControlValue(FolderObject &object, size_t index, unsigned value) const override {}
 
-  unsigned getControlValue(const FolderObject &object,
-                           size_t index) const override {
-    return 0;
-  }
+  unsigned getControlValue(const FolderObject &object, size_t index) const override { return 0; }
 };
 
 }  // namespace glight::theatre

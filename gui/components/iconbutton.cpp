@@ -5,16 +5,13 @@
 
 namespace glight::gui {
 namespace {
-void DrawCirclePart(const Cairo::RefPtr<Cairo::Context>& cairo,
-                    const theatre::Color& color, bool entered, size_t index,
-                    size_t n) {
+void DrawCirclePart(const Cairo::RefPtr<Cairo::Context>& cairo, const theatre::Color& color,
+                    bool entered, size_t index, size_t n) {
   if (entered) {
-    cairo->set_source_rgb(color.RedRatio() / 3.0 + 0.666,
-                          color.GreenRatio() / 3.0 + 0.666,
+    cairo->set_source_rgb(color.RedRatio() / 3.0 + 0.666, color.GreenRatio() / 3.0 + 0.666,
                           color.BlueRatio() / 3.0 + 0.666);
   } else {
-    cairo->set_source_rgb(color.RedRatio(), color.GreenRatio(),
-                          color.BlueRatio());
+    cairo->set_source_rgb(color.RedRatio(), color.GreenRatio(), color.BlueRatio());
   }
   const double angle1 = 2.0 * M_PI / n * index + M_PI_2;
   const double angle2 = 2.0 * M_PI / n * (index + 1) + M_PI_2;
@@ -29,8 +26,7 @@ void DrawCirclePart(const Cairo::RefPtr<Cairo::Context>& cairo,
   cairo->fill();
 }
 
-void DrawCircleBorder(const Cairo::RefPtr<Cairo::Context>& cairo,
-                      bool entered) {
+void DrawCircleBorder(const Cairo::RefPtr<Cairo::Context>& cairo, bool entered) {
   cairo->arc(0.0, 0.0, 1.0, 0, 2.0 * M_PI);
   if (entered) {
     cairo->set_source_rgb(0.5, 0.5, 0.5);
@@ -40,8 +36,7 @@ void DrawCircleBorder(const Cairo::RefPtr<Cairo::Context>& cairo,
   cairo->stroke();
 }
 
-void DrawActiveBorder(const Cairo::RefPtr<Cairo::Context>& cairo,
-                      double pixel_size) {
+void DrawActiveBorder(const Cairo::RefPtr<Cairo::Context>& cairo, double pixel_size) {
   cairo->arc(0.0, 0.0, std::max(1.0 - pixel_size, 0.0), 0, 2.0 * M_PI);
   cairo->set_source_rgb(1.0, 1.0, 1.0);
   cairo->stroke();
@@ -60,15 +55,12 @@ void DrawCross(const Cairo::RefPtr<Cairo::Context>& cairo) {
 }  // namespace
 
 IconButton::IconButton() {
-  set_draw_func([&](const Cairo::RefPtr<Cairo::Context>& cairo, int, int) {
-    Draw(cairo);
-  });
+  set_draw_func([&](const Cairo::RefPtr<Cairo::Context>& cairo, int, int) { Draw(cairo); });
 
   auto gesture = Gtk::GestureClick::create();
   gesture->set_button(1);
   gesture->signal_pressed().connect(&IconButton::OnPress);
-  gesture->signal_released().connect(
-      sigc::mem_fun(*this, &IconButton::OnRelease));
+  gesture->signal_released().connect(sigc::mem_fun(*this, &IconButton::OnRelease));
   add_controller(gesture);
 
   auto motion = Gtk::EventControllerMotion::create();

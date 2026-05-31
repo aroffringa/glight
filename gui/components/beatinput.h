@@ -16,9 +16,7 @@ class BeatInput : public Gtk::Box {
 
   BeatInput(const std::string &label, double value);
 
-  sigc::signal<void(double)> &SignalValueChanged() {
-    return signal_value_changed_;
-  }
+  sigc::signal<void(double)> &SignalValueChanged() { return signal_value_changed_; }
 
   double Value() const { return ScaleToValue(scale_.get_value()); }
 

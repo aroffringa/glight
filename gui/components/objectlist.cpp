@@ -29,8 +29,7 @@ using theatre::FolderObject;
 
 using system::ObservingPtr;
 
-ObjectList::ObjectList()
-    : _openFolder(&Instance::Management().RootFolder()), _listView(*this) {
+ObjectList::ObjectList() : _openFolder(&Instance::Management().RootFolder()), _listView(*this) {
   Instance::Events().SignalUpdateControllables().connect(
       sigc::mem_fun(*this, &ObjectList::fillList));
 
@@ -100,35 +99,28 @@ void ObjectList::fillList() {
   std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
   fillListFolder(*_openFolder, selectedObj);
   lock.unlock();
-  if (selectedObj &&
-      !SelectedObject())  // if the selected object is no longer in the list
+  if (selectedObj && !SelectedObject())  // if the selected object is no longer in the list
     _signalSelectionChange.emit();
 }
 
-void ObjectList::fillListFolder(const Folder &folder,
-                                const FolderObject *selectedObj) {
-  bool almostAll = _displayType == ObjectListType::AllExceptFixtures ||
-                   _displayType == ObjectListType::All;
-  bool showFolders =
-      _displayType == ObjectListType::OnlyPresetCollections || almostAll;
-  bool showPresetCollections =
-      _displayType == ObjectListType::OnlyPresetCollections || almostAll;
+void ObjectList::fillListFolder(const Folder &folder, const FolderObject *selectedObj) {
+  bool almostAll =
+      _displayType == ObjectListType::AllExceptFixtures || _displayType == ObjectListType::All;
+  bool showFolders = _displayType == ObjectListType::OnlyPresetCollections || almostAll;
+  bool showPresetCollections = _displayType == ObjectListType::OnlyPresetCollections || almostAll;
   bool showChases = _displayType == ObjectListType::OnlyChases || almostAll;
   bool showEffects = _displayType == ObjectListType::OnlyEffects ||
                      _displayType == ObjectListType::OnlyVariables || almostAll;
   bool showFixtures = _displayType == ObjectListType::All;
 
-  Glib::RefPtr<Gtk::IconTheme> theme =
-      Gtk::IconTheme::get_for_display(Gdk::Display::get_default());
+  Glib::RefPtr<Gtk::IconTheme> theme = Gtk::IconTheme::get_for_display(Gdk::Display::get_default());
   int icon_height = 16;
   for (ObservingPtr<FolderObject> child : folder.Children()) {
     FolderObject *obj = child.Get();
     Folder *childFolder = showFolders ? dynamic_cast<Folder *>(obj) : nullptr;
     theatre::PresetCollection *presetCollection =
-        showPresetCollections ? dynamic_cast<theatre::PresetCollection *>(obj)
-                              : nullptr;
-    theatre::Chase *chase =
-        showChases ? dynamic_cast<theatre::Chase *>(obj) : nullptr;
+        showPresetCollections ? dynamic_cast<theatre::PresetCollection *>(obj) : nullptr;
+    theatre::Chase *chase = showChases ? dynamic_cast<theatre::Chase *>(obj) : nullptr;
     theatre::TimeSequence *timeSequence =
         showChases ? dynamic_cast<theatre::TimeSequence *>(obj) : nullptr;
     theatre::Effect *effect = nullptr;
@@ -139,13 +131,11 @@ void ObjectList::fillListFolder(const Folder &folder,
     theatre::FixtureControl *fixtureControl =
         showFixtures ? dynamic_cast<theatre::FixtureControl *>(obj) : nullptr;
     theatre::FixtureGroup *fixtureGroup =
-        _showFixtureGroups ? dynamic_cast<theatre::FixtureGroup *>(obj)
-                           : nullptr;
-    theatre::Scene *scene =
-        almostAll ? dynamic_cast<theatre::Scene *>(obj) : nullptr;
+        _showFixtureGroups ? dynamic_cast<theatre::FixtureGroup *>(obj) : nullptr;
+    theatre::Scene *scene = almostAll ? dynamic_cast<theatre::Scene *>(obj) : nullptr;
 
-    if (childFolder || presetCollection || chase || timeSequence || effect ||
-        fixtureControl || fixtureGroup || scene) {
+    if (childFolder || presetCollection || chase || timeSequence || effect || fixtureControl ||
+        fixtureGroup || scene) {
       Gtk::TreeModel::iterator iter = _listModel->append();
       Gtk::TreeModel::Row &childRow = *iter;
       std::string icon_name = "x-office-document";
@@ -171,11 +161,9 @@ void ObjectList::fillListFolder(const Folder &folder,
       childRow[_listColumns._title] = obj->Name();
       childRow[_listColumns._object] = child;
       if (!icon_name.empty()) {
-        const auto file =
-            theme->lookup_icon(icon_name, icon_height)->get_file();
+        const auto file = theme->lookup_icon(icon_name, icon_height)->get_file();
         if (file->query_exists()) {
-          childRow[_listColumns._icon] =
-              Gdk::Pixbuf::create_from_file(file->get_path());
+          childRow[_listColumns._icon] = Gdk::Pixbuf::create_from_file(file->get_path());
         }
         if (obj == selectedObj) {
           _listView.get_selection()->select(iter);
@@ -187,8 +175,7 @@ void ObjectList::fillListFolder(const Folder &folder,
 
 ObservingPtr<FolderObject> ObjectList::SelectedObject() const {
   Glib::RefPtr<const Gtk::TreeSelection> selection = _listView.get_selection();
-  const std::vector<Gtk::TreeModel::Path> selected =
-      selection->get_selected_rows();
+  const std::vector<Gtk::TreeModel::Path> selected = selection->get_selected_rows();
   if (selected.size() == 1) {
     const Gtk::TreeModel::Path path = selected[0];
     return (*_listModel->get_iter(path))[_listColumns._object];
@@ -199,8 +186,7 @@ ObservingPtr<FolderObject> ObjectList::SelectedObject() const {
 
 std::vector<ObservingPtr<FolderObject>> ObjectList::Selection() const {
   Glib::RefPtr<const Gtk::TreeSelection> selection = _listView.get_selection();
-  const std::vector<Gtk::TreeModel::Path> selected =
-      selection->get_selected_rows();
+  const std::vector<Gtk::TreeModel::Path> selected = selection->get_selected_rows();
   std::vector<ObservingPtr<FolderObject>> objects;
   objects.reserve(selected.size());
   for (Gtk::TreeModel::Path path : selected) {
@@ -211,15 +197,13 @@ std::vector<ObservingPtr<FolderObject>> ObjectList::Selection() const {
 
 void ObjectList::SelectObject(const FolderObject &object) {
   if (!selectObject(object, _listModel->children()))
-    throw std::runtime_error("Object to select ('" + object.Name() +
-                             "') not found in list");
+    throw std::runtime_error("Object to select ('" + object.Name() + "') not found in list");
 }
 
 bool ObjectList::selectObject(const FolderObject &object,
                               const Gtk::TreeModel::Children &children) {
   for (const Gtk::TreeConstRow &child : children) {
-    const ObservingPtr<FolderObject> &row_object_ptr =
-        child[_listColumns._object];
+    const ObservingPtr<FolderObject> &row_object_ptr = child[_listColumns._object];
     const FolderObject *row_object = row_object_ptr.Get();
     if (row_object == &object) {
       _listView.get_selection()->select(child.get_iter());
@@ -247,8 +231,7 @@ void ObjectList::constructContextMenu() {
     std::shared_ptr<Gio::Menu> move_to_menu = Gio::Menu::create();
 
     int folder_counter = 0;
-    constructFolderMenu(move_to_menu, actions,
-                        Instance::Management().RootFolder(), folder_counter);
+    constructFolderMenu(move_to_menu, actions, Instance::Management().RootFolder(), folder_counter);
     menu->append_submenu("Move to", move_to_menu);
   }
 
@@ -257,8 +240,7 @@ void ObjectList::constructContextMenu() {
 }
 
 void ObjectList::constructFolderMenu(const std::shared_ptr<Gio::Menu> &menu,
-                                     Gio::ActionMap &actions, Folder &folder,
-                                     int &counter) {
+                                     Gio::ActionMap &actions, Folder &folder, int &counter) {
   std::shared_ptr<Gio::Menu> sub_menu;
   for (const ObservingPtr<FolderObject> &object : folder.Children()) {
     Folder *subFolder = dynamic_cast<Folder *>(object.Get());
@@ -267,8 +249,7 @@ void ObjectList::constructFolderMenu(const std::shared_ptr<Gio::Menu> &menu,
         sub_menu = Gio::Menu::create();
         const std::string name = "moveto_" + std::to_string(counter);
         ++counter;
-        AddMenuItem(actions, sub_menu, ".", name,
-                    [&]() { onMoveSelected(&folder); });
+        AddMenuItem(actions, sub_menu, ".", name, [&]() { onMoveSelected(&folder); });
       }
       constructFolderMenu(sub_menu, actions, *subFolder, counter);
     }
@@ -280,15 +261,14 @@ void ObjectList::constructFolderMenu(const std::shared_ptr<Gio::Menu> &menu,
     // If the folder is empty, we create a single menu item
     const std::string name = "moveto_" + std::to_string(counter);
     ++counter;
-    std::shared_ptr<Gio::SimpleAction> item = AddMenuItem(
-        actions, menu, folder.Name(), name, [&]() { onMoveSelected(&folder); });
+    std::shared_ptr<Gio::SimpleAction> item =
+        AddMenuItem(actions, menu, folder.Name(), name, [&]() { onMoveSelected(&folder); });
 
     if (&folder == SelectedObject()) item->set_enabled(false);
   }
 }
 
-ObjectList::TreeViewWithMenu::TreeViewWithMenu(ObjectList &parent)
-    : _parent(parent) {
+ObjectList::TreeViewWithMenu::TreeViewWithMenu(ObjectList &parent) : _parent(parent) {
   auto gesture = Gtk::GestureClick::create();
   gesture->set_button(3);
   gesture->signal_pressed().connect(
@@ -309,8 +289,7 @@ void ObjectList::onMoveSelected(Folder *destination) {
     Instance::Events().EmitUpdate();
   } catch (std::exception &e) {
     dialog_ = std::make_unique<Gtk::MessageDialog>(
-        Instance::MainWindow(),
-        "Could not move item to " + destination->Name() + ": " + e.what(),
+        Instance::MainWindow(), "Could not move item to " + destination->Name() + ": " + e.what(),
         false, Gtk::MessageType::ERROR, Gtk::ButtonsType::OK, true);
     dialog_->signal_response().connect([this](int) { dialog_.reset(); });
     dialog_->show();

@@ -51,10 +51,8 @@ class FaderSetState {
 
   bool IsAssigned(const theatre::SourceValue *source) const {
     for (const std::unique_ptr<FaderState> &fader : faders) {
-      const std::vector<theatre::SourceValue *> &sources =
-          fader->GetSourceValues();
-      if (std::find(sources.begin(), sources.end(), source) != sources.end())
-        return true;
+      const std::vector<theatre::SourceValue *> &sources = fader->GetSourceValues();
+      if (std::find(sources.begin(), sources.end(), source) != sources.end()) return true;
     }
     return false;
   }

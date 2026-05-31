@@ -26,8 +26,7 @@ class InputSelectWidget : public Gtk::Box {
         _selectedObject(nullptr),
         _selectedInput(NO_INPUT_SELECTED) {
     _browser.SetDisplayType(ObjectListType::All);
-    _browser.SignalSelectionChange().connect(
-        [&]() { onBrowserSelectionChange(); });
+    _browser.SignalSelectionChange().connect([&]() { onBrowserSelectionChange(); });
     append(_browser);
 
     _listModel = Gtk::ListStore::create(_listColumns);
@@ -43,9 +42,7 @@ class InputSelectWidget : public Gtk::Box {
     append(_inputBox);
   }
 
-  sigc::signal<void()> &SignalSelectionChange() {
-    return _signalSelectionChange;
-  }
+  sigc::signal<void()> &SignalSelectionChange() { return _signalSelectionChange; }
 
   theatre::Controllable *SelectedObject() const { return _selectedObject; }
   size_t SelectedInput() const { return _selectedInput; }
@@ -82,8 +79,8 @@ class InputSelectWidget : public Gtk::Box {
       for (size_t input = 0; input != _selectedObject->NInputs(); ++input) {
         Gtk::TreeModel::iterator iter = _listModel->append();
         Gtk::TreeModel::Row row = *iter;
-        row[_listColumns._title] = std::to_string(input + 1) + ". " +
-                                   ToString(_selectedObject->InputType(input));
+        row[_listColumns._title] =
+            std::to_string(input + 1) + ". " + ToString(_selectedObject->InputType(input));
         row[_listColumns._inputIndex] = input;
       }
     }

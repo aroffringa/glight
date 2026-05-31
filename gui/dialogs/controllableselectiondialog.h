@@ -20,8 +20,7 @@ class ControllableSelectionDialog : public Gtk::Dialog {
       : Dialog(title, true), object_browser_(), new_button_("New...") {
     set_size_request(600, 400);
 
-    object_browser_.SignalSelectionChange().connect(
-        [&]() { OnSelectionChanged(); });
+    object_browser_.SignalSelectionChange().connect([&]() { OnSelectionChanged(); });
     get_content_area()->append(object_browser_);
 
     new_button_.signal_clicked().connect([&]() { OnNew(); });
@@ -32,29 +31,21 @@ class ControllableSelectionDialog : public Gtk::Dialog {
     select_button_->set_sensitive(false);
   }
 
-  void SelectObject(theatre::FolderObject& object) {
-    object_browser_.SelectObject(object);
-  }
+  void SelectObject(theatre::FolderObject& object) { object_browser_.SelectObject(object); }
 
   system::ObservingPtr<theatre::FolderObject> SelectedObject() const {
     return object_browser_.SelectedObject();
   }
   theatre::Folder& SelectedFolder() { return object_browser_.SelectedFolder(); }
 
-  void ShowNewButton(bool make_visible) {
-    new_button_.set_visible(make_visible);
-  }
+  void ShowNewButton(bool make_visible) { new_button_.set_visible(make_visible); }
 
   sigc::signal<void()>& SignalNewClicked() { return signal_new_clicked_; }
 
-  void SetFilter(ObjectListType filter) {
-    object_browser_.SetDisplayType(filter);
-  }
+  void SetFilter(ObjectListType filter) { object_browser_.SetDisplayType(filter); }
 
  private:
-  void OnSelectionChanged() {
-    select_button_->set_sensitive(object_browser_.SelectedObject());
-  }
+  void OnSelectionChanged() { select_button_->set_sensitive(object_browser_.SelectedObject()); }
   void OnNew() { signal_new_clicked_(); }
   ObjectBrowser object_browser_;
   Gtk::Button new_button_;

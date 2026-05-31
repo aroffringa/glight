@@ -21,8 +21,7 @@ enum class PropertyType {
 
 class Property final {
  public:
-  Property(const std::string &name, const std::string &description,
-           PropertyType type)
+  Property(const std::string &name, const std::string &description, PropertyType type)
       : type_(type), set_index_(0), name_(name), description_(description) {}
 
   /**
@@ -44,12 +43,8 @@ class Property final {
   const std::string &Description() const { return description_; }
 
   size_t OptionCount() const { return options_.size(); }
-  const std::string &OptionName(size_t index) const {
-    return options_[index].first;
-  }
-  const std::string &OptionDescription(size_t index) const {
-    return options_[index].second;
-  }
+  const std::string &OptionName(size_t index) const { return options_[index].first; }
+  const std::string &OptionDescription(size_t index) const { return options_[index].second; }
 
  private:
   friend class PropertySet;

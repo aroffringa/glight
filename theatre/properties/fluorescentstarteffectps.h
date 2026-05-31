@@ -10,21 +10,15 @@ namespace glight::theatre {
 class FluorescentStartEffectPS final : public PropertySet {
  public:
   FluorescentStartEffectPS() {
-    addProperty(Property("averageduration", "Average duration",
-                         PropertyType::Duration));
-    addProperty(
-        Property("stddev", "Standard deviation", PropertyType::Duration));
-    addProperty(
-        Property("flashduration", "Flash duration", PropertyType::Duration));
-    addProperty(
-        Property("glowvalue", "Glow value", PropertyType::ControlValue));
-    addProperty(Property("independentoutputs", "Independent outputs",
-                         PropertyType::Boolean));
+    addProperty(Property("averageduration", "Average duration", PropertyType::Duration));
+    addProperty(Property("stddev", "Standard deviation", PropertyType::Duration));
+    addProperty(Property("flashduration", "Flash duration", PropertyType::Duration));
+    addProperty(Property("glowvalue", "Glow value", PropertyType::ControlValue));
+    addProperty(Property("independentoutputs", "Independent outputs", PropertyType::Boolean));
   }
 
  protected:
-  virtual void setDuration(FolderObject &object, size_t index,
-                           double value) const final override {
+  virtual void setDuration(FolderObject &object, size_t index, double value) const final override {
     FluorescentStartEffect &fx = static_cast<FluorescentStartEffect &>(object);
     switch (index) {
       case 0:
@@ -39,10 +33,8 @@ class FluorescentStartEffectPS final : public PropertySet {
     }
   }
 
-  virtual double getDuration(const FolderObject &object,
-                             size_t index) const final override {
-    const FluorescentStartEffect &fx =
-        static_cast<const FluorescentStartEffect &>(object);
+  virtual double getDuration(const FolderObject &object, size_t index) const final override {
+    const FluorescentStartEffect &fx = static_cast<const FluorescentStartEffect &>(object);
     switch (index) {
       case 0:
         return fx.AverageDuration();
@@ -67,10 +59,8 @@ class FluorescentStartEffectPS final : public PropertySet {
     }
   }
 
-  virtual unsigned getControlValue(const FolderObject &object,
-                                   size_t index) const final override {
-    const FluorescentStartEffect &fx =
-        static_cast<const FluorescentStartEffect &>(object);
+  virtual unsigned getControlValue(const FolderObject &object, size_t index) const final override {
+    const FluorescentStartEffect &fx = static_cast<const FluorescentStartEffect &>(object);
     switch (index) {
       case 3:
         return fx.GlowValue();
@@ -78,8 +68,7 @@ class FluorescentStartEffectPS final : public PropertySet {
     return 0;
   }
 
-  virtual void setBool(FolderObject &object, size_t index,
-                       bool value) const override {
+  virtual void setBool(FolderObject &object, size_t index, bool value) const override {
     FluorescentStartEffect &fx = static_cast<FluorescentStartEffect &>(object);
     switch (index) {
       case 4:
@@ -88,10 +77,8 @@ class FluorescentStartEffectPS final : public PropertySet {
     }
   }
 
-  virtual bool getBool(const FolderObject &object,
-                       size_t index) const final override {
-    const FluorescentStartEffect &fx =
-        static_cast<const FluorescentStartEffect &>(object);
+  virtual bool getBool(const FolderObject &object, size_t index) const final override {
+    const FluorescentStartEffect &fx = static_cast<const FluorescentStartEffect &>(object);
     switch (index) {
       case 4:
         return fx.IndependentOutputs();

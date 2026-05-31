@@ -14,13 +14,9 @@ class Input {
       : controllable_(&controllable), input_index_(input_index) {}
 
   constexpr Controllable* GetControllable() { return controllable_; }
-  constexpr const Controllable* GetControllable() const {
-    return controllable_;
-  }
+  constexpr const Controllable* GetControllable() const { return controllable_; }
 
-  constexpr void SetControllable(Controllable* controllable) {
-    controllable_ = controllable;
-  }
+  constexpr void SetControllable(Controllable* controllable) { controllable_ = controllable; }
 
   constexpr size_t InputIndex() const { return input_index_; }
 

@@ -16,8 +16,7 @@ namespace glight::gui {
 
 EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect& effect)
     : PropertiesWindow(),
-      _titleLabel("Effect " + effect.Name() + " (" +
-                  EffectTypeToName(effect.GetType()) + ")"),
+      _titleLabel("Effect " + effect.Name() + " (" + EffectTypeToName(effect.GetType()) + ")"),
       _effect(&effect) {
   set_title("glight - " + effect.Name());
   set_size_request(650, 250);
@@ -34,8 +33,8 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect& effect)
   _connectionsButtonBox.append(_addConnectionButton);
 
   _connectControllablesButton.set_image_from_icon_name("folder");
-  _connectControllablesButton.signal_clicked().connect(sigc::mem_fun(
-      *this, &EffectPropertiesWindow::onConnectControllableClicked));
+  _connectControllablesButton.signal_clicked().connect(
+      sigc::mem_fun(*this, &EffectPropertiesWindow::onConnectControllableClicked));
   _connectionsButtonBox.append(_connectControllablesButton);
 
   _removeConnectionButton.set_image_from_icon_name("list-remove");
@@ -49,14 +48,12 @@ EffectPropertiesWindow::EffectPropertiesWindow(theatre::Effect& effect)
   _connectionsListModel = Gtk::ListStore::create(_connectionsListColumns);
 
   _connectionsListView.set_model(_connectionsListModel);
-  _connectionsListView.append_column("Connected control",
-                                     _connectionsListColumns._title);
-  _connectionsListView.get_selection()->signal_changed().connect(sigc::mem_fun(
-      *this, &EffectPropertiesWindow::onSelectedConnectionChanged));
+  _connectionsListView.append_column("Connected control", _connectionsListColumns._title);
+  _connectionsListView.get_selection()->signal_changed().connect(
+      sigc::mem_fun(*this, &EffectPropertiesWindow::onSelectedConnectionChanged));
   _connectionsScrolledWindow.set_child(_connectionsListView);
 
-  _connectionsScrolledWindow.set_policy(Gtk::PolicyType::NEVER,
-                                        Gtk::PolicyType::AUTOMATIC);
+  _connectionsScrolledWindow.set_policy(Gtk::PolicyType::NEVER, Gtk::PolicyType::AUTOMATIC);
   _connectionsScrolledWindow.set_expand(true);
   _connectionsBox.append(_connectionsScrolledWindow);
   _connectionsBox.set_expand(true);
@@ -87,17 +84,14 @@ void EffectPropertiesWindow::fillConnectionsList() {
     Gtk::TreeModel::iterator iter = _connectionsListModel->append();
     Gtk::TreeModel::Row& row = *iter;
     row[_connectionsListColumns._title] =
-        _effect->Connections()[index].first->InputName(
-            _effect->Connections()[index].second);
+        _effect->Connections()[index].first->InputName(_effect->Connections()[index].second);
     row[_connectionsListColumns._index] = index;
-    row[_connectionsListColumns._inputIndex] =
-        _effect->Connections()[index].second;
+    row[_connectionsListColumns._inputIndex] = _effect->Connections()[index].second;
   }
 }
 
 void EffectPropertiesWindow::onSelectedConnectionChanged() {
-  Glib::RefPtr<Gtk::TreeSelection> selection =
-      _connectionsListView.get_selection();
+  Glib::RefPtr<Gtk::TreeSelection> selection = _connectionsListView.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
   _removeConnectionButton.set_sensitive(bool(selected));
 }
@@ -127,8 +121,7 @@ void EffectPropertiesWindow::onConnectControllableClicked() {
       for (theatre::Controllable* controllable : dialog.GetSelection()) {
         for (size_t i = 0; i != controllable->NInputs(); ++i) {
           const theatre::FunctionType input_type = controllable->InputType(i);
-          if (IsColor(input_type) ||
-              input_type == theatre::FunctionType::Master) {
+          if (IsColor(input_type) || input_type == theatre::FunctionType::Master) {
             glight::theatre::SourceValue* source_value =
                 Instance::Management().GetSourceValue(*controllable, i);
             sources.emplace_back(source_value);
@@ -143,21 +136,17 @@ void EffectPropertiesWindow::onConnectControllableClicked() {
 }
 
 void EffectPropertiesWindow::onRemoveConnectionClicked() {
-  Glib::RefPtr<Gtk::TreeSelection> selection =
-      _connectionsListView.get_selection();
+  Glib::RefPtr<Gtk::TreeSelection> selection = _connectionsListView.get_selection();
   Gtk::TreeModel::iterator selected = selection->get_selected();
-  if (selected)
-    _effect->RemoveConnection((*selected)[_connectionsListColumns._index]);
+  if (selected) _effect->RemoveConnection((*selected)[_connectionsListColumns._index]);
   fillConnectionsList();
 }
 
-void EffectPropertiesWindow::onInputsSelected(
-    const std::vector<theatre::SourceValue*>& sources) {
+void EffectPropertiesWindow::onInputsSelected(const std::vector<theatre::SourceValue*>& sources) {
   {
     std::unique_lock<std::mutex> lock(Instance::Management().Mutex());
     for (theatre::SourceValue* source_value : sources) {
-      _effect->AddConnection(source_value->GetControllable(),
-                             source_value->InputIndex());
+      _effect->AddConnection(source_value->GetControllable(), source_value->InputIndex());
       if (Instance::Management().HasCycle()) {
         _effect->RemoveConnection(_effect->Connections().size() - 1);
         lock.unlock();

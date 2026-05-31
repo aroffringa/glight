@@ -12,8 +12,8 @@ class DispenserEffect final : public Effect {
   virtual EffectType GetType() const override { return EffectType::Dispenser; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
     setAllOutputs(values[0], primary);
   }
 

@@ -44,8 +44,7 @@ void TheatreDimensions::StoreValues() {
   theatre.SetWidth(std::atof(width_entry_.get_text().c_str()));
   theatre.SetDepth(std::atof(depth_entry_.get_text().c_str()));
   theatre.SetHeight(std::atof(height_entry_.get_text().c_str()));
-  theatre.SetFixtureSymbolSize(
-      std::atof(fixture_size_entry_.get_text().c_str()));
+  theatre.SetFixtureSymbolSize(std::atof(fixture_size_entry_.get_text().c_str()));
   set_button_.set_sensitive(false);
   Instance::Events().EmitUpdate();
 }

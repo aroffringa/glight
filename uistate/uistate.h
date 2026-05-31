@@ -12,12 +12,8 @@ namespace glight::uistate {
 
 class UIState {
  public:
-  std::vector<std::unique_ptr<FaderSetState>> &FaderSets() {
-    return fader_sets_;
-  }
-  const std::vector<std::unique_ptr<FaderSetState>> &FaderSets() const {
-    return fader_sets_;
-  }
+  std::vector<std::unique_ptr<FaderSetState>> &FaderSets() { return fader_sets_; }
+  const std::vector<std::unique_ptr<FaderSetState>> &FaderSets() const { return fader_sets_; }
 
   /**
    * Emitted when fader sets are added or removed from the list. This
@@ -25,9 +21,7 @@ class UIState {
    * situations in which the list of fader sets are shown, e.g. as for
    * the menu items in the main window.
    */
-  sigc::signal<void()> &FaderSetSignalChange() {
-    return fader_set_signal_change_;
-  }
+  sigc::signal<void()> &FaderSetSignalChange() { return fader_set_signal_change_; }
 
   void EmitFaderSetChangeSignal() { fader_set_signal_change_(); }
 
@@ -92,17 +86,11 @@ class UIState {
   bool ShowBeams() const { return show_beams; }
   void SetShowBeams(bool _show_beams) { show_beams = _show_beams; }
   bool ShowProjections() const { return show_projections; }
-  void SetShowProjections(bool _show_projections) {
-    show_projections = _show_projections;
-  }
+  void SetShowProjections(bool _show_projections) { show_projections = _show_projections; }
   bool ShowCrosshairs() const { return show_crosshairs; }
-  void SetShowCrosshairs(bool _show_crosshairs) {
-    show_crosshairs = _show_crosshairs;
-  }
+  void SetShowCrosshairs(bool _show_crosshairs) { show_crosshairs = _show_crosshairs; }
   bool ShowStageBorders() const { return show_stage_borders; }
-  void SetShowStageBorders(bool show_borders) {
-    show_stage_borders = show_borders;
-  }
+  void SetShowStageBorders(bool show_borders) { show_stage_borders = show_borders; }
 
  private:
   bool layout_locked_ = false;

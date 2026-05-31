@@ -13,12 +13,10 @@ namespace glight::theatre {
 
 namespace details {
 template <typename Range>
-const Range* GetParameterRange(unsigned input,
-                               const std::vector<Range>& ranges) {
-  auto iter = std::upper_bound(ranges.begin(), ranges.end(), input,
-                               [](unsigned lhs, const Range& rhs) -> bool {
-                                 return lhs < rhs.input_max;
-                               });
+const Range* GetParameterRange(unsigned input, const std::vector<Range>& ranges) {
+  auto iter =
+      std::upper_bound(ranges.begin(), ranges.end(), input,
+                       [](unsigned lhs, const Range& rhs) -> bool { return lhs < rhs.input_max; });
   if (iter == ranges.end() || iter->input_min > input)
     return nullptr;
   else
@@ -28,8 +26,7 @@ const Range* GetParameterRange(unsigned input,
 
 struct ColorRangeParameters {
   struct Range {
-    constexpr Range(unsigned input_min_, unsigned input_max_,
-                    const std::optional<Color>& color_)
+    constexpr Range(unsigned input_min_, unsigned input_max_, const std::optional<Color>& color_)
         : input_min(input_min_), input_max(input_max_), color(color_) {}
 
     unsigned input_min;
@@ -55,8 +52,7 @@ struct ColorRangeParameters {
 
 struct RotationSpeedParameters {
   struct Range {
-    constexpr Range(unsigned input_min_, unsigned input_max_, int speed_min_,
-                    int speed_max_)
+    constexpr Range(unsigned input_min_, unsigned input_max_, int speed_min_, int speed_max_)
         : input_min(input_min_),
           input_max(input_max_),
           speed_min(speed_min_),
@@ -76,8 +72,7 @@ struct RotationSpeedParameters {
       return 0;
     } else {
       // linearly interpolate speed over the range
-      return int(input - range->input_min) *
-                 (range->speed_max - range->speed_min) /
+      return int(input - range->input_min) * (range->speed_max - range->speed_min) /
                  int(range->input_max - range->input_min) +
              range->speed_min;
     }
@@ -89,14 +84,10 @@ struct RotationSpeedParameters {
 };
 
 struct FixtureFunctionParameters {
-  void SetRotationSpeedParameters(
-      const RotationSpeedParameters& rotation_parameters) {
-    parameters =
-        system::MakeIndifferent<RotationSpeedParameters>(rotation_parameters);
+  void SetRotationSpeedParameters(const RotationSpeedParameters& rotation_parameters) {
+    parameters = system::MakeIndifferent<RotationSpeedParameters>(rotation_parameters);
   }
-  void UnsetRotationParameters() {
-    parameters.Reset<RotationSpeedParameters>();
-  }
+  void UnsetRotationParameters() { parameters.Reset<RotationSpeedParameters>(); }
 
   void SetColorRangeParameters(const ColorRangeParameters& color_range) {
     parameters = system::MakeIndifferent<ColorRangeParameters>(color_range);

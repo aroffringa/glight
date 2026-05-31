@@ -15,8 +15,7 @@ class SourceValueStore;
 
 class SourceValueStoreItem {
  public:
-  SourceValueStoreItem(SourceValueStore& parent, SourceValue& source_value,
-                       ControlValue value)
+  SourceValueStoreItem(SourceValueStore& parent, SourceValue& source_value, ControlValue value)
       : parent_(&parent), value_(value) {
     SetSourceValue(source_value);
   }
@@ -47,8 +46,7 @@ class SourceValueStore {
   }
 
   void RemoveItem(SourceValueStoreItem& item) {
-    for (std::vector<SourceValueStoreItem>::iterator i = items_.begin();
-         i != items_.end(); ++i) {
+    for (std::vector<SourceValueStoreItem>::iterator i = items_.begin(); i != items_.end(); ++i) {
       if (&*i == &item) {
         items_.erase(i);
         return;

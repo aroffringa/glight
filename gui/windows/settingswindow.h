@@ -23,8 +23,8 @@ class SettingsWindow : public ChildWindow {
 
  private:
   void FillUniverses();
-  void SetUniverseRow(const theatre::devices::UniverseMap& universes,
-                      size_t universe, Gtk::TreeRow& row);
+  void SetUniverseRow(const theatre::devices::UniverseMap& universes, size_t universe,
+                      Gtk::TreeRow& row);
   void UpdateAfterSelection();
   void SaveSelectedUniverse();
   void SaveSelectedOlaUniverse();

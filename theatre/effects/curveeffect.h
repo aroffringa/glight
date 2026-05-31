@@ -9,15 +9,7 @@ namespace glight::theatre {
 
 class CurveEffect final : public Effect {
  public:
-  enum Function {
-    Linear,
-    Quadratic,
-    Exponential,
-    Logarithmic,
-    Sinusoid,
-    WarmUp,
-    SquareRoot
-  };
+  enum Function { Linear, Quadratic, Exponential, Logarithmic, Sinusoid, WarmUp, SquareRoot };
 
   CurveEffect()
       : Effect(1),
@@ -30,8 +22,8 @@ class CurveEffect final : public Effect {
   void SetFunction(enum Function f) { _function = f; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
     uint32_t value = values[0].UInt();
     switch (_function) {
       case Linear:
@@ -42,14 +34,12 @@ class CurveEffect final : public Effect {
       case Exponential: {
         // bring value between 0 - 1
         double d = double(value) / ControlValue::MaxUInt();
-        value = (std::exp(d * 5.0) - 1.0) * ControlValue::MaxUInt() /
-                (std::exp(5.0) - 1.0);
+        value = (std::exp(d * 5.0) - 1.0) * ControlValue::MaxUInt() / (std::exp(5.0) - 1.0);
       } break;
       case Logarithmic: {
         // bring value between ~1 - 256
         double d = double(value) * 256.0 / ControlValue::MaxUInt();
-        value = std::max(
-            0.0, ControlValue::MaxUInt() * std::log(d) / std::log(256.0));
+        value = std::max(0.0, ControlValue::MaxUInt() * std::log(d) / std::log(256.0));
       } break;
       case Sinusoid: {
         // bring value between 0 - 1
@@ -63,8 +53,7 @@ class CurveEffect final : public Effect {
           value = value * 3 - ControlValue::MaxUInt() * 2;
       } break;
       case SquareRoot: {
-        value = std::sqrt(double(value)) *
-                std::sqrt(double(ControlValue::MaxUInt()));
+        value = std::sqrt(double(value)) * std::sqrt(double(ControlValue::MaxUInt()));
       } break;
     }
     setAllOutputs(ControlValue(value), primary);

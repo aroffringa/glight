@@ -19,8 +19,7 @@ Manager::Manager()
 
 Manager::~Manager() = default;
 
-void Manager::SetFixtureColor(size_t column, size_t row,
-                              const theatre::Color& color, bool blink) {
+void Manager::SetFixtureColor(size_t column, size_t row, const theatre::Color& color, bool blink) {
   fixture_colors_[column * grid_width_ + row] = color;
   if (mode_ == MidiGridMode::VisualizeFixtures && controller_) {
     controller_->SetPixelColor(column, row, color, false);
@@ -53,15 +52,12 @@ void Manager::HandleButtonPress(const ButtonSet& button_set) {
         const size_t palette_index = (x % 4) * 8 + y;
         if (color_index < 2 && palette_index < 32) {
           // Set the old button back to full on
-          const unsigned char old_button =
-              std::get<0>(selected_colors_[color_index]);
+          const unsigned char old_button = std::get<0>(selected_colors_[color_index]);
           const size_t x_old = Controller::PadButtonX(old_button);
           const size_t y_old = Controller::PadButtonY(old_button);
           const size_t palette_index_old = (x_old % 4) * 8 + y_old;
-          const std::vector<theatre::Color> palette =
-              theatre::Color::DefaultSet32();
-          controller_->SetPixelColor(x_old, y_old, palette[palette_index_old],
-                                     false);
+          const std::vector<theatre::Color> palette = theatre::Color::DefaultSet32();
+          controller_->SetPixelColor(x_old, y_old, palette[palette_index_old], false);
           const theatre::Color color = palette[palette_index];
           controller_->SetPixelColor(x, y, color, true);
           selected_colors_[color_index] = std::tuple(button, true, color);
@@ -105,12 +101,10 @@ void Manager::SetTwoColorSelectionMode() {
 
 unsigned char Manager::GetFaderValue(size_t fader_index) {
   const unsigned char value = controller_->GetFaderValue(fader_index);
-  if (fader_values_.size() <= fader_index)
-    fader_values_.resize(fader_index + 1);
+  if (fader_values_.size() <= fader_index) fader_values_.resize(fader_index + 1);
   if (value != fader_values_[fader_index].first) {
     fader_values_[fader_index].first = value;
-    controller_->SetTrackButton(fader_index,
-                                value ? ButtonState::On : ButtonState::Off);
+    controller_->SetTrackButton(fader_index, value ? ButtonState::On : ButtonState::Off);
   }
   return fader_values_[fader_index].second ? 255 : value;
 }
@@ -123,8 +117,7 @@ void Manager::SetBeat(system::OptionalNumber<double> beat) {
   if (has_changed) {
     const int beat_ = beat ? static_cast<int>(std::floor(*beat)) % 4 : 5;
     for (int i = 0; i != 4; ++i)
-      controller_->SetSceneButton(
-          i + 4, i == beat_ ? ButtonState::On : ButtonState::Off);
+      controller_->SetSceneButton(i + 4, i == beat_ ? ButtonState::On : ButtonState::Off);
   }
   beat_ = beat;
 }

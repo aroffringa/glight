@@ -84,9 +84,7 @@ BOOST_AUTO_TEST_CASE(FollowDown) {
   f2->Add(f3.GetObserver());
   f1->Add(f2.GetObserver());
   root->Add(f1.GetObserver());
-  BOOST_CHECK_EQUAL(
-      root->FollowDown(folders::RemoveRoot("root/bert/carole/daniel")),
-      f3.Get());
+  BOOST_CHECK_EQUAL(root->FollowDown(folders::RemoveRoot("root/bert/carole/daniel")), f3.Get());
   std::string notMoved = folders::RemoveRoot("root/bert/carole/daniel");
   BOOST_CHECK_EQUAL(root->FollowDown(notMoved), f3.Get());
 }
@@ -143,12 +141,9 @@ BOOST_AUTO_TEST_CASE(RemoveFolder) {
   const glight::system::Settings settings;
   Management management(settings);
   Folder &root = management.RootFolder();
-  FixtureType &fixtureType =
-      *management.GetTheatre().AddFixtureType(StockFixture::Light);
-  Fixture &fixture =
-      *management.GetTheatre().AddFixture(fixtureType.Modes().front());
-  ObservingPtr<FixtureControl> control =
-      management.AddFixtureControlPtr(fixture, root);
+  FixtureType &fixtureType = *management.GetTheatre().AddFixtureType(StockFixture::Light);
+  Fixture &fixture = *management.GetTheatre().AddFixture(fixtureType.Modes().front());
+  ObservingPtr<FixtureControl> control = management.AddFixtureControlPtr(fixture, root);
 
   Folder &folder = management.AddFolder(root, "Folder");
   ObservingPtr<TimeSequence> ts1 = management.AddTimeSequencePtr();

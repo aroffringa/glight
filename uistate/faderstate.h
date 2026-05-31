@@ -15,13 +15,7 @@ class SourceValue;
 
 namespace glight::uistate {
 
-enum class FaderControlType {
-  Fader,
-  ToggleButton,
-  ColorButton,
-  ComboButton,
-  MoverControl
-};
+enum class FaderControlType { Fader, ToggleButton, ColorButton, ComboButton, MoverControl };
 
 constexpr inline bool IsFullColumnType(FaderControlType fader_type) {
   return fader_type == FaderControlType::Fader;
@@ -84,9 +78,7 @@ class FaderState {
     }
   }
 
-  const std::vector<theatre::SourceValue *> &GetSourceValues() const {
-    return source_values_;
-  }
+  const std::vector<theatre::SourceValue *> &GetSourceValues() const { return source_values_; }
   bool NewToggleButtonColumn() const { return new_column_; }
 
   bool DisplayName() const { return display_name_; }

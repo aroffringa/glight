@@ -14,8 +14,7 @@ class MusicActivationEffectPS final : public PropertySet {
   }
 
  protected:
-  virtual void setDuration(FolderObject &object, size_t index,
-                           double value) const override {
+  virtual void setDuration(FolderObject &object, size_t index, double value) const override {
     MusicActivationEffect &mfx = static_cast<MusicActivationEffect &>(object);
     switch (index) {
       case 0:
@@ -24,10 +23,8 @@ class MusicActivationEffectPS final : public PropertySet {
     }
   }
 
-  virtual double getDuration(const FolderObject &object,
-                             size_t index) const final override {
-    const MusicActivationEffect &mfx =
-        static_cast<const MusicActivationEffect &>(object);
+  virtual double getDuration(const FolderObject &object, size_t index) const final override {
+    const MusicActivationEffect &mfx = static_cast<const MusicActivationEffect &>(object);
     switch (index) {
       case 0:
         return mfx.OffDelay();

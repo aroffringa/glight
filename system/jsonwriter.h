@@ -95,12 +95,8 @@ class JsonWriter {
   }
 
   static std::string Encode(const std::string_view& str);
-  static std::string Encode(const std::string& str) {
-    return Encode(std::string_view(str));
-  }
-  static std::string Encode(const char* str) {
-    return Encode(std::string_view(str));
-  }
+  static std::string Encode(const std::string& str) { return Encode(std::string_view(str)); }
+  static std::string Encode(const char* str) { return Encode(std::string_view(str)); }
 
  private:
   void Start(const char c) {
@@ -147,11 +143,9 @@ class JsonWriter {
 
   template <typename T>
   void IntegerNumber(T number) {
-    constexpr size_t max_digits =
-        std::numeric_limits<T>::digits10 + 1 + std::is_signed<T>::value;
+    constexpr size_t max_digits = std::numeric_limits<T>::digits10 + 1 + std::is_signed<T>::value;
     std::array<char, max_digits> data;
-    const char* end =
-        std::to_chars(data.data(), data.data() + max_digits, number).ptr;
+    const char* end = std::to_chars(data.data(), data.data() + max_digits, number).ptr;
     Next();
     Out() << std::string_view(data.data(), end - data.data());
     state_ = State::AfterItem;
@@ -166,13 +160,7 @@ class JsonWriter {
 
   std::ostream* stream_ = nullptr;
 
-  enum class State {
-    Empty,
-    AfterName,
-    AfterStart,
-    AfterItem,
-    NewLine
-  } state_ = State::Empty;
+  enum class State { Empty, AfterName, AfterStart, AfterItem, NewLine } state_ = State::Empty;
 
   size_t indent_ = 0;
 };

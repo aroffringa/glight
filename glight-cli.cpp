@@ -44,8 +44,7 @@ std::vector<TextFader> InitializeFaders(const UIState& state) {
     for (const std::unique_ptr<FaderState>& fader : fader_set->faders) {
       if (fader->GetFaderType() == FaderControlType::Fader) {
         theatre::SourceValue* source = nullptr;
-        if (!fader->GetSourceValues().empty())
-          source = fader->GetSourceValues()[0];
+        if (!fader->GetSourceValues().empty()) source = fader->GetSourceValues()[0];
         if (source) {
           TextFader& new_fader = result.emplace_back();
           new_fader.label = source->Name();
@@ -59,8 +58,7 @@ std::vector<TextFader> InitializeFaders(const UIState& state) {
   return result;
 }
 
-void PrintState(const std::vector<TextFader>& faders, size_t width,
-                size_t height) {
+void PrintState(const std::vector<TextFader>& faders, size_t width, size_t height) {
   for (const TextFader& fader : faders) {
     if (fader.line >= height) break;
     const theatre::ControlValue value = fader.source->A().Value();

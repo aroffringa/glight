@@ -18,14 +18,10 @@ class FluorescentStartEffect final : public Effect {
         _glowValue(ControlValue::MaxUInt() / 5),  // 20%
         _independentOutputs(true){};
 
-  virtual EffectType GetType() const override {
-    return EffectType::FluorescentStart;
-  }
+  virtual EffectType GetType() const override { return EffectType::FluorescentStart; }
 
   double AverageDuration() const { return _averageDuration; }
-  void SetAverageDuration(double avgDuration) {
-    _averageDuration = avgDuration;
-  }
+  void SetAverageDuration(double avgDuration) { _averageDuration = avgDuration; }
 
   double StdDeviation() const { return _stdDeviation; }
   void SetStdDeviation(double stdDev) { _stdDeviation = stdDev; }
@@ -37,13 +33,11 @@ class FluorescentStartEffect final : public Effect {
   void SetGlowValue(unsigned glowValue) { _glowValue = glowValue; }
 
   bool IndependentOutputs() const { return _independentOutputs; }
-  void SetIndependentOutputs(bool independentOutputs) {
-    _independentOutputs = independentOutputs;
-  }
+  void SetIndependentOutputs(bool independentOutputs) { _independentOutputs = independentOutputs; }
 
  private:
-  virtual void MixImplementation(const ControlValue *values,
-                                 const Timing &timing, bool primary) override {
+  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+                                 bool primary) override {
     std::vector<ConnectionInfo> &primary_data = _data[primary];
     if (values[0]) {
       const size_t count = _independentOutputs ? Connections().size() : 1;
@@ -51,9 +45,8 @@ class FluorescentStartEffect final : public Effect {
 
       for (size_t i = 0; i != count; ++i) {
         ConnectionInfo &data = primary_data[i];
-        bool nextState =
-            (data._state != std::numeric_limits<unsigned>::max()) &&
-            ((data._state == 0) || (data._nextStateTime < timing.TimeInMS()));
+        bool nextState = (data._state != std::numeric_limits<unsigned>::max()) &&
+                         ((data._state == 0) || (data._nextStateTime < timing.TimeInMS()));
         if (nextState) {
           ++data._state;
           if (data._state >= 6)
@@ -62,13 +55,12 @@ class FluorescentStartEffect final : public Effect {
             if (data._state % 2 == 0)  // flash?
               data._nextStateTime = timing.TimeInMS() + _flashDuration;
             else
-              data._nextStateTime = timing.DrawGaussianValue() * _stdDeviation +
-                                    _averageDuration + timing.TimeInMS();
+              data._nextStateTime =
+                  timing.DrawGaussianValue() * _stdDeviation + _averageDuration + timing.TimeInMS();
           }
         }
         unsigned value;
-        if (data._state % 2 == 0 ||
-            data._state == std::numeric_limits<unsigned>::max())
+        if (data._state % 2 == 0 || data._state == std::numeric_limits<unsigned>::max())
           value = ControlValue::MaxUInt();
         else if (data._state == 1)
           value = 0;

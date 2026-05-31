@@ -12,8 +12,8 @@ namespace glight::gui {
 
 class ComboControlWidget final : public ControlWidget {
  public:
-  ComboControlWidget(FaderWindow &fader_window, uistate::FaderState &state,
-                     ControlMode mode, char key);
+  ComboControlWidget(FaderWindow &fader_window, uistate::FaderState &state, ControlMode mode,
+                     char key);
   ~ComboControlWidget();
 
   virtual void Toggle() final;

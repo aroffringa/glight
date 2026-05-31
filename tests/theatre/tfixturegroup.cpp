@@ -31,8 +31,7 @@ BOOST_AUTO_TEST_CASE(construct) {
 
 BOOST_AUTO_TEST_CASE(insert) {
   theatre::Theatre theatre;
-  const theatre::FixtureType& type =
-      *theatre.AddFixtureTypePtr(StockFixture::Rgb);
+  const theatre::FixtureType& type = *theatre.AddFixtureTypePtr(StockFixture::Rgb);
   ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
   ObservingPtr<Fixture> b = theatre.AddFixturePtr(type.Modes().front());
   FixtureGroup group("g1");
@@ -96,8 +95,7 @@ BOOST_AUTO_TEST_CASE(add_to_management) {
   ObservingPtr<Fixture> a = theatre.AddFixturePtr(type.Modes().front());
   theatre.AddFixture(type.Modes().front());
   ObservingPtr<Fixture> c = theatre.AddFixturePtr(type.Modes().front());
-  FixtureGroup& group =
-      *management.AddFixtureGroup(management.RootFolder(), "newgroup");
+  FixtureGroup& group = *management.AddFixtureGroup(management.RootFolder(), "newgroup");
   BOOST_CHECK_EQUAL(group.Name(), "newgroup");
   group.Insert(a);
   group.Insert(c);

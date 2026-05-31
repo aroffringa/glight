@@ -15,8 +15,8 @@ void FixtureFunction::DecChannel() {
   if (fine_channel_) fine_channel_ = fine_channel_->Previous();
 }
 
-void FixtureFunction::SetChannel(
-    const DmxChannel &channel, const std::optional<DmxChannel> &fine_channel) {
+void FixtureFunction::SetChannel(const DmxChannel &channel,
+                                 const std::optional<DmxChannel> &fine_channel) {
   main_channel_ = channel;
   fine_channel_ = fine_channel;
 }

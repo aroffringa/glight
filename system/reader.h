@@ -16,8 +16,7 @@ class Management;
 
 namespace system {
 
-void ImportFixtureTypes(const std::string &filename,
-                        theatre::Management &management);
+void ImportFixtureTypes(const std::string &filename, theatre::Management &management);
 
 void Read(const std::string &filename, theatre::Management &management,
           uistate::UIState *ui_state = nullptr);

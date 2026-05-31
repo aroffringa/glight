@@ -10,17 +10,13 @@ namespace glight::theatre {
 class FadeEffectPS final : public PropertySet {
  public:
   FadeEffectPS() {
-    addProperty(
-        Property("upduration", "Up fading duration", PropertyType::Duration));
-    addProperty(Property("downduration", "Down fading duration",
-                         PropertyType::Duration));
-    addProperty(
-        Property("sustaintime", "Sustain time", PropertyType::Duration));
+    addProperty(Property("upduration", "Up fading duration", PropertyType::Duration));
+    addProperty(Property("downduration", "Down fading duration", PropertyType::Duration));
+    addProperty(Property("sustaintime", "Sustain time", PropertyType::Duration));
   }
 
  protected:
-  virtual void setDuration(FolderObject &object, size_t index,
-                           double value) const final override {
+  virtual void setDuration(FolderObject &object, size_t index, double value) const final override {
     FadeEffect &fadefx = static_cast<FadeEffect &>(object);
     switch (index) {
       case 0:
@@ -35,8 +31,7 @@ class FadeEffectPS final : public PropertySet {
     }
   }
 
-  virtual double getDuration(const FolderObject &object,
-                             size_t index) const final override {
+  virtual double getDuration(const FolderObject &object, size_t index) const final override {
     const FadeEffect &fadefx = static_cast<const FadeEffect &>(object);
     switch (index) {
       case 0:

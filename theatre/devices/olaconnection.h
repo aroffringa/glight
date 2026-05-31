@@ -40,21 +40,16 @@ class OlaConnection {
     assert(universes_.contains(universe));
     return universes_.find(universe)->second.type;
   }
-  void SetOutputValues(unsigned universe, const unsigned char *newValues,
-                       size_t size);
-  void GetOutputValues(unsigned universe, unsigned char *destination,
-                       size_t size);
-  void GetInputValues(unsigned universe, unsigned char *destination,
-                      size_t size);
+  void SetOutputValues(unsigned universe, const unsigned char *newValues, size_t size);
+  void GetOutputValues(unsigned universe, unsigned char *destination, size_t size);
+  void GetInputValues(unsigned universe, unsigned char *destination, size_t size);
   void WaitForNextSync();
   void Abort();
 
  private:
-  void ReceiveDmx(const ola::client::DMXMetadata &metadata,
-                  const ola::DmxBuffer &data);
-  void ReceiveUniverseList(
-      const ola::client::Result &result,
-      const std::vector<ola::client::OlaUniverse> &universes);
+  void ReceiveDmx(const ola::client::DMXMetadata &metadata, const ola::DmxBuffer &data);
+  void ReceiveUniverseList(const ola::client::Result &result,
+                           const std::vector<ola::client::OlaUniverse> &universes);
   bool SendDmx();
   void RegisterUniverseCallback(const ola::client::Result &result);
 

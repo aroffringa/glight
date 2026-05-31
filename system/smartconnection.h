@@ -15,8 +15,7 @@ class SmartConnection {
   }
   SmartConnection(const SmartConnection& source) = delete;
 
-  explicit SmartConnection(sigc::connection&& connection) noexcept
-      : connection_(connection) {}
+  explicit SmartConnection(sigc::connection&& connection) noexcept : connection_(connection) {}
 
   ~SmartConnection() noexcept { connection_.disconnect(); }
 
