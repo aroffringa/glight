@@ -32,17 +32,20 @@ class VariableEffect final : public Effect {
  protected:
   virtual void MixImplementation(const ControlValue *values,
                                  const Timing &timing, bool primary) override {
-    for (const std::pair<Controllable *, size_t> &connection : Connections()) {
+    for (size_t connection_index = 0; connection_index != NConnections();
+         ++connection_index) {
+      const std::pair<const Controllable *, size_t> &connection =
+          GetConnection(connection_index);
       const size_t input_index = connection.second;
       switch (connection.first->InputType(input_index)) {
         case FunctionType::Red:
-          connection.first->MixInput(input_index, values[0]);
+          MixConnection(connection_index, values[0], primary);
           break;
         case FunctionType::Green:
-          connection.first->MixInput(input_index, values[1]);
+          MixConnection(connection_index, values[1], primary);
           break;
         case FunctionType::Blue:
-          connection.first->MixInput(input_index, values[2]);
+          MixConnection(connection_index, values[2], primary);
           break;
         default:
           break;

@@ -36,10 +36,9 @@ class TwinkleEffect final : public Effect {
     if (values[0]) {
       if (previous_time_[primary] == -1.0)
         previous_time_[primary] = timing.TimeInMS();
-      inputs_[primary].resize(Connections().size());
-      for (size_t i = 0; i != Connections().size(); ++i) {
-        MixInput(Connections()[i], inputs_[primary][i], values[0], timing,
-                 primary);
+      inputs_[primary].resize(NConnections());
+      for (size_t i = 0; i != NConnections(); ++i) {
+        MixInput(i, inputs_[primary][i], values[0], timing, primary);
       }
     }
     previous_time_[primary] = timing.TimeInMS();
@@ -52,9 +51,8 @@ class TwinkleEffect final : public Effect {
     double state_timer = 0.0;
   };
 
-  void MixInput(const std::pair<Controllable*, size_t>& connection,
-                InputData& input, const ControlValue& value,
-                const Timing& timing, bool primary) {
+  void MixInput(size_t connection_index, InputData& input,
+                const ControlValue& value, const Timing& timing, bool primary) {
     const double time_passed = timing.TimeInMS() - previous_time_[primary];
     input.state_timer -= time_passed;
     switch (input.state) {
@@ -68,18 +66,17 @@ class TwinkleEffect final : public Effect {
         if (input.state_timer <= 0.0) {
           input.state_timer = hold_time_;
           input.state = State::Hold;
-          connection.first->MixInput(connection.second, value);
+          MixConnection(connection_index, value, primary);
         } else {
           const double transition_point =
               transition_out_.LengthInMs() - input.state_timer;
           const ControlValue transition_value =
               transition_in_.InValue(transition_point, timing);
-          connection.first->MixInput(connection.second,
-                                     transition_value * value);
+          MixConnection(connection_index, transition_value * value, primary);
         }
         break;
       case State::Hold:
-        connection.first->MixInput(connection.second, value);
+        MixConnection(connection_index, value, primary);
         if (input.state_timer <= 0.0) {
           input.state = State::TransitionOut;
           input.state_timer = transition_out_.LengthInMs();
@@ -94,8 +91,7 @@ class TwinkleEffect final : public Effect {
         } else {
           const ControlValue transition_value =
               transition_out_.InValue(input.state_timer, timing);
-          connection.first->MixInput(connection.second,
-                                     transition_value * value);
+          MixConnection(connection_index, transition_value * value, primary);
         }
         break;
     }

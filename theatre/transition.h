@@ -1,7 +1,7 @@
 #ifndef THEATRE_TRANSITION_H_
 #define THEATRE_TRANSITION_H_
 
-#include "presetcollection.h"
+#include "controllable.h"
 #include "timing.h"
 
 #include <cassert>
@@ -216,9 +216,8 @@ class Transition {
    * @param transition_time value between 0 and _lengthInMS.
    * @param timing used for randomness, etc.
    */
-  void Mix(Controllable &first, size_t first_input, Controllable &second,
-           size_t second_input, double transition_time,
-           const ControlValue &value, const Timing &timing) const;
+  void Mix(Connection &first, Connection &second, double transition_time,
+           ControlValue value, const Timing &timing, bool primary) const;
 
  private:
   double length_in_ms_ = 250.0;

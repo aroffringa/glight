@@ -195,13 +195,19 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
 
     // Process source values. These will output to controllables.
     if (is_primary) {
-      for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-        sv->GetControllable().MixInput(sv->InputIndex(),
-                                       ControlValue(sv->PrimaryValue()));
+      for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
+        const ControlValue value(sv->PrimaryValue());
+        sv->GetControllable().MixInput(sv->InputIndex(), value,
+                                       sv->PreviousPrimary());
+        sv->PreviousPrimary() = value;
+      }
     } else {
-      for (const std::unique_ptr<SourceValue> &sv : _sourceValues)
-        sv->GetControllable().MixInput(sv->InputIndex(),
-                                       ControlValue(sv->SecondaryValue()));
+      for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
+        const ControlValue value(sv->SecondaryValue());
+        sv->GetControllable().MixInput(sv->InputIndex(), value,
+                                       sv->PreviousSecondary());
+        sv->PreviousSecondary() = value;
+      }
     }
 
     // Process all controllables that follow
@@ -574,8 +580,8 @@ bool Management::topologicalSortVisit(Controllable &controllable,
                                       std::vector<Controllable *> &list) {
   if (controllable.VisitLevel() == 0) {
     controllable.SetVisitLevel(1);
-    for (size_t i = 0; i != controllable.NOutputs(); ++i) {
-      Controllable *other = controllable.Output(i).first;
+    for (size_t i = 0; i != controllable.NConnections(); ++i) {
+      Controllable *other = controllable.GetConnection(i).first;
       if (!topologicalSortVisit(*other, list)) return false;
     }
     controllable.SetVisitLevel(2);

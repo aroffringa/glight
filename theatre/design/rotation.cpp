@@ -7,6 +7,7 @@
 
 #include "theatre/folder.h"
 #include "theatre/management.h"
+#include "theatre/presetcollection.h"
 #include "theatre/timesequence.h"
 
 namespace glight::theatre {

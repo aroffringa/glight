@@ -1,149 +1,164 @@
 #ifndef THEATRE_CHASE_H_
 #define THEATRE_CHASE_H_
 
+#include <array>
+#include <type_traits>
+#include <vector>
+
 #include "controllable.h"
-#include "sequence.h"
+#include "controlvalue.h"
+#include "input.h"
 #include "timing.h"
 #include "transition.h"
 #include "trigger.h"
 
 namespace glight::theatre {
 
-/**
-        @author Andre Offringa
-*/
 class Chase final : public Controllable {
  public:
-  Chase() : _phaseOffset(0.0) {}
+  Chase() = default;
 
   size_t NInputs() const override { return 1; }
 
-  ControlValue &InputValue(size_t) override { return _inputValue; }
+  ControlValue &InputValue(size_t) override { return input_value_; }
 
   virtual FunctionType InputType(size_t) const override {
     return FunctionType::Master;
   }
 
-  size_t NOutputs() const override { return _sequence.List().size(); }
+  size_t NConnections() const override { return sequence_.size(); }
 
-  std::pair<const Controllable *, size_t> Output(size_t index) const override {
-    const Input &input = _sequence.List()[index];
-    return std::pair<const Controllable *, size_t>(input.GetControllable(),
-                                                   input.InputIndex());
+  std::pair<const Controllable *, size_t> GetConnection(
+      size_t index) const override {
+    const Input &to_input = sequence_[index];
+    return std::pair<const Controllable *, size_t>(to_input.GetControllable(),
+                                                   to_input.InputIndex());
   }
 
-  virtual void Mix(const Timing &timing, bool primary) override {
+  void Mix(const Timing &timing, bool primary) override {
     // Slowly drive the phase offset back to zero.
-    if (_phaseOffset != 0.0) {
-      if (_phaseOffset > 8.0)
-        _phaseOffset -= 8.0;
-      else if (_phaseOffset < -8.0)
-        _phaseOffset += 8.0;
+    if (phase_offset_ != 0.0) {
+      if (phase_offset_ > 8.0)
+        phase_offset_ -= 8.0;
+      else if (phase_offset_ < -8.0)
+        phase_offset_ += 8.0;
       else
-        _phaseOffset = 0.0;
+        phase_offset_ = 0.0;
     }
-    switch (_trigger.Type()) {
+    switch (trigger_.Type()) {
       case TriggerType::Delay:
-        mixDelayChase(timing);
+        MixDelayChase(timing, primary);
         break;
       case TriggerType::Sync:
-        mixSyncedChase(timing);
+        MixSyncedChase(timing, primary);
         break;
       case TriggerType::Beat:
-        mixBeatChase(timing);
+        MixBeatChase(timing, primary);
         break;
     }
   }
 
-  const Transition &GetTransition() const { return _transition; }
-  Transition &GetTransition() { return _transition; }
+  const Transition &GetTransition() const { return transition_; }
+  Transition &GetTransition() { return transition_; }
 
-  const Trigger &GetTrigger() const { return _trigger; }
-  Trigger &GetTrigger() { return _trigger; }
+  const Trigger &GetTrigger() const { return trigger_; }
+  Trigger &GetTrigger() { return trigger_; }
 
-  const Sequence &GetSequence() const { return _sequence; }
-  Sequence &GetSequence() { return _sequence; }
+  const std::vector<Input> &GetSequence() const { return sequence_; }
+  template <typename InputVector>
+  void SetSequence(InputVector &&sequence) {
+    sequence_ = std::forward<InputVector>(sequence);
+    connection_values_.resize(sequence_.size());
+  }
 
   void ShiftDelayTrigger(double triggerTime, double transitionTime,
                          double currentTime) {
-    double currentDuration = _trigger.DelayInMs() + _transition.LengthInMs();
-    double currentPhase = std::fmod(currentTime + _phaseOffset,
-                                    currentDuration * _sequence.Size());
+    double currentDuration = trigger_.DelayInMs() + transition_.LengthInMs();
+    double currentPhase = std::fmod(currentTime + phase_offset_,
+                                    currentDuration * sequence_.size());
     double stepPhase = std::fmod(currentPhase, currentDuration);
     unsigned step =
-        (unsigned)fmod(currentPhase / currentDuration, _sequence.Size());
+        (unsigned)fmod(currentPhase / currentDuration, sequence_.size());
     double newStepDuration = (triggerTime + transitionTime);
-    double newDuration = newStepDuration * _sequence.Size();
-    if (stepPhase < _trigger.DelayInMs()) {
+    double newDuration = newStepDuration * sequence_.size();
+    if (stepPhase < trigger_.DelayInMs()) {
       // No transition is ongoing
       // Find an offset such that
       // (time + _phaseOffset) % duration = step*duration + stepPhase*old/new
       // phaseOffset = (step*stepDuration + stepPhase*old/new - time) % duration
-      _phaseOffset = std::fmod(
+      phase_offset_ = std::fmod(
           step * newStepDuration +
-              stepPhase * triggerTime / _trigger.DelayInMs() - currentTime,
+              stepPhase * triggerTime / trigger_.DelayInMs() - currentTime,
           newDuration);
     } else {
       // Transition ongoing: shift to the relative position inside the
       // transition Find an offset such that (time + _phaseOffset) % duration =
       // step*duration + stepPhase*old/new + trigger phaseOffset =
       // (step*stepDuration + transPhase*old/new + trigger - time) % duration
-      _phaseOffset =
+      phase_offset_ =
           std::fmod(step * newStepDuration +
-                        (stepPhase - _trigger.DelayInMs()) * transitionTime /
-                            _transition.LengthInMs() +
+                        (stepPhase - trigger_.DelayInMs()) * transitionTime /
+                            transition_.LengthInMs() +
                         triggerTime - currentTime,
                     newDuration);
     }
-    _trigger.SetDelayInMs(triggerTime);
-    _transition.SetLengthInMs(transitionTime);
+    trigger_.SetDelayInMs(triggerTime);
+    transition_.SetLengthInMs(transitionTime);
   }
 
-  void ResetPhaseOffset() { _phaseOffset = 0.0; }
+  void ResetPhaseOffset() { phase_offset_ = 0.0; }
 
  private:
-  void mixBeatChase(const Timing &timing) {
+  void MixBeatChase(const Timing &timing, bool primary) {
     double timeInMs = timing.BeatValue();
-    unsigned step =
-        (unsigned)fmod(timeInMs / _trigger.DelayInBeats(), _sequence.Size());
-    _sequence.List()[step].GetControllable()->MixInput(
-        _sequence.List()[step].InputIndex(), _inputValue);
+    unsigned step = (unsigned)std::fmod(timeInMs / trigger_.DelayInBeats(),
+                                        sequence_.size());
+    sequence_[step].GetControllable()->MixInput(
+        sequence_[step].InputIndex(), input_value_,
+        connection_values_[step][primary]);
   }
 
-  void mixSyncedChase(const Timing &timing) {
+  void MixSyncedChase(const Timing &timing, bool primary) {
     unsigned step =
-        (timing.TimestepNumber() / _trigger.DelayInSyncs()) % _sequence.Size();
-    _sequence.List()[step].GetControllable()->MixInput(
-        _sequence.List()[step].InputIndex(), _inputValue);
+        (timing.TimestepNumber() / trigger_.DelayInSyncs()) % sequence_.size();
+    sequence_[step].GetControllable()->MixInput(
+        sequence_[step].InputIndex(), input_value_,
+        connection_values_[step][primary]);
   }
 
-  void mixDelayChase(const Timing &timing) {
-    double timeInMs = timing.TimeInMS() + _phaseOffset;
-    double totalDuration = _trigger.DelayInMs() + _transition.LengthInMs();
+  void MixDelayChase(const Timing &timing, bool primary) {
+    double timeInMs = timing.TimeInMS() + phase_offset_;
+    double totalDuration = trigger_.DelayInMs() + transition_.LengthInMs();
     double phase = std::fmod(timeInMs, totalDuration);
-    unsigned step = (unsigned)fmod(timeInMs / totalDuration, _sequence.Size());
-    if (phase < _trigger.DelayInMs()) {
+    unsigned step =
+        (unsigned)std::fmod(timeInMs / totalDuration, sequence_.size());
+    if (phase < trigger_.DelayInMs()) {
       // We are not in a transition, just mix the corresponding controllable
-      _sequence.List()[step].GetControllable()->MixInput(
-          _sequence.List()[step].InputIndex(), _inputValue);
+      sequence_[step].GetControllable()->MixInput(
+          sequence_[step].InputIndex(), input_value_,
+          connection_values_[step][primary]);
     } else {
       // We are in a transition
-      const double transition_time = phase - _trigger.DelayInMs();
-      Controllable &first = *_sequence.List()[step].GetControllable();
-      Controllable &second =
-          *_sequence.List()[(step + 1) % _sequence.Size()].GetControllable();
-      _transition.Mix(
-          first, _sequence.List()[step].InputIndex(), second,
-          _sequence.List()[(step + 1) % _sequence.Size()].InputIndex(),
-          transition_time, _inputValue, timing);
+      const double transition_time = phase - trigger_.DelayInMs();
+      Connection first = {.to_controllable = sequence_[step].GetControllable(),
+                          .to_input_index = sequence_[step].InputIndex(),
+                          .values = connection_values_[step]};
+      const size_t next_step = (step + 1) % sequence_.size();
+      Connection second = {
+          .to_controllable = sequence_[next_step].GetControllable(),
+          .to_input_index = sequence_[next_step].InputIndex(),
+          .values = connection_values_[next_step]};
+      transition_.Mix(first, second, transition_time, input_value_, timing,
+                      primary);
     }
   }
 
-  ControlValue _inputValue;
-  Sequence _sequence;
-  Trigger _trigger;
-  Transition _transition;
-  double _phaseOffset;
+  ControlValue input_value_;
+  std::vector<Input> sequence_;
+  Trigger trigger_;
+  Transition transition_;
+  double phase_offset_ = 0.0;
+  std::vector<std::array<ControlValue, 2>> connection_values_;
 };
 
 }  // namespace glight::theatre

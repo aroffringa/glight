@@ -14,7 +14,7 @@ class DispenserEffect final : public Effect {
  protected:
   virtual void MixImplementation(const ControlValue *values,
                                  const Timing &timing, bool primary) override {
-    setAllOutputs(values[0]);
+    setAllOutputs(values[0], primary);
   }
 
  private:

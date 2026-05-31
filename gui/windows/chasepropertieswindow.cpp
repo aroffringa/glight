@@ -199,8 +199,10 @@ void ChasePropertiesWindow::onToTimeSequenceClicked() {
   theatre::TimeSequence &tSequence = *time_sequence_ptr;
   tSequence.SetRepeatCount(0);
   size_t index = 0;
-  for (theatre::Input &input : _chase->GetSequence().List()) {
-    tSequence.AddStep(*input.GetControllable(), input.InputIndex());
+  for (const theatre::Input &input : _chase->GetSequence()) {
+    theatre::Controllable &controllable =
+        Instance::Management().GetNonConst(*input.GetControllable());
+    tSequence.AddStep(controllable, input.InputIndex());
     theatre::TimeSequence::Step &step = tSequence.GetStep(index);
     if (_chase->GetTrigger().Type() == theatre::TriggerType::Delay)
       step.transition = _chase->GetTransition();

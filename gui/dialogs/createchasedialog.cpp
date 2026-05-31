@@ -109,12 +109,13 @@ void CreateChaseDialog::onCreateChaseButtonClicked() {
     new_chase->SetName(folder.GetAvailableName("Chase"));
     folder.Add(new_chase);
 
-    theatre::Sequence &sequence = new_chase->GetSequence();
+    std::vector<theatre::Input> sequence;
     Gtk::TreeModel::Children children = _newChaseListModel->children();
     for (const Gtk::TreeRow &row : children) {
       theatre::Controllable *object = row[_newChaseListColumns._controllable];
-      sequence.Add(*object, 0);
+      sequence.emplace_back(*object, 0);
     }
+    new_chase->SetSequence(sequence);
 
     lock.unlock();
 

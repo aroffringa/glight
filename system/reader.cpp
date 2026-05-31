@@ -14,6 +14,7 @@
 #include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
+#include "theatre/presetcollection.h"
 #include "theatre/presetvalue.h"
 #include "theatre/theatre.h"
 #include "theatre/timesequence.h"
@@ -320,17 +321,18 @@ void ParsePresetCollection(const Object &node, Management &management) {
   }
 }
 
-void ParseSequence(const Object &node, Sequence &sequence,
-                   Management &management) {
+std::vector<Input> ParseSequence(const Object &node, Management &management) {
   const Array &inputs = ToArr(node["inputs"]);
+  std::vector<Input> sequence;
   for (Node &item_node : inputs) {
     const Object &item = ToObj(item_node);
     size_t input = OptionalSize(item, "input-index", 0);
     size_t folderId = OptionalSize(item, "folder", 0);
     Controllable &c = dynamic_cast<Controllable &>(
         management.Folders()[folderId]->GetChild(ToStr(item["name"])));
-    sequence.Add(c, input);
+    sequence.emplace_back(c, input);
   }
+  return sequence;
 }
 
 void ParseTrigger(const Object &node, Trigger &trigger) {
@@ -353,7 +355,7 @@ void ParseChase(const Object &node, Management &management) {
   Chase &chase = *chase_ptr;
   ParseTrigger(ToObj(node["trigger"]), chase.GetTrigger());
   chase.GetTransition() = ParseTransition(ToObj(node["transition"]));
-  ParseSequence(ToObj(node["sequence"]), chase.GetSequence(), management);
+  chase.SetSequence(ParseSequence(ToObj(node["sequence"]), management));
 }
 
 void ParseTimeSequence(const Object &node, Management &management) {
@@ -363,7 +365,7 @@ void ParseTimeSequence(const Object &node, Management &management) {
   TimeSequence &time_sequence = *time_sequence_ptr;
   time_sequence.SetSustain(ToBool(node["sustain"]));
   time_sequence.SetRepeatCount(ToNum(node["repeat-count"]).AsSize());
-  ParseSequence(ToObj(node["sequence"]), time_sequence.Sequence(), management);
+  time_sequence.SetSequence(ParseSequence(ToObj(node["sequence"]), management));
   const Array &steps = ToArr(node["steps"]);
   for (Node &item : steps) {
     const Object &step_obj = ToObj(item);
@@ -371,7 +373,7 @@ void ParseTimeSequence(const Object &node, Management &management) {
     ParseTrigger(ToObj(step_obj["trigger"]), step.trigger);
     step.transition = ParseTransition(ToObj(step_obj["transition"]));
   }
-  if (time_sequence.Steps().size() != time_sequence.Sequence().Size())
+  if (time_sequence.Steps().size() != time_sequence.Sequence().size())
     throw std::runtime_error(
         "nr of steps in time sequence doesn't match sequence size");
 }

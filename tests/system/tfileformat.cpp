@@ -186,7 +186,7 @@ void CheckEqual(const Management &a, const Management &b) {
   BOOST_CHECK_EQUAL(a_fixture_control->Name(), "Control for RGBW fixture");
   BOOST_CHECK_EQUAL(a_fixture_control->NInputs(),
                     3);  // rgb filter will make it 3
-  BOOST_CHECK_EQUAL(a_fixture_control->NOutputs(), 0);
+  BOOST_CHECK_EQUAL(a_fixture_control->NConnections(), 0);
   BOOST_CHECK_EQUAL(
       a.GetFixtureControl(a_fixture).Get(),
       &a.GetObjectFromPath(
@@ -219,7 +219,7 @@ void CheckEqual(const Management &a, const Management &b) {
           "The root folder/A subfolder/A preset collection"));
   BOOST_CHECK_EQUAL(readCollection.Name(), "A preset collection");
   BOOST_CHECK_EQUAL(readCollection.NInputs(), 1);
-  BOOST_CHECK_EQUAL(readCollection.NOutputs(), 2);
+  BOOST_CHECK_EQUAL(readCollection.NConnections(), 2);
   BOOST_CHECK_EQUAL(readCollection.PresetValues()[0]->Value().UInt(),
                     ControlValue::MaxUInt() / 2);
   BOOST_CHECK_EQUAL(&readCollection.PresetValues()[0]->GetControllable(),
@@ -261,7 +261,8 @@ void CheckEqual(const Management &a, const Management &b) {
     const Controllable &controllable_b = *b.Controllables()[controllable_index];
     BOOST_CHECK_EQUAL(controllable_a.FullPath(), controllable_b.FullPath());
     BOOST_CHECK_EQUAL(controllable_a.NInputs(), controllable_b.NInputs());
-    BOOST_CHECK_EQUAL(controllable_a.NOutputs(), controllable_b.NOutputs());
+    BOOST_CHECK_EQUAL(controllable_a.NConnections(),
+                      controllable_b.NConnections());
     if (const Scene *scene_a = dynamic_cast<const Scene *>(&controllable_a);
         scene_a) {
       const Scene *scene_b = dynamic_cast<const Scene *>(&controllable_b);

@@ -57,11 +57,13 @@ class RandomSelectEffect final : public Effect {
       }
       if (active_transition_[primary]) {
         MixDirect(transition_connections,
-                  values[0] * transition_.OutValue(transition_time, timing));
+                  values[0] * transition_.OutValue(transition_time, timing),
+                  primary);
         MixDirect(activeConnections,
-                  values[0] * transition_.InValue(transition_time, timing));
+                  values[0] * transition_.InValue(transition_time, timing),
+                  primary);
       } else {
-        MixDirect(activeConnections, values[0]);
+        MixDirect(activeConnections, values[0], primary);
       }
     } else {
       _active[primary] = false;
@@ -82,13 +84,11 @@ class RandomSelectEffect final : public Effect {
   }
 
   void MixDirect(const std::vector<size_t> &connections,
-                 const ControlValue value) {
+                 const ControlValue value, bool primary) {
     size_t n_active = std::min(_count, Connections().size());
     for (size_t i = 0; i != n_active; ++i) {
       if (connections[i] < Connections().size()) {
-        const std::pair<Controllable *, size_t> &connection =
-            Connections()[connections[i]];
-        connection.first->MixInput(connection.second, value);
+        MixConnection(connections[i], value, primary);
       }
     }
   }

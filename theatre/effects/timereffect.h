@@ -54,13 +54,13 @@ class TimerEffect final : public Effect {
       if (timing.TimeInMS() - start < transition_in_.LengthInMs()) {
         const ControlValue multiplier =
             transition_in_.InValue(timing.TimeInMS() - start, timing);
-        setAllOutputs(input * multiplier);
+        setAllOutputs(input * multiplier, primary);
       } else {
         transition_start_[primary].Reset();
       }
     }
     if (!transition_start_[primary]) {
-      setAllOutputs(input);
+      setAllOutputs(input, primary);
     }
   }
 
@@ -74,7 +74,7 @@ class TimerEffect final : public Effect {
       if (timing.TimeInMS() - start < transition_out_.LengthInMs()) {
         const ControlValue multiplier =
             transition_out_.OutValue(timing.TimeInMS() - start, timing);
-        setAllOutputs(input * multiplier);
+        setAllOutputs(input * multiplier, primary);
       } else {
         transition_start_[primary].Reset();
       }

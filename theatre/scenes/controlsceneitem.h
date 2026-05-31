@@ -29,7 +29,7 @@ class ControlSceneItem final : public SceneItem {
     const double ratio = (timing.TimeInMS() - OffsetInMS()) / DurationInMS();
     const ControlValue value(_startValue.UInt() * (1.0 - ratio) +
                              _endValue.UInt() * ratio);
-    _controllable.MixInput(_input, value);
+    _controllable.MixInput(_input, value, connection_value_);
   }
   Controllable &GetControllable() const { return _controllable; }
   size_t GetInput() const { return _input; }
@@ -37,7 +37,9 @@ class ControlSceneItem final : public SceneItem {
  private:
   Controllable &_controllable;
   size_t _input;
-  ControlValue _startValue, _endValue;
+  ControlValue _startValue;
+  ControlValue _endValue;
+  ControlValue connection_value_;
 };
 
 }  // namespace glight::theatre

@@ -49,7 +49,7 @@ class PulseEffect final : public Effect {
           if (pos < transition_in_.LengthInMs()) {
             // Fade in
             const ControlValue value = transition_in_.InValue(pos, timing);
-            setAllOutputs(values[0] * value);
+            setAllOutputs(values[0] * value, primary);
             handled = true;
           } else {
             pos -= transition_in_.LengthInMs();
@@ -58,7 +58,7 @@ class PulseEffect final : public Effect {
 
         if (sustain_ != 0 && !handled) {
           if (pos < sustain_) {
-            setAllOutputs(ControlValue(values[0].UInt()));
+            setAllOutputs(ControlValue(values[0].UInt()), primary);
             handled = true;
           } else
             pos -= sustain_;
@@ -68,7 +68,7 @@ class PulseEffect final : public Effect {
           if (pos < transition_out_.LengthInMs()) {
             // Fade out
             const ControlValue value = transition_out_.OutValue(pos, timing);
-            setAllOutputs(values[0] * value);
+            setAllOutputs(values[0] * value, primary);
           }
         }
       }
