@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   BOOST_CHECK_EQUAL(fixture.Functions().front()->MainChannel().Channel(), 100);
   BOOST_CHECK(!fixture.Functions().front()->FineChannel());
   control->InputValue(0) = ControlValue::Zero();
-  control->MixInput(0, ControlValue::Max());
+  control->MixInput(0, ControlValue::Max(), 0);
   std::vector<unsigned> values(512, 0);
   Timing timing(0.0, 0, 0, 0, 0);
   control->Mix(timing, true);

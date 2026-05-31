@@ -42,18 +42,21 @@ class RgbMasterEffect final : public Effect {
  protected:
   virtual void MixImplementation(const ControlValue *values,
                                  const Timing &timing, bool primary) override {
-    for (const std::pair<Controllable *, size_t> &connection : Connections()) {
+    for (size_t connection_index = 0; connection_index != NConnections();
+         ++connection_index) {
+      const std::pair<const Controllable *, size_t> &connection =
+          GetConnection(connection_index);
       const size_t input_index = connection.second;
       const ControlValue master = values[3];
       switch (connection.first->InputType(input_index)) {
         case FunctionType::Red:
-          connection.first->MixInput(input_index, values[0] * master);
+          MixConnection(connection_index, values[0] * master, primary);
           break;
         case FunctionType::Green:
-          connection.first->MixInput(input_index, values[1] * master);
+          MixConnection(connection_index, values[1] * master, primary);
           break;
         case FunctionType::Blue:
-          connection.first->MixInput(input_index, values[2] * master);
+          MixConnection(connection_index, values[2] * master, primary);
           break;
         default:
           break;

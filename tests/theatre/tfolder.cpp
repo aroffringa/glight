@@ -158,7 +158,8 @@ BOOST_AUTO_TEST_CASE(RemoveFolder) {
   ObservingPtr<Chase> c = management.AddChasePtr();
   c->SetName("c");
   folder.Add(c);
-  c->GetSequence().Add(*control, 0);
+  std::vector<Input> sequence{{*control, 0}};
+  c->SetSequence(std::move(sequence));
 
   ts1->AddStep(*c, 0);
 

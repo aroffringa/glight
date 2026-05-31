@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(SetValue) {
 
   fixtureControl.InputValue(0) = ControlValue::Zero();
   presetCollection.InputValue(0) = ControlValue::Zero();
-  presetCollection.MixInput(0, ControlValue::Max());
+  presetCollection.MixInput(0, ControlValue::Max(), 0);
 
   std::vector<unsigned> values(512, 0);
   Timing timing(0.0, 0, 0, 0, 0);

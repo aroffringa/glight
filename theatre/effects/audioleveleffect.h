@@ -29,7 +29,7 @@ class AudioLevelEffect final : public Effect {
     unsigned audioLevel = (unsigned(timing.AudioLevel()) << 8);
     double timePassed = timing.TimeInMS() - _lastTime[primary];
     _lastTime[primary] = timing.TimeInMS();
-    unsigned decay =
+    const unsigned decay =
         unsigned(std::min<double>(timePassed * _decaySpeed, (1 << 24) - 1));
     if (_lastValue[primary] < decay)
       _lastValue[primary] = 0;
@@ -40,9 +40,7 @@ class AudioLevelEffect final : public Effect {
     unsigned v = ControlValue::Mix(_lastValue[primary], values[0].UInt(),
                                    MixStyle::Multiply);
     ControlValue audioLevelCV(v);
-    for (const std::pair<Controllable *, size_t> &connection : Connections()) {
-      connection.first->MixInput(connection.second, audioLevelCV);
-    }
+    setAllOutputs(audioLevelCV, primary);
   }
 
  private:

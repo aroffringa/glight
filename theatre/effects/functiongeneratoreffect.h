@@ -85,7 +85,7 @@ class FunctionGeneratorEffect final : public Effect {
     output =
         std::clamp(output * amplitude_.Ratio() + offset_.Ratio(), 0.0, 1.0) *
         input;
-    setAllOutputs(ControlValue(output));
+    setAllOutputs(ControlValue(output), primary);
   }
 
  private:

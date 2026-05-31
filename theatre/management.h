@@ -2,6 +2,7 @@
 #define THEATRE_MANAGEMENT_H_
 
 #include <atomic>
+#include <cassert>
 #include <chrono>
 #include <memory>
 #include <mutex>
@@ -91,6 +92,14 @@ class Management {
       }
     }
     return list;
+  }
+  /**
+   * Get the non-const version of this controller from a const pointer. The
+   * controller must be part of this management.
+   */
+  Controllable &GetNonConst(const Controllable &controllable) {
+    assert(Contains(controllable));
+    return const_cast<Controllable &>(controllable);
   }
 
   Folder &AddFolder(Folder &parent, const std::string &name);

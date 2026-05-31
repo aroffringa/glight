@@ -293,6 +293,48 @@ inline constexpr bool IsColor(FunctionType type) {
   return false;
 }
 
+/**
+ * Returns true for function types for which it is possible
+ * to show intermediate values when going from value A to B.
+ */
+inline constexpr bool CanFade(FunctionType type) {
+  switch (type) {
+    case FunctionType::ColorMacro:
+    case FunctionType::ColorWheel:
+    case FunctionType::Combined:
+    case FunctionType::Effect:
+    case FunctionType::Focus:
+    case FunctionType::GoboWheel:
+    case FunctionType::Prism:
+    case FunctionType::Pulse:
+    case FunctionType::Strobe:
+      return false;
+      // Colors:
+    case FunctionType::Red:
+    case FunctionType::Green:
+    case FunctionType::Blue:
+    case FunctionType::White:
+    case FunctionType::Amber:
+    case FunctionType::UV:
+    case FunctionType::Lime:
+    case FunctionType::ColdWhite:
+    case FunctionType::WarmWhite:
+      // Other fadeables:
+    case FunctionType::ColorTemperature:
+    case FunctionType::Hue:
+    case FunctionType::Lightness:
+    case FunctionType::Master:
+    case FunctionType::Pan:
+    case FunctionType::RotationSpeed:
+    case FunctionType::Saturation:
+    case FunctionType::Tilt:
+    case FunctionType::Unknown:
+    case FunctionType::Zoom:
+      return true;
+  }
+  return false;
+}
+
 inline constexpr bool IsRgb(FunctionType type) {
   return type == FunctionType::Red || type == FunctionType::Green ||
          type == FunctionType::Blue;

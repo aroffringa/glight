@@ -1,6 +1,7 @@
 #ifndef THEATRE_PRESETCOLLECTION_H_
 #define THEATRE_PRESETCOLLECTION_H_
 
+#include <array>
 #include <memory>
 #include <set>
 #include <vector>
@@ -25,7 +26,10 @@ class PresetCollection final : public Controllable {
       : Controllable(name), _inputValue(0) {}
   ~PresetCollection() { Clear(); }
 
-  void Clear() { _presetValues.clear(); }
+  void Clear() {
+    _presetValues.clear();
+    connection_values_.clear();
+  }
 
   void SetFromCurrentSituation(Management &management);
 
@@ -41,40 +45,44 @@ class PresetCollection final : public Controllable {
 
   FunctionType InputType(size_t) const override { return FunctionType::Master; }
 
-  size_t NOutputs() const override { return _presetValues.size(); }
+  size_t NConnections() const override { return _presetValues.size(); }
 
-  std::pair<const Controllable *, size_t> Output(size_t index) const override {
+  std::pair<const Controllable *, size_t> GetConnection(
+      size_t index) const override {
     return std::make_pair(&_presetValues[index]->GetControllable(),
                           _presetValues[index]->InputIndex());
   }
 
   void Mix(const Timing &timing, bool primary) override {
     unsigned leftHand = _inputValue.UInt();
-    for (const std::unique_ptr<PresetValue> &pv : _presetValues) {
+    for (size_t i = 0; i != _presetValues.size(); ++i) {
+      const std::unique_ptr<PresetValue> &pv = _presetValues[i];
       unsigned rightHand = pv->Value().UInt();
       ControlValue value(
           ControlValue::Mix(leftHand, rightHand, MixStyle::Multiply));
 
-      pv->GetControllable().MixInput(pv->InputIndex(), value);
+      pv->GetControllable().MixInput(pv->InputIndex(), value,
+                                     connection_values_[i][primary]);
     }
   }
   const std::vector<std::unique_ptr<PresetValue>> &PresetValues() const {
     return _presetValues;
   }
   PresetValue &AddPresetValue(const PresetValue &source) {
-    _presetValues.emplace_back(new PresetValue(source));
-    return *_presetValues.back();
+    connection_values_.emplace_back();
+    return *_presetValues.emplace_back(new PresetValue(source));
   }
   PresetValue &AddPresetValue(Controllable &controllable, size_t input) {
-    _presetValues.emplace_back(new PresetValue(controllable, input));
-    return *_presetValues.back();
+    connection_values_.emplace_back();
+    return *_presetValues.emplace_back(new PresetValue(controllable, input));
   }
   PresetValue &AddPresetValue(const PresetValue &source,
                               Controllable &controllable) {
-    _presetValues.emplace_back(new PresetValue(source, controllable));
-    return *_presetValues.back();
+    connection_values_.emplace_back();
+    return *_presetValues.emplace_back(new PresetValue(source, controllable));
   }
   void RemovePresetValue(size_t index) {
+    connection_values_.erase(connection_values_.begin() + index);
     _presetValues.erase(_presetValues.begin() + index);
   }
   size_t Size() const { return _presetValues.size(); }
@@ -82,6 +90,7 @@ class PresetCollection final : public Controllable {
  private:
   ControlValue _inputValue;
   std::vector<std::unique_ptr<PresetValue>> _presetValues;
+  std::vector<std::array<ControlValue, 2>> connection_values_;
 };
 
 }  // namespace glight::theatre

@@ -61,9 +61,10 @@ class Scene : public Controllable, private system::SyncListener {
 
   FunctionType InputType(size_t) const override { return FunctionType::Master; }
 
-  size_t NOutputs() const override { return controllables_.size(); }
+  size_t NConnections() const override { return controllables_.size(); }
 
-  std::pair<const Controllable *, size_t> Output(size_t index) const override {
+  std::pair<const Controllable *, size_t> GetConnection(
+      size_t index) const override {
     return controllables_[index];
   }
 

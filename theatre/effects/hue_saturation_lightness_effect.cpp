@@ -96,52 +96,55 @@ std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(
 
 void HueSaturationLightnessEffect::MixImplementation(const ControlValue *values,
                                                      const Timing & /*timing*/,
-                                                     bool /*primary*/) {
+                                                     bool primary) {
   // TODO cache
   std::array<ControlValue, 3> rgb = Convert(values[0], values[1], values[2]);
-  for (const std::pair<Controllable *, size_t> &connection : Connections()) {
+  for (size_t connection_index = 0; connection_index != NConnections();
+       ++connection_index) {
+    const std::pair<const Controllable *, size_t> &connection =
+        GetConnection(connection_index);
     switch (connection.first->InputType(connection.second)) {
       case FunctionType::Red:
-        connection.first->MixInput(connection.second, rgb[0]);
+        MixConnection(connection_index, rgb[0], primary);
         break;
       case FunctionType::Green:
-        connection.first->MixInput(connection.second, rgb[1]);
+        MixConnection(connection_index, rgb[1], primary);
         break;
       case FunctionType::Blue:
-        connection.first->MixInput(connection.second, rgb[2]);
+        MixConnection(connection_index, rgb[2], primary);
         break;
       case FunctionType::White:
-        connection.first->MixInput(connection.second,
-                                   DeduceWhite(rgb[0], rgb[1], rgb[2]));
+        MixConnection(connection_index, DeduceWhite(rgb[0], rgb[1], rgb[2]),
+                      primary);
         break;
       case FunctionType::Amber:
-        connection.first->MixInput(connection.second,
-                                   DeduceAmber(rgb[0], rgb[1], rgb[2]));
+        MixConnection(connection_index, DeduceAmber(rgb[0], rgb[1], rgb[2]),
+                      primary);
         break;
       case FunctionType::UV:
-        connection.first->MixInput(connection.second,
-                                   DeduceUv(rgb[0], rgb[1], rgb[2]));
+        MixConnection(connection_index, DeduceUv(rgb[0], rgb[1], rgb[2]),
+                      primary);
         break;
       case FunctionType::Lime:
-        connection.first->MixInput(connection.second,
-                                   DeduceLime(rgb[0], rgb[1], rgb[2]));
+        MixConnection(connection_index, DeduceLime(rgb[0], rgb[1], rgb[2]),
+                      primary);
         break;
       case FunctionType::ColdWhite:
-        connection.first->MixInput(connection.second,
-                                   DeduceColdWhite(rgb[0], rgb[1], rgb[2]));
+        MixConnection(connection_index, DeduceColdWhite(rgb[0], rgb[1], rgb[2]),
+                      primary);
         break;
       case FunctionType::WarmWhite:
-        connection.first->MixInput(connection.second,
-                                   DeduceWarmWhite(rgb[0], rgb[1], rgb[2]));
+        MixConnection(connection_index, DeduceWarmWhite(rgb[0], rgb[1], rgb[2]),
+                      primary);
         break;
       case FunctionType::Hue:
-        connection.first->MixInput(connection.second, values[0]);
+        MixConnection(connection_index, values[0], primary);
         break;
       case FunctionType::Saturation:
-        connection.first->MixInput(connection.second, values[1]);
+        MixConnection(connection_index, values[1], primary);
         break;
       case FunctionType::Lightness:
-        connection.first->MixInput(connection.second, values[2]);
+        MixConnection(connection_index, values[2], primary);
         break;
       default:
         break;

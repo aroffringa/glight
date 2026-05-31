@@ -34,8 +34,7 @@ class MusicActivationEffect final : public Effect {
     }
     const double timePassed = timing.TimeInMS() - _lastBeatTime[primary];
     if (timePassed < _offDelay) {
-      for (const std::pair<Controllable *, size_t> &connection : Connections())
-        connection.first->MixInput(connection.second, values[0]);
+      setAllOutputs(values[0], primary);
     }
   }
 

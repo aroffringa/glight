@@ -329,10 +329,10 @@ void SceneWindow::fillControllablesList() {
         _latestSelectedControllable = nullptr;
       }
     }
-    for (size_t output_index = 0; output_index != _selectedScene->NOutputs();
-         ++output_index) {
+    for (size_t output_index = 0;
+         output_index != _selectedScene->NConnections(); ++output_index) {
       std::pair<const glight::theatre::Controllable *, size_t> output =
-          _selectedScene->Output(output_index);
+          _selectedScene->GetConnection(output_index);
       Gtk::TreeModel::iterator iter = _controllablesListModel->append();
       Gtk::TreeModel::Row &row = *iter;
       row[_controllablesListColumns._text] = output.first->Name();

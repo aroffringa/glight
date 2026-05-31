@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "functiontype.h"
+
 namespace glight::theatre {
 
 enum class MixStyle {
@@ -12,7 +14,8 @@ enum class MixStyle {
   LowestValue,
   Multiply,
   First,
-  Second
+  Second,
+  LastTakesPrecedence
 };
 
 inline std::string ToString(MixStyle mix_style) {
@@ -32,6 +35,8 @@ inline std::string ToString(MixStyle mix_style) {
       return "first";
     case MixStyle::Second:
       return "second";
+    case MixStyle::LastTakesPrecedence:
+      return "last_takes_precedence";
   }
 }
 
@@ -40,6 +45,8 @@ inline MixStyle GetMixStyle(const std::string& str) {
     return MixStyle::HighestValue;
   else if (str == "sum")
     return MixStyle::Sum;
+  else if (str == "last_takes_precedence")
+    return MixStyle::LastTakesPrecedence;
   else if (str == "lowest_value")
     return MixStyle::LowestValue;
   else if (str == "multiply")
@@ -50,6 +57,47 @@ inline MixStyle GetMixStyle(const std::string& str) {
     return MixStyle::Second;
   else
     return MixStyle::Default;
+}
+
+inline constexpr MixStyle GetMixStyle(FunctionType function_type) {
+  switch (function_type) {
+    // Positional function types:
+    case FunctionType::ColorMacro:
+    case FunctionType::ColorTemperature:
+    case FunctionType::ColorWheel:
+    case FunctionType::Combined:
+    case FunctionType::Focus:
+    case FunctionType::GoboWheel:
+    case FunctionType::Pan:
+    case FunctionType::Prism:
+    case FunctionType::Saturation:
+    case FunctionType::Tilt:
+    case FunctionType::Zoom:
+    case FunctionType::Unknown:
+    case FunctionType::Hue:
+      return MixStyle::LastTakesPrecedence;
+    // Effects:
+    case FunctionType::Effect:
+    case FunctionType::Pulse:
+    case FunctionType::RotationSpeed:
+    case FunctionType::Strobe:
+      return MixStyle::HighestValue;
+    // Colors:
+    case FunctionType::Red:
+    case FunctionType::Green:
+    case FunctionType::Blue:
+    case FunctionType::White:
+    case FunctionType::Amber:
+    case FunctionType::UV:
+    case FunctionType::Lime:
+    case FunctionType::ColdWhite:
+    case FunctionType::WarmWhite:
+      // other summed function types:
+    case FunctionType::Master:
+    case FunctionType::Lightness:
+      return MixStyle::Sum;
+  }
+  return MixStyle::Sum;
 }
 
 }  // namespace glight::theatre

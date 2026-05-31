@@ -25,8 +25,7 @@ class InvertEffect final : public Effect {
     ControlValue inverted = Invert(values[0]);
     if (inverted.UInt() < _offThreshold) inverted = ControlValue(0);
     ControlValue value = theatre::Mix(values[1], inverted, MixStyle::Multiply);
-    for (const std::pair<Controllable *, size_t> &connection : Connections())
-      connection.first->MixInput(connection.second, value);
+    setAllOutputs(value, primary);
   }
 
   virtual FunctionType InputType(size_t inputIndex) const override {

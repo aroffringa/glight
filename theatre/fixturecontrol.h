@@ -45,9 +45,9 @@ class FixtureControl final : public Controllable {
     return {InputColor(index)};
   }
 
-  size_t NOutputs() const override { return 0; }
+  size_t NConnections() const override { return 0; }
 
-  std::pair<const Controllable *, size_t> Output(size_t) const override {
+  std::pair<const Controllable *, size_t> GetConnection(size_t) const override {
     assert(false);
     return std::pair<const Controllable *, size_t>(nullptr, 0);
   }

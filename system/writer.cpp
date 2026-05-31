@@ -15,6 +15,7 @@
 #include "theatre/fixturetype.h"
 #include "theatre/folder.h"
 #include "theatre/management.h"
+#include "theatre/presetcollection.h"
 #include "theatre/presetvalue.h"
 #include "theatre/theatre.h"
 #include "theatre/timesequence.h"
@@ -289,7 +290,7 @@ void writePresetValue(WriteState &state, const PresetValue &presetValue) {
 }
 
 void writePresetCollection(WriteState &state,
-                           const class PresetCollection &presetCollection) {
+                           const PresetCollection &presetCollection) {
   const std::vector<std::unique_ptr<PresetValue>> &values =
       presetCollection.PresetValues();
   for (const std::unique_ptr<PresetValue> &pv : values)
@@ -339,10 +340,10 @@ void writeTransition(WriteState &state, const Transition &transition,
   state.writer.EndObject();
 }
 
-void writeSequence(WriteState &state, const Sequence &sequence) {
+void writeSequence(WriteState &state, const std::vector<Input> &sequence) {
   state.writer.StartObject("sequence");
   state.writer.StartArray("inputs");
-  for (const Input &input : sequence.List()) {
+  for (const Input &input : sequence) {
     state.writer.StartObject();
     if (input.InputIndex())
       state.writer.Number("input-index", input.InputIndex());
@@ -356,7 +357,7 @@ void writeSequence(WriteState &state, const Sequence &sequence) {
 }
 
 void writeChase(WriteState &state, const Chase &chase) {
-  const std::vector<Input> &list = chase.GetSequence().List();
+  const std::vector<Input> &list = chase.GetSequence();
   for (const Input &input : list)
     writeControllable(state, *input.GetControllable());
 
@@ -370,7 +371,7 @@ void writeChase(WriteState &state, const Chase &chase) {
 }
 
 void writeTimeSequence(WriteState &state, const TimeSequence &timeSequence) {
-  const std::vector<Input> &list = timeSequence.Sequence().List();
+  const std::vector<Input> &list = timeSequence.Sequence();
   for (const Input &input : list)
     writeControllable(state, *input.GetControllable());
 
@@ -500,8 +501,8 @@ void writeSceneItem(WriteState &state, const SceneItem &item) {
 }
 
 void writeScene(WriteState &state, const Scene &scene) {
-  for (size_t i = 0; i != scene.NOutputs(); ++i) {
-    writeControllable(state, *scene.Output(i).first);
+  for (size_t i = 0; i != scene.NConnections(); ++i) {
+    writeControllable(state, *scene.GetConnection(i).first);
   }
 
   state.writer.StartObject();

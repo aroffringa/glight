@@ -29,7 +29,7 @@ Chase &AutoDesign::MakeRunningLight(const DesignInfo &design,
   chase->SetName(GetValidName(design, "Runchase"));
   design.destination->Add(chase);
   design.management->AddSourceValue(*chase, 0);
-  Sequence &seq = chase->GetSequence();
+  std::vector<Input> seq;
   size_t frames;
   if (runType == RunType::InwardRun || runType == RunType::OutwardRun)
     frames = (colors.size() + 1) / 2;
@@ -96,13 +96,14 @@ Chase &AutoDesign::MakeRunningLight(const DesignInfo &design,
         }
       }
     }
-    seq.Add(*pc, 0);
+    seq.emplace_back(*pc, 0);
     design.management->AddSourceValue(*pc, 0);
   }
   if (runType == RunType::BackAndForthRun) {
     for (size_t i = 2; i < colors.size(); ++i)
-      seq.Add(*seq.List()[colors.size() - i].GetControllable(), 0);
+      seq.emplace_back(*seq[colors.size() - i].GetControllable(), 0);
   }
+  chase->SetSequence(std::move(seq));
   return *chase;
 }
 
@@ -116,7 +117,7 @@ Chase &AutoDesign::MakeColorVariation(
   Chase &chase = *chase_ptr;
   chase.SetName(GetValidName(design, "Colorvar"));
   management.AddSourceValue(chase, 0);
-  Sequence &seq = chase.GetSequence();
+  std::vector<Input> seq;
   std::random_device rd;
   std::mt19937 rnd(rd());
   std::normal_distribution<double> distribution(0.0, variation);
@@ -148,9 +149,10 @@ Chase &AutoDesign::MakeColorVariation(
                        design.deduction);
       }
     }
-    seq.Add(pc, 0);
+    seq.emplace_back(pc, 0);
     management.AddSourceValue(pc, 0);
   }
+  chase.SetSequence(std::move(seq));
   return chase;
 }
 
@@ -164,7 +166,7 @@ Chase &AutoDesign::MakeColorShift(const DesignInfo &design,
   chase.SetName(GetValidName(design, "Colourshift"));
   destination.Add(chase_ptr);
   management.AddSourceValue(chase, 0);
-  Sequence &seq = chase.GetSequence();
+  std::vector<Input> seq;
   size_t frames = colors.size();
   std::vector<std::vector<size_t>> pos(frames);
   std::random_device rd;
@@ -220,13 +222,14 @@ Chase &AutoDesign::MakeColorShift(const DesignInfo &design,
       AddPresetValue(management, *(*design.controllables)[cIndex], pc,
                      colors[colourIndex], design.deduction);
     }
-    seq.Add(pc, 0);
+    seq.emplace_back(pc, 0);
     management.AddSourceValue(pc, 0);
   }
   if (shiftType == ShiftType::BackAndForthShift) {
     for (size_t i = 2; i < frames; ++i)
-      seq.Add(*seq.List()[frames - i].GetControllable(), 0);
+      seq.emplace_back(*seq[frames - i].GetControllable(), 0);
   }
+  chase.SetSequence(std::move(seq));
   return chase;
 }
 
@@ -314,7 +317,7 @@ Chase &AutoDesign::MakeIncreasingChase(
   chase.SetName(GetValidName(design, "Increasing chase"));
   destination.Add(std::move(chase_ptr));
   management.AddSourceValue(chase, 0);
-  Sequence &seq = chase.GetSequence();
+  std::vector<Input> seq;
 
   size_t nFix = design.controllables->size();
   for (size_t frameIndex = 0; frameIndex != nFix * 2; ++frameIndex) {
@@ -358,9 +361,10 @@ Chase &AutoDesign::MakeIncreasingChase(
       AddPresetValue(management, *(*design.controllables)[i], pc, colors[i],
                      design.deduction);
     }
-    seq.Add(pc, 0);
+    seq.emplace_back(pc, 0);
     management.AddSourceValue(pc, 0);
   }
+  chase.SetSequence(std::move(seq));
   return chase;
 }
 

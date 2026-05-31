@@ -20,6 +20,7 @@
 #include "theatre/folder.h"
 #include "theatre/folderoperations.h"
 #include "theatre/management.h"
+#include "theatre/presetcollection.h"
 #include "theatre/theatre.h"
 #include "theatre/timesequence.h"
 

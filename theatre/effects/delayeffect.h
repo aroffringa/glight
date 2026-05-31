@@ -57,10 +57,7 @@ class DelayEffect final : public Effect {
         _bufferReadPos[primary] = (_bufferReadPos[primary] + 1) % buffer.size();
       }
     }
-    for (const std::pair<Controllable *, size_t> &connection : Connections()) {
-      connection.first->MixInput(connection.second,
-                                 buffer[_bufferReadPos[primary]].second);
-    }
+    setAllOutputs(buffer[_bufferReadPos[primary]].second, primary);
   }
 
  private:

@@ -32,7 +32,7 @@ class CurveEffect final : public Effect {
  protected:
   virtual void MixImplementation(const ControlValue *values,
                                  const Timing &timing, bool primary) override {
-    unsigned value = values[0].UInt();
+    uint32_t value = values[0].UInt();
     switch (_function) {
       case Linear:
         break;
@@ -67,7 +67,7 @@ class CurveEffect final : public Effect {
                 std::sqrt(double(ControlValue::MaxUInt()));
       } break;
     }
-    setAllOutputs(ControlValue(value));
+    setAllOutputs(ControlValue(value), primary);
   }
 
  private:

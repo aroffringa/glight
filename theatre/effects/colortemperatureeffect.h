@@ -34,32 +34,38 @@ class ColorTemperatureEffect final : public Effect {
 
  protected:
   virtual void MixImplementation(const ControlValue *values, const Timing &,
-                                 bool) override {
+                                 bool primary) override {
     const unsigned range =
         std::min(40000u, max_temperature_ - min_temperature_);
     const unsigned scaled_value = values[0].UInt() >> 14;  // make 10 bit
     const unsigned temperature =
         min_temperature_ + ((range * scaled_value) >> 10);
     const theatre::Color rgb = system::TemperatureToRgb(temperature);
-    for (const std::pair<Controllable *, size_t> &connection : Connections()) {
+    for (size_t connection_index = 0; connection_index != NConnections();
+         ++connection_index) {
+      const std::pair<const Controllable *, size_t> &connection =
+          GetConnection(connection_index);
       switch (connection.first->InputType(connection.second)) {
         case FunctionType::Red:
-          connection.first->MixInput(
-              connection.second,
-              ControlValue(static_cast<int>(rgb.Red()) << 16) * values[1]);
+          MixConnection(
+              connection_index,
+              ControlValue(static_cast<int>(rgb.Red()) << 16) * values[1],
+              primary);
           break;
         case FunctionType::Green:
-          connection.first->MixInput(
-              connection.second,
-              ControlValue(static_cast<int>(rgb.Green()) << 16) * values[1]);
+          MixConnection(
+              connection_index,
+              ControlValue(static_cast<int>(rgb.Green()) << 16) * values[1],
+              primary);
           break;
         case FunctionType::Blue:
-          connection.first->MixInput(
-              connection.second,
-              ControlValue(static_cast<int>(rgb.Blue()) << 16) * values[1]);
+          MixConnection(
+              connection_index,
+              ControlValue(static_cast<int>(rgb.Blue()) << 16) * values[1],
+              primary);
           break;
         case FunctionType::White:
-          connection.first->MixInput(connection.second, values[1]);
+          MixConnection(connection_index, values[1], primary);
           break;
         case FunctionType::Amber:
           // TODO

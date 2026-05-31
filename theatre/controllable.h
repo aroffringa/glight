@@ -1,7 +1,10 @@
 #ifndef THEATRE_CONTROL_H_
 #define THEATRE_CONTROL_H_
 
+#include <array>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "color.h"
 #include "controlvalue.h"
@@ -10,7 +13,14 @@
 
 namespace glight::theatre {
 
+class Controllable;
 class Timing;
+
+struct Connection {
+  Controllable *to_controllable;
+  size_t to_input_index;
+  std::array<ControlValue, 2> values;
+};
 
 /**
  * A Controllable has a number of inputs and optionally some outputs
@@ -19,12 +29,11 @@ class Timing;
  */
 class Controllable : public FolderObject {
  public:
-  Controllable() : _visitLevel(0) {}
+  Controllable() = default;
 
-  Controllable(const Controllable &source)
-      : FolderObject(source), _visitLevel(0) {}
+  Controllable(const Controllable &source) : FolderObject(source) {}
 
-  Controllable(const std::string &name) : FolderObject(name), _visitLevel(0) {}
+  Controllable(const std::string &name) : FolderObject(name) {}
 
   virtual size_t NInputs() const = 0;
 
@@ -32,24 +41,33 @@ class Controllable : public FolderObject {
 
   virtual FunctionType InputType(size_t index) const = 0;
 
-  virtual size_t NOutputs() const = 0;
+  /**
+   * Number of output connections this controllable has from one of its outputs
+   * to the input of another controllable.
+   */
+  virtual size_t NConnections() const = 0;
 
-  virtual std::pair<const Controllable *, size_t> Output(
+  /**
+   * Get information about a connection. A connection starts from the
+   * output of this controllable and connects to the input of another
+   * controllable.
+   */
+  virtual std::pair<const Controllable *, size_t> GetConnection(
       size_t index) const = 0;
 
-  std::pair<Controllable *, size_t> Output(size_t index) {
+  std::pair<Controllable *, size_t> GetConnection(size_t index) {
     const std::pair<const Controllable *, size_t> output =
-        const_cast<const Controllable *>(this)->Output(index);
+        const_cast<const Controllable *>(this)->GetConnection(index);
     return std::make_pair(const_cast<Controllable *>(output.first),
                           output.second);
   }
 
-  virtual std::vector<Color> InputColors([[maybe_unused]] size_t index) const {
+  virtual std::vector<Color> InputColors(size_t index) const {
     // Return the colours that it connects to
     std::vector<Color> colors;
-    colors.reserve(NOutputs());
-    for (size_t o = 0; o != NOutputs(); ++o) {
-      const auto output = Output(o);
+    colors.reserve(NConnections());
+    for (size_t o = 0; o != NConnections(); ++o) {
+      const auto output = GetConnection(o);
       const std::vector<Color> c = output.first->InputColors(output.second);
       colors.insert(colors.end(), c.begin(), c.end());
     }
@@ -73,15 +91,16 @@ class Controllable : public FolderObject {
   /**
    * Sets the value at the controllable's input.
    */
-  void MixInput(size_t index, const ControlValue &value) {
-    const unsigned mixVal = ControlValue::Mix(InputValue(index).UInt(),
-                                              value.UInt(), MixStyle::Default);
-    InputValue(index) = ControlValue(mixVal);
+  void MixInput(size_t index, ControlValue new_value,
+                ControlValue previous_value) {
+    const FunctionType input_type = InputType(index);
+    InputValue(index) = theatre::MixInput(InputValue(index), new_value,
+                                          previous_value, input_type);
   }
 
   bool HasOutputConnection(const Controllable &controllable) const {
-    for (size_t i = 0; i != NOutputs(); ++i)
-      if (Output(i).first == &controllable) return true;
+    for (size_t i = 0; i != NConnections(); ++i)
+      if (GetConnection(i).first == &controllable) return true;
     return false;
   }
 
@@ -90,9 +109,9 @@ class Controllable : public FolderObject {
 
   void SetVisitLevel(char visitLevel) { _visitLevel = visitLevel; }
 
+ protected:
  private:
-  ControlValue _inputValue;
-  char _visitLevel;
+  char _visitLevel = 0;
 };
 
 }  // namespace glight::theatre

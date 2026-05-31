@@ -71,9 +71,7 @@ class ThresholdEffect final : public Effect {
         thresholded.Set(ControlValue::Max().UInt() - v * 65536);
       }
     }
-    for (const std::pair<Controllable *, size_t> &connection : Connections()) {
-      connection.first->MixInput(connection.second, thresholded);
-    }
+    setAllOutputs(thresholded, primary);
   }
 
  private:

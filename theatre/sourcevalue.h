@@ -157,11 +157,17 @@ class SourceValue {
         ControlValue::Invert(cross_fader_.TargetValue()));
   }
 
+  ControlValue& PreviousPrimary() { return previous_primary_; }
+
+  ControlValue& PreviousSecondary() { return previous_secondary_; }
+
  private:
   Input input_;
   SingleSourceValue a_;
   SingleSourceValue b_;
   SingleSourceValue cross_fader_;
+  ControlValue previous_primary_;
+  ControlValue previous_secondary_;
   sigc::signal<void()> signal_delete_;
 };
 

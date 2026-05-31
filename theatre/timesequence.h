@@ -5,7 +5,7 @@
 
 #include "controllable.h"
 #include "controlvalue.h"
-#include "sequence.h"
+#include "input.h"
 #include "timing.h"
 #include "transition.h"
 #include "trigger.h"
@@ -14,16 +14,7 @@ namespace glight::theatre {
 
 class TimeSequence final : public Controllable {
  public:
-  TimeSequence()
-      : _inputValue(),
-        _activeValue{ControlValue(), ControlValue()},
-        _stepStart(),
-        _stepNumber{0, 0},
-        _transitionTriggered{false, false},
-        _sequence(),
-        _steps(),
-        _sustain(false),
-        _repeatCount(1) {}
+  TimeSequence() = default;
 
   std::unique_ptr<TimeSequence> CopyWithoutSequence() const {
     return std::unique_ptr<TimeSequence>(new TimeSequence(*this));
@@ -37,11 +28,12 @@ class TimeSequence final : public Controllable {
     return FunctionType::Master;
   }
 
-  size_t NOutputs() const override { return _sequence.List().size(); }
+  size_t NConnections() const override { return _sequence.size(); }
 
-  std::pair<const Controllable *, size_t> Output(size_t index) const override {
-    return std::make_pair(_sequence.List()[index].GetControllable(),
-                          _sequence.List()[index].InputIndex());
+  std::pair<const Controllable *, size_t> GetConnection(
+      size_t index) const override {
+    return std::make_pair(_sequence[index].GetControllable(),
+                          _sequence[index].InputIndex());
   }
 
   size_t RepeatCount() const { return _repeatCount; }
@@ -53,7 +45,7 @@ class TimeSequence final : public Controllable {
   bool Sustain() const { return _sustain; }
   void SetSustain(bool sustain) { _sustain = sustain; }
 
-  virtual void Mix(const Timing &timing, bool primary) override {
+  void Mix(const Timing &timing, bool primary) override {
     ControlValue &activeValue = _activeValue[primary];
     Timing &stepStart = _stepStart[primary];
     size_t &stepNumber = _stepNumber[primary];
@@ -99,8 +91,11 @@ class TimeSequence final : public Controllable {
             } break;
           }
           if (!transitionTriggered) {
-            Input &input = _sequence.List()[stepNumber % _steps.size()];
-            input.GetControllable()->MixInput(input.InputIndex(), activeValue);
+            const size_t step_index = stepNumber % _steps.size();
+            Input &input = _sequence[step_index];
+            input.GetControllable()->MixInput(
+                input.InputIndex(), activeValue,
+                connection_values_[step_index][primary]);
           }
         }
         if (transitionTriggered) {
@@ -112,17 +107,27 @@ class TimeSequence final : public Controllable {
           } else {
             // Not there yet; transition to next state
             double transitionTime = timing.TimeInMS() - stepStart.TimeInMS();
-            Input &a = _sequence.List()[stepNumber % _steps.size()];
-            Input &b = _sequence.List()[(stepNumber + 1) % _steps.size()];
+            const size_t a_index = stepNumber % _steps.size();
+            const size_t b_index = (stepNumber + 1) % _steps.size();
+            Input &a = _sequence[a_index];
+            Input &b = _sequence[b_index];
             if (transitionTime >= activeStep.transition.LengthInMs()) {
               ++stepNumber;
               stepStart = timing;
               transitionTriggered = false;
-              b.GetControllable()->MixInput(b.InputIndex(), activeValue);
+              b.GetControllable()->MixInput(
+                  b.InputIndex(), activeValue,
+                  connection_values_[b_index][primary]);
             } else {
-              activeStep.transition.Mix(*a.GetControllable(), a.InputIndex(),
-                                        *b.GetControllable(), b.InputIndex(),
-                                        transitionTime, activeValue, timing);
+              Connection connection_a{.to_controllable = a.GetControllable(),
+                                      .to_input_index = a.InputIndex(),
+                                      .values = connection_values_[a_index]};
+              Connection connection_b{.to_controllable = b.GetControllable(),
+                                      .to_input_index = b.InputIndex(),
+                                      .values = connection_values_[b_index]};
+              activeStep.transition.Mix(connection_a, connection_b,
+                                        transitionTime, activeValue, timing,
+                                        primary);
             }
           }
         }
@@ -134,10 +139,14 @@ class TimeSequence final : public Controllable {
     }
   }
 
-  class Sequence &Sequence() {
-    return _sequence;
+  const std::vector<Input> &Sequence() const { return _sequence; }
+
+  template <typename VectorInput>
+  void SetSequence(VectorInput &&sequence) {
+    _sequence = std::forward<VectorInput>(sequence);
+    connection_values_.assign(_sequence.size(),
+                              {ControlValue(), ControlValue()});
   }
-  const class Sequence &Sequence() const { return _sequence; }
 
   struct Step {
     Transition transition;
@@ -147,12 +156,12 @@ class TimeSequence final : public Controllable {
   std::vector<Step> &Steps() { return _steps; }
 
   Step &AddStep(Controllable &controllable, size_t input) {
-    _sequence.Add(controllable, input);
+    _sequence.emplace_back(controllable, input);
     return _steps.emplace_back();
   }
 
   void RemoveStep(size_t index) {
-    _sequence.Remove(index);
+    _sequence.erase(_sequence.begin() + index);
     _steps.erase(_steps.begin() + index);
   }
 
@@ -183,13 +192,14 @@ class TimeSequence final : public Controllable {
   ControlValue _inputValue;
   std::array<ControlValue, 2> _activeValue;
   std::array<Timing, 2> _stepStart;
-  std::array<size_t, 2> _stepNumber;
-  std::array<bool, 2> _transitionTriggered;
+  std::array<size_t, 2> _stepNumber = {0, 0};
+  std::array<bool, 2> _transitionTriggered = {false, false};
 
-  class Sequence _sequence;
+  std::vector<Input> _sequence;
+  std::vector<std::array<ControlValue, 2>> connection_values_;
   std::vector<Step> _steps;
-  bool _sustain;
-  size_t _repeatCount;
+  bool _sustain = false;
+  size_t _repeatCount = 1;
 };
 
 }  // namespace glight::theatre
