@@ -22,7 +22,6 @@ class ValueSnapshot;
 class Fixture : public NamedObject {
  public:
   Fixture(Theatre &theatre, const FixtureMode &type, const std::string &name);
-  // Fixture(const Fixture &source, Theatre &theatre);
 
   static inline constexpr double kDefaultHeight = 5.0;
   static inline constexpr double kDefaultTilt = 0.25 * M_PI;

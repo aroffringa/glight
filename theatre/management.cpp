@@ -185,11 +185,15 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
     throw std::runtime_error("Cycle in dependencies");
 
   for (bool is_primary : {false, true}) {
-    // Reset all inputs
+    // Reset all inputs (except if they are LTP)
     for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
+      Controllable &controllable = sv->GetControllable();
       for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs();
            ++inputIndex) {
-        sv->GetControllable().InputValue(inputIndex) = ControlValue(0);
+        const MixStyle mix_style =
+            GetMixStyle(controllable.InputType(inputIndex));
+        if (mix_style != MixStyle::LastTakesPrecedence)
+          controllable.InputValue(inputIndex) = ControlValue(0);
       }
     }
 

@@ -82,8 +82,8 @@ void FillManagement(Management &management) {
   ObservingPtr<Chase> chase = management.AddChasePtr();
   chase->SetName("A chase");
   subFolder.Add(chase);
-  chase->GetSequence().Add(*a, 0);
-  chase->GetSequence().Add(*b, 0);
+  std::vector<Input> sequence{{*a, 0}, {*b, 0}};
+  chase->SetSequence(std::move(sequence));
   management.AddSourceValue(*chase, 0);
 
   ObservingPtr<TimeSequence> timeSequence = management.AddTimeSequencePtr();
@@ -239,10 +239,10 @@ void CheckEqual(const Management &a, const Management &b) {
 
   const Chase &readChase = static_cast<const Chase &>(
       a.GetObjectFromPath("The root folder/A subfolder/A chase"));
-  BOOST_CHECK_EQUAL(readChase.GetSequence().Size(), 2);
-  BOOST_CHECK_EQUAL(readChase.GetSequence().List()[0].GetControllable(),
+  BOOST_CHECK_EQUAL(readChase.GetSequence().size(), 2);
+  BOOST_CHECK_EQUAL(readChase.GetSequence()[0].GetControllable(),
                     &readCollection);
-  BOOST_CHECK_EQUAL(readChase.GetSequence().List()[0].InputIndex(), 0);
+  BOOST_CHECK_EQUAL(readChase.GetSequence()[0].InputIndex(), 0);
 
   const AudioLevelEffect *readEffect = dynamic_cast<const AudioLevelEffect *>(
       &a.GetObjectFromPath("The root folder/Effect folder/An audio effect"));

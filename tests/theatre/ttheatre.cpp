@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(add_fixture) {
   BOOST_CHECK(control.InputColor(0) == Color(255, 0, 0));
   BOOST_CHECK(control.InputColor(1) == Color(0, 255, 0));
   BOOST_CHECK(control.InputColor(2) == Color(0, 0, 255));
-  BOOST_CHECK_EQUAL(control.NOutputs(), 0);
+  BOOST_CHECK_EQUAL(control.NConnections(), 0);
   BOOST_CHECK(control.InputType(0) != control.InputType(1));
   BOOST_CHECK(control.InputType(1) != control.InputType(2));
 }

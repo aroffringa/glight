@@ -17,12 +17,17 @@ namespace glight::theatre {
 class ControlValue {
  public:
   constexpr ControlValue() noexcept : value_(0) {}
-  constexpr explicit ControlValue(uint32_t value) noexcept : value_(value) {}
+  constexpr ControlValue(uint32_t value) noexcept : value_(value) {}
 
   constexpr ControlValue(const ControlValue& source) noexcept = default;
   constexpr ControlValue& operator=(const ControlValue& rhs) noexcept = default;
+  ControlValue& operator+=(ControlValue value) noexcept {
+    value_ += value.UInt();
+    return *this;
+  }
 
   constexpr explicit operator bool() const noexcept { return value_ != 0; }
+  constexpr explicit operator uint32_t() const noexcept { return value_; }
 
   constexpr uint32_t UInt() const noexcept { return value_; }
 
@@ -110,10 +115,6 @@ class ControlValue {
     return std::min(value_, ControlValue::MaxUInt()) >> 16;
   }
   void Set(uint32_t uintValue) noexcept { value_ = uintValue; }
-  ControlValue& operator+=(ControlValue value) noexcept {
-    value_ += value.UInt();
-    return *this;
-  }
 
  private:
   uint32_t value_;

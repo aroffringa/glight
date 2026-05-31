@@ -38,10 +38,11 @@ BOOST_AUTO_TEST_CASE(remove_indirect) {
   pcB->SetFromCurrentSituation(management);
   ObservingPtr<Chase> chase = management.AddChasePtr();
   chase->SetName("chase");
-  Sequence &sequence = chase->GetSequence();
   root.Add(chase);
-  sequence.Add(*pcA, 0);
-  sequence.Add(*pcB, 0);
+  std::vector<Input> sequence;
+  sequence.emplace_back(*pcA, 0);
+  sequence.emplace_back(*pcB, 0);
+  chase->SetSequence(sequence);
   BOOST_CHECK_EQUAL(management.Controllables().size(),
                     4);  // 1 preset, 2 collections, 1 chase
   management.RemoveControllable(*pcA);

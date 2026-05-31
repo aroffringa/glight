@@ -61,6 +61,7 @@ void PresetCollection::SetFromCurrentSituation(Management& management) {
       value->SetValue(sv->A().Value());
     }
   }
+  connection_values_.assign(_presetValues.size(), {0, 0});
 }
 
 void PresetCollection::SetFromCurrentFixtures(
@@ -82,6 +83,7 @@ void PresetCollection::SetFromCurrentFixtures(
       }
     }
   }
+  connection_values_.assign(_presetValues.size(), {0, 0});
 }
 
 }  // namespace glight::theatre

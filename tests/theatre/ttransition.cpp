@@ -7,6 +7,7 @@
 
 namespace glight {
 
+using theatre::Connection;
 using theatre::ControlValue;
 using theatre::Timing;
 using theatre::Transition;
@@ -58,34 +59,46 @@ BOOST_AUTO_TEST_CASE(fade_mix) {
   const Transition t(500.0, TransitionType::Fade);
 
   VariableEffect result_a;
-  t.Mix(result_a, 0, result_a, 1, 0.0, ControlValue::Max(), timing);
+  Connection a0{&result_a, 0, {0, 0}};
+  Connection a1{&result_a, 1, {0, 0}};
+  t.Mix(a0, a1, 0.0, ControlValue::Max(), timing, true);
   BOOST_CHECK_EQUAL(result_a.InputValue(0).ToUChar(), 255);
   BOOST_CHECK_EQUAL(result_a.InputValue(1).ToUChar(), 0);
 
   VariableEffect result_b;
-  t.Mix(result_b, 0, result_b, 1, 500.0, ControlValue::Max() / 2, timing);
+  Connection b0{&result_b, 0, {0, 0}};
+  Connection b1{&result_b, 1, {0, 0}};
+  t.Mix(b0, b1, 500.0, ControlValue::Max() / 2, timing, true);
   BOOST_CHECK_EQUAL(result_b.InputValue(0).ToUChar(), 0);
   BOOST_CHECK_EQUAL(result_b.InputValue(1).ToUChar(), 127);
 
   VariableEffect result_c;
-  t.Mix(result_c, 0, result_c, 1, 125.0, ControlValue::Max(), timing);
+  Connection c0{&result_c, 0, {0, 0}};
+  Connection c1{&result_c, 1, {0, 0}};
+  t.Mix(c0, c1, 125.0, ControlValue::Max(), timing, true);
   BOOST_CHECK_EQUAL(result_c.InputValue(0).ToUChar(), 192);
   BOOST_CHECK_EQUAL(result_c.InputValue(1).ToUChar(), 63);
 
   // Test for time values outside the transition range
   VariableEffect result_d;
-  t.Mix(result_d, 0, result_d, 1, -100.0, ControlValue::Max(), timing);
+  Connection d0{&result_d, 0, {0, 0}};
+  Connection d1{&result_d, 1, {0, 0}};
+  t.Mix(d0, d1, -100.0, ControlValue::Max(), timing, true);
   BOOST_CHECK_EQUAL(result_d.InputValue(0).ToUChar(), 255);
   BOOST_CHECK_EQUAL(result_d.InputValue(1).ToUChar(), 0);
 
   VariableEffect result_e;
-  t.Mix(result_e, 0, result_e, 1, 600.0, ControlValue::Max(), timing);
+  Connection e0{&result_e, 0, {0, 0}};
+  Connection e1{&result_e, 1, {0, 0}};
+  t.Mix(e0, e1, 600.0, ControlValue::Max(), timing, true);
   BOOST_CHECK_EQUAL(result_e.InputValue(0).ToUChar(), 0);
   BOOST_CHECK_EQUAL(result_e.InputValue(1).ToUChar(), 255);
 
   // Test for too high control values
   VariableEffect result_f;
-  t.Mix(result_f, 0, result_f, 1, 500.0, ControlValue::Max() * 5u / 4, timing);
+  Connection f0{&result_f, 0, {0, 0}};
+  Connection f1{&result_f, 1, {0, 0}};
+  t.Mix(f0, f1, 500.0, ControlValue::Max() * 5u / 4, timing, true);
   BOOST_CHECK_EQUAL(result_f.InputValue(0).ToUChar(), 0);
   BOOST_CHECK_EQUAL(result_f.InputValue(1).ToUChar(), 255);
 }

@@ -26,7 +26,10 @@ class PresetCollection final : public Controllable {
       : Controllable(name), _inputValue(0) {}
   ~PresetCollection() { Clear(); }
 
-  void Clear() { _presetValues.clear(); }
+  void Clear() {
+    _presetValues.clear();
+    connection_values_.clear();
+  }
 
   void SetFromCurrentSituation(Management &management);
 
