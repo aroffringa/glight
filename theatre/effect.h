@@ -16,7 +16,7 @@ namespace glight::theatre {
 
 class Effect : public Controllable {
  public:
-  Effect(size_t n_inputs) : input_values_(n_inputs, ControlValue()) {}
+  Effect(size_t n_inputs) : input_values_(n_inputs) {}
 
   virtual ~Effect() {
     while (!connections_.empty()) {
@@ -58,7 +58,7 @@ class Effect : public Controllable {
 
   size_t NInputs() const final override { return input_values_.size(); }
 
-  ControlValue &InputValue(size_t index) final override { return input_values_[index]; }
+  ControlValue &InputValue(size_t index, bool primary) final override { return input_values_[index][primary]; }
 
   virtual FunctionType InputType(size_t) const override { return FunctionType::Master; }
 
@@ -73,7 +73,7 @@ class Effect : public Controllable {
   }
 
  protected:
-  virtual void MixImplementation(const ControlValue *inputValues, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *inputValues, const Timing &timing,
                                  bool primary) = 0;
 
   /**
@@ -81,22 +81,23 @@ class Effect : public Controllable {
    * inputs are where the values are stored, this implies that this
    * function sets the inputs of the connected objects.
    */
-  void setAllOutputs(ControlValue value, bool primary) const {
-    for (size_t i = 0; i != connections_.size(); ++i) {
-      MixConnection(i, value, primary);
+  void MixToAllOutputs(ControlValue value, bool primary) {
+    for (size_t connection_index = 0; connection_index != connections_.size(); ++connection_index) {
+      MixConnection(connection_index, value, primary);
     }
   }
 
-  void MixConnection(size_t connection_index, ControlValue value, bool primary) const {
+  void MixConnection(size_t connection_index, ControlValue value, bool primary) {
     const std::pair<Controllable *, size_t> &connection = connections_[connection_index];
     connection.first->MixInput(connection.second, value,
-                               connection_values_[connection_index][primary]);
+                               connection_values_[connection_index][primary], primary);
+    connection_values_[connection_index][primary] = value;
   }
 
  private:
   friend class EffectControl;
 
-  std::vector<ControlValue> input_values_;
+  std::vector<std::array<ControlValue, 2>> input_values_;
   std::vector<std::pair<Controllable *, size_t>> connections_;
   std::vector<std::array<ControlValue, 2>> connection_values_;
   std::vector<sigc::connection> on_delete_connections_;

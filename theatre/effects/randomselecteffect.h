@@ -24,10 +24,10 @@ class RandomSelectEffect final : public Effect {
   const Transition &GetTransition() const { return transition_; }
 
  private:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) final {
     size_t n_active = std::min(_count, Connections().size());
-    if (values[0] && n_active != 0) {
+    if (values[0][primary] && n_active != 0) {
       std::vector<size_t> &activeConnections = _activeConnections[primary];
       std::vector<size_t> &transition_connections = transition_connections_[primary];
       if (Connections().size() != activeConnections.size()) {
@@ -53,12 +53,12 @@ class RandomSelectEffect final : public Effect {
         active_transition_[primary] = transition_time < transition_.LengthInMs();
       }
       if (active_transition_[primary]) {
-        MixDirect(transition_connections, values[0] * transition_.OutValue(transition_time, timing),
+        MixDirect(transition_connections, values[0][primary] * transition_.OutValue(transition_time, timing),
                   primary);
-        MixDirect(activeConnections, values[0] * transition_.InValue(transition_time, timing),
+        MixDirect(activeConnections, values[0][primary] * transition_.InValue(transition_time, timing),
                   primary);
       } else {
-        MixDirect(activeConnections, values[0], primary);
+        MixDirect(activeConnections, values[0][primary], primary);
       }
     } else {
       _active[primary] = false;

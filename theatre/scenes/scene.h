@@ -22,7 +22,7 @@ class Management;
 /**
  * @author Andre Offringa
  */
-class Scene : public Controllable, private system::SyncListener {
+class Scene final : public Controllable, private system::SyncListener {
  private:
   constexpr static int kWaitSyncs = 5;
 
@@ -53,7 +53,7 @@ class Scene : public Controllable, private system::SyncListener {
 
   size_t NInputs() const override { return 1; }
 
-  ControlValue &InputValue(size_t) override { return input_value_; }
+  ControlValue &InputValue(size_t,bool) override { return input_value_; }
 
   FunctionType InputType(size_t) const override { return FunctionType::Master; }
 
@@ -64,7 +64,7 @@ class Scene : public Controllable, private system::SyncListener {
   }
 
   void Mix(const Timing &timing, bool primary) override {
-    if (InputValue(0)) {
+    if (InputValue(0,primary)) {
       if (primary && !_isPlaying) Start(timing.TimeInMS());
       const double relTimeInMs = timing.TimeInMS() - StartTimeInMS();
       const Timing relTiming(relTimeInMs, timing.TimestepNumber(), timing.BeatValue(),

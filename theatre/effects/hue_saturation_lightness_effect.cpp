@@ -90,10 +90,10 @@ std::array<ControlValue, 3> HueSaturationLightnessEffect::Convert(ControlValue h
   }
 }
 
-void HueSaturationLightnessEffect::MixImplementation(const ControlValue *values,
+void HueSaturationLightnessEffect::MixImplementation(const std::array<ControlValue, 2> *values,
                                                      const Timing & /*timing*/, bool primary) {
   // TODO cache
-  std::array<ControlValue, 3> rgb = Convert(values[0], values[1], values[2]);
+  std::array<ControlValue, 3> rgb = Convert(values[0][primary], values[1][primary], values[2][primary]);
   for (size_t connection_index = 0; connection_index != NConnections(); ++connection_index) {
     const std::pair<const Controllable *, size_t> &connection = GetConnection(connection_index);
     switch (connection.first->InputType(connection.second)) {
@@ -125,13 +125,13 @@ void HueSaturationLightnessEffect::MixImplementation(const ControlValue *values,
         MixConnection(connection_index, DeduceWarmWhite(rgb[0], rgb[1], rgb[2]), primary);
         break;
       case FunctionType::Hue:
-        MixConnection(connection_index, values[0], primary);
+        MixConnection(connection_index, values[0][primary], primary);
         break;
       case FunctionType::Saturation:
-        MixConnection(connection_index, values[1], primary);
+        MixConnection(connection_index, values[1][primary], primary);
         break;
       case FunctionType::Lightness:
-        MixConnection(connection_index, values[2], primary);
+        MixConnection(connection_index, values[2][primary], primary);
         break;
       default:
         break;

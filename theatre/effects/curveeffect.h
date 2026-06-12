@@ -22,9 +22,9 @@ class CurveEffect final : public Effect {
   void SetFunction(enum Function f) { _function = f; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) override {
-    uint32_t value = values[0].UInt();
+    uint32_t value = values[0][primary].UInt();
     switch (_function) {
       case Linear:
         break;
@@ -56,7 +56,7 @@ class CurveEffect final : public Effect {
         value = std::sqrt(double(value)) * std::sqrt(double(ControlValue::MaxUInt()));
       } break;
     }
-    setAllOutputs(ControlValue(value), primary);
+    MixToAllOutputs(ControlValue(value), primary);
   }
 
  private:

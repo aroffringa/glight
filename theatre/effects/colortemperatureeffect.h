@@ -29,10 +29,10 @@ class ColorTemperatureEffect final : public Effect {
   void SetMaximumTemperature(unsigned temperature) { max_temperature_ = temperature; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values, const Timing &,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &,
                                  bool primary) override {
     const unsigned range = std::min(40000u, max_temperature_ - min_temperature_);
-    const unsigned scaled_value = values[0].UInt() >> 14;  // make 10 bit
+    const unsigned scaled_value = values[0][primary].UInt() >> 14;  // make 10 bit
     const unsigned temperature = min_temperature_ + ((range * scaled_value) >> 10);
     const theatre::Color rgb = system::TemperatureToRgb(temperature);
     for (size_t connection_index = 0; connection_index != NConnections(); ++connection_index) {
@@ -40,18 +40,18 @@ class ColorTemperatureEffect final : public Effect {
       switch (connection.first->InputType(connection.second)) {
         case FunctionType::Red:
           MixConnection(connection_index,
-                        ControlValue(static_cast<int>(rgb.Red()) << 16) * values[1], primary);
+                        ControlValue(static_cast<int>(rgb.Red()) << 16) * values[1][primary], primary);
           break;
         case FunctionType::Green:
           MixConnection(connection_index,
-                        ControlValue(static_cast<int>(rgb.Green()) << 16) * values[1], primary);
+                        ControlValue(static_cast<int>(rgb.Green()) << 16) * values[1][primary], primary);
           break;
         case FunctionType::Blue:
           MixConnection(connection_index,
-                        ControlValue(static_cast<int>(rgb.Blue()) << 16) * values[1], primary);
+                        ControlValue(static_cast<int>(rgb.Blue()) << 16) * values[1][primary], primary);
           break;
         case FunctionType::White:
-          MixConnection(connection_index, values[1], primary);
+          MixConnection(connection_index, values[1][primary], primary);
           break;
         case FunctionType::Amber:
           // TODO

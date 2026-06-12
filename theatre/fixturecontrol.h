@@ -1,6 +1,7 @@
 #ifndef THEATRE_FIXTURE_CONTROL_H_
 #define THEATRE_FIXTURE_CONTROL_H_
 
+#include <array>
 #include <cassert>
 #include <memory>
 #include <vector>
@@ -15,7 +16,12 @@ namespace glight::theatre {
 class FixtureControl final : public Controllable {
  public:
   FixtureControl(Fixture &fixture)
-      : Controllable(fixture.Name()), fixture_(&fixture), values_(fixture.Functions().size()) {}
+      : Controllable(fixture.Name()), fixture_(&fixture) {
+     values_[false].resize(fixture.Functions().size());
+     values_[true].resize(fixture.Functions().size());
+     filtered_[false].resize(fixture.Functions().size());
+     filtered_[true].resize(fixture.Functions().size());
+  }
 
   Fixture &GetFixture() const { return *fixture_; }
 
@@ -26,7 +32,7 @@ class FixtureControl final : public Controllable {
       return filters_.back()->InputTypes().size();
   }
 
-  ControlValue &InputValue(size_t index) override { return values_[index]; }
+  ControlValue &InputValue(size_t index, bool primary) override { return values_[primary][index]; }
 
   virtual FunctionType InputType(size_t index) const override {
     if (filters_.empty())
@@ -50,20 +56,21 @@ class FixtureControl final : public Controllable {
 
   void Mix(const Timing &, bool is_primary) override {
     // Propagate control values through the filters
+    in_scratch_ = values_[is_primary];
     for (auto iterator = filters_.rbegin(); iterator != filters_.rend(); ++iterator) {
       std::unique_ptr<Filter> &filter = *iterator;
-      scratch_.resize(filter->OutputTypes().size());
-      values_.resize(filter->InputTypes().size());
-      filter->Apply(values_, scratch_);
-      std::swap(scratch_, values_);
+      out_scratch_.resize(filter->OutputTypes().size());
+      in_scratch_.resize(filter->InputTypes().size());
+      filter->Apply(in_scratch_, out_scratch_);
+      std::swap(out_scratch_, in_scratch_);
     }
-    values_.resize(NInputs());
+    std::swap(filtered_[is_primary], in_scratch_);
   }
 
-  void GetChannelValues(unsigned *channelValues, unsigned universe) const {
+  void GetChannelValues(unsigned *channelValues, unsigned universe, bool primary) const {
     for (size_t i = 0; i != fixture_->Functions().size(); ++i) {
       const std::unique_ptr<FixtureFunction> &ff = fixture_->Functions()[i];
-      ff->MixChannels(values_[i].UInt(), MixStyle::Default, channelValues, universe);
+      ff->MixChannels(filtered_[primary][i].UInt(), MixStyle::Default, channelValues, universe);
     }
   }
 
@@ -80,15 +87,20 @@ class FixtureControl final : public Controllable {
       filters_.emplace_back(std::move(filter));
       filters_.back()->SetOutputTypes(previous_last->InputTypes());
     }
-    values_.resize(NInputs());
+    values_[false].resize(NInputs());
+    values_[true].resize(NInputs());
+    filtered_[false].resize(NInputs());
+    filtered_[true].resize(NInputs());
   }
 
   const std::vector<std::unique_ptr<Filter>> &Filters() const { return filters_; }
 
  private:
   Fixture *fixture_;
-  std::vector<ControlValue> values_;
-  std::vector<ControlValue> scratch_;
+  std::array<std::vector<ControlValue>, 2> values_;
+  std::vector<ControlValue> in_scratch_;
+  std::vector<ControlValue> out_scratch_;
+  std::array<std::vector<ControlValue>, 2> filtered_;
   // The filters, in backward order. Therefore, filters_.back()
   // defines the inputs of this fixture, and the result of filters_.back()
   // is sent to the previous filter, unless filters_.front() is reached.
