@@ -53,10 +53,10 @@ class RandomSelectEffect final : public Effect {
         active_transition_[primary] = transition_time < transition_.LengthInMs();
       }
       if (active_transition_[primary]) {
-        MixDirect(transition_connections, values[0][primary] * transition_.OutValue(transition_time, timing),
-                  primary);
-        MixDirect(activeConnections, values[0][primary] * transition_.InValue(transition_time, timing),
-                  primary);
+        MixDirect(transition_connections,
+                  values[0][primary] * transition_.OutValue(transition_time, timing), primary);
+        MixDirect(activeConnections,
+                  values[0][primary] * transition_.InValue(transition_time, timing), primary);
       } else {
         MixDirect(activeConnections, values[0][primary], primary);
       }

@@ -15,12 +15,11 @@ namespace glight::theatre {
 
 class FixtureControl final : public Controllable {
  public:
-  FixtureControl(Fixture &fixture)
-      : Controllable(fixture.Name()), fixture_(&fixture) {
-     values_[false].resize(fixture.Functions().size());
-     values_[true].resize(fixture.Functions().size());
-     filtered_[false].resize(fixture.Functions().size());
-     filtered_[true].resize(fixture.Functions().size());
+  FixtureControl(Fixture &fixture) : Controllable(fixture.Name()), fixture_(&fixture) {
+    values_[false].resize(fixture.Functions().size());
+    values_[true].resize(fixture.Functions().size());
+    filtered_[false].resize(fixture.Functions().size());
+    filtered_[true].resize(fixture.Functions().size());
   }
 
   Fixture &GetFixture() const { return *fixture_; }

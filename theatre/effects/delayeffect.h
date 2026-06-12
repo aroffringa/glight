@@ -33,8 +33,8 @@ class DelayEffect final : public Effect {
     std::vector<std::pair<double, ControlValue>> &buffer = _buffer[primary];
     if (_previousTimestep[primary] == timing.TimestepNumber()) {
       unsigned prevWritePos = (_bufferWritePos[primary] + buffer.size() - 1) % buffer.size();
-      buffer[prevWritePos].second.Set(ControlValue::Mix(buffer[prevWritePos].second.UInt(),
-                                                        values[0][primary].UInt(), MixStyle::Default));
+      buffer[prevWritePos].second.Set(ControlValue::Mix(
+          buffer[prevWritePos].second.UInt(), values[0][primary].UInt(), MixStyle::Default));
     } else {
       _previousTimestep[primary] = timing.TimestepNumber();
       buffer[_bufferWritePos[primary]].first = timing.TimeInMS();

@@ -58,7 +58,9 @@ class Effect : public Controllable {
 
   size_t NInputs() const final override { return input_values_.size(); }
 
-  ControlValue &InputValue(size_t index, bool primary) final override { return input_values_[index][primary]; }
+  ControlValue &InputValue(size_t index, bool primary) final override {
+    return input_values_[index][primary];
+  }
 
   virtual FunctionType InputType(size_t) const override { return FunctionType::Master; }
 
@@ -73,8 +75,8 @@ class Effect : public Controllable {
   }
 
  protected:
-  virtual void MixImplementation(const std::array<ControlValue, 2> *inputValues, const Timing &timing,
-                                 bool primary) = 0;
+  virtual void MixImplementation(const std::array<ControlValue, 2> *inputValues,
+                                 const Timing &timing, bool primary) = 0;
 
   /**
    * Output the provided value to all output connections. Because

@@ -40,15 +40,18 @@ class ColorTemperatureEffect final : public Effect {
       switch (connection.first->InputType(connection.second)) {
         case FunctionType::Red:
           MixConnection(connection_index,
-                        ControlValue(static_cast<int>(rgb.Red()) << 16) * values[1][primary], primary);
+                        ControlValue(static_cast<int>(rgb.Red()) << 16) * values[1][primary],
+                        primary);
           break;
         case FunctionType::Green:
           MixConnection(connection_index,
-                        ControlValue(static_cast<int>(rgb.Green()) << 16) * values[1][primary], primary);
+                        ControlValue(static_cast<int>(rgb.Green()) << 16) * values[1][primary],
+                        primary);
           break;
         case FunctionType::Blue:
           MixConnection(connection_index,
-                        ControlValue(static_cast<int>(rgb.Blue()) << 16) * values[1][primary], primary);
+                        ControlValue(static_cast<int>(rgb.Blue()) << 16) * values[1][primary],
+                        primary);
           break;
         case FunctionType::White:
           MixConnection(connection_index, values[1][primary], primary);

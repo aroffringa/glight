@@ -218,7 +218,8 @@ class Transition {
    * @param transition_time value between 0 and _lengthInMS.
    * @param timing used for randomness, etc.
    */
-  std::array<ControlValue, 2> Mix(double transition_time, ControlValue value, const Timing &timing) const;
+  std::array<ControlValue, 2> Mix(double transition_time, ControlValue value,
+                                  const Timing &timing) const;
 
  private:
   double length_in_ms_ = 250.0;

@@ -36,7 +36,8 @@ class AudioLevelEffect final : public Effect {
       _lastValue[primary] -= decay;
     _lastValue[primary] = std::max(_lastValue[primary], audioLevel);
 
-    unsigned v = ControlValue::Mix(_lastValue[primary], values[0][primary].UInt(), MixStyle::Multiply);
+    unsigned v =
+        ControlValue::Mix(_lastValue[primary], values[0][primary].UInt(), MixStyle::Multiply);
     ControlValue audioLevelCV(v);
     MixToAllOutputs(audioLevelCV, primary);
   }

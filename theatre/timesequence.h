@@ -85,7 +85,8 @@ class TimeSequence final : public Controllable {
             input.GetControllable()->MixInput(input.InputIndex(), activeValue,
                                               connection_values_[step_index][primary], primary);
             connection_values_[step_index][primary] = activeValue;
-            MixInputsIf(_sequence, 0, connection_values_, primary, [step_index](size_t i){ return i != step_index; });
+            MixInputsIf(_sequence, 0, connection_values_, primary,
+                        [step_index](size_t i) { return i != step_index; });
           }
         }
         if (transitionTriggered) {
@@ -106,14 +107,19 @@ class TimeSequence final : public Controllable {
               transitionTriggered = false;
               b.GetControllable()->MixInput(b.InputIndex(), activeValue,
                                             connection_values_[b_index][primary], primary);
-              MixInputsIf(_sequence, 0, connection_values_, primary, [b_index](size_t i){ return i != b_index; });
+              MixInputsIf(_sequence, 0, connection_values_, primary,
+                          [b_index](size_t i) { return i != b_index; });
             } else {
-              const auto [first, second] = activeStep.transition.Mix(transitionTime, activeValue, timing);
-              a.GetControllable()->MixInput(a.InputIndex(), first, connection_values_[a_index][primary], primary);
-              b.GetControllable()->MixInput(b.InputIndex(), second, connection_values_[b_index][primary], primary);
+              const auto [first, second] =
+                  activeStep.transition.Mix(transitionTime, activeValue, timing);
+              a.GetControllable()->MixInput(a.InputIndex(), first,
+                                            connection_values_[a_index][primary], primary);
+              b.GetControllable()->MixInput(b.InputIndex(), second,
+                                            connection_values_[b_index][primary], primary);
               connection_values_[a_index][primary] = first;
               connection_values_[b_index][primary] = second;
-              MixInputsIf(_sequence, 0, connection_values_, primary, [=](size_t i){ return i != a_index && i != b_index; });
+              MixInputsIf(_sequence, 0, connection_values_, primary,
+                          [=](size_t i) { return i != a_index && i != b_index; });
             }
           }
         }

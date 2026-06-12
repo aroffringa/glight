@@ -93,7 +93,8 @@ class Controllable : public FolderObject {
    */
   void MixInput(size_t index, ControlValue new_value, ControlValue previous_value, bool primary) {
     const FunctionType input_type = InputType(index);
-    InputValue(index, primary) = theatre::MixInput(InputValue(index, primary), new_value, previous_value, input_type);
+    InputValue(index, primary) =
+        theatre::MixInput(InputValue(index, primary), new_value, previous_value, input_type);
   }
 
   bool HasOutputConnection(const Controllable &controllable) const {
@@ -112,12 +113,15 @@ class Controllable : public FolderObject {
   char _visitLevel = 0;
 };
 
-template<typename Condition>
-void MixInputsIf(std::span<Input> inputs, ControlValue value, std::vector<std::array<ControlValue, 2>>& connection_values, bool primary, Condition condition) {
-  for(size_t i=0; i!=inputs.size(); ++i) {
-    if(condition(i)) {
-      Input& input = inputs[i];
-      input.GetControllable()->MixInput(input.InputIndex(), value, connection_values[i][primary], primary);
+template <typename Condition>
+void MixInputsIf(std::span<Input> inputs, ControlValue value,
+                 std::vector<std::array<ControlValue, 2>> &connection_values, bool primary,
+                 Condition condition) {
+  for (size_t i = 0; i != inputs.size(); ++i) {
+    if (condition(i)) {
+      Input &input = inputs[i];
+      input.GetControllable()->MixInput(input.InputIndex(), value, connection_values[i][primary],
+                                        primary);
       connection_values[i][primary] = value;
     }
   }

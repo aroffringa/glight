@@ -48,8 +48,8 @@ class ThresholdEffect final : public Effect {
       if (values[0][primary].UInt() <= _lowerStartLimit)
         thresholded.Set(0);
       else {  //  lowerstart < value < lowerend
-        unsigned v =
-            (values[0][primary].UInt() - _lowerStartLimit) * 255 / (_lowerEndLimit - _lowerStartLimit);
+        unsigned v = (values[0][primary].UInt() - _lowerStartLimit) * 255 /
+                     (_lowerEndLimit - _lowerStartLimit);
         thresholded.Set(v * 65536);
       }
     } else {  // value >= lowerend
@@ -58,8 +58,8 @@ class ThresholdEffect final : public Effect {
       else if (values[0][primary].UInt() > _upperEndLimit)
         thresholded.Set(0);
       else {  // upperend >= value > upperstart
-        unsigned v =
-            (values[0][primary].UInt() - _upperStartLimit) * 255 / (_lowerEndLimit - _lowerStartLimit);
+        unsigned v = (values[0][primary].UInt() - _upperStartLimit) * 255 /
+                     (_lowerEndLimit - _lowerStartLimit);
         thresholded.Set(ControlValue::Max().UInt() - v * 65536);
       }
     }

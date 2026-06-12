@@ -122,24 +122,28 @@ class Chase final : public Controllable {
     const size_t step = (unsigned)std::fmod(timeInMs / totalDuration, sequence_.size());
     if (phase < trigger_.DelayInMs() || sequence_.size() == 1) {
       // We are not in a transition, just mix the corresponding controllable
-      Input& active = sequence_[step];
+      Input &active = sequence_[step];
       active.GetControllable()->MixInput(active.InputIndex(), input_value_[primary],
-                                                  connection_values_[step][primary], primary);
+                                         connection_values_[step][primary], primary);
       connection_values_[step][primary] = input_value_[primary];
 
-      MixInputsIf(sequence_, 0, connection_values_, primary, [step](size_t i){ return i != step; });
+      MixInputsIf(sequence_, 0, connection_values_, primary,
+                  [step](size_t i) { return i != step; });
     } else {
       // We are in a transition
       const double transition_time = phase - trigger_.DelayInMs();
       const size_t next_step = (step + 1) % sequence_.size();
       const auto [first, second] = transition_.Mix(transition_time, input_value_[primary], timing);
-      Input& a = sequence_[step];
-      Input& b = sequence_[next_step];
-      a.GetControllable()->MixInput(a.InputIndex(), first, connection_values_[step][primary], primary);
-      b.GetControllable()->MixInput(b.InputIndex(), second, connection_values_[next_step][primary], primary);
+      Input &a = sequence_[step];
+      Input &b = sequence_[next_step];
+      a.GetControllable()->MixInput(a.InputIndex(), first, connection_values_[step][primary],
+                                    primary);
+      b.GetControllable()->MixInput(b.InputIndex(), second, connection_values_[next_step][primary],
+                                    primary);
 
       // Set the other values to zero (necessary for LTP mode).
-      MixInputsIf(sequence_, 0, connection_values_, primary, [=](size_t i){ return i != step && i != next_step; });
+      MixInputsIf(sequence_, 0, connection_values_, primary,
+                  [=](size_t i) { return i != step && i != next_step; });
     }
   }
 

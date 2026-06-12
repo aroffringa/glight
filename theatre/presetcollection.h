@@ -37,7 +37,7 @@ class PresetCollection final : public Controllable {
 
   size_t NInputs() const override { return 1; }
 
-  ControlValue &InputValue(size_t,bool primary) override { return _inputValue[primary]; }
+  ControlValue &InputValue(size_t, bool primary) override { return _inputValue[primary]; }
 
   std::vector<Color> InputColors(size_t) const override;
 
@@ -55,7 +55,8 @@ class PresetCollection final : public Controllable {
       const std::unique_ptr<PresetValue> &pv = _presetValues[i];
       const ControlValue value = _inputValue[primary] * pv->Value();
 
-      pv->GetControllable().MixInput(pv->InputIndex(), value, connection_values_[i][primary], primary);
+      pv->GetControllable().MixInput(pv->InputIndex(), value, connection_values_[i][primary],
+                                     primary);
       connection_values_[i][primary] = value;
     }
   }

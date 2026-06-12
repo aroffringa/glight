@@ -144,9 +144,7 @@ class SourceValue {
     return (b_.Value() * Invert(cross_fader_.Value())).UInt() +
            (a_.Value() * cross_fader_.Value()).UInt();
   }
-  unsigned Value(bool primary) const {
-    return primary ? PrimaryValue() : SecondaryValue();
-  }
+  unsigned Value(bool primary) const { return primary ? PrimaryValue() : SecondaryValue(); }
   /**
    * Swap a and b and flip the cross fader.
    * This won't change the mix output.
@@ -161,9 +159,7 @@ class SourceValue {
 
   ControlValue& PreviousSecondary() { return previous_[false]; }
 
-  ControlValue& Previous(bool primary) {
-    return previous_[primary];
-  }
+  ControlValue& Previous(bool primary) { return previous_[primary]; }
 
  private:
   Input input_;

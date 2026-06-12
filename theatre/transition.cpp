@@ -177,7 +177,8 @@ ControlValue Transition::OutValue(double transition_time, const Timing &timing) 
 /**
  * @param transitionTime value between 0 and _lengthInMS.
  */
-std::array<ControlValue, 2> Transition::Mix(double transition_time, ControlValue value, const Timing &timing) const {
+std::array<ControlValue, 2> Transition::Mix(double transition_time, ControlValue value,
+                                            const Timing &timing) const {
   const double ratio = std::clamp(transition_time / length_in_ms_, 0.0, 1.0);
   switch (type_) {
     case TransitionType::None:
@@ -231,14 +232,16 @@ std::array<ControlValue, 2> Transition::Mix(double transition_time, ControlValue
       unsigned secondRatioValue = (unsigned)(ratio * 256.0);
       secondRatioValue = (secondRatioValue / 51) * 51;
       const unsigned firstRatioValue = 255 - secondRatioValue;
-      return {ControlValue((value.UInt() * firstRatioValue) >> 8), ControlValue((value.UInt() * secondRatioValue) >> 8)};
+      return {ControlValue((value.UInt() * firstRatioValue) >> 8),
+              ControlValue((value.UInt() * secondRatioValue) >> 8)};
     } break;
     case TransitionType::ConstantAcceleration: {
       const double fade_value =
           (ratio <= 0.5) ? ratio * ratio * 2.0 : 1.0 - (ratio - 1.0) * (ratio - 1.0) * 2.0;
       unsigned secondRatioValue = (unsigned)(fade_value * 65536.0);
       const unsigned firstRatioValue = 65535 - secondRatioValue;
-      return {ControlValue(((value.UInt() >> 8) * firstRatioValue) >> 8), ControlValue(((value.UInt() >> 8) * secondRatioValue) >> 8)};
+      return {ControlValue(((value.UInt() >> 8) * firstRatioValue) >> 8),
+              ControlValue(((value.UInt() >> 8) * secondRatioValue) >> 8)};
     } break;
     case TransitionType::Random: {
       const unsigned scaled_ratio = (unsigned)(ratio * 256);
@@ -247,7 +250,8 @@ std::array<ControlValue, 2> Transition::Mix(double transition_time, ControlValue
       const unsigned secondRatioValue =
           timing.DrawRandomValue(upper_bound - lower_bound) + lower_bound;
       const unsigned firstRatioValue = 255 - secondRatioValue;
-      return {ControlValue((value.UInt() * firstRatioValue) >> 8), ControlValue((value.UInt() * secondRatioValue) >> 8)};
+      return {ControlValue((value.UInt() * firstRatioValue) >> 8),
+              ControlValue((value.UInt() * secondRatioValue) >> 8)};
     } break;
     case TransitionType::Erratic: {
       unsigned scaled_ratio = (unsigned)(ratio * ControlValue::MaxUInt());
