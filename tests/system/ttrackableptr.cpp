@@ -329,6 +329,36 @@ BOOST_AUTO_TEST_CASE(self_move_assignment_observing_ptr) {
   BOOST_CHECK_EQUAL(n_deletes, 1);
 }
 
+BOOST_AUTO_TEST_CASE(reset_after_observing) {
+  ResetTracker();
+  Tracker* tracker = new Tracker();
+  TrackablePtr<Tracker> a(tracker);
+  ObservingPtr<Tracker> x = a.GetObserver();
+  BOOST_CHECK(x.Get() == tracker);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 1);
+
+  a.Reset(new Tracker());
+  BOOST_CHECK_EQUAL(n_constructions, 2);
+  BOOST_CHECK_EQUAL(n_deletes, 1);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 0);
+
+  BOOST_CHECK(!x);
+  BOOST_CHECK(x.Get() == nullptr);
+
+  x = a.GetObserver();
+  BOOST_CHECK(x);
+  BOOST_CHECK(x.Get() == a.Get());
+  BOOST_CHECK_EQUAL(a.ShareCount(), 1);
+
+  a.Reset();
+  BOOST_CHECK(!x);
+  BOOST_CHECK(x.Get() == nullptr);
+  BOOST_CHECK_EQUAL(a.ShareCount(), 0);
+
+  BOOST_CHECK_EQUAL(n_constructions, 2);
+  BOOST_CHECK_EQUAL(n_deletes, 2);
+}
+
 BOOST_AUTO_TEST_CASE(get_observer) {
   ResetTracker();
   Tracker* tracker = new Tracker();
@@ -707,6 +737,50 @@ BOOST_AUTO_TEST_CASE(performance_track_shared, *boost::unit_test::disabled()) {
     for (size_t j = 0; j != n_observers; ++j) o.emplace_back(p);
   }
   BOOST_CHECK_EQUAL(v.size(), n);
+}
+
+struct FirstBase {
+  virtual ~FirstBase() = default;
+  int x;
+};
+
+struct SecondBase {
+  int y;
+};
+
+struct Derived : FirstBase, SecondBase {};
+
+BOOST_AUTO_TEST_CASE(multiple_inheritance) {
+  TrackablePtr<Derived> ptr = MakeTrackable<Derived>();
+  ptr->x = 1337;
+  ptr->y = 42;
+  ObservingPtr<Derived> observer = ptr.GetObserver();
+
+  ObservingPtr<FirstBase> first_base = observer;
+  BOOST_CHECK_EQUAL(first_base->x, 1337);
+  BOOST_CHECK_EQUAL(first_base.Get(), static_cast<FirstBase*>(ptr.Get()));
+  first_base->x = 3;
+
+  ObservingPtr<SecondBase> second_base = observer;
+  BOOST_CHECK_EQUAL(second_base->y, 42);
+  second_base->y = 4;
+  BOOST_CHECK_EQUAL(second_base.Get(), static_cast<SecondBase*>(ptr.Get()));
+
+  BOOST_CHECK_EQUAL(ptr->x, 3);
+  BOOST_CHECK_EQUAL(ptr->y, 4);
+
+  first_base = ptr.GetObserver<FirstBase>();
+  BOOST_CHECK_EQUAL(first_base->x, 3);
+  BOOST_CHECK_EQUAL(first_base.Get(), static_cast<FirstBase*>(ptr.Get()));
+  first_base->x = 5;
+
+  second_base = ptr.GetObserver<SecondBase>();
+  BOOST_CHECK_EQUAL(second_base->y, 4);
+  BOOST_CHECK_EQUAL(second_base.Get(), static_cast<SecondBase*>(ptr.Get()));
+  second_base->y = 6;
+
+  BOOST_CHECK_EQUAL(ptr->x, 5);
+  BOOST_CHECK_EQUAL(ptr->y, 6);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
