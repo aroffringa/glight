@@ -45,16 +45,16 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   PresetCollection &presetCollection = *management.AddPresetCollectionPtr();
   presetCollection.SetFromCurrentSituation(management);
 
-  fixtureControl.InputValue(0) = ControlValue::Zero();
-  presetCollection.InputValue(0) = ControlValue::Zero();
-  presetCollection.MixInput(0, ControlValue::Max(), 0);
+  fixtureControl.InputValue(0, true) = ControlValue::Zero();
+  presetCollection.InputValue(0, true) = ControlValue::Zero();
+  presetCollection.MixInput(0, ControlValue::Max(), 0, true);
 
   std::vector<unsigned> values(512, 0);
   Timing timing(0.0, 0, 0, 0, 0);
   // Mix controls in order of dependencies
   presetCollection.Mix(timing, true);
   fixtureControl.Mix(timing, true);
-  fixtureControl.GetChannelValues(values.data(), 0);
+  fixtureControl.GetChannelValues(values.data(), 0, true);
   for (size_t i = 0; i != 512; ++i) {
     if (i == 100) {
       // it's not accurately Max, because of truncations.

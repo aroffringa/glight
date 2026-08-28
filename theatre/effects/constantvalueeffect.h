@@ -18,9 +18,9 @@ class ConstantValueEffect final : public Effect {
   void SetValue(unsigned value) { _value = value; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) override {
-    setAllOutputs(ControlValue(_value), primary);
+    MixToAllOutputs(ControlValue(_value), primary);
   }
 
  private:

@@ -36,10 +36,10 @@ class FluorescentStartEffect final : public Effect {
   void SetIndependentOutputs(bool independentOutputs) { _independentOutputs = independentOutputs; }
 
  private:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) override {
     std::vector<ConnectionInfo> &primary_data = _data[primary];
-    if (values[0]) {
+    if (values[0][primary]) {
       const size_t count = _independentOutputs ? Connections().size() : 1;
       primary_data.resize(count);
 
@@ -67,9 +67,9 @@ class FluorescentStartEffect final : public Effect {
         else
           value = _glowValue;
         if (_independentOutputs) {
-          MixConnection(i, values[0] * ControlValue(value), primary);
+          MixConnection(i, values[0][primary] * ControlValue(value), primary);
         } else {
-          setAllOutputs(values[0] * ControlValue(value), primary);
+          MixToAllOutputs(values[0][primary] * ControlValue(value), primary);
         }
       }
     } else {

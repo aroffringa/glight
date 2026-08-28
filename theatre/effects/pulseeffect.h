@@ -29,9 +29,9 @@ class PulseEffect final : public Effect {
   void SetRepeat(bool repeat) { _repeat = repeat; }
 
  protected:
-  virtual void MixImplementation(const ControlValue* values, const Timing& timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2>* values, const Timing& timing,
                                  bool primary) override {
-    if (values[0].UInt() == 0) {
+    if (values[0][primary].UInt() == 0) {
       is_active_[primary] = false;
     } else {
       if (!is_active_[primary]) {
@@ -49,7 +49,7 @@ class PulseEffect final : public Effect {
           if (pos < transition_in_.LengthInMs()) {
             // Fade in
             const ControlValue value = transition_in_.InValue(pos, timing);
-            setAllOutputs(values[0] * value, primary);
+            MixToAllOutputs(values[0][primary] * value, primary);
             handled = true;
           } else {
             pos -= transition_in_.LengthInMs();
@@ -58,7 +58,7 @@ class PulseEffect final : public Effect {
 
         if (sustain_ != 0 && !handled) {
           if (pos < sustain_) {
-            setAllOutputs(ControlValue(values[0].UInt()), primary);
+            MixToAllOutputs(ControlValue(values[0][primary].UInt()), primary);
             handled = true;
           } else
             pos -= sustain_;
@@ -68,7 +68,7 @@ class PulseEffect final : public Effect {
           if (pos < transition_out_.LengthInMs()) {
             // Fade out
             const ControlValue value = transition_out_.OutValue(pos, timing);
-            setAllOutputs(values[0] * value, primary);
+            MixToAllOutputs(values[0][primary] * value, primary);
           }
         }
       }

@@ -35,12 +35,12 @@ BOOST_AUTO_TEST_CASE(SetValue) {
   BOOST_CHECK_EQUAL(fixture.Functions().size(), 1);
   BOOST_CHECK_EQUAL(fixture.Functions().front()->MainChannel().Channel(), 100);
   BOOST_CHECK(!fixture.Functions().front()->FineChannel());
-  control->InputValue(0) = ControlValue::Zero();
-  control->MixInput(0, ControlValue::Max(), 0);
+  control->InputValue(0, true) = ControlValue::Zero();
+  control->MixInput(0, ControlValue::Max(), 0, true);
   std::vector<unsigned> values(512, 0);
   Timing timing(0.0, 0, 0, 0, 0);
   control->Mix(timing, true);
-  control->GetChannelValues(values.data(), 0);
+  control->GetChannelValues(values.data(), 0, true);
   for (size_t i = 0; i != 512; ++i) {
     if (i == 100)
       BOOST_CHECK_EQUAL(values[100], ControlValue::MaxUInt());

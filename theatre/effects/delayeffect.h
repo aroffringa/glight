@@ -28,17 +28,17 @@ class DelayEffect final : public Effect {
   void SetDelayInMS(double delayInMS) { _delayInMS = delayInMS; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) override {
     std::vector<std::pair<double, ControlValue>> &buffer = _buffer[primary];
     if (_previousTimestep[primary] == timing.TimestepNumber()) {
       unsigned prevWritePos = (_bufferWritePos[primary] + buffer.size() - 1) % buffer.size();
-      buffer[prevWritePos].second.Set(ControlValue::Mix(buffer[prevWritePos].second.UInt(),
-                                                        values[0].UInt(), MixStyle::Default));
+      buffer[prevWritePos].second.Set(ControlValue::Mix(
+          buffer[prevWritePos].second.UInt(), values[0][primary].UInt(), MixStyle::Default));
     } else {
       _previousTimestep[primary] = timing.TimestepNumber();
       buffer[_bufferWritePos[primary]].first = timing.TimeInMS();
-      buffer[_bufferWritePos[primary]].second = values[0];
+      buffer[_bufferWritePos[primary]].second = values[0][primary];
       _bufferWritePos[primary] = (_bufferWritePos[primary] + 1) % buffer.size();
       if (_bufferWritePos[primary] == _bufferReadPos[primary]) {
         // Increase size of circular buffer
@@ -53,7 +53,7 @@ class DelayEffect final : public Effect {
         _bufferReadPos[primary] = (_bufferReadPos[primary] + 1) % buffer.size();
       }
     }
-    setAllOutputs(buffer[_bufferReadPos[primary]].second, primary);
+    MixToAllOutputs(buffer[_bufferReadPos[primary]].second, primary);
   }
 
  private:

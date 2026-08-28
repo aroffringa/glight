@@ -16,13 +16,9 @@ class TimeSequence final : public Controllable {
  public:
   TimeSequence() = default;
 
-  std::unique_ptr<TimeSequence> CopyWithoutSequence() const {
-    return std::unique_ptr<TimeSequence>(new TimeSequence(*this));
-  }
-
   size_t NInputs() const override { return 1; }
 
-  ControlValue &InputValue(size_t) override { return _inputValue; }
+  ControlValue &InputValue(size_t, bool primary) override { return _inputValue[primary]; }
 
   virtual FunctionType InputType(size_t) const override { return FunctionType::Master; }
 
@@ -46,7 +42,7 @@ class TimeSequence final : public Controllable {
     Timing &stepStart = _stepStart[primary];
     size_t &stepNumber = _stepNumber[primary];
     bool &transitionTriggered = _transitionTriggered[primary];
-    if (_inputValue || (_sustain && activeValue)) {
+    if (_inputValue[primary] || (_sustain && activeValue)) {
       if (!activeValue) {
         // Start the sequence
         stepNumber = 0;
@@ -55,9 +51,9 @@ class TimeSequence final : public Controllable {
       }
       if (_repeatCount == 0 || stepNumber < _repeatCount * _steps.size()) {
         if (_sustain)
-          activeValue = Max(activeValue, _inputValue);
+          activeValue = Max(activeValue, _inputValue[primary]);
         else
-          activeValue = _inputValue;
+          activeValue = _inputValue[primary];
         const Step &activeStep = _steps[stepNumber % _steps.size()];
         if (!transitionTriggered) {
           switch (activeStep.trigger.Type()) {
@@ -87,14 +83,17 @@ class TimeSequence final : public Controllable {
             const size_t step_index = stepNumber % _steps.size();
             Input &input = _sequence[step_index];
             input.GetControllable()->MixInput(input.InputIndex(), activeValue,
-                                              connection_values_[step_index][primary]);
+                                              connection_values_[step_index][primary], primary);
+            connection_values_[step_index][primary] = activeValue;
+            MixInputsIf(_sequence, 0, connection_values_, primary,
+                        [step_index](size_t i) { return i != step_index; });
           }
         }
         if (transitionTriggered) {
           // Are we in the final step?
           if (_repeatCount != 0 && stepNumber + 1 >= _repeatCount * _steps.size()) {
             ++stepNumber;
-            activeValue = _inputValue;
+            activeValue = _inputValue[primary];
           } else {
             // Not there yet; transition to next state
             double transitionTime = timing.TimeInMS() - stepStart.TimeInMS();
@@ -107,21 +106,25 @@ class TimeSequence final : public Controllable {
               stepStart = timing;
               transitionTriggered = false;
               b.GetControllable()->MixInput(b.InputIndex(), activeValue,
-                                            connection_values_[b_index][primary]);
+                                            connection_values_[b_index][primary], primary);
+              MixInputsIf(_sequence, 0, connection_values_, primary,
+                          [b_index](size_t i) { return i != b_index; });
             } else {
-              Connection connection_a{.to_controllable = a.GetControllable(),
-                                      .to_input_index = a.InputIndex(),
-                                      .values = connection_values_[a_index]};
-              Connection connection_b{.to_controllable = b.GetControllable(),
-                                      .to_input_index = b.InputIndex(),
-                                      .values = connection_values_[b_index]};
-              activeStep.transition.Mix(connection_a, connection_b, transitionTime, activeValue,
-                                        timing, primary);
+              const auto [first, second] =
+                  activeStep.transition.Mix(transitionTime, activeValue, timing);
+              a.GetControllable()->MixInput(a.InputIndex(), first,
+                                            connection_values_[a_index][primary], primary);
+              b.GetControllable()->MixInput(b.InputIndex(), second,
+                                            connection_values_[b_index][primary], primary);
+              connection_values_[a_index][primary] = first;
+              connection_values_[b_index][primary] = second;
+              MixInputsIf(_sequence, 0, connection_values_, primary,
+                          [=](size_t i) { return i != a_index && i != b_index; });
             }
           }
         }
       } else {
-        activeValue = _inputValue;
+        activeValue = _inputValue[primary];
       }
     } else {
       activeValue = ControlValue(0);
@@ -159,25 +162,7 @@ class TimeSequence final : public Controllable {
   size_t Size() const { return _steps.size(); }
 
  private:
-  /**
-   * Copy constructor for dry copy
-   */
-  TimeSequence(const TimeSequence &timeSequence)
-      :
-
-        Controllable(timeSequence),
-
-        _inputValue(timeSequence._inputValue),
-        _activeValue(timeSequence._activeValue),
-        _stepStart(timeSequence._stepStart),
-        _stepNumber(timeSequence._stepNumber),
-        _transitionTriggered(timeSequence._transitionTriggered),
-
-        _steps(timeSequence._steps),
-        _sustain(timeSequence._sustain),
-        _repeatCount(timeSequence._repeatCount) {}
-
-  ControlValue _inputValue;
+  ControlValue _inputValue[2];
   std::array<ControlValue, 2> _activeValue;
   std::array<Timing, 2> _stepStart;
   std::array<size_t, 2> _stepNumber = {0, 0};

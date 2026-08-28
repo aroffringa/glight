@@ -25,9 +25,9 @@ class FlickerEffect final : public Effect {
   void SetIndependentOutputs(bool independentOutputs) { _independentOutputs = independentOutputs; }
 
  private:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) override {
-    if (values[0]) {
+    if (values[0][primary]) {
       const size_t count = _independentOutputs ? Connections().size() : 1;
       std::vector<unsigned> &value = _value[primary];
       value.resize(count);
@@ -47,10 +47,10 @@ class FlickerEffect final : public Effect {
 
       if (_independentOutputs) {
         for (size_t i = 0; i != Connections().size(); ++i) {
-          MixConnection(i, values[0] * ControlValue(value[i]), primary);
+          MixConnection(i, values[0][primary] * ControlValue(value[i]), primary);
         }
       } else {
-        setAllOutputs(values[0] * ControlValue(value[0]), primary);
+        MixToAllOutputs(values[0][primary] * ControlValue(value[0]), primary);
       }
     }
   }

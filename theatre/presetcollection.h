@@ -21,8 +21,8 @@ class Management;
  */
 class PresetCollection final : public Controllable {
  public:
-  PresetCollection() : _inputValue(0) {}
-  PresetCollection(const std::string &name) : Controllable(name), _inputValue(0) {}
+  PresetCollection() {}
+  PresetCollection(const std::string &name) : Controllable(name) {}
   ~PresetCollection() { Clear(); }
 
   void Clear() {
@@ -37,7 +37,7 @@ class PresetCollection final : public Controllable {
 
   size_t NInputs() const override { return 1; }
 
-  ControlValue &InputValue(size_t) override { return _inputValue; }
+  ControlValue &InputValue(size_t, bool primary) override { return _inputValue[primary]; }
 
   std::vector<Color> InputColors(size_t) const override;
 
@@ -51,13 +51,13 @@ class PresetCollection final : public Controllable {
   }
 
   void Mix(const Timing &timing, bool primary) override {
-    unsigned leftHand = _inputValue.UInt();
     for (size_t i = 0; i != _presetValues.size(); ++i) {
       const std::unique_ptr<PresetValue> &pv = _presetValues[i];
-      unsigned rightHand = pv->Value().UInt();
-      ControlValue value(ControlValue::Mix(leftHand, rightHand, MixStyle::Multiply));
+      const ControlValue value = _inputValue[primary] * pv->Value();
 
-      pv->GetControllable().MixInput(pv->InputIndex(), value, connection_values_[i][primary]);
+      pv->GetControllable().MixInput(pv->InputIndex(), value, connection_values_[i][primary],
+                                     primary);
+      connection_values_[i][primary] = value;
     }
   }
   const std::vector<std::unique_ptr<PresetValue>> &PresetValues() const { return _presetValues; }
@@ -80,7 +80,7 @@ class PresetCollection final : public Controllable {
   size_t Size() const { return _presetValues.size(); }
 
  private:
-  ControlValue _inputValue;
+  ControlValue _inputValue[2];
   std::vector<std::unique_ptr<PresetValue>> _presetValues;
   std::vector<std::array<ControlValue, 2>> connection_values_;
 };

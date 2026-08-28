@@ -144,6 +144,7 @@ class SourceValue {
     return (b_.Value() * Invert(cross_fader_.Value())).UInt() +
            (a_.Value() * cross_fader_.Value()).UInt();
   }
+  unsigned Value(bool primary) const { return primary ? PrimaryValue() : SecondaryValue(); }
   /**
    * Swap a and b and flip the cross fader.
    * This won't change the mix output.
@@ -154,17 +155,18 @@ class SourceValue {
     cross_fader_.SetTargetValue(ControlValue::Invert(cross_fader_.TargetValue()));
   }
 
-  ControlValue& PreviousPrimary() { return previous_primary_; }
+  ControlValue& PreviousPrimary() { return previous_[true]; }
 
-  ControlValue& PreviousSecondary() { return previous_secondary_; }
+  ControlValue& PreviousSecondary() { return previous_[false]; }
+
+  ControlValue& Previous(bool primary) { return previous_[primary]; }
 
  private:
   Input input_;
   SingleSourceValue a_;
   SingleSourceValue b_;
   SingleSourceValue cross_fader_;
-  ControlValue previous_primary_;
-  ControlValue previous_secondary_;
+  ControlValue previous_[2];
   sigc::signal<void()> signal_delete_;
 };
 

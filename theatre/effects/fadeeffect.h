@@ -33,11 +33,11 @@ class FadeEffect final : public Effect {
   void SetSustain(double sustainMS) { _sustain = 1e-3 * sustainMS; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) override {
     double timePassed = 0.001 * (timing.TimeInMS() - _previousTime[primary]);
     _previousTime[primary] = timing.TimeInMS();
-    const unsigned targetValue = values[0].UInt();
+    const unsigned targetValue = values[0][primary].UInt();
     if (targetValue != _fadingValue[primary]) {
       if (targetValue > _fadingValue[primary]) {
         _sustainTimer[primary] = _sustain;
@@ -73,7 +73,7 @@ class FadeEffect final : public Effect {
       }
     }
     if (_fadingValue[primary] != 0) {
-      setAllOutputs(ControlValue(_fadingValue[primary]), primary);
+      MixToAllOutputs(ControlValue(_fadingValue[primary]), primary);
     }
   }
 

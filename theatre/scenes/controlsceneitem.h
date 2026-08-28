@@ -28,7 +28,8 @@ class ControlSceneItem final : public SceneItem {
   void Mix(const Timing &timing, bool primary) override {
     const double ratio = (timing.TimeInMS() - OffsetInMS()) / DurationInMS();
     const ControlValue value(_startValue.UInt() * (1.0 - ratio) + _endValue.UInt() * ratio);
-    _controllable.MixInput(_input, value, connection_value_);
+    _controllable.MixInput(_input, value, connection_value_, primary);
+    connection_value_ = value;
   }
   Controllable &GetControllable() const { return _controllable; }
   size_t GetInput() const { return _input; }

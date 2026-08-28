@@ -28,13 +28,13 @@ class TimerEffect final : public Effect {
   void SetEndPattern(const system::TimePattern& end) { end_ = end; }
 
  protected:
-  virtual void MixImplementation(const ControlValue* values, const Timing& timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2>* values, const Timing& timing,
                                  bool primary) final {
-    if (values[0]) {
+    if (values[0][primary]) {
       if (NowInRange(start_, end_)) {
-        MixOn(values[0], timing, primary);
+        MixOn(values[0][primary], timing, primary);
       } else {
-        MixOff(values[0], timing, primary);
+        MixOff(values[0][primary], timing, primary);
       }
     }
   }
@@ -49,13 +49,13 @@ class TimerEffect final : public Effect {
       const int start = *transition_start_[primary];
       if (timing.TimeInMS() - start < transition_in_.LengthInMs()) {
         const ControlValue multiplier = transition_in_.InValue(timing.TimeInMS() - start, timing);
-        setAllOutputs(input * multiplier, primary);
+        MixToAllOutputs(input * multiplier, primary);
       } else {
         transition_start_[primary].Reset();
       }
     }
     if (!transition_start_[primary]) {
-      setAllOutputs(input, primary);
+      MixToAllOutputs(input, primary);
     }
   }
 
@@ -68,7 +68,7 @@ class TimerEffect final : public Effect {
       const int start = *transition_start_[primary];
       if (timing.TimeInMS() - start < transition_out_.LengthInMs()) {
         const ControlValue multiplier = transition_out_.OutValue(timing.TimeInMS() - start, timing);
-        setAllOutputs(input * multiplier, primary);
+        MixToAllOutputs(input * multiplier, primary);
       } else {
         transition_start_[primary].Reset();
       }

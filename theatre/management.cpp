@@ -92,7 +92,7 @@ void Management::InferInputUniverse(unsigned universe, ValueSnapshot &snapshot, 
 
   for (const TrackablePtr<Controllable> &controllable : _controllables) {
     if (FixtureControl *fc = dynamic_cast<FixtureControl *>(controllable.Get())) {
-      fc->GetChannelValues(values, universe);
+      fc->GetChannelValues(values, universe, is_primary);
     }
   }
 
@@ -176,30 +176,23 @@ void Management::MixAll(unsigned timestep_number, ValueSnapshot &primary,
   if (!topologicalSort(unorderedList, orderedList))
     throw std::runtime_error("Cycle in dependencies");
 
-  for (bool is_primary : {false, true}) {
-    // Reset all inputs (except if they are LTP)
-    for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
-      Controllable &controllable = sv->GetControllable();
-      for (size_t inputIndex = 0; inputIndex != sv->GetControllable().NInputs(); ++inputIndex) {
-        const MixStyle mix_style = GetMixStyle(controllable.InputType(inputIndex));
-        if (mix_style != MixStyle::LastTakesPrecedence)
-          controllable.InputValue(inputIndex) = ControlValue(0);
+  // Reset all inputs (except if they are LTP)
+  for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
+    Controllable &controllable = sv->GetControllable();
+    for (size_t input_index = 0; input_index != controllable.NInputs(); ++input_index) {
+      const MixStyle mix_style = GetMixStyle(controllable.InputType(input_index));
+      if (mix_style != MixStyle::LastTakesPrecedence) {
+        controllable.InputValue(input_index, true) = ControlValue(0);
+        controllable.InputValue(input_index, false) = ControlValue(0);
       }
     }
-
+  }
+  for (bool is_primary : {false, true}) {
     // Process source values. These will output to controllables.
-    if (is_primary) {
-      for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
-        const ControlValue value(sv->PrimaryValue());
-        sv->GetControllable().MixInput(sv->InputIndex(), value, sv->PreviousPrimary());
-        sv->PreviousPrimary() = value;
-      }
-    } else {
-      for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
-        const ControlValue value(sv->SecondaryValue());
-        sv->GetControllable().MixInput(sv->InputIndex(), value, sv->PreviousSecondary());
-        sv->PreviousSecondary() = value;
-      }
+    for (const std::unique_ptr<SourceValue> &sv : _sourceValues) {
+      const ControlValue value(sv->Value(is_primary));
+      sv->GetControllable().MixInput(sv->InputIndex(), value, sv->Previous(is_primary), is_primary);
+      sv->Previous(is_primary) = value;
     }
 
     // Process all controllables that follow

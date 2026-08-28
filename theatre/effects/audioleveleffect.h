@@ -24,7 +24,7 @@ class AudioLevelEffect final : public Effect {
   void SetDecaySpeed(unsigned decaySpeed) { _decaySpeed = decaySpeed; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) override {
     unsigned audioLevel = (unsigned(timing.AudioLevel()) << 8);
     double timePassed = timing.TimeInMS() - _lastTime[primary];
@@ -36,9 +36,10 @@ class AudioLevelEffect final : public Effect {
       _lastValue[primary] -= decay;
     _lastValue[primary] = std::max(_lastValue[primary], audioLevel);
 
-    unsigned v = ControlValue::Mix(_lastValue[primary], values[0].UInt(), MixStyle::Multiply);
+    unsigned v =
+        ControlValue::Mix(_lastValue[primary], values[0][primary].UInt(), MixStyle::Multiply);
     ControlValue audioLevelCV(v);
-    setAllOutputs(audioLevelCV, primary);
+    MixToAllOutputs(audioLevelCV, primary);
   }
 
  private:

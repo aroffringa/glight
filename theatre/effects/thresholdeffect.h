@@ -41,29 +41,29 @@ class ThresholdEffect final : public Effect {
   void SetUpperEndLimit(unsigned upperEndLimit) { _upperEndLimit = upperEndLimit; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) override {
     ControlValue thresholded;
-    if (values[0].UInt() < _lowerEndLimit) {
-      if (values[0].UInt() <= _lowerStartLimit)
+    if (values[0][primary].UInt() < _lowerEndLimit) {
+      if (values[0][primary].UInt() <= _lowerStartLimit)
         thresholded.Set(0);
       else {  //  lowerstart < value < lowerend
-        unsigned v =
-            (values[0].UInt() - _lowerStartLimit) * 255 / (_lowerEndLimit - _lowerStartLimit);
+        unsigned v = (values[0][primary].UInt() - _lowerStartLimit) * 255 /
+                     (_lowerEndLimit - _lowerStartLimit);
         thresholded.Set(v * 65536);
       }
     } else {  // value >= lowerend
-      if (values[0].UInt() <= _upperStartLimit)
+      if (values[0][primary].UInt() <= _upperStartLimit)
         thresholded = ControlValue::Max();
-      else if (values[0].UInt() > _upperEndLimit)
+      else if (values[0][primary].UInt() > _upperEndLimit)
         thresholded.Set(0);
       else {  // upperend >= value > upperstart
-        unsigned v =
-            (values[0].UInt() - _upperStartLimit) * 255 / (_lowerEndLimit - _lowerStartLimit);
+        unsigned v = (values[0][primary].UInt() - _upperStartLimit) * 255 /
+                     (_lowerEndLimit - _lowerStartLimit);
         thresholded.Set(ControlValue::Max().UInt() - v * 65536);
       }
     }
-    setAllOutputs(thresholded, primary);
+    MixToAllOutputs(thresholded, primary);
   }
 
  private:

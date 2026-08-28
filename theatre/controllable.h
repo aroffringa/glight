@@ -2,6 +2,7 @@
 #define THEATRE_CONTROL_H_
 
 #include <array>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
@@ -10,6 +11,7 @@
 #include "controlvalue.h"
 #include "fixturefunction.h"
 #include "folderobject.h"
+#include "input.h"
 
 namespace glight::theatre {
 
@@ -37,7 +39,7 @@ class Controllable : public FolderObject {
 
   virtual size_t NInputs() const = 0;
 
-  virtual ControlValue &InputValue(size_t index) = 0;
+  virtual ControlValue &InputValue(size_t index, bool primary) = 0;
 
   virtual FunctionType InputType(size_t index) const = 0;
 
@@ -89,9 +91,10 @@ class Controllable : public FolderObject {
   /**
    * Sets the value at the controllable's input.
    */
-  void MixInput(size_t index, ControlValue new_value, ControlValue previous_value) {
+  void MixInput(size_t index, ControlValue new_value, ControlValue previous_value, bool primary) {
     const FunctionType input_type = InputType(index);
-    InputValue(index) = theatre::MixInput(InputValue(index), new_value, previous_value, input_type);
+    InputValue(index, primary) =
+        theatre::MixInput(InputValue(index, primary), new_value, previous_value, input_type);
   }
 
   bool HasOutputConnection(const Controllable &controllable) const {
@@ -109,6 +112,20 @@ class Controllable : public FolderObject {
  private:
   char _visitLevel = 0;
 };
+
+template <typename Condition>
+void MixInputsIf(std::span<Input> inputs, ControlValue value,
+                 std::vector<std::array<ControlValue, 2>> &connection_values, bool primary,
+                 Condition condition) {
+  for (size_t i = 0; i != inputs.size(); ++i) {
+    if (condition(i)) {
+      Input &input = inputs[i];
+      input.GetControllable()->MixInput(input.InputIndex(), value, connection_values[i][primary],
+                                        primary);
+      connection_values[i][primary] = value;
+    }
+  }
+}
 
 }  // namespace glight::theatre
 

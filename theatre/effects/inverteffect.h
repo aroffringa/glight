@@ -20,12 +20,12 @@ class InvertEffect final : public Effect {
   void SetOffThreshold(unsigned offThreshold) { _offThreshold = offThreshold; }
 
  protected:
-  virtual void MixImplementation(const ControlValue *values, const Timing &timing,
+  virtual void MixImplementation(const std::array<ControlValue, 2> *values, const Timing &timing,
                                  bool primary) override {
-    ControlValue inverted = Invert(values[0]);
+    ControlValue inverted = Invert(values[0][primary]);
     if (inverted.UInt() < _offThreshold) inverted = ControlValue(0);
-    ControlValue value = theatre::Mix(values[1], inverted, MixStyle::Multiply);
-    setAllOutputs(value, primary);
+    ControlValue value = theatre::Mix(values[1][primary], inverted, MixStyle::Multiply);
+    MixToAllOutputs(value, primary);
   }
 
   virtual FunctionType InputType(size_t inputIndex) const override {

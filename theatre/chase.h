@@ -20,7 +20,7 @@ class Chase final : public Controllable {
 
   size_t NInputs() const override { return 1; }
 
-  ControlValue &InputValue(size_t) override { return input_value_; }
+  ControlValue &InputValue(size_t, bool primary) override { return input_value_[primary]; }
 
   virtual FunctionType InputType(size_t) const override { return FunctionType::Master; }
 
@@ -105,40 +105,49 @@ class Chase final : public Controllable {
   void MixBeatChase(const Timing &timing, bool primary) {
     double timeInMs = timing.BeatValue();
     unsigned step = (unsigned)std::fmod(timeInMs / trigger_.DelayInBeats(), sequence_.size());
-    sequence_[step].GetControllable()->MixInput(sequence_[step].InputIndex(), input_value_,
-                                                connection_values_[step][primary]);
+    sequence_[step].GetControllable()->MixInput(sequence_[step].InputIndex(), input_value_[primary],
+                                                connection_values_[step][primary], primary);
   }
 
   void MixSyncedChase(const Timing &timing, bool primary) {
     unsigned step = (timing.TimestepNumber() / trigger_.DelayInSyncs()) % sequence_.size();
-    sequence_[step].GetControllable()->MixInput(sequence_[step].InputIndex(), input_value_,
-                                                connection_values_[step][primary]);
+    sequence_[step].GetControllable()->MixInput(sequence_[step].InputIndex(), input_value_[primary],
+                                                connection_values_[step][primary], primary);
   }
 
   void MixDelayChase(const Timing &timing, bool primary) {
-    double timeInMs = timing.TimeInMS() + phase_offset_;
-    double totalDuration = trigger_.DelayInMs() + transition_.LengthInMs();
-    double phase = std::fmod(timeInMs, totalDuration);
-    unsigned step = (unsigned)std::fmod(timeInMs / totalDuration, sequence_.size());
-    if (phase < trigger_.DelayInMs()) {
+    const double timeInMs = timing.TimeInMS() + phase_offset_;
+    const double totalDuration = trigger_.DelayInMs() + transition_.LengthInMs();
+    const double phase = std::fmod(timeInMs, totalDuration);
+    const size_t step = (unsigned)std::fmod(timeInMs / totalDuration, sequence_.size());
+    if (phase < trigger_.DelayInMs() || sequence_.size() == 1) {
       // We are not in a transition, just mix the corresponding controllable
-      sequence_[step].GetControllable()->MixInput(sequence_[step].InputIndex(), input_value_,
-                                                  connection_values_[step][primary]);
+      Input &active = sequence_[step];
+      active.GetControllable()->MixInput(active.InputIndex(), input_value_[primary],
+                                         connection_values_[step][primary], primary);
+      connection_values_[step][primary] = input_value_[primary];
+
+      MixInputsIf(sequence_, 0, connection_values_, primary,
+                  [step](size_t i) { return i != step; });
     } else {
       // We are in a transition
       const double transition_time = phase - trigger_.DelayInMs();
-      Connection first = {.to_controllable = sequence_[step].GetControllable(),
-                          .to_input_index = sequence_[step].InputIndex(),
-                          .values = connection_values_[step]};
       const size_t next_step = (step + 1) % sequence_.size();
-      Connection second = {.to_controllable = sequence_[next_step].GetControllable(),
-                           .to_input_index = sequence_[next_step].InputIndex(),
-                           .values = connection_values_[next_step]};
-      transition_.Mix(first, second, transition_time, input_value_, timing, primary);
+      const auto [first, second] = transition_.Mix(transition_time, input_value_[primary], timing);
+      Input &a = sequence_[step];
+      Input &b = sequence_[next_step];
+      a.GetControllable()->MixInput(a.InputIndex(), first, connection_values_[step][primary],
+                                    primary);
+      b.GetControllable()->MixInput(b.InputIndex(), second, connection_values_[next_step][primary],
+                                    primary);
+
+      // Set the other values to zero (necessary for LTP mode).
+      MixInputsIf(sequence_, 0, connection_values_, primary,
+                  [=](size_t i) { return i != step && i != next_step; });
     }
   }
 
-  ControlValue input_value_;
+  ControlValue input_value_[2];
   std::vector<Input> sequence_;
   Trigger trigger_;
   Transition transition_;

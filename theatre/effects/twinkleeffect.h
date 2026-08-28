@@ -27,12 +27,13 @@ class TwinkleEffect final : public Effect {
   const Transition& GetTransitionOut() const { return transition_out_; }
 
  protected:
-  void MixImplementation(const ControlValue* values, const Timing& timing, bool primary) override {
-    if (values[0]) {
+  void MixImplementation(const std::array<ControlValue, 2>* values, const Timing& timing,
+                         bool primary) override {
+    if (values[0][primary]) {
       if (previous_time_[primary] == -1.0) previous_time_[primary] = timing.TimeInMS();
       inputs_[primary].resize(NConnections());
       for (size_t i = 0; i != NConnections(); ++i) {
-        MixInput(i, inputs_[primary][i], values[0], timing, primary);
+        MixInput(i, inputs_[primary][i], values[0][primary], timing, primary);
       }
     }
     previous_time_[primary] = timing.TimeInMS();

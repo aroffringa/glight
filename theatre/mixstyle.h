@@ -74,14 +74,13 @@ inline constexpr MixStyle GetMixStyle(FunctionType function_type) {
     case FunctionType::Tilt:
     case FunctionType::Zoom:
     case FunctionType::Unknown:
-    case FunctionType::Hue:
-      return MixStyle::LastTakesPrecedence;
-    // Effects:
+    // Effects
     case FunctionType::Effect:
+    case FunctionType::Hue:
     case FunctionType::Pulse:
     case FunctionType::RotationSpeed:
     case FunctionType::Strobe:
-      return MixStyle::HighestValue;
+      return MixStyle::LastTakesPrecedence;
     // Colors:
     case FunctionType::Red:
     case FunctionType::Green:

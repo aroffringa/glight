@@ -212,12 +212,14 @@ class Transition {
   ControlValue OutValue(double transition_time, const Timing &timing) const;
 
   /**
-   * Mix two controllables that are transitioning.
+   * Get values for two controllables that are transitioning, with a 'master' value that controls
+   * the full output. This return the combination of @ref InValue() and @ref OutValue() scaled by
+   * the value. By combining this, the function is often faster than separating the calls.
    * @param transition_time value between 0 and _lengthInMS.
    * @param timing used for randomness, etc.
    */
-  void Mix(Connection &first, Connection &second, double transition_time, ControlValue value,
-           const Timing &timing, bool primary) const;
+  std::array<ControlValue, 2> Mix(double transition_time, ControlValue value,
+                                  const Timing &timing) const;
 
  private:
   double length_in_ms_ = 250.0;
