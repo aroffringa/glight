@@ -140,6 +140,7 @@ class TrackablePtr {
     object_ = object;
   }
   void Reset(std::unique_ptr<T> object_ptr) noexcept {
+    assert(object_ptr.get() != object_);
     Reset();
     object_ = object_ptr.release();
   }
@@ -379,54 +380,54 @@ class ObservingPtr {
     return result;
   }
 
-  constexpr bool operator==(const ObservingPtr& rhs) const { return Get() == rhs.Get(); }
-  constexpr bool operator!=(const ObservingPtr& rhs) const { return Get() != rhs.Get(); }
-  constexpr bool operator<(const ObservingPtr& rhs) const {
+  constexpr bool operator==(const ObservingPtr& rhs) const noexcept { return Get() == rhs.Get(); }
+  constexpr bool operator!=(const ObservingPtr& rhs) const noexcept { return Get() != rhs.Get(); }
+  constexpr bool operator<(const ObservingPtr& rhs) const noexcept {
     return std::less<T*>()(Get(), rhs.Get());
   }
-  constexpr bool operator>(const ObservingPtr& rhs) const {
+  constexpr bool operator>(const ObservingPtr& rhs) const noexcept {
     return std::greater<T*>()(Get(), rhs.Get());
   }
-  constexpr bool operator<=(const ObservingPtr& rhs) const {
+  constexpr bool operator<=(const ObservingPtr& rhs) const noexcept {
     return std::less_equal<T*>()(Get(), rhs.Get());
   }
-  constexpr bool operator>=(const ObservingPtr& rhs) const {
-    return std::greater_equal()(Get(), rhs.Get());
+  constexpr bool operator>=(const ObservingPtr& rhs) const noexcept {
+    return std::greater_equal<T*>()(Get(), rhs.Get());
   }
-  constexpr friend bool operator==(const ObservingPtr& lhs, const T* rhs) {
+  constexpr friend bool operator==(const ObservingPtr& lhs, const T* rhs) noexcept {
     return lhs.Get() == rhs;
   }
-  constexpr friend bool operator==(const T* lhs, const ObservingPtr& rhs) {
+  constexpr friend bool operator==(const T* lhs, const ObservingPtr& rhs) noexcept {
     return lhs == rhs.Get();
   }
-  constexpr friend bool operator!=(const ObservingPtr& lhs, const T* rhs) {
+  constexpr friend bool operator!=(const ObservingPtr& lhs, const T* rhs) noexcept {
     return lhs.Get() != rhs;
   }
-  constexpr friend bool operator!=(const T* lhs, const ObservingPtr& rhs) {
+  constexpr friend bool operator!=(const T* lhs, const ObservingPtr& rhs) noexcept {
     return lhs != rhs.Get();
   }
-  constexpr friend bool operator<(const ObservingPtr& lhs, const T* rhs) {
+  constexpr friend bool operator<(const ObservingPtr& lhs, const T* rhs) noexcept {
     return std::less<const T*>()(lhs.Get(), rhs);
   }
-  constexpr friend bool operator<(const T* lhs, const ObservingPtr& rhs) {
+  constexpr friend bool operator<(const T* lhs, const ObservingPtr& rhs) noexcept {
     return std::less<const T*>()(lhs, rhs.Get());
   }
-  constexpr friend bool operator>(const ObservingPtr& lhs, const T* rhs) {
+  constexpr friend bool operator>(const ObservingPtr& lhs, const T* rhs) noexcept {
     return std::greater<const T*>()(lhs.Get(), rhs);
   }
-  constexpr friend bool operator>(const T* lhs, const ObservingPtr& rhs) {
+  constexpr friend bool operator>(const T* lhs, const ObservingPtr& rhs) noexcept {
     return std::greater<const T*>()(lhs, rhs.Get());
   }
-  constexpr friend bool operator<=(const ObservingPtr& lhs, const T* rhs) {
+  constexpr friend bool operator<=(const ObservingPtr& lhs, const T* rhs) noexcept {
     return std::less_equal<const T*>()(lhs.Get(), rhs);
   }
-  constexpr friend bool operator<=(const T* lhs, const ObservingPtr& rhs) {
+  constexpr friend bool operator<=(const T* lhs, const ObservingPtr& rhs) noexcept {
     return std::less_equal<const T*>()(lhs, rhs.Get());
   }
-  constexpr friend bool operator>=(const ObservingPtr& lhs, const T* rhs) {
+  constexpr friend bool operator>=(const ObservingPtr& lhs, const T* rhs) noexcept {
     return std::greater_equal<const T*>()(lhs.Get(), rhs);
   }
-  constexpr friend bool operator>=(const T* lhs, const ObservingPtr& rhs) {
+  constexpr friend bool operator>=(const T* lhs, const ObservingPtr& rhs) noexcept {
     return std::greater_equal<const T*>()(lhs, rhs.Get());
   }
   constexpr T* Get() const noexcept { return data_ && data_->is_alive ? object_ : nullptr; }
@@ -469,7 +470,7 @@ requires(std::is_same_v<ObservingType, T> || std::is_convertible_v<T*, Observing
   } else {
     data_->reference_count++;
   }
-  return ObservingPtr<ObservingType>(data_, object_);
+  return ObservingPtr<ObservingType>(data_, static_cast<ObservingType*>(object_));
 }
 
 template <typename T, typename... Args>
