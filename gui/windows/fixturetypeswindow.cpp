@@ -187,14 +187,15 @@ void FixtureTypesWindow::OnAddModeButtonClicked() {
 void FixtureTypesWindow::onRemoveClicked() {
   const SelectionData selected = GetSelected();
   if (selected.mode) {
-    {
-      theatre::Management &management = Instance::Management();
-      std::lock_guard<std::mutex> lock(management.Mutex());
+    theatre::Management &management = Instance::Management();
+    std::unique_lock<std::mutex> lock(management.Mutex());
+    if (!management.GetTheatre().IsUsed(*selected.type)) {
       const size_t index = selected.type->ModeIndex(*selected.mode);
       selected.type->Modes().erase(selected.type->Modes().begin() + index);
+      lock.unlock();
+      Instance::Events().EmitUpdate();
+      Select(*selected.type, true);
     }
-    Instance::Events().EmitUpdate();
-    Select(*selected.type);
   } else if (selected.type) {
     {
       theatre::Management &management = Instance::Management();
@@ -229,7 +230,7 @@ void FixtureTypesWindow::onSaveClicked() {
       ObservingPtr<FixtureType> new_type = Instance::Management()
                                                .GetTheatre()
                                                .AddFixtureType(system::MakeTrackable<FixtureType>())
-                                               .GetObserver<FixtureType>();
+                                               .GetObserver();
       type = new_type.Get();
       Instance::Management().RootFolder().Add(std::move(new_type));
     } else {
@@ -260,26 +261,32 @@ void FixtureTypesWindow::onSaveClicked() {
     const unsigned idle_power = std::max(0LL, std::atoll(idle_power_entry_.get_text().c_str()));
     type->SetIdlePower(idle_power);
     type->SetFixtureClass(theatre::GetFixtureClass(class_combo_.get_active_text().data()));
+
     Instance::Events().EmitUpdate();
-    Select(*type);
+    Select(*type, true);
   }
 }
 
 void FixtureTypesWindow::Select(const FixtureMode &selection) {
   Gtk::TreeModel::Children children = tree_model_->children();
-  for (Gtk::TreeRow row : children) {
-    if (row[list_columns_.fixture_mode_] == &selection) {
-      tree_view_.get_selection()->select(row.get_iter());
-      break;
+  for (const Gtk::TreeRow &parent : children) {
+    for (const Gtk::TreeConstRow &row : parent.children()) {
+      if (row[list_columns_.fixture_mode_] == &selection) {
+        tree_view_.expand_row(tree_model_->get_path(parent.get_iter()), true);
+        tree_view_.get_selection()->select(row.get_iter());
+        break;
+      }
     }
   }
 }
 
-void FixtureTypesWindow::Select(const FixtureType &selection) {
+void FixtureTypesWindow::Select(const FixtureType &selection, bool expand) {
   Gtk::TreeModel::Children children = tree_model_->children();
-  for (Gtk::TreeRow row : children) {
+  for (const Gtk::TreeRow &row : children) {
     if (row[list_columns_.fixture_type_] == &selection) {
-      tree_view_.get_selection()->select(row.get_iter());
+      Gtk::TreeIter<Gtk::TreeConstRow> iter = row.get_iter();
+      tree_view_.get_selection()->select(iter);
+      if (expand) tree_view_.expand_row(tree_model_->get_path(iter), true);
       break;
     }
   }
@@ -322,14 +329,15 @@ void FixtureTypesWindow::onSelectionChanged() {
     RecursionLock::Token token(recursion_lock_);
     const SelectionData selection = GetSelected();
     const bool has_selection = selection.has_selection;
-    remove_button_.set_sensitive(has_selection && !layout_locked_);
     save_button_.set_sensitive(has_selection && !layout_locked_);
     right_grid_.set_sensitive(has_selection && !layout_locked_);
     if (FixtureMode *mode = selection.mode; mode) {
       ShowTypeWidgets(false);
-      const bool is_used = Instance::Management().GetTheatre().IsUsed(*mode);
+      const bool is_used = Instance::Management().GetTheatre().IsUsed(*selection.mode);
       functions_frame_.set_sensitive(!is_used && !layout_locked_);
       functions_frame_.SetData(mode->Name(), mode->Functions());
+      const bool type_is_used = Instance::Management().GetTheatre().IsUsed(*selection.type);
+      remove_button_.set_sensitive(!type_is_used && !layout_locked_);
     } else if (FixtureType *type = selection.type; type) {
       ShowTypeWidgets(true);
       SelectFixtures(*type);
@@ -352,6 +360,8 @@ void FixtureTypesWindow::onSelectionChanged() {
 
       max_power_entry_.set_text(std::to_string(type->MaxPower()));
       idle_power_entry_.set_text(std::to_string(type->IdlePower()));
+
+      remove_button_.set_sensitive(!layout_locked_);
     } else {
       ShowTypeWidgets(true);
       name_entry_.set_text("");
@@ -368,6 +378,7 @@ void FixtureTypesWindow::onSelectionChanged() {
       max_power_entry_.set_text("0");
       idle_power_entry_.set_text("0");
       functions_frame_.SetData("", {});
+      remove_button_.set_sensitive(false);
     }
   }
 }
