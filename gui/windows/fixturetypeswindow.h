@@ -55,7 +55,7 @@ class FixtureTypesWindow : public ChildWindow {
   };
   SelectionData GetSelected() const;
   void Select(const theatre::FixtureMode &selection);
-  void Select(const theatre::FixtureType &selection);
+  void Select(const theatre::FixtureType &selection, bool expand);
   void SelectFixtures(const theatre::FixtureMode &mode);
   void SelectFixtures(const theatre::FixtureType &type);
   void ShowTypeWidgets(bool visible);
