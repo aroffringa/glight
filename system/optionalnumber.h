@@ -33,7 +33,7 @@ namespace glight::system {
  * than a set optional (independent of the magic value that is used).
  */
 template <typename NumberType>
-class OptionalNumber {
+requires(std::is_arithmetic_v<NumberType>) class OptionalNumber {
  public:
   static NumberType constexpr UnsetValue = std::is_signed_v<NumberType>
                                                ? std::numeric_limits<NumberType>::lowest()
@@ -92,23 +92,37 @@ class OptionalNumber {
   constexpr bool HasValue() const noexcept { return number_ != UnsetValue; }
   constexpr explicit operator bool() const noexcept { return number_ != UnsetValue; }
 
-  constexpr NumberType Value() const noexcept { return number_; }
+  constexpr NumberType Value() const noexcept {
+    assert(HasValue());
+    return number_;
+  }
   constexpr NumberType ValueOr(NumberType otherwise) const noexcept {
     return number_ == UnsetValue ? otherwise : number_;
   }
 
   template <typename T>
   constexpr bool operator==(const OptionalNumber<T>& rhs) const noexcept {
-    return number_ == rhs.number_;
+    if constexpr (std::is_same_v<T, NumberType>)
+      return number_ == rhs.number_;
+    else {
+      if (!HasValue() && !rhs.HasValue()) return true;
+      if (!HasValue() || !rhs.HasValue()) return false;
+      return Value() == rhs.Value();
+    }
   }
 
   template <typename T>
   constexpr bool operator!=(const OptionalNumber<T>& rhs) const noexcept {
-    return number_ != rhs.number_;
+    if constexpr (std::is_same_v<T, NumberType>)
+      return number_ != rhs.number_;
+    else {
+      if (HasValue() != rhs.HasValue()) return true;
+      if (!HasValue() && !rhs.HasValue()) return false;
+      return Value() != rhs.Value();
+    }
   }
 
-  template <typename T>
-  constexpr bool operator<(const OptionalNumber<T>& rhs) const noexcept {
+  constexpr bool operator<(const OptionalNumber& rhs) const noexcept {
     // When the number is signed, the value for Unset is the lowest possible
     // value, and thus we can directly compare the numbers. Otherwise, a bit
     // more work is required to guarantee correct ordering.
@@ -118,23 +132,16 @@ class OptionalNumber {
       return rhs.HasValue() && (!HasValue() || number_ < rhs.number_);
   }
 
-  template <typename T>
-  constexpr bool operator>=(const OptionalNumber<T>& rhs) const noexcept {
-    return !(*this < rhs);
-  }
+  constexpr bool operator>=(const OptionalNumber& rhs) const noexcept { return !(*this < rhs); }
 
-  template <typename T>
-  constexpr bool operator<=(const OptionalNumber<T>& rhs) const noexcept {
+  constexpr bool operator<=(const OptionalNumber& rhs) const noexcept {
     if constexpr (std::is_signed_v<NumberType>)
       return number_ <= rhs.number_;
     else
       return *this == rhs || *this < rhs;
   }
 
-  template <typename T>
-  constexpr bool operator>(const OptionalNumber<T>& rhs) const noexcept {
-    return !(*this <= rhs);
-  }
+  constexpr bool operator>(const OptionalNumber& rhs) const noexcept { return !(*this <= rhs); }
 
   constexpr bool operator==(NumberType rhs) const noexcept { return number_ == rhs; }
 

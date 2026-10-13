@@ -118,4 +118,15 @@ static_assert(OptionalNumber<std::int16_t>::UnsetValue == -32768);
 static_assert(OptionalNumber<float>::UnsetValue == std::numeric_limits<float>::lowest());
 static_assert(OptionalNumber<double>::UnsetValue == std::numeric_limits<double>::lowest());
 
+static_assert(OptionalNumber<int>() == OptionalNumber<unsigned short>());
+static_assert(OptionalNumber<int>(3) == OptionalNumber<unsigned short>(3));
+static_assert(!(OptionalNumber<int>() == OptionalNumber<unsigned short>(0)));
+static_assert(!(OptionalNumber<int>(0) == OptionalNumber<unsigned short>()));
+
+static_assert(OptionalNumber<int>() != OptionalNumber<unsigned short>(3));
+static_assert(OptionalNumber<int>(3) != OptionalNumber<unsigned short>());
+static_assert(OptionalNumber<int>(0) != OptionalNumber<unsigned short>(3));
+static_assert(!(OptionalNumber<int>() != OptionalNumber<unsigned short>()));
+static_assert(!(OptionalNumber<int>(3) != OptionalNumber<unsigned short>(3)));
+
 }  // namespace
