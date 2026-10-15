@@ -16,6 +16,22 @@ class Test {
   static_assert(OptionalNumber<T>(0).HasValue());
   static_assert(OptionalNumber<T>(T(13)).Value() == T(13));
 
+  using GetOptFive = decltype([](T) noexcept { return OptionalNumber<T>(T(5)); });
+
+  static_assert(!OptionalNumber<T>().AndThen(GetOptFive()).HasValue());
+  static_assert(OptionalNumber<T>(T(3)).AndThen(GetOptFive()) == OptionalNumber<T>(T(5)));
+  static_assert(noexcept(OptionalNumber<T>().AndThen(GetOptFive())));
+
+  static_assert(OptionalNumber<T>().OrElse(GetOptFive()) == OptionalNumber<T>(T(5)));
+  static_assert(OptionalNumber<T>(T(3)).OrElse(GetOptFive()) == OptionalNumber<T>(T(3)));
+  static_assert(noexcept(OptionalNumber<T>().OrElse(GetOptFive())));
+
+  using GetFive = decltype([](T) { return T(5); });
+
+  static_assert(!OptionalNumber<T>().Transform(GetFive()).HasValue());
+  static_assert(OptionalNumber<T>(T(3)).Transform(GetFive()) == OptionalNumber<T>(T(5)));
+  static_assert(noexcept(OptionalNumber<T>().Transform(GetOptFive())));
+
   static constexpr OptionalNumber<T> GetAssigned() {
     OptionalNumber<T> number;
     return number = T(0.0);
