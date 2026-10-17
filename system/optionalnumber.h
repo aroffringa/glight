@@ -33,9 +33,9 @@ namespace glight::system {
  * than a set optional (independent of the magic value that is used).
  */
 template <typename NumberType>
-class OptionalNumber {
+requires(std::is_arithmetic_v<NumberType>) class OptionalNumber {
  public:
-  static NumberType constexpr UnsetValue = std::is_signed_v<NumberType>
+  static constexpr NumberType UnsetValue = std::is_signed_v<NumberType>
                                                ? std::numeric_limits<NumberType>::lowest()
                                                : std::numeric_limits<NumberType>::max();
 
@@ -46,14 +46,17 @@ class OptionalNumber {
   template <class T = NumberType>
   requires(!std::is_same_v<T, OptionalNumber<T>>) constexpr explicit OptionalNumber(
       T number) noexcept
-      : number_(number) {}
+      : number_(number) {
+    assert(static_cast<NumberType>(number) != UnsetValue);
+  }
 
   constexpr OptionalNumber(const OptionalNumber<NumberType>& source) noexcept = default;
 
   constexpr OptionalNumber(OptionalNumber<NumberType>&& source) noexcept = default;
 
   template <typename T>
-  constexpr explicit OptionalNumber(const std::optional<T>& source) noexcept
+  requires std::convertible_to<T, NumberType> constexpr explicit OptionalNumber(
+      const std::optional<T>& source) noexcept
       : number_(source ? *source : UnsetValue) {}
 
   constexpr OptionalNumber<NumberType>& operator=(std::nullopt_t) noexcept {
@@ -62,8 +65,10 @@ class OptionalNumber {
   }
 
   template <class T>
-  constexpr OptionalNumber<NumberType>& operator=(T number) noexcept {
-    number_ = number;
+  requires std::convertible_to<T, NumberType> constexpr OptionalNumber<NumberType>& operator=(
+      T number) noexcept {
+    assert(static_cast<NumberType>(number) != UnsetValue);
+    number_ = static_cast<T>(number);
     return *this;
   }
 
@@ -92,23 +97,55 @@ class OptionalNumber {
   constexpr bool HasValue() const noexcept { return number_ != UnsetValue; }
   constexpr explicit operator bool() const noexcept { return number_ != UnsetValue; }
 
-  constexpr NumberType Value() const noexcept { return number_; }
+  constexpr NumberType Value() const noexcept {
+    assert(HasValue());
+    return number_;
+  }
   constexpr NumberType ValueOr(NumberType otherwise) const noexcept {
     return number_ == UnsetValue ? otherwise : number_;
   }
 
+  template <typename F>
+  constexpr OptionalNumber<NumberType> AndThen(F&& f) const
+      noexcept(noexcept(std::forward<F>(f)(number_))) {
+    return HasValue() ? std::forward<F>(f)(number_) : OptionalNumber<NumberType>();
+  }
+
+  template <typename F>
+  constexpr OptionalNumber<NumberType> Transform(F&& f) const
+      noexcept(noexcept(std::forward<F>(f)(number_))) {
+    return HasValue() ? OptionalNumber<NumberType>(std::forward<F>(f)(number_))
+                      : OptionalNumber<NumberType>();
+  }
+
+  template <typename F>
+  constexpr OptionalNumber<NumberType> OrElse(F&& f) const
+      noexcept(noexcept(std::forward<F>(f)(number_))) {
+    return HasValue() ? *this : std::forward<F>(f)(number_);
+  }
+
   template <typename T>
   constexpr bool operator==(const OptionalNumber<T>& rhs) const noexcept {
-    return number_ == rhs.number_;
+    if constexpr (std::is_same_v<T, NumberType>)
+      return number_ == rhs.number_;
+    else {
+      if (!HasValue() && !rhs.HasValue()) return true;
+      if (!HasValue() || !rhs.HasValue()) return false;
+      return Value() == rhs.Value();
+    }
   }
 
   template <typename T>
   constexpr bool operator!=(const OptionalNumber<T>& rhs) const noexcept {
-    return number_ != rhs.number_;
+    if constexpr (std::is_same_v<T, NumberType>)
+      return number_ != rhs.number_;
+    else {
+      if (HasValue() != rhs.HasValue()) return true;
+      return HasValue() && Value() != rhs.Value();
+    }
   }
 
-  template <typename T>
-  constexpr bool operator<(const OptionalNumber<T>& rhs) const noexcept {
+  constexpr bool operator<(const OptionalNumber& rhs) const noexcept {
     // When the number is signed, the value for Unset is the lowest possible
     // value, and thus we can directly compare the numbers. Otherwise, a bit
     // more work is required to guarantee correct ordering.
@@ -118,59 +155,80 @@ class OptionalNumber {
       return rhs.HasValue() && (!HasValue() || number_ < rhs.number_);
   }
 
-  template <typename T>
-  constexpr bool operator>=(const OptionalNumber<T>& rhs) const noexcept {
-    return !(*this < rhs);
-  }
+  constexpr bool operator>=(const OptionalNumber& rhs) const noexcept { return !(*this < rhs); }
 
-  template <typename T>
-  constexpr bool operator<=(const OptionalNumber<T>& rhs) const noexcept {
+  constexpr bool operator<=(const OptionalNumber& rhs) const noexcept {
     if constexpr (std::is_signed_v<NumberType>)
       return number_ <= rhs.number_;
     else
       return *this == rhs || *this < rhs;
   }
 
-  template <typename T>
-  constexpr bool operator>(const OptionalNumber<T>& rhs) const noexcept {
-    return !(*this <= rhs);
+  constexpr bool operator>(const OptionalNumber& rhs) const noexcept { return !(*this <= rhs); }
+
+  constexpr friend bool operator==(const OptionalNumber<NumberType>& lhs, NumberType rhs) noexcept {
+    return lhs.number_ == rhs;
+  }
+  constexpr friend bool operator==(NumberType lhs, const OptionalNumber<NumberType>& rhs) noexcept {
+    return rhs.number_ == lhs;
   }
 
-  constexpr bool operator==(NumberType rhs) const noexcept { return number_ == rhs; }
-
-  constexpr bool operator!=(NumberType rhs) const noexcept { return number_ != rhs; }
-
-  constexpr bool operator<(NumberType rhs) const noexcept {
-    if constexpr (std::is_signed_v<NumberType>)
-      return number_ < rhs;
-    else
-      return !HasValue() || number_ < rhs;
+  constexpr friend bool operator!=(const OptionalNumber<NumberType>& lhs, NumberType rhs) noexcept {
+    return lhs.number_ != rhs;
+  }
+  constexpr friend bool operator!=(NumberType rhs, const OptionalNumber<NumberType>& lhs) noexcept {
+    return rhs.number_ != lhs;
   }
 
-  constexpr bool operator>=(NumberType rhs) const noexcept {
+  constexpr friend bool operator<(const OptionalNumber<NumberType>& lhs, NumberType rhs) noexcept {
     if constexpr (std::is_signed_v<NumberType>)
-      return number_ >= rhs;
+      return lhs.number_ < rhs;
     else
-      return HasValue() && number_ >= rhs;
+      return !lhs.HasValue() || lhs.number_ < rhs;
+  }
+  constexpr friend bool operator<(NumberType lhs, const OptionalNumber<NumberType>& rhs) noexcept {
+    return rhs > lhs;
   }
 
-  constexpr bool operator<=(NumberType rhs) const noexcept {
+  constexpr friend bool operator>=(const OptionalNumber<NumberType>& lhs, NumberType rhs) noexcept {
     if constexpr (std::is_signed_v<NumberType>)
-      return number_ <= rhs;
+      return lhs.number_ >= rhs;
     else
-      return !HasValue() || number_ <= rhs;
+      return lhs.HasValue() && lhs.number_ >= rhs;
+  }
+  constexpr friend bool operator>=(NumberType lhs, const OptionalNumber<NumberType>& rhs) noexcept {
+    return rhs <= lhs;
   }
 
-  constexpr bool operator>(NumberType rhs) const noexcept {
+  constexpr friend bool operator<=(const OptionalNumber<NumberType>& lhs, NumberType rhs) noexcept {
     if constexpr (std::is_signed_v<NumberType>)
-      return number_ > rhs;
+      return lhs.number_ <= rhs;
     else
-      return HasValue() && number_ > rhs;
+      return !lhs.HasValue() || lhs.number_ <= rhs;
+  }
+  constexpr friend bool operator<=(NumberType rhs, const OptionalNumber<NumberType>& lhs) noexcept {
+    return rhs >= lhs;
+  }
+
+  constexpr friend bool operator>(const OptionalNumber<NumberType>& lhs, NumberType rhs) noexcept {
+    if constexpr (std::is_signed_v<NumberType>)
+      return lhs.number_ > rhs;
+    else
+      return lhs.HasValue() && lhs.number_ > rhs;
+  }
+  constexpr friend bool operator>(NumberType lhs, const OptionalNumber<NumberType>& rhs) noexcept {
+    return rhs < lhs;
   }
 
   constexpr void Reset() noexcept { number_ = UnsetValue; }
 
-  constexpr void Swap(OptionalNumber<NumberType>& other) {
+  template <typename T = NumberType>
+  requires std::convertible_to<T, NumberType> constexpr void Emplace(T value) noexcept {
+    assert(static_cast<NumberType>(value) != UnsetValue);
+    number_ = static_cast<NumberType>(value);
+  }
+
+  constexpr void Swap(OptionalNumber<NumberType>& other) noexcept {
     // To let OptionalNumber also work with types that may implement their own
     // swap function, we bring std::swap in but don't call swap explicitly from
     // the std namespace.
