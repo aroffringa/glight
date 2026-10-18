@@ -87,6 +87,7 @@ class FaderWindow : public Gtk::Window {
     fade_out_action_->get_state(state);
     return state;
   }
+  void RemoveControl(size_t index);
 
   void initializeWidgets();
   void initializeMenu();
@@ -99,9 +100,9 @@ class FaderWindow : public Gtk::Window {
   void onAddColorButtonClicked();
   void onAddComboButtonClicked();
   void onAddMoverButtonClicked();
-  void removeFader();
+  void RemoveLastFaderWithState();
   void onRemoveFaderClicked() {
-    if (!_upperControls.empty()) removeFader();
+    if (!_upperControls.empty()) RemoveLastFaderWithState();
   }
   void onRemove5FadersClicked() {
     for (size_t i = 0; i != 5; ++i) onRemoveFaderClicked();
@@ -156,10 +157,17 @@ class FaderWindow : public Gtk::Window {
   Gtk::Box _leftBox{Gtk::Orientation::VERTICAL};
   Gtk::Grid _controlGrid;
 
-  std::vector<std::unique_ptr<ControlWidget>> _upperControls;
-  std::vector<std::unique_ptr<ControlWidget>> _lowerControls;
-  std::vector<Gtk::Box> _upperColumns;
-  std::vector<Gtk::Box> _lowerColumns;
+  struct ControlInfo {
+    std::unique_ptr<ControlWidget> control;
+    Gtk::Box *column;
+  };
+
+  std::vector<ControlInfo> _upperControls;
+  std::vector<ControlInfo> _lowerControls;
+  // These need to be pointers, because other classes point to the elements, and updating
+  // the vector should not change their address.
+  std::vector<std::unique_ptr<Gtk::Box>> _upperColumns;
+  std::vector<std::unique_ptr<Gtk::Box>> _lowerColumns;
   uistate::FaderSetState *_state = nullptr;
   RecursionLock _recursionLock;
   sigc::connection _timeoutConnection;

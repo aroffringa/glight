@@ -11,16 +11,18 @@ inline std::shared_ptr<Gio::SimpleAction> AddMenuItem(Gio::ActionMap& actions,
                                                       const std::shared_ptr<Gio::Menu>& menu,
                                                       const Glib::ustring& label,
                                                       const Glib::ustring& action_name,
-                                                      const sigc::slot<void()>& slot) {
-  menu->append(label, "win." + action_name);
+                                                      const sigc::slot<void()>& slot,
+                                                      const Glib::ustring& prefix = "win.") {
+  menu->append(label, prefix + action_name);
   return actions.add_action(action_name, slot);
 };
 
 inline std::shared_ptr<Gio::SimpleAction> AddToggleMenuItem(
     Gio::ActionMap& actions, const std::shared_ptr<Gio::Menu>& menu, const Glib::ustring& label,
-    const Glib::ustring& action_name, bool initial_value, const sigc::slot<void(bool)>& slot) {
+    const Glib::ustring& action_name, bool initial_value, const sigc::slot<void(bool)>& slot,
+    const Glib::ustring& prefix = "win.") {
   auto action_toggle = Gio::SimpleAction::create_bool(action_name, initial_value);
-  menu->append(label, "win." + action_name);
+  menu->append(label, prefix + action_name);
   action_toggle->signal_activate().connect([slot, action_toggle](const Glib::VariantBase&) {
     bool active = false;
     action_toggle->get_state(active);
