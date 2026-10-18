@@ -131,6 +131,8 @@ class ControlWidget : public Gtk::Box {
 
   uistate::FaderState &State() const { return _state; }
 
+  void OpenMenu(double x, double y);
+
  private:
   void OnTheatreUpdate();
   void OnStateChange();

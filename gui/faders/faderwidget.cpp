@@ -4,6 +4,7 @@
 #include "faderwindow.h"
 
 #include <gtkmm/adjustment.h>
+#include <gtkmm/cssprovider.h>
 #include <gtkmm/eventcontrollermotion.h>
 #include <gtkmm/gestureclick.h>
 
@@ -77,10 +78,38 @@ FaderWidget::FaderWidget(FaderWindow &fader_window, uistate::FaderState &state, 
   append(_checkButton);
   _checkButton.set_visible(state.DisplayCheckButton());
 
+  auto css_provider = Gtk::CssProvider::create();
+  const std::string css_data =
+      ".animated-label {"
+      "  color: #333333;"
+      "  transition: color 300ms ease, font-size 300ms ease;"
+      "}"
+      ".animated-label.hovered {"
+      "  background-color: #ffffff;"
+      "  color: #007acc;"
+      "}";
+
+  css_provider->load_from_string(css_data);
+  Gtk::StyleContext::add_provider_for_display(Gdk::Display::get_default(), css_provider,
+                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
   auto label_gesture = Gtk::GestureClick::create();
   label_gesture->set_button(1);
-  label_gesture->signal_pressed().connect([&](int, double, double) { ShowAssignDialog(); });
+  label_gesture->signal_pressed().connect([&](int, double x, double y) {
+    const Gdk::Graphene::Point src_point(x, y);
+    const std::optional<Gdk::Graphene::Point> dest_point =
+        _nameLabel.compute_point(fader_window, src_point);
+    if (dest_point) {
+      OpenMenu(dest_point->get_x(), dest_point->get_y());
+    }
+  });
   _nameLabel.add_controller(label_gesture);
+  auto label_motion = Gtk::EventControllerMotion::create();
+  label_motion->signal_enter().connect(
+      [&](double, double) { _nameLabel.add_css_class("hovered"); });
+  label_motion->signal_leave().connect([&]() { _nameLabel.remove_css_class("hovered"); });
+  _nameLabel.add_controller(label_motion);
+  _nameLabel.add_css_class("animated-label");
   _nameLabel.set_visible(state.DisplayName());
 
   update_display_settings_connection_ =
@@ -148,7 +177,7 @@ void FaderWidget::OnAssigned(bool moveFader) {
     const std::vector<theatre::Color> colors = controllable->InputColors(source->InputIndex());
     _checkButton.SetColors(UniqueWithoutOrdering(colors));
   } else {
-    _nameLabel.set_text("<..>");
+    _nameLabel.set_text(kDefaultName);
     _checkButton.SetColors({});
     _fadeUpButton.set_visible(false);
     _fadeDownButton.set_visible(false);
