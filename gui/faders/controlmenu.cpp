@@ -10,8 +10,8 @@ ControlMenu::ControlMenu(const uistate::FaderState& state)
   auto menu = Gio::Menu::create();
   assign_section_ = Gio::Menu::create();
 
-  Add(assign_section_, "Assign...", "assign", signal_assign_);
-  Add(assign_section_, "Unassign", "unassign", signal_unassign_);
+  Add(assign_section_, "Assign...", "assign_fader", signal_assign_);
+  Add(assign_section_, "Unassign", "unassign_fader", signal_unassign_);
 
   menu->append_section(assign_section_);
 
@@ -34,7 +34,7 @@ std::shared_ptr<Gio::SimpleAction> ControlMenu::Add(std::shared_ptr<Gio::Menu>& 
                                                     const Glib::ustring& label,
                                                     const Glib::ustring& action_name,
                                                     const sigc::slot<void()>& slot) {
-  return AddMenuItem(*actions_, menu, label, action_name, slot);
+  return AddMenuItem(*actions_, menu, label, action_name, slot, "control.");
 };
 
 std::shared_ptr<Gio::SimpleAction> ControlMenu::Toggle(std::shared_ptr<Gio::Menu>& menu,
@@ -42,7 +42,7 @@ std::shared_ptr<Gio::SimpleAction> ControlMenu::Toggle(std::shared_ptr<Gio::Menu
                                                        const Glib::ustring& action_name,
                                                        bool initial_value,
                                                        const sigc::slot<void(bool)>& slot) {
-  return AddToggleMenuItem(*actions_, menu, label, action_name, initial_value, slot);
+  return AddToggleMenuItem(*actions_, menu, label, action_name, initial_value, slot, "control.");
 };
 
 }  // namespace glight::gui

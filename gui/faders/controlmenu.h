@@ -41,9 +41,9 @@ class ControlMenu : public Gtk::PopoverMenu {
   sigc::signal<void(bool)>& SignalToggleFadeButtons() { return signal_toggle_fade_buttons_; }
 
   template <typename Function>
-  void AddExtraItem(const std::string& label, Function function) {
-    assign_section_->append("Assign...", "assign");
-    actions_->add_action("assign", function);
+  void AddExtraItem(const std::string& name, const std::string& label, Function function) {
+    assign_section_->append(label, name);
+    actions_->add_action(name, function);
   }
 
   const std::shared_ptr<Gio::SimpleActionGroup>& GetActionGroup() const { return actions_; }

@@ -45,10 +45,10 @@ ControlWidget::ControlWidget(FaderWindow& fader_window, uistate::FaderState& sta
         [&](bool new_value) { State().SetOverlayFadeButtons(new_value); });
     PrepareContextMenu(*menu);
 
-    insert_action_group("win", menu->GetActionGroup());
+    insert_action_group("control", menu->GetActionGroup());
     menu->set_parent(GetFaderWindow());
     menu->set_pointing_to(Gdk::Rectangle(x, y, 1, 1));
-    GetFaderWindow().insert_action_group("win", menu->GetActionGroup());
+    GetFaderWindow().insert_action_group("control", menu->GetActionGroup());
     menu->popup();
   });
   add_controller(menu_gesture);

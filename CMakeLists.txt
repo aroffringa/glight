@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.5)
 project(glight)
 
 find_package(PkgConfig)
-pkg_check_modules(GTKMM gtkmm-4.0>=4.0.0 REQUIRED)
+# Widget.get_children() is only available from 4.14
+pkg_check_modules(GTKMM gtkmm-4.0>=4.14.0 REQUIRED)
 pkg_check_modules(SIGCXX3 sigc++-3.0 REQUIRED)
 pkg_check_modules(FLACPP flac++ REQUIRED)
 pkg_check_modules(ALSA alsa REQUIRED)
