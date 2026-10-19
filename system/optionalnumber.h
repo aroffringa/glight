@@ -55,8 +55,8 @@ requires(std::is_arithmetic_v<NumberType>) class OptionalNumber {
   constexpr OptionalNumber(OptionalNumber<NumberType>&& source) noexcept = default;
 
   template <typename T>
-  requires std::convertible_to<T, NumberType> constexpr explicit OptionalNumber(
-      const std::optional<T>& source) noexcept
+  requires std::convertible_to<T, NumberType>
+  constexpr explicit OptionalNumber(const std::optional<T>& source) noexcept
       : number_(source ? *source : UnsetValue) {}
 
   constexpr OptionalNumber<NumberType>& operator=(std::nullopt_t) noexcept {
@@ -65,8 +65,8 @@ requires(std::is_arithmetic_v<NumberType>) class OptionalNumber {
   }
 
   template <class T>
-  requires std::convertible_to<T, NumberType> constexpr OptionalNumber<NumberType>& operator=(
-      T number) noexcept {
+  requires std::convertible_to<T, NumberType>
+  constexpr OptionalNumber<NumberType>& operator=(T number) noexcept {
     assert(static_cast<NumberType>(number) != UnsetValue);
     number_ = static_cast<T>(number);
     return *this;
@@ -223,7 +223,8 @@ requires(std::is_arithmetic_v<NumberType>) class OptionalNumber {
   constexpr void Reset() noexcept { number_ = UnsetValue; }
 
   template <typename T = NumberType>
-  requires std::convertible_to<T, NumberType> constexpr void Emplace(T value) noexcept {
+  requires std::convertible_to<T, NumberType>
+  constexpr void Emplace(T value) noexcept {
     assert(static_cast<NumberType>(value) != UnsetValue);
     number_ = static_cast<NumberType>(value);
   }

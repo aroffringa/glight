@@ -528,7 +528,6 @@ void ParseGuiPresetRef(const Object &node, uistate::FaderSetState &fader, Manage
     state->SetFaderType(uistate::GetFaderControlType(ToStr(node["fader-type"])));
   }
   if (!IsFullColumnType(state->GetFaderType())) state->SetColumn(ToBool(node["new-toggle-column"]));
-  state->SetDisplayName(OptionalBool(node, "display-name", state->DisplayName()));
   state->SetDisplayFlashButton(
       OptionalBool(node, "display-flash-button", state->DisplayFlashButton()));
   state->SetDisplayCheckButton(

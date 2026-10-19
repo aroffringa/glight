@@ -238,7 +238,8 @@ class TrackablePtr {
 
   template <typename ObserverType = T>
   requires(std::is_same_v<ObserverType, T> ||
-           std::is_convertible_v<T*, ObserverType*>) ObservingPtr<ObserverType> GetObserver() const;
+           std::is_convertible_v<T*, ObserverType*>) ObservingPtr<ObserverType> GetObserver()
+  const;
 
   /**
    * Number of observers that track this pointer.
@@ -462,7 +463,8 @@ class ObservingPtr {
 template <typename T>
 template <typename ObservingType>
 requires(std::is_same_v<ObservingType, T> || std::is_convertible_v<T*, ObservingType*>)
-    ObservingPtr<ObservingType> TrackablePtr<T>::GetObserver() const {
+    ObservingPtr<ObservingType> TrackablePtr<T>::GetObserver()
+const {
   if (object_ == nullptr) {
     return ObservingPtr<ObservingType>();
   } else if (data_ == nullptr) {

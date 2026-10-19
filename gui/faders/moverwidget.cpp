@@ -51,14 +51,10 @@ MoverWidget::MoverWidget(FaderWindow &fader_window, uistate::FaderState &state, 
   down_button_.SignalRelease().connect(stop_tilt);
   grid_.attach(down_button_, 1, 2);
 
-  auto label_gesture = Gtk::GestureClick::create();
+  InitializeNameLabel(name_label_);
   name_label_.set_halign(Gtk::Align::START);
   name_label_.set_justify(Gtk::Justification::LEFT);
   name_label_.set_hexpand(true);
-  label_gesture->set_button(1);
-  label_gesture->signal_pressed().connect(
-      [this, g = label_gesture.get()](int, double, double) { ShowAssignDialog(); });
-  name_label_.add_controller(label_gesture);
   grid_.attach(name_label_, 0, 3, 3, 1);
 
   append(grid_);
@@ -111,16 +107,16 @@ void MoverWidget::OnAssigned(bool move_fader) {
   if (theatre::SourceValue *pan_source = GetSourceValue(0); pan_source) {
     name = pan_source->Name() + "\n";
   } else {
-    name = "<..>\n";
+    name = std::string(kDefaultName) + "\n";
   }
   if (theatre::SourceValue *tilt_source = GetSourceValue(1); tilt_source) {
     name += tilt_source->Name();
   } else {
-    name += "<..>";
+    name += kDefaultName;
   }
   name_label_.set_text(name);
 }
 
-void MoverWidget::UpdateDisplaySettings() { name_label_.set_visible(State().DisplayName()); }
+void MoverWidget::UpdateDisplaySettings() {}
 
 }  // namespace glight::gui

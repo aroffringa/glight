@@ -39,14 +39,10 @@ ToggleWidget::ToggleWidget(FaderWindow &fader_window, uistate::FaderState &state
   icon_button_.SignalChanged().connect([&]() { OnIconClicked(); });
   append(icon_button_);
 
-  auto label_gesture = Gtk::GestureClick::create();
+  InitializeNameLabel(name_label_);
   name_label_.set_halign(Gtk::Align::START);
   name_label_.set_justify(Gtk::Justification::LEFT);
   name_label_.set_hexpand(true);
-  label_gesture->set_button(1);
-  label_gesture->signal_pressed().connect(
-      [this, g = label_gesture.get()](int, double, double) { ShowAssignDialog(); });
-  name_label_.add_controller(label_gesture);
 
   append(name_label_);
 
@@ -164,7 +160,6 @@ void ToggleWidget::Limit(double value) {
 }
 
 void ToggleWidget::UpdateDisplaySettings() {
-  name_label_.set_visible(State().DisplayName());
   flash_button_.set_visible(State().DisplayFlashButton());
   fade_button_.set_visible(State().OverlayFadeButtons());
   icon_button_.set_visible(State().DisplayCheckButton());

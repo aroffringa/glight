@@ -129,6 +129,10 @@ inline constexpr ControlValue operator*(const ControlValue& lhs, uint32_t factor
   return ControlValue(lhs.UInt() * factor);
 }
 
+inline constexpr std::strong_ordering operator<=>(ControlValue lhs, ControlValue rhs) {
+  return lhs.UInt() <=> rhs.UInt();
+}
+
 /**
  * @param ratio Value between 0 and 1.
  */

@@ -515,7 +515,6 @@ void writeFaderState(WriteState &state, const uistate::FaderState &fader) {
   state.writer.String("fader-type", ToString(fader.GetFaderType()));
   if (!IsFullColumnType(fader.GetFaderType()))
     state.writer.Boolean("new-toggle-column", fader.NewToggleButtonColumn());
-  state.writer.Boolean("display-name", fader.DisplayName());
   state.writer.Boolean("display-flash-button", fader.DisplayFlashButton());
   state.writer.Boolean("display-check-button", fader.DisplayCheckButton());
   state.writer.Boolean("overlay-fade-buttons", fader.OverlayFadeButtons());

@@ -12,6 +12,8 @@
 
 #include <gtkmm/popovermenu.h>
 
+#include "theatre/controlvalue.h"
+
 namespace glight::uistate {
 class FaderState;
 }
@@ -22,17 +24,17 @@ class ControlMenu : public Gtk::PopoverMenu {
  public:
   ControlMenu(const uistate::FaderState& state);
 
-  bool DisplayName() const { return GetState(display_name_); }
   bool DisplayFlashButton() const { return GetState(display_flash_button_); }
   bool DisplayCheckButton() const { return GetState(display_check_button_); }
   bool OverlayFadeButtons() const { return GetState(overlay_fade_buttons_); }
 
   Glib::SignalProxy<void()> SignalHide() { return signal_hide(); }
 
+  sigc::signal<void(theatre::ControlValue, bool)>& SignalSetTo() { return signal_set_to_; }
+  sigc::signal<void(theatre::ControlValue)>& SignalFadeTo() { return signal_fade_to_; }
+
   sigc::signal<void()>& SignalAssign() { return signal_assign_; }
   sigc::signal<void()>& SignalUnassign() { return signal_unassign_; }
-
-  sigc::signal<void(bool)>& SignalToggleName() { return signal_toggle_name_; }
 
   sigc::signal<void(bool)>& SignalToggleFlashButton() { return signal_toggle_flash_button_; }
 
@@ -72,12 +74,12 @@ class ControlMenu : public Gtk::PopoverMenu {
 
   sigc::signal<void()> signal_assign_;
   sigc::signal<void()> signal_unassign_;
-  sigc::signal<void(bool)> signal_toggle_name_;
   sigc::signal<void(bool)> signal_toggle_flash_button_;
   sigc::signal<void(bool)> signal_toggle_check_button_;
   sigc::signal<void(bool)> signal_toggle_fade_buttons_;
+  sigc::signal<void(theatre::ControlValue, bool)> signal_set_to_;
+  sigc::signal<void(theatre::ControlValue)> signal_fade_to_;
 
-  std::shared_ptr<Gio::SimpleAction> display_name_;
   std::shared_ptr<Gio::SimpleAction> display_flash_button_;
   std::shared_ptr<Gio::SimpleAction> display_check_button_;
   std::shared_ptr<Gio::SimpleAction> overlay_fade_buttons_;
