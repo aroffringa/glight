@@ -81,14 +81,6 @@ class FaderState {
   const std::vector<theatre::SourceValue *> &GetSourceValues() const { return source_values_; }
   bool NewToggleButtonColumn() const { return new_column_; }
 
-  bool DisplayName() const { return display_name_; }
-  void SetDisplayName(bool display_name) {
-    if (display_name_ != display_name) {
-      display_name_ = display_name;
-      signal_change_();
-    }
-  }
-
   bool DisplayFlashButton() const { return display_flash_button_; }
   void SetDisplayFlashButton(bool display_flash_button) {
     if (display_flash_button_ != display_flash_button) {
@@ -135,7 +127,6 @@ class FaderState {
   std::vector<theatre::SourceValue *> source_values_;
   FaderControlType fader_type_ = FaderControlType::Fader;
   bool new_column_ = false;
-  bool display_name_ = true;
   bool display_flash_button_ = true;
   bool display_check_button_ = true;
   bool overlay_fade_buttons_ = true;

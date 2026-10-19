@@ -5,6 +5,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/dialog.h>
+#include <gtkmm/label.h>
 
 #include "../../theatre/forwards.h"
 
@@ -86,7 +87,7 @@ class ControlWidget : public Gtk::Box {
   /**
    * Number of source values that this controlwidget naturally
    * connects too. For a single slider or single check button
-   * this is 1, but for choice or color selection wiget, this
+   * this is 1, but for choice or color selection widgets, this
    * may be different.
    * This does not need to match the number of assigned source values.
    * It is used for example for automatically assigned the faders to
@@ -132,6 +133,11 @@ class ControlWidget : public Gtk::Box {
   uistate::FaderState &State() const { return _state; }
 
   void OpenMenu(double x, double y);
+
+ protected:
+  constexpr static const char *kDefaultName = "...";
+
+  void InitializeNameLabel(Gtk::Label &label);
 
  private:
   void OnTheatreUpdate();

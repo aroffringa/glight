@@ -56,7 +56,6 @@ class FaderWidget final : public ControlWidget {
   Gtk::Button _fadeDownButton;
   ControlButton flash_button_;
   IconButton _checkButton;
-  constexpr static const char *kDefaultName = "≡";
   Gtk::Label _nameLabel{kDefaultName};
   bool _mouseIn = false;
   bool _holdUpdates = false;

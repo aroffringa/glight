@@ -26,6 +26,7 @@ ComboControlWidget::ComboControlWidget(FaderWindow &fader_window, uistate::Fader
                                        ControlMode mode, char key)
     : ControlWidget(fader_window, state, mode) {
   set_orientation(Gtk::Orientation::VERTICAL);
+  InitializeNameLabel(description_label_);
   append(description_label_);
   description_label_.show();
 
@@ -146,7 +147,6 @@ void ComboControlWidget::PrepareContextMenu(ControlMenu &menu) {
 }
 
 void ComboControlWidget::UpdateDisplaySettings() {
-  description_label_.set_visible(State().DisplayName());
   if (State().Label().empty())
     description_label_.set_text("<No description>");
   else

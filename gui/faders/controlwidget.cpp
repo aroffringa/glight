@@ -1,5 +1,7 @@
 #include "controlwidget.h"
 
+#include <gtkmm/cssprovider.h>
+#include <gtkmm/eventcontrollermotion.h>
 #include <gtkmm/gestureclick.h>
 
 #include "gui/eventtransmitter.h"
@@ -37,9 +39,20 @@ ControlWidget::~ControlWidget() {
 void ControlWidget::OpenMenu(double x, double y) {
   std::unique_ptr<ControlMenu>& menu = GetFaderWindow().GetControlMenu();
   menu = std::make_unique<ControlMenu>(State());
+  menu->SignalSetTo().connect([&](theatre::ControlValue value, bool is_a) {
+    if (!sources_.empty() && sources_[0]) {
+      sources_[0]->AorB(is_a).Set(value);
+    }
+  });
+  menu->SignalFadeTo().connect([&](theatre::ControlValue value) {
+    if (!sources_.empty() && sources_[0]) {
+      theatre::ControlValue source = sources_[0]->A().Value();
+      const double fade_speed = (value > source) ? _fadeUpSpeed : _fadeDownSpeed;
+      sources_[0]->A().Set(value.UInt(), fade_speed);
+    }
+  });
   menu->SignalAssign().connect([&]() { ShowAssignDialog(); });
   menu->SignalUnassign().connect([&]() { Assign({}, true); });
-  menu->SignalToggleName().connect([&](bool new_value) { State().SetDisplayName(new_value); });
   menu->SignalToggleFlashButton().connect(
       [&](bool new_value) { State().SetDisplayFlashButton(new_value); });
   menu->SignalToggleCheckButton().connect(
@@ -53,6 +66,40 @@ void ControlWidget::OpenMenu(double x, double y) {
   menu->set_pointing_to(Gdk::Rectangle(x, y, 1, 1));
   GetFaderWindow().insert_action_group("control", menu->GetActionGroup());
   menu->popup();
+}
+
+void ControlWidget::InitializeNameLabel(Gtk::Label& label) {
+  auto css_provider = Gtk::CssProvider::create();
+  const std::string css_data =
+      ".animated-label {"
+      "  color: #333333;"
+      "  transition: color 300ms ease, font-size 300ms ease;"
+      "}"
+      ".animated-label.hovered {"
+      "  background-color: #ffffff;"
+      "  color: #007acc;"
+      "}";
+
+  css_provider->load_from_string(css_data);
+  Gtk::StyleContext::add_provider_for_display(Gdk::Display::get_default(), css_provider,
+                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+  auto label_gesture = Gtk::GestureClick::create();
+  label_gesture->set_button(1);
+  label_gesture->signal_pressed().connect([&](int, double x, double y) {
+    const Gdk::Graphene::Point src_point(x, y);
+    const std::optional<Gdk::Graphene::Point> dest_point =
+        label.compute_point(fader_window_, src_point);
+    if (dest_point) {
+      OpenMenu(dest_point->get_x(), dest_point->get_y());
+    }
+  });
+  label.add_controller(label_gesture);
+  auto label_motion = Gtk::EventControllerMotion::create();
+  label_motion->signal_enter().connect([&](double, double) { label.add_css_class("hovered"); });
+  label_motion->signal_leave().connect([&]() { label.remove_css_class("hovered"); });
+  label.add_controller(label_motion);
+  label.add_css_class("animated-label");
 }
 
 bool ControlWidget::IsAssigned() const {

@@ -116,7 +116,7 @@ void ColorControlWidget::PrepareContextMenu(ControlMenu &menu) {
   menu.SignalAssign().connect([&]() { ShowAssignControllableDialog(); });
 }
 
-void ColorControlWidget::UpdateDisplaySettings() { name_label_.set_visible(State().DisplayName()); }
+void ColorControlWidget::UpdateDisplaySettings() {}
 
 void ColorControlWidget::ShowAssignControllableDialog() {
   dialog_ = std::make_unique<ControllableSelectionDialog>("Select item for color control", false);

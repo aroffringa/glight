@@ -6,6 +6,10 @@ using namespace glight::theatre;
 
 BOOST_AUTO_TEST_SUITE(control_value)
 
+static_assert(ControlValue::FromRatio(0.0) == ControlValue(0));
+static_assert(ControlValue::FromRatio(0.5) == ControlValue::Max() / 2);
+static_assert(ControlValue::FromRatio(1.0) == ControlValue::Max());
+
 BOOST_AUTO_TEST_CASE(MinOperator) {
   constexpr ControlValue a(3);
   constexpr ControlValue b(4);
