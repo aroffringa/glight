@@ -229,6 +229,7 @@ void FixtureModeFrame::OpenFunctionParametersEditWindow() {
           std::make_unique<windows::EditColorRange>(function.GetColorRangeParameters().GetRanges());
       sub_window_->set_modal(true);
       sub_window_->set_transient_for(parent_window_);
+      sub_window_->set_hide_on_close(true);
       sub_window_->signal_hide().connect([&]() {
         function.GetColorRangeParameters().GetRanges() =
             static_cast<windows::EditColorRange*>(sub_window_.get())->GetRanges();
