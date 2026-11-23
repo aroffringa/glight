@@ -233,6 +233,7 @@ void ParseFixtures(const json::Array &node, Theatre &theatre) {
           std::to_string(fixture.Mode().Functions().size()) + " functions according to its type");
     }
   }
+  theatre.NotifyDmxChange();
 }
 
 void ParseFixtureGroups(const json::Array &node, Management &management) {
